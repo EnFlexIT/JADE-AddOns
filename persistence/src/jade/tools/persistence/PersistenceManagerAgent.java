@@ -491,45 +491,6 @@ public class PersistenceManagerAgent extends ToolAgent {
         }
     }
 
-    protected void afterClone() {
-        super.afterClone();
-    }
-    
-    protected void afterLoad() {
-        super.afterLoad();
-    }
-    
-    protected void afterMove() {
-        super.afterMove();
-    }
-    
-    protected void afterReload() {
-        super.afterReload();
-    }
-    
-    protected void afterThaw() {
-        super.afterThaw();
-    }
-
-    protected void beforeClone() {
-        super.beforeClone();
-    }
-    
-    protected void beforeFreeze() {
-        super.beforeFreeze();
-    }
-    
-    protected void beforeMove() {
-        super.beforeMove();
-    }
-    
-    protected void beforeReload() {
-        super.beforeReload();
-    }
-    
-    protected void beforeSave() {
-        super.beforeSave();
-    }
 
     /**
         This method starts the agent behaviours to allow the agent
