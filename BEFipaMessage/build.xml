@@ -19,7 +19,7 @@
 
   <!-- Compile the javadoc code from ${src} into ${doc} -->
   <target name="doc" depends="init" description="generate javadoc documentation">
-    <javadoc destdir="${doc}/api" author="true" windowtitle="BitEfficient ACLCodec" sourcepath="${src}" packagenames="sonera.fipa.acl.*, sonera.fipa.envelope.*, sonera.fipa.util.*"/>
+    <javadoc destdir="${doc}/api" classpath="${classpath}" author="true" windowtitle="BitEfficient ACLCodec" sourcepath="${src}" packagenames="sonera.fipa.acl.*, sonera.fipa.envelope.*, sonera.fipa.util.*"/>
   </target>
 
   <!-- Compile the java code from ${src} into ${build} -->

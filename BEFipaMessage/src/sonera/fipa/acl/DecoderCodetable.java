@@ -181,7 +181,7 @@ public class DecoderCodetable {
 	 * Insert a new byte array to codetable. If the code table is full,
 	 * (size>>3) entries are removed from the end of LRU list.
 	 * 
-	 * @param s byte array to insert
+	 * @param b byte array to insert
 	 */
         public int insert(byte [] b) {
                 return (insert(null, b, false));

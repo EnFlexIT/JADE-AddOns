@@ -227,7 +227,7 @@ public class EncoderCodetable {
         }
         /**
  	 * 
-	 * @param s The byte array to lookup
+	 * @param b The byte array to lookup
 	 * @return The code number for the byte array if found, -1 otherwise
 	 */
         public int lookup(byte [] b) {
