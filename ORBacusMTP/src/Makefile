@@ -4,7 +4,9 @@
 .PHONY: all batch classes clean lib
 
 JADELIB     =   ../../../lib/jade.jar
-ORBACUSLIB  =   ../../../lib/OB.jar
+OBHOME = ../../..
+ORBACUSLIB  =   $(OBHOME)/lib/OB.jar
+OBNAMINGLIB  =  $(OBHOME)/lib/OBNaming.jar
 LIBNAME	    =	../lib/iiopOB.jar
 CLSDIR      =	../classes
 BATCH_MAKE  =	../makeORBacusMTP.bat
@@ -16,7 +18,7 @@ ARFLAGS = cvf
 MAKE = make
 IDLCC = jidl
 JC = javac
-JFLAGS = -deprecation -O -d $(CLSDIR) -classpath .:$(JADELIB):$(ORBACUSLIB)
+JFLAGS = -deprecation -O -d $(CLSDIR) -classpath .:$(JADELIB):$(ORBACUSLIB):$(OBNAMINGLIB)
 
 SOURCES     = 	MessageTransportProtocol.java
 IDLSPEC     =   fipa.idl
