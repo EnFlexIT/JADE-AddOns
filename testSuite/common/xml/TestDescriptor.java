@@ -57,6 +57,10 @@ public class TestDescriptor {
 		name =n;
 	}
 
+	public void setSkip(boolean s){
+		skip = s;
+	}
+	
 	public void setSkip(String s){
 		if(s.equalsIgnoreCase("true"))
 			skip = true;

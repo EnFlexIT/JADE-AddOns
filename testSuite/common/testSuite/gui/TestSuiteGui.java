@@ -42,14 +42,13 @@ import test.common.xml.*;
 /**
  * @author Giovanni Caire - TiLab
  * @author Elisabetta Cortese - TiLab
-*/
+ */
 public class TestSuiteGui extends JFrame {
 	// Gui states used to enable/disable buttons
 	public static final int IDLE_STATE = 0;
 	public static final int READY_STATE = 1;
 	public static final int RUNNING_STATE = 2;
 	public static final int DEBUGGING_STATE = 3;
-	public static final int CONFIGURING_STATE = 4;
 	private int status;
 	
 	private GuiAgent myAgent;
@@ -57,8 +56,8 @@ public class TestSuiteGui extends JFrame {
 	//private String currentTester = null;
 	private TSDaemonConnectionConfiguration daemonConf = new TSDaemonConnectionConfiguration();
 		
-	private JButton exitB, openB, runB, debugB, stepB, configB, connectB, runAllB;
-	private JMenuItem exitI, openI, runI, debugI, stepI, configI, connectI, runAllI;
+	private JButton exitB, openB, runB, debugB, stepB, configB, selectB, connectB, runAllB;
+	private JMenuItem exitI, openI, runI, debugI, stepI, configI, selectI, connectI, runAllI;
 	private JTextField currentF;
 	
 	public TestSuiteGui(GuiAgent myAgent, String xmlFileName) {
@@ -75,6 +74,7 @@ public class TestSuiteGui extends JFrame {
 		Icon debugImg = GuiProperties.getIcon("debug");
     Icon stepImg = GuiProperties.getIcon("step");
     Icon configImg = GuiProperties.getIcon("config");
+    Icon selectImg = GuiProperties.getIcon("select");
     Icon connectImg = GuiProperties.getIcon("connect");
     
 		/////////////////////////////////////////////////////
@@ -95,6 +95,12 @@ public class TestSuiteGui extends JFrame {
 		//connectB.setDisabledIcon(connectImg);
 		connectB.setToolTipText("Use the Test Suite Daemon to launch other JADE instances remotely");
 		
+		// RUN-ALL button
+		runAllB = bar.add(new RunAllAction(this));
+		runAllB.setText("");
+		runAllB.setIcon(runAllImg);
+		runAllB.setToolTipText("Run all tester agents");
+		
 		bar.addSeparator();
 		
 		// OPEN button
@@ -111,6 +117,15 @@ public class TestSuiteGui extends JFrame {
 		//runB.setDisabledIcon(runImg);
 		configB.setToolTipText("Set arguments for the current tester agent");
 		
+		// SELECT TESTS button
+		selectB  = bar.add(new SelectAction(this));
+		selectB.setText("");
+		selectB.setIcon(selectImg);
+		//selectB.setDisabledIcon(selectImg);
+		selectB.setToolTipText("Select the which tests to execute and which one to skip");
+		
+		bar.addSeparator();
+		
 		// RUN button
 		runB  = bar.add(new RunAction(this));
 		runB.setText("");
@@ -118,14 +133,6 @@ public class TestSuiteGui extends JFrame {
 		//runB.setDisabledIcon(runImg);
 		runB.setToolTipText("Run the current tester agent");
 	
-		// RUN-ALL button
-		runAllB = bar.add(new RunAllAction(this));
-		runAllB.setText("");
-		runAllB.setIcon(runAllImg);
-		runAllB.setToolTipText("Run all tester agents");
-		
-		bar.addSeparator();
-		
 		// DEBUG button
 		debugB  = bar.add(new DebugAction(this));
 		debugB.setText("");
@@ -249,14 +256,21 @@ public class TestSuiteGui extends JFrame {
 		myAgent.postGuiEvent(ev); 
 	}
 		
+	// Method called by the SelectAction
+	void select() {
+		GuiEvent ev = new GuiEvent(this, TestSuiteAgent.SELECT_EVENT); 
+		myAgent.postGuiEvent(ev); 
+	}
+		
 	public void setStatus(int status) {
 		this.status = status;
 		updateEnabled();
 	}
-	//Elisabetta 
+
 	public int getStatus() {
 		return this.status;
 	}
+	
 	public void setCurrentF(String c){
 		currentF.setText(c);
 	}
@@ -268,6 +282,7 @@ public class TestSuiteGui extends JFrame {
 		debugB.setEnabled(status == READY_STATE);
 		stepB.setEnabled(status == DEBUGGING_STATE);
 		configB.setEnabled(status == READY_STATE);
+		selectB.setEnabled(status == READY_STATE);
 	}
 	
 }

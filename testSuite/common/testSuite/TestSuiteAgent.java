@@ -65,9 +65,10 @@ public class TestSuiteAgent extends GuiAgent {
 	public static final int RUNALL_EVENT = 9;
 	public static final int DEBUG_EVENT = 3;
 	public static final int CONFIGURE_EVENT = 4;
-	public static final int STEP_EVENT = 5;
-	public static final int GO_EVENT = 6;
-	public static final int EXIT_EVENT = 7;
+	public static final int SELECT_EVENT = 5;
+	public static final int STEP_EVENT = 6;
+	public static final int GO_EVENT = 7;
+	public static final int EXIT_EVENT = 8;
 
 	// Maps a tester with the results of the tests it performed 
 	// Used in RUN_ALL to print the final report
@@ -179,6 +180,18 @@ public class TestSuiteAgent extends GuiAgent {
 				}
 			} );
 			break;
+		case SELECT_EVENT: 
+			System.out.println("TestSuiteAgent handling SELECT event");
+			// The user pressed "Select"
+			// Add a behaviour that makes the currently loaded tester agent show
+			// the test selection gui and, on completion, sets the GUI status back to READY
+			addBehaviour(new Requester(this, new SelectTests()) {
+				public int onEnd() {
+					myGui.setStatus(TestSuiteGui.READY_STATE);
+					return 0;
+				}
+			} );
+			break;
 		case STEP_EVENT: 
 			System.out.println("TestSuiteAgent handling STEP event");
 			// The user pressed "Step"
@@ -250,9 +263,11 @@ public class TestSuiteAgent extends GuiAgent {
 		
 		// take tester to run and its order in the list
 		protected void processItem(Object item, int index){
-  		FunctionalityDescriptor fDsc = (FunctionalityDescriptor) item;
-  		myAgent.addBehaviour(new SingleTesterExecutor(myAgent, fDsc, this));
-  		pause();
+			FunctionalityDescriptor fDsc = (FunctionalityDescriptor) item;
+			if (!fDsc.getSkip()) {
+	  		myAgent.addBehaviour(new SingleTesterExecutor(myAgent, fDsc, this));
+  			pause();
+			}
 		}
 		
   	public int onEnd() {
@@ -264,16 +279,18 @@ public class TestSuiteAgent extends GuiAgent {
 				FunctionalityDescriptor fDsc = (FunctionalityDescriptor) items.get(i);
 				String className = fDsc.getTesterClassName();
 				ExecResult res = (ExecResult) runAllResults.get(className);
-				System.out.println("Functionality:  "+fDsc.getName());
-				if (res != null) {
-					System.out.println("Passed:  "+res.getPassed());
-					System.out.println("Failed:  "+res.getFailed());
-					System.out.println("Skipped: "+res.getSkipped());
+				if (!fDsc.getSkip()) {
+					System.out.println("Functionality:  "+fDsc.getName());
+					if (res != null) {
+						System.out.println("Passed:  "+res.getPassed());
+						System.out.println("Failed:  "+res.getFailed());
+						System.out.println("Skipped: "+res.getSkipped());
+					}
+					else {
+						System.out.println("No result available");
+					}
+					System.out.println("-----------------------------------------------");
 				}
-				else {
-					System.out.println("No result available");
-				}
-				System.out.println("-----------------------------------------------");
 			}
 			runAllOngoing = false;
 			myGui.setCurrentF(null);		

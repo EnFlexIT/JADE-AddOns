@@ -43,6 +43,7 @@ class GuiProperties {
 			"debug", LookAndFeel.makeIcon(foo.getClass(), "images/debug.gif"),
 			"step", LookAndFeel.makeIcon(foo.getClass(), "images/step.gif"),
 			"config", LookAndFeel.makeIcon(foo.getClass(), "images/config.gif"),
+			"select", LookAndFeel.makeIcon(foo.getClass(), "images/select.gif"),
 			"connect", LookAndFeel.makeIcon(foo.getClass(), "images/connect.gif")
 		};
 

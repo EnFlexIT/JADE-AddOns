@@ -72,9 +72,7 @@ public class XMLManager {
 			for (int i = 0; i < list.getLength(); i++) {
 				Element e = (Element)list.item(i);
 				FunctionalityDescriptor fd = getFunctionalityDescriptor(e);
-				if(!fd.getSkip()){
-					l.add(fd);
-				}
+				l.add(fd);
 			}
 		}
 		return (FunctionalityDescriptor[]) l.toArray(new FunctionalityDescriptor[0]);
@@ -93,9 +91,7 @@ public class XMLManager {
 			for (int i = 0; i < list.getLength(); i++) {
 				Element e = (Element)list.item(i);
 				TestDescriptor td = getTestDescriptor(e);
-				if(!td.getSkip()){
-					l.add(td);
-				}
+				l.add(td);
 			}
 		}
 		return (TestDescriptor[]) l.toArray(new TestDescriptor[0]);		
@@ -120,16 +116,16 @@ public class XMLManager {
 		TestDescriptor td = new TestDescriptor();
 
 		td = new TestDescriptor();
-		td.setName(e.getAttribute("name"));
-		td.setSkip(e.getAttribute("skip"));
+		td.setName(e.getAttribute("name").trim());
+		td.setSkip(e.getAttribute("skip").trim());
 		Node n = ((NodeList)(e.getChildNodes())).item(1);
-		td.setTestClass((n.getChildNodes()).item(0).getNodeValue());
+		td.setTestClass((n.getChildNodes()).item(0).getNodeValue().trim());
 		n = ((NodeList)(e.getChildNodes())).item(3);
-		td.setWhat((n.getChildNodes()).item(0).getNodeValue());
+		td.setWhat((n.getChildNodes()).item(0).getNodeValue().trim());
 		n = ((NodeList)(e.getChildNodes())).item(5);
-		td.setHow((n.getChildNodes()).item(0).getNodeValue());
+		td.setHow((n.getChildNodes()).item(0).getNodeValue().trim());
 		n = ((NodeList)(e.getChildNodes())).item(7);
-		td.setPassedWhen((n.getChildNodes()).item(0).getNodeValue());
+		td.setPassedWhen((n.getChildNodes()).item(0).getNodeValue().trim());
 
 		return td;
 	} 

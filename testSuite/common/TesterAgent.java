@@ -40,6 +40,7 @@ import jade.domain.FIPAAgentManagement.FailureException;
 import jade.proto.AchieveREResponder;
 import jade.proto.states.ReplySender;
 import test.common.testerAgentControlOntology.*;
+import test.common.xml.TestDescriptor;
 
 public abstract class TesterAgent extends Agent {
 	//private Codec codec;
@@ -160,6 +161,14 @@ public abstract class TesterAgent extends Agent {
 					InsertArgumentsDlg.insertValues(args);
 				}
 				theTestGroup.setArguments(args);
+				return createInform(aa, request);
+			}
+			else if (requestedAction instanceof SelectTests) {
+				// SELECT_TESTS action: 
+				TestDescriptor[] descriptors = theTestGroup.getDescriptors();
+				if (descriptors != null && descriptors.length > 0) { 
+					SelectTestsDlg.selectTests(descriptors);
+				}
 				return createInform(aa, request);
 			}
 			else if (requestedAction instanceof Resume) {

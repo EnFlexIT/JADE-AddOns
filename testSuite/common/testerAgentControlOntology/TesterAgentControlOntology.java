@@ -43,6 +43,8 @@ public class TesterAgentControlOntology extends Ontology {
   
   public static final String CONFIGURE = "CONFIGURE";
 
+  public static final String SELECT_TESTS = "SELECT-TESTS";
+
   public static final String RESUME = "RESUME";
   public static final String RESUME_DEBUG_MODE = "debug-mode";
   
@@ -69,6 +71,7 @@ public class TesterAgentControlOntology extends Ontology {
     try {
     	add(new AgentActionSchema(EXECUTE), Execute.class);
     	add(new AgentActionSchema(CONFIGURE), Configure.class);
+    	add(new AgentActionSchema(SELECT_TESTS), SelectTests.class);
     	add(new AgentActionSchema(RESUME), Resume.class);
     	add(new AgentActionSchema(EXIT), Exit.class);
     	add(new ConceptSchema(EXEC_RESULT), ExecResult.class);

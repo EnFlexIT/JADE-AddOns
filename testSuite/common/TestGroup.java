@@ -40,11 +40,6 @@ public class TestGroup {
 	private List argumentSpecs = new ArrayList();
   private HashMap args = new HashMap();
 	
-	/*public TestGroup(String[] tests) {
-		testClassNames = (tests != null ? tests : new String[0]);
-		cnt = 0;
-	}*/
-	
 	public TestGroup(String filename) {
 		myTests = XMLManager.getTests(filename);
 		cnt = 0;
@@ -101,17 +96,30 @@ public class TestGroup {
 	protected void shutdown(Agent a) {
 	}
 	
+	
+	/**
+	   Only called by the TestGroupExecutor to set which tests to execute and
+	   which one to skip
+	 */
+	TestDescriptor[] getDescriptors() {
+		return myTests;
+	}
+	
 	/**
 	   Only called by the TestGroupExecutor to get the next test to execute
 	 */
 	Test next() throws TestException {		
 		String className = null;
 		try {
-			TestDescriptor dsc = myTests[cnt++];
-			Test t = (Test) Class.forName(dsc.getTestClassName()).newInstance();
-			t.setGroup(this);
-			t.setDescriptor(dsc);
-			return t;
+			while (true) {
+				TestDescriptor dsc = myTests[cnt++];
+				if (!dsc.getSkip()) {
+					Test t = (Test) Class.forName(dsc.getTestClassName()).newInstance();
+					t.setGroup(this);
+					t.setDescriptor(dsc);
+					return t;
+				}
+			}
 		}
 		catch (IndexOutOfBoundsException ioobe) {
 			return null;
