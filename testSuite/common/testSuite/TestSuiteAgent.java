@@ -88,7 +88,7 @@ public class TestSuiteAgent extends GuiAgent {
 		getContentManager().registerOntology(TesterAgentControlOntology.getInstance());
 		
 		// Create the GUI
-		myGui = new TestSuiteGui(this, "test//testerList.xml"); 
+		myGui = new TestSuiteGui(this, "test/testerList.xml"); 
 		myGui.showCorrect();				
 	}	
 		

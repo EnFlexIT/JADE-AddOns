@@ -47,7 +47,7 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 	public static final String REMOTE_PLATFORM_PORT = "9003";
 	
 	protected TestGroup getTestGroup() {
-		TestGroup tg = new TestGroup("test\\interPlatform\\interPlatformTestsList.xml"){		
+		TestGroup tg = new TestGroup("test/interPlatform/interPlatformTestsList.xml"){		
 			
 			private JadeController jc;
 			
