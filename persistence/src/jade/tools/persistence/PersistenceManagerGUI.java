@@ -288,7 +288,7 @@ public class PersistenceManagerGUI extends javax.swing.JFrame implements GUICons
                         p = new ProfileImpl();
                         break;
                 }
-                
+
                 // Add the persistence service if not already listed in the profile
                 addPersistenceService(p);
 
@@ -374,13 +374,13 @@ public class PersistenceManagerGUI extends javax.swing.JFrame implements GUICons
             if(serviceClass.equals(jade.core.persistence.PersistenceService.class.getName())) {
                 return;
             }
+	}
 
-            // Not found -- Add the Persistence Service to the list
-            Specifier spec = new Specifier();
-            spec.setClassName(jade.core.persistence.PersistenceService.class.getName());
-            l.add(spec);
-            p.setSpecifiers(Profile.SERVICES, l);
-        }
+	// Not found -- Add the Persistence Service to the list
+	Specifier spec = new Specifier();
+	spec.setClassName(jade.core.persistence.PersistenceService.class.getName());
+	l.add(spec);
+	p.setSpecifiers(Profile.SERVICES, l);
     }
     
     /**
