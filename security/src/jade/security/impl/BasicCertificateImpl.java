@@ -60,6 +60,13 @@ public class BasicCertificateImpl implements jade.security.JADECertificate {
 	}
 
 	public BasicCertificateImpl(byte[] encoded) throws CertificateException {
+                try {
+                  decode(encoded);
+                }
+                catch (IOException ex) {
+                  throw new CertificateException( ex.getMessage() );
+                }
+/*
 		String[] lines = new String(encoded).split("\n");
 
 		setSubject(decodePrincipal(lines[0]));
@@ -70,20 +77,9 @@ public class BasicCertificateImpl implements jade.security.JADECertificate {
 		for (int i = 4; i < lines.length; i++) {
 			addPermission(decodePermission(lines[i]));
 		}
+*/
 	}
 
-	public BasicCertificateImpl(String encoded) throws CertificateException {
-		String[] lines = encoded.split("\n");
-
-		setSubject(decodePrincipal(lines[0]));
-		setNotBefore(decodeDate(lines[1]));
-		setNotAfter(decodeDate(lines[2]));
-		this.signature.data = decodeBytes(lines[3]);
-
-		for (int i = 4; i < lines.length; i++) {
-			addPermission(decodePermission(lines[i]));
-		}
-	}
 
 	public void setSubject(JADEPrincipal subject) {
 		this.subject = subject;
@@ -158,43 +154,44 @@ public class BasicCertificateImpl implements jade.security.JADECertificate {
 		return toString().getBytes();
 	}
 
+
+  /*
+   * Implementation of "Credentials.encode()".
+   */
+  public byte[] encode() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    DataOutputStream out = new DataOutputStream(baos);
+    // Writes the --subject--
+    byte[] tmp = CredentialsEngine.encodePrincipal( getSubject() );
+    out.writeInt(tmp.length);
+    out.write(tmp,0,tmp.length);
+    // Write the --signature--
+    tmp = CredentialsEngine.encodeSignature( getSignature() );
+    out.writeInt(tmp.length);
+    out.write(tmp,0,tmp.length);
+    // Flush
+    return baos.toByteArray();
+  }
+
   /*
    * Implementation of "Credentials.decode()".
    * Currently the encoding only contains the Subject and the Signature 
    */
   public Credentials decode(byte[] enc) throws IOException {
     DataInputStream in = new DataInputStream(new ByteArrayInputStream(enc));
-    // Decodes the subject Principal
+    // Decodes the --subject-- Principal
     int size = in.readInt();
     byte[] data = new byte[size];
     in.read(data,0,size);
-    subject = CredentialsEngine.decodePrincipal(data);
-    // Decode the signature
+    setSubject( CredentialsEngine.decodePrincipal(data) );
+    // Decode the --signature--
     size = in.readInt();
     data = new byte[size];
     in.read(data,0,size);
-    signature = CredentialsEngine.decodeSignature(data);    
+    setSignature ( CredentialsEngine.decodeSignature(data) );    
     return this;
   }
-  
-  /*
-   * Implementation of "Credentials.encode()".
-   * Currently only encodes the Subject and the Signature 
-   */
-  public byte[] encode() throws IOException {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    DataOutputStream out = new DataOutputStream(baos);
-    // Writes the subject
-    byte[] tmp = CredentialsEngine.encodePrincipal(subject);
-    out.writeInt(tmp.length);
-    out.write(tmp,0,tmp.length);
-    // Write the signature
-    tmp = CredentialsEngine.encodeSignature(signature);
-    out.writeInt(tmp.length);
-    out.write(tmp,0,tmp.length);
-    // Flush
-    return baos.toByteArray();
-  }
+
 
   /*
    * Prints out this certificate.
@@ -263,7 +260,7 @@ public class BasicCertificateImpl implements jade.security.JADECertificate {
 		return p;
 	}
 	
-	static private String encodePermission(Permission p) {
+	static protected String encodePermission(Permission p) {
 		if (p == null)
 			return "null";
 
@@ -277,7 +274,7 @@ public class BasicCertificateImpl implements jade.security.JADECertificate {
 		return str.toString();
 	}
 	
-	static private Permission decodePermission(String s) {
+	static protected Permission decodePermission(String s) {
 		if (s.equals("null"))
 			return null;
 
