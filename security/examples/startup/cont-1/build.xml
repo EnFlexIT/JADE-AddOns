@@ -5,29 +5,24 @@
    http://jakarta.apache.org/ant/
 -->
 
-<!-- =========  REMOTE Container  ========= -->
+<!-- =========  MAIN  ========= -->
 
-<project name="startup-cont-1" default="run-remote-cont" basedir=".">
+<project name="coresec-examples" default="run" basedir=".">
   <!-- set global properties for this build -->
-  <property name="jaderoot" value="../../../../../"/>
-  <property name="libJADEDir" value="${jaderoot}/lib"/>
+  <property name="libJADEDir" value="../../../../../lib" />
+  <property name="lib" value="../../../lib" />
+  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/jadeTools.jar;${lib}/jadeSecurity.jar;" /> 
 
-  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/iiop.jar;${libJADEDir}/jadeTools.jar;${jaderoot}/add-ons/security/lib/jadeSecurity.jar;" /> 
 
-
-  <target name="run-remote-cont" depends="" description="Startup a remote container." >
+  <target name="run" depends="" description="Startup a JADE Main-Container." >
 
        <java classname="jade.Boot" fork="yes">
-
-         <arg line="-conf cont-1.conf -container -host 127.0.0.1" />
-
+         <arg line="-conf cont-1.conf" />
          <classpath>
            <pathelement path="${classpath}"/>
          </classpath>
        </java>
   </target>
-
-
 
 
 </project>
