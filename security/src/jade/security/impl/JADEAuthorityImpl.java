@@ -26,42 +26,37 @@ package jade.security.impl;
 import jade.core.Agent;
 import jade.core.Profile;
 import jade.core.security.SecurityHelper;
-import jade.security.util.SecurityStore;
-import jade.security.util.SecurityData;
 import jade.core.security.authentication.UserPassCredential;
-
 import jade.domain.FIPAAgentManagement.SecurityObject;
-
 import jade.security.Credentials;
 import jade.security.JADEPrincipal;
-import jade.security.SecurityFactory;
 import jade.security.JADESecurityException;
-
+import jade.security.SecurityFactory;
+import jade.security.util.SecurityData;
+import jade.security.util.SecurityStore;
 import jade.util.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
-import java.security.Key;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.InvalidKeyException;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.security.spec.InvalidKeySpecException;
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.DESKeySpec;
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+
 import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * This class is the base class to perform cryptographic operations.
@@ -208,7 +203,7 @@ public class JADEAuthorityImpl implements jade.security.JADEAuthority {
       myLogger.log(LEV1,"Principal "+name+" does not have a key pair, creating it.");
       // a file does not exist
       // ask the store to generate a key pair for itself
-      keyPair = securityStore.generateNewKeyPair(keySize,keyAlgo);
+      keyPair = SecurityStore.generateNewKeyPair(keySize,keyAlgo);
       securityStore.setMyKeyPair(keyPair);
       securityStore.flush();
     }

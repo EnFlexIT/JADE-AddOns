@@ -23,7 +23,6 @@ Boston, MA  02111-1307, USA.
 
 package jade.core.security.authentication;
 
-import jade.security.JADESecurityException;
 import jade.security.SecurityFactory;
 import jade.security.Credentials;
 import jade.security.JADEPrincipal;
@@ -117,7 +116,7 @@ private boolean checkUser(String name, byte[] password) throws LoginException {
     if (sf!=null) {
  
       // what algorithm (and password file format) should I use?
-      String digest_alg = sf.getParameter(
+      String digest_alg = SecurityFactory.getParameter(
                    PWD_HASH_ALGORITHM_KEY, 
                    PWD_HASH_ALGORITHM_DEFAULT);
       
@@ -150,7 +149,7 @@ private boolean checkUser_DES(UserPassCredential cred) throws LoginException {
 // --- load and parse password file ---
   String passwdFile = null;
   SecurityFactory sf = SecurityFactory.getSecurityFactory();
-  passwdFile = sf.getParameter(
+  passwdFile = SecurityFactory.getParameter(
         jade.core.security.authentication.SimpleLoginModule.AUTHENTICATION_LOGINSIMPLECREDFILE_KEY,
         jade.core.security.authentication.SimpleLoginModule.AUTHENTICATION_LOGINSIMPLECREDFILE_DEFAULT);
 
