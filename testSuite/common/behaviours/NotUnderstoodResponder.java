@@ -26,6 +26,7 @@ package test.common.behaviours;
 import jade.core.behaviours.*;
 import jade.lang.acl.*;
 import jade.util.leap.*;
+import jade.domain.FIPAAgentManagement.Envelope;
 
 import java.util.Enumeration;
 
@@ -39,6 +40,15 @@ public class NotUnderstoodResponder extends GenericMessageHandler {
 		reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
 		// Set the same content
 		reply.setContent(msg.getContent());
+    
+    // Set the same payload encoding parameters
+    Envelope me,re;
+    if ((me = msg.getEnvelope()) != null) {
+      reply.setEnvelope(re = new Envelope());
+      re.setAclRepresentation(me.getAclRepresentation());
+      re.setPayloadEncoding(me.getPayloadEncoding());
+    }
+    
 		// Set the same user defined parameters
 		Properties pp = msg.getAllUserDefinedParameters();
 		Enumeration e = pp.propertyNames();
