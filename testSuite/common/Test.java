@@ -26,6 +26,9 @@ package test.common;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.SerialBehaviour;
+import jade.core.behaviours.FSMBehaviour;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.util.leap.*;
 import jade.core.behaviours.DataStore;
@@ -138,10 +141,10 @@ public abstract class Test implements Serializable {
   	Logger.getLogger().log(s);
   }
   
-  protected final void pause(Agent a) {
-  	if (pauseEnabled) {
+  protected final void pause() {
+  	if (pauseEnabled) { 
+  		myWrapper.pause();
   		log("Test paused. Send a REQUEST message with content \"resume\" to go on");
-  		a.blockingReceive(resumeTemplate);
   	}
   }
   
@@ -177,6 +180,7 @@ public abstract class Test implements Serializable {
   private class Wrapper extends SerialBehaviour {
   	private boolean stopped = false;
   	private Behaviour wrapped;
+  	private Behaviour paused;
   	private List children = new ArrayList();
   	
   	private Wrapper(Agent a, Behaviour b) {
@@ -208,6 +212,21 @@ public abstract class Test implements Serializable {
   		stopped = true;
   	}
   	
+  	private void pause() {
+  		paused = wrapped;
+  		wrapped = new CyclicBehaviour(myAgent) {
+  			public void action() {
+  				ACLMessage msg = myAgent.receive(resumeTemplate);
+  				if (msg != null) {
+  					wrapped = paused;
+  				}
+  				else {
+  					block();
+  				}
+  			}
+  		};
+  	}
+
   	public void reset() {
   		stopped = false;
   		super.reset();
