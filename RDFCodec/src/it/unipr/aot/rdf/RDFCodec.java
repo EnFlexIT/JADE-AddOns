@@ -380,11 +380,11 @@ public class RDFCodec extends ByteArrayCodec {
 
 			//object (resource) with ID
             if (((ParseTree)node).getID()!=null) 
-            	Ontology.setAttribute(abs, RESOURCE_ID, AbsPrimitive.wrap(((ParseTree)node).getID()));
+            	AbsHelper.setAttribute(abs, RESOURCE_ID, AbsPrimitive.wrap(((ParseTree)node).getID()));
 
             //object (resource) with reference (about)
             if (((ParseTree)node).getAbout()!=null) 
-            	Ontology.setAttribute(abs, RESOURCE_ABOUT, AbsPrimitive.wrap(((ParseTree)node).getAbout()));
+            	AbsHelper.setAttribute(abs, RESOURCE_ABOUT, AbsPrimitive.wrap(((ParseTree)node).getAbout()));
             //references.add(abs);
             //counter++;
 
@@ -417,7 +417,7 @@ public class RDFCodec extends ByteArrayCodec {
 
                 if (slotValue != null && slotName != null) {
   				  //System.out.println("\nwrite attribute of: "+slotName);
-                  Ontology.setAttribute(abs, slotName, slotValue);
+                  AbsHelper.setAttribute(abs, slotName, slotValue);
                 }
             }
 
