@@ -1,0 +1,31 @@
+; Tue Sep 24 14:31:05 BST 2002
+; 
+;+ (version "1.7")
+;+ (build "Build 930")
+
+([addresses] of :JADE-SLOT
+	(:JADE-UNNAMED-SLOT FALSE))
+
+([AgentAction] of :JADE-CLASS
+	(:JADE-IGNORE TRUE))
+
+([AID] of :JADE-CLASS
+	(:JADE-IGNORE TRUE))
+
+([Concept] of :JADE-CLASS
+	(:JADE-IGNORE TRUE))
+
+([name] of :JADE-SLOT
+	(:JADE-UNNAMED-SLOT FALSE))
+
+([Predicate] of :JADE-CLASS
+	(:JADE-IGNORE TRUE))
+
+([resolvers] of :JADE-SLOT
+	(:JADE-UNNAMED-SLOT FALSE))
+
+([SimpleJADEAbstractOntology_00014] of :STANDARD-FACET
+	(:ASSOCIATED-SLOT [:JADE-NAME]))
+
+([SimpleJADEAbstractOntology_00016] of :STANDARD-FACET
+	(:ASSOCIATED-SLOT [:JADE-UNNAMED-SLOT]))

@@ -1,0 +1,2295 @@
+; Tue Sep 24 15:10:32 BST 2002
+; 
+;+ (version "1.7")
+;+ (build "Build 930")
+
+([BROWSER_SLOT_NAMES] of Property_List)
+
+([CLSES_TAB] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ClsesTab")
+	(is_hidden FALSE)
+	(property_list [ProjectKB_1717_00007])
+	(label "Classes"))
+
+([Discovery_ProjectKB_00000] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00001])
+	(name ":JADE-CLASS")
+	(y 0)
+	(x 0)
+	(height 600)
+	(width 699))
+
+([Discovery_ProjectKB_00001] of Property_List
+	(name "class widget properties")
+	(properties
+		[Discovery_ProjectKB_00002]
+		[Discovery_ProjectKB_00010]
+		[Discovery_ProjectKB_00011]
+		[Discovery_ProjectKB_00012]
+		[Discovery_ProjectKB_00013]
+		[Discovery_ProjectKB_00014]
+		[Discovery_ProjectKB_00015]
+		[Discovery_ProjectKB_00016]
+		[Discovery_ProjectKB_00017]
+		[Discovery_ProjectKB_00035]
+		[Discovery_ProjectKB_00037]
+		[Discovery_ProjectKB_00039]
+		[Discovery_ProjectKB_00041]
+		[Discovery_ProjectKB_00043]))
+
+([Discovery_ProjectKB_00002] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ConstraintsWidget")
+	(property_list [Discovery_ProjectKB_00003])
+	(name ":SLOT-CONSTRAINTS")
+	(label "Constraints")
+	(y 0)
+	(x 400)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00003] of Property_List
+	(properties
+		[Discovery_ProjectKB_00004]
+		[Discovery_ProjectKB_00005]
+		[Discovery_ProjectKB_00006]
+		[Discovery_ProjectKB_00007]
+		[Discovery_ProjectKB_00008]
+		[Discovery_ProjectKB_00009]))
+
+([Discovery_ProjectKB_00004] of Boolean
+	(name "ButtonDisplayed-View Selected Instances")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00005] of Boolean
+	(name "ButtonDisplayed-Create Instance")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00006] of Boolean
+	(name "ButtonDisplayed-References")
+	(boolean_value FALSE))
+
+([Discovery_ProjectKB_00007] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00008] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00009] of Boolean
+	(name "ButtonDisplayed-Delete Selected Instances")
+	(boolean_value FALSE))
+
+([Discovery_ProjectKB_00010] of Widget
+	(name ":DIRECT-INSTANCES"))
+
+([Discovery_ProjectKB_00011] of Widget
+	(name ":DIRECT-SUBCLASSES"))
+
+([Discovery_ProjectKB_00012] of Widget
+	(name ":DIRECT-SUPERCLASSES"))
+
+([Discovery_ProjectKB_00013] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00014] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00015] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.RoleWidget")
+	(name ":ROLE")
+	(label "Role")
+	(y 60)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00016] of Widget
+	(name ":DIRECT-TYPE"))
+
+([Discovery_ProjectKB_00017] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TemplateSlotsWidget")
+	(property_list [Discovery_ProjectKB_00018])
+	(name ":DIRECT-TEMPLATE-SLOTS")
+	(label "Template Slots")
+	(y 120)
+	(x 0)
+	(height 300)
+	(width 600))
+
+([Discovery_ProjectKB_00018] of Property_List
+	(properties
+		[Discovery_ProjectKB_00019]
+		[Discovery_ProjectKB_00020]
+		[Discovery_ProjectKB_00021]
+		[Discovery_ProjectKB_00022]
+		[Discovery_ProjectKB_00023]
+		[Discovery_ProjectKB_00024]
+		[Discovery_ProjectKB_00025]
+		[Discovery_ProjectKB_00026]
+		[Discovery_ProjectKB_00027]
+		[Discovery_ProjectKB_00028]
+		[Discovery_ProjectKB_00029]
+		[Discovery_ProjectKB_00030]
+		[Discovery_ProjectKB_00031]
+		[Discovery_ProjectKB_00032]
+		[Discovery_ProjectKB_00033]
+		[Discovery_ProjectKB_00034]))
+
+([Discovery_ProjectKB_00019] of Boolean
+	(name "ButtonDisplayed-View selected slots")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00020] of Boolean
+	(name "ButtonDisplayed-View selected slots at class")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00021] of Boolean
+	(name "ButtonDisplayed-Create slot and attach to class")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00022] of Boolean
+	(name "ButtonDisplayed-Remove overrides from selected slots")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00023] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00024] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00025] of Boolean
+	(name "ButtonDisplayed-Move up")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00026] of Boolean
+	(name "ButtonDisplayed-Move down")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00027] of String
+	(name "ButtonDescription-View selected slots")
+	(string_value "View selected slots"))
+
+([Discovery_ProjectKB_00028] of String
+	(name "ButtonDescription-View selected slots at class")
+	(string_value "View selected slots at class"))
+
+([Discovery_ProjectKB_00029] of String
+	(name "ButtonDescription-Create slot and attach to class")
+	(string_value "Create slot and attach to class"))
+
+([Discovery_ProjectKB_00030] of String
+	(name "ButtonDescription-Remove overrides from selected slots")
+	(string_value "Remove overrides from selected slots"))
+
+([Discovery_ProjectKB_00031] of String
+	(name "ButtonDescription-Add")
+	(string_value "Attach slots to class"))
+
+([Discovery_ProjectKB_00032] of String
+	(name "ButtonDescription-Remove")
+	(string_value "Remove selected slots from class"))
+
+([Discovery_ProjectKB_00033] of String
+	(name "ButtonDescription-Move up")
+	(string_value "Move selected slot up"))
+
+([Discovery_ProjectKB_00034] of String
+	(name "ButtonDescription-Move down")
+	(string_value "Move selected slot down"))
+
+([Discovery_ProjectKB_00035] of Property_List
+	(name "layout properties")
+	(properties [Discovery_ProjectKB_00036]))
+
+([Discovery_ProjectKB_00036] of String
+	(name "vertical_stretcher")
+	(string_value ":DIRECT-TEMPLATE-SLOTS"))
+
+([Discovery_ProjectKB_00037] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00038])
+	(name ":JADE-JAVA-BASE-CLASS")
+	(label "Java super-class")
+	(y 420)
+	(x 350)
+	(height 60)
+	(width 250))
+
+([Discovery_ProjectKB_00038] of Property_List)
+
+([Discovery_ProjectKB_00039] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextAreaWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00040])
+	(name ":JADE-JAVA-CODE")
+	(label "Additional Java Code")
+	(y 480)
+	(x 0)
+	(height 120)
+	(width 600))
+
+([Discovery_ProjectKB_00040] of Property_List)
+
+([Discovery_ProjectKB_00041] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00042])
+	(name ":JADE-NAME")
+	(label "JADE Name")
+	(y 420)
+	(x 80)
+	(height 60)
+	(width 250))
+
+([Discovery_ProjectKB_00042] of Property_List)
+
+([Discovery_ProjectKB_00043] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00145])
+	(name ":JADE-IGNORE")
+	(label "ignore")
+	(y 440)
+	(x 0)
+	(height 40)
+	(width 70))
+
+([Discovery_ProjectKB_00044] of Integer
+	(integer_value 250)
+	(name "ClsesTab.left_right"))
+
+([Discovery_ProjectKB_00045] of Integer
+	(integer_value 692)
+	(name "ClsesTab.left.top_bottom"))
+
+([Discovery_ProjectKB_00046] of Integer
+	(integer_value 250)
+	(name "SlotsTab.left_right"))
+
+([Discovery_ProjectKB_00047] of Integer
+	(integer_value 400)
+	(name "SlotTab.left.top_bottom"))
+
+([Discovery_ProjectKB_00048] of Integer
+	(integer_value 250)
+	(name "FormsTab.left_right"))
+
+([Discovery_ProjectKB_00049] of Integer
+	(integer_value 250)
+	(name "InstancesTab.left_right"))
+
+([Discovery_ProjectKB_00050] of Integer
+	(integer_value 250)
+	(name "InstancesTab.right.left_right"))
+
+([Discovery_ProjectKB_00051] of String
+	(name "SearchTab_Query"))
+
+([Discovery_ProjectKB_00054] of Map)
+
+([Discovery_ProjectKB_00145] of Property_List)
+
+([Discovery_ProjectKB_00245] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00246])
+	(name ":INSTANCE-ANNOTATION"))
+
+([Discovery_ProjectKB_00246] of Property_List
+	(properties
+		[Discovery_ProjectKB_00247]
+		[Discovery_ProjectKB_00248]
+		[Discovery_ProjectKB_00249]
+		[Discovery_ProjectKB_00250]))
+
+([Discovery_ProjectKB_00247] of Widget
+	(name ":ANNOTATED-INSTANCE"))
+
+([Discovery_ProjectKB_00248] of Widget
+	(name ":CREATOR"))
+
+([Discovery_ProjectKB_00249] of Widget
+	(name ":CREATION-TIMESTAMP"))
+
+([Discovery_ProjectKB_00250] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.YellowStickyWidget")
+	(is_hidden FALSE)
+	(name ":ANNOTATION-TEXT")
+	(y 0)
+	(x 0)
+	(height 100)
+	(width 200))
+
+([Discovery_ProjectKB_00251] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00252])
+	(name ":STANDARD-FACET"))
+
+([Discovery_ProjectKB_00252] of Property_List
+	(name "facet widget properties")
+	(properties
+		[Discovery_ProjectKB_00253]
+		[Discovery_ProjectKB_00254]
+		[Discovery_ProjectKB_00255]
+		[Discovery_ProjectKB_00263]
+		[Discovery_ProjectKB_00268]))
+
+([Discovery_ProjectKB_00253] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00254] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00255] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceFieldWidget")
+	(property_list [Discovery_ProjectKB_00256])
+	(name ":ASSOCIATED-SLOT")
+	(label "Associated Slot")
+	(y 60)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00256] of Property_List
+	(properties
+		[Discovery_ProjectKB_00257]
+		[Discovery_ProjectKB_00258]
+		[Discovery_ProjectKB_00259]
+		[Discovery_ProjectKB_00260]
+		[Discovery_ProjectKB_00261]
+		[Discovery_ProjectKB_00262]))
+
+([Discovery_ProjectKB_00257] of Boolean
+	(name "ButtonDisplayed-View Instance")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00258] of Boolean
+	(name "ButtonDisplayed-References")
+	(boolean_value FALSE))
+
+([Discovery_ProjectKB_00259] of Boolean
+	(name "ButtonDisplayed-Create Instance")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00260] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00261] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00262] of Boolean
+	(name "ButtonDisplayed-Delete Instance")
+	(boolean_value FALSE))
+
+([Discovery_ProjectKB_00263] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ClsFieldWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00264])
+	(name ":DIRECT-TYPE")
+	(y 120)
+	(x 0)
+	(height 60)
+	(width 250))
+
+([Discovery_ProjectKB_00264] of Property_List
+	(properties
+		[Discovery_ProjectKB_00265]
+		[Discovery_ProjectKB_00266]
+		[Discovery_ProjectKB_00267]))
+
+([Discovery_ProjectKB_00265] of Boolean
+	(name "ButtonDisplayed-View Class")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00266] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00267] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00268] of Property_List
+	(name "layout properties"))
+
+([Discovery_ProjectKB_00269] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00270])
+	(name ":JADE-SLOT")
+	(y 0)
+	(x 0)
+	(height 578)
+	(width 714))
+
+([Discovery_ProjectKB_00270] of Property_List
+	(name "slot widget properties")
+	(properties
+		[Discovery_ProjectKB_00271]
+		[Discovery_ProjectKB_00272]
+		[Discovery_ProjectKB_00273]
+		[Discovery_ProjectKB_00274]
+		[Discovery_ProjectKB_00275]
+		[Discovery_ProjectKB_00281]
+		[Discovery_ProjectKB_00282]
+		[Discovery_ProjectKB_00283]
+		[Discovery_ProjectKB_00289]
+		[Discovery_ProjectKB_00290]
+		[Discovery_ProjectKB_00291]
+		[Discovery_ProjectKB_00292]
+		[Discovery_ProjectKB_00293]
+		[Discovery_ProjectKB_00294]
+		[Discovery_ProjectKB_00295]
+		[Discovery_ProjectKB_00296]
+		[Discovery_ProjectKB_00297]
+		[Discovery_ProjectKB_00299]))
+
+([Discovery_ProjectKB_00271] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.MinimumCardinalityWidget")
+	(name ":SLOT-MINIMUM-CARDINALITY")
+	(label "Cardinality")
+	(y 120)
+	(x 200)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00272] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.MaximumCardinalityWidget")
+	(name ":SLOT-MAXIMUM-CARDINALITY")
+	(y 175)
+	(x 200)
+	(height 35)
+	(width 200))
+
+([Discovery_ProjectKB_00273] of Widget
+	(name ":SLOT-CONSTRAINTS"))
+
+([Discovery_ProjectKB_00274] of Widget
+	(name ":DIRECT-TYPE"))
+
+([Discovery_ProjectKB_00275] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.SlotValuesWidget")
+	(property_list [Discovery_ProjectKB_00276])
+	(name ":SLOT-VALUES")
+	(label "Values")
+	(y 0)
+	(x 400)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00276] of Property_List
+	(properties
+		[Discovery_ProjectKB_00277]
+		[Discovery_ProjectKB_00278]
+		[Discovery_ProjectKB_00279]
+		[Discovery_ProjectKB_00280]))
+
+([Discovery_ProjectKB_00277] of Boolean
+	(name "ButtonDisplayed-View the selected value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00278] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00279] of Boolean
+	(name "ButtonDisplayed-Create a new value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00280] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00281] of Widget
+	(name ":DIRECT-SUPERSLOTS"))
+
+([Discovery_ProjectKB_00282] of Widget
+	(name ":DIRECT-SUBSLOTS"))
+
+([Discovery_ProjectKB_00283] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DefaultValuesWidget")
+	(property_list [Discovery_ProjectKB_00284])
+	(name ":SLOT-DEFAULTS")
+	(label "Default")
+	(y 120)
+	(x 400)
+	(height 150)
+	(width 200))
+
+([Discovery_ProjectKB_00284] of Property_List
+	(properties
+		[Discovery_ProjectKB_00285]
+		[Discovery_ProjectKB_00286]
+		[Discovery_ProjectKB_00287]
+		[Discovery_ProjectKB_00288]))
+
+([Discovery_ProjectKB_00285] of Boolean
+	(name "ButtonDisplayed-View the selected value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00286] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00287] of Boolean
+	(name "ButtonDisplayed-Create a new value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00288] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00289] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00290] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMaximumWidget")
+	(name ":SLOT-NUMERIC-MAXIMUM")
+	(label "Maximum")
+	(y 210)
+	(x 100)
+	(height 60)
+	(width 100))
+
+([Discovery_ProjectKB_00291] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMinimumWidget")
+	(name ":SLOT-NUMERIC-MINIMUM")
+	(label "Minimum")
+	(y 210)
+	(x 0)
+	(height 60)
+	(width 100))
+
+([Discovery_ProjectKB_00292] of Widget
+	(name ":ASSOCIATED-FACET"))
+
+([Discovery_ProjectKB_00293] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00294] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InverseSlotWidget")
+	(name ":SLOT-INVERSE")
+	(label "Inverse Slot")
+	(y 210)
+	(x 200)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00295] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ValueTypeWidget")
+	(name ":SLOT-VALUE-TYPE")
+	(label "Value Type")
+	(y 60)
+	(x 0)
+	(height 150)
+	(width 200))
+
+([Discovery_ProjectKB_00296] of Property_List
+	(name "layout properties"))
+
+([Discovery_ProjectKB_00297] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00298])
+	(name ":JADE-NAME")
+	(label "JADE Name")
+	(y 270)
+	(x 0)
+	(height 60)
+	(width 250))
+
+([Discovery_ProjectKB_00298] of Property_List)
+
+([Discovery_ProjectKB_00299] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00300])
+	(name ":JADE-UNNAMED-SLOT")
+	(label "Anonymous")
+	(y 280)
+	(x 260)
+	(height 60)
+	(width 125))
+
+([Discovery_ProjectKB_00300] of Property_List)
+
+([Discovery_ProjectKB_00301] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00302])
+	(name ":INSTANCE-ANNOTATION"))
+
+([Discovery_ProjectKB_00302] of Property_List
+	(properties
+		[Discovery_ProjectKB_00303]
+		[Discovery_ProjectKB_00304]
+		[Discovery_ProjectKB_00305]
+		[Discovery_ProjectKB_00306]))
+
+([Discovery_ProjectKB_00303] of Widget
+	(name ":ANNOTATED-INSTANCE"))
+
+([Discovery_ProjectKB_00304] of Widget
+	(name ":CREATOR"))
+
+([Discovery_ProjectKB_00305] of Widget
+	(name ":CREATION-TIMESTAMP"))
+
+([Discovery_ProjectKB_00306] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.YellowStickyWidget")
+	(is_hidden FALSE)
+	(name ":ANNOTATION-TEXT")
+	(y 0)
+	(x 0)
+	(height 100)
+	(width 200))
+
+([Discovery_ProjectKB_00307] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00308])
+	(name ":JADE-SLOT")
+	(y 0)
+	(x 0)
+	(height 578)
+	(width 714))
+
+([Discovery_ProjectKB_00308] of Property_List
+	(name "slot widget properties")
+	(properties
+		[Discovery_ProjectKB_00309]
+		[Discovery_ProjectKB_00411]
+		[Discovery_ProjectKB_00511]
+		[Discovery_ProjectKB_00512]
+		[Discovery_ProjectKB_00513]
+		[Discovery_ProjectKB_00519]
+		[Discovery_ProjectKB_00520]
+		[Discovery_ProjectKB_00521]
+		[Discovery_ProjectKB_00527]
+		[Discovery_ProjectKB_00528]
+		[Discovery_ProjectKB_00529]
+		[Discovery_ProjectKB_00530]
+		[Discovery_ProjectKB_00531]
+		[Discovery_ProjectKB_00532]
+		[Discovery_ProjectKB_00533]
+		[Discovery_ProjectKB_00534]
+		[Discovery_ProjectKB_00535]
+		[Discovery_ProjectKB_00537]))
+
+([Discovery_ProjectKB_00309] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.MinimumCardinalityWidget")
+	(name ":SLOT-MINIMUM-CARDINALITY")
+	(label "Cardinality")
+	(y 120)
+	(x 200)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00310] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00311])
+	(name ":JADE-CLASS")
+	(y 0)
+	(x 0)
+	(height 600)
+	(width 723))
+
+([Discovery_ProjectKB_00311] of Property_List
+	(name "class widget properties")
+	(properties
+		[Discovery_ProjectKB_00312]
+		[Discovery_ProjectKB_00320]
+		[Discovery_ProjectKB_00321]
+		[Discovery_ProjectKB_00322]
+		[Discovery_ProjectKB_00323]
+		[Discovery_ProjectKB_00324]
+		[Discovery_ProjectKB_00325]
+		[Discovery_ProjectKB_00326]
+		[Discovery_ProjectKB_00327]
+		[Discovery_ProjectKB_00345]
+		[Discovery_ProjectKB_00347]
+		[Discovery_ProjectKB_00349]
+		[Discovery_ProjectKB_00351]
+		[Discovery_ProjectKB_00454]))
+
+([Discovery_ProjectKB_00312] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ConstraintsWidget")
+	(property_list [Discovery_ProjectKB_00313])
+	(name ":SLOT-CONSTRAINTS")
+	(label "Constraints")
+	(y 0)
+	(x 400)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00313] of Property_List
+	(properties
+		[Discovery_ProjectKB_00314]
+		[Discovery_ProjectKB_00315]
+		[Discovery_ProjectKB_00316]
+		[Discovery_ProjectKB_00317]
+		[Discovery_ProjectKB_00318]
+		[Discovery_ProjectKB_00319]))
+
+([Discovery_ProjectKB_00314] of Boolean
+	(name "ButtonDisplayed-View Selected Instances")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00315] of Boolean
+	(name "ButtonDisplayed-Create Instance")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00316] of Boolean
+	(name "ButtonDisplayed-References")
+	(boolean_value FALSE))
+
+([Discovery_ProjectKB_00317] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00318] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00319] of Boolean
+	(name "ButtonDisplayed-Delete Selected Instances")
+	(boolean_value FALSE))
+
+([Discovery_ProjectKB_00320] of Widget
+	(name ":DIRECT-INSTANCES"))
+
+([Discovery_ProjectKB_00321] of Widget
+	(name ":DIRECT-SUBCLASSES"))
+
+([Discovery_ProjectKB_00322] of Widget
+	(name ":DIRECT-SUPERCLASSES"))
+
+([Discovery_ProjectKB_00323] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00324] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00325] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.RoleWidget")
+	(name ":ROLE")
+	(label "Role")
+	(y 60)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00326] of Widget
+	(name ":DIRECT-TYPE"))
+
+([Discovery_ProjectKB_00327] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TemplateSlotsWidget")
+	(property_list [Discovery_ProjectKB_00328])
+	(name ":DIRECT-TEMPLATE-SLOTS")
+	(label "Template Slots")
+	(y 120)
+	(x 0)
+	(height 300)
+	(width 600))
+
+([Discovery_ProjectKB_00328] of Property_List
+	(properties
+		[Discovery_ProjectKB_00329]
+		[Discovery_ProjectKB_00330]
+		[Discovery_ProjectKB_00331]
+		[Discovery_ProjectKB_00332]
+		[Discovery_ProjectKB_00333]
+		[Discovery_ProjectKB_00334]
+		[Discovery_ProjectKB_00335]
+		[Discovery_ProjectKB_00336]
+		[Discovery_ProjectKB_00337]
+		[Discovery_ProjectKB_00338]
+		[Discovery_ProjectKB_00339]
+		[Discovery_ProjectKB_00340]
+		[Discovery_ProjectKB_00341]
+		[Discovery_ProjectKB_00342]
+		[Discovery_ProjectKB_00343]
+		[Discovery_ProjectKB_00344]))
+
+([Discovery_ProjectKB_00329] of Boolean
+	(name "ButtonDisplayed-View selected slots")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00330] of Boolean
+	(name "ButtonDisplayed-View selected slots at class")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00331] of Boolean
+	(name "ButtonDisplayed-Create slot and attach to class")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00332] of Boolean
+	(name "ButtonDisplayed-Remove overrides from selected slots")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00333] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00334] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00335] of Boolean
+	(name "ButtonDisplayed-Move up")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00336] of Boolean
+	(name "ButtonDisplayed-Move down")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00337] of String
+	(name "ButtonDescription-View selected slots")
+	(string_value "View selected slots"))
+
+([Discovery_ProjectKB_00338] of String
+	(name "ButtonDescription-View selected slots at class")
+	(string_value "View selected slots at class"))
+
+([Discovery_ProjectKB_00339] of String
+	(name "ButtonDescription-Create slot and attach to class")
+	(string_value "Create slot and attach to class"))
+
+([Discovery_ProjectKB_00340] of String
+	(name "ButtonDescription-Remove overrides from selected slots")
+	(string_value "Remove overrides from selected slots"))
+
+([Discovery_ProjectKB_00341] of String
+	(name "ButtonDescription-Add")
+	(string_value "Attach slots to class"))
+
+([Discovery_ProjectKB_00342] of String
+	(name "ButtonDescription-Remove")
+	(string_value "Remove selected slots from class"))
+
+([Discovery_ProjectKB_00343] of String
+	(name "ButtonDescription-Move up")
+	(string_value "Move selected slot up"))
+
+([Discovery_ProjectKB_00344] of String
+	(name "ButtonDescription-Move down")
+	(string_value "Move selected slot down"))
+
+([Discovery_ProjectKB_00345] of Property_List
+	(name "layout properties")
+	(properties [Discovery_ProjectKB_00346]))
+
+([Discovery_ProjectKB_00346] of String
+	(name "vertical_stretcher")
+	(string_value ":DIRECT-TEMPLATE-SLOTS"))
+
+([Discovery_ProjectKB_00347] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00348])
+	(name ":JADE-JAVA-BASE-CLASS")
+	(label "Java super-class")
+	(y 420)
+	(x 350)
+	(height 60)
+	(width 250))
+
+([Discovery_ProjectKB_00348] of Property_List)
+
+([Discovery_ProjectKB_00349] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextAreaWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00350])
+	(name ":JADE-JAVA-CODE")
+	(label "Additional Java Code")
+	(y 480)
+	(x 0)
+	(height 120)
+	(width 600))
+
+([Discovery_ProjectKB_00350] of Property_List)
+
+([Discovery_ProjectKB_00351] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00352])
+	(name ":JADE-NAME")
+	(label "JADE Name")
+	(y 420)
+	(x 80)
+	(height 60)
+	(width 250))
+
+([Discovery_ProjectKB_00352] of Property_List)
+
+([Discovery_ProjectKB_00387] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00388])
+	(name ":STANDARD-FACET"))
+
+([Discovery_ProjectKB_00388] of Property_List
+	(name "facet widget properties")
+	(properties
+		[Discovery_ProjectKB_00389]
+		[Discovery_ProjectKB_00390]
+		[Discovery_ProjectKB_00391]))
+
+([Discovery_ProjectKB_00389] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00390] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00391] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceFieldWidget")
+	(name ":ASSOCIATED-SLOT")
+	(label "Associated Slot")
+	(y 60)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00392] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00393])
+	(name ":INSTANCE-ANNOTATION"))
+
+([Discovery_ProjectKB_00393] of Property_List
+	(properties
+		[Discovery_ProjectKB_00394]
+		[Discovery_ProjectKB_00395]
+		[Discovery_ProjectKB_00396]
+		[Discovery_ProjectKB_00397]))
+
+([Discovery_ProjectKB_00394] of Widget
+	(name ":ANNOTATED-INSTANCE"))
+
+([Discovery_ProjectKB_00395] of Widget
+	(name ":CREATOR"))
+
+([Discovery_ProjectKB_00396] of Widget
+	(name ":CREATION-TIMESTAMP"))
+
+([Discovery_ProjectKB_00397] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.YellowStickyWidget")
+	(is_hidden FALSE)
+	(name ":ANNOTATION-TEXT")
+	(y 0)
+	(x 0)
+	(height 100)
+	(width 200))
+
+([Discovery_ProjectKB_00411] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.MaximumCardinalityWidget")
+	(name ":SLOT-MAXIMUM-CARDINALITY")
+	(y 175)
+	(x 200)
+	(height 35)
+	(width 200))
+
+([Discovery_ProjectKB_00454] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00554])
+	(name ":JADE-IGNORE")
+	(label "ignore")
+	(y 440)
+	(x 0)
+	(height 40)
+	(width 70))
+
+([Discovery_ProjectKB_00511] of Widget
+	(name ":SLOT-CONSTRAINTS"))
+
+([Discovery_ProjectKB_00512] of Widget
+	(name ":DIRECT-TYPE"))
+
+([Discovery_ProjectKB_00513] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.SlotValuesWidget")
+	(property_list [Discovery_ProjectKB_00514])
+	(name ":SLOT-VALUES")
+	(label "Values")
+	(y 0)
+	(x 400)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00514] of Property_List
+	(properties
+		[Discovery_ProjectKB_00515]
+		[Discovery_ProjectKB_00516]
+		[Discovery_ProjectKB_00517]
+		[Discovery_ProjectKB_00518]))
+
+([Discovery_ProjectKB_00515] of Boolean
+	(name "ButtonDisplayed-View the selected value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00516] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00517] of Boolean
+	(name "ButtonDisplayed-Create a new value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00518] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00519] of Widget
+	(name ":DIRECT-SUPERSLOTS"))
+
+([Discovery_ProjectKB_00520] of Widget
+	(name ":DIRECT-SUBSLOTS"))
+
+([Discovery_ProjectKB_00521] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DefaultValuesWidget")
+	(property_list [Discovery_ProjectKB_00522])
+	(name ":SLOT-DEFAULTS")
+	(label "Default")
+	(y 120)
+	(x 400)
+	(height 150)
+	(width 200))
+
+([Discovery_ProjectKB_00522] of Property_List
+	(properties
+		[Discovery_ProjectKB_00523]
+		[Discovery_ProjectKB_00524]
+		[Discovery_ProjectKB_00525]
+		[Discovery_ProjectKB_00526]))
+
+([Discovery_ProjectKB_00523] of Boolean
+	(name "ButtonDisplayed-View the selected value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00524] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00525] of Boolean
+	(name "ButtonDisplayed-Create a new value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00526] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00527] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00528] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMaximumWidget")
+	(name ":SLOT-NUMERIC-MAXIMUM")
+	(label "Maximum")
+	(y 210)
+	(x 100)
+	(height 60)
+	(width 100))
+
+([Discovery_ProjectKB_00529] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMinimumWidget")
+	(name ":SLOT-NUMERIC-MINIMUM")
+	(label "Minimum")
+	(y 210)
+	(x 0)
+	(height 60)
+	(width 100))
+
+([Discovery_ProjectKB_00530] of Widget
+	(name ":ASSOCIATED-FACET"))
+
+([Discovery_ProjectKB_00531] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00532] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InverseSlotWidget")
+	(name ":SLOT-INVERSE")
+	(label "Inverse Slot")
+	(y 210)
+	(x 200)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00533] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ValueTypeWidget")
+	(name ":SLOT-VALUE-TYPE")
+	(label "Value Type")
+	(y 60)
+	(x 0)
+	(height 150)
+	(width 200))
+
+([Discovery_ProjectKB_00534] of Property_List
+	(name "layout properties"))
+
+([Discovery_ProjectKB_00535] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00536])
+	(name ":JADE-NAME")
+	(label "JADE Name")
+	(y 270)
+	(x 0)
+	(height 60)
+	(width 250))
+
+([Discovery_ProjectKB_00536] of Property_List)
+
+([Discovery_ProjectKB_00537] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00538])
+	(name ":JADE-UNNAMED-SLOT")
+	(label "Anonymous")
+	(y 280)
+	(x 260)
+	(height 60)
+	(width 125))
+
+([Discovery_ProjectKB_00538] of Property_List)
+
+([Discovery_ProjectKB_00539] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00540])
+	(name ":JADE-CLASS")
+	(y 0)
+	(x 0)
+	(height 600)
+	(width 699))
+
+([Discovery_ProjectKB_00540] of Property_List
+	(name "class widget properties")
+	(properties
+		[Discovery_ProjectKB_00541]
+		[Discovery_ProjectKB_00549]
+		[Discovery_ProjectKB_00550]
+		[Discovery_ProjectKB_00551]
+		[Discovery_ProjectKB_00552]
+		[Discovery_ProjectKB_00553]
+		[Discovery_ProjectKB_00555]
+		[Discovery_ProjectKB_00655]
+		[Discovery_ProjectKB_00757]
+		[Discovery_ProjectKB_00874]
+		[Discovery_ProjectKB_00876]
+		[Discovery_ProjectKB_00878]
+		[Discovery_ProjectKB_00880]
+		[Discovery_ProjectKB_00882]))
+
+([Discovery_ProjectKB_00541] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ConstraintsWidget")
+	(property_list [Discovery_ProjectKB_00542])
+	(name ":SLOT-CONSTRAINTS")
+	(label "Constraints")
+	(y 0)
+	(x 400)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00542] of Property_List
+	(properties
+		[Discovery_ProjectKB_00543]
+		[Discovery_ProjectKB_00544]
+		[Discovery_ProjectKB_00545]
+		[Discovery_ProjectKB_00546]
+		[Discovery_ProjectKB_00547]
+		[Discovery_ProjectKB_00548]))
+
+([Discovery_ProjectKB_00543] of Boolean
+	(name "ButtonDisplayed-View Selected Instances")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00544] of Boolean
+	(name "ButtonDisplayed-Create Instance")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00545] of Boolean
+	(name "ButtonDisplayed-References")
+	(boolean_value FALSE))
+
+([Discovery_ProjectKB_00546] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00547] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00548] of Boolean
+	(name "ButtonDisplayed-Delete Selected Instances")
+	(boolean_value FALSE))
+
+([Discovery_ProjectKB_00549] of Widget
+	(name ":DIRECT-INSTANCES"))
+
+([Discovery_ProjectKB_00550] of Widget
+	(name ":DIRECT-SUBCLASSES"))
+
+([Discovery_ProjectKB_00551] of Widget
+	(name ":DIRECT-SUPERCLASSES"))
+
+([Discovery_ProjectKB_00552] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00553] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00554] of Property_List)
+
+([Discovery_ProjectKB_00555] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.RoleWidget")
+	(name ":ROLE")
+	(label "Role")
+	(y 60)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00655] of Widget
+	(name ":DIRECT-TYPE"))
+
+([Discovery_ProjectKB_00656] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00657])
+	(name ":JADE-SLOT")
+	(y 0)
+	(x 0)
+	(height 578)
+	(width 714))
+
+([Discovery_ProjectKB_00657] of Property_List
+	(name "slot widget properties")
+	(properties
+		[Discovery_ProjectKB_00658]
+		[Discovery_ProjectKB_00659]
+		[Discovery_ProjectKB_00660]
+		[Discovery_ProjectKB_00661]
+		[Discovery_ProjectKB_00662]
+		[Discovery_ProjectKB_00668]
+		[Discovery_ProjectKB_00669]
+		[Discovery_ProjectKB_00670]
+		[Discovery_ProjectKB_00676]
+		[Discovery_ProjectKB_00677]
+		[Discovery_ProjectKB_00678]
+		[Discovery_ProjectKB_00679]
+		[Discovery_ProjectKB_00680]
+		[Discovery_ProjectKB_00681]
+		[Discovery_ProjectKB_00682]
+		[Discovery_ProjectKB_00683]
+		[Discovery_ProjectKB_00684]
+		[Discovery_ProjectKB_00686]))
+
+([Discovery_ProjectKB_00658] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.MinimumCardinalityWidget")
+	(name ":SLOT-MINIMUM-CARDINALITY")
+	(label "Cardinality")
+	(y 190)
+	(x 200)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00659] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.MaximumCardinalityWidget")
+	(name ":SLOT-MAXIMUM-CARDINALITY")
+	(y 250)
+	(x 200)
+	(height 35)
+	(width 200))
+
+([Discovery_ProjectKB_00660] of Widget
+	(name ":SLOT-CONSTRAINTS"))
+
+([Discovery_ProjectKB_00661] of Widget
+	(name ":DIRECT-TYPE"))
+
+([Discovery_ProjectKB_00662] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.SlotValuesWidget")
+	(property_list [Discovery_ProjectKB_00663])
+	(name ":SLOT-VALUES")
+	(label "Values")
+	(y 0)
+	(x 400)
+	(height 190)
+	(width 200))
+
+([Discovery_ProjectKB_00663] of Property_List
+	(properties
+		[Discovery_ProjectKB_00664]
+		[Discovery_ProjectKB_00665]
+		[Discovery_ProjectKB_00666]
+		[Discovery_ProjectKB_00667]))
+
+([Discovery_ProjectKB_00664] of Boolean
+	(name "ButtonDisplayed-View the selected value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00665] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00666] of Boolean
+	(name "ButtonDisplayed-Create a new value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00667] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00668] of Widget
+	(name ":DIRECT-SUPERSLOTS"))
+
+([Discovery_ProjectKB_00669] of Widget
+	(name ":DIRECT-SUBSLOTS"))
+
+([Discovery_ProjectKB_00670] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DefaultValuesWidget")
+	(property_list [Discovery_ProjectKB_00671])
+	(name ":SLOT-DEFAULTS")
+	(label "Default")
+	(y 190)
+	(x 400)
+	(height 150)
+	(width 200))
+
+([Discovery_ProjectKB_00671] of Property_List
+	(properties
+		[Discovery_ProjectKB_00672]
+		[Discovery_ProjectKB_00673]
+		[Discovery_ProjectKB_00674]
+		[Discovery_ProjectKB_00675]))
+
+([Discovery_ProjectKB_00672] of Boolean
+	(name "ButtonDisplayed-View the selected value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00673] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00674] of Boolean
+	(name "ButtonDisplayed-Create a new value")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00675] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00676] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 140)
+	(width 200))
+
+([Discovery_ProjectKB_00677] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMaximumWidget")
+	(name ":SLOT-NUMERIC-MAXIMUM")
+	(label "Maximum")
+	(y 280)
+	(x 100)
+	(height 60)
+	(width 100))
+
+([Discovery_ProjectKB_00678] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMinimumWidget")
+	(name ":SLOT-NUMERIC-MINIMUM")
+	(label "Minimum")
+	(y 280)
+	(x 0)
+	(height 60)
+	(width 100))
+
+([Discovery_ProjectKB_00679] of Widget
+	(name ":ASSOCIATED-FACET"))
+
+([Discovery_ProjectKB_00680] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00681] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InverseSlotWidget")
+	(name ":SLOT-INVERSE")
+	(label "Inverse Slot")
+	(y 280)
+	(x 200)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00682] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ValueTypeWidget")
+	(name ":SLOT-VALUE-TYPE")
+	(label "Value Type")
+	(y 120)
+	(x 0)
+	(height 160)
+	(width 200))
+
+([Discovery_ProjectKB_00683] of Property_List
+	(name "layout properties"))
+
+([Discovery_ProjectKB_00684] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00685])
+	(name ":JADE-NAME")
+	(y 60)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00685] of Property_List)
+
+([Discovery_ProjectKB_00686] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00687])
+	(name ":JADE-UNNAMED-SLOT")
+	(label "Anonymous")
+	(y 140)
+	(x 200)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00687] of Property_List)
+
+([Discovery_ProjectKB_00757] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TemplateSlotsWidget")
+	(property_list [Discovery_ProjectKB_00857])
+	(name ":DIRECT-TEMPLATE-SLOTS")
+	(label "Template Slots")
+	(y 120)
+	(x 0)
+	(height 300)
+	(width 600))
+
+([Discovery_ProjectKB_00857] of Property_List
+	(properties
+		[Discovery_ProjectKB_00858]
+		[Discovery_ProjectKB_00859]
+		[Discovery_ProjectKB_00860]
+		[Discovery_ProjectKB_00861]
+		[Discovery_ProjectKB_00862]
+		[Discovery_ProjectKB_00863]
+		[Discovery_ProjectKB_00864]
+		[Discovery_ProjectKB_00865]
+		[Discovery_ProjectKB_00866]
+		[Discovery_ProjectKB_00867]
+		[Discovery_ProjectKB_00868]
+		[Discovery_ProjectKB_00869]
+		[Discovery_ProjectKB_00870]
+		[Discovery_ProjectKB_00871]
+		[Discovery_ProjectKB_00872]
+		[Discovery_ProjectKB_00873]))
+
+([Discovery_ProjectKB_00858] of Boolean
+	(name "ButtonDisplayed-View selected slots")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00859] of Boolean
+	(name "ButtonDisplayed-View selected slots at class")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00860] of Boolean
+	(name "ButtonDisplayed-Create slot and attach to class")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00861] of Boolean
+	(name "ButtonDisplayed-Remove overrides from selected slots")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00862] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00863] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00864] of Boolean
+	(name "ButtonDisplayed-Move up")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00865] of Boolean
+	(name "ButtonDisplayed-Move down")
+	(boolean_value TRUE))
+
+([Discovery_ProjectKB_00866] of String
+	(name "ButtonDescription-View selected slots")
+	(string_value "View selected slots"))
+
+([Discovery_ProjectKB_00867] of String
+	(name "ButtonDescription-View selected slots at class")
+	(string_value "View selected slots at class"))
+
+([Discovery_ProjectKB_00868] of String
+	(name "ButtonDescription-Create slot and attach to class")
+	(string_value "Create slot and attach to class"))
+
+([Discovery_ProjectKB_00869] of String
+	(name "ButtonDescription-Remove overrides from selected slots")
+	(string_value "Remove overrides from selected slots"))
+
+([Discovery_ProjectKB_00870] of String
+	(name "ButtonDescription-Add")
+	(string_value "Attach slots to class"))
+
+([Discovery_ProjectKB_00871] of String
+	(name "ButtonDescription-Remove")
+	(string_value "Remove selected slots from class"))
+
+([Discovery_ProjectKB_00872] of String
+	(name "ButtonDescription-Move up")
+	(string_value "Move selected slot up"))
+
+([Discovery_ProjectKB_00873] of String
+	(name "ButtonDescription-Move down")
+	(string_value "Move selected slot down"))
+
+([Discovery_ProjectKB_00874] of Property_List
+	(name "layout properties")
+	(properties [Discovery_ProjectKB_00875]))
+
+([Discovery_ProjectKB_00875] of String
+	(name "vertical_stretcher")
+	(string_value ":DIRECT-TEMPLATE-SLOTS"))
+
+([Discovery_ProjectKB_00876] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00877])
+	(name ":JADE-JAVA-BASE-CLASS")
+	(label "Java super-class")
+	(y 420)
+	(x 350)
+	(height 60)
+	(width 250))
+
+([Discovery_ProjectKB_00877] of Property_List)
+
+([Discovery_ProjectKB_00878] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextAreaWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00879])
+	(name ":JADE-JAVA-CODE")
+	(label "Additional Java Code")
+	(y 480)
+	(x 0)
+	(height 120)
+	(width 600))
+
+([Discovery_ProjectKB_00879] of Property_List)
+
+([Discovery_ProjectKB_00880] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00881])
+	(name ":JADE-NAME")
+	(label "JADE Name")
+	(y 420)
+	(x 80)
+	(height 60)
+	(width 250))
+
+([Discovery_ProjectKB_00881] of Property_List)
+
+([Discovery_ProjectKB_00882] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00883])
+	(name ":JADE-IGNORE")
+	(label "ignore")
+	(y 440)
+	(x 0)
+	(height 40)
+	(width 70))
+
+([Discovery_ProjectKB_00883] of Property_List)
+
+([Discovery_ProjectKB_00884] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00885])
+	(name ":STANDARD-FACET"))
+
+([Discovery_ProjectKB_00885] of Property_List
+	(name "facet widget properties")
+	(properties
+		[Discovery_ProjectKB_00886]
+		[Discovery_ProjectKB_00887]
+		[Discovery_ProjectKB_00888]))
+
+([Discovery_ProjectKB_00886] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00887] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 120)
+	(width 200))
+
+([Discovery_ProjectKB_00888] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceFieldWidget")
+	(name ":ASSOCIATED-SLOT")
+	(label "Associated Slot")
+	(y 60)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([Discovery_ProjectKB_00889] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [Discovery_ProjectKB_00890])
+	(name ":THING")
+	(y 0)
+	(x 0)
+	(height 834)
+	(width 994))
+
+([Discovery_ProjectKB_00890] of Property_List)
+
+([FORMS_TAB] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormsTab")
+	(is_hidden FALSE)
+	(property_list [ProjectKB_1717_00037])
+	(label "Forms"))
+
+([INSTANCES_TAB] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab")
+	(is_hidden FALSE)
+	(property_list [ProjectKB_1717_00040])
+	(label "Instances"))
+
+([LAYOUT_PROPERTIES] of Property_List
+	(name "layout properties")
+	(properties [VERTICAL_STRETCHER]))
+
+([PAL_DESCRIPTION_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextAreaWidget")
+	(is_hidden FALSE)
+	(name ":PAL-DESCRIPTION")
+	(label "Description")
+	(y 0)
+	(x 275)
+	(height 180)
+	(width 250))
+
+([PAL_FORM_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(is_hidden FALSE)
+	(property_list [PAL_PROPERTY_LIST])
+	(name ":PAL-CONSTRAINT")
+	(y 0)
+	(x 0)
+	(height 476)
+	(width 603))
+
+([PAL_NAME_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(is_hidden FALSE)
+	(name ":PAL-NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 275))
+
+([PAL_PROPERTY_LIST] of Property_List
+	(properties
+		[PAL_NAME_WIDGET]
+		[PAL_RANGE_WIDGET]
+		[PAL_DESCRIPTION_WIDGET]
+		[PAL_STATEMENT_WIDGET]))
+
+([PAL_RANGE_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protegex.widget.pal.constraint.PalRangeWidget")
+	(is_hidden FALSE)
+	(name ":PAL-RANGE")
+	(label "Range")
+	(y 180)
+	(x 275)
+	(height 180)
+	(width 250))
+
+([PAL_STATEMENT_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protegex.widget.pal.constraint.PalConstraintWidget")
+	(is_hidden FALSE)
+	(name ":PAL-STATEMENT")
+	(label "Statement")
+	(y 60)
+	(x 0)
+	(height 300)
+	(width 275))
+
+([PROJECT] of Project
+	(sources [SOURCES])
+	(default_facet_metaclass ":STANDARD-FACET")
+	(tabs
+		[CLSES_TAB]
+		[SLOTS_TAB]
+		[FORMS_TAB]
+		[INSTANCES_TAB]
+		[QUERIES_TAB]
+		[ProjectKB_1717_00001]
+		[ProjectKB_1717_00003]
+		[ProjectKB_1717_00005])
+	(included_projects
+		"SimpleJADEAbstractOntology.pprj"
+		"FIPAAgentManagement.pprj")
+	(options [ProjectKB_1717_00008])
+	(default_cls_metaclass ":STANDARD-CLASS")
+	(default_slot_metaclass ":STANDARD-SLOT")
+	(next_frame_number 16)
+	(property_map [Discovery_ProjectKB_00054])
+	(customized_instance_widgets
+		[Discovery_ProjectKB_00392]
+		[STANDARD_CLASS_FORM_WIDGET]
+		[STANDARD_SLOT_FORM_WIDGET]
+		[PAL_FORM_WIDGET]
+		[Discovery_ProjectKB_00656]
+		[Discovery_ProjectKB_00387]
+		[Discovery_ProjectKB_00310])
+	(browser_slot_names [BROWSER_SLOT_NAMES])
+	(default_instance_widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
+
+([ProjectKB_1717_00000] of String
+	(name "factory_class_name")
+	(string_value "edu.stanford.smi.protege.storage.clips.ClipsKnowledgeBaseFactory"))
+
+([ProjectKB_1717_00001] of Widget
+	(widget_class_name "nl.uva.psy.swi.beangenerator.OntologyBeanGeneratorTab")
+	(is_hidden FALSE)
+	(property_list [ProjectKB_1717_00002])
+	(label "Ontology Bean Generator"))
+
+([ProjectKB_1717_00002] of Property_List)
+
+([ProjectKB_1717_00003] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.KAToolTab")
+	(is_hidden TRUE)
+	(property_list [ProjectKB_1717_00004]))
+
+([ProjectKB_1717_00004] of Property_List)
+
+([ProjectKB_1717_00005] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ClsesAndInstancesTab")
+	(is_hidden TRUE)
+	(property_list [ProjectKB_1717_00006]))
+
+([ProjectKB_1717_00006] of Property_List)
+
+([ProjectKB_1717_00007] of Property_List
+	(properties
+		[Discovery_ProjectKB_00044]
+		[Discovery_ProjectKB_00045]))
+
+([ProjectKB_1717_00008] of Options
+	(update_modification_slots FALSE)
+	(is_readonly FALSE)
+	(display_multi_parent_class_icon TRUE)
+	(display_hidden_classes TRUE)
+	(display_abstract_class_icon TRUE)
+	(confirm_on_remove FALSE))
+
+([ProjectKB_1717_00009] of Property_List
+	(properties
+		[ProjectKB_1717_00010]
+		[ProjectKB_1717_00011]
+		[ProjectKB_1717_00012]
+		[ProjectKB_1717_00013]
+		[ProjectKB_1717_00014]
+		[ProjectKB_1717_00015]))
+
+([ProjectKB_1717_00010] of Boolean
+	(name "ButtonDisplayed-View Selected Instances")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00011] of Boolean
+	(name "ButtonDisplayed-Create Instance")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00012] of Boolean
+	(name "ButtonDisplayed-References")
+	(boolean_value FALSE))
+
+([ProjectKB_1717_00013] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00014] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00015] of Boolean
+	(name "ButtonDisplayed-Delete Selected Instances")
+	(boolean_value FALSE))
+
+([ProjectKB_1717_00016] of Property_List
+	(properties
+		[ProjectKB_1717_00017]
+		[ProjectKB_1717_00018]
+		[ProjectKB_1717_00019]
+		[ProjectKB_1717_00020]
+		[ProjectKB_1717_00021]
+		[ProjectKB_1717_00022]
+		[ProjectKB_1717_00023]
+		[ProjectKB_1717_00024]))
+
+([ProjectKB_1717_00017] of Boolean
+	(name "ButtonDisplayed-View selected slots")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00018] of Boolean
+	(name "ButtonDisplayed-View selected slots at class")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00019] of Boolean
+	(name "ButtonDisplayed-Create slot and attach to class")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00020] of Boolean
+	(name "ButtonDisplayed-Remove overrides from selected slots")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00021] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00022] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00023] of Boolean
+	(name "ButtonDisplayed-Move up")
+	(boolean_value FALSE))
+
+([ProjectKB_1717_00024] of Boolean
+	(name "ButtonDisplayed-Move down")
+	(boolean_value FALSE))
+
+([ProjectKB_1717_00025] of Property_List
+	(properties
+		[Discovery_ProjectKB_00046]
+		[Discovery_ProjectKB_00047]))
+
+([ProjectKB_1717_00026] of Property_List
+	(properties
+		[ProjectKB_1717_00027]
+		[ProjectKB_1717_00028]
+		[ProjectKB_1717_00029]
+		[ProjectKB_1717_00030]))
+
+([ProjectKB_1717_00027] of Boolean
+	(name "ButtonDisplayed-View the selected value")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00028] of Boolean
+	(name "ButtonDisplayed-Create a new value")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00029] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00030] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00031] of Property_List
+	(properties
+		[ProjectKB_1717_00032]
+		[ProjectKB_1717_00033]
+		[ProjectKB_1717_00034]
+		[ProjectKB_1717_00035]))
+
+([ProjectKB_1717_00032] of Boolean
+	(name "ButtonDisplayed-View the selected value")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00033] of Boolean
+	(name "ButtonDisplayed-Create a new value")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00034] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00035] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([ProjectKB_1717_00036] of Property_List
+	(name "layout properties"))
+
+([ProjectKB_1717_00037] of Property_List
+	(properties [Discovery_ProjectKB_00048]))
+
+([ProjectKB_1717_00040] of Property_List
+	(properties
+		[Discovery_ProjectKB_00049]
+		[Discovery_ProjectKB_00050]))
+
+([ProjectKB_1717_00041] of Property_List
+	(properties [Discovery_ProjectKB_00051]))
+
+([ProjectKB_1717_00042] of String
+	(name "classes_file_name")
+	(string_value "Discovery.pont"))
+
+([ProjectKB_1717_00043] of String
+	(name "instances_file_name")
+	(string_value "Discovery.pins"))
+
+([QUERIES_TAB] of Widget
+	(widget_class_name "edu.stanford.smi.protegex.queries_tab.QueriesTab")
+	(is_hidden FALSE)
+	(property_list [ProjectKB_1717_00041])
+	(label "Queries"))
+
+([SLOTS_TAB] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.SlotsTab")
+	(is_hidden FALSE)
+	(property_list [ProjectKB_1717_00025])
+	(label "Slots"))
+
+([SOURCES] of Property_List
+	(properties
+		[ProjectKB_1717_00000]
+		[ProjectKB_1717_00042]
+		[ProjectKB_1717_00043]))
+
+([STANDARD_CLASS_CONSTRAINTS_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ConstraintsWidget")
+	(property_list [ProjectKB_1717_00009])
+	(name ":SLOT-CONSTRAINTS")
+	(label "Constraints")
+	(y 0)
+	(x 400)
+	(height 120)
+	(width 200))
+
+([STANDARD_CLASS_DIRECT_INSTANCES_WIDGET] of Widget
+	(name ":DIRECT-INSTANCES"))
+
+([STANDARD_CLASS_DIRECT_SUBCLASSES_WIDGET] of Widget
+	(name ":DIRECT-SUBCLASSES"))
+
+([STANDARD_CLASS_DIRECT_SUPERCLASSES_WIDGET] of Widget
+	(name ":DIRECT-SUPERCLASSES"))
+
+([STANDARD_CLASS_DIRECT_TYPE_WIDGET] of Widget
+	(name ":DIRECT-TYPE"))
+
+([STANDARD_CLASS_DOCUMENTATION_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 120)
+	(width 200))
+
+([STANDARD_CLASS_FORM_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(property_list [STANDARD_CLASS_WIDGETS])
+	(name ":STANDARD-CLASS")
+	(y 0)
+	(x 0)
+	(height 578)
+	(width 714))
+
+([STANDARD_CLASS_NAME_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([STANDARD_CLASS_ROLE_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.RoleWidget")
+	(name ":ROLE")
+	(label "Role")
+	(y 60)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([STANDARD_CLASS_TEMPLATE_SLOTS_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.TemplateSlotsWidget")
+	(property_list [ProjectKB_1717_00016])
+	(name ":DIRECT-TEMPLATE-SLOTS")
+	(label "Template Slots")
+	(y 120)
+	(x 0)
+	(height 150)
+	(width 600))
+
+([STANDARD_CLASS_WIDGETS] of Property_List
+	(name "class widget properties")
+	(properties
+		[STANDARD_CLASS_CONSTRAINTS_WIDGET]
+		[STANDARD_CLASS_DIRECT_INSTANCES_WIDGET]
+		[STANDARD_CLASS_DIRECT_SUBCLASSES_WIDGET]
+		[STANDARD_CLASS_DIRECT_SUPERCLASSES_WIDGET]
+		[STANDARD_CLASS_DOCUMENTATION_WIDGET]
+		[STANDARD_CLASS_NAME_WIDGET]
+		[STANDARD_CLASS_ROLE_WIDGET]
+		[STANDARD_CLASS_DIRECT_TYPE_WIDGET]
+		[STANDARD_CLASS_TEMPLATE_SLOTS_WIDGET]
+		[LAYOUT_PROPERTIES]))
+
+([STANDARD_SLOT_ASSOCIATED_FACET_WIDGET] of Widget
+	(name ":ASSOCIATED-FACET"))
+
+([STANDARD_SLOT_CONSTRAINTS_WIDGET] of Widget
+	(name ":SLOT-CONSTRAINTS"))
+
+([STANDARD_SLOT_DEFAULT_VALUE_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DefaultValuesWidget")
+	(property_list [ProjectKB_1717_00031])
+	(name ":SLOT-DEFAULTS")
+	(label "Default")
+	(y 120)
+	(x 400)
+	(height 150)
+	(width 200))
+
+([STANDARD_SLOT_DIRECT_TYPE_WIDGET] of Widget
+	(name ":DIRECT-TYPE"))
+
+([STANDARD_SLOT_DOCUMENTATION_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(name ":DOCUMENTATION")
+	(label "Documentation")
+	(y 0)
+	(x 200)
+	(height 120)
+	(width 200))
+
+([STANDARD_SLOT_FORM_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(property_list [STANDARD_SLOT_WIDGETS])
+	(name ":STANDARD-SLOT")
+	(y 0)
+	(x 0)
+	(height 578)
+	(width 714))
+
+([STANDARD_SLOT_INVERSE_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InverseSlotWidget")
+	(name ":SLOT-INVERSE")
+	(label "Inverse Slot")
+	(y 210)
+	(x 200)
+	(height 60)
+	(width 200))
+
+([STANDARD_SLOT_MAXIMUM_CARDINALITY_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.MaximumCardinalityWidget")
+	(name ":SLOT-MAXIMUM-CARDINALITY")
+	(y 175)
+	(x 200)
+	(height 35)
+	(width 200))
+
+([STANDARD_SLOT_MAXIMUM_VALUE_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMaximumWidget")
+	(name ":SLOT-NUMERIC-MAXIMUM")
+	(label "Maximum")
+	(y 210)
+	(x 100)
+	(height 60)
+	(width 100))
+
+([STANDARD_SLOT_MINIMUM_CARDINALITY_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.MinimumCardinalityWidget")
+	(name ":SLOT-MINIMUM-CARDINALITY")
+	(label "Cardinality")
+	(y 120)
+	(x 200)
+	(height 60)
+	(width 200))
+
+([STANDARD_SLOT_MINIMUM_VALUE_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMinimumWidget")
+	(name ":SLOT-NUMERIC-MINIMUM")
+	(label "Minimum")
+	(y 210)
+	(x 0)
+	(height 60)
+	(width 100))
+
+([STANDARD_SLOT_NAME_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(name ":NAME")
+	(label "Name")
+	(y 0)
+	(x 0)
+	(height 60)
+	(width 200))
+
+([STANDARD_SLOT_SUBSLOTS_WIDGET] of Widget
+	(name ":DIRECT-SUBSLOTS"))
+
+([STANDARD_SLOT_SUPERSLOTS_WIDGET] of Widget
+	(name ":DIRECT-SUPERSLOTS"))
+
+([STANDARD_SLOT_TYPE_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ValueTypeWidget")
+	(name ":SLOT-VALUE-TYPE")
+	(label "Value Type")
+	(y 60)
+	(x 0)
+	(height 150)
+	(width 200))
+
+([STANDARD_SLOT_VALUES_WIDGET] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.SlotValuesWidget")
+	(property_list [ProjectKB_1717_00026])
+	(name ":SLOT-VALUES")
+	(label "Template Values")
+	(y 0)
+	(x 400)
+	(height 120)
+	(width 200))
+
+([STANDARD_SLOT_WIDGETS] of Property_List
+	(name "slot widget properties")
+	(properties
+		[STANDARD_SLOT_MINIMUM_CARDINALITY_WIDGET]
+		[STANDARD_SLOT_MAXIMUM_CARDINALITY_WIDGET]
+		[STANDARD_SLOT_CONSTRAINTS_WIDGET]
+		[STANDARD_SLOT_DIRECT_TYPE_WIDGET]
+		[STANDARD_SLOT_VALUES_WIDGET]
+		[STANDARD_SLOT_SUPERSLOTS_WIDGET]
+		[STANDARD_SLOT_SUBSLOTS_WIDGET]
+		[STANDARD_SLOT_DEFAULT_VALUE_WIDGET]
+		[STANDARD_SLOT_DOCUMENTATION_WIDGET]
+		[STANDARD_SLOT_MAXIMUM_VALUE_WIDGET]
+		[STANDARD_SLOT_MINIMUM_VALUE_WIDGET]
+		[STANDARD_SLOT_ASSOCIATED_FACET_WIDGET]
+		[STANDARD_SLOT_NAME_WIDGET]
+		[STANDARD_SLOT_INVERSE_WIDGET]
+		[STANDARD_SLOT_TYPE_WIDGET]
+		[ProjectKB_1717_00036]))
+
+([VERTICAL_STRETCHER] of String
+	(name "vertical_stretcher")
+	(string_value ":DIRECT-TEMPLATE-SLOTS"))

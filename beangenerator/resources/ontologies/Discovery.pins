@@ -1,0 +1,31 @@
+; Tue Sep 24 15:10:32 BST 2002
+; 
+;+ (version "1.7")
+;+ (build "Build 930")
+
+([agents] of :JADE-SLOT)
+
+([channel] of :JADE-SLOT)
+
+([directories] of :JADE-SLOT)
+
+([DiscoveryAdvertisement] of :JADE-CLASS)
+
+([filter] of :JADE-SLOT)
+
+([GetAdvert] of :JADE-CLASS)
+
+([GetAllDescriptions] of :JADE-CLASS)
+
+([GetDirectories] of :JADE-CLASS)
+
+([NotificationFilter] of :JADE-CLASS)
+
+([platform] of :JADE-SLOT)
+
+([Subscribe] of :JADE-CLASS)
+
+([UnknownChannelException] of :JADE-CLASS
+	(:JADE-JAVA-BASE-CLASS "java.lang.Exception"))
+
+([Unsubscribe] of :JADE-CLASS)

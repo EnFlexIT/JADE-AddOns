@@ -1,0 +1,74 @@
+; Wed Jul 24 15:38:48 BST 2002
+; 
+;+ (version "1.7")
+;+ (build "Build 930")
+
+([agent-name] of JADE_SLOT
+	(JADE_NAME "agent-name"))
+
+([agentDescription] of JADE_SLOT
+	(JADE_NAME "agent-description")
+	(JADE_UNNAMED_SLOT TRUE))
+
+([ams-agent-description] of JADE_CLASS)
+
+([Demo_00031] of :STANDARD-FACET)
+
+([Demo_00032] of :STANDARD-FACET
+	(:ASSOCIATED-SLOT [JADE_NAME]))
+
+([DemoException] of JADE_CLASS
+	(JADE_NAME "blah-exception")
+	(JADE_JAVA_BASE_CLASS "java.lang.Exception"))
+
+([deregister] of JADE_CLASS
+	(JADE_NAME "de-register"))
+
+([description] of JADE_SLOT)
+
+([DFAgentDescription] of JADE_CLASS
+	(JADE_NAME "df-agent-description"))
+
+([dynamic] of JADE_SLOT)
+
+([GetDescription] of JADE_CLASS
+	(JADE_NAME "get-description"))
+
+([language] of JADE_SLOT)
+
+([max-depth] of JADE_SLOT)
+
+([max-results] of JADE_SLOT)
+
+([mobility] of JADE_SLOT)
+
+([ontology] of JADE_SLOT)
+
+([properties] of JADE_SLOT
+	(JADE_UNNAMED_SLOT FALSE))
+
+([property] of JADE_CLASS)
+
+([property-name] of JADE_SLOT
+	(JADE_NAME "name"))
+
+([protocol] of JADE_SLOT)
+
+([Register] of JADE_CLASS
+	(JADE_NAME "register"))
+
+([search-constraints] of JADE_CLASS)
+
+([service-name] of JADE_SLOT
+	(JADE_NAME "name"))
+
+([services] of JADE_SLOT
+	(JADE_UNNAMED_SLOT FALSE))
+
+([state] of JADE_SLOT)
+
+([transport-profile] of JADE_SLOT)
+
+([type] of JADE_SLOT)
+
+([value] of JADE_SLOT)

@@ -1,0 +1,99 @@
+<!-- Build file for the Protege beangenerator -->
+<!-- Author: Jerome Picault, Motorola Labs -->
+
+<project name="BeanGenerator" default="compile" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property environment="env"/>
+  <property name="protege-home" value="${env.PROTEGE_HOME}"/>
+  <property name="projectname" value="beangenerator"/>
+  <property name="src" value="src"/>
+  <property name="build" value="classes"/>
+  <property name="doc" value="doc"/>
+  <property name="lib" value="lib"/>
+  <property name="resources" value="resources"/>
+  <property name="ontologies" value="${resources}/ontologies"/>
+  <property name="dist" value="../.."/>
+  <property name="libJADEDir" value="../../lib"/>
+  <property name="classpath" value="../..;${libJADEDir}/jade.jar;${protege-home}/protege.jar"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the directories structure used to store files -->
+    <mkdir dir="${lib}"/>
+    <mkdir dir="${build}"/>
+  </target>
+  
+
+  <!-- Compile the java code from ${src} into ${build} -->
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on" />
+    <!-- Copy images -->
+    <copy todir="${build}/nl/uva/psy/swi/beangenerator/graphics">
+       <fileset dir="${src}/nl/uva/psy/swi/beangenerator/graphics" />
+    </copy>
+  </target>
+
+  <!-- Make jars file and put in ${lib} -->
+  <target name="lib" depends="compile">
+    <jar jarfile="${lib}/${projectname}.jar"
+         manifest="${resources}/MANIFEST.txt"
+         update="true"
+         basedir="${build}">
+    </jar>
+  </target>
+ 
+  <!-- Install the bean in Protege -->
+  <target name="install" depends="lib">
+    <copy file="${lib}/${projectname}.jar" tofile="${protege-home}/plugins/${projectname}.jar" />
+    <copy file="${resources}/${projectname}.properties" tofile="${protege-home}/${projectname}.properties" />
+    <copy todir="${protege-home}/projects">
+       <fileset dir="${ontologies}">
+         <include name="SimpleJADEAbstractOntology**"/>
+       </fileset>
+    </copy>
+  </target>
+
+  <!-- Install the examples in the Protege directory -->
+  <target name="examples" depends="install">
+    <copy todir="${protege-home}/projects">
+       <fileset dir="${ontologies}">
+         <include name="Demo**"/>
+       </fileset>
+    </copy>
+    <copy todir="${protege-home}/projects">
+       <fileset dir="${ontologies}">
+         <include name="Discovery**"/>
+       </fileset>
+    </copy>
+    <copy todir="${protege-home}/projects">
+       <fileset dir="${ontologies}">
+         <include name="FIPAAgentManagement**"/>
+       </fileset>
+    </copy>
+  </target>
+
+
+  <!-- Make distribution zip file and put in ${dist} -->
+  <target name="dist" depends="lib">
+    <jar jarfile="${dist}/${projectname}.zip">
+      <fileset dir="${dist}" includes="add-ons/${projectname}/${src}/**"/>
+      <fileset dir="${dist}" includes="add-ons/${projectname}/examples/**"/>
+      <fileset dir="${dist}" includes="add-ons/${projectname}/*"/>
+      <fileset dir="${dist}" includes="add-ons/${projectname}/lib/**"/>
+    </jar>
+  </target>
+ 
+  <target name="all" depends="init, compile, lib, dist"/>
+ 
+  <!-- delete ${build} and ${lib} directories -->
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} directory tree -->
+    <delete includeEmptyDirs="true" quiet="true">
+      <fileset dir="${build}"/>
+      <fileset dir="${lib}" includes="${projectname}.jar"/>
+    </delete>
+  </target>
+
+</project>
