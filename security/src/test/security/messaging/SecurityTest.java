@@ -161,7 +161,7 @@ public class SecurityTest extends Test {
       b1.addSubBehaviour(new SimpleBehaviour(a) {
         
           private boolean done = false;
-        
+
           public void action() {
             ACLMessage msg = myAgent.receive();
             if (msg == null) {
@@ -173,8 +173,8 @@ public class SecurityTest extends Test {
                   // If the message gets there it means that everything went well so far
                   SecurityHelper sh = (SecurityHelper)myAgent.getHelper(jade.core.security.SecurityService.NAME);
                   if ( (shouldPass) &&
-                       (! (sign^sh.isSigned(msg))) && 
-                       (! (encrypt^sh.isEncrypted(msg))) &&
+                       (! (sign^sh.getUseSignature(msg))) && 
+                       (! (encrypt^sh.getUseEncryption(msg))) &&
                        (CONTENT.equals(msg.getContent())) ) {
                     passed("Everything happened as expected");
                   }

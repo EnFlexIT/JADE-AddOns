@@ -107,7 +107,7 @@ public class MessagingChecker extends BaseJADEChecker {
           )) {
           Agent sen = myContainer.acquireLocalAgent(sender);
           try {
-            ((SecurityHelper)sen.getHelper(SecurityService.NAME)).toSign( msg.getACLMessage() );
+            ((SecurityHelper)sen.getHelper(SecurityService.NAME)).setUseSignature( msg.getACLMessage() );
           }
           catch (ServiceException ex) { 
             // something went wrong, msg will not be signed

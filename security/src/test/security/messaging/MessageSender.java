@@ -111,7 +111,7 @@ public class MessageSender extends Agent {
         if (isSet(signAlgo)) {
           se.setSignatureAlgorithm(signAlgo);
         }
-        se.toSign(msg);
+        se.setUseSignature(msg);
       }
       if (encrypt) {
         if (isSet(symAlgo)) {
@@ -124,7 +124,7 @@ public class MessageSender extends Agent {
           JADEPrincipal jp = new JADEPrincipalImpl(dest.getName(),new SDSINameImpl(destKey,destAlgo,null));
           se.addTrustedPrincipal(jp);
         }
-        se.toEncrypt(msg);
+        se.setUseEncryption(msg);
       }
     }
     catch (Exception e) {

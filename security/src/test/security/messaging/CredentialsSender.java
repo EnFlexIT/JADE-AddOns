@@ -99,7 +99,7 @@ public class CredentialsSender extends Agent {
       if (encrypt) {
         JADEPrincipal jp = new JADEPrincipalImpl(dest.getName(),new SDSINameImpl(destKey,destAlgo,null));
         se.addTrustedPrincipal(jp);
-        se.toEncrypt(msg);
+        se.setUseEncryption(msg);
       }
     }
     catch (Exception e) {
