@@ -123,7 +123,6 @@ public class TestGroupExecutor extends FSMBehaviour {
 						ret = EXECUTE;
 						StringBuffer sb = new StringBuffer("\n--------------------------------------------\n");
 						sb.append("Executing test: "+currentTest.getName()+"\n\n");
-						sb.append("Description:\n"+currentTest.getDescription()+"\n");
 						l.log(sb.toString());
 						Behaviour b2 = currentTest.load(myAgent, getDataStore(), TEST_RESULT_KEY);
 						registerState(b2, EXECUTE_TEST_STATE);
