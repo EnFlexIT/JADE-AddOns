@@ -152,6 +152,12 @@ public class TestGroupExecutor extends FSMBehaviour {
 			}
 			
 			public int onEnd() {
+				if (ret == EXECUTE) {
+					// Before entering the execution state flush messages that
+					// may have been left into the queue and that may confuse 
+					// the test execution
+					flushMessageQueue();
+				}
 				return ret;
 			}
 		};
@@ -222,6 +228,14 @@ public class TestGroupExecutor extends FSMBehaviour {
 			public boolean done() {
 				return finished;
 			}
+			
+			public int onEnd() {
+				// Before entering the execution state flush messages that
+				// may have been left into the queue and that may confuse 
+				// the test execution
+				flushMessageQueue();
+				return 0;
+			}
 		};
 		b.setDataStore(getDataStore());
 		registerState(b, PAUSE_STATE);
@@ -234,6 +248,12 @@ public class TestGroupExecutor extends FSMBehaviour {
 	
 	void setDebugMode(boolean b) {
 		debugMode = b;
+	}
+	
+	private void flushMessageQueue() {
+		while (myAgent.receive() != null) {
+			;
+		}
 	}
 }
 
