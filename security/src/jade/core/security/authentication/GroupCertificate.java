@@ -67,12 +67,11 @@ public class GroupCertificate extends BasicCertificateImpl {
     out.write(tmp,0,tmp.length);
     // Write the rest of the certificate
     tmp = super.encode();
-    out.writeInt(tmp.length);
     out.write(tmp,0,tmp.length);
     // Flush
     return baos.toByteArray();
   }
-  
+
   public Credentials decode(byte[] enc) throws IOException {
     DataInputStream in = new DataInputStream(new ByteArrayInputStream(enc));
     // Decodes the group Principal
@@ -80,11 +79,14 @@ public class GroupCertificate extends BasicCertificateImpl {
     byte[] data = new byte[size];
     in.read(data,0,size);
     group = CredentialsEngine.decodePrincipal(data);
-    // Decode the certificate
-    size = in.readInt();
-    data = new byte[size];
-    in.read(data,0,size);
+
+
+    // Decode the rest of the certificate
+    int n_left = in.available();
+    data = new byte[n_left];
+    in.read(data, 0, n_left);
     super.decode(data);
+
     return this;
   }
 
