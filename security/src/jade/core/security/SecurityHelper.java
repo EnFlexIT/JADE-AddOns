@@ -527,62 +527,16 @@ public class SecurityHelper
     return authority;
   }
 
-  /**
-   *  Create a new Authority instance.
-   *  This can be used when creating a application-level service
-   *  provided by an agent, by using an alternate authority besides
-   *  the default one of the agent.
-   */
-  /*
-   private JADEAuthority createAuthority( SecurityStore securityStore ){
-    JADEAuthorityImpl a = new JADEAuthorityImpl();
-    //a.setSecurityStore( securityStore );
-    try {
-      a.init(myAgent, null);
-    }
-    catch(Exception e) {
-      myLogger.log(Logger.WARNING,"Exception occured in init(Agent): "+e);
-      e.printStackTrace();
-    }
-    return a;
-	}
-  */
-  
-  /**
-   * Calculate the signature of a certain 'text'
-   * by using the own private key
-   */
-  /*
-  public void sign(SecurityObject so, byte[] text) throws Exception {
-    SecurityData sd = decode(so);
-    // have the authority sign the "text"
-    authority.sign(sd,text);
-    // re-encode so
-    encode(so,sd);          
-  }
-  */
-  
-  /**
-   *   Verify the signature of a certain 'text'
-   *   by using the given public key
-   */
-  /*
-    public boolean verifySignature(SecurityObject so, byte[] text) throws Exception {
-    SecurityData sd = decode(so);
-    return authority.verifySignature(sd,text);
-    }
-  */
-
 
  /**
-  * Add credentials to the Credentials Folder 
+  * Returns the credentials of the SecurityHelper's Credentials Folder.
   */
   public Credentials getCredentials() {
     return credsFolder;
   }
 
   /**
-   * Add new credentials to the Credentials Folder 
+   * Add new credentials to the Credentials Folder.
    */
   public void addCredentials( Credentials newCreds ) {
     // it should be checked if the same Credentials is not yet present
