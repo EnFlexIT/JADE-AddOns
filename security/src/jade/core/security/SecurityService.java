@@ -112,8 +112,10 @@ public class SecurityService extends BaseService {
 
   private void setPropertiesValue() {
     // initialize the SecurityFactory
-    myProfile.setParameter( SecurityFactory.SECURITY_FACTORY_CLASS_KEY,
+    /* alois: this overrides user defined values !
+  	myProfile.setParameter( SecurityFactory.SECURITY_FACTORY_CLASS_KEY,
                           "jade.security.impl.JADESecurityFactory" );
+    */
     SecurityFactory.getSecurityFactory( myProfile );
 
     // if present, a jade configuration entry 
