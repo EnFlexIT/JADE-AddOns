@@ -53,7 +53,7 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 	public BasicCertificateImpl() {
 	}
 
-	public BasicCertificateImpl(byte[] encoded) throws CertificateException {
+	BasicCertificateImpl(byte[] encoded) throws CertificateException {
 		String[] lines = new String(encoded).split("\n");
 
 		setSubject(decodePrincipal(lines[0]));
@@ -66,7 +66,7 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		}
 	}
 
-	public BasicCertificateImpl(String encoded) throws CertificateException {
+	BasicCertificateImpl(String encoded) throws CertificateException {
 		String[] lines = encoded.split("\n");
 
 		setSubject(decodePrincipal(lines[0]));
