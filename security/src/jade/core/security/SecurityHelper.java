@@ -47,7 +47,6 @@ import jade.security.CertificateException;
 import jade.security.DelegationCertificate;
 import jade.security.impl.*;
 import jade.security.util.*;
-//import javax.security.auth.login.LoginContext;
 import jade.core.ServiceException;
 import jade.core.Profile;
 import jade.core.security.authentication.UserPassCredential;
@@ -55,14 +54,17 @@ import jade.core.security.authentication.UserPassCredential;
 import starlight.util.Base64;
 import java.io.IOException;
 
+/* 
+*  Note: this class shall not make any reference (e.g. import) to any 
+*  java.security.XXX or javax.crypto.XXX to be compatible with all Java editions.
+*/
+
 /**
  * This class provides an agent all methods for accessing security functionalities.
  * 
- * Usually each agent has a <code>SecurityServiceExecutor</code> object accessible through
- * the <code>getServiceExecutor()</code> method of the <code>Agent</code> class.
+ * Usually each agent has a <code>SecurityHelper</code> object accessible through
+ * the <code>getHelper()</code> method of the <code>Agent</code> class.
  *
- * Note: this class shall not make any reference (e.g. import) to any 
- * java.security.XXX or javax.crypto.XXX to be compatible with all Java editions.
  *
  * @author Giosue Vitaglione - Telecom Italia Lab
  * @author Nicolas Lhuillier - Motorola 
@@ -104,11 +106,6 @@ public class SecurityHelper
   private int     symKeySize = 128; // or 192,256
   private	String  signAlgo = "SHA1withRSA";
   
-  
-  /**
-   * This command represents the <code>authenticate-user</code> action.
-   */
-  //static final String AUTHENTICATE_USER = "Authenticate-User";
   
   // constructor
   public SecurityHelper (Profile p){
@@ -188,7 +185,9 @@ public class SecurityHelper
   */
   
   /**
-   * Tells if the message has been signed. Note that if the message was signed 
+   * Tells if a message has been set with setUseSignature, 
+   * or if an incoming message has been signed by the sender. 
+   * Note that if the incoming message was signed 
    * then it also means the signature is valid.
    * @param msg the message to be checked for signature
    * @return true if message has been signed, false otherwise 
@@ -211,21 +210,12 @@ public class SecurityHelper
     return false;
   }
 
-  /**
-   * Returns the JADE encoded version of this agent's public key.
-   * This is useful when this key has to be sent to another entity.
-   */
-  /*
-    public JADEKey getKey() {
-    return authority.getPublic();
-    }
-  */
 
   /**
    * Sets the message to be signed
-   * TODO: Currently the information is set to a user defined slot
    */
   public void setUseSignature(ACLMessage msg) {
+    //Currently the information is set to a user defined slot
     Envelope e = msg.getEnvelope();
     if (e == null) {
       e = new Envelope();
@@ -264,7 +254,8 @@ public class SecurityHelper
   }
   
   /**
-   * Tells if the message has been encrypted
+   * Tells if a message has been set with setUseEncryption, 
+   * or if an incoming message has been encrypted by the sender.
    */
   public boolean getUseEncryption(ACLMessage msg) {
     Envelope e = msg.getEnvelope();
@@ -285,7 +276,7 @@ public class SecurityHelper
   }
 
   /**
-   * Sets the message to be encrypted
+   * Sets the message to be encrypted.
    */
   public void setUseEncryption(ACLMessage msg) {
     Envelope e = msg.getEnvelope();
@@ -325,22 +316,6 @@ public class SecurityHelper
     sos[0] = so; 
   }
 
-  /**
-   * Returns the JADE public key contained in a signed SecurityObject.
-   * Or null if no key has been found.
-   * @throw an Exception if the SecurityObject encoding is not supported
-   * QUESTION (NL): SO we need this method
-   */
-  /*
-    public JADEKey getPublicKey(SecurityObject so) throws Exception {
-    JADEKey k = null;
-    if (so.getType() == SecurityObject.SIGN) {
-    SecurityData sd = decode(so);
-    k = sd.key;
-    }
-    return k;
-  }
-  */
   
   /**
    * Adds the public key k for agent a to the keyring of trusted public keys
@@ -481,19 +456,19 @@ public class SecurityHelper
   }
   */
 
-	/**
+  /**
    *     Calculate the message digest (aka the hash) of the given text.
    *     The algorithm used is set by
    */
   /*
-	public byte[] digest(byte[] text) {
+  public byte[] digest(byte[] text) {
     try {
 	    MessageDigest md5 = MessageDigest.getInstance(digestAlgorithm);
 	    return md5.digest(text);
     } catch (NoSuchAlgorithmException e) { e.printStackTrace();
     }
     return null;
-	}
+  }
   
   public void setDigestAlgorithm (String algorithm) {
     // it should be checked if it is a valid one
@@ -530,7 +505,7 @@ public class SecurityHelper
    * with the given AID.
    */
   /*
-	public JADEPrincipal getPrincipal(AID aid) {
+  public JADEPrincipal getPrincipal(AID aid) {
 		JADEPrincipal p = null;
     myLogger.log( Logger.WARNING, "not implemented!");
 
@@ -540,7 +515,7 @@ public class SecurityHelper
     // return the pub.key
 
     return p;
-} // end getPrincipal(AID)
+  } // end getPrincipal(AID)
 */
 
 
