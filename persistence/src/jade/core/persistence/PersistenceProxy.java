@@ -37,6 +37,8 @@ import jade.core.ServiceException;
 import jade.core.NotFoundException;
 import jade.core.NameClashException;
 
+import jade.mtp.MTPDescriptor;
+
 import jade.security.CertificateFolder;
 import jade.security.AuthException;
 
@@ -77,7 +79,7 @@ public class PersistenceProxy extends Service.SliceProxy implements PersistenceS
     }
 
 
-    public void loadAgent(AID agentID, String repository) throws IMTPException, NotFoundException {
+    public void loadAgent(AID agentID, String repository) throws IMTPException, NotFoundException, NameClashException {
 	try {
 	    GenericCommand cmd = new GenericCommand(H_LOADAGENT, PersistenceSlice.NAME, null);
 	    cmd.addParam(agentID);
@@ -91,6 +93,9 @@ public class PersistenceProxy extends Service.SliceProxy implements PersistenceS
 		}
 		else if(result instanceof NotFoundException) {
 		    throw (NotFoundException)result;
+		}
+		else if(result instanceof NameClashException) {
+		    throw (NameClashException)result;
 		}
 		else {
 		    throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
@@ -153,111 +158,103 @@ public class PersistenceProxy extends Service.SliceProxy implements PersistenceS
 	}
     }
 
-    public void freezeAgent(AID agentID, String repository, ContainerID bufferContainer) throws IMTPException, NotFoundException {
-	try {
-	    GenericCommand cmd = new GenericCommand(H_FREEZEAGENT, PersistenceSlice.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    cmd.addParam(bufferContainer);
+    public void freezeAgent(AID agentID, String repository, ContainerID bufferContainer) throws ServiceException, IMTPException, NotFoundException {
+	GenericCommand cmd = new GenericCommand(H_FREEZEAGENT, PersistenceSlice.NAME, null);
+	cmd.addParam(agentID);
+	cmd.addParam(repository);
+	cmd.addParam(bufferContainer);
 
-	    Node n = getNode();
-	    Object result = n.accept(cmd);
-	    if((result != null) && (result instanceof Throwable)) {
-		if(result instanceof IMTPException) {
-		    throw (IMTPException)result;
-		}
-		else if(result instanceof NotFoundException) {
-		    throw (NotFoundException)result;
-		}
-		else {
-		    throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
-		}
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
 	    }
-	}
-	catch(ServiceException se) {
-	    throw new IMTPException("Unable to access remote node", se);
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		throw (NotFoundException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
 	}
     }
 
-    public void thawAgent(AID agentID, String repository, ContainerID newContainer) throws IMTPException, NotFoundException {
-	try {
-	    GenericCommand cmd = new GenericCommand(H_THAWAGENT, PersistenceSlice.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    cmd.addParam(newContainer);
+    public void thawAgent(AID agentID, String repository, ContainerID newContainer) throws ServiceException, IMTPException, NotFoundException {
+	GenericCommand cmd = new GenericCommand(H_THAWAGENT, PersistenceSlice.NAME, null);
+	cmd.addParam(agentID);
+	cmd.addParam(repository);
+	cmd.addParam(newContainer);
 
-	    Node n = getNode();
-	    Object result = n.accept(cmd);
-	    if((result != null) && (result instanceof Throwable)) {
-		if(result instanceof IMTPException) {
-		    throw (IMTPException)result;
-		}
-		else if(result instanceof NotFoundException) {
-		    throw (NotFoundException)result;
-		}
-		else {
-		    throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
-		}
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
 	    }
-	}
-	catch(ServiceException se) {
-	    throw new IMTPException("Unable to access remote node", se);
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		throw (NotFoundException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
 	}
     }
 
-    public Long setupFrozenAgent(AID agentID, Long agentFK, ContainerID cid, String repository) throws IMTPException, NotFoundException {
-	try {
-	    GenericCommand cmd = new GenericCommand(H_SETUPFROZENAGENT, PersistenceSlice.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(agentFK);
-	    cmd.addParam(cid);
-	    cmd.addParam(repository);
+    public Long setupFrozenAgent(AID agentID, Long agentFK, ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException {
+	GenericCommand cmd = new GenericCommand(H_SETUPFROZENAGENT, PersistenceSlice.NAME, null);
+	cmd.addParam(agentID);
+	cmd.addParam(agentFK);
+	cmd.addParam(cid);
+	cmd.addParam(repository);
 
-	    Node n = getNode();
-	    Object result = n.accept(cmd);
-	    if((result != null) && (result instanceof Throwable)) {
-		if(result instanceof IMTPException) {
-		    throw (IMTPException)result;
-		}
-		else if(result instanceof NotFoundException) {
-		    throw (NotFoundException)result;
-		}
-		else {
-		    throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
-		}
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
 	    }
-	    return (Long)result;
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		throw (NotFoundException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
 	}
-	catch(ServiceException se) {
-	    throw new IMTPException("Unable to access remote node", se);
-	}
+	return (Long)result;
     }
 
-    public void setupThawedAgent(AID agentID, Long agentFK, ContainerID cid, String repository, List bufferedMessages) throws IMTPException, NotFoundException {
-	try {
-	    GenericCommand cmd = new GenericCommand(H_SETUPTHAWEDAGENT, PersistenceSlice.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(agentFK);
-	    cmd.addParam(cid);
-	    cmd.addParam(repository);
-	    cmd.addParam(bufferedMessages);
+    public void setupThawedAgent(AID agentID, Long agentFK, ContainerID cid, String repository, List bufferedMessages) throws ServiceException, IMTPException, NotFoundException {
+	GenericCommand cmd = new GenericCommand(H_SETUPTHAWEDAGENT, PersistenceSlice.NAME, null);
+	cmd.addParam(agentID);
+	cmd.addParam(agentFK);
+	cmd.addParam(cid);
+	cmd.addParam(repository);
+	cmd.addParam(bufferedMessages);
 
-	    Node n = getNode();
-	    Object result = n.accept(cmd);
-	    if((result != null) && (result instanceof Throwable)) {
-		if(result instanceof IMTPException) {
-		    throw (IMTPException)result;
-		}
-		else if(result instanceof NotFoundException) {
-		    throw (NotFoundException)result;
-		}
-		else {
-		    throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
-		}
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
 	    }
-	}
-	catch(ServiceException se) {
-	    throw new IMTPException("Unable to access remote node", se);
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		    throw (NotFoundException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
 	}
     }
 
@@ -311,6 +308,101 @@ public class PersistenceProxy extends Service.SliceProxy implements PersistenceS
 	catch(ServiceException se) {
 	    throw new IMTPException("Unable to access remote node", se);
 	}
+    }
+
+    public void saveContainer(String repository) throws ServiceException, IMTPException, NotFoundException {
+	GenericCommand cmd = new GenericCommand(H_SAVECONTAINER, PersistenceSlice.NAME, null);
+	cmd.addParam(repository);
+
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
+	    }
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		throw (NotFoundException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
+	}
+    }
+
+    public void loadContainer(String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException {
+	GenericCommand cmd = new GenericCommand(H_LOADCONTAINER, PersistenceSlice.NAME, null);
+	cmd.addParam(repository);
+
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
+	    }
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		throw (NotFoundException)result;
+	    }
+	    else if(result instanceof NameClashException) {
+		throw (NameClashException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
+	}
+    }
+
+    public MTPDescriptor[] getInstalledMTPs(ContainerID cid) throws ServiceException, IMTPException, NotFoundException {
+	GenericCommand cmd = new GenericCommand(H_GETINSTALLEDMTPS, PersistenceSlice.NAME, null);
+	cmd.addParam(cid);
+
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
+	    }
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		throw (NotFoundException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
+	}
+
+	return (MTPDescriptor[])result;
+    }
+
+    public AID[] getAgentIDs(ContainerID cid) throws ServiceException, IMTPException, NotFoundException {
+	GenericCommand cmd = new GenericCommand(H_GETAGENTIDS, PersistenceSlice.NAME, null);
+	cmd.addParam(cid);
+
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
+	    }
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		throw (NotFoundException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
+	}
+
+	return (AID[])result;
     }
 
 }
