@@ -45,7 +45,7 @@ public class Receiver extends Agent {
     private Ontology   ontology    = PeopleOntology.getInstance();
     private FatherOf       proposition = null;
     
-    private static Logger = Logger.getMyLogger(Receiver.class.getName());
+    private static Logger logger = Logger.getMyLogger(Receiver.class.getName());
 
     class ReceiverBehaviour extends SimpleBehaviour {
 	private boolean finished = false;
