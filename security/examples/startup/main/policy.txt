@@ -1,4 +1,4 @@
-grant codebase "file:../../../lib/coresec.jar" {
+grant codebase "file:../../../lib/JadeSecurity.jar" {
 	permission java.security.AllPermission;  };
 grant codebase "file:../../../../../lib/jade.jar" {
 	permission java.security.AllPermission;  };

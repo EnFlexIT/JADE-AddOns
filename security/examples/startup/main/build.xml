@@ -12,8 +12,8 @@
   <property name="jaderoot" value="../../../../.." />
   <property name="libJADEDir" value="${jaderoot}/lib" />
 
-  <property name="bc.jar"  value="${libJADEDir}/add-ons/coresec/lib/bc/bcprov-jdk14-119.jar" />
-  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/iiop.jar;${libJADEDir}/jadeTools.jar;${bc.jar};${jaderoot}/add-ons/coresec/lib/coresec.jar;" /> 
+  <property name="bc.jar"  value="${libJADEDir}/add-ons/security/lib/bc/bcprov-jdk14-119.jar" />
+  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/iiop.jar;${libJADEDir}/jadeTools.jar;${bc.jar};${jaderoot}/add-ons/security/lib/jadeSecurity.jar;" /> 
 
 
   <target name="main" depends="" description="Startup a JADE Main-Container." >
