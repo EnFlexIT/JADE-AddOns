@@ -1,7 +1,7 @@
 /*****************************************************************
 JADE - Java Agent DEvelopment Framework is a framework to develop
 multi-agent systems in compliance with the FIPA specifications.
-Copyright (C) 2000 CSELT S.p.A. 
+Copyright (C) 2002 TILAB S.p.A. 
 
 GNU Lesser General Public License
 
@@ -86,7 +86,7 @@ public class PrincipalImpl implements AgentPrincipal, ContainerPrincipal, jade.u
 		return (o != null) && getName().equals(o.toString());
 	}
 	
-	public PrincipalImpl getParent() {
+	PrincipalImpl getParent() {
 		if (name2 != null)
 			return new PrincipalImpl(getOwnership());
 		
