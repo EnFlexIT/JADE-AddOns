@@ -36,6 +36,7 @@ import jade.content.onto.OntologyException;
 import jade.content.onto.BasicOntology;
 import jade.content.lang.*;
 import jade.content.lang.Codec.CodecException;
+import jade.content.lang.ByteArrayCodec;
 import jade.content.abs.*;
 import jade.content.schema.*;
 
@@ -47,7 +48,7 @@ import jade.content.schema.*;
 
   @author Paola Turci - Universita` di Parma
  */
-public class RDFCodec extends Codec {
+public class RDFCodec extends ByteArrayCodec {
 
   /* A symbolic constant, containing the name of this language.  */
   //  public static final String NAME = "FIPA-RDF0";
@@ -210,11 +211,11 @@ public class RDFCodec extends Codec {
         //pe.printStackTrace();
         throw new CodecException("SAXParse exception");
     }catch (OntologyException oe) {
-       throw new CodecException(oe.getMessage());
+       throw new CodecException("", oe);
     }catch (IOException ioe) {
-       throw new CodecException(ioe.getMessage());
+       throw new CodecException("", ioe);
     }catch (ClassCastException cce) {
-       throw new CodecException(cce.getMessage());
+       throw new CodecException("", cce);
     }
   }
 
@@ -247,7 +248,6 @@ public class RDFCodec extends Codec {
         String     tag;
         AbsObject absObj;
         try {
-
             String kind = node.getName();
 
             //System.out.println("\n\nKIND:  "+kind);
@@ -267,8 +267,11 @@ public class RDFCodec extends Codec {
             }
 
             if (kind.equals(URI_PRIMITIVE)||kind.equals(PRIMITIVE)) {
+                //node.dump();
 
-                if(node.size()!=2) throw new OntologyException("error in primitive type");
+                if(node.size()!=2) {
+                	throw new OntologyException("error in primitive type");
+                }
 
                 String  type;
                 String  value;
@@ -299,11 +302,11 @@ public class RDFCodec extends Codec {
                 }
 
                 if (type.equalsIgnoreCase("Integer")) {
-                    abs = AbsPrimitive.wrap((new Integer(value)).intValue());
+                    abs = AbsPrimitive.wrap((new Long(value)).longValue());
                 }
 
                 if (type.equalsIgnoreCase("Float")) {
-                    abs = AbsPrimitive.wrap((new Float(value)).floatValue());
+                    abs = AbsPrimitive.wrap((new Double(value)).doubleValue());
                 }
 
                 return abs;
@@ -432,7 +435,7 @@ public class RDFCodec extends Codec {
     Writes on an output stream the AbsObject in RDF format
    */
    private synchronized void write(PrintWriter stream,
-                                    AbsObject abs) throws IOException {
+                                    AbsObject abs) throws IOException, CodecException {
 /*
         int reference = references.indexOf(abs);
 
@@ -456,8 +459,7 @@ public class RDFCodec extends Codec {
                 stream.print(insertCDATASection(obj.toString()));
                 stream.print(END_TAG_PRIMITIVE_VALUE);
             }
-
-            if (obj instanceof Boolean) {
+            else if (obj instanceof Boolean) {
                 stream.print(TAG_OBJECT_TYPE);
                 stream.print("Boolean");
                 stream.print(END_TAG_OBJECT_TYPE);
@@ -465,8 +467,7 @@ public class RDFCodec extends Codec {
                 stream.print(obj.toString());
                 stream.print(END_TAG_PRIMITIVE_VALUE);
             }
-
-            if (obj instanceof Integer) {
+            else if (obj instanceof Long) {
                 stream.print(TAG_OBJECT_TYPE);
                 stream.print("Integer");
                 stream.print(END_TAG_OBJECT_TYPE);
@@ -474,14 +475,16 @@ public class RDFCodec extends Codec {
                 stream.print(obj.toString());
                 stream.print(END_TAG_PRIMITIVE_VALUE);
             }
-
-            if (obj instanceof Float) {
+            else if (obj instanceof Double) {
                 stream.print(TAG_OBJECT_TYPE);
                 stream.print("Float");
                 stream.print(END_TAG_OBJECT_TYPE);
                 stream.print(TAG_PRIMITIVE_VALUE);
                 stream.print(obj.toString());
                 stream.print(END_TAG_PRIMITIVE_VALUE);
+            }
+            else {
+            	throw new CodecException("Unsupported primitive type "+obj.getClass().getName());
             }
 
             stream.print(END_TAG_PRIMITIVE);
