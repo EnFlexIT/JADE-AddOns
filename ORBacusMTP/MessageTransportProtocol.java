@@ -47,6 +47,7 @@ import FIPA.*; // OMG IDL stubs
 import jade.core.AID;
 
 import jade.domain.FIPAAgentManagement.Envelope;
+import jade.domain.FIPAAgentManagement.ReceivedObject;
 
 import jade.mtp.InChannel;
 import jade.mtp.OutChannel;
@@ -170,7 +171,11 @@ public class MessageTransportProtocol implements MTP {
 	  Date d = unmarshalDateTime(IDLenv.date[0]);
 	  env.setDate(d);
 	}
-	// FIXME: need to unmarshal 'received' slot
+
+	// Read in the 'received' stamp
+	if(IDLenv.received.length > 0)
+	  env.addStamp(unmarshalReceivedObj(IDLenv.received[0]));
+
 	// FIXME: need to unmarshal user properties
 
       }
@@ -195,6 +200,16 @@ public class MessageTransportProtocol implements MTP {
     private Date unmarshalDateTime(FIPA.DateTime d) {
       Date result = new Date();
       return result;
+    }
+
+    private ReceivedObject unmarshalReceivedObj(FIPA.ReceivedObject ro) {
+      ReceivedObject result = new ReceivedObject();
+      result.setBy(ro.by);
+      result.setFrom(ro.from);
+      result.setDate(unmarshalDateTime(ro.date));
+      result.setId(ro.id);
+      result.setVia(ro.via);
+      return result
     }
 
   } // End of MTSServant class
@@ -447,9 +462,24 @@ public class MessageTransportProtocol implements MTP {
       int IDLpayloadLength = Integer.parseInt(payloadLength);
       String IDLpayloadEncoding = env.getPayloadEncoding();
       FIPA.DateTime[] IDLdate = new FIPA.DateTime[] { marshalDateTime(env.getDate()) };
-      FIPA.ReceivedObject[] IDLreceived = new FIPA.ReceivedObject[] { }; // FIXME: need to marshal 'received' slot
       FIPA.Property[][] IDLtransportBehaviour = new FIPA.Property[][] { };
       FIPA.Property[] IDLuserDefinedProperties = new FIPA.Property[] { }; // FIXME: need to marshal user properties
+
+      // Fill in the list of 'received' stamps
+      /* FIXME: Maybe several IDL Envelopes should be generated, one for every 'received' stamp...
+      ReceivedObject[] received = env.getStamps();
+      FIPA.ReceivedObject[] IDLreceived = new FIPA.ReceivedObject[received.length];
+      for(int i = 0; i < received.length; i++)
+	IDLreceived[i] = marshalReceivedObj(received[i]);
+      */
+
+      // FIXME: For now, only the current 'received' object is considered...
+      ReceivedObject received = env.getReceived();
+      FIPA.ReceivedObject[] IDLreceived;
+      if(received != null)
+	IDLreceived = new FIPA.ReceivedObject[] { marshalReceivedObj(received) };
+      else
+	IDLreceived = new FIPA.ReceivedObject[] { };
 
       FIPA.Envelope IDLenv = new FIPA.Envelope(IDLto,
 					       IDLfrom,
@@ -532,6 +562,16 @@ public class MessageTransportProtocol implements MTP {
 					     typeDesignator);
     return result;
 
+  }
+
+  private FIPA.ReceivedObject marshalReceivedObj(ReceivedObject ro) {
+    FIPA.ReceivedObject result = new FIPA.ReceivedObject();
+    result.by = ro.getBy();
+    result.from = ro.getFrom();
+    result.date = marshalDateTime(ro.getDate());
+    result.id = ro.getId();
+    result.via = ro.getVia();
+    return result;
   }
 
 }
