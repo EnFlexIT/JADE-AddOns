@@ -1,6 +1,5 @@
 README file for ORBacus based IIOP MTP for JADE, Version $Name$
 
-
 INTRODUCTION
 ============
 
@@ -47,6 +46,10 @@ CLASSPATH the following files:
   - iiopOB.jar (ORBacus based IIOP MTP)
   - OB.jar (Basic ORBacus runtime system, available from http://www.ooc.com)
 
+If you want to use 'corbaname:' addresses, you also have to include in
+your CLASSPATH the file:
+  - OBNaming.jar (ORBacus COS Naming Service, available from http://www.ooc.com)
+
 Moreover, you *must not* include iiop.jar in your CLASSPATH. You can
 include jadeTools.jar or not, depending on whether you need the tools
 or not.
@@ -86,11 +89,83 @@ need to publish the IOR of the agent platform. If no transport address
 is specified, an IOR address is generated with the port and the object
 key chosen by the ORB.
 
+Supported MTP address kinds
+---------------------------
+
+The ORBacus based IIOP MTP supports three kinds of addresses,
+corresponding to three different ways to describe a CORBA Object
+Reference in String form.
+
+  1) 'IOR:' addresses
+
+  These addresses have the form:
+    IOR:<Hex digits>
+  where the hexadecimal digits are simply a string representation of
+  the memory dump of a CORBA data structure, containing all the
+  information needed to find and contact a CORBA object. This address
+  kind is the most widely supported, and it's the most complete one
+  (it can contain multiple transport profiles, character set
+  informations, and so on). Its only disadvantage is not being human
+  readable: in particular, in a TCP/IP environment, special utilities
+  need to be used to extract the host name and port number from an IOR
+  (which could be useful for network configuration purposes).
+
+  2) 'corbaloc:' addresses
+
+  These addresses have the form:
+    corbaloc:<proto>:<hostname>:<port>/<objectID>
+  and try to represent a CORBA Object Reference just like an HTTP
+  URL. They can be easily read, but they lose a lot of information
+  with respect to IOR form, and they make only sense in a TCP/IP
+  environment. The <proto> part denotes the transport protocol to be
+  used, and it's optional, defaulting to 'iiop'; the <hostname> and
+  <port> parts define the IP host and the TCP port where a suitable
+  IIOP message must be sent in order to contact the CORBA object. The
+  <objectID> part identifies a specific CORBA object (usually,
+  selecting the host and the port will at most select an object
+  adapter). Supporting this kind of addresses breaks the server-side
+  source code portability that wasthe ultimate goal of the POA
+  specification, because there is no concept of 'port' in the POA, to
+  keep transport protocol independence: so, this ORBacus based MTP
+  uses ORBacus-specific extensions to select the TCP port when
+  requested, and creates a different POA for each TCP port.
+
+  3) 'corbaname' addresses
+
+  These addresses have the form:
+    corbaname::<NShostname>:<NSport>/<NSName>#<objBinding>
+  and use the CORBA COS Naming Service as an indirection level, to
+  reach a CORBA object that was previously bound into a COSNaming
+  Server. The <NShostname> and <NSport> parts define the IP host and
+  TCP port where an implementation of the COSNaming::NamingContext IDL
+  interface is listening. The <NSName> identifies the specific
+  implementation (it defaults to 'NameService'). The <objBinding>
+  part, then, describes the binding in the NamingContext object, from
+  where the actual CORBA object implementing the FIPA::MTS interface
+  can be retrieved. Following the CORBA Interoperable Naming Service
+  specification, the <objBinding> string can contain '.' and '/', to
+  specify the 'id' and 'kind' fields of a COSNaming::NameComponent,
+  and to describe paths of COSNaming::NameComponent objects.
+  When activating a 'corbaname:' address, this MTP implementation
+  creates a new FIPA::MTS object and binds it into the given Naming
+  Server. Likewise, when deactivating the 'corbaname:' address, the
+  binding is removed from the Naming Server.
+
+
 Configuring MTPs from the command line
 --------------------------------------
 
-In this case the following parameter must be specified on the command line:
+In this case the following parameter must be specified on the command line.
+For a default 'IOR:' address, write:
+  -mtp orbacus.MessageTransportProtocol
+For a 'corbaloc:' address, write:
   -mtp orbacus.MessageTransportProtocol(corbaloc:iiop:<hostname>:<port>/<name>)
+For a 'corbaname:' address, write:
+  -mtp orbacus.MessageTransportProtocol(corbaname::<NShostname>:<NSport>/<NSname>#<objBinding>)
+When activating a 'corbaname:' address, take care that a COSNaming
+Service implementation is actually running at the
+<NSHostname>:<NSport> address, with the <NSname> Object ID, or the MTP
+activation will fail.
 
 When a container starts, it prints on the standard output all the
 activated MTP addresses, separated by a carriage return. Moreover, it
