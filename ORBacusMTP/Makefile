@@ -64,7 +64,7 @@ IDLSTUBS    =   FIPA/AgentID.java \
 		FIPA/stringsHelper.java \
 		FIPA/stringsHolder.java
 
-all: idl classes lib dist
+all: idl classes lib
 	@echo
 	@echo Build complete.
 	@echo
@@ -83,7 +83,7 @@ lib:
 	$(AR) $(ARFLAGS) ../$(LIBNAME) *; \
 
 dist:
-	$(AR) $(ARFLAGS) ..\ORBacusMTP.zip *
+	$(AR) $(ARFLAGS) ../ORBacusMTP.zip *
 
 batch:
 	rm -f $(BATCH_MAKE) $(BATCH_CLEAN)
