@@ -5,10 +5,10 @@
 	]>
 -->
 	<TestsList> 
-		<Test name="Stress-test-for-timeout-blocking-mechanism" skip="false">
+		<Test name="Inter platform communication via IIOP" skip="false">
 			<TestClassName>test.interPlatform.tests.TestRemotePing</TestClassName>
 			<WhatTest> Tests sending and receiving a message to/from an agent on a remote platform.</WhatTest>
 			<HowWorkTest> It uses the default IIOP MTP.</HowWorkTest>
-			<WhenTestPass> The test passes if no exception is fired.</WhenTestPass>
+			<WhenTestPass> The test passes if the agent on the remote platform receives the ping message and replies correctly and no exception is fired.</WhenTestPass>
 		</Test>		
 	</TestsList>
