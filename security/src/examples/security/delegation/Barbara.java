@@ -65,7 +65,7 @@ public class Barbara extends Agent {
 	    System.out.println( "\n		Barbara:  Creating Delegation Certificate for Anja" );
 	    DelegationCertificate cert = getAuthority().createDelegationCertificate();
 
-		cert.setNotBefore( new Date(System.currentTimeMillis()+10000) );
+		cert.setNotBefore( new Date(System.currentTimeMillis()-1000) );
 		cert.setNotAfter( new Date(System.currentTimeMillis() + 15*60*1000) ); // 15 minutes from now
 		cert.setSubject( getAuthority().createAgentPrincipal( new AID("Anja", AID.ISLOCALNAME)  , "alice" ) );
 
@@ -75,8 +75,8 @@ public class Barbara extends Agent {
 		cert.addPermission(new jade.security.impl.ContainerPermission("alice", "move-from"));
 		cert.addPermission(new jade.security.impl.ContainerPermission("bob", "move-to"));
 
-		try {		
-		System.out.println( "\n		Barbara:     signing" );
+		try {
+		System.out.println( "\n		Barbara:     signing..." );
 		getAuthority().sign( cert, getCertificateFolder() );
  		} catch (jade.security.AuthException e) { 
  			System.out.println( "AuthException during Delegation Certificate signing: "+ e.getMessage() );
@@ -85,9 +85,12 @@ public class Barbara extends Agent {
 		System.out.println( "\n		Barbara:  Preparing message..." );
 		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 	    msg.addReceiver(  new AID("Anja", AID.ISLOCALNAME)  );
+	    
 	    try {
-	    msg.setContentObject( cert );
-	 	} catch ( java.io.IOException e) {System.out.println( e.getMessage() ); }
+	    	msg.setByteSequenceContent( cert.getEncoded() );
+	 	} catch ( jade.security.CertificateEncodingException e) {
+	 		System.out.println("CertificateEncodingException."); 
+	 	}
 	 	
 		System.out.println( "\n		Barbara:  Sending Delegation Certificate to Anja" );
 		send(msg);

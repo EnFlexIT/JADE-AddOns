@@ -56,6 +56,7 @@ public class Anja extends Agent {
 		System.in.read();
 	} catch (java.io.IOException e) {}
 
+	// Destination
 	ContainerID loc = new ContainerID();
 	loc.setName("Container-1");
 	
@@ -87,23 +88,28 @@ public class GetDelegationBehaviour extends SimpleBehaviour {
 
 	public void action() {
 
+		// Certificate to be received
+		DelegationCertificate deleg1=null;
+
 		// Wait for a delegation certificate from Barbara
-		System.out.println("\nWaiting for the Delegation Certificate...");
+		System.out.println("\n\nWaiting for the Delegation Certificate...");
 		ACLMessage delegMsg = blockingReceive();
 		System.out.println("Delegation Certificate received.");
 
-		try{
+
 		  // get the DelegationCertificate
 		  System.out.println("  extracting Certificate from ACLMessage...");
-		  DelegationCertificate deleg1 = (DelegationCertificate) delegMsg.getContentObject();
+		  try{
+		    deleg1 = getAuthority().createDelegationCertificate( delegMsg.getByteSequenceContent() );
+		  } catch(jade.security.CertificateException e) {
+			    System.out.println("\n Unreadable Certificate. " );
+		  }
 
-		  // add the receive delegation certificate to Ajna's Certificate older
+
+		  // add the receive delegation certificate to Ajna's Certificate folder
 		  getCertificateFolder().addDelegationCertificate( deleg1 );
 		  System.out.println("  adding Delegation Certificate to my Certificate Folder");
 
-		} catch(UnreadableException e) {
-			System.out.println("\n Unreadable Certificate. " );
-		}
 
 	} // end action
 	
@@ -118,7 +124,7 @@ public class GetDelegationBehaviour extends SimpleBehaviour {
 public class SayHi extends SimpleBehaviour {
 
 	public void action() {
-		System.out.println("\n Anja: I'm here !!" );
+		System.out.println("\n\n Anja: I'm here !!" );
 	}
 	public boolean done() {
 		return ( true );
