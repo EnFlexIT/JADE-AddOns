@@ -36,6 +36,7 @@ public class TestRemotePing extends Test {
 	public  static final String TEST_NAME = "Remote Ping";
 	private static final String RESPONDER_NAME = "responder";
 	private final String CONV_ID = "conv_ID"+hashCode();
+	private RemoteController rc;
 	
 	private AID resp = null;
 	
@@ -53,9 +54,9 @@ public class TestRemotePing extends Test {
   		final DataStore store = ds;
   		final String key = resultKey;
   		
-	  	//Object[] args = getGroupArguments();
-	  	//AID remoteAMS = (AID) args[0];
-	  	AID remoteAMS = (AID) getGroupArgument(InterPlatformCommunicationTesterAgent.REMOTE_AMS_NAME);
+			rc = TestUtility.launchJadeInstance("Container-1", null, new String("-container -port 8888 -mtp jade.mtp.iiop.MessageTransportProtocol"), null); 
+	  	
+			AID remoteAMS = (AID) getGroupArgument(InterPlatformCommunicationTesterAgent.REMOTE_AMS_KEY);
   		resp = TestUtility.createTarget(a, RESPONDER_NAME, remoteAMS);
   		TestUtility.addBehaviour(a, resp, "test.common.behaviours.NotUnderstoodResponder");
   		
@@ -114,6 +115,8 @@ public class TestRemotePing extends Test {
   public void clean(Agent a) {
   	try {
   		TestUtility.killTarget(a, resp);
+  		Thread.sleep(1000);
+  		rc.kill();
   	}
   	catch (Exception e) {
   		e.printStackTrace();

@@ -39,8 +39,10 @@ import java.net.InetAddress;
  */
 public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 	// Names and default values for group arguments
-	public static final String REMOTE_AMS_NAME = "remote-ams";
+	public static final String REMOTE_AMS_KEY = "remote-ams";
 	
+	public static final String REMOTE_PLATFORM_NAME = "Remote-platform";
+	public static final String REMOTE_PLATFORM_PORT = "9002";
 	
 	protected TestGroup getTestGroup() {
 		TestGroup tg = new TestGroup(new String[] {
@@ -51,19 +53,17 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 			
 			public void initialize(Agent a) throws TestException {
 				try {
-    			// NB Explicitly setting the local host is necessary to be sure that
-					// the remote platform name is consistent with the name we assume
-					// its AMS will have
-					String localHost = InetAddress.getLocalHost().getHostAddress();
-					rc = TestUtility.launchJadeInstance("Remote-platform", null, new String("-host "+localHost+" -port 9002"), new String[]{"IOR"}); 
+					// Start the remote platform with a SUNOrb-based IIOP MTP
+					rc = TestUtility.launchJadeInstance(REMOTE_PLATFORM_NAME, null, new String("-name "+REMOTE_PLATFORM_NAME+" -port "+REMOTE_PLATFORM_PORT), new String[]{"IOR"}); 
 		
-					AID remoteAMS = new AID("ams@"+localHost+":9002/JADE", AID.ISGUID);
+					// Construct the AID of the AMS of the remote platform and make it
+					// accessible to the tests as a group argument
+					AID remoteAMS = new AID("ams@"+REMOTE_PLATFORM_NAME, AID.ISGUID);
 					Iterator it = rc.getAddresses().iterator();
 					while (it.hasNext()) {
 						remoteAMS.addAddresses((String) it.next());
 					}
-					
-					setArgument(REMOTE_AMS_NAME, remoteAMS);
+					setArgument(REMOTE_AMS_KEY, remoteAMS);
 				}
 				catch (TestException te) {
 					throw te;
@@ -74,7 +74,14 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 			}
 			
 			public void shutdown(Agent a) {
-				rc.kill();
+  			try {
+  				// Kill the remote platform
+  				Thread.sleep(1000);
+  				rc.kill();
+  			}
+  			catch (Exception e) {
+  				e.printStackTrace();
+  			}
 			}
 		};
 		
