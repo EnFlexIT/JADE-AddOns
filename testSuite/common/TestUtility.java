@@ -69,7 +69,7 @@ public class TestUtility {
      Create a target agent in the local platform
 	 */
   public static AID createTarget(Agent a, String respName) throws TestException {
-  	return createTarget(a, respName, Agent.getAMS());
+  	return createTarget(a, respName, a.getAMS());
   }
     
   /**
