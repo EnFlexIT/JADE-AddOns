@@ -55,6 +55,7 @@ import jade.core.UnreachableException;
 import jade.core.behaviours.Behaviour;
 
 import jade.lang.acl.ACLMessage;
+import jade.mtp.MTPDescriptor;
 import jade.security.AuthException;
 
 import jade.util.leap.List;
@@ -106,7 +107,81 @@ public class PersistenceService extends BaseService {
 	private String repository;
 	private Long queueID;
 
-    }
+    } // End of FrozenAgentsEntry class
+
+
+    private static class SaveContainerOperation {
+
+	public SaveContainerOperation(AID[] agentIDs, java.util.Set mtps) {
+	    myAgentIDs = agentIDs;
+	    myMTPs = mtps;
+	}
+
+	public AID[] getAgentIDs() {
+	    return myAgentIDs;
+	}
+
+	// This method is called by the agent threads that are saving
+	// themselves.
+	// When the last agent is added to the list, the master thread
+	// (i.e. the one that started the save-container operation in
+	// the first place) is restarted, so that it can perform the
+	// save operation. After that, the master thread will wake up
+	// all threads blocked in this method.
+	public synchronized void addAgentToSave(Agent a) {
+	    myAgents.add(a);
+
+	    if(isComplete()) {
+		synchronized(masterLock) {
+		    masterLock.notifyAll();
+		}
+	    }
+
+	    try {
+		while(!isFlushed()) {
+		    wait();
+		}
+	    }
+	    catch(InterruptedException ie) {
+		// Do nothing...
+	    }
+	}
+
+	public void waitUntilComplete() {
+	    synchronized(masterLock) {
+		try {
+		    while(!isComplete()) {
+			masterLock.wait();
+		    }
+		}
+		catch(InterruptedException ie) {
+		    // Do nothing
+		}
+	    }
+	}
+
+	public synchronized void flushAgentsToSave() {
+	    flushed = true;
+	    notifyAll();
+	}
+
+	public boolean isComplete() {
+	    return myAgents.size() == myAgentIDs.length;
+	}
+
+	public boolean isFlushed() {
+	    return flushed;
+	}
+
+
+	private AID[] myAgentIDs;
+	private java.util.Set myAgents = new java.util.HashSet();
+	private java.util.Set myMTPs;
+	private Object masterLock = new Object();
+	private boolean flushed = false;
+
+    } // End of SaveContainerOperation class
+
 
     private static final String[] OWNED_COMMANDS = new String[] {
 	PersistenceHelper.SAVE_AGENT,
@@ -116,18 +191,49 @@ public class PersistenceService extends BaseService {
 	PersistenceHelper.THAW_AGENT,
 	PersistenceHelper.SAVE_MYSELF,
 	PersistenceHelper.RELOAD_MYSELF,
-	PersistenceHelper.FREEZE_MYSELF
+	PersistenceHelper.FREEZE_MYSELF,
+	PersistenceHelper.SAVE_CONTAINER,
+	PersistenceHelper.LOAD_CONTAINER,
+	PersistenceHelper.DELETE_CONTAINER
     };
 
     public void init(AgentContainer ac, Profile p) throws ProfileException {
 	super.init(ac, p);
 	myContainer = ac;
+	myServiceFinder = ac.getServiceFinder();
 	myPersistenceManager = new PersistenceManager(myContainer.getID().getName());
 	amsHandler = new PersistenceManagementBehaviour();
     }
 
     public void boot(Profile p) throws ServiceException {
 	// Coordinate with the other slices to set up the repositories...
+
+	// Reload this container from a repository if needed
+	final String repository = p.getParameter(PersistenceHelper.LOAD_FROM, null);
+	if(repository != null) {
+
+	    Thread loader = new Thread(new Runnable() {
+
+		public void run() {
+		    try {
+			helper.loadContainer(myContainer.getID(), repository);
+		    }
+		    catch(ServiceException se) {
+			se.printStackTrace();
+		    }
+		    catch(IMTPException imtpe) {
+			imtpe.printStackTrace();
+		    }
+		    catch(NotFoundException nfe) {
+			nfe.printStackTrace();
+		    }
+		    catch(NameClashException nce) {
+			nce.printStackTrace();
+		    }
+		}
+	    }, "Persistent-Container-Loader");
+	    loader.start();
+	}
     }
 
     public String getName() {
@@ -203,6 +309,15 @@ public class PersistenceService extends BaseService {
 		}
 		else if(name.equals(PersistenceHelper.FREEZE_MYSELF)) {
 		    handleFreezeMyself(cmd);
+		}
+		else if(name.equals(PersistenceHelper.SAVE_CONTAINER)) {
+		    handleSaveContainer(cmd);
+		}
+		else if(name.equals(PersistenceHelper.LOAD_CONTAINER)) {
+		    handleLoadContainer(cmd);
+		}
+		else if(name.equals(PersistenceHelper.DELETE_CONTAINER)) {
+		    handleDeleteContainer(cmd);
 		}
 	    }
 	    catch(IMTPException imtpe) {
@@ -369,8 +484,17 @@ public class PersistenceService extends BaseService {
 		    pm.add(it.next());
 		}
 
-		// Use the Persistence Manager to save the agent
-		myPersistenceManager.saveAgent(target, repository, pm);
+		// Check whether this agent is being saved as a part of a save-container operation
+		SaveContainerOperation op = retrieveSaveContainerOp(agentID);
+		if(op != null) {
+		    myContainer.releaseLocalAgent(agentID);
+		    op.addAgentToSave(target);
+		}
+		else {
+
+		    // Direct save: use the Persistence Manager to save the agent
+		    myPersistenceManager.saveAgent(target, repository, pm);
+		}
 	    }
 	    finally {
 		myContainer.releaseLocalAgent(agentID);
@@ -429,6 +553,72 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
+	private void handleSaveContainer(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
+	    Object[] params = cmd.getParams();
+	    ContainerID cid = (ContainerID)params[0];
+	    String repository = (String)params[1];
+
+	    // Forward the request to save to the proper container
+	    MainContainer impl = myContainer.getMain();
+	    if(impl != null) {
+		// On a main container, one is able to save any
+		// container
+		PersistenceSlice targetSlice = (PersistenceSlice)getSlice(cid.getName());
+		try {
+		    targetSlice.saveContainer(repository);
+		}
+		catch(IMTPException imtpe) {
+		    // Try to get a newer slice and repeat...
+		    targetSlice = (PersistenceSlice)getFreshSlice(cid.getName());
+		    targetSlice.saveContainer(repository);
+		}
+	    }
+	    else {
+		// On a peripheral container, one can only save the
+		// local container
+		PersistenceSlice targetSlice = (PersistenceSlice)getSlice(localSlice.getNode().getName());
+		targetSlice.saveContainer(repository);
+	    }
+	}
+
+	private void handleLoadContainer(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException, NameClashException {
+	    Object[] params = cmd.getParams();
+	    ContainerID cid = (ContainerID)params[0];
+	    String repository = (String)params[1];
+
+	    // Forward the request to save to the proper container
+	    MainContainer impl = myContainer.getMain();
+	    if(impl != null) {
+		// On a main container, one is able to reload any
+		// container
+		PersistenceSlice targetSlice = (PersistenceSlice)getSlice(cid.getName());
+		try {
+		    targetSlice.loadContainer(repository);
+		}
+		catch(IMTPException imtpe) {
+		    // Try to get a newer slice and repeat...
+		    targetSlice = (PersistenceSlice)getFreshSlice(cid.getName());
+		    targetSlice.loadContainer(repository);
+		}
+	    }
+	    else {
+		// On a peripheral container, one can only reload the
+		// local container
+		PersistenceSlice targetSlice = (PersistenceSlice)getSlice(localSlice.getNode().getName());
+		targetSlice.loadContainer(repository);
+	    }
+	}
+
+	private void handleDeleteContainer(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
+	    Object[] params = cmd.getParams();
+	    ContainerID cid = (ContainerID)params[0];
+	    String repository = (String)params[1];
+
+	    // Forward the request to delete to the proper container
+
+	    // FIXME: Do we really need this operation?
+	}
+
     } // End of CommandSourceSink class
 
 
@@ -455,6 +645,12 @@ public class PersistenceService extends BaseService {
 		}
 		else if(name.equals(PersistenceHelper.THAW_AGENT)) {
 		    handleThawAgent(cmd);
+		}
+		else if(name.equals(PersistenceHelper.SAVE_CONTAINER)) {
+		    handleSaveContainer(cmd);
+		}
+		else if(name.equals(PersistenceHelper.LOAD_CONTAINER)) {
+		    handleLoadContainer(cmd);
 		}
 	    }
 	    catch(ServiceException se) {
@@ -557,22 +753,188 @@ public class PersistenceService extends BaseService {
 	    if(messageQueueID != null) {
 		// Retrieve the frozen message queue
 		List bufferedMessages = new ArrayList();
-		Long agentFK = myPersistenceManager.evictFrozenMessageQueue(messageQueueID, repository, bufferedMessages);
+		Long agentFK = myPersistenceManager.readFrozenMessageQueue(messageQueueID, repository, bufferedMessages);
 		// Activate message buffering for the frozen agent on the buffer container
 		PersistenceSlice targetSlice = (PersistenceSlice)getSlice(newContainer.getName());
 		try {
 		    try {
-		    targetSlice.setupThawedAgent(agentID, agentFK, newContainer, repository, bufferedMessages);
-		    } catch(Throwable t) { t.printStackTrace(); throw new IMTPException("Synth");}
+			targetSlice.setupThawedAgent(agentID, agentFK, newContainer, repository, bufferedMessages);
+		    }
+		    catch(IMTPException imtpe) {
+			// Try again with a newer slice
+			targetSlice = (PersistenceSlice)getFreshSlice(newContainer.getName());
+			targetSlice.setupThawedAgent(agentID, agentFK, newContainer, repository, bufferedMessages);
+		    }
+
+		    // Actually remove the frozen message queue from the DB, without retrieving the buffered messages list
+		    myPersistenceManager.evictFrozenMessageQueue(messageQueueID, repository);
 		}
-		catch(IMTPException imtpe) {
-		    // Try again with a newer slice
-		    targetSlice = (PersistenceSlice)getFreshSlice(newContainer.getName());
-		    targetSlice.setupThawedAgent(agentID, agentFK, newContainer, repository, bufferedMessages);
+		catch(ServiceException se) {
+		    // Some kind of DB-related error. Abort the operation.
+		    frozenAgents.put(agentID, e);
+		    throw se;
 		}
 	    }
 	    else {
 		throw new NotFoundException("Agent " + agentID.getLocalName() + " not found during thaw-agent");
+	    }
+	}
+
+	private void handleSaveContainer(VerticalCommand cmd) throws ServiceException, IMTPException, NotFoundException {
+	    Object[] params = cmd.getParams();
+	    String repository = (String)params[0];
+
+	    PersistenceSlice mainSlice = (PersistenceSlice)getSlice(MAIN_SLICE);
+
+	    MTPDescriptor[] mtpsArray;
+	    try {
+		mtpsArray = mainSlice.getInstalledMTPs(myContainer.getID());
+	    }
+	    catch(IMTPException imtpe) {
+		// Try again with a newer slice
+		mainSlice = (PersistenceSlice)getFreshSlice(MAIN_SLICE);
+		mtpsArray = mainSlice.getInstalledMTPs(myContainer.getID());
+	    }
+
+	    java.util.Set mtps = new java.util.HashSet();
+	    for(int i = 0; i < mtpsArray.length; i++) {
+		mtps.add(mtpsArray[i]);
+	    }
+
+	    AID[] agentsArray = null;
+	    try {
+		agentsArray = mainSlice.getAgentIDs(myContainer.getID());
+	    }
+	    catch(IMTPException imtpe) {
+		// Try again with a newer slice
+		mainSlice = (PersistenceSlice)getFreshSlice(MAIN_SLICE);
+		agentsArray = mainSlice.getAgentIDs(myContainer.getID());
+	    }
+
+
+	    SaveContainerOperation op = new SaveContainerOperation(agentsArray, mtps);
+
+	    // Request a save operation to all the agents
+	    for(int i = 0; i < agentsArray.length; i++) {
+		AID id = agentsArray[i];
+		Agent a = myContainer.acquireLocalAgent(id);
+
+		// Insert a new entry into the pending operations table
+		submitSaveContainerOp(id, op);
+		a.requestSave(repository);
+		myContainer.releaseLocalAgent(id);
+	    }
+
+	    // Wait for all agents to be in the correct state
+	    op.waitUntilComplete();
+
+	    try {
+		java.util.Set agents = new java.util.HashSet();
+		for(int i = 0; i < agentsArray.length; i++) {
+
+		    Agent a = myContainer.acquireLocalAgent(agentsArray[i]);
+		    List pendingMessages = new ArrayList();
+		    myContainer.fillListFromMessageQueue(pendingMessages, a);
+		    java.util.List pm = new java.util.ArrayList(pendingMessages.size());
+		    Iterator it = pendingMessages.iterator();
+		    while(it.hasNext()) {
+			pm.add(it.next());
+		    }
+
+		    agents.add(new SavedAgent(a, pm));
+		}
+
+		myPersistenceManager.saveContainer(myContainer.getID().getName(), repository, agents, mtps);
+
+		// Restart all the blocked agent threads
+		op.flushAgentsToSave();
+
+	    }
+	    finally {
+		if(agentsArray != null) {
+		    for(int i = 0; i < agentsArray.length; i++) {
+			myContainer.releaseLocalAgent(agentsArray[i]);
+		    }
+		}
+	    }
+
+	}
+
+	private void handleLoadContainer(VerticalCommand cmd) throws ServiceException, IMTPException, NotFoundException, NameClashException, AuthException {
+	    Object[] params = cmd.getParams();
+	    String repository = (String)params[0];
+
+	    String containerName = myContainer.getID().getName();
+	    SavedContainer saved = new SavedContainer();
+	    saved.setName(containerName);
+
+	    myPersistenceManager.retrieveSavedContainer(saved, repository);
+
+	    // Stop all active agents
+	    AID[] agentsArray;
+	    PersistenceSlice mainSlice = (PersistenceSlice)getSlice(MAIN_SLICE);
+	    try {
+		agentsArray = mainSlice.getAgentIDs(myContainer.getID());
+	    }
+	    catch(IMTPException imtpe) {
+		// Try again with a newer slice
+		mainSlice = (PersistenceSlice)getFreshSlice(MAIN_SLICE);
+		agentsArray = mainSlice.getAgentIDs(myContainer.getID());
+	    }
+
+	    for(int i = 0; i < agentsArray.length; i++) {
+		Agent a = myContainer.acquireLocalAgent(agentsArray[i]);
+		a.doDelete();
+		myContainer.releaseLocalAgent(agentsArray[i]);
+		//		a.join();
+	    }
+
+	    // Remove all installed MTPs
+	    MTPDescriptor[] mtpsArray;
+	    try {
+		mtpsArray = mainSlice.getInstalledMTPs(myContainer.getID());
+	    }
+	    catch(IMTPException imtpe) {
+		// Try again with a newer slice
+		mainSlice = (PersistenceSlice)getFreshSlice(MAIN_SLICE);
+		mtpsArray = mainSlice.getInstalledMTPs(myContainer.getID());
+	    }
+
+	    Service messaging = myServiceFinder.findService(jade.core.messaging.MessagingSlice.NAME);
+	    for(int i = 0; i < mtpsArray.length; i++) {
+		MTPDescriptor mtp = mtpsArray[i];
+		GenericCommand uninstallMTP = new GenericCommand(jade.core.messaging.MessagingSlice.UNINSTALL_MTP, jade.core.messaging.MessagingSlice.NAME, null);
+		uninstallMTP.addParam(mtp.getAddresses()[0]);
+		uninstallMTP.addParam(myContainer.getID());
+		messaging.submit(uninstallMTP);
+	    }
+
+	    // Activate all saved MTPs
+	    java.util.Iterator it = saved.getInstalledMTPs().iterator();
+	    while(it.hasNext()) {
+		MTPDescriptor mtp = (MTPDescriptor)it.next();
+		GenericCommand installMTP = new GenericCommand(jade.core.messaging.MessagingSlice.INSTALL_MTP, jade.core.messaging.MessagingSlice.NAME, null);
+		installMTP.addParam(mtp.getAddresses()[0]);
+		installMTP.addParam(myContainer.getID());
+		installMTP.addParam(mtp.getClassName());
+		messaging.submit(installMTP);
+	    }
+
+	    // Start all saved agents
+	    it = saved.getAgents().iterator();
+	    while(it.hasNext()) {
+		SavedAgent sa = (SavedAgent)it.next();
+
+		Agent instance = sa.getAgent();
+		java.util.List pendingMessages = sa.getPendingMessages();
+
+		// Restore the agent message queue inserting
+		// received messages at the start of the queue
+		for(int i = pendingMessages.size(); i > 0; i--) {
+		    instance.putBack((ACLMessage)pendingMessages.get(i - 1));
+		}
+
+		myContainer.initAgent(instance.getAID(), instance, AgentContainer.CREATE_AND_START);
 	    }
 	}
 
@@ -637,7 +999,7 @@ public class PersistenceService extends BaseService {
 		Long queueID = e.getQueueID();
 		String repository = e.getRepository();
 		String sliceName = e.getSliceName();
-		Long agentFK = myPersistenceManager.evictFrozenMessageQueue(queueID, repository, null);
+		Long agentFK = myPersistenceManager.evictFrozenMessageQueue(queueID, repository);
 
 		// Delete the frozen agent from the (possibly remote) repository it was stored
 		PersistenceSlice targetSlice = (PersistenceSlice)getSlice(sliceName);
@@ -801,6 +1163,30 @@ public class PersistenceService extends BaseService {
 
 		    thawedAgent(agentID, buffer, home);
 		}
+		else if(cmdName.equals(PersistenceSlice.H_SAVECONTAINER)) {
+		    String repository = (String)params[0];
+
+		    GenericCommand gCmd = new GenericCommand(PersistenceHelper.SAVE_CONTAINER, PersistenceHelper.NAME, null);
+		    gCmd.addParam(repository);
+
+		    result = gCmd;
+		}
+		else if(cmdName.equals(PersistenceSlice.H_LOADCONTAINER)) {
+		    String repository = (String)params[0];
+
+		    GenericCommand gCmd = new GenericCommand(PersistenceHelper.LOAD_CONTAINER, PersistenceHelper.NAME, null);
+		    gCmd.addParam(repository);
+
+		    result = gCmd;
+		}
+		else if(cmdName.equals(PersistenceSlice.H_GETINSTALLEDMTPS)) {
+		    ContainerID cid = (ContainerID)params[0];
+		    cmd.setReturnValue(getInstalledMTPs(cid));
+		}
+		else if(cmdName.equals(PersistenceSlice.H_GETAGENTIDS)) {
+		    ContainerID cid = (ContainerID)params[0];
+		    cmd.setReturnValue(getAgentIDs(cid));
+		}
 	    }
 	    catch(Throwable t) {
 		cmd.setReturnValue(t);
@@ -893,6 +1279,42 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
+	private MTPDescriptor[] getInstalledMTPs(ContainerID cid) throws IMTPException, NotFoundException {
+	    MainContainer impl = myContainer.getMain();
+	    if(impl != null) {
+
+		List l = impl.containerMTPs(cid);
+		MTPDescriptor[] mtps = new MTPDescriptor[l.size()];
+		Iterator it = l.iterator();
+		int idx = 0;
+		while(it.hasNext()) {
+		    mtps[idx++] = (MTPDescriptor)it.next();
+		}
+
+		return mtps;
+	    }
+	    else {
+		throw new NotFoundException("Not a Main Container");
+	    }
+	}
+
+	private AID[] getAgentIDs(ContainerID cid) throws IMTPException, NotFoundException {
+	    MainContainer impl = myContainer.getMain();
+	    if(impl != null) {
+
+		List l = impl.containerAgents(cid);
+		AID[] agentIDs = new AID[l.size()];
+		Iterator it = l.iterator();
+		int idx = 0;
+		while(it.hasNext()) {
+		    agentIDs[idx++] = (AID)it.next();
+		}
+		return agentIDs;
+	    }
+	    else {
+		throw new NotFoundException("Not a Main Container");
+	    }
+	}
 
     } // End of ServiceComponent class
 
@@ -900,7 +1322,10 @@ public class PersistenceService extends BaseService {
 
     // The concrete agent container, providing access to LADT, etc.
     private AgentContainer myContainer;
-		
+
+    // The Service Finder component
+    private ServiceFinder myServiceFinder;
+
     // The local slice for this service
     private final ServiceComponent localSlice = new ServiceComponent();
 
@@ -1084,6 +1509,69 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
+	public void saveContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException {
+	    GenericCommand cmd = new GenericCommand(PersistenceHelper.SAVE_CONTAINER, PersistenceHelper.NAME, null);
+	    cmd.addParam(cid);
+	    cmd.addParam(repository);
+	    Object lastException = submit(cmd);
+
+	    if(lastException != null) {
+
+		if(lastException instanceof ServiceException) {
+		    throw (ServiceException)lastException;
+		}
+		if(lastException instanceof IMTPException) {
+		    throw (IMTPException)lastException;
+		}
+		if(lastException instanceof NotFoundException) {
+		    throw (NotFoundException)lastException;
+		}
+	    }
+	}
+
+	public void loadContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException {
+	    GenericCommand cmd = new GenericCommand(PersistenceHelper.LOAD_CONTAINER, PersistenceHelper.NAME, null);
+	    cmd.addParam(cid);
+	    cmd.addParam(repository);
+	    Object lastException = submit(cmd);
+
+	    if(lastException != null) {
+
+		if(lastException instanceof ServiceException) {
+		    throw (ServiceException)lastException;
+		}
+		if(lastException instanceof IMTPException) {
+		    throw (IMTPException)lastException;
+		}
+		if(lastException instanceof NotFoundException) {
+		    throw (NotFoundException)lastException;
+		}
+		if(lastException instanceof NameClashException) {
+		    throw (NameClashException)lastException;
+		}
+	    }
+	}
+
+	public void deleteContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException {
+	    GenericCommand cmd = new GenericCommand(PersistenceHelper.DELETE_CONTAINER, PersistenceHelper.NAME, null);
+	    cmd.addParam(cid);
+	    cmd.addParam(repository);
+	    Object lastException = submit(cmd);
+
+	    if(lastException != null) {
+
+		if(lastException instanceof ServiceException) {
+		    throw (ServiceException)lastException;
+		}
+		if(lastException instanceof IMTPException) {
+		    throw (IMTPException)lastException;
+		}
+		if(lastException instanceof NotFoundException) {
+		    throw (NotFoundException)lastException;
+		}
+	    }
+	}
+
     };
 
     // The command sink, source side
@@ -1104,9 +1592,23 @@ public class PersistenceService extends BaseService {
     // The table of the primary keys for the currently frozen agents
     private Map frozenAgents = new HashMap();
 
+    private Map saveContainerOps = new HashMap();
+
     // Work-around for PJAVA compilation
     protected Service.Slice getFreshSlice(String name) throws ServiceException {
     	return super.getFreshSlice(name);
+    }
+
+    private void submitSaveContainerOp(AID agentID, SaveContainerOperation op) {
+
+	// FIXME: Should use a map of lists
+	saveContainerOps.put(agentID, op);
+    }
+
+    private SaveContainerOperation retrieveSaveContainerOp(AID agentID) {
+
+	// FIXME: Should use a map of lists
+	return (SaveContainerOperation)saveContainerOps.get(agentID);
     }
 
 }
