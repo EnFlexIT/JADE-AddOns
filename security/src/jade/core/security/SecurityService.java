@@ -95,8 +95,6 @@ public class SecurityService extends BaseService {
     myContainer = ac;
     myProfile = profile;
 
-    myLogger.log( Logger.WARNING, "Initializing the Security Service..." );
-
     // set properly various profile parameters and system properties
     setPropertiesValue();
 
@@ -136,10 +134,8 @@ public class SecurityService extends BaseService {
 
 
   public void boot(Profile p) {
-    myLogger.log(Logger.SEVERE, "Booting SecurityService...");
     // load
     loadContainerAuthority();
-    myLogger.log(Logger.SEVERE, "ContainerAuthority loaded.");
     try {
       // register codecs (FIXME: currently only the default one)
       codecs = new Hashtable();
@@ -250,10 +246,8 @@ public class SecurityService extends BaseService {
   private void loadContainerAuthority(){
     // open the related SecurityStore
     // get the key pair, and create the JADEPrincipal
-System.out.println( " kkkk ");
-System.out.println( " kkkk ");
-System.out.println( SecurityFactory.getSecurityFactory() );
-System.out.println( SecurityFactory.getSecurityFactory(myProfile) );
+SecurityFactory.getSecurityFactory();
+SecurityFactory.getSecurityFactory(myProfile);
 
     myLogger.log(Logger.FINER, "Creatinng the container Authority...");
     SecurityFactory sf = SecurityFactory.getSecurityFactory(myProfile);
