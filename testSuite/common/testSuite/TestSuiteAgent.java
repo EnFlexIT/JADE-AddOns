@@ -57,7 +57,7 @@ import java.util.Vector;
 
 public class TestSuiteAgent extends GuiAgent {
 	public static JadeController mainController;
-	public static final String MAIN_SERVICES = "jade.core.mobility.AgentMobilityService;jade.core.event.NotificationService;jade.core.replication.MainReplicationService;jade.core.replication.AddressNotificationService";
+	public static final String MAIN_SERVICES = "jade.core.mobility.AgentMobilityService;jade.core.event.NotificationService;jade.core.replication.MainReplicationService;jade.core.replication.AddressNotificationService;jade.core.messaging.PersistentDeliveryService";
 	public static final String TEST_PLATFORM_NAME = "TestPlatform";
 	
 	private static final String NAME = "test-suite";
