@@ -33,6 +33,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.TreePath;
 import java.io.*;
 import jade.gui.GuiEvent;
+import jade.gui.JadeLogoButton;
 
 import test.common.testSuite.TestSuiteAgent;
 import test.common.testerAgentControlOntology.TestResult;
@@ -49,7 +50,7 @@ import test.common.Logger;
  * @author Matteo Bisi - UniPR
  * @author Yuri Ferrari - UniPR
  * @author Rossano Vitulli - UniPR
- * @version $Date: December 2003
+ * @version $Date$ $Revision$
  */
 public class TestSuiteGui extends javax.swing.JFrame {
 
@@ -473,6 +474,22 @@ public class TestSuiteGui extends javax.swing.JFrame {
     rootPanel.add(counterPanel, gridBagConstraints);
 
     getContentPane().add(rootPanel, java.awt.BorderLayout.CENTER);
+		
+		// add the button with the JADE Logo to the toolbar
+    JToolBar.addSeparator(); 
+    JadeLogoButton logo = new JadeLogoButton();	
+    logo.setText("Web");
+    logo.setToolTipText("Browse the JADE web site");
+    logo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+    //logo.setIconTextGap(0);
+    logo.setMaximumSize(new java.awt.Dimension(64, 64));
+    logo.setMinimumSize(new java.awt.Dimension(64, 64));
+    logo.setPreferredSize(new java.awt.Dimension(64, 64));
+    logo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+    JToolBar.add(logo);
+
+		// set the icon for this frame
+		setIconImage(getToolkit().getImage(logo.getClass().getResource("/jade/gui/images/logosmall.jpg")));
 
     pack();
   }                                                                        // GEN-END:initComponents
