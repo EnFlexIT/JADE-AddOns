@@ -12,17 +12,15 @@ grant codebase "file:../../../../lib/jade.jar" {
 grant codebase "file:../../../../lib/jadeTools.jar" {
       permission java.security.AllPermission;  };
 
-// Agent code is not allowed any permission.
-grant codebase "file:../../lib/examples.jar" {
-};
+// Note that examples agent code is not allowed any permission.
 
 
 
 grant principal jade.security.Name "*" {
-  permission jade.security.PlatformPermission "", "create";
-  permission jade.security.ContainerPermission "", "create";
-  permission jade.security.AgentPermission "*", "create,kill";
-  permission jade.security.AMSPermission   "agent-class=*", "register,deregister,modify";
-  permission jade.security.MessagePermission "agent-name=*", "send-to";
+  permission jade.security.PlatformPermission "", "create,kill";
+  permission jade.security.ContainerPermission "", "create,kill";
+  permission jade.security.AgentPermission "", "create,kill";
+  permission jade.security.AMSPermission   "", "register,deregister,modify";
+  permission jade.security.MessagePermission "", "send-to";
 };
 
