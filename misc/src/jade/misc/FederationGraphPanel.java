@@ -242,7 +242,7 @@ class FederationGraphPanel extends JPanel {
 	void removeFederation(AID child, AID parent) {
 		// Mutual exclusion with paintComponent()
 		synchronized (federations) {
-			dfs.remove(new Federation(child, parent));
+			federations.remove(new Federation(child, parent));
 		}
 		
 		// Let AWT repaint the panel

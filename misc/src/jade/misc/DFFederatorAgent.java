@@ -27,13 +27,13 @@ import jade.core.Agent;
 import jade.core.AID;
 import jade.domain.FIPANames;
 import jade.domain.DFGUIManagement.*;
+import jade.domain.JADEAgentManagement.*;	   
+import jade.domain.FIPAAgentManagement.DFAgentDescription;	   
 import jade.content.ContentManager;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
-//import jade.domain.JADEAgentManagement.ShowGui;
-import jade.domain.JADEAgentManagement.*;	   
 
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -66,33 +66,8 @@ import java.util.Vector;
  * @see <a href="../../../../resources/DFFederatorAgent.properties">sample properties file </a>
  **/
 public class DFFederatorAgent extends Agent {
-	private DFFederatorAgentGUI myGui;
-
-    /** constructor **/
-	
+	private DFFederatorAgentGUI myGui;	
 	 
-    public DFFederatorAgent() {
-	/*federate = new Federate();
-	action = new Action();
-	action.setAction(federate);
-	request = new ACLMessage(ACLMessage.REQUEST);
-	request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);	
-	request.setOntology(DFAppletOntology.NAME);
-	*/
-	
-	// action ShowGui requested to df belonging to the federation
-				  
-	/*showGui = new ShowGui();
-	actionShowGui = new Action();
-	actionShowGui.setAction(showGui);
-	requestShowGui = new ACLMessage(ACLMessage.REQUEST);
-	requestShowGui.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
-	requestShowGui.setOntology(JADEManagementOntology.NAME);
-	// this vector contains the df that have already received a request
-	// to show a gui
-	aidDfVec = new Vector();*/
-    }
-
     /* This is the prefix string that identifies the key of a property
      * that represent a sub DF. The postfix after this key is appended
      * also to RootDFKeyPrefix to get the key of the property that
@@ -155,55 +130,95 @@ public class DFFederatorAgent extends Agent {
     	}
     }
 
-    /*private Federate federate; 
-    private ACLMessage request;
-    private Action action;
-
-    private void federate(AID childDF, AID parentDF) {
-	showGui(childDF);
-	showGui(parentDF);
-	federate.setParentDF(parentDF);
-	action.setActor(childDF);
-	request.clearAllReceiver();
-	request.addReceiver(childDF);
-	try {
-	    getContentManager().fillContent(request, action);
-	    //System.out.println(request);
-	    send(request);
-	    System.out.println(getLocalName()+" sent to "+childDF+ "\n a request to federate with "+parentDF);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
-    }*/
-	
-	/**
-	  * Send a request to perform action ShowGui to all the federated dfs
-	  *
-	  **/
-	/*private jade.domain.JADEAgentManagement.ShowGui showGui;
-	private ACLMessage requestShowGui;
-	private Action actionShowGui;
-	private Vector aidDfVec; 
-	private void showGui(AID df) {
-		// send a request only to a new df to showgui
-		if (!aidDfVec.contains(df)) 
-		{
-			aidDfVec.addElement(df);
-			actionShowGui.setActor(df);
-			requestShowGui.clearAllReceiver();
-			requestShowGui.addReceiver(df);
+    //////////////////////////////////
+    // Methods called by the GUI
+    //////////////////////////////////
+    
+    void requestShowGui(final AID df) {
+    	Action action = new Action(df, new ShowGui());
+			ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+			request.addReceiver(df);
+			request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);	
+			request.setOntology(JADEManagementOntology.NAME);
 			try {
-			    getContentManager().fillContent(requestShowGui, actionShowGui);
-			    //System.out.println(request);
-			    send(requestShowGui);
-			    System.out.println(getLocalName() + " sent to " + df);
-			} catch (Exception e) {
-			    e.printStackTrace();
+	    	getContentManager().fillContent(request, action);
+    		addBehaviour(new AchieveREInitiator(this, request) {
+    			protected void handleFailure(ACLMessage failure) {
+    				String msg = new String(df.getName()+" GUI activation failed ["+failure.getContent()+"]"); 
+    				myGui.notifyFailure(msg);
+    			}
+    		} );
 			}
-		}
-    }*/
+			catch (Exception e) {
+				e.printStackTrace();
+				String msg = new String(df.getName()+" GUI activation failed ["+e.getMessage()+"]"); 
+				myGui.notifyFailure(msg);
+			}
+		}	
+		
+    void requestFederation(final AID childDF, final AID parentDF) {
+			System.out.println("Federating "+childDF.getName()+" with "+parentDF.getName());
+			Federate f = new Federate();
+			f.setDf(parentDF);
+			Action action = new Action(childDF, f);
+			ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+			request.addReceiver(childDF);
+			request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);	
+			request.setOntology(DFAppletOntology.NAME);
+			try {
+	    	getContentManager().fillContent(request, action);
+    		addBehaviour(new AchieveREInitiator(this, request) {
+    			protected void handleInform(ACLMessage inform) {
+    				myGui.notifyFederationOK(childDF, parentDF);
+    			}
+    			protected void handleFailure(ACLMessage failure) {
+						String msg = new String("Federation between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+failure.getContent()+"]");
+    				myGui.notifyFailure(msg);
+    			}
+    		} );
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				String msg = new String("Federation between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+e.getMessage()+"]");
+				myGui.notifyFailure(msg);
+			}
+		}	
+				
+    void requestFederationRemoval(final AID childDF, final AID parentDF) {
+			System.out.println("Removing federation between "+childDF.getName()+" and "+parentDF.getName());
+			DeregisterFrom d = new DeregisterFrom();
+			d.setDf(parentDF);
+			DFAgentDescription dfd = new DFAgentDescription();
+			dfd.setName(childDF);
+			d.setDescription(dfd);
+			Action action = new Action(childDF, d);
+			ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+			request.addReceiver(childDF);
+			request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);	
+			request.setOntology(DFAppletOntology.NAME);
+			try {
+	    	getContentManager().fillContent(request, action);
+    		addBehaviour(new AchieveREInitiator(this, request) {
+    			protected void handleInform(ACLMessage inform) {
+    				myGui.notifyFederationRemoved(childDF, parentDF);
+    			}
+    			protected void handleFailure(ACLMessage failure) {
+						String msg = new String("Federation removal between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+failure.getContent()+"]");
+    				myGui.notifyFailure(msg);
+    			}
+    		} );
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				String msg = new String("Federation removal between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+e.getMessage()+"]");
+				myGui.notifyFailure(msg);
+			}
+    }
 
-
+    ////////////////////////////////////
+    // Private utility methods
+    ////////////////////////////////////
+    
     /**
      * Parses the passed string containing an agent name and an agent address
      * separated by a comma and creates an AID for that agent.
@@ -234,56 +249,4 @@ public class DFFederatorAgent extends Agent {
 	return RootDFKeyPrefix + subDFKey.substring(SubDFKeyPrefix.length());
     }
 	
-    void requestShowGui(final AID df) {
-    	Action action = new Action(df, new ShowGui());
-			ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-			request.addReceiver(df);
-			request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);	
-			request.setOntology(JADEManagementOntology.NAME);
-			try {
-	    	getContentManager().fillContent(request, action);
-    		addBehaviour(new AchieveREInitiator(this, request) {
-    			protected void handleFailure(ACLMessage failure) {
-    				myGui.notifyShowGuiFailed(df);
-    			}
-    		} );
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-    		myGui.notifyShowGuiFailed(df);
-			}
-		}	
-		
-    void requestFederation(final AID childDF, final AID parentDF) {
-			System.out.println("Federating "+childDF.getName()+" with "+parentDF.getName());
-			Federate f = new Federate();
-			f.setParentDF(parentDF);
-			Action action = new Action(childDF, f);
-			ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-			request.addReceiver(childDF);
-			request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);	
-			request.setOntology(DFAppletOntology.NAME);
-			try {
-	    	getContentManager().fillContent(request, action);
-    		addBehaviour(new AchieveREInitiator(this, request) {
-    			protected void handleInform(ACLMessage inform) {
-    				myGui.notifyFederationOK(childDF, parentDF);
-    			}
-    			protected void handleFailure(ACLMessage failure) {
-    				System.out.println(failure);
-    				myGui.notifyFederationFailed(childDF, parentDF);
-    			}
-    		} );
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-    		myGui.notifyFederationFailed(childDF, parentDF);
-			}
-		}	
-				
-    void requestFederationRemoval(final AID childDF, final AID parentDF) {
-			System.out.println("Removing federation between "+childDF.getName()+" and "+parentDF.getName());
-    	// FIXME: TBD
-    	System.out.println("Federation removal not yet implemented");
-    }
 }

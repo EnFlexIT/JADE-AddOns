@@ -200,25 +200,21 @@ class DFFederatorAgentGUI extends JFrame {
 		graphPanel.addFederation(childDF, parentDF);
 	}
 	
-	void notifyFederationFailed(AID childDF, AID parentDF) {
-		System.out.println("Federation between "+childDF.getName()+" and "+parentDF.getName()+" Failed");
-		// FIXME: Show an error dialog
-	}
-	
 	void notifyFederationRemoved(AID childDF, AID parentDF) {
-		System.out.println("Federation removed");
+		System.out.println("Federation between "+childDF.getName()+" and "+parentDF.getName()+" removed");
 		graphPanel.removeFederation(childDF, parentDF);
 	}
 	
-	void notifyShowGuiFailed(AID df) {
-		System.out.println("Show GUI Failure");
+	void notifyFailure(String msg) {
+		System.out.println(msg);
 		// FIXME: Show an error dialog
 	}
+	
 	
 	/**
 	   Show the DFFederatorAgentGUI properly
 	 */
-	public void showCorrect() {
+	void showCorrect() {
 		pack();
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int centerX = (int)screenSize.getWidth() / 2;
