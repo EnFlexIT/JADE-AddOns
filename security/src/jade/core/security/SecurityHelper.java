@@ -195,7 +195,7 @@ public class SecurityHelper
    * @param msg the message to be checked for signature
    * @return true if message has been signed, false otherwise 
    */
-  public boolean isSigned(ACLMessage msg) { // getUseSignature
+  public boolean getUseSignature(ACLMessage msg) {
     Envelope e = msg.getEnvelope();
     if (e != null) {
       for (Iterator it = e.getAllProperties(); it.hasNext();) {
@@ -227,7 +227,7 @@ public class SecurityHelper
    * Sets the message to be signed
    * TODO: Currently the information is set to a user defined slot
    */
-  public void toSign(ACLMessage msg) {  // setUseSignature
+  public void setUseSignature(ACLMessage msg) {
     Envelope e = msg.getEnvelope();
     if (e == null) {
       e = new Envelope();
@@ -268,7 +268,7 @@ public class SecurityHelper
   /**
    * Tells if the message has been encrypted
    */
-  public boolean isEncrypted(ACLMessage msg) { // getUseEncryption
+  public boolean getUseEncryption(ACLMessage msg) {
     Envelope e = msg.getEnvelope();
     if (e != null) {
       for (Iterator it = e.getAllProperties(); it.hasNext();) {
@@ -289,7 +289,7 @@ public class SecurityHelper
   /**
    * Sets the message to be encrypted
    */
-  public void toEncrypt(ACLMessage msg) {  // setUseEncryption
+  public void setUseEncryption(ACLMessage msg) {
     Envelope e = msg.getEnvelope();
     if (e == null) {
       e = new Envelope();
