@@ -19,7 +19,7 @@
   <!-- Compile the javadoc code from ${src} into ${doc} -->
   <target name="doc" depends="init">
     <mkdir dir="${doc}/api"/>
-    <javadoc sourcepath="${src}/${packageDir}" sourcefiles="${src}/${packageDir}/RoundTripReceiver.java,${src}/${packageDir}/RoundTripSender.java" destdir="${doc}/api" author="true" windowtitle="Message RoundTrip Time Benchmark API"/>
+    <javadoc sourcepath="${src}/${packageDir}" sourcefiles="${src}/${packageDir}/*.java" destdir="${doc}/api" author="true" windowtitle="Message RoundTrip Time Benchmark API"/>
   </target>
 
   <target name="compile" depends="init">
