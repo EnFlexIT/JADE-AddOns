@@ -11,30 +11,40 @@ grant codebase "file:../../../../add-ons/security/lib/jadeS.jar" {
 
 
 
-
 //
 // --- Below all the JADE permissions allowed for the platform ---
 //
 
+
+
 //
 // --- UNCOMMENT the following for allowing message exchange between agents belonging to 'alice' and 'bob' ---
 //
-//grant principal jade.security.impl.PrincipalImpl "bob" {
-//	permission jade.security.impl.AgentPermission "alice", "send-to,receive-from"; };
 //grant principal jade.security.impl.PrincipalImpl "alice" {
 //	permission jade.security.impl.AgentPermission "bob", "send-to,receive-from"; };
-
-
-
-//
-// --- UNCOMMENT the following, so that 'bob' is allowed to kill 'da1' on 'Container-1'  ---
-//
 //grant principal jade.security.impl.PrincipalImpl "bob" {
+//	permission jade.security.impl.AgentPermission "alice", "send-to,receive-from"; };
+
+
+
+//
+// --- UNCOMMENT the following, so that 'alice' is allowed to kill 'da1' on 'Container-1'  ---
+//
+//grant principal jade.security.impl.PrincipalImpl "alice" {
 //	permission jade.security.impl.AgentPermission "/da1", "kill";
 //	permission jade.security.impl.ContainerPermission "/Container-1", "kill-in";
-//	permission jade.security.impl.AMSPermission "/da1", "modify";
-//};
+//	permission jade.security.impl.AMSPermission "/da1", "modify";  };
 
+
+
+// enable a set of permissions for 'alice'
+grant principal jade.security.impl.PrincipalImpl "alice" {
+	permission jade.security.impl.AgentPermission "alice", "create,kill,suspend,resume,take,send-to,send-as,receive-from,move,copy";
+	permission jade.security.impl.AMSPermission "alice", "register,deregister,modify";
+	permission jade.security.impl.PlatformPermission "alice", "create,kill";
+	permission jade.security.impl.ContainerPermission "alice", "create,kill,create-in,kill-in";
+	permission jade.security.impl.AuthorityPermission "alice", "sign-ic,sign-dc";
+};
 
 // enable a set of permissions for 'bob'
 grant principal jade.security.impl.PrincipalImpl "bob" {
@@ -57,13 +67,13 @@ grant principal jade.security.impl.PrincipalImpl "/ams" {
 };
 
 
-// enable a set of permissions for 'alice'
-grant principal jade.security.impl.PrincipalImpl "alice" {
-	permission jade.security.impl.AgentPermission "alice", "create,kill,suspend,resume,take,send-to,send-as,receive-from,move,copy";
-	permission jade.security.impl.AMSPermission "alice", "register,deregister,modify";
-	permission jade.security.impl.PlatformPermission "alice", "create,kill";
-	permission jade.security.impl.ContainerPermission "alice", "create,kill,create-in,kill-in";
-	permission jade.security.impl.AuthorityPermission "alice", "sign-ic,sign-dc";
+grant principal jade.security.impl.PrincipalImpl "bob" {
+	permission jade.security.impl.AgentPermission "alice", 
+ 								"take";
+	permission jade.security.impl.AMSPermission "bob",  
+ 								"register,deregister,modify";
+       permission jade.security.impl.AuthorityPermission "bob", 
+ 								"sign-ic,sign-dc";
 };
 
 

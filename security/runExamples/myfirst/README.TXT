@@ -34,6 +34,8 @@ then, in the other command prompt window,
 type:  cont.bat
 
 Two Dummy Agents, named: 'da0' and 'da1' will appear.
+Main container and 'da0' belong to user 'alice', 
+Container-1 and 'da1' belong to agent 'bob'.
 
 Try to send a message from 'da0' to 'da1', 
 an exception is fired because 'da0' doesn't 
@@ -61,7 +63,7 @@ and double-click on cont.bat.
 The batch files set the appropriate 
 CLASSPATH for you.
 
-Then into the 'da0' window, you can send 
+Then, into the 'da0' window, you can send 
 a message to 'da1'.
 
 
