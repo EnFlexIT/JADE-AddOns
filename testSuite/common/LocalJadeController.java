@@ -86,6 +86,23 @@ class LocalJadeController implements JadeController {
 		}
 	}
 	
+	private void notifyStarted() {
+		synchronized (lock) {
+			ready = true;
+			lock.notifyAll();
+		}
+	}	
+
+	private void notifyTerminated() {
+		// If ready is false then the sub-process exited prematurely
+		// Notify the launcher.
+		synchronized (lock) {
+			if (!ready) {
+				lock.notifyAll();
+			}
+		}
+	}
+	
 	public List getAddresses() {
 		return addresses;
 	}
@@ -127,13 +144,7 @@ class LocalJadeController implements JadeController {
 					subProc.exitValue();
 					System.out.println("Remote JADE instance "+name+" terminated");
 					
-					// If ready is false then the sub-process exited prematurely
-					// Just notify the launcher
-					synchronized (lock) {
-						if (!ready) {
-							lock.notifyAll();
-						}
-					}
+					notifyTerminated();
 					break;
 				}
 				catch (IllegalThreadStateException itse) {
@@ -143,22 +154,7 @@ class LocalJadeController implements JadeController {
 				
 				try {
 					String line = br.readLine();
-					if (line != null) {
-						// Redirect sub-process output to standard output
-						System.out.println(name+">> "+line);
-						
-						// Possibly update the list of addresses of this JADE instance
-						catchAddress(line);
-					
-						// Notify the launcher when JADE startup is completed 
-						if (containerName == null && line.startsWith("Agent container") && line.endsWith("is ready.")) {
-							catchContainerName(line);
-							synchronized (lock) {
-								ready = true;
-								lock.notifyAll();
-							}
-						}
-					}
+					handleLine(line);
 				}
 				catch (Exception e) {
 					e.printStackTrace();
@@ -167,6 +163,22 @@ class LocalJadeController implements JadeController {
 			
 			stopErrorManager();
 		}   // END of run()
+		
+		private void handleLine(String line) {
+			if (line != null) {
+				// Redirect sub-process output to standard output
+				System.out.println(name+">> "+line);
+				
+				// Possibly update the list of addresses of this JADE instance
+				catchAddress(line);
+			
+				// Notify the launcher when JADE startup is completed 
+				if (containerName == null && line.startsWith("Agent container") && line.endsWith("is ready.")) {
+					catchContainerName(line);
+					notifyStarted();
+				}
+			}
+		}
 		
 		private void catchAddress(String line) {
 			for (int i = 0; i < protoNames.length; ++i) {
@@ -191,10 +203,7 @@ class LocalJadeController implements JadeController {
 						brErr = new BufferedReader(new InputStreamReader(subProc.getErrorStream()));
 						while (true) {
 							String line = brErr.readLine();
-							if (line != null) {
-								// Redirect sub-process error to standard output
-								System.out.println(name+"-ERROR>> "+line);
-							}
+							handleLine(line);
 						}
 					}
 					catch (Exception e) {
