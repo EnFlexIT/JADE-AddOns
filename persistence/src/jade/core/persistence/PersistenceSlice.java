@@ -73,8 +73,13 @@ public interface PersistenceSlice extends Service.Slice {
     static final String H_THAWEDAGENT = "11";
     static final String H_SAVECONTAINER = "12";
     static final String H_LOADCONTAINER = "13";
-    static final String H_GETINSTALLEDMTPS = "14";
-    static final String H_GETAGENTIDS = "15";
+    static final String H_DELETECONTAINER = "14";
+    static final String H_GETINSTALLEDMTPS = "15";
+    static final String H_GETAGENTIDS = "16";
+    static final String H_GETREPOSITORIES = "17";
+    static final String H_GETSAVEDAGENTS = "18";
+    static final String H_GETFROZENAGENTS = "19";
+    static final String H_GETSAVEDCONTAINERS = "20";
 
 
     void saveAgent(AID agentID, String repository) throws IMTPException, NotFoundException;
@@ -90,8 +95,14 @@ public interface PersistenceSlice extends Service.Slice {
     void thawedAgent(AID agentID, ContainerID buffer, ContainerID home) throws ServiceException, IMTPException, NotFoundException;
     void saveContainer(String repository) throws ServiceException, IMTPException, NotFoundException;
     void loadContainer(String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException;
+    void deleteContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException;
 
     MTPDescriptor[] getInstalledMTPs(ContainerID cid) throws ServiceException, IMTPException, NotFoundException;
     AID[] getAgentIDs(ContainerID cid) throws ServiceException, IMTPException, NotFoundException;
+
+    String[] getRepositories() throws ServiceException, IMTPException;
+    String[] getSavedAgents(String repository) throws ServiceException, IMTPException, NotFoundException;
+    String[] getFrozenAgents(String repository) throws ServiceException, IMTPException, NotFoundException;
+    String[] getSavedContainers(String repository) throws ServiceException, IMTPException, NotFoundException;
 
 }
