@@ -29,6 +29,7 @@ import jade.lang.acl.ACLMessage;
 
 import jade.util.leap.List;
 import jade.util.leap.ArrayList;
+import jade.util.Logger;
 
 import jade.content.*;
 import jade.content.abs.*;
@@ -46,6 +47,8 @@ public class Sender extends Agent {
     
     // This agent complies with the People ontology
     private Ontology   ontology = PeopleOntology.getInstance();
+    
+    private static Logger logger = Logger.getMyLogger(Sender.class.getName());
 
     class SenderBehaviour extends SimpleBehaviour {
 	private boolean finished = false;
@@ -57,7 +60,7 @@ public class Sender extends Agent {
 	public void action() {
 	    try {
 		// Preparing the message
-		System.out.println( "[" + getLocalName() + "] Creating inform message with content fatherOf(man :name John :address London, [man :name Bill :address Paris])");
+		logger.log(Logger.INFO, "[" + getLocalName() + "] Creating inform message with content fatherOf(man :name John :address London, [man :name Bill :address Paris])");
 
 		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 		AID receiver = new AID("receiver", false);
@@ -105,10 +108,10 @@ public class Sender extends Agent {
 		System.out.println(msg.getContent());
 
 		// Send the message
-		System.out.println( "[" + getLocalName() + "] Sending the message...");
+		logger.log(Logger.INFO, "[" + getLocalName() + "] Sending the message...");
 		send(msg);
 	    } catch(Exception e) { 
-	    	System.out.println("Sender: error in sending message");
+	    	logger.log(Logger.WARNING,"Sender: error in sending message");
 	    	e.printStackTrace(); }
 
 	    finished = true;

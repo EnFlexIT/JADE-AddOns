@@ -100,7 +100,6 @@ class XMLContentHandler extends DefaultHandler {
 		if ((temp.charAt(0)=='\t') && (temp.charAt(temp.length()-1)=='\t'))
 			temp = "";
 		lastValue = lastValue + temp;
-		// System.out.println("characters -> " + temp + " " + start + " " + length + "(" + lastValue+")");
 		// Remove unexpected text data like sequence of tabs
 		
 	}					   	
@@ -196,7 +195,6 @@ public class XMLCodec extends StringCodec {
     public AbsContentElement decode(String content) 
             throws CodecException {
 
-		// System.out.println(content);
 		try {
 			parser.parse(new InputSource(new StringReader(content)), handler);
  		} catch (Exception e) {

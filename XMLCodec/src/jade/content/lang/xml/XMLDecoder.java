@@ -241,14 +241,11 @@ class XMLDecoder {
 	}
 		
 	protected void addToStack(String qname, Attributes attr, ObjectSchema objectSchema) throws OntologyException {
-		//try {
 			StackElement stackElement = new StackElement();
 			stackElement.tag = qname;
 			stackElement.term = (AbsObject)objectSchema.newInstance();
 			stack.push(stackElement);
-		//} catch (OntologyException e) {
-		//	System.out.println(e);
-		//}
+
 	}
 		
 	protected ObjectSchema getContentType(Facet[] facets) {

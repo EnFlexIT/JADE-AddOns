@@ -33,6 +33,8 @@ import jade.content.onto.*;
 import jade.content.lang.*;
 import jade.content.lang.xml.*;
 
+import jade.util.Logger;
+
 
 import examples.xmlcontent.ontology.*;
 
@@ -42,6 +44,8 @@ public class Receiver extends Agent {
         
     private Ontology   ontology    = PeopleOntology.getInstance();
     private FatherOf       proposition = null;
+    
+    private static Logger = Logger.getMyLogger(Receiver.class.getName());
 
     class ReceiverBehaviour extends SimpleBehaviour {
 	private boolean finished = false;
@@ -53,16 +57,16 @@ public class Receiver extends Agent {
 	public void action() {
 	    //for(int c = 0; c < 2; c++) {
 		try {
-		    System.out.println( "[" + getLocalName() + "] Waiting for a message...");
+		    logger.log(Logger.INFO, "[" + getLocalName() + "] Waiting for a message...");
 
 		    ACLMessage msg = blockingReceive();
 
 		    if (msg!= null) {
 			    ContentElement p = manager.extractContent(msg);
-			    System.out.println("Received message  "+ msg.getContent());
+			    logger.log(Logger.INFO,"Received message  "+ msg.getContent());
 			    if(p instanceof FatherOf) {
 				proposition = (FatherOf)p;
-				System.out.println("[" + getLocalName() + "] Receiver inform message: information stored.");
+				logger.log(Logger.FINE,"[" + getLocalName() + "] Receiver inform message: information stored.");
 				//Estrae il contenuto del messaggio e lo stampa
 				FatherOf fo =new FatherOf();
 				fo.setFather(proposition.getFather());
@@ -76,11 +80,11 @@ public class Receiver extends Agent {
 				
 				}
 			else{
-				System.out.println("msg null");
+				logger.log(Logger.WARNING,"msg null");
 				}
 		    }
 		} catch(Exception e) { 
-			System.out.println("Error in extracting message");
+			logger.log(Logger.WARNING,"Error in extracting message");
 			e.printStackTrace(); }
 	   // }
 	    finished = true;
