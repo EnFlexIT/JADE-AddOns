@@ -91,22 +91,30 @@ public class SecurityHelper
   private Credentials credsFolder = null;
 
   // Constant for setting parameters
-  public static final String KEY_ALGO = "jade_core_security_SecurityService_KEY_ALGO";
-  public static final String KEY_SIZE = "jade_core_security_SecurityService_KEY_SIZE";
-  
+  public static final String ASYM_ALGO_KEY = "jade_security_AsymAlgorithm";
+  public static final String ASYM_ALGO_DEFAULT = "RSA";
+  public static final String ASYM_KEYSIZE_KEY = "jade_security_AsymKeySize";
+  public static final String ASYM_KEYSIZE_DEFAULT = "512";
+  public static final String SYM_ALGO_KEY = "jade_security_SymAlgorithm";
+  public static final String SYM_ALGO_DEFAULT = "AES";
+  public static final String SYM_KEYSIZE_KEY = "jade_security_SymKeySize";
+  public static final String SYM_KEYSIZE_DEFAULT = "128"; // or 192,256
+  public static final String SIGN_ALGO_KEY = "jade_security_SignAlgorithm";
+  public static final String SIGN_ALGO_DEFAULT = "SHA1withRSA"; 
+
   // Constant for credential user-defined parameter in ACLMessage
   public static final String CREDENTIALS = "credentials";
   
   // JADE Authority class
   public static final String AUTH = "jade_core_security_SecurityService_AUTHORITY";
   private String DEFAULT_AUTH = "jade.security.impl.JADEAuthorityImpl";
-  
+
   // Algorithm parameters and default values
-  private String  symAlgo = "AES";
-  private int     symKeySize = 128; // or 192,256
-  private	String  signAlgo = "SHA1withRSA";
-  
-  
+  private String  symAlgo;
+  private int     symKeySize; 
+  private String  signAlgo;
+
+
   // constructor
   public SecurityHelper (Profile p){
     this.myProfile=p;
@@ -117,6 +125,7 @@ public class SecurityHelper
    * Configuration parameters are read from the profile.
    */
   public void init(Agent a) {
+    setCryptoParameters();
     String name=null;
     try {
       myLogger.log(Logger.FINEST,"SecurityHelper: init(Agent) ");
@@ -149,8 +158,12 @@ public class SecurityHelper
       }
     */ 
   }
- 
-  
+
+  private void setCryptoParameters(){
+    symAlgo = myProfile.getParameter( SYM_ALGO_KEY, SYM_ALGO_DEFAULT);
+    symKeySize = Integer.parseInt( myProfile.getParameter(SYM_KEYSIZE_KEY, SYM_KEYSIZE_DEFAULT) );
+    signAlgo = myProfile.getParameter( SIGN_ALGO_KEY, SIGN_ALGO_DEFAULT);
+  }
 
   /**
    * The SecurityHelper loads keys and certificates of a user
