@@ -223,6 +223,7 @@ public class PermissionFilter extends Filter {
             // cmd already contains the right return value
         } else {
           // authorization exception, something was not authorized
+          if (myLogger.isLoggable(Logger.SEVERE))
           myLogger.log(Logger.SEVERE, 
                      ((direction==Filter.INCOMING) ? " UP " : "down")+
                      "[PermissionFilter] NOT AUTHORIZED!!!\n" + e.getMessage() ); 
@@ -238,6 +239,7 @@ public class PermissionFilter extends Filter {
         return false;
 
       } catch (Throwable e) {
+        if (myLogger.isLoggable(Logger.SEVERE))
         myLogger.log(Logger.SEVERE, "[PermissionFilter] ", e); 
       }
 
@@ -247,7 +249,9 @@ public class PermissionFilter extends Filter {
     } // end accept mehotd
 
 
+static java.util.logging.Level LEV = Logger.FINE;
 public static synchronized void log(boolean direction, jade.core.Command cmd) {
+      if (!myLogger.isLoggable(LEV)) return;
       Object[] params = null;
       if (cmd!=null) { params = cmd.getParams(); }
       StringBuffer sb = new StringBuffer("\n");
@@ -258,10 +262,12 @@ public static synchronized void log(boolean direction, jade.core.Command cmd) {
       if (params!=null)
       for (int i=0; i<params.length; i++)
         sb.append( "     ["+i+"] "+params[i]+"\n");
-      myLogger.log( Logger.FINE, sb.toString() );
+      myLogger.log( LEV, sb.toString() );
+      
   }
     
 public static synchronized void log(jade.core.Command cmd) {
+    if (!myLogger.isLoggable(LEV)) return;
     Object[] params = null;
     if (cmd!=null) { params = cmd.getParams(); }
     StringBuffer sb = new StringBuffer("\n");
@@ -271,7 +277,7 @@ public static synchronized void log(jade.core.Command cmd) {
     if (params!=null)
     for (int i=0; i<params.length; i++)
       sb.append( "     ["+i+"] "+params[i]+"\n");
-    myLogger.log( Logger.FINE, sb.toString() );
+    myLogger.log( LEV, sb.toString() );
 }
 
 // this contains the mapping  (cmd name) <-> (checkers)
