@@ -23,20 +23,14 @@ Boston, MA  02111-1307, USA.
 
 package jade.core.security.permission.checkers;
 
-import jade.core.Command;
-import jade.core.security.permission.CommandChecker;
-import jade.core.security.permission.checkers.SimpleJADEChecker;
-
-import jade.core.Agent;
 import jade.core.AID;
+import jade.core.Agent;
+import jade.core.Command;
 import jade.core.Location;
-
+import jade.security.Credentials;
 import jade.security.JADEPrincipal;
 import jade.security.JADESecurityException;
 
-import jade.core.AgentContainer;
-import jade.core.Profile;
-import jade.security.Credentials;
 import java.security.Permission;
 
 /**

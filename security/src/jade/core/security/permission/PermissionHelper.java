@@ -25,17 +25,12 @@
 package jade.core.security.permission;
 
 import jade.core.Agent;
-
-import jade.security.JADEPrincipal;
+import jade.security.Credentials;
 import jade.security.JADEAuthority;
-import jade.security.JADEAccessController;
-
+import jade.security.JADEPrincipal;
 import jade.security.JADESecurityException;
 import jade.security.PrivilegedExceptionAction;
-
 import jade.security.impl.JADEAuthorityImpl;
-import jade.security.impl.JADEAccessControllerImpl;
-import jade.security.Credentials;
 
 
 /**

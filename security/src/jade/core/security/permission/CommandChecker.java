@@ -26,9 +26,6 @@ package jade.core.security.permission;
 import jade.core.Command;
 import jade.security.JADESecurityException;
 
-import jade.core.AgentContainer;
-import jade.core.Profile;
-
 
 /**
 

@@ -19,36 +19,36 @@
 
 package jade.core.security.permission.checkers;
 
-import jade.core.Command;
-import jade.core.Agent;
 import jade.core.AID;
-import jade.core.Location;
-import jade.security.JADEPrincipal;
-import jade.security.JADESecurityException;
-import jade.security.JADEAccessController;
-
-import jade.core.AgentContainer;
-import jade.core.Profile;
-
-import java.util.Hashtable;
-import jade.security.Credentials;
-import jade.core.management.AgentManagementSlice;
-import jade.security.*;
-import jade.core.Service;
+import jade.core.Agent;
+import jade.core.AgentState;
+import jade.core.Command;
 import jade.core.ContainerID;
-import jade.core.security.permission.PermissionFilter;
+import jade.core.Filter;
+import jade.core.GenericCommand;
+import jade.core.IMTPException;
 import jade.core.NodeDescriptor;
-import jade.core.security.authentication.OwnershipCertificate;
+import jade.core.Service;
+import jade.core.ServiceException;
+import jade.core.management.AgentManagementSlice;
 import jade.core.security.SecurityHelper;
 import jade.core.security.SecurityService;
-import jade.core.*;
+import jade.core.security.authentication.OwnershipCertificate;
 import jade.core.security.authentication.UserAuthenticator;
 import jade.core.security.authentication.UserPassCredential;
-import javax.security.auth.login.*;
-import jade.security.impl.NameAuthority;
-import jade.util.Logger;
-import jade.security.util.SecurityData;
+import jade.core.security.permission.PermissionFilter;
+import jade.security.AMSPermission;
+import jade.security.AgentPermission;
+import jade.security.AuthPermission;
 import jade.security.CertificateEncodingException;
+import jade.security.ContainerPermission;
+import jade.security.Credentials;
+import jade.security.JADEPrincipal;
+import jade.security.JADESecurityException;
+import jade.security.PlatformPermission;
+import jade.security.util.SecurityData;
+import jade.util.Logger;
+
 import java.security.Permission;
 
 /**

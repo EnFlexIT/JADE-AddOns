@@ -23,33 +23,24 @@ Boston, MA  02111-1307, USA.
 
 package jade.core.security.signature;
 
-import jade.core.Agent;
 import jade.core.AID;
+import jade.core.Agent;
 import jade.core.AgentContainer;
 import jade.core.Filter;
 import jade.core.VerticalCommand;
-
-import jade.core.messaging.MessagingSlice;
-import jade.core.messaging.MessagingService;
 import jade.core.messaging.GenericMessage;
-
-import jade.core.security.*;
-import jade.security.util.*;
-
+import jade.core.messaging.MessagingService;
+import jade.core.messaging.MessagingSlice;
+import jade.core.security.SecurityHelper;
+import jade.core.security.SecurityService;
+import jade.core.security.SecuritySlice;
 import jade.domain.FIPAAgentManagement.Envelope;
-import jade.domain.FIPAAgentManagement.Property;
-import jade.domain.FIPAAgentManagement.SecurityObject;
 import jade.domain.FIPAAgentManagement.InternalError;
-
+import jade.domain.FIPAAgentManagement.SecurityObject;
 import jade.lang.acl.ACLMessage;
-
-import jade.security.SDSIName;
 import jade.security.JADESecurityException;
-
+import jade.security.util.SecurityData;
 import jade.util.Logger;
-import jade.util.leap.Iterator;
-
-import java.util.Hashtable;
 
 /**
    This class implements the filter responsible for signing

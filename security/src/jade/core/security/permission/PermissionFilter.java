@@ -25,28 +25,21 @@ package jade.core.security.permission;
 
 import jade.core.AgentContainer;
 import jade.core.Filter;
-import jade.core.VerticalCommand;
+import jade.core.Profile;
 import jade.core.Service;
-
-import java.util.Hashtable;
-import java.util.Vector;
+import jade.core.VerticalCommand;
+import jade.core.management.AgentManagementSlice;
+import jade.core.messaging.MessagingSlice;
+import jade.core.security.permission.checkers.MessagingChecker;
+import jade.core.security.permission.checkers.SimpleJADEChecker;
+import jade.security.JADEAccessController;
+import jade.security.JADESecurityException;
+import jade.security.impl.JADEAccessControllerImpl;
 import jade.util.Logger;
 
-// thee following import statements will have to go away
-// as soon as the loading of the checkerTable is done by the service themselves
-import jade.core.mobility.AgentMobilitySlice;
-import jade.core.messaging.MessagingSlice;
-import jade.core.security.permission.checkers.*;
-import jade.core.management.AgentManagementSlice;
-import jade.core.mobility.AgentMobilityHelper;
 import java.util.Enumeration;
-import jade.security.JADESecurityException;
-import jade.core.Profile;
-import jade.security.impl.JADEAccessControllerImpl;
-import jade.security.JADEAccessController;
-import jade.security.SecurityFactory;
-import jade.core.BaseService;
-import jade.core.*;
+import java.util.Hashtable;
+import java.util.Vector;
 
 
 

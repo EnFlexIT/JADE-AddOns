@@ -25,33 +25,13 @@ package jade.core.security.signature;
 
 //#MIDP_EXCLUDE_FILE
 
-import jade.core.ServiceFinder;
-import jade.core.HorizontalCommand;
-import jade.core.VerticalCommand;
-import jade.core.GenericCommand;
-import jade.core.Service;
-import jade.core.BaseService;
-import jade.core.ServiceException;
-import jade.core.Sink;
-import jade.core.Filter;
-import jade.core.Node;
-
-import jade.core.Profile;
-import jade.core.Agent;
-import jade.core.AID;
-import jade.core.CaseInsensitiveString;
-import jade.core.ContainerID;
-import jade.core.Location;
 import jade.core.AgentContainer;
-import jade.core.MainContainer;
-
+import jade.core.BaseService;
+import jade.core.Filter;
+import jade.core.Profile;
 import jade.core.ProfileException;
-import jade.core.IMTPException;
-import jade.core.NameClashException;
-import jade.core.NotFoundException;
-import jade.core.UnreachableException;
-
-import jade.security.JADESecurityException;
+import jade.core.Service;
+import jade.core.Sink;
 
 
 /**

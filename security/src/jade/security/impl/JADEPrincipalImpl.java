@@ -19,13 +19,8 @@
 
 package jade.security.impl;
 
-import jade.security.*;
-import jade.util.leap.List;
-import jade.util.leap.ArrayList;
-import jade.core.AID;
-import jade.core.ContainerID;
-
-import java.security.PublicKey;
+import jade.security.JADEPrincipal;
+import jade.security.SDSIName;
 
 public class JADEPrincipalImpl
     implements JADEPrincipal, jade.util.leap.Serializable {
