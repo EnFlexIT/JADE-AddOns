@@ -1,0 +1,1 @@
+..\misc\runjade.bat -container -host localhost TestAgent001:com.whitestein.wsig.test.TestAgent001

@@ -1,0 +1,27 @@
+"(
+	(action
+		(agent-identifier
+			:name wsigs@T20java:1099/JADE
+			:addresses (sequence iiop://T20java:1099/JADE) )
+		(register
+			(df-agent-description
+				:name
+					(agent-identifier
+						:name da0@T20java:1099/JADE
+						:address (sequence iiop://T20java:1099/JADE) )
+				:protocols (set fipa-request)
+				:ontologies (set simple-ontology)
+				:languages (set fipa-sl0)
+				:services
+					(set
+						(service-description
+							:name echo
+							:type echo-string
+							:ontologies	(set simple-ontology)
+							:properties 
+								(set
+									(property
+										:name description
+										:value "echo service" ))))))
+	)
+)"

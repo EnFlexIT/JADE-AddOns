@@ -1,0 +1,427 @@
+
+1. Install:
+     ...
+     Steps are followed from doc/jUDDI_install.txt
+
+2. run following sequence from eclipse extarnal programs:
+     run_jade_main.bat  - to start a JADE main platform
+     run_tcpmon_jUDDI.bat  - to see a communication with jUDDI
+     run_tcpmon_TestSOAPServer.bat  - to see a comm. with a simple WSserver
+     run_tcpmon_wsig_port.bat  - to see the gateway comm. as WS server 
+     
+3. start the gateway
+     run_wsig.bat  
+
+DEBUG: com.whitestein.wsigs.net.HTTPServer : HTTP server is started.
+Retrieving document at 'file:///C:/Program%20Files/Apache%20Software%20Foundation/Tomcat%205.0/webapps/test/mywsdl.wsdl'.
+INFO : com.whitestein.wsigs.Configuration : WSIGS configuration is loaded.
+Retrieving document at 'file:///C:/Program%20Files/Apache%20Software%20Foundation/Tomcat%205.0/webapps/axis/Version.xml.wsdl'.
+Agent container Container-1@JADE-IMTP://T20java is ready.
+INFO : com.whitestein.wsigs.GatewayAgent : WSIGS's GatewayAgent is set up.
+
+4.
+   start a testAgent001 as run_test001
+
+Agent container Container-2@JADE-IMTP://T20java is ready.
+INFO : com.whitestein.wsigs.test.TestAgent001 : A TestAgent001 is starting.
+INFO : com.whitestein.wsigs.Configuration : WSIGS configuration is loaded.
+DEBUG: com.whitestein.wsigs.test.TestAgent001 : (REQUEST :conversation-id conv_0 :sender (agent-identifier :name testAgent001@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((action (agent-identifier :name testAgent001@T20java:1099/JADE) (register (df-agent-description :name (agent-identifier :name testAgent001@T20java:1099/JADE) :services (set (service-description :name echo :type echo_type :protocols (set fipa-request) :languages (set fipa-sl0)) (service-description :name get_true :type echo_type :protocols (set fipa-request) :languages (set fipa-sl0))) :protocols (set fipa-request) :languages (set fipa-sl0)))))" :ontology FIPA-Agent-Management :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.test.TestAgent001 : A TestAgent001 is started.
+DEBUG: com.whitestein.wsigs.test.TestAgent001 : A testAgent001 receives: (INFORM :conversation-id conv_0 :sender (agent-identifier :name wsigs@T20java:1099/JADE) :receivers (sequence (agent-identifier :name testAgent001@T20java:1099/JADE)) :content "((done (action (agent-identifier :name testAgent001@T20java:1099/JADE) (register (df-agent-description :name (agent-identifier :name testAgent001@T20java:1099/JADE) :services (set (service-description :name echo :type echo_type :protocols (set fipa-request) :languages (set fipa-sl0)) (service-description :name get_true :type echo_type :protocols (set fipa-request) :languages (set fipa-sl0))) :protocols (set fipa-request) :languages (set fipa-sl0))))))" :ontology FIPA-Agent-Management :reply-with testAgent001@T20java:1099/JADE1102423326010 :language fipa-sl0) 
+
+
+---  wsigs: ---------------------------------------------
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : A wsigs's registration from an agent: jade.domain.FIPAAgentManagement.DFAgentDescription@e49dcd.
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : A tModel is going to be created.
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : Ask for authToken.
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : Returned authToken from a UDDI:authToken:6532F3E0-484D-11D9-B3E0-F547FF890743
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : New tModelKey: uuid:65B4F520-484D-11D9-B520-8DEC0D854B0A
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : Ask for authToken.
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : Returned authToken from a UDDI:authToken:65FFB9C0-484D-11D9-B9C0-ABB85EABCDDA
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : A bindingTemplate is going to be created.
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : Ask for authToken.
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : Returned authToken from a UDDI:authToken:66800D50-484D-11D9-8D50-A6922DC701E4
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : New BindingKey: 66AAEDE0-484D-11D9-ADE0-C2B91BFA85B9
+DEBUG: com.whitestein.wsigs.ws.DFToUDDI4j : An agent services registration done.
+---------------------------------------------
+
+--- run_tcpmon_jUDDI ------------------------------------
+a request:
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><get_authToken generic="2.0" userID="jna" cred="jnauddi" xmlns="urn:uddi-org:api_v2"/> </soapenv:Body>
+</soapenv:Envelope>
+
+a response:
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><authToken generic="2.0" operator="jUDDI.org" xmlns="urn:uddi-org:api_v2"><authInfo>authToken:6532F3E0-484D-11D9-B3E0-F547FF890743</authInfo></authToken> </soapenv:Body>
+</soapenv:Envelope>
+
+---
+a request:
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><save_tModel generic="2.0" xmlns="urn:uddi-org:api_v2"><authInfo>authToken:6532F3E0-484D-11D9-B3E0-F547FF890743</authInfo><tModel tModelKey=""><name>WSIGS&apos;s tModel for testAgent001</name><overviewDoc><overviewURL>http://t20java:1233/</overviewURL></overviewDoc></tModel></save_tModel> </soapenv:Body>
+</soapenv:Envelope>
+
+a response:
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><tModelDetail generic="2.0" operator="jUDDI.org" xmlns="urn:uddi-org:api_v2"><tModel authorizedName="Jozef Nagy" operator="jUDDI.org" tModelKey="uuid:65B4F520-484D-11D9-B520-8DEC0D854B0A"><name>WSIGS's tModel for testAgent001</name><overviewDoc><overviewURL>http://t20java:1233/</overviewURL></overviewDoc></tModel></tModelDetail> </soapenv:Body>
+</soapenv:Envelope>
+
+---
+a request:
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><get_authToken generic="2.0" userID="jna" cred="jnauddi" xmlns="urn:uddi-org:api_v2"/> </soapenv:Body>
+</soapenv:Envelope>
+
+a response:
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><authToken generic="2.0" operator="jUDDI.org" xmlns="urn:uddi-org:api_v2"><authInfo>authToken:65FFB9C0-484D-11D9-B9C0-ABB85EABCDDA</authInfo></authToken> </soapenv:Body>
+</soapenv:Envelope>
+
+---
+a request:
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><save_service generic="2.0" xmlns="urn:uddi-org:api_v2"><authInfo>authToken:65FFB9C0-484D-11D9-B9C0-ABB85EABCDDA</authInfo><businessService serviceKey="" businessKey="8C983E50-E09B-11D8-BE50-DA8FBF3BDC61"><name>WSIGS&apos;s businessService for testAgent001</name></businessService></save_service> </soapenv:Body>
+</soapenv:Envelope>
+
+a response:
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><serviceDetail generic="2.0" operator="jUDDI.org" xmlns="urn:uddi-org:api_v2"><businessService businessKey="8C983E50-E09B-11D8-BE50-DA8FBF3BDC61" serviceKey="663CE9D0-484D-11D9-A9D0-D26F1A846C7D"><name>WSIGS's businessService for testAgent001</name></businessService></serviceDetail> </soapenv:Body>
+</soapenv:Envelope>
+
+
+---
+a request:
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><get_authToken generic="2.0" userID="jna" cred="jnauddi" xmlns="urn:uddi-org:api_v2"/> </soapenv:Body>
+</soapenv:Envelope>
+
+a response:
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><authToken generic="2.0" operator="jUDDI.org" xmlns="urn:uddi-org:api_v2"><authInfo>authToken:66800D50-484D-11D9-8D50-A6922DC701E4</authInfo></authToken> </soapenv:Body>
+</soapenv:Envelope>
+
+---
+a request:
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><save_binding generic="2.0" xmlns="urn:uddi-org:api_v2"><authInfo>authToken:66800D50-484D-11D9-8D50-A6922DC701E4</authInfo><bindingTemplate bindingKey="" serviceKey="663CE9D0-484D-11D9-A9D0-D26F1A846C7D"><accessPoint URLType="http">http://localhost:1233</accessPoint><tModelInstanceDetails><tModelInstanceInfo tModelKey="uuid:65B4F520-484D-11D9-B520-8DEC0D854B0A"/></tModelInstanceDetails></bindingTemplate></save_binding> </soapenv:Body>
+</soapenv:Envelope>
+
+a response:
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body><bindingDetail generic="2.0" operator="jUDDI.org" xmlns="urn:uddi-org:api_v2"><bindingTemplate bindingKey="66AAEDE0-484D-11D9-ADE0-C2B91BFA85B9" serviceKey="663CE9D0-484D-11D9-A9D0-D26F1A846C7D"><accessPoint URLType="http">http://localhost:1233</accessPoint><tModelInstanceDetails><tModelInstanceInfo tModelKey="uuid:65B4F520-484D-11D9-B520-8DEC0D854B0A"/></tModelInstanceDetails></bindingTemplate></bindingDetail> </soapenv:Body>
+</soapenv:Envelope>
+
+-----------
+
+
+5. to start a SOAP client use .test.TestSOAPClient.class
+5.1. an empty answer as an example
+
+DEBUG: com.whitestein.wsigs.test.TestSOAPClient :  Test SOAP Client starts. 
+DEBUG: com.whitestein.wsigs.test.TestSOAPClient : A SOAP sent: 
+  <?xml version="1.0" encoding="UTF-8"?> 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">  	 <soapenv:Body> 	  <tns:opTestEcho03 xmlns:tns="http://T20java:8080/test/mywsdl" >   	   <tns:name >  	    <tns:BO_String>a string</tns:BO_String>   	   </tns:name>   	  </tns:opTestEcho03>  	 </soapenv:Body>   	</soapenv:Envelope>
+
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint : A SOAP received: null 
+DEBUG: com.whitestein.wsigs.test.TestSOAPClient : A SOAP received: null.
+DEBUG: com.whitestein.wsigs.test.TestSOAPClient :  SOAP test client ends. 
+
+----
+a request:
+
+POST /wsigs/ HTTP/1.1
+SOAPAction: ""
+Connection: close
+Content-Type: text/xml; charset="utf-8"
+Host: t20java
+User-Agent: Java/1.4.2_01
+Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2
+Content-Length: 451
+
+<?xml version="1.0" encoding="UTF-8"?> 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">  	 <soapenv:Body> 	  <tns:opTestEcho03 xmlns:tns="http://T20java:8080/test/mywsdl" >   	   <tns:name >  	    <tns:BO_String>a string</tns:BO_String>   	   </tns:name>   	  </tns:opTestEcho03>  	 </soapenv:Body>   	</soapenv:Envelope>
+
+
+a response:
+
+HTTP/1.1 204 No Content
+Connection: close
+
+--------- wsigs --------------------------
+DEBUG: com.whitestein.wsigs.net.HTTPServer : A new HTTP request is going to serve.
+DEBUG: com.whitestein.wsigs.net.Connection : A HTTP SOAP is receiving ... 
+DEBUG: com.whitestein.wsigs.net.Connection : A SOAP received: <?xml version="1.0" encoding="UTF-8"?> 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">  	 <soapenv:Body> 	  <tns:opTestEcho03 xmlns:tns="http://T20java:8080/test/mywsdl" >   	   <tns:name >  	    <tns:BO_String>a string</tns:BO_String>   	   </tns:name>   	  </tns:opTestEcho03>  	 </soapenv:Body>   	</soapenv:Envelope>
+
+DEBUG: com.whitestein.wsigs.net.Connection : The end of the HTTP SOAP's receiving.
+DEBUG: com.whitestein.wsigs.ws.WSMessage :  The first identifier is: http://t20java/wsigs/, opTestEcho03
+DEBUG: com.whitestein.wsigs.net.SOAPHandler :  WSIGS is called by a http access point now.
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: name value:   	    
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: BO_String value: a string
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: BO_String value: a string
+ FIPA sending.
+DEBUG: com.whitestein.wsigs.GatewayAgent :  WSIGS: ACL message created. (REQUEST :conversation-id "Query( agent-identifier :name wsigs@T20java:1099/JADE )1102423931671" :sender (agent-identifier :name wsigs@T20java:1099/JADE) :receivers (sequence (agent-identifier :name testAgent001@T20java:1099/JADE)) :content "((action (agent-identifier :name testAgent001@T20java:1099/JADE) (echo (name \"a string\"))))" :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.GatewayAgent : A no-DF request for WSIGS:(INFORM :conversation-id "Query( agent-identifier :name wsigs@T20java:1099/JADE )1102423931671" :sender (agent-identifier :name testAgent001@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((done (action (agent-identifier :name testAgent001@T20java:1099/JADE) (echo (name \"a string\")))))" :reply-with wsigs@T20java:1099/JADE1102423931872 :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP :  a translator's input: (INFORM :conversation-id "Query( agent-identifier :name wsigs@T20java:1099/JADE )1102423931671" :sender (agent-identifier :name testAgent001@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((done (action (agent-identifier :name testAgent001@T20java:1099/JADE) (echo (name \"a string\")))))" :reply-with wsigs@T20java:1099/JADE1102423931872 :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP :  a translator's output: null
+DEBUG: com.whitestein.wsigs.net.SOAPHandler :  A WSClient's listener is invoked.
+DEBUG: com.whitestein.wsigs.GatewayAgent : listener invoked for conversationId Query( agent-identifier :name wsigs@T20java:1099/JADE )1102423931671
+DEBUG: com.whitestein.wsigs.net.SOAPHandler : A SOAP returned to a client: NULL
+--------------------------
+
+
+
+5.2 a SOAP's answer as an example
+
+DEBUG: com.whitestein.wsigs.test.TestSOAPClient :  Test SOAP Client starts. 
+DEBUG: com.whitestein.wsigs.test.TestSOAPClient : A SOAP sent: 
+  <?xml version="1.0" encoding="UTF-8"?> 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">  	 <soapenv:Body> 	  <tns:opTestTrue04 xmlns:tns="http://T20java:8080/test/mywsdl" >   	   <tns:name >  	    <tns:BO_String>a string</tns:BO_String>   	   </tns:name>   	  </tns:opTestTrue04>  	 </soapenv:Body>   	</soapenv:Envelope>
+
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  Content-Length = 351
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: <?xml version="1.0" encoding="UTF-8"?>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:  <soapenv:Body>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:   <tns:BO_Boolean xmlns:tns="http://T20java:8080/test/mywsdl">true</tns:BO_Boolean>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:  </soapenv:Body>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: </soapenv:Envelope>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint : A SOAP received: <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> <soapenv:Body>  <tns:BO_Boolean xmlns:tns="http://T20java:8080/test/mywsdl">true</tns:BO_Boolean> </soapenv:Body></soapenv:Envelope>
+DEBUG: com.whitestein.wsigs.test.TestSOAPClient : A SOAP received: 
+  <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> <soapenv:Body>  <tns:BO_Boolean xmlns:tns="http://T20java:8080/test/mywsdl">true</tns:BO_Boolean> </soapenv:Body></soapenv:Envelope>
+DEBUG: com.whitestein.wsigs.test.TestSOAPClient :  SOAP test client ends. 
+
+-------
+a request:
+
+POST /wsigs/ HTTP/1.1
+SOAPAction: ""
+Connection: close
+Content-Type: text/xml; charset="utf-8"
+Host: t20java
+User-Agent: Java/1.4.2_01
+Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2
+Content-Length: 451
+
+<?xml version="1.0" encoding="UTF-8"?> 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">  	 <soapenv:Body> 	  <tns:opTestTrue04 xmlns:tns="http://T20java:8080/test/mywsdl" >   	   <tns:name >  	    <tns:BO_String>a string</tns:BO_String>   	   </tns:name>   	  </tns:opTestTrue04>  	 </soapenv:Body>   	</soapenv:Envelope>
+
+
+a response:
+
+HTTP/1.1 200 OK
+Connection: close
+Content-Type: application/soap+xml; charset="utf-8"
+Content-Length: 351
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:BO_Boolean xmlns:tns="http://T20java:8080/test/mywsdl">true</tns:BO_Boolean>
+ </soapenv:Body>
+</soapenv:Envelope>
+
+----
+--------- wsigs --------------------------
+DEBUG: com.whitestein.wsigs.net.HTTPServer : A new HTTP request is going to serve.
+DEBUG: com.whitestein.wsigs.net.Connection : A HTTP SOAP is receiving ... 
+DEBUG: com.whitestein.wsigs.net.Connection : A SOAP received: <?xml version="1.0" encoding="UTF-8"?> 	<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">  	 <soapenv:Body> 	  <tns:opTestTrue04 xmlns:tns="http://T20java:8080/test/mywsdl" >   	   <tns:name >  	    <tns:BO_String>a string</tns:BO_String>   	   </tns:name>   	  </tns:opTestTrue04>  	 </soapenv:Body>   	</soapenv:Envelope>
+
+DEBUG: com.whitestein.wsigs.net.Connection : The end of the HTTP SOAP's receiving.
+DEBUG: com.whitestein.wsigs.ws.WSMessage :  The first identifier is: http://t20java/wsigs/, opTestTrue04
+DEBUG: com.whitestein.wsigs.net.SOAPHandler :  WSIGS is called by a http access point now.
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: name value:   	    
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: BO_String value: a string
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: BO_String value: a string
+ FIPA sending.
+DEBUG: com.whitestein.wsigs.GatewayAgent :  WSIGS: ACL message created. (REQUEST :conversation-id "Query( agent-identifier :name wsigs@T20java:1099/JADE )1102424159309" :sender (agent-identifier :name wsigs@T20java:1099/JADE) :receivers (sequence (agent-identifier :name testAgent001@T20java:1099/JADE)) :content "((action (agent-identifier :name testAgent001@T20java:1099/JADE) (get_true (name \"a string\"))))" :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.GatewayAgent : A no-DF request for WSIGS:(INFORM :conversation-id "Query( agent-identifier :name wsigs@T20java:1099/JADE )1102424159309" :sender (agent-identifier :name testAgent001@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((result (action (agent-identifier :name testAgent001@T20java:1099/JADE) (get_true (name \"a string\"))) \"true\"))" :reply-with wsigs@T20java:1099/JADE1102424159459 :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP :  a translator's input: (INFORM :conversation-id "Query( agent-identifier :name wsigs@T20java:1099/JADE )1102424159309" :sender (agent-identifier :name testAgent001@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((result (action (agent-identifier :name testAgent001@T20java:1099/JADE) (get_true (name \"a string\"))) \"true\"))" :reply-with wsigs@T20java:1099/JADE1102424159459 :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP : com.whitestein.wsigs.translator.FIPASL0ToSOAP.generateXML(...) enters.
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP :  a translator's output: <?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:BO_Boolean xmlns:tns="http://T20java:8080/test/mywsdl">true</tns:BO_Boolean>
+ </soapenv:Body>
+</soapenv:Envelope>
+DEBUG: com.whitestein.wsigs.net.SOAPHandler :  A WSClient's listener is invoked.
+DEBUG: com.whitestein.wsigs.GatewayAgent : listener invoked for conversationId Query( agent-identifier :name wsigs@T20java:1099/JADE )1102424159309
+DEBUG: com.whitestein.wsigs.net.SOAPHandler : A SOAP returned to a client: <?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:BO_Boolean xmlns:tns="http://T20java:8080/test/mywsdl">true</tns:BO_Boolean>
+ </soapenv:Body>
+</soapenv:Envelope>
+DEBUG: com.whitestein.wsigs.net.Connection : A SOAP returned to a client: <?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:BO_Boolean xmlns:tns="http://T20java:8080/test/mywsdl">true</tns:BO_Boolean>
+ </soapenv:Body>
+</soapenv:Envelope>
+------------------------------------------
+
+
+
+6.
+  an axample of an Agent called a WS is presented by run_Test033
+    (.test.TesAgent033.class)
+  At the end of a presentation it must be terminated through JADE's GUI.
+  
+Agent container Container-3@JADE-IMTP://T20java is ready.
+INFO : com.whitestein.wsigs.test.TestAgent033 : A testAgent033 is starting.
+DEBUG: com.whitestein.wsigs.test.TestAgent033 : A testAgent033 is started.
+INFO : com.whitestein.wsigs.Configuration : WSIGS configuration is loaded.
+DEBUG: com.whitestein.wsigs.test.TestAgent033 : (REQUEST :conversation-id conv_0 :sender (agent-identifier :name testAgent033@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((action                                                       
+		(agent-identifier                                         
+			:name ( agent-identifier :name wsigs@T20java:1099/JADE ) )                       
+		(getTestVersion                         
+   ) ))" :ontology AnOntology :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.test.TestAgent033 : A testAgent033 receives: (INFORM :conversation-id conv_0 :sender (agent-identifier :name wsigs@T20java:1099/JADE) :receivers (sequence (agent-identifier :name testAgent033@T20java:1099/JADE)) :content "((result (action                                                       
+		(agent-identifier                                         
+			:name ( agent-identifier :name wsigs@T20java:1099/JADE ) )                       
+		(getTestVersion                         
+   ) ) (xml-tag-getVersionResponse :xml-element (getVersionResponse (xml-tag-getVersionReturn :xml-element (getVersionReturn \"Apache Axis version: 1.1Built on Jun 13, 2003 (09:19:43 EDT)\") :xml-attributes (set (property :name type :value xsd:string)))) :xml-attributes (set (property :name encodingStyle :value http://schemas.xmlsoap.org/soap/encoding/))) ))" :ontology AnOntology :reply-with testAgent033@T20java:1099/JADE1102424571802 :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.test.TestAgent033 : (REQUEST :conversation-id conv_1 :sender (agent-identifier :name testAgent033@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((action                                                       
+		(agent-identifier                                         
+			:name ( agent-identifier :name wsigs@T20java:1099/JADE ) )                       
+		(xml-tag-getTestVersion
+          :xml-attributes (set (property :name color :value blue))
+          :xml-element (getTestVersion)
+       ) ))" :ontology AnOntology :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.test.TestAgent033 : A testAgent033 receives: (INFORM :conversation-id conv_1 :sender (agent-identifier :name wsigs@T20java:1099/JADE) :receivers (sequence (agent-identifier :name testAgent033@T20java:1099/JADE)) :content "((result (action                                                       
+		(agent-identifier                                         
+			:name ( agent-identifier :name wsigs@T20java:1099/JADE ) )                       
+		(xml-tag-getTestVersion
+          :xml-attributes (set (property :name color :value blue))
+          :xml-element (getTestVersion)
+       ) ) (xml-tag-getVersionResponse :xml-element (getVersionResponse (xml-tag-getVersionReturn :xml-element (getVersionReturn \"Apache Axis version: 1.1Built on Jun 13, 2003 (09:19:43 EDT)\") :xml-attributes (set (property :name type :value xsd:string)))) :xml-attributes (set (property :name encodingStyle :value http://schemas.xmlsoap.org/soap/encoding/))) ))" :ontology AnOntology :reply-with testAgent033@T20java:1099/JADE1102424573584 :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.test.TestAgent033 : A testAgent033 is taken down now.
+JADE is closing down now.
+
+-------------------------------
+
+a request:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:getVersion xmlns:tns="empty"/>
+ </soapenv:Body>
+</soapenv:Envelope>
+
+a response:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <ns1:getVersionResponse soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="empty">
+   <ns1:getVersionReturn xsi:type="xsd:string">Apache Axis version: 1.1
+Built on Jun 13, 2003 (09:19:43 EDT)</ns1:getVersionReturn>
+  </ns1:getVersionResponse>
+ </soapenv:Body>
+</soapenv:Envelope>
+
+------
+
+a request:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:getVersion color="blue" xmlns:tns="empty"/>
+ </soapenv:Body>
+</soapenv:Envelope>
+
+a response:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <ns1:getVersionResponse soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="empty">
+   <ns1:getVersionReturn xsi:type="xsd:string">Apache Axis version: 1.1
+Built on Jun 13, 2003 (09:19:43 EDT)</ns1:getVersionReturn>
+  </ns1:getVersionResponse>
+ </soapenv:Body>
+</soapenv:Envelope>
+
+----------
+
+--------- wsigs --------------------------
+DEBUG: com.whitestein.wsigs.GatewayAgent : A no-DF request for WSIGS:(REQUEST :conversation-id conv_0 :sender (agent-identifier :name testAgent033@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((action                                                       
+		(agent-identifier                                         
+			:name ( agent-identifier :name wsigs@T20java:1099/JADE ) )                       
+		(getTestVersion                         
+   ) ))" :ontology AnOntology :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.GatewayAgent :  WSIGS is called by an agent now.
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP :  a translator's input: (REQUEST :conversation-id conv_0 :sender (agent-identifier :name testAgent033@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((action                                                       
+		(agent-identifier                                         
+			:name ( agent-identifier :name wsigs@T20java:1099/JADE ) )                       
+		(getTestVersion                         
+   ) ))" :ontology AnOntology :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP : com.whitestein.wsigs.translator.FIPASL0ToSOAP.generateXML(...) enters.
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP :  a translator's output: <?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:getVersion xmlns:tns="empty"/>
+ </soapenv:Body>
+</soapenv:Envelope>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  WS sending.
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: <?xml version="1.0" encoding="UTF-8"?>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:  <soapenv:Body>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:   <ns1:getVersionResponse soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="empty">
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:    <ns1:getVersionReturn xsi:type="xsd:string">Apache Axis version: 1.1
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: Built on Jun 13, 2003 (09:19:43 EDT)</ns1:getVersionReturn>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:   </ns1:getVersionResponse>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:  </soapenv:Body>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: </soapenv:Envelope>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint : A SOAP received: <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> <soapenv:Body>  <ns1:getVersionResponse soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="empty">   <ns1:getVersionReturn xsi:type="xsd:string">Apache Axis version: 1.1Built on Jun 13, 2003 (09:19:43 EDT)</ns1:getVersionReturn>  </ns1:getVersionResponse> </soapenv:Body></soapenv:Envelope>
+ERROR: com.whitestein.wsigs.ws.WSEndPoint : java.net.ProtocolException: Cannot write output after reading input.
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: getVersionResponse value:    
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: getVersionReturn value: Apache Axis version: 1.1Built on Jun 13, 2003 (09:19:43 EDT)
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: getVersionReturn value: Apache Axis version: 1.1Built on Jun 13, 2003 (09:19:43 EDT)
+DEBUG: com.whitestein.wsigs.GatewayAgent : A no-DF request for WSIGS:(REQUEST :conversation-id conv_1 :sender (agent-identifier :name testAgent033@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((action                                                       
+		(agent-identifier                                         
+			:name ( agent-identifier :name wsigs@T20java:1099/JADE ) )                       
+		(xml-tag-getTestVersion
+          :xml-attributes (set (property :name color :value blue))
+          :xml-element (getTestVersion)
+       ) ))" :ontology AnOntology :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.GatewayAgent :  WSIGS is called by an agent now.
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP :  a translator's input: (REQUEST :conversation-id conv_1 :sender (agent-identifier :name testAgent033@T20java:1099/JADE) :receivers (sequence (agent-identifier :name wsigs@T20java:1099/JADE)) :content "((action                                                       
+		(agent-identifier                                         
+			:name ( agent-identifier :name wsigs@T20java:1099/JADE ) )                       
+		(xml-tag-getTestVersion
+          :xml-attributes (set (property :name color :value blue))
+          :xml-element (getTestVersion)
+       ) ))" :ontology AnOntology :protocol fipa-request :language fipa-sl0) 
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP : com.whitestein.wsigs.translator.FIPASL0ToSOAP.generateXML(...) enters.
+DEBUG: com.whitestein.wsigs.translator.FIPASL0ToSOAP :  a translator's output: <?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:getVersion color="blue" xmlns:tns="empty"/>
+ </soapenv:Body>
+</soapenv:Envelope>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  WS sending.
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: <?xml version="1.0" encoding="UTF-8"?>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:  <soapenv:Body>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:   <ns1:getVersionResponse soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="empty">
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:    <ns1:getVersionReturn xsi:type="xsd:string">Apache Axis version: 1.1
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: Built on Jun 13, 2003 (09:19:43 EDT)</ns1:getVersionReturn>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:   </ns1:getVersionResponse>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received:  </soapenv:Body>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint :  a line received: </soapenv:Envelope>
+DEBUG: com.whitestein.wsigs.ws.WSEndPoint : A SOAP received: <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"> <soapenv:Body>  <ns1:getVersionResponse soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="empty">   <ns1:getVersionReturn xsi:type="xsd:string">Apache Axis version: 1.1Built on Jun 13, 2003 (09:19:43 EDT)</ns1:getVersionReturn>  </ns1:getVersionResponse> </soapenv:Body></soapenv:Envelope>
+ERROR: com.whitestein.wsigs.ws.WSEndPoint : java.net.ProtocolException: Cannot write output after reading input.
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: getVersionResponse value:    
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: getVersionReturn value: Apache Axis version: 1.1Built on Jun 13, 2003 (09:19:43 EDT)
+DEBUG: com.whitestein.wsigs.translator.SOAPToFIPASL0 :  isLeaf method for: getVersionReturn value: Apache Axis version: 1.1Built on Jun 13, 2003 (09:19:43 EDT)
+------------------------------------------

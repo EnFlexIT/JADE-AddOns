@@ -1,0 +1,482 @@
+faultCode: {http://schemas.xmlsoap.org/soap/envelope/}Server.userException
+  => the SOAPBodyElement must be used
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:xxxxxx xmlns:tns="http://T20java:8080/myWSDL">
+   <tns:register>
+    <tns:_JADE.UNNAMED0>
+     <tns:df-agent-description>
+      <tns:name>
+       <tns:agent-identifier>
+        <tns:name>
+         <tns:BO_String>da0@T20java:1099/JADE</tns:BO_String>
+        </tns:name>
+       </tns:agent-identifier>
+      </tns:name>
+      <tns:services>
+       <tns:set>
+        <tns:service-description>
+         <tns:name>
+          <tns:BO_String>echo</tns:BO_String>
+         </tns:name>
+         <tns:properties>
+          <tns:set>
+           <tns:property>
+            <tns:name>
+             <tns:BO_String>description</tns:BO_String>
+            </tns:name>
+            <tns:value>
+             <tns:BO_String>echo service</tns:BO_String>
+            </tns:value>
+           </tns:property>
+           <tns:property>
+            <tns:name>
+             <tns:BO_String>prop_2</tns:BO_String>
+            </tns:name>
+            <tns:value>
+             <tns:BO_String>value_2</tns:BO_String>
+            </tns:value>
+           </tns:property>
+          </tns:set>
+         </tns:properties>
+         <tns:ontologies>
+          <tns:set>
+           <tns:BO_String>simple-ontology</tns:BO_String>
+          </tns:set>
+         </tns:ontologies>
+         <tns:type>
+          <tns:BO_String>echo-type</tns:BO_String>
+         </tns:type>
+        </tns:service-description>
+       </tns:set>
+      </tns:services>
+      <tns:ontologies>
+       <tns:set>
+        <tns:BO_String>simple-ontology</tns:BO_String>
+       </tns:set>
+      </tns:ontologies>
+      <tns:protocols>
+       <tns:set>
+        <tns:BO_String>fipa-request</tns:BO_String>
+       </tns:set>
+      </tns:protocols>
+      <tns:languages>
+       <tns:set>
+        <tns:BO_String>fipa-sl0</tns:BO_String>
+        <tns:BO_String>XMLCodec</tns:BO_String>
+       </tns:set>
+      </tns:languages>
+     </tns:df-agent-description>
+    </tns:_JADE.UNNAMED0>
+   </tns:register>
+  </tns:xxxxxx>
+ </soapenv:Body>
+</soapenv:Envelope>
+-----------------------------------------------------------------------------
+
+
+BasicOntology is not used;
+-----------------------------------------------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:xxxxxx xmlns:tns="http://T20java:8080/myWSDL">
+   <tns:action>
+    <tns:_JADE.UNNAMED1>
+     <tns:register>
+      <tns:_JADE.UNNAMED0>
+       <tns:df-agent-description>
+        <tns:name>
+         <tns:agent-identifier>
+          <tns:name>
+           <tns:BO_String>da0@T20java:1099/JADE</tns:BO_String>
+          </tns:name>
+         </tns:agent-identifier>
+        </tns:name>
+        <tns:services>
+         <tns:set>
+          <tns:service-description>
+           <tns:name>
+            <tns:BO_String>echo</tns:BO_String>
+           </tns:name>
+           <tns:properties>
+            <tns:set>
+             <tns:property>
+              <tns:name>
+               <tns:BO_String>description</tns:BO_String>
+              </tns:name>
+              <tns:value>
+               <tns:BO_String>echo service</tns:BO_String>
+              </tns:value>
+             </tns:property>
+             <tns:property>
+              <tns:name>
+               <tns:BO_String>prop_2</tns:BO_String>
+              </tns:name>
+              <tns:value>
+               <tns:BO_String>value_2</tns:BO_String>
+              </tns:value>
+             </tns:property>
+            </tns:set>
+           </tns:properties>
+           <tns:ontologies>
+            <tns:set>
+             <tns:BO_String>simple-ontology</tns:BO_String>
+            </tns:set>
+           </tns:ontologies>
+           <tns:type>
+            <tns:BO_String>echo-type</tns:BO_String>
+           </tns:type>
+          </tns:service-description>
+         </tns:set>
+        </tns:services>
+        <tns:ontologies>
+         <tns:set>
+          <tns:BO_String>simple-ontology</tns:BO_String>
+         </tns:set>
+        </tns:ontologies>
+        <tns:protocols>
+         <tns:set>
+          <tns:BO_String>fipa-request</tns:BO_String>
+         </tns:set>
+        </tns:protocols>
+        <tns:languages>
+         <tns:set>
+          <tns:BO_String>fipa-sl0</tns:BO_String>
+          <tns:BO_String>XMLCodec</tns:BO_String>
+         </tns:set>
+        </tns:languages>
+       </tns:df-agent-description>
+      </tns:_JADE.UNNAMED0>
+     </tns:register>
+    </tns:_JADE.UNNAMED1>
+    <tns:_JADE.UNNAMED0>
+     <tns:agent-identifier>
+      <tns:name>
+       <tns:BO_String>wsigs@T20java:1099/JADE</tns:BO_String>
+      </tns:name>
+     </tns:agent-identifier>
+    </tns:_JADE.UNNAMED0>
+   </tns:action>
+  </tns:xxxxxx>
+ </soapenv:Body>
+</soapenv:Envelope>
+-----------------------------------------------------------------------------
+
+BasicOntology is used;
+-----------------------------------------------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:xxxxxx xmlns:tns="http://T20java:8080/myWSDL">
+   <tns:action>
+    <tns:actor>
+     <tns:agent-identifier>
+      <tns:name>
+       <tns:BO_String>wsigs@T20java:1099/JADE</tns:BO_String>
+      </tns:name>
+     </tns:agent-identifier>
+    </tns:actor>
+    <tns:action>
+     <tns:register>
+      <tns:_JADE.UNNAMED0>
+       <tns:df-agent-description>
+        <tns:name>
+         <tns:agent-identifier>
+          <tns:name>
+           <tns:BO_String>da0@T20java:1099/JADE</tns:BO_String>
+          </tns:name>
+         </tns:agent-identifier>
+        </tns:name>
+        <tns:services>
+         <tns:set>
+          <tns:service-description>
+           <tns:name>
+            <tns:BO_String>echo</tns:BO_String>
+           </tns:name>
+           <tns:properties>
+            <tns:set>
+             <tns:property>
+              <tns:name>
+               <tns:BO_String>description</tns:BO_String>
+              </tns:name>
+              <tns:value>
+               <tns:BO_String>echo service</tns:BO_String>
+              </tns:value>
+             </tns:property>
+             <tns:property>
+              <tns:name>
+               <tns:BO_String>prop_2</tns:BO_String>
+              </tns:name>
+              <tns:value>
+               <tns:BO_String>value_2</tns:BO_String>
+              </tns:value>
+             </tns:property>
+            </tns:set>
+           </tns:properties>
+           <tns:ontologies>
+            <tns:set>
+             <tns:BO_String>simple-ontology</tns:BO_String>
+            </tns:set>
+           </tns:ontologies>
+           <tns:type>
+            <tns:BO_String>echo-type</tns:BO_String>
+           </tns:type>
+          </tns:service-description>
+         </tns:set>
+        </tns:services>
+        <tns:ontologies>
+         <tns:set>
+          <tns:BO_String>simple-ontology</tns:BO_String>
+         </tns:set>
+        </tns:ontologies>
+        <tns:protocols>
+         <tns:set>
+          <tns:BO_String>fipa-request</tns:BO_String>
+         </tns:set>
+        </tns:protocols>
+        <tns:languages>
+         <tns:set>
+          <tns:BO_String>fipa-sl0</tns:BO_String>
+          <tns:BO_String>XMLCodec</tns:BO_String>
+         </tns:set>
+        </tns:languages>
+       </tns:df-agent-description>
+      </tns:_JADE.UNNAMED0>
+     </tns:register>
+    </tns:action>
+   </tns:action>
+  </tns:xxxxxx>
+ </soapenv:Body>
+</soapenv:Envelope>
+-----------------------------------------------------------------------------
+
+
+-----------------------------------------------------------------------------
+		// test
+		//SOAPMessage msg2 = mf.createMessage();
+		//msg2.getSOAPPart().getEnvelope().getBody(
+		//		).addBodyElement(
+		//				new PrefixedQName( xmlURI, "xxxxxx", prefix)).addChildElement(
+		//						generateXML( a, prefix, xmlURI ));
+		
+		// test
+		//try {
+		//	msg2.writeTo( System.out );
+		//	//msg.writeTo( System.out );
+		//}catch (Exception e) {
+		//	e.printStackTrace();
+		//}
+		
+
+-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------
+3. Message Translators
+FIPA -> SOAP
+
+3.2.
+ FIPA : SET      -> XML Schema : Conjunction
+ FIPA : SEQUENCE -> XML Schema : Sequence
+ note:
+  schema disjunction is not expressed in SOAP call, it is not needed in a message translation.
+
+complex type:  group | all | choice | sequence
+
+------------------------------------------------------------
+<simpleType name='sizes'>
+  <list itemType='decimal'/>
+</simpleType>
+
+<cerealSizes xsi:type='sizes'> 8 10.5 12 </cerealSizes>
+------------------------------------------------------------
+
+------------------------------------------------------------
+  <attributeGroup name="occurs">
+    <attribute name="minOccurs" type="nonNegativeInteger"
+    	default="1"/>
+    <attribute name="maxOccurs">
+      <simpleType>
+    .    <union>
+    .      <simpleType>
+    .        <restriction base='nonNegativeInteger'/>
+    .      </simpleType>
+    .      <simpleType>
+    .        <restriction base='string'>
+    .          <enumeration value='unbounded'/>
+    .        </restriction>
+    .      </simpleType>
+    .    </union>
+      </simpleType>
+    </attribute>
+  </attributeGroup>
+------------------------------------------------------------
+
+------------------------------------------------------------
+  <xsd:element name='size'>
+    <xsd:simpleType>
+      <xsd:union>
+        <xsd:simpleType>
+          <xsd:restriction base='integer'/>
+        </xsd:simpleType>
+        <xsd:simpleType>
+          <xsd:restriction base='string'/>
+        </xsd:simpleType>
+      </xsd:union>
+    </xsd:simpleType>
+  </xsd:element>
+
+  <size>1</size>
+  <size>large</size>
+  <size xsi:type='xsd:string'>1</size>
+------------------------------------------------------------
+
+
+codecSL0 required that an Ontology given knows all string names used.
+It is possible to convert correctly with null ontology.
+------------------------------------------------------------
+		AbsObject a = null;
+		AbsContentElementList c = null;
+		Action action = new Action();
+		AbsAgentAction absAction;
+		FIPAMessage fipa = new FIPAMessage();
+		try {
+			a = createSL0( soap.getMessage());
+			c = new AbsContentElementList();
+			//System.out.println( " action " + BasicOntology.getInstance().fromObject( action ));
+
+			absAction = (AbsAgentAction) BasicOntology.getInstance().fromObject( action );
+			AID aid = new AID("agent001", AID.ISLOCALNAME);
+			AbsConcept absAID = (AbsConcept) BasicOntology.getInstance().fromObject( aid );
+			absAction.set( SL0Vocabulary.ACTION_ACTOR, absAID );
+			absAction.set( SL0Vocabulary.ACTION_ACTION, new AbsConcept("xxxx") );
+
+			c.add( absAction );
+			fipa.getACLMessage().setContent(
+					codecSL0.encode( BasicOntology.getInstance(), c ));
+		}catch ( Exception e ) {
+			e.printStackTrace();
+		}
+------------------------------------------------------------
+jade.content.lang.Codec$CodecException: No schema found for symbol xxxx
+	at jade.content.lang.sl.SLCodec.getSlotNames(Unknown Source)
+	at jade.content.lang.sl.SLCodec.toString(Unknown Source)
+	at jade.content.lang.sl.SLCodec.toString(Unknown Source)
+	at jade.content.lang.sl.SLCodec.encodeSlotsByOrder(Unknown Source)
+	at jade.content.lang.sl.SLCodec.toString(Unknown Source)
+	at jade.content.lang.sl.SLCodec.toString(Unknown Source)
+	at jade.content.lang.sl.SLCodec.encode(Unknown Source)
+------------------------------------------------------------
+
+
+------------------------------------------------------------
+FIPA: 
+(                                                                                                                                 
+	(action                                                       
+		(agent-identifier                                         
+			:name wsigs@T20java:1099/JADE )                       
+		(register                                                 
+			(df-agent-description                                 
+				:name                                             
+					(agent-identifier                             
+						:name da0@T20java:1099/JADE )             
+				:protocols (set "fipa-request")                 
+				:ontologies (set "simple-ontology")             
+				:languages (set "fipa-sl0" "XMLCodec")        
+				:services                                         
+					(set                                          
+						(service-description                      
+							:name "echo"                        
+							:type "echo-type"                   
+							:ontologies	(set "simple-ontology") 
+							:properties                           
+								(set                              
+									(property                     
+										:name "description"     
+										:value "echo service" ) 
+									(property                     
+										:name "prop_2"          
+										:value "value_2" )))))) 
+	))                                                              
+ -> FIPA codecSL0 decode: 
+((action (agent-identifier :name wsigs@T20java:1099/JADE) (register :description (df-agent-description :name (agent-identifier :name da0@T20java:1099/JADE) :services (set (service-description :name echo :properties (set (property :name description :value "echo service") (property :name prop_2 :value value_2)) :ontologies (set simple-ontology) :type echo-type)) :ontologies (set simple-ontology) :protocols (set fipa-request) :languages (set fipa-sl0 XMLCodec)))))
+ -> SOAP: 
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:register xmlns:tns="http://T20java:8080/myWSDL">
+   <tns:df-agent-description xmlns:tns="http://T20java:8080/myWSDL">
+    <tns:name fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+     <tns:agent-identifier xmlns:tns="http://T20java:8080/myWSDL">
+      <tns:name fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+       <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">da0@T20java:1099/JADE</tns:BO_String>
+      </tns:name>
+     </tns:agent-identifier>
+    </tns:name>
+    <tns:services fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+     <tns:set xmlns:tns="http://T20java:8080/myWSDL">
+      <tns:service-description xmlns:tns="http://T20java:8080/myWSDL">
+       <tns:name fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+        <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">echo</tns:BO_String>
+       </tns:name>
+       <tns:properties fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+        <tns:set xmlns:tns="http://T20java:8080/myWSDL">
+         <tns:property xmlns:tns="http://T20java:8080/myWSDL">
+          <tns:name fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+           <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">description</tns:BO_String>
+          </tns:name>
+          <tns:value fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+           <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">echo service</tns:BO_String>
+          </tns:value>
+         </tns:property>
+         <tns:property xmlns:tns="http://T20java:8080/myWSDL">
+          <tns:name fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+           <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">prop_2</tns:BO_String>
+          </tns:name>
+          <tns:value fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+           <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">value_2</tns:BO_String>
+          </tns:value>
+         </tns:property>
+        </tns:set>
+       </tns:properties>
+       <tns:ontologies fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+        <tns:set xmlns:tns="http://T20java:8080/myWSDL">
+         <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">simple-ontology</tns:BO_String>
+        </tns:set>
+       </tns:ontologies>
+       <tns:type fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+        <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">echo-type</tns:BO_String>
+       </tns:type>
+      </tns:service-description>
+     </tns:set>
+    </tns:services>
+    <tns:ontologies fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+     <tns:set xmlns:tns="http://T20java:8080/myWSDL">
+      <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">simple-ontology</tns:BO_String>
+     </tns:set>
+    </tns:ontologies>
+    <tns:protocols fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+     <tns:set xmlns:tns="http://T20java:8080/myWSDL">
+      <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">fipa-request</tns:BO_String>
+     </tns:set>
+    </tns:protocols>
+    <tns:languages fipa_attribute="true" xmlns:tns="http://T20java:8080/myWSDL">
+     <tns:set xmlns:tns="http://T20java:8080/myWSDL">
+      <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">fipa-sl0</tns:BO_String>
+      <tns:BO_String xmlns:tns="http://T20java:8080/myWSDL">XMLCodec</tns:BO_String>
+     </tns:set>
+    </tns:languages>
+   </tns:df-agent-description>
+  </tns:register>
+ </soapenv:Body>
+</soapenv:Envelope>
+ -> FIPA: 
+((action (agent-identifier :name agent001@T20java:1099/JADE) (register (df-agent-description :name (agent-identifier :name da0@T20java:1099/JADE) :ontologies (set simple-ontology) :services (set (service-description :name echo :ontologies (set simple-ontology) :properties (set (property :name description :value "echo service") (property :name prop_2 :value value_2)) :type echo-type)) :protocols (set fipa-request) :languages (set fipa-sl0 XMLCodec)))) )
+------------------------------------------------------------
+
+

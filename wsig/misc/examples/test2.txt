@@ -1,0 +1,10 @@
+((REQUEST :conversation-id "0" :content "(                                                                                                                                 
+	(action                                                       
+		(agent-identifier                                         
+			:name wsigs@T20java:1099/JADE )                       
+		(op3
+			:age 10
+			:place "here"
+		) )))                         
+
+<tns:		

@@ -1,0 +1,77 @@
+
+XMLCodec examples.
+
+Note: a properties is a set of properties
+Note: check the other set representations (see example 2, properties, languages)
+
+ XML msg content 1 : 
+<CONTENT_ELEMENT type="action">
+  <actor><name>wsigs@T20java:1099/JADE</name></actor>
+  <action type="register">
+    <description type="df-agent-description">
+      <name>
+        <name>da0@T20java:1099/JADE</name>
+      </name>
+      <services>
+        <name>echo</name>
+        <properties><name>description</name><value>echo service</value></properties>
+        <ontologies>simple-ontology</ontologies>
+        <type>echo-type</type>
+      </services>
+      <ontologies>simple-ontology</ontologies>
+      <protocols>fipa-request</protocols>
+      <languages>fipa-sl0</languages>
+    </description>
+  </action>
+</CONTENT_ELEMENT>
+
+XML msg content 2: 
+ <CONTENT_ELEMENT type="action">
+   <actor><name>wsigs@T20java:1099/JADE</name></actor>
+   <action type="register">
+     <description type="df-agent-description">
+       <name><name>da0@T20java:1099/JADE</name></name>
+       <services>
+         <name>echo</name>
+         <properties><name>description</name><value>echo service</value></properties>
+         <properties><name>prop_2</name><value>value_2</value></properties>
+         <ontologies>simple-ontology</ontologies>
+         <type>echo-type</type>
+       </services>
+       <ontologies>simple-ontology</ontologies>
+       <protocols>fipa-request</protocols>
+       <languages>fipa-sl0</languages>
+       <languages>XMLCodec</languages>
+     </description>
+   </action>
+ </CONTENT_ELEMENT>
+
+Abstract Object for XML example 2:
+Note: the fipa-agent-management ontology is known
+Abstract object type=action attributes= 
+  actor:     Abstract object type=agent-identifier attributes= 
+      name:         Abstract object type=BO_String 
+  action:     Abstract object type=register attributes= 
+      description:         Abstract object type=df-agent-description attributes= 
+          name:             Abstract object type=agent-identifier attributes= 
+              name:                 Abstract object type=BO_String 
+          services:             Abstract object type=set attributes= 
+              _JADE.UNNAMED0:                 Abstract object type=service-description attributes= 
+                  name:                     Abstract object type=BO_String 
+                  properties:                     Abstract object type=set attributes= 
+                      _JADE.UNNAMED0:                         Abstract object type=property attributes= 
+                          name:                             Abstract object type=BO_String 
+                          value:                             Abstract object type=BO_String 
+                      _JADE.UNNAMED1:                         Abstract object type=property attributes= 
+                          name:                             Abstract object type=BO_String 
+                          value:                             Abstract object type=BO_String 
+                  ontologies:                     Abstract object type=set attributes= 
+                      _JADE.UNNAMED0:                         Abstract object type=BO_String 
+                  type:                     Abstract object type=BO_String 
+          ontologies:             Abstract object type=set attributes= 
+              _JADE.UNNAMED0:                 Abstract object type=BO_String 
+          protocols:             Abstract object type=set attributes= 
+              _JADE.UNNAMED0:                 Abstract object type=BO_String 
+          languages:             Abstract object type=set attributes= 
+              _JADE.UNNAMED0:                 Abstract object type=BO_String 
+              _JADE.UNNAMED1:                 Abstract object type=BO_String 
