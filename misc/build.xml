@@ -19,7 +19,7 @@
   <!-- Compile the javadoc code from ${src} into ${doc} -->
   <target name="doc" depends="init">
     <mkdir dir="${doc}/api"/>
-    <javadoc sourcepath="${src}" packagenames="jade.misc" destdir="${doc}/api" author="true" windowtitle="JADE Miscellaneous classes"/>
+    <javadoc sourcepath="${src}" packagenames="jade.misc, examples.misc.FSMMessageExchange" destdir="${doc}/api" author="true" windowtitle="JADE Miscellaneous classes"/>
   </target>
 
   <target name="lib" depends="compile" description="generate jar archive">

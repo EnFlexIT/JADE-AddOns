@@ -108,6 +108,20 @@ public class DynamicFSMBehaviour extends FSMBehaviour {
 		loaded = loadStates();
 	}
 
+    /**
+     * This constructor constructs an FSMBehaviour that implements
+     * the FSM represented in the XML document read by the InputStream.
+     * Notice that the passed InputStream is not closed by this class
+     * and should be closed by the caller.
+     * @param myAgent the Agent that is going to execute this behaviour
+     * @param xmlDocument the InputStream containing the XML Document
+     **/
+    public DynamicFSMBehaviour(Agent myAgent, InputStream xmlDocument) {
+	super(myAgent);
+
+	loaded = loadStates(createDomDocument(xmlDocument));
+    }
+
 
 	/**
 	 * Overrides the parent method.
@@ -132,17 +146,26 @@ public class DynamicFSMBehaviour extends FSMBehaviour {
 	}
 
 	/**
-	 * Loads that staes from the same-named file.
+	 * Loads that states from the same-named file.
 	 * @return boolean true if succedded; false if file does not 
 	 * exist or is corrupted
 	 */ 
 	protected boolean loadStates() {
-		Element root = null;
 		Document doc = null;
 		
 		if((doc = createDomDocument(this)) == null)
 			return false;
+		return loadStates(doc);
 		
+	} 
+
+    /**
+     * Loads the states of the FSM from the given DOM Document
+     * @return boolean true if succedded; false otherwise 
+     **/
+    private boolean loadStates(Document doc) {
+	        Element root = null;
+
 		root = doc.getDocumentElement();
 		if(! root.getTagName().equals("fsm"))
 			return false;
@@ -151,7 +174,7 @@ public class DynamicFSMBehaviour extends FSMBehaviour {
 			return false;
 		
 		return true;
-	} 
+    }
 
 	/**
 	 * Utility method.
@@ -173,13 +196,26 @@ public class DynamicFSMBehaviour extends FSMBehaviour {
 		try {
 			InputStream is = this.getClass().getClassLoader().getResourceAsStream(name +".desc");
 			
-			doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+			doc = createDomDocument(is); 
 			
 		}catch(Exception e) {
 			return null;
 		}
 		
 		return doc;
+	}
+
+	/**
+	 * Utility method.
+	 * Parses the passed InputStream and returns a DOM Document. 
+	 * @return Document; if parsing fails, it returns null
+	 */
+	private Document createDomDocument(InputStream is) {
+		try {
+		    return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(is);
+		}catch(Exception e) {
+		    return null;
+		}
 	}
 	
 	/**
