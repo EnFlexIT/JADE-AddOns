@@ -178,7 +178,7 @@
 
 
   <!-- Create the zip file -->
-  <target name="zip" depends="init">
+  <target name="zip" depends="lib">
     <zip zipfile="./jadesecurity.zip" 
          basedir="../../../" 
 	 	 includes="jade/add-ons/security/**" 
@@ -206,6 +206,7 @@
   <!-- Clean all the jar files into lib/ -->
   <target name="clean-jar" description="Clean all the jar files.">
     <echo>--- Delete the APDescription.txt and MPTs-*.txt files in the examples dir ---</echo>
+    <mkdir dir="${lib}"/>
     <delete includeEmptyDirs="true">
       <fileset dir="${lib}" includes="jadeSecurity.jar,examples.jar"/>
     </delete>
@@ -215,11 +216,14 @@
 
 
   <!-- Make distribution zip file and put in ${dist} -->
-  <target name="dist" depends="init,clean,compile,lib">
-    <echo>--- 'jadesecurity.zip' distribution file created.---</echo>
+  <target name="dist" depends="init,clean">
     <antcall target="clean-classes" />
     <antcall target="clean-txt" />
+    <antcall target="lib" />
+    <antcall target="examples.jar" />
+    <antcall target="clean-classes" />
     <antcall target="zip" />
+    <echo>--- 'jadesecurity.zip' distribution file created.---</echo>
   </target>
 
   <!-- targets useful when developing -->
