@@ -16,6 +16,8 @@
     <condition property="EXECidlj.is.set">
       <equals arg1="${EXECidlj}" arg2="true"/>
     </condition>
+    <mkdir dir="${build}" />
+    <mkdir dir="${lib}" />
   </target>
   
   <target name="check_execIdlj" unless="EXECidlj.is.set">
