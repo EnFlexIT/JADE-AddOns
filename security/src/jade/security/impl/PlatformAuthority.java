@@ -165,8 +165,10 @@ public class PlatformAuthority extends ContainerAuthority {
 
 				// Compare the hash of provided password
 				// to the entry in the password file
-				if (! entry.key.equals(hash))
+				if (! entry.key.equals(hash)) {
+					System.out.println("\n\n WRONG PASSWORD : "+hash+" <> "+entry.key );
 					throw new AuthenticationException("Wrong password");
+				}
 
 				// ok: user found + exact password
 				// add permissions here
