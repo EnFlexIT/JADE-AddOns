@@ -1,0 +1,41 @@
+<!--
+   build.xml file
+   for JADE Security Plug-in
+   to be used with 'ant':
+   http://jakarta.apache.org/ant/
+-->
+
+<!-- =========  MAIN - ExitExample  ========= -->
+
+<project name="exit-example" default="run" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="jaderoot" value="../../../.." />
+  <property name="libJADEDir" value="${jaderoot}/lib" />
+
+  <property name="bc.jar"  value="${libJADEDir}/lib/bc/bcprov-jdk14-119.jar" />
+  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/iiop.jar;${libJADEDir}/jadeTools.jar;${bc.jar};${jaderoot}/add-ons/coresec/lib/coresec.jar;${jaderoot}/add-ons/coresec/lib/examples.jar;" /> 
+
+
+  <target name="run" depends="" description="Startup a JADE Main-Container." >
+
+       <java classname="jade.Boot" fork="yes">
+         <arg line="-conf main.conf" />
+         <classpath>
+           <pathelement path="${classpath}"/>
+         </classpath>
+       </java>
+  </target>
+
+
+  <!-- targets useful when developing -->
+  <target name="examples.jar">
+    <echo message="--- Generating example.jar ---" />
+    <ant dir="../../" target="examples.jar" inheritAll="false" />
+  </target>
+  <target name="lib" depends="examples.jar" />
+  <target name="lib-all">
+    <ant dir="../../" target="lib-all" />
+  </target>
+
+
+</project>
