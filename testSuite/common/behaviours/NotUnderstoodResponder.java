@@ -34,6 +34,7 @@ import java.util.Enumeration;
  */
 public class NotUnderstoodResponder extends GenericMessageHandler {
 	protected void handleMessage(ACLMessage msg) {
+		System.out.println("Agent "+myAgent.getName()+": Received message. Replying...");
 		ACLMessage reply = msg.createReply();
 		reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
 		// Set the same content

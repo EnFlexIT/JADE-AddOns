@@ -60,6 +60,7 @@ public class ConfigurableAgent extends Agent {
 		
 	
 	protected void setup() {
+		System.out.println("Agent "+getName()+" started");
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 		
@@ -134,7 +135,7 @@ public class ConfigurableAgent extends Agent {
 			behaviours.put(name, b);
 		}
 		// DEBUG
-		// System.out.println("Loading behaviour "+b);
+		System.out.println("Agent "+getName()+": Loading behaviour "+b);
 		addBehaviour(b);
 	}
 	
@@ -142,6 +143,8 @@ public class ConfigurableAgent extends Agent {
 		String name = rb.getName();
 		Behaviour b = (Behaviour) behaviours.get(name);
 		if (b != null) {
+			// DEBUG
+			System.out.println("Agent "+getName()+": Removing behaviour "+b);
 			removeBehaviour(b);
 		}
 	}
@@ -154,6 +157,8 @@ public class ConfigurableAgent extends Agent {
 		if (languageName == null) {
 			languageName = c.getName();
 		}
+		// DEBUG
+		System.out.println("Agent "+getName()+": Registering language "+languageName);
   	getContentManager().registerLanguage(c, languageName);
 	}
 		
@@ -167,9 +172,9 @@ public class ConfigurableAgent extends Agent {
 		if (ontoName == null) {
 			ontoName = onto.getName();
 		}
+		// DEBUG
+		System.out.println("Agent "+getName()+": Registering ontology "+ontoName);
   	getContentManager().registerOntology(onto, ontoName);
 	}
-		
-				
 }
 
