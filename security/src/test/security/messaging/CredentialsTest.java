@@ -87,7 +87,9 @@ public class CredentialsTest extends Test {
             if (encrypt) {
               agtParams = new String[4];
               SDSIName tmp = sh.getPrincipal().getSDSIName();
-              agtParams[2] = new String(Base64.encode(tmp.getEncoded()));
+              String encodedKey = new String(Base64.encode(tmp.getEncoded()));
+              encodedKey = encodedKey.replace('=', '*');
+              agtParams[2] = encodedKey;
               agtParams[3] = tmp.getAlgorithm();
             }
             else {

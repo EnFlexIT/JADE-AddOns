@@ -70,13 +70,16 @@ public class CredentialsSender extends Agent {
         System.out.println("args["+i+"] = ***"+args[i]+"***");
         }
       */
-      
+
       if (args.length == 2) {
         encrypt = false;
       }
       else if (args.length == 4) {
         encrypt = true;
-        destKey = Base64.decode(((String)args[2]).toCharArray());
+        destKey = Base64.decode(
+            ((String)args[2]).replace('*', '=').toCharArray()
+        );
+
         destAlgo = (String)args[3];
       
       }

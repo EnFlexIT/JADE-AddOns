@@ -99,10 +99,12 @@ public class SecurityTest extends Test {
             agtParams[2] = getTestArgument(SIGN_ALGO_KEY);
             agtParams[3] = getTestArgument(SYM_ALGO_KEY);
             agtParams[4] = getTestArgument(SYM_ALGO_SIZE);
-            
+
             if ((encrypt)&&(publicKey)) {
               SDSIName tmp = sh.getPrincipal().getSDSIName();
-              agtParams[5] = new String(Base64.encode(tmp.getEncoded()));
+              String encodedKey = new String(Base64.encode(tmp.getEncoded()));
+              encodedKey = encodedKey.replace('=', '*');
+              agtParams[5] = encodedKey;
               agtParams[6] = tmp.getAlgorithm();
             }
             agtParams[7] = myAgent.getName();
@@ -139,9 +141,11 @@ public class SecurityTest extends Test {
               else if(INTER.equalsIgnoreCase(config)) {
                 // Starts the sender on a remote container
                 String params = "-container";
+                params += " -dump";
                 params += " -services "+SecurityTestSuite.SECURITY_SERVICES;
                 params += " "+NO_AUTH;
-                params += " "+REMOTE_AGENT+":"+REMOTE_CLASS+toLine(agtParams);
+                params += " -jade_core_management_AgentManagementServices_verbosity 4";
+                params += "  "+REMOTE_AGENT+":"+REMOTE_CLASS+toLine(agtParams);
                 senderHost = TestUtility.launchJadeInstance(REMOTE_NAME,null, params, null);
               }
               else {
@@ -156,10 +160,10 @@ public class SecurityTest extends Test {
             }
           }
         });
-    
+
       // Step 2: Waits for the message and checks it
       b1.addSubBehaviour(new SimpleBehaviour(a) {
-        
+
           private boolean done = false;
 
           public void action() {
@@ -241,7 +245,8 @@ public class SecurityTest extends Test {
   private String toLine(String[] s) {
     String result = "(";
     for (int i=0;i<s.length;i++) {
-      result += s[i] + " ";
+      result += s[i];
+      if (i<s.length-1) result +=" ";
     }
     result += ")";
     return result;

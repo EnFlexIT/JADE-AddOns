@@ -64,6 +64,8 @@ public class MessageSender extends Agent {
   private AID dest;
   
   public void setup(){
+    System.out.println("MessageSender setup()");
+
     ACLMessage msg = null;
     try { 
       // retrieve agents arguments
@@ -74,11 +76,11 @@ public class MessageSender extends Agent {
       }
       
       //DEBUG
-      /*
+      //-*
         for(int i=0;i<args.length;i++) { 
         System.out.println("args["+i+"] = ***"+args[i]+"***");
         }
-      */
+      //*/
       
       // parse arguments
       dest = new AID((String)args[7],AID.ISGUID);
@@ -93,7 +95,9 @@ public class MessageSender extends Agent {
         keySize = Integer.parseInt((String)args[4]);
       }
       if (isSet((String)args[5])) {
-        destKey = Base64.decode(((String)args[5]).toCharArray());
+        destKey = Base64.decode(
+            ((String)args[5]).replace('*', '=').toCharArray()
+        );
       }
       destAlgo = (String)args[6];
       
