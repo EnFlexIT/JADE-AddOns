@@ -197,12 +197,13 @@ public class JADEAuthorityImpl implements jade.security.JADEAuthority {
     }
 
     // load the key pair (if exists, otherwise create a new one into the store)
+    java.util.logging.Level LEV1 = java.util.logging.Level.CONFIG;
     if (securityStore.hasMyKeyPair()) {
-      myLogger.log(Logger.INFO,"Principal "+name+" already had a key pair, loading it.");
+      myLogger.log(LEV1,"Principal "+name+" already had a key pair, loading it.");
       keyPair = securityStore.getMyKeyPair();
     }
     else {
-      myLogger.log(Logger.INFO,"Principal "+name+" does not have a key pair, creating it.");
+      myLogger.log(LEV1,"Principal "+name+" does not have a key pair, creating it.");
       // a file does not exist
       // ask the store to generate a key pair for itself
       keyPair = securityStore.generateNewKeyPair(keySize,keyAlgo);
