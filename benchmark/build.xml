@@ -1,0 +1,33 @@
+<project name="Benchmark" default="compile" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="src" value="src"/>
+  <property name="build" value="classes"/>
+  <property name="doc" value="doc"/>
+  <property name="conf" value="conf"/>
+  <property name="dist" value="dist"/>
+  <property name="packageDir" value="benchmark/roundTripTime"/>
+  <property name="libJADEDir" value="../../../../lib"/>
+  <property name="classpath" value="../..;${libJADEDir}/jade.jar;${libJADEDir}/jadeTools.jar;${libJADEDir}/iiop.jar;${libJADEDir}/Base64.jar;"/>
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the directories structure used to store files -->
+    <mkdir dir="${build}"/>
+  </target>
+  <!-- Compile the javadoc code from ${src} into ${doc} -->
+  <target name="doc" depends="init">
+    <mkdir dir="${doc}/api"/>
+    <javadoc sourcepath="${src}/${packageDir}" sourcefiles="${src}/${packageDir}/RoundTripReceiver.java,${src}/${packageDir}/RoundTripSender.java" destdir="${doc}/api" author="true" windowtitle="Benchmark API"/>
+  </target>
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" optimize="${optimised-build}"/>
+  </target>
+  <!-- Make distribution zip file and put in ${dist} -->
+  <target name="dist" depends="init">
+    <mkdir dir="${dist}"/>
+    <zip zipfile="${dist}/benchmarkAddOn.zip" basedir="../" 
+		 includes="benchmark/${src}/**, benchmark/*, benchmark/${conf}/**, benchmark/${doc}/*.doc" 
+		 excludes="benchmark/${build}/**, benchmark/${doc}/api/**, benchmark/${dist}/**"/>
+  </target>
+  <target name="all" depends="init, doc, compile, dist"/>
+</project>

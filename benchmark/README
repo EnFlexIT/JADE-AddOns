@@ -1,0 +1,48 @@
+Benchmark on JADE Message Transport package.
+
+INTRODUCTION
+This package contains a Java implementation of test to show 
+how works JADE Message Transport and to show JADE behaviours
+when agents' number is high. 
+You can run these tests for two configurations:
+1) Intra platform communication:
+	a) all agents are in Main-Container;
+	b) receiver agents in Main-Container and sender agents
+	   in onother Container;
+2) Inter platform communication:
+	a) MTP IIOP;
+	b) MTP ORBacus;
+	c) MTP HTTP.
+
+
+LICENSE
+See LICENSE file for license information.
+
+
+SOFTWARE VERSIONS
+This version of the package was tested using the following software:
+  - JDK 1.3.0 and higher
+  - JADE 2.5
+
+
+
+COMPILING
+If you have "ANT" program on your computer, in benchmark find build.xml
+so digit: ant
+Notice that kind of Makefile works with every OS.
+
+PACKAGE CONTENTS
+Enclosed in this package is the source code and some 
+documentation.
+After compilation you'll find also classess and doc directories. 
+
+
+GETTING STARTED
+classes/benchmark/roundTripTime/*.java :-)
+In conf directory you'll find some configuration file to run the test, 
+
+java jade.Boot -conf file.conf
+
+--
+Elisabetta Cortese
+elisabetta.cortese@TiLab.com
