@@ -38,7 +38,7 @@ import examples.rdfcontent.ontology.*;
 public class Receiver extends Agent {
     private ContentManager manager     = (ContentManager)getContentManager();
     private Codec          codec       = new RDFCodec();
-    private FullOntology   ontology    = PeopleOntology.getInstance();
+    private Ontology   ontology    = PeopleOntology.getInstance();
     private FatherOf       proposition = null;
 
     class ReceiverBehaviour extends SimpleBehaviour {
@@ -68,27 +68,34 @@ public class Receiver extends Agent {
 			    AbsContentElement abs = manager.extractAbsContent(msg);
 			    if(abs instanceof AbsIRE) {
 				AbsIRE ire = (AbsIRE)abs;
+				ire.dump();
 
-				ACLMessage reply = new ACLMessage(ACLMessage.INFORM);
+				ACLMessage reply = msg.createReply();
+				reply.setPerformative(ACLMessage.INFORM);
+				
 				AID sender = new AID("sender", false);
 
-				msg.setSender(getAID());
-				msg.addReceiver(sender);
-				msg.setLanguage(codec.getName());
-				msg.setOntology(ontology.getName());
+				reply.setSender(getAID());
+				reply.addReceiver(sender);
+				reply.setLanguage(codec.getName());
+				reply.setOntology(ontology.getName());
 
-				AbsConcept absFather = (AbsConcept)ontology.fromObject(proposition.getFather());
+				/*AbsConcept absFather = (AbsConcept)ontology.fromObject(proposition.getFather());
 
 				AbsEquals absEquals = new AbsEquals();
 				absEquals.setIRE(ire);
 				absEquals.setConcept(absFather);
-
+				
 				manager.fillContent(msg, absEquals);
+				*/
+				manager.fillContent(reply, proposition);
 
-				send(msg);
+				send(reply);
 
 				System.out.println("[" + getLocalName() + "] Received query-ref message: reply sent:");
-				absEquals.dump();
+				//absEquals.dump();
+				AbsPredicate absPr = (AbsPredicate)ontology.fromObject(proposition);
+				absPr.dump();
 				break;
 			    }
 			default:

@@ -132,7 +132,10 @@ public class RDFCodec extends Codec {
   private static final String  URI_CONTENT_ELEMENT = URI_NAMESPACE+"contentElement" ;
 
 
-  /**
+  // IOTA operator
+  public static final String  IOTA = "IOTA";
+
+	/**
     Constructor
    */
   public RDFCodec(){
@@ -288,19 +291,19 @@ public class RDFCodec extends Codec {
                 AbsPrimitive abs = null;
 
                 if (type.equalsIgnoreCase("String")) {
-                    abs = new AbsPrimitive(BasicOntology.STRING, removeCDATASection(value));
+                    abs = AbsPrimitive.wrap(removeCDATASection(value));
                 }
 
                 if (type.equalsIgnoreCase("Boolean")) {
-                    abs = new AbsPrimitive(BasicOntology.BOOLEAN,new Boolean(value));
+                    abs = AbsPrimitive.wrap((new Boolean(value)).booleanValue());
                 }
 
                 if (type.equalsIgnoreCase("Integer")) {
-                    abs = new AbsPrimitive(BasicOntology.INTEGER,new Integer(value));
+                    abs = AbsPrimitive.wrap((new Integer(value)).intValue());
                 }
 
                 if (type.equalsIgnoreCase("Float")) {
-                    abs = new AbsPrimitive(BasicOntology.FLOAT,new Float(value));
+                    abs = AbsPrimitive.wrap((new Float(value)).floatValue());
                 }
 
                 return abs;
@@ -316,7 +319,7 @@ public class RDFCodec extends Codec {
                       node.getNode(i).getName().equals(URI_OBJECT_TYPE)){
                     typeName = ((Leaf) node.getNode(i)).getValue();   //reads type
                     node.removeNode(i);
-				  }
+				  				}
                 }
 
                 if (typeName==null)throw new OntologyException("error in aggregate type");
@@ -373,12 +376,12 @@ public class RDFCodec extends Codec {
             //System.out.println("\n\nTYPENAME  absObject:  "+abs.getTypeName());
 
 			//object (resource) with ID
-            if (((ParseTree)node).getID()!=null) abs.set(RESOURCE_ID,
-                                                   AbsPrimitive.wrap(((ParseTree)node).getID()));
+            if (((ParseTree)node).getID()!=null) 
+            	Ontology.setAttribute(abs, RESOURCE_ID, AbsPrimitive.wrap(((ParseTree)node).getID()));
 
             //object (resource) with reference (about)
-            if (((ParseTree)node).getAbout()!=null) abs.set(RESOURCE_ABOUT,
-                                                   AbsPrimitive.wrap(((ParseTree)node).getAbout()));
+            if (((ParseTree)node).getAbout()!=null) 
+            	Ontology.setAttribute(abs, RESOURCE_ABOUT, AbsPrimitive.wrap(((ParseTree)node).getAbout()));
             //references.add(abs);
             //counter++;
 
@@ -411,7 +414,7 @@ public class RDFCodec extends Codec {
 
                 if (slotValue != null && slotName != null) {
   				  //System.out.println("\nwrite attribute of: "+slotName);
-                  abs.set(slotName, slotValue);
+                  Ontology.setAttribute(abs, slotName, slotValue);
                 }
             }
 
@@ -494,9 +497,9 @@ public class RDFCodec extends Codec {
 
             AbsAggregate aggregate = (AbsAggregate) abs;
 
-            for (int i = 0; i < aggregate.getElementCount(); i++) {
+            for (int i = 0; i < aggregate.size(); i++) {
                 stream.print(TAG_AGGREGATE_ELEMENT);
-                write(stream, aggregate.getElement(i));
+                write(stream, aggregate.get(i));
                 stream.print(END_TAG_AGGREGATE_ELEMENT);
             }
 
@@ -510,7 +513,7 @@ public class RDFCodec extends Codec {
 
             AbsContentElementList acel = (AbsContentElementList) abs;
 
-            for (Iterator i = acel.getAll(); i.hasNext(); ) {
+            for (Iterator i = acel.iterator(); i.hasNext(); ) {
                 stream.print(TAG_CONTENT_ELEMENT);
                 write(stream, (AbsObject) i.next());
                 stream.print(END_TAG_CONTENT_ELEMENT);
@@ -580,4 +583,13 @@ public class RDFCodec extends Codec {
 
    //private Vector    references = null;
    private int         counter = 0;
+   
+   /**
+    * @return the ontology containing the schemas of the operator
+    * defined in this language
+    */
+   public Ontology getInnerOntology() {
+   	return RDFOntology.getInstance();
+   }
+   
 }
