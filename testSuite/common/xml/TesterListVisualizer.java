@@ -122,13 +122,7 @@ public class TesterListVisualizer  extends JPanel
 					TreePath path = functionalitiesTree.getSelectionPath();
 					AdapterNode adNode = (AdapterNode) path.getPathComponent(2);
 					Element el = (Element) adNode.domNode;
-					FunctionalityDescriptor func = new FunctionalityDescriptor();
-					func.setName(el.getAttribute("name"));
-					// Note that in this context we don't care about the skip attribute
-					func.setSkip(el.getAttribute("skip"));
-					// The class-name is the first child of the selected element
-					Node n = ((NodeList) el.getChildNodes()).item(1);
-					func.setTesterClassName(n.getChildNodes().item(0).getNodeValue());
+					FunctionalityDescriptor func = XMLManager.getFunctionalityDescriptor(el);
 					dummy[0] = func;
 				}
 				catch (Exception ex) {
@@ -327,7 +321,7 @@ public class TesterListVisualizer  extends JPanel
          if( domNode.getNodeType() == Node.ELEMENT_NODE){
            s = nodeName;
            if(s.equalsIgnoreCase("tester") || s.equalsIgnoreCase("test")){
-           	s += ": "+domNode.getAttributes().getNamedItem("name").getNodeValue();
+           	s = " "+domNode.getAttributes().getNamedItem("name").getNodeValue();
            	String checkSkip = domNode.getAttributes().getNamedItem("skip").getNodeValue();
            	if(checkSkip.equalsIgnoreCase("true")){
            		s += " "+"SKIPPED";
@@ -462,7 +456,7 @@ public class TesterListVisualizer  extends JPanel
       AdapterNode node = (AdapterNode) aNode;
         Node n = node.domNode;
    		if(n.getNodeName().equalsIgnoreCase("testslistrif")){
-			System.out.println("Chiamato getDocument testListRif ");
+		//	System.out.println("Chiamato getDocument testListRif ");
 		 	Document d = getDocument(n.getFirstChild().getNodeValue());
 		 	NodeList nl =  d.getElementsByTagName("TestsList");
 			node.domNode = (Node) nl.item(0);
