@@ -9,6 +9,67 @@ grant codebase "file:../../../../../lib/jadeTools.jar" {
 // --- Startup example ---
 // --- Policy on the MAIN container ---
 
+
+// -----------------------------------------------------------------------------------------------------------
+// permissions to start a main container
+// -----------------------------------------------------------------------------------------------------------
+// 
+/*
+grant principal jade.security.Name "alice" {
+	permission jade.security.PlatformPermission "", "create";
+	permission jade.security.ContainerPermission "", "create";
+	permission jade.security.AMSPermission   "agent-class=jade.domain.ams", "register";
+	permission jade.security.AMSPermission   "agent-class=jade.domain.df", "register";
+};
+*/
+// -----------------------------------------------------------------------------------------------------------
+
+
+// -----------------------------------------------------------------------------------------------------------
+// permissions to start create an agent
+// -----------------------------------------------------------------------------------------------------------
+// 
+/*
+grant principal jade.security.Name "alice" {
+	permission jade.security.PlatformPermission "", "create";
+	permission jade.security.ContainerPermission "", "create";
+	permission jade.security.AMSPermission   "agent-class=*", "register, derister,modify";
+	permission jade.security.AgentPermission "agent-class=*", "create, kill";
+	permission jade.security.MessagePermission "agent-owner:alice", "send-to";
+};
+*/
+// -----------------------------------------------------------------------------------------------------------
+
+
+// -----------------------------------------------------------------------------------------------------------
+// permissions to start create an agent and launch a remote container
+// -----------------------------------------------------------------------------------------------------------
+// 
+
+grant principal jade.security.Name "alice" {
+	permission jade.security.PlatformPermission "", "create";
+	permission jade.security.ContainerPermission "", "create";
+	permission jade.security.AMSPermission   "agent-class=*", "register, derister,modify";
+	permission jade.security.AgentPermission "agent-class=*", "create, kill";
+	permission jade.security.MessagePermission "agent-owner:alice", "send-to";
+};
+
+grant principal jade.security.Name "bob" {
+	permission jade.security.ContainerPermission "", "create";
+	permission jade.security.AgentPermission "agent-class=*", "create,kill";
+	permission jade.security.AMSPermission   "agent-class=*", "register,deregister,modify";
+	permission jade.security.MessagePermission "agent-name=*", "send-to";
+};
+
+// -----------------------------------------------------------------------------------------------------------
+
+
+
+// -----------------------------------------------------------------------------------------------------------
+// sample configuration for working with examples
+// -----------------------------------------------------------------------------------------------------------
+// 
+/*
 grant principal jade.security.Name "alice" {
 	permission jade.security.PlatformPermission "", "create";
 	permission jade.security.ContainerPermission "", "create";
@@ -26,8 +87,15 @@ grant principal jade.security.Name "bob" {
 	permission jade.security.MessagePermission "agent-name=*", "send-to";
 };
 
+*/
 
+
+// explicitly granting permission to an agent
+/*
 grant principal jade.security.Name "ams@myplatform.example.org" {
 	permission jade.security.MessagePermission "agent-name=*", "send-to";
 	permission jade.security.AMSPermission   "*", "register,deregister,modify";
 };
+
+*/
+// -----------------------------------------------------------------------------------------------------------

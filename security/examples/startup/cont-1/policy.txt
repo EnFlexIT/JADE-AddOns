@@ -9,6 +9,33 @@ grant codebase "file:../../../../../lib/jadeTools.jar" {
 // --- Policy on the remote container ---
 
 
+
+// -----------------------------------------------------------------------------------------------------------
+// permissions to start create a container and agents is given
+// -----------------------------------------------------------------------------------------------------------
+// 
+
+grant principal jade.security.Name "bob" {
+	permission jade.security.ContainerPermission "", "create";
+	permission jade.security.AgentPermission "agent-owner:bob", "create, kill";
+	permission jade.security.MessagePermission "agent-class=*,agent-owner:bob", "send-to";
+	permission jade.security.AMSPermission   "agent-class=*", "register,deregister,modify";	
+	permission jade.security.MessagePermission "agent-name=*", "send-to";	
+};
+
+grant principal jade.security.Name "*" {
+	permission jade.security.MessagePermission "agent-name=*", "send-to";
+};
+
+// -----------------------------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------------------------------------
+// sample configuration for working with examples
+// -----------------------------------------------------------------------------------------------------------
+// 
+/*
 grant principal jade.security.Name "*" {
 //	permission jade.security.AgentPermission "agent-owner=bob", "create";
 	permission jade.security.AgentPermission "agent-name=bob-rma*", "create,kill";
@@ -17,6 +44,5 @@ grant principal jade.security.Name "*" {
 	permission jade.security.AMSPermission   "agent-class=*", "register,deregister,modify";
 	permission jade.security.MessagePermission "agent-name=*", "send-to";
 };
-
-
-
+*/
+// -----------------------------------------------------------------------------------------------------------
