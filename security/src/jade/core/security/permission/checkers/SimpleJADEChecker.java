@@ -289,7 +289,7 @@ public class SimpleJADEChecker extends BaseJADEChecker {
       // get the owner of the requester
       if (creds!=null) requester_owner = oc.getOwner();
 
-    
+
       // get the owner of the agent to kill
       OwnershipCertificate oc_victim = (OwnershipCertificate) service.getOwnershipCertificate( victim_name );
       if (oc_victim!=null) victim_owner_name = oc_victim.getOwner().getName();
@@ -329,12 +329,84 @@ public class SimpleJADEChecker extends BaseJADEChecker {
       permission = new AMSPermission( AuthPermission.AGENT_CLASS+"="+className 
                                       , "deregister");
       // TOFIX:  //checkAction( requester, permission, target, creds );
+    } else 
+//----------
+    if (name.equals(AgentManagementSlice.REQUEST_STATE_CHANGE)) {
+      jade.core.security.permission.PermissionFilter.log( direction, cmd );
+
+      AID agentID = (AID) params[0];
+      int requestedState = ((AgentState) params[1]).getValue();
+
+      String action="";
+      switch(requestedState) {
+        case Agent.AP_SUSPENDED:
+          action="suspend"; break;
+        case Agent.AP_ACTIVE:
+          action="resume";  break;
+        case Agent.AP_WAITING:
+          action="suspend"; break;
       }
 
+      Agent agent = null; // agent the requester want to change status to
+      String className = "";
+      JADEPrincipal requester_owner = null;
+      JADEPrincipal agentPrincipal = null;
+      String agent_owner_name = "";
+      String agent_name = agentID.getName();
 
+
+      // if the requester does not show any his creds, pass his ownership cert
+      OwnershipCertificate oc=null;
+      if (creds==null) {
+        oc = (OwnershipCertificate) service.getOwnershipCertificate(requester);
+        creds = (OwnershipCertificate) oc;
+      }
+      // get the owner of the requester
+      if (creds!=null) requester_owner = oc.getOwner();
+
+
+      // get the owner of the agent /which the requester want to change state to)
+      OwnershipCertificate oc_victim = (OwnershipCertificate) service.getOwnershipCertificate( agent_name );
+      if (oc_victim!=null) agent_owner_name = oc_victim.getOwner().getName();
+
+      agent = myContainer.acquireLocalAgent(agentID);
+      if (agent!=null) { className = (String) agent.getClass().getName();  }
+      myContainer.releaseLocalAgent(agentID);
+
+      if (agent!=null) {
+        // agent is on this container
+        permission = new AgentPermission( AuthPermission.AGENT_CLASS+"="+className+","+
+                                          AuthPermission.AGENT_OWNER+"="+agent_owner_name+","+
+                                          AuthPermission.AGENT_NAME+ "="+agent_name 
+                                          , action);
+      } else {
+        // agent is not on this container
+        permission = new AgentPermission( AuthPermission.AGENT_OWNER+"="+agent_owner_name+","+ 
+                                          AuthPermission.AGENT_NAME+ "="+agent_name 
+                                          , action);
+      }
+      checkAction( requester, permission, target, creds );
   }
+
+
+}
 //----------
 //----------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
   
   
