@@ -220,13 +220,17 @@ public class MessageTransportProtocol implements MTP {
 
 
   private static abstract class OBAddress implements TransportAddress {
+
     public abstract String getString();
+
+    public abstract void deactivate() throws MTPException;
 
     public MTS getObject() {
       return FIPA.MTSHelper.narrow(myORB.string_to_object(getString()));
     }
 
   }
+
 
   private static class OBAddressIOR extends OBAddress {
 
@@ -240,6 +244,20 @@ public class MessageTransportProtocol implements MTP {
 
     public String getString() {
       return ior;
+    }
+
+    public void deactivate() throws MTPException {
+      try {
+	org.omg.CORBA.Object objRef = myORB.string_to_object(ior);
+	byte[] oid = rootPOA.reference_to_id(objRef);
+	rootPOA.deactivate_object(oid);
+      }
+      catch(SystemException se) {
+	throw new MTPException("Error during 'IOR' address deactivation", se);
+      }
+      catch(UserException ue) {
+	throw new MTPException("Error during 'IOR' address deactivation", ue);
+      }
     }
 
     public String getProto() {
@@ -272,7 +290,6 @@ public class MessageTransportProtocol implements MTP {
     private String port;
     private String file;
 
-
     public OBAddressURL(String rep) throws MTPException {
       if(!rep.startsWith("corbaloc:"))
         throw new MTPException("Missing 'corbaloc': " + rep);
@@ -297,6 +314,25 @@ public class MessageTransportProtocol implements MTP {
 
     public String getString() {
       return proto + host + ':' + port + "/" + file;
+    }
+
+    public void deactivate() throws MTPException {
+      System.out.println("Deactivating " + getString() + " ...");
+      // Retrieve the POA for this address port.
+      try {
+	// Name for the POA at the given address
+	String POAname = "POA" + getPort();
+	String mgrName = POAname + "Manager";
+	POA myPOA = rootPOA.find_POA(POAname, false); // Don't try to create it if it doesn't exist
+
+	// Close the POA and the managed object, waiting for pending
+	// calls to complete
+	myPOA.destroy(true, true);
+	System.out.println("Done");
+      }
+      catch(org.omg.PortableServer.POAPackage.AdapterNonExistent ane) {
+	throw new MTPException("No POA is active on the port " + getPort(), ane);
+      }
     }
 
     public String getProto() {
@@ -364,6 +400,47 @@ public class MessageTransportProtocol implements MTP {
 
     public String getString() {
       return proto + host + ':' + port + "/" + file + "#" + anchor;
+    }
+
+    public void deactivate() throws MTPException {
+
+      System.out.println("Deactivating " + getString() + " ...");
+      // Contact the Naming Service the address points to and bind the
+      // object reference to it. The String points to the root of the
+      // naming service.
+      String namingServiceURL = "corbaloc::" + getHost() + ':' + getPort() + '/';
+      String namingServiceObjectID = getFile();
+      if((namingServiceObjectID == null)||(namingServiceObjectID.length() == 0))
+	namingServiceObjectID = "NameService";
+      namingServiceURL = namingServiceURL.concat(namingServiceObjectID);
+
+      try {
+	org.omg.CORBA.Object o = myORB.string_to_object(namingServiceURL);
+	NamingContextExt rootCtx = NamingContextExtHelper.narrow(o);
+
+	String objName = getAnchor();
+	if((objName == null) || (objName.length() == 0))
+	  throw new MTPException("Missing Binding Name in 'corbaname' address.");
+
+	// Retrieve the structured name of the object
+	NameComponent[] n = rootCtx.to_name(objName);
+	org.omg.CORBA.Object objRef = rootCtx.resolve(n);
+
+	// Remove the Servant from the Naming Service
+	rootCtx.unbind(n);
+
+	// Deactivate the Servant
+	byte[] oid = rootPOA.reference_to_id(objRef);
+	rootPOA.deactivate_object(oid);
+	System.out.println("Done");
+      }
+      catch(SystemException se) {
+	throw new MTPException("Error during 'corbaname' address deactivation", se);
+      }
+      catch(UserException ue) {
+	throw new MTPException("Error during 'corbaname' address deactivation", ue);
+      }
+
     }
 
     public String getProto() {
@@ -458,8 +535,11 @@ public class MessageTransportProtocol implements MTP {
 	throw new MTPException("Wrong IIOP address: " + cce2.getMessage());
       }
     }
+    catch(SystemException se) {
+      throw new MTPException("Error during address deactivation", se);
+    }
     catch(UserException ue) {
-      throw new MTPException("An ORBacus related exception was thrown: " + ue.getMessage(), ue);
+      throw new MTPException("Error during address activation", ue);
     }
   }
 
@@ -502,9 +582,14 @@ public class MessageTransportProtocol implements MTP {
 
   }
 
-
   public void deactivate(TransportAddress ta) throws MTPException {
-    // FIXME: To be implemented...
+    try {
+      OBAddress obTA = (OBAddress)ta;
+      obTA.deactivate();
+    }
+    catch(ClassCastException cce) {
+      throw new MTPException("Invalid Transport Address.", cce);
+    }
   }
 
   public void deactivate() throws MTPException {
