@@ -125,7 +125,6 @@ public class TestsTree extends JTree implements Serializable {
   } 
 
   public void fireTestChanged(final String testName, final boolean expand) {
-  	repaint();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
       	DomToTreeModelAdapter fModel = (DomToTreeModelAdapter) getModel();
