@@ -73,6 +73,7 @@ public class RoundTripSender extends Agent {
     static int THR_LOW = 0;
     private static int agents = 0;
     private static int terminatedAgents = 0;
+    private static boolean resultPrinted = false;
 
     synchronized static void increaseNumAgents(int couples) {
 	if (agents == 0) {
@@ -94,11 +95,12 @@ public class RoundTripSender extends Agent {
 	times.add(new Double(avg));
     }
 
-    public void printResults() {
+    public double printResults() {
         double totalTime = 0;
         double tot1 = 0;
         double tot2 = 0;
         double currentValue;
+        double rtt;
         double standardDev;
         int n = times.size();
 
@@ -108,9 +110,11 @@ public class RoundTripSender extends Agent {
             tot1 = tot1 + currentValue * currentValue;
             tot2 = tot2 + currentValue;
         }
+        rtt = totalTime / (double)n;
         standardDev = Math.sqrt( ( n * tot1 - tot2 * tot2 ) / ( n * (n-1) ) );
-        System.out.println( "Average RTT=" + totalTime / (double)n + " msec Dev.Std=" + standardDev );
-	System.exit(0);
+        System.out.println( "Average RTT=" + rtt + " msec Dev.Std=" + standardDev );
+        return rtt;
+	//System.exit(0);
     }
 
     synchronized static boolean startMeasuring() {
@@ -125,16 +129,17 @@ public class RoundTripSender extends Agent {
     ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
     String ior = "";
     int couples = 0;
+		AID controller = null;
 
    /**
     * This agent get parameter from command line.
     */
     public void setup() {
-
-	String receiverName = (String)(getArguments()[0]);
-        iterations = (new Long((String)(getArguments()[1]))).longValue();
-        ior = (String)getArguments()[2];
-	couples = Integer.parseInt(((String)(getArguments()[3])));
+	Object[] args = getArguments();
+	String receiverName = (String)(args[0]);
+        iterations = (new Long((String)(args[1]))).longValue();
+        ior = (String)args[2];
+	couples = Integer.parseInt(((String)(args[3])));
 	receiver = new AID(receiverName, ((ior.length() > 9) ? AID.ISGUID : AID.ISLOCALNAME));
         if(ior.length() > 9){ //is GUID
             receiver.addAddresses(ior);
@@ -142,6 +147,10 @@ public class RoundTripSender extends Agent {
 	msg.setContent("CONTENT");
         msg.addReceiver(receiver);
 
+  if (args.length == 5) {
+  	controller = new AID((String) args[4], AID.ISLOCALNAME);
+  }
+        
 	increaseNumAgents(couples);
 
         addBehaviour( new CyclicBehaviour(this) {
@@ -163,7 +172,19 @@ public class RoundTripSender extends Agent {
 			      decreaseNumAgents();
 			      updateResults(startTime, stopTime, iterations);
 			      if ( stopTripping(couples) ){
-				  printResults();
+				    	if (!resultPrinted) {
+				    		resultPrinted = true;
+					    	double rtt = printResults();
+					    	if (controller != null) {
+					    		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+					    		msg.addReceiver(controller);
+				  	  		msg.setContent(String.valueOf(rtt));
+				    			myAgent.send(msg);
+				    		}
+				    		else {
+				    			System.exit(0);
+				    		}
+				    	}
 			      }
 			  }
 			  counter ++;
