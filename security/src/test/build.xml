@@ -11,6 +11,7 @@
     <pathelement location="classes"/>
     <!-- JADE and JADE TestSuite  classes -->
     <pathelement location="../../classes"/>
+    <pathelement location="lib/bc/bcprov-jdk14.jar"/>
   </path>
 
 
