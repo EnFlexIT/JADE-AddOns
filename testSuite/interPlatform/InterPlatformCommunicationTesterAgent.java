@@ -49,17 +49,17 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 			"test.interPlatform.tests.TestRemotePing"
 		}) {
 			
-			private RemoteController rc;
+			private JadeController jc;
 			
 			public void initialize(Agent a) throws TestException {
 				try {
 					// Start the remote platform with a SUNOrb-based IIOP MTP
-					rc = TestUtility.launchJadeInstance(REMOTE_PLATFORM_NAME, null, new String("-name "+REMOTE_PLATFORM_NAME+" -port "+REMOTE_PLATFORM_PORT), new String[]{"IOR"}); 
+					jc = TestUtility.launchJadeInstance(REMOTE_PLATFORM_NAME, null, new String("-name "+REMOTE_PLATFORM_NAME+" -port "+REMOTE_PLATFORM_PORT), new String[]{"IOR"}); 
 		
 					// Construct the AID of the AMS of the remote platform and make it
 					// accessible to the tests as a group argument
 					AID remoteAMS = new AID("ams@"+REMOTE_PLATFORM_NAME, AID.ISGUID);
-					Iterator it = rc.getAddresses().iterator();
+					Iterator it = jc.getAddresses().iterator();
 					while (it.hasNext()) {
 						remoteAMS.addAddresses((String) it.next());
 					}
@@ -77,7 +77,7 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
   			try {
   				// Kill the remote platform
   				Thread.sleep(1000);
-  				rc.kill();
+  				jc.kill();
   			}
   			catch (Exception e) {
   				e.printStackTrace();

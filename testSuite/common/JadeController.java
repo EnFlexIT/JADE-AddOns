@@ -1,5 +1,5 @@
 /*****************************************************************
-JADE - Java Agent DEvelopment Framework is a framework to develop
+JADE - Java Agent DEvelopment Framework is a framework to develop 
 multi-agent systems in compliance with the FIPA specifications.
 Copyright (C) 2000 CSELT S.p.A. 
 
@@ -21,21 +21,17 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package test.common.behaviours;
+package test.common;
 
-import jade.core.behaviours.*;
-import jade.lang.acl.*;
-import jade.util.leap.*;
+import jade.util.leap.List;
 
 /**
    @author Giovanni Caire - TILAB
  */
-public class NotUnderstoodResponder extends GenericMessageHandler {
-	protected void handleMessage(ACLMessage msg) {
-		ACLMessage reply = msg.createReply();
-		reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-		reply.setContent(msg.getContent());
-		myAgent.send(reply);
-	}
+public interface JadeController {
+	List getAddresses();
 	
+	String getContainerName();
+		
+	void kill();	
 }

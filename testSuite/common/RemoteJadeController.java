@@ -1,5 +1,5 @@
 /*****************************************************************
-JADE - Java Agent DEvelopment Framework is a framework to develop
+JADE - Java Agent DEvelopment Framework is a framework to develop 
 multi-agent systems in compliance with the FIPA specifications.
 Copyright (C) 2000 CSELT S.p.A. 
 
@@ -21,21 +21,48 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package test.common.behaviours;
+package test.common;
 
-import jade.core.behaviours.*;
-import jade.lang.acl.*;
 import jade.util.leap.*;
+import test.common.remote.RemoteManager;
+import java.rmi.RemoteException;
 
 /**
    @author Giovanni Caire - TILAB
  */
-public class NotUnderstoodResponder extends GenericMessageHandler {
-	protected void handleMessage(ACLMessage msg) {
-		ACLMessage reply = msg.createReply();
-		reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-		reply.setContent(msg.getContent());
-		myAgent.send(reply);
+class RemoteJadeController implements JadeController {
+	private int myId;
+	private RemoteManager myRm;
+	
+	private List addresses = null;
+	private String containerName = null;
+	
+	public RemoteJadeController(RemoteManager rm, int id) throws TestException {
+		myRm = rm;
+		myId = id;
+		try {
+			addresses = myRm.getJadeInstanceAddresses(myId);
+			containerName = myRm.getJadeInstanceContainerName(myId);
+		}
+		catch (RemoteException re) {
+			throw new TestException("Error getting information from remote manager", re);
+		}
 	}
 	
+	public List getAddresses() {
+		return addresses;
+	}
+	
+	public String getContainerName() {
+		return containerName;
+	}
+		
+	public void kill() {
+		try {
+			myRm.killJadeInstance(myId);
+		}
+		catch (Exception e) {
+			System.out.println("WARNING: Error killing JADE instance remotely. "+e.getMessage());
+		}
+	}	
 }

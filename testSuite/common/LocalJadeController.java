@@ -23,26 +23,27 @@ Boston, MA  02111-1307, USA.
 
 package test.common;
 
-import jade.core.Agent;
+//import jade.core.Agent;
 import jade.core.Runtime;
-import jade.core.Profile;
-import jade.core.ProfileImpl;
-import jade.wrapper.*;
+//import jade.core.Profile;
+//import jade.core.ProfileImpl;
+//import jade.wrapper.*;
 import jade.util.leap.*;
-import test.common.*;
+//import test.common.*;
 import java.io.*;
 import java.util.StringTokenizer;
 
 /**
+   @author Giovanni Caire - TILAB
  */
-public class RemoteController {
+class LocalJadeController implements JadeController {
 	private Object lock = new Object();
 	private boolean ready = false;
 	private List addresses = new ArrayList();
 	private String containerName = null;
 	private Process proc;
 	
-	public RemoteController(String instanceName, String cmdLine, String[] protoNames) throws TestException {
+	public LocalJadeController(String instanceName, String cmdLine, String[] protoNames) throws TestException {
 		try {
 			// Start a JADE instance in a different Process
 			proc = java.lang.Runtime.getRuntime().exec(cmdLine);

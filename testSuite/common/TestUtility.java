@@ -40,8 +40,11 @@ import jade.proto.FIPAProtocolNames;
 import jade.content.AgentAction;
 
 import test.common.agentConfigurationOntology.*;
+import test.common.remote.RemoteManager;
 
 import java.util.Date;
+import java.rmi.*;
+import java.net.InetAddress;
 
 /**
    Class including static methods useful during test setup/takedown
@@ -59,6 +62,8 @@ public class TestUtility {
   private static jade.content.ContentManager cm = new jade.content.ContentManager();
  	private static jade.content.lang.Codec codec = new jade.content.lang.leap.LEAPCodec();
   private static jade.content.onto.Ontology onto = AgentConfigurationOntology.getInstance();
+  
+  private static test.common.remote.RemoteManager rm = null;
   
   static {
   	cm.registerLanguage(codec);
@@ -184,17 +189,6 @@ public class TestUtility {
   }
   
   /**
-     Launch a new instance of JADE in a separate process
-   */
-  public static RemoteController launchJadeInstance(String instanceName, String classpath, String jadeArgs, String[] protoNames) throws TestException { 
-		if (classpath == null) {
-  		classpath = System.getProperty("java.class.path");
-		}
-		RemoteController rc = new RemoteController(instanceName, new String("java -cp "+classpath+" jade.Boot "+jadeArgs), protoNames);
-		return rc;
-  }
-  
-  /**
      Make the indicated target agent perform the indicated action
    */
   public static void forceAction(Agent a, AID targetAID, AgentAction action) throws TestException { 
@@ -211,6 +205,55 @@ public class TestUtility {
     catch (Exception e) {
     	throw new TestException("Error forcing action "+action+" to agent "+targetAID.getName(), e);
     }
+  }
+  
+  /**
+     Launch a new instance of JADE in a separate process
+   */
+  public static JadeController launchJadeInstance(String instanceName, String classpath, String jadeArgs, String[] protoNames) throws TestException { 
+		JadeController jc = null;
+		if (rm != null) {
+			// If a RemoteManager is set, use it and launch the JADE instance 
+			// remotely
+			try {
+				int id = rm.launchJadeInstance(instanceName, classpath, jadeArgs, protoNames);
+				jc = new RemoteJadeController(rm, id);
+			}
+			catch (RemoteException re) {
+				throw new TestException("Communication error launching JADE instance remotely", re);
+			}
+		}
+		else {
+			// Otherwise launch the JADE instance locally
+  		if (classpath == null) {
+  			classpath = System.getProperty("java.class.path");
+			}
+			jc = new LocalJadeController(instanceName, new String("java -cp "+classpath+" jade.Boot "+jadeArgs), protoNames);
+		}
+		return jc;
+  }
+
+  public static void setRemoteManager(String hostName, int port, String managerName) throws TestException {
+  	String remoteManagerRMI = new String("rmi://"+hostName+":"+port+"//"+managerName);
+  	try {
+  		rm = (RemoteManager) Naming.lookup(remoteManagerRMI);
+  	}
+  	catch (Exception e) {
+  		throw new TestException("Error looking up remote manager "+remoteManagerRMI, e);
+  	}
+  }
+  
+  public static void resetRemoteManager() {
+  	rm = null;
+  }
+  	
+  public static String getLocalHostName() throws TestException {
+  	try {
+			return InetAddress.getLocalHost().getHostName();
+  	}
+  	catch (Exception e) {
+  		throw new TestException("Can't get local host name", e);
+  	}
   }
   
   /**

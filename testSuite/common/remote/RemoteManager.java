@@ -1,5 +1,5 @@
 /*****************************************************************
-JADE - Java Agent DEvelopment Framework is a framework to develop
+JADE - Java Agent DEvelopment Framework is a framework to develop 
 multi-agent systems in compliance with the FIPA specifications.
 Copyright (C) 2000 CSELT S.p.A. 
 
@@ -21,21 +21,20 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package test.common.behaviours;
+package test.common.remote;
 
-import jade.core.behaviours.*;
-import jade.lang.acl.*;
-import jade.util.leap.*;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+import test.common.TestException;
+import jade.util.leap.List;
 
 /**
    @author Giovanni Caire - TILAB
  */
-public class NotUnderstoodResponder extends GenericMessageHandler {
-	protected void handleMessage(ACLMessage msg) {
-		ACLMessage reply = msg.createReply();
-		reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-		reply.setContent(msg.getContent());
-		myAgent.send(reply);
-	}
-	
+public interface RemoteManager extends Remote {
+	int launchJadeInstance(String instanceName, String classpath, String jadeArgs, String[] protoNames) throws TestException, RemoteException;
+	List getJadeInstanceAddresses(int id) throws TestException, RemoteException;
+	String getJadeInstanceContainerName(int id) throws TestException, RemoteException;
+	void killJadeInstance(int id) throws TestException, RemoteException;
 }

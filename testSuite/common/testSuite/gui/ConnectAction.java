@@ -21,21 +21,24 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package test.common.behaviours;
+package test.common.testSuite.gui;
 
-import jade.core.behaviours.*;
-import jade.lang.acl.*;
-import jade.util.leap.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.io.*;
 
-/**
-   @author Giovanni Caire - TILAB
- */
-public class NotUnderstoodResponder extends GenericMessageHandler {
-	protected void handleMessage(ACLMessage msg) {
-		ACLMessage reply = msg.createReply();
-		reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-		reply.setContent(msg.getContent());
-		myAgent.send(reply);
+class ConnectAction extends AbstractAction {
+	private TestSuiteGui gui;
+
+	public ConnectAction(TestSuiteGui gui) {
+		super ("Connect");
+		this.gui = gui;
 	}
 	
+	public void actionPerformed(ActionEvent e) {
+		System.out.println("Connect");
+		gui.connect();
+	}
 }
+	

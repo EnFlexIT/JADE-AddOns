@@ -32,8 +32,10 @@ import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
 import jade.util.leap.ArrayList;
 
-import test.common.TesterAgent;
 import test.common.testSuite.TestSuiteAgent;
+import test.common.TestUtility;
+import test.common.TestException;
+import test.common.remote.TSDaemon;
 
 public class TestSuiteGui extends JFrame {
 	// Gui states used to enable/disable buttons
@@ -47,9 +49,10 @@ public class TestSuiteGui extends JFrame {
 	private GuiAgent myAgent;
 	private String[] testers;
 	private String currentTester = null;
-	
-	private JButton exitB, openB, runB, debugB, stepB, configB;
-	private JMenuItem exitI, openI, runI, debugI, stepI, configI;
+	private TSDaemonConnectionConfiguration daemonConf = new TSDaemonConnectionConfiguration();
+		
+	private JButton exitB, openB, runB, debugB, stepB, configB, connectB;
+	private JMenuItem exitI, openI, runI, debugI, stepI, configI, connectI;
 	private JTextField currentF;
 	
 	public TestSuiteGui(GuiAgent myAgent, String[] testers) {
@@ -65,34 +68,43 @@ public class TestSuiteGui extends JFrame {
 		Icon debugImg = GuiProperties.getIcon("debug");
     Icon stepImg = GuiProperties.getIcon("step");
     Icon configImg = GuiProperties.getIcon("config");
+    Icon connectImg = GuiProperties.getIcon("connect");
     
 		/////////////////////////////////////////////////////
 		// Add Toolbar to the NORTH part of the border layout 
 		JToolBar bar = new JToolBar();
 
-		// TEST
+		// EXIT button
 		exitB  = bar.add(new ExitAction(this));
 		exitB.setText("");
 		exitB.setIcon(exitImg);
 		//exitB.setDisabledIcon(exitImg);
 		exitB.setToolTipText("Exit the JADE Test Suite");
 		
+		// CONNECT button
+		connectB  = bar.add(new ConnectAction(this));
+		connectB.setText("");
+		connectB.setIcon(connectImg);
+		//connectB.setDisabledIcon(connectImg);
+		connectB.setToolTipText("Use the Test Suite Daemon to launch other JADE instances remotely");
+		
 		bar.addSeparator();
 		
+		// OPEN button
 		openB  = bar.add(new OpenAction(this));
 		openB.setText("");
 		openB.setIcon(openImg);
 		//runB.setDisabledIcon(runImg);
 		openB.setToolTipText("Load a tester agent");
 		
-		bar.addSeparator();
-		
+		// RUN button
 		runB  = bar.add(new RunAction(this));
 		runB.setText("");
 		runB.setIcon(runImg);
 		//runB.setDisabledIcon(runImg);
 		runB.setToolTipText("Run the current tester agent");
 		
+		// CONFIG button
 		configB  = bar.add(new ConfigAction(this));
 		configB.setText("");
 		configB.setIcon(configImg);
@@ -101,13 +113,14 @@ public class TestSuiteGui extends JFrame {
 		
 		bar.addSeparator();
 		
-		// DEBUG
+		// DEBUG button
 		debugB  = bar.add(new DebugAction(this));
 		debugB.setText("");
 		debugB.setIcon(debugImg);
 		//goB.setDisabledIcon(debugImg);
 		debugB.setToolTipText("Debug the current tester agent");
 		
+		// STEP button
 		stepB  = bar.add(new StepAction(this));
 		stepB.setText("");
 		stepB.setIcon(stepImg);
@@ -163,6 +176,24 @@ public class TestSuiteGui extends JFrame {
 			ev.addParameter(currentTester);
 			setStatus(READY_STATE);
 			myAgent.postGuiEvent(ev);
+		}
+	}
+	
+	// Method called by the ConnectAction
+	void connect() {
+		TSDaemonConnectionDlg.configure(daemonConf);
+		if (daemonConf.getChanged()) {
+			if (daemonConf.getConnect()) {
+				try {
+					TestUtility.setRemoteManager(daemonConf.getHostName(), TSDaemon.DEFAULT_PORT, TSDaemon.DEFAULT_NAME);
+				}
+				catch (TestException te) {
+					System.out.println("Error connecting to the Test Suite Daemon. "+te.getMessage());
+				}
+			}
+			else {
+				TestUtility.resetRemoteManager();
+			}
 		}
 	}
 	

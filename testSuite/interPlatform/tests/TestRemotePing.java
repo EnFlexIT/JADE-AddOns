@@ -36,7 +36,8 @@ public class TestRemotePing extends Test {
 	public  static final String TEST_NAME = "Remote Ping";
 	private static final String RESPONDER_NAME = "responder";
 	private final String CONV_ID = "conv_ID"+hashCode();
-	private RemoteController rc;
+	private final String CONTENT = "\"PING\"";
+	private JadeController jc;
 	
 	private AID resp = null;
 	
@@ -54,7 +55,7 @@ public class TestRemotePing extends Test {
   		final DataStore store = ds;
   		final String key = resultKey;
   		
-			rc = TestUtility.launchJadeInstance("Container-1", null, new String("-container -port 8888 -mtp jade.mtp.iiop.MessageTransportProtocol"), null); 
+			jc = TestUtility.launchJadeInstance("Container-1", null, new String("-container -host "+TestUtility.getLocalHostName()+" -port 8888 -mtp jade.mtp.iiop.MessageTransportProtocol"), null); 
 	  	
 			AID remoteAMS = (AID) getGroupArgument(InterPlatformCommunicationTesterAgent.REMOTE_AMS_KEY);
   		resp = TestUtility.createTarget(a, RESPONDER_NAME, remoteAMS);
@@ -66,6 +67,7 @@ public class TestRemotePing extends Test {
   				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
   				msg.addReceiver(resp);
   				msg.setConversationId(CONV_ID);
+  				msg.setContent(CONTENT);
   				myAgent.send(msg);
   			}
   			
@@ -73,7 +75,7 @@ public class TestRemotePing extends Test {
   				ACLMessage msg = myAgent.receive(MessageTemplate.MatchConversationId(CONV_ID)); 
 					if (msg != null) { 
 						AID sender = msg.getSender();
-						if (sender.equals(resp)) {
+						if (sender.equals(resp) && CONTENT.equals(msg.getContent())) {
 							store.put(key, new Integer(Test.TEST_PASSED));
 						}
 						else {
@@ -116,7 +118,7 @@ public class TestRemotePing extends Test {
   	try {
   		TestUtility.killTarget(a, resp);
   		Thread.sleep(1000);
-  		rc.kill();
+  		jc.kill();
   	}
   	catch (Exception e) {
   		e.printStackTrace();

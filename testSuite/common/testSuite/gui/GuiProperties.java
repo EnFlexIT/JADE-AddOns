@@ -41,7 +41,8 @@ class GuiProperties {
 			"run",LookAndFeel.makeIcon(foo.getClass(), "images/run.gif"),
 			"debug", LookAndFeel.makeIcon(foo.getClass(), "images/debug.gif"),
 			"step", LookAndFeel.makeIcon(foo.getClass(), "images/step.gif"),
-			"config", LookAndFeel.makeIcon(foo.getClass(), "images/config.gif")
+			"config", LookAndFeel.makeIcon(foo.getClass(), "images/config.gif"),
+			"connect", LookAndFeel.makeIcon(foo.getClass(), "images/connect.gif")
 		};
 
 		myDefaults = new UIDefaults (icons);

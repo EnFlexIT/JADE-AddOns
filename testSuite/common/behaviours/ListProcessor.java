@@ -23,19 +23,63 @@ Boston, MA  02111-1307, USA.
 
 package test.common.behaviours;
 
+import jade.core.*;
 import jade.core.behaviours.*;
-import jade.lang.acl.*;
 import jade.util.leap.*;
 
 /**
    @author Giovanni Caire - TILAB
  */
-public class NotUnderstoodResponder extends GenericMessageHandler {
-	protected void handleMessage(ACLMessage msg) {
-		ACLMessage reply = msg.createReply();
-		reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-		reply.setContent(msg.getContent());
-		myAgent.send(reply);
+public abstract class ListProcessor extends SimpleBehaviour {
+	private List items ;
+	private int cnt = 0;
+	private boolean paused = false;
+	private boolean stopped = false;
+	
+	public ListProcessor(Agent a, List l) {
+		super(a);
+		items = (l != null ? l : new ArrayList());
 	}
 	
+	protected abstract void processItem(Object item, int index);
+
+	public void action() {
+		if (!stopped) {
+			if (!paused) {
+				if (cnt < items.size()) {
+					Object i = items.get(cnt);
+					processItem(i, cnt);
+					cnt++;
+				}
+			}
+			else {
+				block();
+			}
+		}
+	}
+	
+	public boolean done() {
+		return (cnt >= items.size() && !paused) || stopped;
+	}
+	
+	public void pause() {
+		paused = true;
+		block();
+	}
+	
+	public void resume() {
+		paused = false;
+		restart();
+	}
+	
+	public void stop() {
+		stopped = true;
+		if (paused) {
+			restart();
+		}
+	}
+	
+	public boolean isStopped() {
+		return stopped;
+	}
 }

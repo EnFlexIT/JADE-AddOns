@@ -263,7 +263,7 @@ public class TestSuiteAgent extends GuiAgent {
       rt.setCloseVM(true);
 
       Profile pMain = new ProfileImpl(null, 8888, null);
-			pMain.setSpecifiers("mtps", new ArrayList());
+			pMain.setSpecifiers(Profile.MTPS, new ArrayList());
 			
       MainContainer mc = rt.createMainContainer(pMain);
       
