@@ -1,0 +1,59 @@
+<project name="Miscellaneous" default="compile" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="src" value="src"/>
+  <property name="build" value="classes"/>
+  <property name="doc" value="doc"/>
+  <property name="dist" value="../.."/>
+  <property name="libJADEDir" value="../../lib"/>
+  <property name="classpath" value="../..;${libJADEDir}/jade.jar;${libJADEDir}/jadeTools.jar;${libJADEDir}/iiop.jar;classes;"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the directories structure used to store files -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <!-- Compile the javadoc code from ${src} into ${doc} -->
+  <target name="doc" depends="init">
+    <mkdir dir="${doc}/api"/>
+    <javadoc sourcepath="${src}" packagenames="jade.misc" destdir="${doc}/api" author="true" windowtitle="JADE Miscellaneous classes"/>
+  </target>
+
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on"/>
+  </target>
+
+  <!-- Make distribution zip file and put in ${dist} -->
+  <target name="dist" depends="init, clean">
+    <jar jarfile="${dist}/miscAdd-on.zip">
+      <fileset dir="${dist}" includes="add-ons/misc/${src}/**"/>
+      <fileset dir="${dist}" includes="add-ons/misc/*"/>
+      <fileset dir="${dist}" includes="add-ons/misc/resources/**"/>
+    </jar>
+  </target>
+
+  <!-- delete ${build} and ${lib} directories -->
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} directory tree -->
+    <delete includeEmptyDirs="true">
+      <fileset dir="${build}"/>
+      <fileset dir=".">
+           <include name="APDescription.txt"/>
+	   <include name="MTPs-Main-Container.txt"/>
+      </fileset>
+    </delete>
+  </target>
+ 
+  <target name="test" description="test the classes">
+    <java classname="jade.Boot" >
+       <arg value="-gui -nomtp subDF:jade.domain.df x:jade.misc.DFFederatorAgent(resources/DFFederatorAgent.properties)"/> 
+       <classpath>
+           <pathelement path="${classpath}"/>
+       </classpath>
+    </java>
+  </target>
+
+  <target name="all" depends="clean, init, doc, compile, dist, test"/>
+
+</project>
