@@ -32,6 +32,7 @@ import jade.mtp.InChannel;
 import jade.mtp.MTP;
 import jade.mtp.MTPException;
 import jade.mtp.TransportAddress;
+import jade.core.Profile;
 
 import java.io.File;
 
@@ -89,7 +90,7 @@ public class MtpBoot implements MTP {
    * @return Trnasport Address for the address activated
    * @throws MTPException Error during address activation
    */
-  public TransportAddress activate (InChannel.Dispatcher disp)
+  public TransportAddress activate (InChannel.Dispatcher disp, Profile p)
                              throws MTPException {
 
     return mtp.activate(disp);
@@ -102,7 +103,7 @@ public class MtpBoot implements MTP {
    * @param ta Address to activate
    * @throws MTPException Error during address activation
    */
-  public void activate (InChannel.Dispatcher disp, TransportAddress ta)
+  public void activate (InChannel.Dispatcher disp, TransportAddress ta, Profile p)
                  throws MTPException {
     mtp.activate(disp, ta);
   }

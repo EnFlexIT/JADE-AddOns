@@ -48,6 +48,7 @@ import com.ooc.OB.BootManagerHelper;
 import FIPA.*; // OMG IDL stubs
 
 import jade.core.AID;
+import jade.core.Profile;
 
 import jade.domain.FIPAAgentManagement.Envelope;
 import jade.domain.FIPAAgentManagement.ReceivedObject;
@@ -477,7 +478,7 @@ public class MessageTransportProtocol implements MTP {
 
   } // End of OBAddressNS
 
-  public TransportAddress activate(InChannel.Dispatcher disp) throws MTPException {
+  public TransportAddress activate(InChannel.Dispatcher disp, Profile p) throws MTPException {
 
     // Create a servant object on the root POA
     MTSServant servant = new MTSServant(disp);
@@ -492,7 +493,7 @@ public class MessageTransportProtocol implements MTP {
 
   }
 
-  public void activate(InChannel.Dispatcher disp, TransportAddress ta) throws MTPException {
+  public void activate(InChannel.Dispatcher disp, TransportAddress ta, Profile p) throws MTPException {
     try {
       OBAddressURL addr = (OBAddressURL)ta;
 
