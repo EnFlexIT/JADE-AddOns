@@ -155,12 +155,13 @@ public class MessageTransportProtocol implements MTP {
 	}
 
 	// Read in the 'encrypted' slot
+	/* Commented for compliance to FIPA Standard 2002 
 	if(IDLenv.encrypted.length > 0)
 	  env.clearAllEncrypted();
 	for(int i = 0; i < IDLenv.encrypted.length; i++) {
 	  String word = IDLenv.encrypted[i];
 	  env.addEncrypted(word);
-	}
+	} */
 
 	// Read in the other slots
 	if(IDLenv.comments.length() > 0)
@@ -651,6 +652,7 @@ public class MessageTransportProtocol implements MTP {
 
 
       // Fill in the 'encrypted' field of the IDL envelope
+	  /* Commented for compliance to FIPA 2002 standard
       Iterator itEncrypted = env.getAllEncrypted();
       List encrypted = new ArrayList();
       while(itEncrypted.hasNext()) {
@@ -660,8 +662,8 @@ public class MessageTransportProtocol implements MTP {
 
       String[] IDLencrypted = new String[encrypted.size()];
       for(int i = 0; i < encrypted.size(); i++)
-	IDLencrypted[i] = (String)encrypted.get(i);
-
+	IDLencrypted[i] = (String)encrypted.get(i); */
+	  String[] IDLencrypted = new String[0];	
 
       // Fill in the other fields of the IDL envelope ...
       String IDLcomments = env.getComments();
