@@ -52,6 +52,9 @@ class RDFCoder {
 	boolean description=false;
 	boolean type=false;
 	String seqType=null;
+    /*nspan, add:*/
+    String fullOntologyName = null;
+    /*nspan, end*/
 	
 	protected void setOntology(Ontology o, String prop) {
 		ontology = o;
@@ -247,9 +250,15 @@ class RDFCoder {
 				sb.append(startTag);
     			sb.append(">");
     			sb.append("<rdf:Description>");
-    			sb.append("<fipa-rdf:type>");
-    			sb.append(content.getTypeName());
-    			sb.append("</fipa-rdf:type>");
+                /*nspan, change:
+                  sb.append("<fipa-rdf:type>");
+                  sb.append(content.getTypeName());
+                  sb.append("</fipa-rdf:type>");
+                  with:*/
+                  sb.append("<rdf:type>");
+                  sb.append(fullOntologyName + "#" + content.getTypeName());
+                  sb.append("</rdf:type>");
+                /*nspan, end*/
     			}
     		else if (startTag.equals("fipa-rdf:CONTENT_ELEMENT_LIST")){
     			sb.append("<");
@@ -292,9 +301,15 @@ class RDFCoder {
 					sb.append("<"+"rdf:object"+">");		    				
     				}
     				if(type){
-    		         	sb.append("<fipa-rdf:type>");
-    			     	sb.append(currSchema.getTypeName());
-    			     	sb.append("</fipa-rdf:type>");
+                    /*nspan, change:
+                      sb.append("<fipa-rdf:type>");
+                      sb.append(currSchema.getTypeName());
+                      sb.append("</fipa-rdf:type>");
+                    with:*/
+                      sb.append("<rdf:type>");
+                      sb.append(fullOntologyName + "#" + currSchema.getTypeName());
+                      sb.append("</rdf:type>");
+                    /*nspan, end*/
     			     	type=false;
     			       	}
     				}
