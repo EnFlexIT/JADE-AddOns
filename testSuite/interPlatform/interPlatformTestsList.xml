@@ -25,4 +25,18 @@
 			<HowWorkTest> A ping message is exchanged between two agents living on different platforms with an Envelope including two properties: a Serializable object and a String.</HowWorkTest>
 			<WhenTestPass> The test passes if the agent on the remote platform receives the ping message and replies correctly and no exception is fired.</WhenTestPass>
 		</Test>		
+    <Test name="Payload ASCII encoding" skip="false">
+			<TestClassName>test.interPlatform.tests.TestCharset</TestClassName>
+      <WhatTest>Test the sending of accentuated characters using the default ASCII charset</WhatTest>
+			<HowWorkTest> The sender sends a message which content contains accentuated characters</HowWorkTest>
+			<WhenTestPass> The test is expected to fail: the agent on the remote platform receives the message without the accentuated characters.</WhenTestPass>
+		</Test>		
+    <Test name="Payload UTF-8 encoding" skip="false">
+			<TestClassName>test.interPlatform.tests.TestCharset</TestClassName>
+      <Argument key="pass" value="true">This test is meant to succeed</Argument>
+      <Argument key="charset" value="UTF-8">This test is meant to fail</Argument>
+      <WhatTest>Test the sending of accentuated characters using the UTF-8 charset. There are two parameters: "pass" to tell if the test shall pass or failed and "charset" to set the charset encoding to be tested.</WhatTest>
+			<HowWorkTest> The sender sends a message which content contains accentuated characters</HowWorkTest>
+			<WhenTestPass> The agent on the remote platform receives the message with the accentuated characters.</WhenTestPass>
+		</Test>		
 	</TestsList>
