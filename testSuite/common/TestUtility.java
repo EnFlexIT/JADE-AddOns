@@ -29,7 +29,7 @@ import jade.domain.*;
 import jade.core.Agent;
 import jade.core.AID;
 import jade.core.ContainerID;
-import jade.core.AgentManager;
+import jade.core.AgentContainer;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
@@ -111,7 +111,7 @@ public class TestUtility {
 	  		ca.setContainer((ContainerID) a.here());
 			}
 			else {
-				ca.setContainer(new ContainerID(AgentManager.MAIN_CONTAINER_NAME, null));
+				ca.setContainer(new ContainerID(AgentContainer.MAIN_CONTAINER_NAME, null));
 			}
 		}
   		
