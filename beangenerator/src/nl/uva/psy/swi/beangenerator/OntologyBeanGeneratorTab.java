@@ -343,6 +343,7 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
   private void addRoleNameConstant(Cls theCls, Slot theSlot)
     throws Exception {
     String slotName = converter.getSlotName(theSlot);
+    slotName = ProtegeTools.toJavaString(slotName); //added by J.Picault
     //System.out.println("slotName: " + slotName);
     if ((slotName.length() < 1) || (slotName.charAt(0) == ':')) {
       throw new Exception("Invalid slot name");
