@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import java.io.Serializable;
+
 import org.omg.CORBA.*;
 import org.omg.PortableServer.*;
 import org.omg.CosNaming.*;
@@ -213,7 +215,7 @@ public class MessageTransportProtocol implements MTP {
 
 
       private Property unmarshalProperty(FIPA.Property p) {
-	  return new Property(p.keyword, p.value);
+	  return new Property(p.keyword, p.value.extract_Value());
       }
 
     private ReceivedObject unmarshalReceivedObj(FIPA.ReceivedObject ro) {
@@ -767,7 +769,9 @@ public class MessageTransportProtocol implements MTP {
   }
 
   private FIPA.Property marshalProperty(Property p) {
-      return new FIPA.Property(p.getName(), (org.omg.CORBA.Any)p.getValue());
+    org.omg.CORBA.Any value = myORB.create_any();
+    value.insert_Value((Serializable)p.getValue());
+    return new FIPA.Property(p.getName(), value);
   }
 
   private FIPA.AgentID marshalAID(AID id) {
