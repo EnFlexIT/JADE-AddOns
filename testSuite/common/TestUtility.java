@@ -305,12 +305,7 @@ public class TestUtility {
      @return the name of the local host
    */
   public static String getLocalHostName() throws TestException {
-  	try {
-			return InetAddress.getLocalHost().getHostName();
-  	}
-  	catch (Exception e) {
-  		throw new TestException("Can't get local host name", e);
-  	}
+  	return jade.core.Profile.getDefaultNetworkName();
   }
   
   /**
