@@ -100,7 +100,7 @@ public class JADEAccessControllerImpl
 
      if (requester==null) {
        // 'null' is not a valid requester
-       requester=new JADEPrincipalImpl("xxx");
+       requester=new JADEPrincipalImpl("guest");
 /*
        throw new JADESecurityException("AccCtrl "+ac_name+
                                ", req from:"+requester+
