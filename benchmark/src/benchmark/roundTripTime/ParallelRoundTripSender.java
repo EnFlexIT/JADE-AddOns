@@ -28,6 +28,7 @@ import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
+import jade.util.Logger;
 
 import java.io.*;
 import java.util.Iterator;
@@ -67,6 +68,9 @@ public class ParallelRoundTripSender extends Agent {
      * Number of message to send.
      */
     static long iterations = 0;
+    
+    //logging
+    private static Logger logger = Logger.getMyLogger(ParallelRoundTripSender.class.getName());
 
 
     static int THR_UP = 95; // percentage of agents that must have been created before starting to count roundtrip
@@ -78,7 +82,7 @@ public class ParallelRoundTripSender extends Agent {
     synchronized static void increaseNumAgents(int couples) {
 	if (agents == 0) {
 	    THR_UP = Math.round(THR_UP * couples / 100.0f);
-	    System.out.println("The roundtrippers will measure time when at least "+THR_UP+" agents have been created and "+THR_LOW+" agents are still working.");
+	    logger.log(Logger.INFO,"The roundtrippers will measure time when at least "+THR_UP+" agents have been created and "+THR_LOW+" agents are still working.");
 	}
 	agents++;
     }
@@ -112,7 +116,7 @@ public class ParallelRoundTripSender extends Agent {
         }
         rtt = totalTime / (double)n;
         standardDev = Math.sqrt( ( n * tot1 - tot2 * tot2 ) / ( n * (n-1) ) );
-        System.out.println( "Average RTT=" + rtt + " msec Dev.Std=" + standardDev );
+        logger.log(Logger.INFO,"Average RTT=" + rtt + " msec Dev.Std=" + standardDev );
         return rtt;
 	//System.exit(0);
     }
@@ -173,7 +177,6 @@ public class ParallelRoundTripSender extends Agent {
 		int counter = 0;
 		int state = 0;
 		public void action() {
-			//System.out.println(measuring+" "+THR_LOW+" "+THR_UP);
 		    switch (state) {
 				case 0:
 						if ( startMeasuring() ) {

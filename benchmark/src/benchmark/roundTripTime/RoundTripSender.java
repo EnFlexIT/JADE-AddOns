@@ -27,6 +27,7 @@ import jade.core.Agent;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.util.Logger;
 
 import java.io.*;
 import java.util.Iterator;
@@ -59,6 +60,9 @@ public class RoundTripSender extends Agent {
      * Number of message to send.
      */
     static long iterations = 0;
+    
+    //logging
+    private static Logger logger = Logger.getMyLogger(RoundTripSender.class.getName());
 
     /**
      * This method send message to receiver. and wait until
@@ -79,16 +83,16 @@ public class RoundTripSender extends Agent {
 
     synchronized static void increaseNumAgents(int couples) {
 	if (agents == 0) {
-	    System.out.println("\n  couples="+couples+"     iterations="+iterations +"\n" );
+	    logger.log(Logger.INFO,"  couples="+couples+"     iterations="+iterations  );
 	    THR_UP = Math.round(THR_UP * couples / 100.0f);
-	    System.out.println("The roundtrippers will measure time when at least "+THR_UP+" agents have been created.");
+	    logger.log(Logger.INFO,"The roundtrippers will measure time when at least "+THR_UP+" agents have been created.");
 	}
 	agents++;
     }
 
     synchronized static void decreaseNumAgents() {
         terminatedAgents++;
-        System.out.println(agents-terminatedAgents+" still active.");
+        logger.log(Logger.INFO,agents-terminatedAgents+" still active.");
     }
 
     static Vector times = new Vector();
@@ -116,7 +120,7 @@ public class RoundTripSender extends Agent {
         }
         rtt = totalTime / (double)n;
         standardDev = Math.sqrt( ( n * tot1 - tot2 * tot2 ) / ( n * (n-1) ) );
-        System.out.println( "Average RTT=" + rtt + " msec Dev.Std=" + standardDev );
+        logger.log(Logger.INFO,"Average RTT=" + rtt + " msec Dev.Std=" + standardDev );
         return rtt;
     }
 
@@ -124,7 +128,7 @@ public class RoundTripSender extends Agent {
 			if (agents >= THR_UP) {
 				if (!startPrinted) {
 					startPrinted = true;
-					System.out.println(agents+" agents are active. Start measuring...");
+					logger.log(Logger.INFO,agents+" agents are active. Start measuring...");
 				}
 				return true;
 			}
