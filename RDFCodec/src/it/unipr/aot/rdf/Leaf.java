@@ -59,8 +59,6 @@ import java.io.IOException;
 
     void toStream(DataOutputStream stream) throws IOException{
   	  try{
-  	    System.out.println("\n LEAF name:   "+getName());
-  	    System.out.println("\n LEAF value:  "+getValue());
   	    stream.writeUTF(getName());
   	    stream.writeUTF(getValue());
       }catch (IOException ioe) {
@@ -75,7 +73,6 @@ import java.io.IOException;
       }
 
       System.out.println(getName()+ "   " + getValue());
-
     }
 
     public void dump() {

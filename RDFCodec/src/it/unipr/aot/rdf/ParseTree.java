@@ -150,7 +150,6 @@ class ParseTree extends Node{
 
   void toStream(DataOutputStream stream) throws IOException{
     try{
-	  System.out.println("\n PARSETREE Name:   "+getName());
 	  stream.writeUTF(getName());
 	  for (int i=0; i<size(); i++)
         ((Node)getNode(i)).toStream(stream);

@@ -62,7 +62,6 @@ public class RDFFrameConsumer implements RDFConsumer, RDFParserWrapper{
   }
 
   public void endModel () {
-   // System.out.println("Total statements: " + num);
   }
 
   public NodeFactory getNodeFactory() {
@@ -78,7 +77,6 @@ public class RDFFrameConsumer implements RDFConsumer, RDFParserWrapper{
     Each main resource (main AbsObject) has a tree associated
    */
   public void addStatement (Statement s){
-	//System.out.println(s);
     parseTreeBuilder.addStatement(s);
   }
 

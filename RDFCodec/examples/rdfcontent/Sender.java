@@ -29,6 +29,7 @@ import jade.lang.acl.ACLMessage;
 
 import jade.util.leap.List;
 import jade.util.leap.ArrayList;
+import jade.util.Logger;
 
 import jade.content.*;
 import jade.content.abs.*;
@@ -47,6 +48,8 @@ public class Sender extends Agent {
 
     class SenderBehaviour extends SimpleBehaviour {
 	private boolean finished = false;
+	
+	private static Logger logger = Logger.getMyLogger(Sender.class.getName());
 
 	public SenderBehaviour(Agent a) { super(a); }
 
@@ -55,7 +58,7 @@ public class Sender extends Agent {
 	public void action() {
 	    try {
 		// Preparing the first message
-		System.out.println( "[" + getLocalName() + "] Creating inform message with content fatherOf(man :name John :address London, [man :name Bill :address Paris])");
+		logger.log(Logger.INFO, "[" + getLocalName() + "] Creating inform message with content fatherOf(man :name John :address London, [man :name Bill :address Paris])");
 
 		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 		AID receiver = new AID("receiver", false);
@@ -93,13 +96,13 @@ public class Sender extends Agent {
 		manager.fillContent(msg, fatherOf);
 
 		// Send the message
-		System.out.println( "[" + getLocalName() + "] Sending the message...");
+		logger.log(Logger.INFO, "[" + getLocalName() + "] Sending the message...");
 		send(msg);
 
 		// Now ask the proposition back.
 		// Use a query-ref with the following content:
 		// iota ?x fatherOf(?x, [man :name "Bill" :address "Paris"])
-		System.out.println( "[" + getLocalName() + "] Creating query-ref message with content iota ?x fatherOf(?x, [man :name Bill :address Paris])");
+		logger.log(Logger.INFO, "[" + getLocalName() + "] Creating query-ref message with content iota ?x fatherOf(?x, [man :name Bill :address Paris])");
 		msg.setPerformative(ACLMessage.QUERY_REF);
 
 		// Create an abstract descriptor from scratch
@@ -127,7 +130,7 @@ public class Sender extends Agent {
 		manager.fillContent(msg, absIRE);
 
 		// Send the message
-		System.out.println( "[" + getLocalName() + "] Sending the message...");
+		logger.log(Logger.INFO, "[" + getLocalName() + "] Sending the message...");
 		send(msg);
 	    } catch(Exception e) { e.printStackTrace(); }
 

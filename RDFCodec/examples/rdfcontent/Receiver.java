@@ -31,6 +31,7 @@ import jade.content.*;
 import jade.content.abs.*;
 import jade.content.onto.*;
 import jade.content.lang.*;
+import jade.util.Logger;
 import it.unipr.aot.rdf.RDFCodec;
 
 import examples.rdfcontent.ontology.*;
@@ -40,6 +41,9 @@ public class Receiver extends Agent {
     private Codec          codec       = new RDFCodec();
     private Ontology   ontology    = PeopleOntology.getInstance();
     private FatherOf       proposition = null;
+    
+    //logging
+    private static Logger logger = Logger.getMyLogger(Receiver.class.getName());
 
     class ReceiverBehaviour extends SimpleBehaviour {
 	private boolean finished = false;
@@ -51,7 +55,7 @@ public class Receiver extends Agent {
 	public void action() {
 	    for(int c = 0; c < 2; c++) {
 		try {
-		    System.out.println( "[" + getLocalName() + "] Waiting for a message...");
+		    logger.log(Logger.INFO, "[" + getLocalName() + "] Waiting for a message...");
 
 		    ACLMessage msg = blockingReceive();
 
@@ -61,7 +65,7 @@ public class Receiver extends Agent {
 			    ContentElement p = manager.extractContent(msg);
 			    if(p instanceof FatherOf) {
 				proposition = (FatherOf)p;
-				System.out.println("[" + getLocalName() + "] Receiver inform message: information stored.");
+				logger.log(Logger.INFO,"[" + getLocalName() + "] Receiver inform message: information stored.");
 				break;
 			    }
 			case ACLMessage.QUERY_REF:
@@ -89,12 +93,12 @@ public class Receiver extends Agent {
 
 				send(reply);
 
-				System.out.println("[" + getLocalName() + "] Received query-ref message: reply sent:");
+				logger.log(Logger.INFO,"[" + getLocalName() + "] Received query-ref message: reply sent:");
 				System.out.println(absEquals);
 				break;
 			    }
 			default:
-			    System.out.println("[" + getLocalName() + "] Malformed message.");
+			    logger.log(Logger.INFO,"[" + getLocalName() + "] Malformed message.");
 			}
 		    }
 		} catch(Exception e) { e.printStackTrace(); }

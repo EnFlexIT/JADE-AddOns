@@ -55,7 +55,6 @@ import java.io.IOException;
 
     void toStream(DataOutputStream stream) throws IOException{
   	  try{
-  	    System.out.println("\n NODE Name:   "+getName());
   	    stream.writeUTF(getName());
       }catch (IOException ioe) {
 	     throw ioe;

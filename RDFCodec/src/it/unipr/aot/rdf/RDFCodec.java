@@ -201,7 +201,6 @@ public class RDFCodec extends ByteArrayCodec {
       Iterator i=parseTreeList.iterator();
       ParseTree node = (ParseTree) i.next();
 
-      // System.out.println("\n Tree Dump ");
       // node.dump();
 
       AbsObject obj = read(node, ontology);
@@ -250,7 +249,6 @@ public class RDFCodec extends ByteArrayCodec {
         try {
             String kind = node.getName();
 
-            //System.out.println("\n\nKIND:  "+kind);
 
             if (kind.equals(URI_REFERENCE)||kind.equals(REFERENCE)) {
 /*
@@ -290,7 +288,6 @@ public class RDFCodec extends ByteArrayCodec {
                        value = ((Leaf) node.getNode(0)).getValue();//reads value
 				}else throw new OntologyException("error in primitive type");
 
-                //System.out.println("\nType:  "+type+"   Value: "+value);
                 AbsPrimitive abs = null;
 
                 if (type.equalsIgnoreCase("String")) {
@@ -330,7 +327,6 @@ public class RDFCodec extends ByteArrayCodec {
                 AbsAggregate abs = new AbsAggregate(typeName);
 
                 for (int i=0; i<node.size(); i++){
-                   //System.out.println("\n\nElement - Aggregate\n");
                    if (!(node.getNode(i).getName().equals(AGGREGATE_ELEMENT)||
                          node.getNode(i).getName().equals(URI_AGGREGATE_ELEMENT)))
                          throw new OntologyException("error in aggregate element");
@@ -346,7 +342,6 @@ public class RDFCodec extends ByteArrayCodec {
                 AbsContentElementList abs = new AbsContentElementList();
 
                 for (int i=0; i<node.size(); i++){
-                   //System.out.println("\n\nElement - Aggregate\n");
                    if (!(node.getNode(i).getName().equals(CONTENT_ELEMENT)||
                          node.getNode(i).getName().equals(URI_CONTENT_ELEMENT)))
                          throw new OntologyException("error in content element");
@@ -358,7 +353,6 @@ public class RDFCodec extends ByteArrayCodec {
                 return abs;
             }
 
-            //System.out.println("\n\n Node dump");
             //node.dump();
 
             String   typeName = null;
@@ -376,7 +370,6 @@ public class RDFCodec extends ByteArrayCodec {
             ObjectSchema schema = ontology.getSchema(typeName);
             AbsObject    abs = schema.newInstance();
 
-            //System.out.println("\n\nTYPENAME  absObject:  "+abs.getTypeName());
 
 			//object (resource) with ID
             if (((ParseTree)node).getID()!=null) 
@@ -416,7 +409,6 @@ public class RDFCodec extends ByteArrayCodec {
 
 
                 if (slotValue != null && slotName != null) {
-  				  //System.out.println("\nwrite attribute of: "+slotName);
                   AbsHelper.setAttribute(abs, slotName, slotValue);
                 }
             }
