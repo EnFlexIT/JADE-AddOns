@@ -52,7 +52,7 @@ import jade.util.Logger;
 public class UseAgentTag extends BodyTagSupport {
 
      String container;	     
-     jade.wrapper.Agent ac;
+     jade.wrapper.AgentController ac;
      
      //logger object
      private static Logger logger = Logger.getMyLogger(UseAgentTag.class.getName());

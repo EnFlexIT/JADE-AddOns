@@ -59,8 +59,8 @@ public class SendObjectTag extends BodyTagSupport {
 	    if (scope==0) {
 		throw new JspException ("sendObject: id "+id+" not found");
 	    }
-	    jade.wrapper.Agent agent =
-		(jade.wrapper.Agent) pageContext.getAttribute(id,scope);
+	    jade.wrapper.AgentController agent =
+		(jade.wrapper.AgentController) pageContext.getAttribute(id,scope);
 	    if (agent==null) {
 		throw new JspException ("sendObject: id "+id+" not found");
 	    }
