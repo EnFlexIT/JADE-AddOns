@@ -22,6 +22,7 @@ It is created according a JADE's build.xml.
 	<property name="build" location="classes"/>
 	<property name="demo" location="demo"/>
 	<property name="misc" location="misc"/>
+  <property name="libJADEDir" value="../../lib"/>
 
 	<target name="init">
 		<!-- Create the time stamp -->
@@ -33,7 +34,12 @@ It is created according a JADE's build.xml.
 	</target>
 
 	<target name="compile" depends="init" description="compile the source">
-	    <javac srcdir="${src}" destdir="${build}" nowarn="off" target="1.4" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="on" excludes="demo/**,examples/**,test/**"/>
+	    <javac srcdir="${src}" destdir="${build}" nowarn="off" target="1.4" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="on" excludes="demo/**,examples/**,test/**">
+	      <classpath>
+	        <fileset dir="${libJADEDir}" includes="*.jar"/>
+	        <fileset dir="${lib}" includes="**/*.jar"/>
+	      </classpath>
+	    </javac>
 	    <copy todir="${build}">
 			<fileset file="${misc}/wsig.mf"/>
 	    </copy>
@@ -48,11 +54,16 @@ It is created according a JADE's build.xml.
 	</target>
 
 	<target name="doc" depends="init" description="generate javadoc documentation">
-		<javadoc destdir="${doc}/api" author="true" windowtitle="WSIG ${version} API Reference" sourcepath="${src}" use="true" packagenames="com.whitestein.wsig"/>
+		<javadoc destdir="${doc}/api" author="true" windowtitle="WSIG ${version} API Reference" sourcepath="${src}" use="true" packagenames="com.whitestein.wsig">
+      <classpath>
+        <fileset dir="${libJADEDir}" includes="*.jar"/>
+        <fileset dir="${lib}" includes="**/*.jar"/>
+      </classpath>
+    </javadoc>
 	</target>
 
 	<target name="dist" depends="init,compile,lib,doc" description="generate the distribution">
-		<zip zipfile="../../../WSIG-beta.0.4.zip" basedir="../../.." includes="jade/add-ons/wsig/**" />
+		<zip zipfile="../../../WSIGAddOn-beta.0.4.zip" basedir="../../.." includes="jade/add-ons/wsig/**" excludes="jade/add-ons/wsig/classes/**"/>
 	</target>
 	
 	<target name="clean" description="clean up">
