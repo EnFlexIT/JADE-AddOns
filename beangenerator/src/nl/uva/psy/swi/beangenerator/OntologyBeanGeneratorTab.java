@@ -4,12 +4,12 @@
  *  (C) 2002 TILAB S.p.A. This file is donated by Acklin B.V. to the JADE
  *  project. GNU Lesser General Public License This library is free software;
  *  you can redistribute it and/or modify it under the terms of the GNU Lesser
- *  General Public License as published by the Free Software Foundation, version
+     *  General Public License as published by the Free Software Foundation, version
  *  2.1 of the License. This library is distributed in the hope that it will be
  *  useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser
  *  General Public License for more details. You should have received a copy of
- *  the GNU Lesser General Public License along with this library; if not, write
+     *  the GNU Lesser General Public License along with this library; if not, write
  *  to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
  *  MA 02111-1307, USA. **************************************************************
  */
@@ -38,9 +38,6 @@ import edu.stanford.smi.protege.util.*;
 
 import edu.stanford.smi.protege.widget.*;
 
-//Jade
-import jade.util.Logger;
-
 /**
  *  Main class which handles the Ontology generation
  *
@@ -48,11 +45,9 @@ import jade.util.Logger;
  *@author     Jamie Lawrence - Media Lab Europe
  *@created    November 14, 2002
  */
-public class OntologyBeanGeneratorTab extends InstancesTab {
+public class OntologyBeanGeneratorTab
+  extends InstancesTab {
 
-  //logging 
-  private static Logger logger = Logger.getMyLogger(OntologyBeanGeneratorTab.class.getName());
-	
   /**
    *  Get the cardinality of this slot and build the appropriate String
    *  Ultimately there are two possible outputs: For singule slots its either
@@ -72,14 +67,16 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     // specify the optionality
     if (min == 0) {
       optionality = "ObjectSchema.OPTIONAL";
-    } else {
+    }
+    else {
       optionality = "ObjectSchema.MANDATORY";
     }
 
     // maximum cardinality (either specify the max or infinite)
     if (max >= 1) {
       maxString = Integer.toString(max);
-    } else {
+    }
+    else {
       maxString = "ObjectSchema.UNLIMITED";
     }
 
@@ -87,7 +84,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     StringBuffer schemaParams = new StringBuffer();
     if (max == 1) {
       schemaParams.append(optionality);
-    } else {
+    }
+    else {
       // attributes with ranges
       schemaParams.append(min);
       schemaParams.append(", ");
@@ -143,7 +141,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       if (isJADEPrimitive(superClass) || !isIgnored(superClass)) {
         break;
       }
-    } while (superClass.getDirectSuperclassCount() > 0);
+    }
+    while (superClass.getDirectSuperclassCount() > 0);
 
     return superClass;
   }
@@ -180,7 +179,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
 
       result.append(" implements ");
       result.append(superClassName);
-    } else {
+    }
+    else {
       // Extending an existing class in the ontology
       // FIXME: Should overwrite the java specific inheritence???
       //        if(result.length() == 0){
@@ -282,7 +282,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
                             "In JADE it is not possible to inherit from Predicates.  Unable to add class " +
                             theCls.getName());
       }
-    } while (superSuperClass.getDirectSuperclassCount() > 0);
+    }
+    while (superSuperClass.getDirectSuperclassCount() > 0);
 
     // ignore inheritence from the basic bean classes
     if (isJADEPrimitive(superClass)) {
@@ -294,7 +295,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     String classSchema = converter.toSchemaVariableName(theCls, null);
 
     //        className = OntologyBeanGeneratorUtil.firstDown(className);
-    ontologyInheritance.append("    " + classSchema + ".addSuperSchema(" + superClassSchema +
+    ontologyInheritance.append("    " + classSchema + ".addSuperSchema(" +
+                               superClassSchema +
                                ");\n");
   }
 
@@ -339,18 +341,22 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
 
       // define the role schema and and the name mapping
       addRoleToSchema(theCls, theSlot);
-    } catch (Exception e) {
-      JOptionPane.showMessageDialog(null, "Something went wrong with Slot: " + theSlot.getName() + " of class: " + theCls.getName(), "error",
+    }
+    catch (Exception e) {
+      JOptionPane.showMessageDialog(null,
+                                    "Something went wrong with Slot: " +
+                                    theSlot.getName() + " of class: " +
+                                    theCls.getName(), "error",
                                     JOptionPane.ERROR_MESSAGE);
       return;
     }
   }
 
-  private void addRoleNameConstant(Cls theCls, Slot theSlot)
-    throws Exception {
+  private void addRoleNameConstant(Cls theCls, Slot theSlot) throws Exception {
     String slotName = converter.getSlotName(theSlot);
     slotName = ProtegeTools.toJavaString(slotName); //added by J.Picault
-    if ((slotName.length() < 1) || (slotName.charAt(0) == ':')) {
+    //System.out.println("slotName: " + slotName);
+    if ( (slotName.length() < 1) || (slotName.charAt(0) == ':')) {
       throw new Exception("Invalid slot name");
     }
     // used to inform caller of an invalid name
@@ -404,7 +410,6 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       termString = "(TermSchema)";
     }
 
-
     if (c.size() == 1) {
       // one allowed class
 
@@ -414,28 +419,19 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       Cls allowedCls = (Cls) c.iterator().next();
       ontologyType = allowedCls.getName();
       // if this is a JADE primative class, use the Basic Ontology
-      if (ontologyType.equalsIgnoreCase("Concept")){
-        ontologyType = "(ConceptSchema) ConceptSchema.getBaseSchema()";
-      } else if (ontologyType.equalsIgnoreCase("Predicate")){
-        ontologyType = "(PredicateSchema) PredicateSchema.getBaseSchema()";
-      } else if (ontologyType.equalsIgnoreCase("AgentAction")){
-        ontologyType = "(AgentActionSchema) AgentActionSchema.getBaseSchema()";
-      } else if (ontologyType.equalsIgnoreCase("AID")) {
-        termString = "(ConceptSchema)";
-        ontologyType = "BasicOntology." + ontologyType.toUpperCase();
-      /*
       if (ontologyType.equalsIgnoreCase("Concept") ||
           ontologyType.equalsIgnoreCase("AID") ||
           ontologyType.equalsIgnoreCase("AgentAction") ||
           ontologyType.equalsIgnoreCase("Predicate")) {
         if (ontologyType.equalsIgnoreCase("AID")) {
           termString = "(ConceptSchema)";
-        } else {
+        }
+        else {
           termString = "(PrimitiveSchema)";
         }
         ontologyType = "BasicOntology." + ontologyType.toUpperCase();
-      */
-      } else {
+      }
+      else {
         // else, use the schema for the class
         termString = "(TermSchema)";
         // FIXME: what wrong?
@@ -445,7 +441,9 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     }
     if (c.size() > 1) {
       // multiple classes allowed, default to Concept
-      termSchemaString   = "(ConceptSchema) ConceptSchema.getBaseSchema()";
+      ontologyType = "BasicOntology.STRING";
+      termString = "(TermSchema)";
+      termSchemaString = "new ConceptSchema(\"Concept\")";
     }
 
     //    if (theSlot.getOwnSlotAllowsMultipleValues(theSlot)) {
@@ -456,7 +454,7 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
 
     // ignore all system classes
     if (ontologyType.toString().charAt(0) == ':') {
-      logger.log(Logger.WARNING,"ignore ontology type!, returning");
+      System.out.println("ingnore ontology type!, returning");
       return;
     }
 
@@ -464,7 +462,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     if (termSchemaString == null) {
       if (termString == null) {
         termSchemaString = ontologyType;
-      } else {
+      }
+      else {
         termSchemaString = termString + "getSchema(" + ontologyType + ")";
       }
       //termSchemaString = ProtegeTools.toJavaString(termSchemaString);
@@ -546,17 +545,23 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
         if (fullBeanSupport) {
           ps.println(", Serializable {");
           ps.println("   // bean stuff");
-          ps.println("   protected PropertyChangeSupport pcs = new PropertyChangeSupport(this);\n");
-          ps.println("   public void addPropertyChangeListener(PropertyChangeListener pcl) {");
+          ps.println(
+                     "   protected PropertyChangeSupport pcs = new PropertyChangeSupport(this);\n");
+          ps.println(
+                     "   public void addPropertyChangeListener(PropertyChangeListener pcl) {");
           ps.println("     pcs.addPropertyChangeListener(pcl);\n" + "   }\n");
-          ps.println("   public void removePropertyChangeListener(PropertyChangeListener pcl) {");
+          ps.println(
+                     "   public void removePropertyChangeListener(PropertyChangeListener pcl) {");
           ps.println("     pcs.removePropertyChangeListener(pcl);\n" + "   }\n");
-        } else if (microSupport) {
+        }
+        else if (microSupport) {
           ps.println(", Introspectable {");
-        } else {
+        }
+        else {
           ps.println(" {");
         }
-      } else {
+      }
+      else {
         ps.println("public class " + theName + superClass + "{ ");
       }
       ps.println();
@@ -566,12 +571,13 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
         Object codeVal = theCls.getOwnSlotValue(javaJavaCodeSlot);
         if (codeVal != null) {
           ps.println("//////////////////////////// User code");
-          ps.println((String) codeVal);
+          ps.println( (String) codeVal);
         }
       }
 
       return ps;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       e.printStackTrace();
     }
     return null;
@@ -585,13 +591,15 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
   private PrintStream createOntologyFile() {
     PrintStream ps;
     try {
-      StringBuffer fileName = new StringBuffer(converter.toDir(packageName, dirName));
+      StringBuffer fileName = new StringBuffer(converter.toDir(packageName,
+                                                               dirName));
       fileName.append("/");
       fileName.append(converter.toOntologyClassName(ontologyName));
       fileName.append(".java");
 
       File f = new File(fileName.toString());
-      ontologyBeanGeneratorPanel.statusTextArea.append("created ontology file: " +
+      ontologyBeanGeneratorPanel.statusTextArea.append(
+                                                       "created ontology file: " +
                                                        fileName.toString() +
                                                        "\n");
 
@@ -602,7 +610,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
                  " generated by ontology bean generator.  DO NOT EDIT, UNLESS YOU ARE REALLY SURE WHAT YOU ARE DOING!");
 
       // package line
-      packageName = (String) ontologyBeanGeneratorPanel.packageComboBox.getSelectedItem();
+      packageName = (String) ontologyBeanGeneratorPanel.packageComboBox.
+        getSelectedItem();
       ps.println("package " + packageName + ";");
       ps.println();
 
@@ -638,7 +647,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
         ps.println("   private HashMap jadeToProtege;");
 
         ps.println();
-      } else {
+      }
+      else {
         ps.println(" {");
       }
 
@@ -647,11 +657,15 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
                  ontologyName + "\";");
       ps.println("  // The singleton instance of this ontology");
       if (microSupport) {
-        ps.println("  private static MicroIntrospector introspect = new MicroIntrospector();");
-      } else {
+        ps.println(
+                   "  private static MicroIntrospector introspect = new MicroIntrospector();");
+      }
+      else {
         if (useJADENames) {
-          ps.println("  private static ProtegeIntrospector introspect = new ProtegeIntrospector();");
-        } else {
+          ps.println(
+                     "  private static ProtegeIntrospector introspect = new ProtegeIntrospector();");
+        }
+        else {
           ps.println("  private static ReflectiveIntrospector introspect = new ReflectiveIntrospector();");
         }
       }
@@ -666,7 +680,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       if (!microSupport && useJADENames) {
         ps.println("   // ProtegeOntology methods");
 
-        ps.println("   public SlotHolder getSlotNameFromJADEName(SlotHolder jadeSlot) {");
+        ps.println(
+                   "   public SlotHolder getSlotNameFromJADEName(SlotHolder jadeSlot) {");
         ps.println("     return (SlotHolder) jadeToProtege.get(jadeSlot);");
         ps.println("   }");
         ps.println();
@@ -700,7 +715,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       ontologyHeader.append("    " + "try { \n");
 
       return ps;
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       JOptionPane.showMessageDialog(null, e.getMessage(), "error",
                                     JOptionPane.ERROR_MESSAGE);
       ontologyBeanGeneratorPanel.statusTextArea.append(e.getMessage() + "\n");
@@ -718,7 +734,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
    *@param  extern   Description of the Parameter
    *@param  intern   Description of the Parameter
    */
-  private void createSlot(PrintStream ps, Cls theCls, Slot theSlot, StringBuffer extern,
+  private void createSlot(PrintStream ps, Cls theCls, Slot theSlot,
+                          StringBuffer extern,
                           StringBuffer intern) {
     boolean multipleSetters = false;
     String theVarName = ProtegeTools.toJavaVariableStyleString(theSlot.getName());
@@ -751,7 +768,7 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       }
 
       if (c.size() == 1) {
-        theType = ((Cls) c.iterator().next()).getName();
+        theType = ( (Cls) c.iterator().next()).getName();
         if (theType.charAt(0) == ':') {
           ontologyBeanGeneratorPanel.statusTextArea.append("     skipping " +
                                                            theType + "\n");
@@ -772,15 +789,16 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
           theType.equalsIgnoreCase("float")) {
         theType = theType.toLowerCase();
         absSlotType = theVarName;
-      } else {
+      }
+      else {
         theType = ProtegeTools.toJavaString(theType);
         theType = ProtegeTools.firstUpper(theType);
       }
 
       // Add any documentation in Protege to this slot
       ps.println("   /**");
-      ps.println("    * "+getDocumentation(theSlot));
-      ps.println("    */");
+      ps.println(getDocumentation(theSlot));
+      ps.println("   */");
 
       // create the private variable for the slot
       ps.println("   private " + theType + " " + theVarName + ";");
@@ -799,11 +817,13 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
               theType.equals("boolean")) {
             ps.print("this." + theVarName);
             ps.println(", value);");
-          } else if (theType.equals("float")) {
+          }
+          else if (theType.equals("float")) {
             ps.print("\"\"+this." + theVarName);
             ps.println(", \"\"+value);");
 
-          } else {
+          }
+          else {
             ps.print("(this." + theVarName + "==null?new " + theType +
                      "():this." + theVarName + ")");
             ps.println(", value);");
@@ -818,7 +838,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
                  "() {");
       ps.println("     return this." + theVarName + ";\n" + "   }");
       ps.println();
-    } else {
+    }
+    else {
       // multiple cardinality
 
       String oldStr = "     List oldList = this." + theVarName + ";";
@@ -838,7 +859,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       ps.println("   private List " + theVarName + " = new ArrayList();");
 
       //create adder
-      ps.println("   public void " + converter.toAddMethod(theSlot) + "(" + theType +
+      ps.println("   public void " + converter.toAddMethod(theSlot) + "(" +
+                 theType +
                  " elem) { ");
       ps.println(oldStr);
       ps.println("     " + theVarName + ".add(elem);");
@@ -860,7 +882,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       ps.println("   }");
 
       //clearer
-      ps.println("   public void " + converter.toClearAllMethod(theSlot) + "() {");
+      ps.println("   public void " + converter.toClearAllMethod(theSlot) +
+                 "() {");
       ps.println("" + oldStr);
       ps.println("     " + theVarName + ".clear();");
       if (propertyStr != "") {
@@ -902,7 +925,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       extern.append("onto.fromObject(");
       extern.append(converter.toGetMethod(theSlot));
       extern.append("())");
-    } else {
+    }
+    else {
       extern.append(absSlotType);
     }
 
@@ -923,7 +947,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       intern.append(".");
       intern.append(converter.toRoleConstant(theCls, theSlot));
       intern.append(");\n");
-    } else {
+    }
+    else {
       intern.append(" = (");
       intern.append(theType);
       intern.append(")");
@@ -951,7 +976,8 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       if (ontologyFile == null) {
         return;
       }
-    } else {
+    }
+    else {
       ontologyFile = null;
     }
 
@@ -961,16 +987,17 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     Cls agtactCls = itsKB.getCls(AGENTACTION);
     Cls predClS = itsKB.getCls(PREDICATE);
 
-    Collection conceptCol = conceptCls.getSubclasses();
-    Collection aidCol = AIDCls.getSubclasses();
-    Collection agtactClsCol = agtactCls.getSubclasses();
-    Collection predCol = predClS.getSubclasses();
+    Collection conceptCol =  new HashSet(conceptCls.getSubclasses());
+    Collection aidCol = new HashSet(AIDCls.getSubclasses());
+    Collection agtactClsCol = new HashSet(agtactCls.getSubclasses());
+    Collection predCol = new HashSet(predClS.getSubclasses());
 
     // filter the classes.  i.e. remove duplicates, system and ignored classes
     filterClasses(conceptCol, aidCol, agtactClsCol, predCol);
 
     // setup the JProgressBar
-    int max = conceptCol.size() + aidCol.size() + agtactClsCol.size() + predCol.size();
+    int max = conceptCol.size() + aidCol.size() + agtactClsCol.size() +
+      predCol.size();
     ontologyBeanGeneratorPanel.progress.setMaximum(max);
     ontologyBeanGeneratorPanel.progress.setMinimum(0);
 
@@ -1013,11 +1040,21 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
                              Collection agtactClsCol, Collection predCol) {
     // ensure we don't regenerate the classes Concept, AID, AgentAction
     // as they also inherit from Concept
-    conceptCol.remove(itsKB.getCls(CONCEPT));
-    conceptCol.remove(itsKB.getCls(AID));
-    conceptCol.remove(itsKB.getCls(AGENTACTION));
+    if (itsKB.getCls(CONCEPT) == null) {
+      System.out.println("no Concepts found");
+    }
+    else {
+      System.out.println("removing: " + itsKB.getCls(CONCEPT).getClass());
+      conceptCol.remove(itsKB.getCls(CONCEPT));
+    }
+    if (itsKB.getCls(AID) != null) {
+      conceptCol.remove(itsKB.getCls(AID));
+    }
+    if (itsKB.getCls(AGENTACTION) != null) {
+      conceptCol.remove(itsKB.getCls(AGENTACTION));
 
-    // remove all agent actions from the concepts
+      // remove all agent actions from the concepts
+    }
     Iterator agtactClsItor = agtactClsCol.iterator();
     while (agtactClsItor.hasNext()) {
       conceptCol.remove(agtactClsItor.next());
@@ -1037,9 +1074,12 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
   }
 
   private void finishUpRole(Cls theCls) {
-    if (!microSupport){
-      ontologyHeader.append("    add(" + converter.toSchemaVariableName(theCls, null) + ", " + this.packageName + "." + converter.toJavaTypeName(theCls) + ".class);\n");
-    } else {
+    // modified by J.Picault
+    if (!microSupport)
+      ontologyHeader.append("    add(" + converter.toSchemaVariableName(theCls, null) +
+                            ", " + this.packageName + "." +
+                            converter.toJavaTypeName(theCls) + ".class);\n");
+    else  {
       ontologyHeader.append("    add(" + converter.toSchemaVariableName(theCls, null) + ", Class.forName(\"" + this.packageName + "." + converter.toJavaTypeName(theCls) + "\"));\n");
     }
 
@@ -1050,18 +1090,20 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       //  jalopy.setInput(source);
       //  jalopy.setOutput(source);
       //  jalopy.format();
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
       ex.printStackTrace();
     }
   }
 
   /**
-   *  Generate each type; Concept, AgentAction, AID and Predicate
+   *  Generate each type; Concwept, AgentAction, AID and Predicate
    *
    *@param  theClasses      Description of the Parameter
    *@param  collectionName  Description of the Parameter
    */
-  private void generateByCollection(Collection theClasses, String collectionName) {
+  private void generateByCollection(Collection theClasses,
+                                    String collectionName) {
     ontologyHeader.append("\n    // adding " + collectionName + "(s)\n");
 
     Iterator classIter = theClasses.iterator();
@@ -1074,11 +1116,12 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
         //className = OntologyBeanGeneratorUtil.firstUpper(className);
         String superClassString = getSuperClass(theCls);
 
-        boolean isSuperBean = ((superClassString.indexOf("implements") >= 0)
-                               ? true : false);
+        boolean isSuperBean = ( (superClassString.indexOf("implements") >= 0)
+                                ? true : false);
         try {
           addInheritance(theCls);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
           e.printStackTrace();
           break;
         }
@@ -1138,8 +1181,9 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
                                                              "  added slots:\n");
           }
 
-          Collection theSlots = OntologyBeanGeneratorUtil.getDirectTemplateSlots(
-                                                                                 theCls);
+          Collection theSlots = new HashSet(OntologyBeanGeneratorUtil.
+                                            getDirectTemplateSlots(
+                                                                   theCls));
           Iterator slotIter = theSlots.iterator();
 
           // For each slot
@@ -1189,17 +1233,20 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
               format(file);
             }
           }
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
           e.printStackTrace();
         }
       }
       // end if
       // update the progress bar
-      ontologyBeanGeneratorPanel.progress.setValue(ontologyBeanGeneratorPanel.progress.getValue() + 1);
+      ontologyBeanGeneratorPanel.progress.setValue(ontologyBeanGeneratorPanel.
+                                                   progress.getValue() + 1);
       ontologyBeanGeneratorPanel.progress.repaint();
     }
     // end while
   }
+
   // the formatter
   //    private Jalopy jalopy;
 
@@ -1217,19 +1264,24 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     ontologyBeanGeneratorPanel = new OntologyBeanGeneratorPanel(this);
     add(ontologyBeanGeneratorPanel);
     Cls projectAnno = itsKB.getCls(PROJECTANNOTATION);
-    if (projectAnno==null) {
-      logger.log(Logger.WARNING,"Do not forget to include the project SimpeJADEAbstractOntology");
+    if (projectAnno == null) {
+      System.out.println(
+                         "Warning: Do not forget to include the project SimpeJADEAbstractOntology");
       //      JOptionPane.showMessageDialog(null, "Do not forget to include the project SimpeJADEAbstractOntology", "include SimpeJADEAbstractOntology",
       //       JOptionPane.ERROR_MESSAGE);
       return;
     }
     if (projectAnno.getInstanceCount() == 0) {
-      this.projectAnnoInstance = projectAnno.createDirectInstance("project annotation");
-    } else {
-      this.projectAnnoInstance = (Instance) projectAnno.getInstances().iterator().next();
+      this.projectAnnoInstance = projectAnno.createDirectInstance(
+                                                                  "project annotation");
+    }
+    else {
+      this.projectAnnoInstance = (Instance) projectAnno.getInstances().iterator().
+        next();
       this.retrieveProjectAnnotation();
     }
   }
+
   private void removeIgnoredClasses(Collection col) {
     Iterator iter = col.iterator();
     while (iter.hasNext()) {
@@ -1241,7 +1293,7 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
   }
 
   /**
-   *  Reset all global fields and read oprtions
+   *  Reset all global fields and read options
    */
   private void reset() {
     ontologyHeader = new StringBuffer();
@@ -1250,36 +1302,70 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     ontologyInheritance = new StringBuffer();
     nameMapping = new StringBuffer();
 
-    ontologyName = (String) ontologyBeanGeneratorPanel.ontologyComboBox.getSelectedItem();
+    ontologyName = (String) ontologyBeanGeneratorPanel.ontologyComboBox.
+      getSelectedItem();
     ontologyBeanGeneratorPanel.progress.setValue(0);
 
     // Get the JADE_CLASS and the definition of the slot, JADE_NAME etc
+
     Cls jadeClass = itsKB.getCls(JADE_CLASS);
-    Collection jadeClassSlots = jadeClass.getDirectTemplateSlots();
-    Iterator iter = jadeClassSlots.iterator();
-    while (iter.hasNext()) {
-      Slot slot = (Slot) iter.next();
-      if (slot.getName().equals(JADE_JAVA_BASE_CLASS_SLOT)) {
-        javaSuperClassSlot = slot;
-      } else if (slot.getName().equals(JADE_JAVA_CODE_SLOT)) {
-        javaJavaCodeSlot = slot;
-      } else if (slot.getName().equals(JADE_IGNORED_SLOT)) {
-        jadeIgnoredSlot = slot;
-      } else if (slot.getName().equals(PROTEGE_DOC)) {
-        protegeDoc = slot;
+    try {
+      Collection jadeClassSlots = jadeClass.getDirectTemplateSlots();
+      Iterator iter = jadeClassSlots.iterator();
+      while (iter.hasNext()) {
+        Slot slot = (Slot) iter.next();
+        if (slot.getName().equals(JADE_JAVA_BASE_CLASS_SLOT)) {
+          javaSuperClassSlot = slot;
+        }
+        else if (slot.getName().equals(JADE_JAVA_CODE_SLOT)) {
+          javaJavaCodeSlot = slot;
+        }
+        else if (slot.getName().equals(JADE_IGNORED_SLOT)) {
+          jadeIgnoredSlot = slot;
+        }
+        else if (slot.getName().equals(PROTEGE_DOC)) {
+          protegeDoc = slot;
+        }
       }
     }
+    catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    try {
 
-    // Get the JADE_SLOT class and the definition of the slots, JADE_UNNAMED_SLOT
-    // and JADE_JAVA_BASE_CLASS
-    Cls jadeSlotClass = itsKB.getCls(JADE_SLOT);
-    jadeClassSlots = jadeSlotClass.getDirectTemplateSlots();
-    iter = jadeClassSlots.iterator();
-    while (iter.hasNext()) {
-      Slot slot = (Slot) iter.next();
-      if (slot.getName().equals(JADE_UNNAMED_SLOT)) {
-        jadeUnnamedSlot = slot;
+      Collection jadeClassSlots = jadeClass.getDirectTemplateSlots();
+      Iterator iter = jadeClassSlots.iterator();
+      while (iter.hasNext()) {
+        Slot slot = (Slot) iter.next();
+        if (slot.getName().equals(JADE_JAVA_BASE_CLASS_SLOT)) {
+          javaSuperClassSlot = slot;
+        }
+        else if (slot.getName().equals(JADE_JAVA_CODE_SLOT)) {
+          javaJavaCodeSlot = slot;
+        }
+        else if (slot.getName().equals(JADE_IGNORED_SLOT)) {
+          jadeIgnoredSlot = slot;
+        }
+        else if (slot.getName().equals(PROTEGE_DOC)) {
+          protegeDoc = slot;
+        }
       }
+
+      // Get the JADE_SLOT class and the definition of the slots, JADE_UNNAMED_SLOT
+      // and JADE_JAVA_BASE_CLASS
+      Cls jadeSlotClass = itsKB.getCls(JADE_SLOT);
+      jadeClassSlots = jadeSlotClass.getDirectTemplateSlots();
+      iter = jadeClassSlots.iterator();
+      while (iter.hasNext()) {
+        Slot slot = (Slot) iter.next();
+        if (slot.getName().equals(JADE_UNNAMED_SLOT)) {
+          jadeUnnamedSlot = slot;
+        }
+      }
+
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
     }
 
     // Get generation options from the GUI Panel
@@ -1287,15 +1373,20 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     fullBeanSupport = false;
     if (ontologyBeanGeneratorPanel.microSupport.isSelected()) {
       microSupport = true;
-    } else if (ontologyBeanGeneratorPanel.fullBeanSupport.isSelected()) {
+    }
+    else if (ontologyBeanGeneratorPanel.fullBeanSupport.isSelected()) {
       fullBeanSupport = true;
     }
 
-    dirName = (String) ontologyBeanGeneratorPanel.locationComboBox.getSelectedItem();
-    packageName = (String) ontologyBeanGeneratorPanel.packageComboBox.getSelectedItem();
+    dirName = (String) ontologyBeanGeneratorPanel.locationComboBox.
+      getSelectedItem();
+    packageName = (String) ontologyBeanGeneratorPanel.packageComboBox.
+      getSelectedItem();
     beanGeneration = this.ontologyBeanGeneratorPanel.beansCheckBox.isSelected();
-    ontologyGeneration = this.ontologyBeanGeneratorPanel.jadeCheckBox.isSelected();
-    useJADENames = this.ontologyBeanGeneratorPanel.useJadeNamesCheckBox.isSelected();
+    ontologyGeneration = this.ontologyBeanGeneratorPanel.jadeCheckBox.
+      isSelected();
+    useJADENames = this.ontologyBeanGeneratorPanel.useJadeNamesCheckBox.
+      isSelected();
     applyFormatting = this.ontologyBeanGeneratorPanel.doFormatting.getModel()
       .isSelected();
 
@@ -1329,53 +1420,75 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       Slot ontologySlot = itsKB.getSlot(this.ONTOLOGYNAME_SLOT);
       Slot locationSlot = itsKB.getSlot(this.LOCATION_SLOT);
       Slot supportSlot = itsKB.getSlot(this.SUPPORT_SLOT);
-      String packageName = (String) projectAnnoInstance.getOwnSlotValue(packageSlot);
-      String ontologyName = (String) projectAnnoInstance.getOwnSlotValue(ontologySlot);
-      String locationName = (String) projectAnnoInstance.getOwnSlotValue(locationSlot);
-      String supportLine = (String) projectAnnoInstance.getOwnSlotValue(supportSlot);
+      String packageName = (String) projectAnnoInstance.getOwnSlotValue(
+                                                                        packageSlot);
+      String ontologyName = (String) projectAnnoInstance.getOwnSlotValue(
+                                                                         ontologySlot);
+      String locationName = (String) projectAnnoInstance.getOwnSlotValue(
+                                                                         locationSlot);
+      String supportLine = (String) projectAnnoInstance.getOwnSlotValue(
+                                                                        supportSlot);
       if (packageName != null) {
         this.ontologyBeanGeneratorPanel.packageBoxModel.addElement(packageName);
-        this.ontologyBeanGeneratorPanel.packageComboBox.setSelectedItem(packageName);
+        this.ontologyBeanGeneratorPanel.packageComboBox.setSelectedItem(
+                                                                        packageName);
       }
       if (ontologyName != null) {
-        this.ontologyBeanGeneratorPanel.ontologyBoxModel.addElement(ontologyName);
-        this.ontologyBeanGeneratorPanel.ontologyComboBox.setSelectedItem(ontologyName);
+        this.ontologyBeanGeneratorPanel.ontologyBoxModel.addElement(
+                                                                    ontologyName);
+        this.ontologyBeanGeneratorPanel.ontologyComboBox.setSelectedItem(
+                                                                         ontologyName);
       }
       if (locationName != null) {
-        this.ontologyBeanGeneratorPanel.locationBoxModel.addElement(locationName);
-        this.ontologyBeanGeneratorPanel.locationComboBox.setSelectedItem(locationName);
+        this.ontologyBeanGeneratorPanel.locationBoxModel.addElement(
+                                                                    locationName);
+        this.ontologyBeanGeneratorPanel.locationComboBox.setSelectedItem(
+                                                                         locationName);
       }
 
-      ontologyBeanGeneratorPanel.support.setSelected(ontologyBeanGeneratorPanel.standardSupport.getModel(), true);
-      ontologyBeanGeneratorPanel.exampleTextArea.setText(Examples.getStandardExample());
+      ontologyBeanGeneratorPanel.support.setSelected(ontologyBeanGeneratorPanel.
+                                                     standardSupport.getModel(), true);
+      ontologyBeanGeneratorPanel.exampleTextArea.setText(Examples.
+                                                         getStandardExample());
       if (supportLine != null) {
         if (supportLine.equalsIgnoreCase("j2me")) {
-          ontologyBeanGeneratorPanel.support.setSelected(ontologyBeanGeneratorPanel.microSupport.getModel(), true);
-          ontologyBeanGeneratorPanel.exampleTextArea.setText(Examples.getMicroExample());
+          ontologyBeanGeneratorPanel.support.setSelected(
+                                                         ontologyBeanGeneratorPanel.microSupport.getModel(), true);
+          ontologyBeanGeneratorPanel.exampleTextArea.setText(Examples.
+                                                             getMicroExample());
         }
         if (supportLine.equalsIgnoreCase("j2se")) {
-          ontologyBeanGeneratorPanel.support.setSelected(ontologyBeanGeneratorPanel.standardSupport.getModel(), true);
-          ontologyBeanGeneratorPanel.exampleTextArea.setText(Examples.getStandardExample());
+          ontologyBeanGeneratorPanel.support.setSelected(
+                                                         ontologyBeanGeneratorPanel.standardSupport.getModel(), true);
+          ontologyBeanGeneratorPanel.exampleTextArea.setText(Examples.
+                                                             getStandardExample());
         }
         if (supportLine.equalsIgnoreCase("javabeans")) {
-          ontologyBeanGeneratorPanel.support.setSelected(ontologyBeanGeneratorPanel.fullBeanSupport.getModel(), true);
-          ontologyBeanGeneratorPanel.exampleTextArea.setText(Examples.getFullExample());
+          ontologyBeanGeneratorPanel.support.setSelected(
+                                                         ontologyBeanGeneratorPanel.fullBeanSupport.getModel(), true);
+          ontologyBeanGeneratorPanel.exampleTextArea.setText(Examples.
+                                                             getFullExample());
         }
       }
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
       ex.printStackTrace();
     }
 
   }
+
   void saveProjectAnnotation() {
     try {
       Slot packageSlot = itsKB.getSlot(this.PACKAGE_SLOT);
       Slot ontologySlot = itsKB.getSlot(this.ONTOLOGYNAME_SLOT);
       Slot locationSlot = itsKB.getSlot(this.LOCATION_SLOT);
       Slot supportSlot = itsKB.getSlot(this.SUPPORT_SLOT);
-      String packageName = (String) this.ontologyBeanGeneratorPanel.packageComboBox.getSelectedItem();
-      String ontologyName = (String) this.ontologyBeanGeneratorPanel.ontologyComboBox.getSelectedItem();
-      String locationName = (String) this.ontologyBeanGeneratorPanel.locationComboBox.getSelectedItem();
+      String packageName = (String)this.ontologyBeanGeneratorPanel.
+        packageComboBox.getSelectedItem();
+      String ontologyName = (String)this.ontologyBeanGeneratorPanel.
+        ontologyComboBox.getSelectedItem();
+      String locationName = (String)this.ontologyBeanGeneratorPanel.
+        locationComboBox.getSelectedItem();
       String supportLine = "j2se";
 
       if (ontologyBeanGeneratorPanel.microSupport.isSelected()) {
@@ -1396,11 +1509,13 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
       }
       this.projectAnnoInstance.setOwnSlotValue(supportSlot, supportLine);
 
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
       ex.printStackTrace();
     }
 
   }
+
   private boolean applyFormatting;
   private boolean beanGeneration;
   private NameConverter converter;
@@ -1470,5 +1585,4 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
    *  }
    */
 }
-
 //  ***EOF***

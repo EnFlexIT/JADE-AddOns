@@ -1,26 +1,97 @@
-; Tue Sep 24 15:09:53 BST 2002
+; Fri Feb 20 14:14:32 CET 2004
 ; 
-;+ (version "1.7")
-;+ (build "Build 930")
+;+ (version "2.0.1")
+;+ (build "Build 168")
 
 
-(defclass :CLIPS_TOP_LEVEL_SLOT_CLASS
+(defclass %3ACLIPS_TOP_LEVEL_SLOT_CLASS
 	(is-a USER)
 	(role concrete)
-	(single-slot max-depth
-		(type INTEGER)
+	(single-slot MTPFIPAName
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot agentDescription
+		(type INSTANCE)
+;+		(allowed-classes DFAgentDescription AMSAgentDescription)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot protocol
+		(type STRING)
+		(create-accessor read-write))
+	(single-slot mobility
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
 	(single-slot MTPProfileName
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(multislot protocol
+	(single-slot type
 		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot properties
+		(type INSTANCE)
+;+		(allowed-classes Property)
+		(create-accessor read-write))
+	(multislot searchConstraints
+		(type INSTANCE)
+;+		(allowed-classes SearchConstraints)
+		(cardinality 1 ?VARIABLE)
+		(create-accessor read-write))
+	(multislot ontology
+		(type STRING)
+		(create-accessor read-write))
+	(single-slot transport-profile
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot dynamic
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot max-results
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot property-value
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot language
+		(type STRING)
+		(create-accessor read-write))
+	(single-slot max-depth
+		(type INTEGER)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot agent-name
+		(type INSTANCE)
+;+		(allowed-classes AID)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(multislot MTPAddresses
 		(type STRING)
 		(cardinality 1 ?VARIABLE)
+		(create-accessor read-write))
+	(single-slot ownership
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot state
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot availableMTPs
+		(type INSTANCE)
+;+		(allowed-classes APTransportDescription)
+		(create-accessor read-write))
+	(single-slot argument
+		(type STRING)
+;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(multislot services
 		(type INSTANCE)
@@ -30,82 +101,11 @@
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot MTPFIPAName
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(multislot properties
-		(type INSTANCE)
-;+		(allowed-classes Property)
-		(create-accessor read-write))
-	(single-slot ownership
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(multislot availableMTPs
-		(type INSTANCE)
-;+		(allowed-classes APTransportDescription)
-		(create-accessor read-write))
-	(single-slot type
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(single-slot state
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(multislot language
-		(type STRING)
-		(create-accessor read-write))
-	(single-slot property-value
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(single-slot agent-name
-		(type INSTANCE)
-;+		(allowed-classes AID)
-;+		(cardinality 1 1)
-		(create-accessor read-write))
-	(single-slot argument
-		(type STRING)
-;+		(cardinality 1 1)
-		(create-accessor read-write))
-	(multislot searchConstraints
-		(type INSTANCE)
-;+		(allowed-classes SearchConstraints)
-		(cardinality 1 ?VARIABLE)
-		(create-accessor read-write))
-	(single-slot service-name
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(single-slot max-results
-		(type INTEGER)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(multislot ontology
-		(type STRING)
-		(create-accessor read-write))
-	(single-slot agentDescription
-		(type INSTANCE)
-;+		(allowed-classes DFAgentDescription AMSAgentDescription)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(single-slot dynamic
-		(type SYMBOL)
-		(allowed-values FALSE TRUE)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
 	(single-slot argument2
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot mobility
-		(type SYMBOL)
-		(allowed-values FALSE TRUE)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(single-slot transport-profile
+	(single-slot service-name
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write)))
@@ -166,11 +166,15 @@
 (defclass ServiceDescription
 	(is-a Concept)
 	(role concrete)
-	(multislot ontology
-		(type STRING)
-		(create-accessor read-write))
 	(multislot language
 		(type STRING)
+		(create-accessor read-write))
+	(multislot protocol
+		(type STRING)
+		(create-accessor read-write))
+	(single-slot type
+		(type STRING)
+;+		(cardinality 0 1)
 		(create-accessor read-write))
 	(multislot properties
 		(type INSTANCE)
@@ -180,14 +184,10 @@
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(multislot protocol
+	(multislot ontology
 		(type STRING)
 		(create-accessor read-write))
 	(single-slot ownership
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(single-slot type
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write)))
@@ -207,11 +207,11 @@
 (defclass SearchConstraints
 	(is-a Concept)
 	(role concrete)
-	(single-slot max-depth
+	(single-slot max-results
 		(type INTEGER)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot max-results
+	(single-slot max-depth
 		(type INTEGER)
 ;+		(cardinality 0 1)
 		(create-accessor read-write)))
@@ -224,11 +224,11 @@
 ;+		(allowed-classes AID)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot ownership
+	(single-slot state
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot state
+	(single-slot ownership
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write)))
@@ -246,13 +246,13 @@
 		(allowed-values FALSE TRUE)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot transport-profile
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
 	(single-slot name_
 		(type STRING)
 ;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(single-slot transport-profile
+		(type STRING)
+;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
 (defclass APTransportDescription

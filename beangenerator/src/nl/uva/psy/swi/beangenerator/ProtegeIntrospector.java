@@ -49,7 +49,7 @@ public class ProtegeIntrospector extends ReflectiveIntrospector {
    *@throws  OntologyException  If some error occurs during the translation
    */
   public AbsObject externalise(Object obj, ObjectSchema schema, Class javaClass, Ontology referenceOnto)
-    throws OntologyException {
+     throws OntologyException {
     String slotName = "<unknown>";
     try {
       AbsObject abs = schema.newInstance();
@@ -62,9 +62,9 @@ public class ProtegeIntrospector extends ReflectiveIntrospector {
         String transLatedName = translateName(slotName, javaClass);
         if (transLatedName != null) {
           String methodName = "get" + transLatedName;
-          // Retrieve the accessor method from the class and call it
+           // Retrieve the accessor method from the class and call it
           Method getMethod = findMethodCaseInsensitive(methodName, javaClass);
-          //          this.setOntology(referenceOnto);
+//          this.setOntology(referenceOnto);
           AbsObject value = (AbsObject)this.invokeAccessorMethod(getMethod, obj);
           if (value != null) {
             AbsHelper.setAttribute(abs, slotName, value);
@@ -97,7 +97,7 @@ public class ProtegeIntrospector extends ReflectiveIntrospector {
    *@throws  OntologyException    If some error occurs during the translation
    */
   public Object internalise(AbsObject abs, ObjectSchema schema, Class javaClass, Ontology referenceOnto)
-    throws UngroundedException, OntologyException {
+     throws UngroundedException, OntologyException {
 
     try {
       Object obj = javaClass.newInstance();
@@ -140,6 +140,8 @@ public class ProtegeIntrospector extends ReflectiveIntrospector {
   }
 
   private String translateName(String jadeName, Class javaClass) {
+    //System.out.print("Class: " + javaClass.getName());
+    //System.out.print(", jadeName: " + jadeName);
     SlotHolder jadeSlot = new SlotHolder(javaClass.getName(), jadeName);
     if (jadeSlot == null) {
       return null;
@@ -148,6 +150,7 @@ public class ProtegeIntrospector extends ReflectiveIntrospector {
     if (methodKey == null) {
       return null;
     }
+    //System.out.println(", methodKey: " + methodKey.slotName);
     return translateName(methodKey.slotName);
   }
   private ProtegeTools.ProtegeOntology protegeOntology;

@@ -147,7 +147,7 @@ public class OntologyBeanGeneratorUtil {
 
 
   protected static Collection getDirectTemplateSlots(Cls theCls) {
-    Collection c = theCls.getTemplateSlots();
+    Collection c = new HashSet(theCls.getTemplateSlots());
     Iterator itor = c.iterator();
     while (itor.hasNext()) {
       Slot slot = (Slot)itor.next();

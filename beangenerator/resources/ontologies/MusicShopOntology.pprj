@@ -1,0 +1,1106 @@
+; Fri Feb 20 14:13:20 CET 2004
+; 
+;+ (version "2.0.1")
+;+ (build "Build 168")
+
+([BROWSER_SLOT_NAMES] of Property_List)
+
+([CLSES_TAB] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ClsesTab")
+	(property_list [ProjectKB_9402_00005])
+	(label "Classes")
+	(is_hidden FALSE))
+
+([FORMS_TAB] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormsTab")
+	(property_list [ProjectKB_9402_00034])
+	(label "Forms")
+	(is_hidden FALSE))
+
+([INSTANCES_TAB] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab")
+	(property_list [ProjectKB_9402_00037])
+	(label "Instances")
+	(is_hidden FALSE))
+
+([KB_092135_Instance_0] of Property_List
+	(properties
+		[KB_092135_Instance_1]
+		[KB_092135_Instance_2]
+		[KB_092135_Instance_3]
+		[KB_092135_Instance_4]
+		[KB_092135_Instance_5]
+		[KB_092135_Instance_6]
+		[KB_092135_Instance_7]
+		[KB_092135_Instance_8]
+		[KB_092135_Instance_9]
+		[KB_092135_Instance_10])
+	(name "class widget properties"))
+
+([KB_092135_Instance_1] of Widget
+	(x 400)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.ConstraintsWidget")
+	(property_list [MusicShopOntology_ProjectKB_Instance_192])
+	(label "Constraints")
+	(name ":SLOT-CONSTRAINTS")
+	(width 200)
+	(y 0))
+
+([KB_092135_Instance_10] of Property_List
+	(properties [KB_092135_Instance_11])
+	(name "layout properties"))
+
+([KB_092135_Instance_11] of String
+	(name "vertical_stretcher")
+	(string_value ":DIRECT-TEMPLATE-SLOTS"))
+
+([KB_092135_Instance_12] of Property_List
+	(properties
+		[KB_092135_Instance_13]
+		[KB_092135_Instance_14]
+		[KB_092135_Instance_15]
+		[KB_092135_Instance_16]
+		[KB_092135_Instance_17]
+		[KB_092135_Instance_18]
+		[KB_092135_Instance_19]
+		[KB_092135_Instance_20]
+		[KB_092135_Instance_21]
+		[KB_092135_Instance_22]
+		[KB_092135_Instance_23]
+		[KB_092135_Instance_24]
+		[KB_092135_Instance_25]
+		[KB_092135_Instance_26]
+		[KB_092135_Instance_27]
+		[KB_092135_Instance_28])
+	(name "slot widget properties"))
+
+([KB_092135_Instance_13] of Widget
+	(x 200)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.MinimumCardinalityWidget")
+	(label "Cardinality")
+	(name ":SLOT-MINIMUM-CARDINALITY")
+	(width 200)
+	(y 120))
+
+([KB_092135_Instance_14] of Widget
+	(x 200)
+	(height 35)
+	(widget_class_name "edu.stanford.smi.protege.widget.MaximumCardinalityWidget")
+	(name ":SLOT-MAXIMUM-CARDINALITY")
+	(width 200)
+	(y 175))
+
+([KB_092135_Instance_15] of Widget
+	(name ":SLOT-CONSTRAINTS"))
+
+([KB_092135_Instance_16] of Widget
+	(name ":DIRECT-TYPE"))
+
+([KB_092135_Instance_17] of Widget
+	(name ":DIRECT-DOMAIN"))
+
+([KB_092135_Instance_18] of Widget
+	(x 400)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.SlotValuesWidget")
+	(label "Template Values")
+	(name ":SLOT-VALUES")
+	(width 200)
+	(y 0))
+
+([KB_092135_Instance_19] of Widget
+	(name ":DIRECT-SUPERSLOTS"))
+
+([KB_092135_Instance_2] of Widget
+	(name ":DIRECT-INSTANCES"))
+
+([KB_092135_Instance_20] of Widget
+	(name ":DIRECT-SUBSLOTS"))
+
+([KB_092135_Instance_21] of Widget
+	(x 400)
+	(height 150)
+	(widget_class_name "edu.stanford.smi.protege.widget.DefaultValuesWidget")
+	(label "Default")
+	(name ":SLOT-DEFAULTS")
+	(width 200)
+	(y 120))
+
+([KB_092135_Instance_22] of Widget
+	(x 200)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(label "Documentation")
+	(name ":DOCUMENTATION")
+	(width 200)
+	(y 0))
+
+([KB_092135_Instance_23] of Widget
+	(x 100)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMaximumWidget")
+	(label "Maximum")
+	(name ":SLOT-NUMERIC-MAXIMUM")
+	(width 100)
+	(y 210))
+
+([KB_092135_Instance_24] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMinimumWidget")
+	(label "Minimum")
+	(name ":SLOT-NUMERIC-MINIMUM")
+	(width 100)
+	(y 210))
+
+([KB_092135_Instance_25] of Widget
+	(name ":ASSOCIATED-FACET"))
+
+([KB_092135_Instance_26] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(label "Name")
+	(name ":NAME")
+	(width 200)
+	(y 0))
+
+([KB_092135_Instance_27] of Widget
+	(x 200)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.InverseSlotWidget")
+	(label "Inverse Slot")
+	(name ":SLOT-INVERSE")
+	(width 200)
+	(y 210))
+
+([KB_092135_Instance_28] of Widget
+	(x 0)
+	(height 150)
+	(widget_class_name "edu.stanford.smi.protege.widget.ValueTypeWidget")
+	(label "Value Type")
+	(name ":SLOT-VALUE-TYPE")
+	(width 200)
+	(y 60))
+
+([KB_092135_Instance_29] of Property_List
+	(properties
+		[KB_092135_Instance_30]
+		[KB_092135_Instance_31]
+		[KB_092135_Instance_32])
+	(name "facet widget properties"))
+
+([KB_092135_Instance_3] of Widget
+	(name ":DIRECT-SUBCLASSES"))
+
+([KB_092135_Instance_30] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(label "Name")
+	(name ":NAME")
+	(width 200)
+	(y 0))
+
+([KB_092135_Instance_31] of Widget
+	(x 200)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(label "Documentation")
+	(name ":DOCUMENTATION")
+	(width 200)
+	(y 0))
+
+([KB_092135_Instance_32] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceFieldWidget")
+	(label "Associated Slot")
+	(name ":ASSOCIATED-SLOT")
+	(width 200)
+	(y 60))
+
+([KB_092135_Instance_33] of Property_List
+	(properties
+		[KB_092135_Instance_34]
+		[KB_092135_Instance_35]
+		[KB_092135_Instance_36]
+		[KB_092135_Instance_37]))
+
+([KB_092135_Instance_34] of Widget
+	(name ":ANNOTATED-INSTANCE"))
+
+([KB_092135_Instance_35] of Widget
+	(name ":CREATOR"))
+
+([KB_092135_Instance_36] of Widget
+	(name ":CREATION-TIMESTAMP"))
+
+([KB_092135_Instance_37] of Widget
+	(x 0)
+	(height 100)
+	(widget_class_name "edu.stanford.smi.protege.widget.YellowStickyWidget")
+	(name ":ANNOTATION-TEXT")
+	(width 200)
+	(is_hidden FALSE)
+	(y 0))
+
+([KB_092135_Instance_38] of Property_List
+	(properties
+		[KB_092135_Instance_39]
+		[KB_092135_Instance_40]
+		[KB_092135_Instance_41]
+		[KB_092135_Instance_42]))
+
+([KB_092135_Instance_39] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(label "Name")
+	(name ":PAL-NAME")
+	(width 275)
+	(is_hidden FALSE)
+	(y 0))
+
+([KB_092135_Instance_4] of Widget
+	(name ":DIRECT-SUPERCLASSES"))
+
+([KB_092135_Instance_40] of Widget
+	(x 275)
+	(height 180)
+	(widget_class_name "edu.stanford.smi.protegex.widget.pal.constraint.PalRangeWidget")
+	(label "Range")
+	(name ":PAL-RANGE")
+	(width 250)
+	(is_hidden FALSE)
+	(y 180))
+
+([KB_092135_Instance_41] of Widget
+	(x 275)
+	(height 180)
+	(widget_class_name "edu.stanford.smi.protege.widget.TextAreaWidget")
+	(label "Description")
+	(name ":PAL-DESCRIPTION")
+	(width 250)
+	(is_hidden FALSE)
+	(y 0))
+
+([KB_092135_Instance_42] of Widget
+	(x 0)
+	(height 300)
+	(widget_class_name "edu.stanford.smi.protegex.widget.pal.constraint.PalConstraintWidget")
+	(label "Statement")
+	(name ":PAL-STATEMENT")
+	(width 275)
+	(is_hidden FALSE)
+	(y 60))
+
+([KB_092135_Instance_5] of Widget
+	(x 200)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(label "Documentation")
+	(name ":DOCUMENTATION")
+	(width 200)
+	(y 0))
+
+([KB_092135_Instance_6] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(label "Name")
+	(name ":NAME")
+	(width 200)
+	(y 0))
+
+([KB_092135_Instance_7] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.RoleWidget")
+	(label "Role")
+	(name ":ROLE")
+	(width 200)
+	(y 60))
+
+([KB_092135_Instance_8] of Widget
+	(name ":DIRECT-TYPE"))
+
+([KB_092135_Instance_9] of Widget
+	(x 0)
+	(height 150)
+	(widget_class_name "edu.stanford.smi.protege.widget.TemplateSlotsWidget")
+	(property_list [MusicShopOntology_ProjectKB_Instance_199])
+	(label "Template Slots")
+	(name ":DIRECT-TEMPLATE-SLOTS")
+	(width 600)
+	(y 120))
+
+([MusicShopOntology_ProjectKB_00000] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(property_list [KB_092135_Instance_0])
+	(name ":STANDARD-CLASS")
+	(is_hidden FALSE))
+
+([MusicShopOntology_ProjectKB_00013] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(property_list [KB_092135_Instance_12])
+	(name ":STANDARD-SLOT")
+	(is_hidden FALSE))
+
+([MusicShopOntology_ProjectKB_00030] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(property_list [KB_092135_Instance_29])
+	(name ":STANDARD-FACET")
+	(is_hidden FALSE))
+
+([MusicShopOntology_ProjectKB_00035] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(property_list [KB_092135_Instance_33])
+	(name ":INSTANCE-ANNOTATION")
+	(is_hidden FALSE))
+
+([MusicShopOntology_ProjectKB_00041] of Integer
+	(name "ClsesTab.left_right")
+	(integer_value 271))
+
+([MusicShopOntology_ProjectKB_00042] of Integer
+	(name "ClsesTab.left.top_bottom")
+	(integer_value 394))
+
+([MusicShopOntology_ProjectKB_00043] of Integer
+	(name "SlotsTab.left_right")
+	(integer_value 229))
+
+([MusicShopOntology_ProjectKB_00044] of Integer
+	(name "SlotTab.left.top_bottom")
+	(integer_value 369))
+
+([MusicShopOntology_ProjectKB_00045] of Integer
+	(name "FormsTab.left_right")
+	(integer_value 141))
+
+([MusicShopOntology_ProjectKB_00046] of Integer
+	(name "InstancesTab.left_right")
+	(integer_value 149))
+
+([MusicShopOntology_ProjectKB_00047] of Integer
+	(name "InstancesTab.right.left_right")
+	(integer_value 260))
+
+([MusicShopOntology_ProjectKB_00048] of String
+	(name "SearchTab_Query"))
+
+([MusicShopOntology_ProjectKB_00142] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(property_list [KB_092135_Instance_38])
+	(name ":PAL-CONSTRAINT")
+	(is_hidden FALSE))
+
+([MusicShopOntology_ProjectKB_00242] of Widget
+	(x 0)
+	(height 600)
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(property_list [MusicShopOntology_ProjectKB_00243])
+	(name ":JADE-CLASS")
+	(width 699)
+	(is_hidden FALSE)
+	(y 0))
+
+([MusicShopOntology_ProjectKB_00243] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_00244]
+		[MusicShopOntology_ProjectKB_00252]
+		[MusicShopOntology_ProjectKB_00253]
+		[MusicShopOntology_ProjectKB_00254]
+		[MusicShopOntology_ProjectKB_00255]
+		[MusicShopOntology_ProjectKB_00256]
+		[MusicShopOntology_ProjectKB_00257]
+		[MusicShopOntology_ProjectKB_00258]
+		[MusicShopOntology_ProjectKB_00259]
+		[MusicShopOntology_ProjectKB_00277]
+		[MusicShopOntology_ProjectKB_00279]
+		[MusicShopOntology_ProjectKB_00281]
+		[MusicShopOntology_ProjectKB_00283]
+		[MusicShopOntology_ProjectKB_00285])
+	(name "class widget properties"))
+
+([MusicShopOntology_ProjectKB_00244] of Widget
+	(x 400)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.ConstraintsWidget")
+	(property_list [MusicShopOntology_ProjectKB_00245])
+	(label "Constraints")
+	(name ":SLOT-CONSTRAINTS")
+	(width 200)
+	(y 0))
+
+([MusicShopOntology_ProjectKB_00245] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_00246]
+		[MusicShopOntology_ProjectKB_00247]
+		[MusicShopOntology_ProjectKB_00248]
+		[MusicShopOntology_ProjectKB_00249]
+		[MusicShopOntology_ProjectKB_00250]
+		[MusicShopOntology_ProjectKB_00251]))
+
+([MusicShopOntology_ProjectKB_00246] of Boolean
+	(name "ButtonDisplayed-View Selected Instances")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00247] of Boolean
+	(name "ButtonDisplayed-Create Instance")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00248] of Boolean
+	(name "ButtonDisplayed-References")
+	(boolean_value FALSE))
+
+([MusicShopOntology_ProjectKB_00249] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00250] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00251] of Boolean
+	(name "ButtonDisplayed-Delete Selected Instances")
+	(boolean_value FALSE))
+
+([MusicShopOntology_ProjectKB_00252] of Widget
+	(name ":DIRECT-INSTANCES"))
+
+([MusicShopOntology_ProjectKB_00253] of Widget
+	(name ":DIRECT-SUBCLASSES"))
+
+([MusicShopOntology_ProjectKB_00254] of Widget
+	(name ":DIRECT-SUPERCLASSES"))
+
+([MusicShopOntology_ProjectKB_00255] of Widget
+	(x 200)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(label "Documentation")
+	(name ":DOCUMENTATION")
+	(width 200)
+	(y 0))
+
+([MusicShopOntology_ProjectKB_00256] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(label "Name")
+	(name ":NAME")
+	(width 200)
+	(y 0))
+
+([MusicShopOntology_ProjectKB_00257] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.RoleWidget")
+	(label "Role")
+	(name ":ROLE")
+	(width 200)
+	(y 60))
+
+([MusicShopOntology_ProjectKB_00258] of Widget
+	(name ":DIRECT-TYPE"))
+
+([MusicShopOntology_ProjectKB_00259] of Widget
+	(x 0)
+	(height 300)
+	(widget_class_name "edu.stanford.smi.protege.widget.TemplateSlotsWidget")
+	(property_list [MusicShopOntology_ProjectKB_00260])
+	(label "Template Slots")
+	(name ":DIRECT-TEMPLATE-SLOTS")
+	(width 600)
+	(y 120))
+
+([MusicShopOntology_ProjectKB_00260] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_00261]
+		[MusicShopOntology_ProjectKB_00262]
+		[MusicShopOntology_ProjectKB_00263]
+		[MusicShopOntology_ProjectKB_00264]
+		[MusicShopOntology_ProjectKB_00265]
+		[MusicShopOntology_ProjectKB_00266]
+		[MusicShopOntology_ProjectKB_00267]
+		[MusicShopOntology_ProjectKB_00268]
+		[MusicShopOntology_ProjectKB_00269]
+		[MusicShopOntology_ProjectKB_00270]
+		[MusicShopOntology_ProjectKB_00271]
+		[MusicShopOntology_ProjectKB_00272]
+		[MusicShopOntology_ProjectKB_00273]
+		[MusicShopOntology_ProjectKB_00274]
+		[MusicShopOntology_ProjectKB_00275]
+		[MusicShopOntology_ProjectKB_00276]))
+
+([MusicShopOntology_ProjectKB_00261] of Boolean
+	(name "ButtonDisplayed-View selected slots")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00262] of Boolean
+	(name "ButtonDisplayed-View selected slots at class")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00263] of Boolean
+	(name "ButtonDisplayed-Create slot and attach to class")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00264] of Boolean
+	(name "ButtonDisplayed-Remove overrides from selected slots")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00265] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00266] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00267] of Boolean
+	(name "ButtonDisplayed-Move up")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00268] of Boolean
+	(name "ButtonDisplayed-Move down")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00269] of String
+	(name "ButtonDescription-View selected slots")
+	(string_value "View selected slots"))
+
+([MusicShopOntology_ProjectKB_00270] of String
+	(name "ButtonDescription-View selected slots at class")
+	(string_value "View selected slots at class"))
+
+([MusicShopOntology_ProjectKB_00271] of String
+	(name "ButtonDescription-Create slot and attach to class")
+	(string_value "Create slot and attach to class"))
+
+([MusicShopOntology_ProjectKB_00272] of String
+	(name "ButtonDescription-Remove overrides from selected slots")
+	(string_value "Remove overrides from selected slots"))
+
+([MusicShopOntology_ProjectKB_00273] of String
+	(name "ButtonDescription-Add")
+	(string_value "Attach slots to class"))
+
+([MusicShopOntology_ProjectKB_00274] of String
+	(name "ButtonDescription-Remove")
+	(string_value "Remove selected slots from class"))
+
+([MusicShopOntology_ProjectKB_00275] of String
+	(name "ButtonDescription-Move up")
+	(string_value "Move selected slot up"))
+
+([MusicShopOntology_ProjectKB_00276] of String
+	(name "ButtonDescription-Move down")
+	(string_value "Move selected slot down"))
+
+([MusicShopOntology_ProjectKB_00277] of Property_List
+	(properties [MusicShopOntology_ProjectKB_00278])
+	(name "layout properties"))
+
+([MusicShopOntology_ProjectKB_00278] of String
+	(name "vertical_stretcher")
+	(string_value ":DIRECT-TEMPLATE-SLOTS"))
+
+([MusicShopOntology_ProjectKB_00279] of Widget
+	(x 350)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(property_list [MusicShopOntology_ProjectKB_00280])
+	(label "Java super-class")
+	(name ":JADE-JAVA-BASE-CLASS")
+	(width 250)
+	(is_hidden FALSE)
+	(y 420))
+
+([MusicShopOntology_ProjectKB_00280] of Property_List)
+
+([MusicShopOntology_ProjectKB_00281] of Widget
+	(x 0)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.TextAreaWidget")
+	(property_list [MusicShopOntology_ProjectKB_00282])
+	(label "Additional Java Code")
+	(name ":JADE-JAVA-CODE")
+	(width 600)
+	(is_hidden FALSE)
+	(y 480))
+
+([MusicShopOntology_ProjectKB_00282] of Property_List)
+
+([MusicShopOntology_ProjectKB_00283] of Widget
+	(x 80)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(property_list [MusicShopOntology_ProjectKB_00284])
+	(label "JADE Name")
+	(name ":JADE-NAME")
+	(width 250)
+	(is_hidden FALSE)
+	(y 420))
+
+([MusicShopOntology_ProjectKB_00284] of Property_List)
+
+([MusicShopOntology_ProjectKB_00285] of Widget
+	(x 0)
+	(height 40)
+	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
+	(property_list [MusicShopOntology_ProjectKB_00286])
+	(label "ignore")
+	(name ":JADE-IGNORE")
+	(width 70)
+	(is_hidden FALSE)
+	(y 440))
+
+([MusicShopOntology_ProjectKB_00286] of Property_List)
+
+([MusicShopOntology_ProjectKB_00322] of Widget
+	(widget_class_name "nl.uva.psy.swi.beangenerator.OntologyBeanGeneratorTab")
+	(property_list [MusicShopOntology_ProjectKB_00323])
+	(label "Ontology Bean Generator")
+	(is_hidden FALSE))
+
+([MusicShopOntology_ProjectKB_00323] of Property_List)
+
+([MusicShopOntology_ProjectKB_00353] of Map)
+
+([MusicShopOntology_ProjectKB_00574] of Widget
+	(x 0)
+	(height 578)
+	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(property_list [MusicShopOntology_ProjectKB_00575])
+	(name ":JADE-SLOT")
+	(width 714)
+	(is_hidden FALSE)
+	(y 0))
+
+([MusicShopOntology_ProjectKB_00575] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_00576]
+		[MusicShopOntology_ProjectKB_00577]
+		[MusicShopOntology_ProjectKB_00578]
+		[MusicShopOntology_ProjectKB_00579]
+		[MusicShopOntology_ProjectKB_00580]
+		[MusicShopOntology_ProjectKB_00586]
+		[MusicShopOntology_ProjectKB_00587]
+		[MusicShopOntology_ProjectKB_00588]
+		[MusicShopOntology_ProjectKB_00594]
+		[MusicShopOntology_ProjectKB_00595]
+		[MusicShopOntology_ProjectKB_00596]
+		[MusicShopOntology_ProjectKB_00597]
+		[MusicShopOntology_ProjectKB_00598]
+		[MusicShopOntology_ProjectKB_00599]
+		[MusicShopOntology_ProjectKB_00600]
+		[MusicShopOntology_ProjectKB_00601]
+		[MusicShopOntology_ProjectKB_00602]
+		[MusicShopOntology_ProjectKB_00604]
+		[MusicShopOntology_ProjectKB_Instance_208])
+	(name "slot widget properties"))
+
+([MusicShopOntology_ProjectKB_00576] of Widget
+	(x 200)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.MinimumCardinalityWidget")
+	(label "Cardinality")
+	(name ":SLOT-MINIMUM-CARDINALITY")
+	(width 200)
+	(y 120))
+
+([MusicShopOntology_ProjectKB_00577] of Widget
+	(x 200)
+	(height 35)
+	(widget_class_name "edu.stanford.smi.protege.widget.MaximumCardinalityWidget")
+	(name ":SLOT-MAXIMUM-CARDINALITY")
+	(width 200)
+	(y 175))
+
+([MusicShopOntology_ProjectKB_00578] of Widget
+	(name ":SLOT-CONSTRAINTS"))
+
+([MusicShopOntology_ProjectKB_00579] of Widget
+	(name ":DIRECT-TYPE"))
+
+([MusicShopOntology_ProjectKB_00580] of Widget
+	(x 400)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.SlotValuesWidget")
+	(property_list [MusicShopOntology_ProjectKB_00581])
+	(label "Values")
+	(name ":SLOT-VALUES")
+	(width 200)
+	(y 0))
+
+([MusicShopOntology_ProjectKB_00581] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_00582]
+		[MusicShopOntology_ProjectKB_00583]
+		[MusicShopOntology_ProjectKB_00584]
+		[MusicShopOntology_ProjectKB_00585]))
+
+([MusicShopOntology_ProjectKB_00582] of Boolean
+	(name "ButtonDisplayed-View the selected value")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00583] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00584] of Boolean
+	(name "ButtonDisplayed-Create a new value")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00585] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00586] of Widget
+	(name ":DIRECT-SUPERSLOTS"))
+
+([MusicShopOntology_ProjectKB_00587] of Widget
+	(name ":DIRECT-SUBSLOTS"))
+
+([MusicShopOntology_ProjectKB_00588] of Widget
+	(x 400)
+	(height 150)
+	(widget_class_name "edu.stanford.smi.protege.widget.DefaultValuesWidget")
+	(property_list [MusicShopOntology_ProjectKB_00589])
+	(label "Default")
+	(name ":SLOT-DEFAULTS")
+	(width 200)
+	(y 120))
+
+([MusicShopOntology_ProjectKB_00589] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_00590]
+		[MusicShopOntology_ProjectKB_00591]
+		[MusicShopOntology_ProjectKB_00592]
+		[MusicShopOntology_ProjectKB_00593]))
+
+([MusicShopOntology_ProjectKB_00590] of Boolean
+	(name "ButtonDisplayed-View the selected value")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00591] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00592] of Boolean
+	(name "ButtonDisplayed-Create a new value")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00593] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_00594] of Widget
+	(x 200)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.DocumentationWidget")
+	(label "Documentation")
+	(name ":DOCUMENTATION")
+	(width 200)
+	(y 0))
+
+([MusicShopOntology_ProjectKB_00595] of Widget
+	(x 100)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMaximumWidget")
+	(label "Maximum")
+	(name ":SLOT-NUMERIC-MAXIMUM")
+	(width 100)
+	(y 210))
+
+([MusicShopOntology_ProjectKB_00596] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.NumericMinimumWidget")
+	(label "Minimum")
+	(name ":SLOT-NUMERIC-MINIMUM")
+	(width 100)
+	(y 210))
+
+([MusicShopOntology_ProjectKB_00597] of Widget
+	(name ":ASSOCIATED-FACET"))
+
+([MusicShopOntology_ProjectKB_00598] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
+	(label "Name")
+	(name ":NAME")
+	(width 200)
+	(y 0))
+
+([MusicShopOntology_ProjectKB_00599] of Widget
+	(x 200)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.InverseSlotWidget")
+	(label "Inverse Slot")
+	(name ":SLOT-INVERSE")
+	(width 200)
+	(y 210))
+
+([MusicShopOntology_ProjectKB_00600] of Widget
+	(x 0)
+	(height 150)
+	(widget_class_name "edu.stanford.smi.protege.widget.ValueTypeWidget")
+	(label "Value Type")
+	(name ":SLOT-VALUE-TYPE")
+	(width 200)
+	(y 60))
+
+([MusicShopOntology_ProjectKB_00601] of Property_List
+	(name "layout properties"))
+
+([MusicShopOntology_ProjectKB_00602] of Widget
+	(x 0)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.TextFieldWidget")
+	(property_list [MusicShopOntology_ProjectKB_00603])
+	(label "JADE Name")
+	(name ":JADE-NAME")
+	(width 250)
+	(is_hidden FALSE)
+	(y 270))
+
+([MusicShopOntology_ProjectKB_00603] of Property_List)
+
+([MusicShopOntology_ProjectKB_00604] of Widget
+	(x 260)
+	(height 60)
+	(widget_class_name "edu.stanford.smi.protege.widget.CheckBoxWidget")
+	(property_list [MusicShopOntology_ProjectKB_00605])
+	(label "Anonymous")
+	(name ":JADE-UNNAMED-SLOT")
+	(width 125)
+	(is_hidden FALSE)
+	(y 280))
+
+([MusicShopOntology_ProjectKB_00605] of Property_List)
+
+([MusicShopOntology_ProjectKB_Instance_192] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_Instance_193]
+		[MusicShopOntology_ProjectKB_Instance_194]
+		[MusicShopOntology_ProjectKB_Instance_195]
+		[MusicShopOntology_ProjectKB_Instance_196]
+		[MusicShopOntology_ProjectKB_Instance_197]
+		[MusicShopOntology_ProjectKB_Instance_198]))
+
+([MusicShopOntology_ProjectKB_Instance_193] of Boolean
+	(name "ButtonDisplayed-View Selected Instances")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_194] of Boolean
+	(name "ButtonDisplayed-Create Instance")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_195] of Boolean
+	(name "ButtonDisplayed-References")
+	(boolean_value FALSE))
+
+([MusicShopOntology_ProjectKB_Instance_196] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_197] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_198] of Boolean
+	(name "ButtonDisplayed-Delete Selected Instances")
+	(boolean_value FALSE))
+
+([MusicShopOntology_ProjectKB_Instance_199] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_Instance_200]
+		[MusicShopOntology_ProjectKB_Instance_201]
+		[MusicShopOntology_ProjectKB_Instance_202]
+		[MusicShopOntology_ProjectKB_Instance_203]
+		[MusicShopOntology_ProjectKB_Instance_204]
+		[MusicShopOntology_ProjectKB_Instance_205]
+		[MusicShopOntology_ProjectKB_Instance_206]
+		[MusicShopOntology_ProjectKB_Instance_207]))
+
+([MusicShopOntology_ProjectKB_Instance_200] of Boolean
+	(name "ButtonDisplayed-View selected slots")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_201] of Boolean
+	(name "ButtonDisplayed-View selected slots at class")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_202] of Boolean
+	(name "ButtonDisplayed-Create slot and attach to class")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_203] of Boolean
+	(name "ButtonDisplayed-Remove overrides from selected slots")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_204] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_205] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_206] of Boolean
+	(name "ButtonDisplayed-Move up")
+	(boolean_value FALSE))
+
+([MusicShopOntology_ProjectKB_Instance_207] of Boolean
+	(name "ButtonDisplayed-Move down")
+	(boolean_value FALSE))
+
+([MusicShopOntology_ProjectKB_Instance_208] of Widget
+	(x 0)
+	(height 120)
+	(widget_class_name "edu.stanford.smi.protege.widget.InstanceListWidget")
+	(property_list [MusicShopOntology_ProjectKB_Instance_209])
+	(name ":DIRECT-DOMAIN")
+	(width 250)
+	(is_hidden FALSE)
+	(y 340))
+
+([MusicShopOntology_ProjectKB_Instance_209] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_Instance_210]
+		[MusicShopOntology_ProjectKB_Instance_211]
+		[MusicShopOntology_ProjectKB_Instance_212]
+		[MusicShopOntology_ProjectKB_Instance_213]
+		[MusicShopOntology_ProjectKB_Instance_214]
+		[MusicShopOntology_ProjectKB_Instance_215]))
+
+([MusicShopOntology_ProjectKB_Instance_210] of Boolean
+	(name "ButtonDisplayed-View Selected Instances")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_211] of Boolean
+	(name "ButtonDisplayed-Create Instance")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_212] of Boolean
+	(name "ButtonDisplayed-References")
+	(boolean_value FALSE))
+
+([MusicShopOntology_ProjectKB_Instance_213] of Boolean
+	(name "ButtonDisplayed-Add")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_214] of Boolean
+	(name "ButtonDisplayed-Remove")
+	(boolean_value TRUE))
+
+([MusicShopOntology_ProjectKB_Instance_215] of Boolean
+	(name "ButtonDisplayed-Delete Selected Instances")
+	(boolean_value FALSE))
+
+([PROJECT] of Project
+	(property_map [MusicShopOntology_ProjectKB_00353])
+	(default_cls_metaclass ":STANDARD-CLASS")
+	(customized_instance_widgets
+		[MusicShopOntology_ProjectKB_00013]
+		[MusicShopOntology_ProjectKB_00000]
+		[MusicShopOntology_ProjectKB_00574]
+		[MusicShopOntology_ProjectKB_00035]
+		[MusicShopOntology_ProjectKB_00030]
+		[MusicShopOntology_ProjectKB_00242]
+		[MusicShopOntology_ProjectKB_00142])
+	(default_slot_metaclass ":STANDARD-SLOT")
+	(options [ProjectKB_9402_00006])
+	(sources [SOURCES])
+	(browser_slot_names [BROWSER_SLOT_NAMES])
+	(next_frame_number 0)
+	(default_instance_widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
+	(default_facet_metaclass ":STANDARD-FACET")
+	(included_projects "SimpleJADEAbstractOntology.pprj")
+	(tabs
+		[CLSES_TAB]
+		[SLOTS_TAB]
+		[FORMS_TAB]
+		[INSTANCES_TAB]
+		[QUERIES_TAB]
+		[ProjectKB_9402_00001]
+		[ProjectKB_9402_00003]
+		[MusicShopOntology_ProjectKB_00322]))
+
+([ProjectKB_9402_00000] of String
+	(name "factory_class_name")
+	(string_value "edu.stanford.smi.protege.storage.clips.ClipsKnowledgeBaseFactory"))
+
+([ProjectKB_9402_00001] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.KAToolTab")
+	(property_list [ProjectKB_9402_00002])
+	(is_hidden TRUE))
+
+([ProjectKB_9402_00002] of Property_List)
+
+([ProjectKB_9402_00003] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.ClsesAndInstancesTab")
+	(property_list [ProjectKB_9402_00004])
+	(is_hidden TRUE))
+
+([ProjectKB_9402_00004] of Property_List)
+
+([ProjectKB_9402_00005] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_00041]
+		[MusicShopOntology_ProjectKB_00042]))
+
+([ProjectKB_9402_00006] of Options
+	(display_multi_parent_class_icon TRUE)
+	(display_abstract_class_icon TRUE)
+	(is_readonly FALSE)
+	(display_hidden_classes TRUE)
+	(confirm_on_remove FALSE))
+
+([ProjectKB_9402_00022] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_00043]
+		[MusicShopOntology_ProjectKB_00044]))
+
+([ProjectKB_9402_00034] of Property_List
+	(properties [MusicShopOntology_ProjectKB_00045]))
+
+([ProjectKB_9402_00037] of Property_List
+	(properties
+		[MusicShopOntology_ProjectKB_00046]
+		[MusicShopOntology_ProjectKB_00047]))
+
+([ProjectKB_9402_00038] of Property_List
+	(properties [MusicShopOntology_ProjectKB_00048]))
+
+([ProjectKB_9402_00039] of String
+	(name "classes_file_name")
+	(string_value "MusicShopOntology.pont"))
+
+([ProjectKB_9402_00040] of String
+	(name "instances_file_name")
+	(string_value "MusicShopOntology.pins"))
+
+([QUERIES_TAB] of Widget
+	(widget_class_name "edu.stanford.smi.protegex.queries_tab.QueriesTab")
+	(property_list [ProjectKB_9402_00038])
+	(label "Queries")
+	(is_hidden FALSE))
+
+([SLOTS_TAB] of Widget
+	(widget_class_name "edu.stanford.smi.protege.widget.SlotsTab")
+	(property_list [ProjectKB_9402_00022])
+	(label "Slots")
+	(is_hidden FALSE))
+
+([SOURCES] of Property_List
+	(properties
+		[ProjectKB_9402_00000]
+		[ProjectKB_9402_00039]
+		[ProjectKB_9402_00040]))

@@ -294,9 +294,9 @@ public class OntologyBeanGeneratorPanel extends JPanel {
     jLabel4.setText("ontologydomain (e.g. Newspaper)");
     jLabel5.setFont(new java.awt.Font("Dialog", 1, 14));
     jLabel5.setForeground(Color.black);
-    jLabel5.setToolTipText("<html><b>v. 3.0</b><html>");
+    jLabel5.setToolTipText("<html><b>v. 3.1</b><html>");
     jLabel5.setHorizontalAlignment(SwingConstants.CENTER);
-    jLabel5.setText("Ontology Bean Generator for Jade 3.0");
+    jLabel5.setText("Ontology Bean Generator for Jade 3.1");
     jScrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     jScrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     jScrollPane1.getViewport().setBackground(Color.white);
@@ -402,10 +402,20 @@ public class OntologyBeanGeneratorPanel extends JPanel {
                                        microSupport_stateChanged(e);
                                      }
                                    });
+    /* Modified by J.Picault
+       MIDPCheckBox.setText("MIDP workaround");
+       MIDPCheckBox.setToolTipText("add(groupSchema, Class.forName(\"com.mot.wps.ontology.Group.class\")); " +
+       "instead of add(groupSchema, com.mot.wps.ontology.Group.class);");
+       MIDPCheckBox.setBackground(Color.white);
+    */
     contributors.add(uvaLabel);
     contributors.add(acklin);
     contributors.add(mleLabel);
     contributors.add(jadeLabel);
+    /* modified by J.Picault
+       rightPanel.add(MIDPCheckBox, new GridBagConstraints(2, 16, 1, 1, 1.0, 0.0
+       , GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0)); 
+    */
     rightPanel.add(itsOntologyNameButton, new GridBagConstraints(4, 7, 1, 1, 0.0, 0.0
                                                                  , GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
     rightPanel.add(itsPackageNameButton, new GridBagConstraints(4, 2, 1, 2, 0.0, 0.0
@@ -442,7 +452,7 @@ public class OntologyBeanGeneratorPanel extends JPanel {
     beansCheckBox.setText("generate beans");
     beansCheckBox.setToolTipText("Generate the bean classes");
     beansCheckBox.setBackground(Color.white);
-    useJadeNamesCheckBox.setSelected(false);
+    useJadeNamesCheckBox.setSelected(false);//modified by J.Picault
     useJadeNamesCheckBox.setText("use JADE names when specified");
     useJadeNamesCheckBox.setToolTipText("Use the \"JADE Name\" field specified in Protege");
     useJadeNamesCheckBox.setBackground(Color.white);
@@ -727,6 +737,8 @@ public class OntologyBeanGeneratorPanel extends JPanel {
   JCheckBox useJadeNamesCheckBox = new JCheckBox();
   private ImageIcon uvaIcon = new ImageIcon(this.getClass().getResource("graphics/uva.gif"));
   private JLabel uvaLabel = new JLabel();
+  //  public JCheckBox MIDPCheckBox = new JCheckBox(); //modified by J.Picault
+
 
   private class SomeLabelRenderer extends JLabel implements ListCellRenderer {
 

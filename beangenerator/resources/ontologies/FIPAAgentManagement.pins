@@ -1,158 +1,210 @@
-; Tue Sep 24 15:09:53 BST 2002
+; Fri Feb 20 14:14:32 CET 2004
 ; 
-;+ (version "1.7")
-;+ (build "Build 930")
+;+ (version "2.0.1")
+;+ (build "Build 168")
 
-([agent-name] of :JADE-SLOT)
+([agent-name] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN
+		[DFAgentDescription]
+		[AMSAgentDescription]))
 
-([agentDescription] of :JADE-SLOT
-	(:JADE-UNNAMED-SLOT TRUE))
+([agentDescription] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN
+		[Register]
+		[Modify]
+		[Search])
+	(%3AJADE-UNNAMED-SLOT TRUE))
 
-([AlreadyRegistered] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "already-registered"))
+([AlreadyRegistered] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "already-registered"))
 
-([AMSAgentDescription] of :JADE-CLASS
-	(:JADE-NAME "ams-agent-description"))
+([AMSAgentDescription] of %3AJADE-CLASS
+	(%3AJADE-NAME "ams-agent-description"))
 
-([APDescription] of :JADE-CLASS
-	(:JADE-NAME "ap-description"))
+([APDescription] of %3AJADE-CLASS
+	(%3AJADE-NAME "ap-description"))
 
-([APTransportDescription] of :JADE-CLASS
-	(:JADE-NAME "transport-profile"))
+([APTransportDescription] of %3AJADE-CLASS
+	(%3AJADE-NAME "transport-profile"))
 
-([argument] of :JADE-SLOT)
+([argument] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN
+		[UnsupportedAct]
+		[UnexpectedAct]
+		[UnsupportedValue]
+		[UnrecognisedValue]
+		[UnsupportedFunction]
+		[MissingArgument]
+		[UnexpectedArgument]
+		[MissingParameter]
+		[UnexpectedParameter]
+		[UnrecognisedParameterValue]
+		[InternalError]))
 
-([argument2] of :JADE-SLOT)
+([argument2] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN
+		[MissingParameter]
+		[UnexpectedParameter]
+		[UnrecognisedParameterValue]))
 
-([availableMTPs] of :JADE-SLOT)
+([availableMTPs] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [TransportProfile]))
 
-([Demo_00031] of :STANDARD-FACET)
+([Demo_00031] of %3ASTANDARD-FACET)
 
-([Demo_00032] of :STANDARD-FACET)
+([Demo_00032] of %3ASTANDARD-FACET)
 
-([Deregister] of :JADE-CLASS)
+([Deregister] of %3AJADE-CLASS)
 
-([DFAgentDescription] of :JADE-CLASS
-	(:JADE-NAME "df-agent-description"))
+([DFAgentDescription] of %3AJADE-CLASS
+	(%3AJADE-NAME "df-agent-description"))
 
-([dynamic] of :JADE-SLOT)
+([dynamic] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [APDescription]))
 
-([GetDescription] of :JADE-CLASS)
+([GetDescription] of %3AJADE-CLASS)
 
-([InternalError] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "internal-error"))
+([InternalError] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "internal-error"))
 
-([language] of :JADE-SLOT)
+([language] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [ServiceDescription]))
 
-([max-depth] of :JADE-SLOT)
+([max-depth] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [SearchConstraints]))
 
-([max-results] of :JADE-SLOT)
+([max-results] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [SearchConstraints]))
 
-([MissingArgument] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "missing-argument"))
+([MissingArgument] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "missing-argument"))
 
-([MissingParameter] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "missing-parameter"))
+([MissingParameter] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "missing-parameter"))
 
-([mobility] of :JADE-SLOT)
+([mobility] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [APDescription]))
 
-([Modify] of :JADE-CLASS)
+([Modify] of %3AJADE-CLASS)
 
-([MTPAddresses] of :JADE-SLOT)
+([MTPAddresses] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [APTransportDescription]))
 
-([MTPFIPAName] of :JADE-SLOT)
+([MTPFIPAName] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [APTransportDescription]))
 
-([MTPProfileName] of :JADE-SLOT)
+([MTPProfileName] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [APTransportDescription]))
 
-([NotRegistered] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "not-registered"))
+([NotRegistered] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "not-registered"))
 
-([NotUnderstoodException] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "not-understood"))
+([NotUnderstoodException] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "not-understood"))
 
-([ontology] of :JADE-SLOT)
+([ontology] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [ServiceDescription]))
 
-([ownership] of :JADE-SLOT)
+([ownership] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN
+		[ServiceDescription]
+		[AMSAgentDescription]))
 
-([properties] of :JADE-SLOT)
+([project+annotation] of %3APROJECT-ANNOTATION
+	(%3ASUPPORT "j2se")
+	(%3ALOCATION "/home/chris/projects/acklin/fipa/src")
+	(%3AONTOLOGYNAME "FIPAAgentManagement")
+	(%3APACKAGE "nl.acklin.fipa.onto.agentmanagement"))
 
-([Property] of :JADE-CLASS)
+([properties] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [ServiceDescription]))
 
-([property-name] of :JADE-SLOT
-	(:JADE-NAME "name"))
+([Property] of %3AJADE-CLASS)
 
-([property-value] of :JADE-SLOT
-	(:JADE-NAME "value"))
+([property-name] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [Property])
+	(%3AJADE-NAME "name"))
 
-([protocol] of :JADE-SLOT)
+([property-value] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [Property])
+	(%3AJADE-NAME "value"))
 
-([Register] of :JADE-CLASS)
+([protocol] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [ServiceDescription]))
 
-([Search] of :JADE-CLASS)
+([Register] of %3AJADE-CLASS)
 
-([SearchConstraints] of :JADE-CLASS
-	(:JADE-NAME "search-constraints"))
+([Search] of %3AJADE-CLASS)
 
-([searchConstraints] of :JADE-SLOT
-	(:JADE-NAME "search-constraints"))
+([searchConstraints] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [Search])
+	(%3AJADE-NAME "search-constraints"))
 
-([service-name] of :JADE-SLOT
-	(:JADE-NAME "name"))
+([SearchConstraints] of %3AJADE-CLASS
+	(%3AJADE-NAME "search-constraints"))
 
-([ServiceDescription] of :JADE-CLASS
-	(:JADE-NAME "service-description"))
+([service-name] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [ServiceDescription])
+	(%3AJADE-NAME "name"))
 
-([services] of :JADE-SLOT)
+([ServiceDescription] of %3AJADE-CLASS
+	(%3AJADE-NAME "service-description"))
 
-([state] of :JADE-SLOT)
+([services] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [DFAgentDescription]))
 
-([transport-profile] of :JADE-SLOT)
+([state] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [AMSAgentDescription]))
 
-([TransportProfile] of :JADE-CLASS)
+([transport-profile] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [APDescription]))
 
-([type] of :JADE-SLOT)
+([TransportProfile] of %3AJADE-CLASS)
 
-([Unauthorised] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception"))
+([type] of %3AJADE-SLOT
+	(%3ADIRECT-DOMAIN [ServiceDescription]))
 
-([UnexpectedAct] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "unexpected-act"))
+([Unauthorised] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception"))
 
-([UnexpectedArgument] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "unexpected-argument"))
+([UnexpectedAct] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "unexpected-act"))
 
-([UnexpectedArgumentCount] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "unexpected-argument-count"))
+([UnexpectedArgument] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "unexpected-argument"))
 
-([UnexpectedParameter] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "unexpected-parameter"))
+([UnexpectedArgumentCount] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "unexpected-argument-count"))
 
-([UnrecognisedParameterValue] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "unrecognised-parameter-value"))
+([UnexpectedParameter] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "unexpected-parameter"))
 
-([UnrecognisedValue] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "unrecognised-value"))
+([UnrecognisedParameterValue] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "unrecognised-parameter-value"))
 
-([UnsupportedAct] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "unsupported-act"))
+([UnrecognisedValue] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "unrecognised-value"))
 
-([UnsupportedFunction] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "unsupported-function"))
+([UnsupportedAct] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "unsupported-act"))
 
-([UnsupportedValue] of :JADE-CLASS
-	(:JADE-JAVA-BASE-CLASS "java.lang.Exception")
-	(:JADE-NAME "unsupported-value"))
+([UnsupportedFunction] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "unsupported-function"))
+
+([UnsupportedValue] of %3AJADE-CLASS
+	(%3AJADE-JAVA-BASE-CLASS "java.lang.Exception")
+	(%3AJADE-NAME "unsupported-value"))

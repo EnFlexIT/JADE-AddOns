@@ -1,116 +1,156 @@
-; Tue Sep 24 14:31:05 BST 2002
+; Fri Feb 20 13:43:35 CET 2004
 ; 
-;+ (version "1.7")
-;+ (build "Build 930")
+;+ (version "2.0.1")
+;+ (build "Build 168")
 
 
-(defclass :CLIPS_TOP_LEVEL_SLOT_CLASS
+(defclass %3ACLIPS_TOP_LEVEL_SLOT_CLASS
 	(is-a USER)
 	(role concrete)
-	(single-slot :JADE-PROPERTIES-COMPATIBILITY
-		(type SYMBOL)
-		(allowed-values J2ME JavaBeans Classes)
-		(default Classes)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(single-slot :JADE-PROPERTIES-GENERATE-BEANS
-		(type SYMBOL)
-		(allowed-values FALSE TRUE)
-		(default TRUE)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(single-slot :JADE-PROPERTIES-NAME
+	(single-slot %3ASUPPORT
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot :JADE-IGNORE
-		(type SYMBOL)
-		(allowed-values FALSE TRUE)
-		(default FALSE)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(single-slot :JADE-PROPERTIES-PACKAGE
+	(single-slot %3AJADE-PROPERTIES-DIRECTORY
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot :JADE-UNNAMED-SLOT
+	(single-slot %3AJADE-UNNAMED-SLOT
 		(type SYMBOL)
 		(allowed-values FALSE TRUE)
 ;+		(cardinality 1 1)
 ;+		(associated-facet SimpleJADEAbstractOntology_00016)
 		(create-accessor read-write))
-	(single-slot :JADE-PROPERTIES-GENERATE-ONTOLOGY
+	(single-slot %3APACKAGE
+;+		(comment "packagename")
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3AJADE-PROPERTIES-COMPATIBILITY
+		(type SYMBOL)
+		(allowed-values J2ME JavaBeans Classes)
+		(default Classes)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3AJADE-JAVA-BASE-CLASS
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3AJADE-PROPERTIES-GENERATE-BEANS
 		(type SYMBOL)
 		(allowed-values FALSE TRUE)
 		(default TRUE)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot :JADE-JAVA-BASE-CLASS
+	(single-slot %3AJADE-PROPERTIES-PACKAGE
 		(type STRING)
-		(default "java.lang.Exception")
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(multislot resolvers
-		(type SYMBOL)
-;+		(allowed-parents AID)
+	(multislot %3AJADE-INCLUDED-PROPERTIES
+		(type INSTANCE)
+;+		(allowed-classes)
 		(create-accessor read-write))
-	(single-slot :JADE-NAME
+	(single-slot %3AJADE-NAME
 		(type STRING)
 ;+		(cardinality 0 1)
 ;+		(associated-facet SimpleJADEAbstractOntology_00014)
 		(create-accessor read-write))
-	(multislot :JADE-INCLUDED-PROPERTIES
-		(type INSTANCE)
-;+		(allowed-classes)
-		(create-accessor read-write))
-	(single-slot name_
-		(type STRING)
-;+		(cardinality 1 1)
-		(create-accessor read-write))
-	(single-slot :JADE-PROPERTIES-DIRECTORY
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write))
-	(multislot addresses
-		(type STRING)
-		(create-accessor read-write))
-	(single-slot :JADE-JAVA-CODE
-		(type STRING)
-;+		(cardinality 0 1)
-		(create-accessor read-write)))
-
-(defclass :JADE-CLASS
-	(is-a :STANDARD-CLASS)
-	(role concrete)
-	(single-slot :JADE-IGNORE
+	(single-slot %3AJADE-IGNORE
 		(type SYMBOL)
 		(allowed-values FALSE TRUE)
 		(default FALSE)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot :JADE-JAVA-BASE-CLASS
+	(single-slot name_
 		(type STRING)
-		(default "java.lang.Exception")
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(multislot addresses
+		(type STRING)
+		(create-accessor read-write))
+	(single-slot %3AJADE-JAVA-CODE
+		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot :JADE-NAME
+	(single-slot %3ALOCATION
+;+		(comment "The location to store files into")
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write))
-	(single-slot :JADE-JAVA-CODE
+	(single-slot %3AONTOLOGYNAME
+;+		(comment "name of the ontology")
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3AJADE-PROPERTIES-GENERATE-ONTOLOGY
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default TRUE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3AJADE-PROPERTIES-NAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(multislot resolvers
+		(type SYMBOL)
+;+		(allowed-parents AID)
+		(create-accessor read-write)))
+
+(defclass %3AJADE-CLASS
+	(is-a %3ASTANDARD-CLASS)
+	(role concrete)
+	(single-slot %3AJADE-NAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3AJADE-IGNORE
+		(type SYMBOL)
+		(allowed-values FALSE TRUE)
+		(default FALSE)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3AJADE-JAVA-CODE
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3AJADE-JAVA-BASE-CLASS
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
-(defclass :JADE-SLOT
-	(is-a :STANDARD-SLOT)
+(defclass %3AJADE-SLOT
+	(is-a %3ASTANDARD-SLOT)
 	(role concrete)
-	(single-slot :JADE-UNNAMED-SLOT
+	(single-slot %3AJADE-UNNAMED-SLOT
 		(type SYMBOL)
 		(allowed-values FALSE TRUE)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(single-slot :JADE-NAME
+	(single-slot %3AJADE-NAME
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write)))
+
+(defclass %3APROJECT-ANNOTATION
+	(is-a %3AANNOTATION)
+	(role concrete)
+	(single-slot %3ASUPPORT
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3APACKAGE
+;+		(comment "packagename")
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3ALOCATION
+;+		(comment "The location to store files into")
+		(type STRING)
+;+		(cardinality 0 1)
+		(create-accessor read-write))
+	(single-slot %3AONTOLOGYNAME
+;+		(comment "name of the ontology")
 		(type STRING)
 ;+		(cardinality 0 1)
 		(create-accessor read-write)))

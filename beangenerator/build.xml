@@ -51,6 +51,7 @@
     <copy todir="${protege-home}/projects">
        <fileset dir="${ontologies}">
          <include name="SimpleJADEAbstractOntology**"/>
+         <include name="OWLSimpleJADEAbstractOntology**"/>
        </fileset>
     </copy>
   </target>
@@ -59,12 +60,12 @@
   <target name="examples" depends="install">
     <copy todir="${protege-home}/projects">
        <fileset dir="${ontologies}">
-         <include name="Demo**"/>
+         <include name="MusicShop**"/>
        </fileset>
     </copy>
     <copy todir="${protege-home}/projects">
        <fileset dir="${ontologies}">
-         <include name="Discovery**"/>
+         <include name="OWLMusicShop**"/>
        </fileset>
     </copy>
     <copy todir="${protege-home}/projects">
@@ -77,12 +78,12 @@
 
   <!-- Make distribution zip file and put in ${dist} -->
   <target name="dist" depends="lib">
-    <jar jarfile="${dist}/${projectname}.zip">
+    <zip zipfile="${dist}/${projectname}.zip">
       <fileset dir="${dist}" includes="add-ons/${projectname}/${src}/**"/>
-      <fileset dir="${dist}" includes="add-ons/${projectname}/examples/**"/>
+      <fileset dir="${dist}" includes="add-ons/${projectname}/resources/**"/>
       <fileset dir="${dist}" includes="add-ons/${projectname}/*"/>
       <fileset dir="${dist}" includes="add-ons/${projectname}/lib/**"/>
-    </jar>
+    </zip>
   </target>
  
   <target name="all" depends="init, compile, lib, dist"/>
