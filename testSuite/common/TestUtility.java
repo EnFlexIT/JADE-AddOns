@@ -61,7 +61,7 @@ public class TestUtility {
 	public static final String CONFIGURABLE_AGENT = "test.common.ConfigurableAgent";
 	
 	private static final String SPY_NOTIFICATION = "spy-notification";
-	
+	private static int spyCnt = -1;
   
   private static jade.content.ContentManager cm = new jade.content.ContentManager();
   private static jade.content.lang.Codec codec = new jade.content.lang.leap.LEAPCodec();
@@ -324,11 +324,11 @@ public class TestUtility {
   	try {
   		String[] args = null;
   		if (ams == null || a.getAMS().equals(ams)) {
-  			// The containe is in the local platform --> arg0 is the localName
+  			// The container is in the local platform --> arg0 is the localName
   			args = new String[] {a.getLocalName()};
   		}
   		else {
-				// The containe is in a remote platform --> arg0 is the GUID and arg1 following 
+				// The container is in a remote platform --> arg0 is the GUID and arg1 following 
 				// args are the addresses
   			List l = new ArrayList();
   			l.add(a.getName());
@@ -341,7 +341,8 @@ public class TestUtility {
   				args[i] = (String) l.get(i);
   			}
   		}
-  		AID spy = TestUtility.createAgent(a, "spy", "test.common.TestUtility$HostSpyAgent", args, ams, containerName);
+  		spyCnt++;
+  		AID spy = TestUtility.createAgent(a, "spy"+spyCnt, "test.common.TestUtility$HostSpyAgent", args, ams, containerName);
   		ACLMessage msg = a.blockingReceive(MessageTemplate.MatchConversationId(SPY_NOTIFICATION), 10000);
   		if (msg != null) {
 	  		if (msg.getPerformative() == ACLMessage.INFORM) {
