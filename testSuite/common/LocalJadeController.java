@@ -74,7 +74,7 @@ class LocalJadeController implements JadeController {
 		synchronized (lock) {
 			while (!ready) {
 				try {
-					lock.wait(10000); // Wait for 10 sec at most
+					lock.wait(20000); // Wait for 20 sec at most
 					break;
 				}
 				catch (InterruptedException ie) {
