@@ -1,0 +1,63 @@
+<project name="BEFipaMessage" default="compile" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="src" value="src"/>
+  <property name="build" value="classes"/>
+  <property name="doc" value="doc"/>
+  <property name="lib" value="lib"/>
+  <property name="dist" value="../.."/>
+  <property name="libJADEDir" value="../../lib"/>
+  <property name="classpath" value="../..;${libJADEDir}/jade.jar;${libJADEDir}/jadeTools.jar;${libJADEDir}/iiop.jar;${libJADEDir}/Base64.jar;"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the directories structure used to store files -->
+    <mkdir dir="${build}"/>
+    <mkdir dir="${lib}"/>
+    <mkdir dir="${doc}/api"/>
+  </target>
+
+  <!-- Compile the javadoc code from ${src} into ${doc} -->
+  <target name="doc" depends="init" description="generate javadoc documentation">
+    <javadoc destdir="${doc}/api" author="true" windowtitle="BitEfficient ACLCodec" sourcepath="${src}" packagenames="sonera.fipa.acl.*, sonera.fipa.envelope.*, sonera.fipa.util.*"/>
+  </target>
+
+  <!-- Compile the java code from ${src} into ${build} -->
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on"/>
+  </target>
+
+  <!-- Make jars file and put in ${lib} -->
+  <target name="lib" depends="init, compile">
+    <jar jarfile="${lib}/BEExamples.jar">
+      <fileset dir="${build}" includes="**/DummyDecoder.class"/>
+      <fileset dir="${build}" includes="**/DummyEncoder.class"/>
+    </jar>
+    <jar jarfile="${lib}/BEFipaMessage.jar">
+      <fileset dir="${build}" includes="**/sonera/fipa/acl/*"/>
+      <fileset dir="${build}" includes="**/sonera/fipa/util/*"/>
+    </jar>
+  </target>
+
+  <!-- Make distribution zip file and put in ${dist} -->
+  <target name="dist" depends="init, doc, compile, lib">
+    <jar jarfile="${dist}/BEFipaMessageAddOn.zip">
+      <fileset dir="${dist}" includes="add-ons/BEFipaMessage/${src}/**"/>
+      <fileset dir="${dist}" includes="add-ons/BEFipaMessage/*"/>
+      <fileset dir="${dist}" includes="add-ons/BEFipaMessage/${doc}/**"/>
+      <fileset dir="${dist}" includes="add-ons/BEFipaMessage/${lib}/*"/>
+    </jar>
+  </target>
+
+  <target name="all" depends="init, doc, compile, lib, dist"/>
+
+  <!-- delete ${build} and ${lib} directories -->
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} directory tree -->
+    <delete includeEmptyDirs="true">
+      <fileset dir="${build}"/>
+      <fileset dir="${lib}"/>
+    </delete>
+  </target>
+
+</project>
