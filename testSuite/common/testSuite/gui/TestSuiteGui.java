@@ -160,6 +160,7 @@ public class TestSuiteGui extends JFrame {
 		} );
 		
 		setResizable(false);
+		// Initially status must be in IDLE state
 		setStatus(IDLE_STATE);
 	}
 	
@@ -180,7 +181,6 @@ public class TestSuiteGui extends JFrame {
 			currentF.setText(func.getName());
 			GuiEvent ev = new GuiEvent(this, TestSuiteAgent.LOAD_EVENT); 
 			ev.addParameter(func.getTesterClassName());
-			setStatus(READY_STATE);
 			myAgent.postGuiEvent(ev);
 		}
 	}
@@ -219,7 +219,6 @@ public class TestSuiteGui extends JFrame {
 		FunctionalityDescriptor[] allFunc = XMLManager.getFunctionalities(xmlFileName);
 		GuiEvent ev = new GuiEvent(this, ((status == IDLE_STATE || status == READY_STATE) ? TestSuiteAgent.RUNALL_EVENT : TestSuiteAgent.GO_EVENT)); 
 		ev.addParameter(allFunc);
-		setStatus(RUNNING_STATE);
 		myAgent.postGuiEvent(ev);
 	}
 	
