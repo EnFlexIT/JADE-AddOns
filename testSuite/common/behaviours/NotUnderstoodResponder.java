@@ -27,6 +27,8 @@ import jade.core.behaviours.*;
 import jade.lang.acl.*;
 import jade.util.leap.*;
 
+import java.util.Enumeration;
+
 /**
    @author Giovanni Caire - TILAB
  */
@@ -34,8 +36,16 @@ public class NotUnderstoodResponder extends GenericMessageHandler {
 	protected void handleMessage(ACLMessage msg) {
 		ACLMessage reply = msg.createReply();
 		reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+		// Set the same content
 		reply.setContent(msg.getContent());
+		// Set the same user defined parameters
+		Properties pp = msg.getAllUserDefinedParameters();
+		Enumeration e = pp.propertyNames();
+		while (e.hasMoreElements()) {
+			String key = (String) e.nextElement();
+			String value = pp.getProperty(key);
+			reply.addUserDefinedParameter(key, value);
+		}
 		myAgent.send(reply);
-	}
-	
+	}	
 }
