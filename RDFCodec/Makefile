@@ -3,7 +3,7 @@
 JADELIB     	=   	../../../lib/jade.jar
 LIBDIR      	=   	../lib
 LIBNAME     	=   	rdf.jar
-PARSERSLIB  	=   	$(LIBDIR)/xerces.jar:$(LIBDIR)/SiRPAC-1.16.jar
+PARSERSLIB  	=   	$(LIBDIR)/sax2.jar:$(LIBDIR)/rdf-api-2001-01-19.jar
 CLSDIR      	=	classes
 SRCDIR      	=   	src
 EXAMPLESDIR 	= 	examples
@@ -17,7 +17,7 @@ AR 	    	= 	jar
 ARFLAGS     	= 	cvf
 JC 	    	= 	javac
 JFLAGS 	    	= 	-deprecation -O -d ../$(CLSDIR) -classpath .:$(JADELIB):$(PARSERSLIB)
-EXAMPLEJFLAGS	= 	-deprecation -O -d $(CLSDIR) -classpath .:../../lib/jade.jar:lib/xerces.jar:lib/SiRPAC-1.16.jar:$(CLSDIR)
+EXAMPLEJFLAGS	= 	-deprecation -O -d $(CLSDIR) -classpath .:../../lib/jade.jar:lib/sax2.jar:lib/rdf-api-2001-01-19.jar:$(CLSDIR)
 
 SOURCES	    	=	it/unipr/aot/rdf/RDFCodec.java \
 			it/unipr/aot/rdf/RDFFrameConsumer.java	

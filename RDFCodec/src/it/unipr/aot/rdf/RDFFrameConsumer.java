@@ -88,10 +88,20 @@ public class RDFFrameConsumer implements RDFConsumer, RDFParserWrapper{
    */
   public List parse(String content) throws SAXException{
     if (content.length()==0) return null;
+/*
+    java -Dorg.xml.sax.parser=org.apache.xerces.parsers.SAXParser -classpath ./lib/jade.jar:./lib/jadeTools.jar:./lib/xerces.jar:./lib/rdf.jar jade.Boot ( for Unix )
+    or
+    java -Dorg.xml.sax.parser=org.apache.xerces.parsers.SAXParser -classpath .\lib\jade.jar;.\lib\jadeTools.jar;.\lib\xerces.jar;.\lib\rdf.jar jade.Boot ( for Windows )
+*/
 
+    String parserClassName=System.getProperty(SYSTEM_PROPERTY_SAX_PARSER);
+	if( (parserClassName == null) || parserClassName.equals("") ) {
+          System.setProperty(SYSTEM_PROPERTY_SAX_PARSER, SAX_PARSER);
+	}
+/*
     //this property is used by SiRPAC
     System.setProperty(SYSTEM_PROPERTY_SAX_PARSER, SAX_PARSER);
-
+*/
     RDFFactory f = new RDFFactoryImpl();
     try{
       //Prepare input source

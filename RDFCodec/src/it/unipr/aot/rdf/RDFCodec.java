@@ -557,8 +557,6 @@ public class RDFCodec extends Codec {
    }
 
    // Gets a quoted String from RDF string format.
-   // 'm' car added indicates that the previous "\&" has been modified
-   // 'n' car added indicates that the previous "\&" was already present in the RDF string
    // @param a string in RDF format to be transformed.
    // @return a quoted string.
    private String insertCDATASection(String rdfString){
