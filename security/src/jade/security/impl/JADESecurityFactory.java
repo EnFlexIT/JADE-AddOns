@@ -31,6 +31,7 @@ import jade.security.JADEPrincipal;
 import jade.security.SDSIName;
 import jade.core.security.authentication.JADEUserAuthenticator;
 import jade.security.DelegationCertificate;
+import jade.util.Logger;
 
 
 /**
@@ -47,12 +48,12 @@ public class JADESecurityFactory extends SecurityFactory {
 
   public JADEAuthority newJADEAuthority() {
     JADEAuthority ja=null;
+    String className = profile.getParameter(AUTH_CLASS_KEY, AUTH_CLASS_DEFAULT);
     try {
       ja = (JADEAuthority) 
-          Class.forName( 
-          profile.getParameter(AUTH_CLASS_KEY, 
-                               AUTH_CLASS_DEFAULT) ).newInstance();
+          Class.forName( className ).newInstance();
     } catch (Exception ex) {
+      myLogger.log(Logger.FINE, "Error creating JADEAuthority (class="+className+")" );
     }
     return ja;
   }

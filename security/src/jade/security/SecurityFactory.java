@@ -44,6 +44,8 @@ abstract public class SecurityFactory {
   public static final String SECURITY_FACTORY_CLASS_KEY = "jade.security.SecurityFactory";
   public static final String SECURITY_FACTORY_CLASS_DEFAULT = "jade.security.impl.JADESecurityFactory";
 
+  protected static Logger myLogger = Logger.getMyLogger(SecurityFactory.class.getName());
+
 
   // the singleton instance of this object
   private static SecurityFactory singleton = null;
@@ -58,9 +60,10 @@ abstract public class SecurityFactory {
    *  @seealso#getSecurityFactory()
    */
   static public SecurityFactory getSecurityFactory(Profile p) {
+    myLogger.log(Logger.SEVERE, " \n ----- getSecurityFactory(Profile ");
     String className = p.getParameter(SECURITY_FACTORY_CLASS_KEY,
                                       SECURITY_FACTORY_CLASS_DEFAULT);
-
+    
     if (singleton == null) {
 
       try {
@@ -68,30 +71,32 @@ abstract public class SecurityFactory {
             newInstance();
       }
       catch (Exception e) {
-        e.printStackTrace();
-        Logger.println("\nError loading jade.security SecurityFactory:" +
+        //e.printStackTrace();
+        myLogger.log( Logger.SEVERE, "\nError loading jade.security SecurityFactory:" +
                        className);
-        Logger.println("Continuing with default: " +
+        myLogger.log( Logger.SEVERE, "Continuing with default: " +
                        SECURITY_FACTORY_CLASS_DEFAULT);
       }
 
       if (singleton == null) {
         try {
+        myLogger.log( Logger.FINER, "Creating the SecurityFactory singleton"); 
           singleton = (jade.security.SecurityFactory) Class.forName(
               SECURITY_FACTORY_CLASS_DEFAULT).
               newInstance();
+        myLogger.log( Logger.FINER, "SecurityFactory singleton created.");
         }
         catch (Exception e) {
-          e.printStackTrace();
-          Logger.println("\nError loading SecurityFactory:" +
+          //e.printStackTrace();
+          myLogger.log(Logger.SEVERE, "\nError loading SecurityFactory:" +
                          SECURITY_FACTORY_CLASS_DEFAULT);
-          Logger.println(" Exiting... ");
+          myLogger.log(Logger.SEVERE, " Exiting... ");
           System.exit( -1);
         }
       }
       profile = p;
     }
-
+    myLogger.log(Logger.SEVERE, "singleton:" + singleton);
     return singleton;
   } // end getSecurityFactory
 
@@ -100,6 +105,7 @@ abstract public class SecurityFactory {
    * If it has never created, returns 'null'.
    */
   static public SecurityFactory getSecurityFactory() {
+    //System.out.println( "\n ---- getSecurityFactory()");
     return singleton;
   } // end getSecurityFactory
 
