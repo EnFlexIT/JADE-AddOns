@@ -179,7 +179,7 @@ public class ACLEncoder implements ACLConstants {
 		if ((s=m.getConversationId())!=null && s.length() > 0)
 			dumpParam(s, ACL_MSG_PARAM_CONVERSATION_ID);
 		dumpAIDList(m.getAllReplyTo(), ACL_MSG_PARAM_REPLY_TO); 
-		dumpDate(m.getReplyBy());
+		dumpDate(m.getReplyByDate());
 
 		dumpContent(m, content_type);
 		if ((s=m.getInReplyTo())!=null && s.length() > 0)
@@ -215,10 +215,11 @@ public class ACLEncoder implements ACLConstants {
 	/*
 	 * Output DateTimeToken
 	 */
-	private void dumpDate(String s) {
-		if (s == null || s.length() < 1) {
-			return;
-		}
+	private void dumpDate(Date d) {
+		if (d == null) return;
+
+		String s = ISO8601.toString(d);
+
 		byte typeDG = (byte) (bd.containsTypeDg(s) ? 0x01 : 0x00);
 
 		/* Output message parameter code */

@@ -85,6 +85,10 @@ public class DecoderCodetable {
 		initialize((sz>16) ? 16 : (((sz)<8) ? 8 : sz));
 	}
 	/**
+	 * Returns the size of the codetable
+	 */
+	public int getSize() { return size; }
+	/**
 	 * Actual initialization of the codetable
 	 */
 	private void initialize(int sz) {

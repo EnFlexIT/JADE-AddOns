@@ -1,6 +1,6 @@
 
-ifeq (../../../Rules.mk,$(wildcard ../../../Rules.mk))
-include ../../../Rules.mk
+ifeq (../../../../Rules.mk,$(wildcard ../../../../Rules.mk))
+include ../../../../Rules.mk
 endif
 
 SUBDIRS = 
@@ -12,7 +12,7 @@ SUBDIRS =
 all: ${SUBDIRS} ${CLASSES}
 
 .java.class:
-	$(JAVAC) $(JFLAGS) $<
+	$(JAVAC) +P $(JFLAGS) $<
 
 doc:
 	(cd .. && make doc)
@@ -20,3 +20,10 @@ doc:
 clean:
 	rm -fr doc
 	rm -f *.class
+
+pre: dummy
+	rm -fr pre
+	mkdir pre
+	for i in *.java; do gcc -E -C -P -x c -nostdinc -DJADE $$i > pre/$$i; done
+
+dummy:

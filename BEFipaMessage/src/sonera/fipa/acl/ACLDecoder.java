@@ -51,14 +51,12 @@ import jade.core.AID;
 
 
 /**
- * InputStream that reads fipa-bitefficient-std coded ACL messages from
- * given InputStream.
+ *
  *
  * @author Heikki Helin, Mikko Laukkanen
-1 */
+ */
 
-public class ACLInputStream extends BufferedInputStream 
-	implements ACLConstants {
+public class ACLDecoder implements ACLConstants {
 	/**
 	 * as Conversion between communicative acts (legacy <-> 
 	 * bit-efficient) 
@@ -89,37 +87,31 @@ public class ACLInputStream extends BufferedInputStream
 	/** ex Expression parser */
 	private ExprParser ex = new ExprParser();
 
+	private int current;
+
 	/**
-	 * Initialize the ACLInputStream. If this constructor is used,
-	 * the stream assumes that all messages are coded without 
-	 * codetables.
-	 *
-	 * @param i The InputStream from where the messages are read.
+	 * Initialize the ACLDecoder. If this constructor is used,
+	 * all messages are decoded without codetables.
  	 */
-	public ACLInputStream(InputStream i) {
-		super(i);
+	public ACLDecoder() {
 		coding = ACL_BITEFFICIENT;
 		initialize(8);
 	}
 	/**
-	 * Initialize the ACLInputStream and associated codetable.
+	 * Initialize the ACLDecoder with a given codetable size
 	 *
-	 * @param i The InputStream from where the messages are read.
 	 * @param sz The size of the codetable (in bits)
 	 */
-	public ACLInputStream(InputStream i, int sz) {
-		super(i);
+	public ACLDecoder(int sz) {
 		coding = ACL_BITEFFICIENT_CODETABLE;
 		initialize(sz);
 	}
 	/**
-	 * FIXME: Remove size and add getSize to DecoderCodetable!
+	 * Initialize the ACLDecoder with a given codetable
 	 */
-	public ACLInputStream (InputStream i, int sz, DecoderCodetable ct) {
-		super (i);
+	public ACLDecoder (DecoderCodetable ct) {
 		coding = ACL_BITEFFICIENT_CODETABLE;
-		size = sz;
-		initialize(size);
+		initialize(ct.getSize());
 		this.ct = ct;
 	}
 
@@ -134,20 +126,21 @@ public class ACLInputStream extends BufferedInputStream
 		return ct;
 	}
 	/**
-	 * Reads an ACL message from the input stream.
+	 * Parses an ACL message from byte array
 	 * @returns The ACL message read.
 	 */
-	public ACLMessage readMsg() throws IOException,ACLCodec.CodecException  {
+	public ACLMessage readMsg(byte [] inb) throws IOException,ACLCodec.CodecException  {
 
 		m.reset();
 
-		if (getCoding(getByte()) < 0) 
+		current = 0;
+		if (getCoding(getByte(inb)) < 0) 
 			throw new ACLCodec.CodecException ("Unsupported coding", null);
-		if (getVersion(getByte()) < 0) 
+		if (getVersion(getByte(inb)) < 0) 
 			throw new ACLCodec.CodecException ("Unsupported version", null);
-		if (getType(getByte()) < 0) 
+		if (getType(getByte(inb)) < 0) 
 			throw new ACLCodec.CodecException ("Unsupported type", null);
-		while (getMsgParam() != -1);
+		while (getMsgParam(inb) != -1);
 		return m;
 	}
 	/**
@@ -182,74 +175,74 @@ public class ACLInputStream extends BufferedInputStream
 		}
 		return 0;
 	}
-	private int getMsgParam() throws IOException, ACLCodec.CodecException  {
-		byte b = getByte();
+	private int getMsgParam(byte [] inb) throws IOException, ACLCodec.CodecException  {
+		byte b = getByte(inb);
 		switch(b) {
 		case ACL_END_OF_MSG:
 			return -1;
 		case ACL_MSG_PARAM_SENDER:
-			m. setSender (getAID());
+			m. setSender (getAID(inb));
 			return 0;
 		case ACL_MSG_PARAM_RECEIVER:
-			getReceivers();
+			getReceivers(inb);
 			return 0;
 		case ACL_MSG_PARAM_CONTENT:
-			m.setContent((String)getParamX());
+			m.setContent((String)getParamX(inb));
 			return 0;
 		case ACL_MSG_PARAM_REPLY_WITH:
-			m.setReplyWith(getParam());
+			m.setReplyWith(getParam(inb));
 			return 0;
 		case ACL_MSG_PARAM_REPLY_BY:
-			m.setReplyByDate(getDate());
+			m.setReplyByDate(getDate(inb));
 			return 0;
 		case ACL_MSG_PARAM_IN_REPLY_TO:
-			m.setInReplyTo(getParam());
+			m.setInReplyTo(getParam(inb));
 			return 0;
 		case ACL_MSG_PARAM_REPLY_TO:
-			getRepliesTo();
+			getRepliesTo(inb);
 			return 0;
 		case ACL_MSG_PARAM_LANGUAGE:
-			m.setLanguage(getParam());
+			m.setLanguage(getParam(inb));
 			return 0;
 		case ACL_MSG_PARAM_ONTOLOGY:
-			m.setOntology(getParam());
+			m.setOntology(getParam(inb));
 			return 0;
 		case ACL_MSG_PARAM_PROTOCOL:
-			m.setProtocol(getParam());
+			m.setProtocol(getParam(inb));
 			return 0;
 		case ACL_MSG_PARAM_ENCODING:
 
-			m.setEncoding(getParam());
+			m.setEncoding(getParam(inb));
 
 			return 0;
 		case ACL_MSG_PARAM_CONVERSATION_ID:
-			m. setConversationId (getParam());
+			m. setConversationId (getParam(inb));
 			return 0;
 		case ACL_NEW_MSGPARAM_FOLLOWS:
 
-			m.addUserDefinedParameter(getParam(), getParam());
+			m.addUserDefinedParameter(getParam(inb), getParam(inb));
 
 			return 0;
 		}
 		throw new ACLCodec.CodecException ("Unknown component or something like that", null);
 	}			
-	private void getReceivers() throws IOException, ACLCodec.CodecException  {
+	private void getReceivers(byte [] inb) throws IOException, ACLCodec.CodecException  {
 		AID  _aid;
-		while ((_aid=getAID()) != null) {
+		while ((_aid=getAID(inb)) != null) {
 			m. addReceiver (_aid);
 		}
 	}
-	private void getRepliesTo() throws IOException, ACLCodec.CodecException  {
+	private void getRepliesTo(byte [] inb) throws IOException, ACLCodec.CodecException  {
 		AID  _aid;
-		while((_aid=getAID()) != null)  {
+		while((_aid=getAID(inb)) != null)  {
 			m. addReplyTo (_aid);
 		}
 	}
-	private AID  getAID() throws IOException, ACLCodec.CodecException  {
-		byte b = getByte();
-		return (getAID(b));
+	private AID  getAID(byte [] inb) throws IOException, ACLCodec.CodecException  {
+		byte b = getByte(inb);
+		return (getAID(b, inb));
 	}
-	private AID  getAID(byte t) throws IOException, ACLCodec.CodecException  {
+	private AID  getAID(byte t, byte [] inb) throws IOException, ACLCodec.CodecException  {
 
 		AID  _aid = new AID ();
 		byte b;
@@ -261,27 +254,27 @@ public class ACLInputStream extends BufferedInputStream
 		/*
 		 * Mandatory part of AID
 		 */
-		_aid.setName(getString());
+		_aid.setName(getString(inb));
 		/*
 		 * Optional part of AID
 		 */
-		while ((b=getByte())!=ACL_END_OF_COLLECTION) {
+		while ((b=getByte(inb))!=ACL_END_OF_COLLECTION) {
 			switch(b) {
 			case ACL_AID_ADDRESSES:
-				while((b=getByte())!=ACL_END_OF_COLLECTION)
+				while((b=getByte(inb))!=ACL_END_OF_COLLECTION)
 
-					_aid.addAddresses(getRealString(b));
+					_aid.addAddresses(getRealString(b, inb));
 
 				break;
 			case ACL_AID_RESOLVERS:
-				while((b=getByte())!=ACL_END_OF_COLLECTION)
+				while((b=getByte(inb))!=ACL_END_OF_COLLECTION)
 
-					_aid.addResolvers(getAID(b));
+					_aid.addResolvers(getAID(b, inb));
 
 				break;
 			case ACL_AID_USERDEFINED:
-				String key = getString();
-				String value = getString();
+				String key = getString(inb);
+				String value = getString(inb);
 
 				_aid.addUserDefinedSlot(key,value);
 
@@ -292,47 +285,47 @@ public class ACLInputStream extends BufferedInputStream
 		}
 		return _aid;
 	}
-	private byte getByte() throws IOException {
-		return (byte)super.read();
+	private byte getByte(byte [] inb) throws IOException {
+		return (byte)inb[current++];
 	}
 	byte _b[] = new byte[3];
-	private int inputCode() throws IOException {
+	private int inputCode(byte [] inb) throws IOException {
 		int n;
 		if (size > 8) {
-			super.read(_b, 0, 2);
+			_b[0] = getByte(inb);
+			_b[1] = getByte(inb);
 			n = (int)((_b[1]&0xff)+((_b[0]&0xff)<<8));
 		} else {
-			byte b0 = (byte)super.read();
+			byte b0 = (byte)getByte(inb);
 			n = (int)(b0&0xff);
 		}
 		return n;
 	}
-	private String getParam() throws IOException {
-		return ex.toText();
+	private String getParam(byte [] inb) throws IOException {
+		return ex.toText(inb);
 	}
-	private Object getParamX() throws IOException {
-		return ex.toText();
-	}
-
-	private Date getDate() throws IOException {
-		byte type = getByte();
+	private Date getDate(byte [] inb) throws IOException {
+		byte type = getByte(inb);
 		ba.reset();
-		for (int i = 0; i < ACL_DATE_LEN; ++i) ba.add(getByte());
+		for (int i = 0; i < ACL_DATE_LEN; ++i) ba.add(getByte(inb));
 		String s = new BinDate().fromBin(ba.get());
-		if ((type & 0x01) != 0x00) s += (char)getByte();
+		if ((type & 0x01) != 0x00) s += (char)getByte(inb);
 		Date d = null;
 		try {
-			d = ISO8601.toDate(s);  
+			d = ISO8601.toDate(s);
 		} catch (Exception e) {
 			/* FIXME */
 		}
 		return d;
 	}
-	private String getString() throws IOException {
-		byte type = getByte();
-		return getRealString(type);
+	private Object getParamX(byte [] inb) throws IOException {
+		return ex.toText(inb);
 	}
-	private String getRealString(byte type) throws IOException {		
+	private String getString(byte [] inb) throws IOException {
+		byte type = getByte(inb);
+		return getRealString(type, inb);
+	}
+	private String getRealString(byte type, byte [] inb) throws IOException {		
 		byte b, t;
 		ba.reset();
 		String s = null; 
@@ -341,7 +334,7 @@ public class ACLInputStream extends BufferedInputStream
 		case ACL_NEW_WORD_FOLLOWS: case ACL_NEW_STRING_FOLLOWS: 
 			/* New word (or string) */
 			do {
-				ba.add(b=getByte());
+				ba.add(b=getByte(inb));
 			} while(b != ACL_END_OF_PARAM);
 			s = new String(ba.get(),0,ba.length()).trim();
 			if (coding == ACL_BITEFFICIENT_CODETABLE) {
@@ -351,41 +344,41 @@ public class ACLInputStream extends BufferedInputStream
 		case ACL_CT_WORD_FOLLOWS: case ACL_CT_STRING_FOLLOWS:
 
 			/* Word from codetable */
-			s = ct.lookup(inputCode());
+			s = ct.lookup(inputCode(inb));
 			break;
 		case ACL_ABS_DATE_FOLLOWS: case ACL_ABS_DATET_FOLLOWS:
 
 			/* DateTimeToken */
-			for (i = 0; i < ACL_DATE_LEN; ++i) ba.add(getByte());
+			for (i = 0; i < ACL_DATE_LEN; ++i) ba.add(getByte(inb));
 			s = new BinDate().fromBin(ba.get());
-			if ((type & 0x01) != 0x00) s += (char)getByte();
+			if ((type & 0x01) != 0x00) s += (char)getByte(inb);
 			break;
 		case ACL_DECNUM_FOLLOWS: case ACL_HEXNUM_FOLLOWS:
 
 			/* Number token */
 			bb.reset();
-			while(((b=getByte()) & 0x0f) != 0x00) bb.add(b);
+			while(((b=getByte(inb)) & 0x0f) != 0x00) bb.add(b);
 			if (b != 0x00) bb.add(b);
 			s = bn.fromBin(bb.get()); 
 			break;
 		case ACL_NEW_BLE_STR8_FOLLOWS:
 			System.err.println("STR8");
-			len = getByte();
+			len = getByte(inb);
 			/* FIXME */
 			byte [] b1 = new byte[1024];
-			super.read(b1,0,len);
+/*			super.read(b1,0,len); */
 			s = new String(b1).trim();
 			break;		
 		case ACL_NEW_BLE_STR16_FOLLOWS:
-			len = inputCode();
+			len = inputCode(inb);
 /*			super.read(b,0,len); */
 			break;			
 		case ACL_NEW_BLE_STR32_FOLLOWS:
 /*
-			for (i = 0; i < 4; ++i) b[i] = getByte();
+			for (i = 0; i < 4; ++i) b[i] = getByte(inb);
 			len = (int)((b[3]&0xff) + ((b[2]&0xff)<<8)+
 				((b[1]&0xff)<<16) + ((b[0]&0xff)<<24));
-			super.read(b,0,len);
+//			super.read(b,0,len);
 */
 			break;
 		case ACL_CT_BLE_STR_FOLLOWS:
@@ -404,20 +397,20 @@ public class ACLInputStream extends BufferedInputStream
 		public ExprParser() {
 			ba = new ByteArray(512);
 		}
-		public String toText() throws IOException {
+		public String toText(byte [] inb) throws IOException {
 			ba.reset();
 			level = 0;
 			byte b, x; 
 
 			boolean beginOfParameter = true;
 
-			while ((b = getByte())!=-1) {
+			while ((b = getByte(inb))!=-1) {
 				if (b >= 0x40 && b < 0x60) {
 					/* Level UP */
 					ba.add((byte)')');
 					ba.add((byte)' ');
 					if (--level == 0) 
-						return new String(ba.get());
+						return new String(ba.get(),0,ba.length()).trim();
 					b &= ~0x40; /* Clear the level bits */
 				} else if (b >= 0x60 && b <0x80) {
 					/* Level Down */
@@ -432,13 +425,13 @@ public class ACLInputStream extends BufferedInputStream
 						ba.add((byte)' ');
 					else
 						beginOfParameter = false;
-					s = getRealString(b);
+					s = getRealString(b, inb);
 					ba.add(s.getBytes(),s.length());
 					if (level == 0) 
-						return new String(ba.get());
+						return new String(ba.get(),0,ba.length()).trim();
 				}
 			}
-			return new String(ba.get());
+			return new String(ba.get(),0,ba.length()).trim();
 		}
 	}
 }
