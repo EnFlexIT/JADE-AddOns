@@ -26,6 +26,7 @@ package test.common;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.DataStore;
+import test.common.xml.TestDescriptor;
 
 import java.util.Hashtable;
 
@@ -42,8 +43,8 @@ public abstract class Test {
   public static final int DEFAULT_PORT = 1099;
 
   private TestGroup myGroup;
+  private TestDescriptor myDescriptor;
   
-  public abstract String getName();
   public abstract Behaviour load(Agent a, DataStore ds, String resultKey) throws TestException;
   public void clean(Agent a) {
   }
@@ -52,9 +53,22 @@ public abstract class Test {
   	return myGroup.getArgument(name);
   }
   
+  /** 
+     Only called by the TestGroupExecutor
+   */
+  TestDescriptor getDescriptor() {
+  	return myDescriptor;
+  }
+  
+  /** 
+     Only called by the TestGroup
+   */
+  void setDescriptor(TestDescriptor td) {
+  	myDescriptor = td;
+  }
+  
   void setGroup(TestGroup tg) {
   	myGroup = tg;
   }
-  
 }
 

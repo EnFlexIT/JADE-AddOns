@@ -34,8 +34,6 @@ import test.common.*;
 import java.io.*;
 import java.net.InetAddress;
 
-import test.common.xml.*;
-
 /**
    @author Givanni Caire - TILAB
    @author Elisabetta Cortese - TILAB
@@ -49,12 +47,7 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 	public static final String REMOTE_PLATFORM_PORT = "9003";
 	
 	protected TestGroup getTestGroup() {
-		TestDescriptor[] td = XMLManager.getTests("test\\interPlatform\\interPlatformTestsList.xml");
-		String[] listT = new String[td.length];
-		for (int i = 0; i < td.length; i++) {
-			listT[i] = td[i].getTestClassName();
-		}
-		TestGroup tg = new TestGroup(listT){		
+		TestGroup tg = new TestGroup("test\\interPlatform\\interPlatformTestsList.xml"){		
 			
 			private JadeController jc;
 			

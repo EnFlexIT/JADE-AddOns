@@ -25,6 +25,7 @@ package test.common;
 
 import jade.core.Agent;
 import jade.util.leap.*;
+import test.common.xml.*;
 
 /**
    Class representing a group of tests (often related to a given 
@@ -33,13 +34,19 @@ import jade.util.leap.*;
    @author Giovanni Caire - TILAB
  */
 public class TestGroup {
-	private String[] testClassNames;
+	//private String[] testClassNames;
+	private TestDescriptor[] myTests;
 	private int cnt;
 	private List argumentSpecs = new ArrayList();
   private HashMap args = new HashMap();
 	
-	public TestGroup(String[] tests) {
+	/*public TestGroup(String[] tests) {
 		testClassNames = (tests != null ? tests : new String[0]);
+		cnt = 0;
+	}*/
+	
+	public TestGroup(String filename) {
+		myTests = XMLManager.getTests(filename);
 		cnt = 0;
 	}
 	
@@ -100,9 +107,10 @@ public class TestGroup {
 	Test next() throws TestException {		
 		String className = null;
 		try {
-			className = testClassNames[cnt++];
-			Test t = (Test) Class.forName(className).newInstance();
+			TestDescriptor dsc = myTests[cnt++];
+			Test t = (Test) Class.forName(dsc.getTestClassName()).newInstance();
 			t.setGroup(this);
+			t.setDescriptor(dsc);
 			return t;
 		}
 		catch (IndexOutOfBoundsException ioobe) {

@@ -26,6 +26,7 @@ package test.common;
 import jade.core.Agent;
 import jade.core.behaviours.*;
 import jade.lang.acl.MessageTemplate;
+import test.common.xml.TestDescriptor;
 
 /**
    Generic behaviour that executes the tests included in a 
@@ -122,7 +123,11 @@ public class TestGroupExecutor extends FSMBehaviour {
 					if (currentTest != null) {
 						ret = EXECUTE;
 						StringBuffer sb = new StringBuffer("\n--------------------------------------------\n");
-						sb.append("Executing test: "+currentTest.getName()+"\n\n");
+						TestDescriptor td = currentTest.getDescriptor();
+						sb.append("Executing test: "+td.getName()+"\n");
+						sb.append("WHAT: "+td.getWhat()+"\n");
+						sb.append("HOW:  "+td.getHow()+"\n");
+						sb.append("PASSED WHEN: "+td.getPassedWhen()+"\n\n");
 						l.log(sb.toString());
 						Behaviour b2 = currentTest.load(myAgent, getDataStore(), TEST_RESULT_KEY);
 						registerState(b2, EXECUTE_TEST_STATE);
