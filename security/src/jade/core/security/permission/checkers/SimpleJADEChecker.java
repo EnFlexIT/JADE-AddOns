@@ -110,6 +110,7 @@ public class SimpleJADEChecker extends BaseJADEChecker {
 
       if ( startingMain ) {
         // check if that user/principal is authorized, according to the policy
+        if (myLogger.isLoggable(Logger.FINE))
         myLogger.log(Logger.FINE, "  NEW_NODE ("+nd.getName()+")  p="+requester+" c="+creds);
         permission = new PlatformPermission( "", "create");
         // check if that user/principal is authorized, according to the policy
@@ -121,6 +122,7 @@ public class SimpleJADEChecker extends BaseJADEChecker {
       }
 
       // check if that user/principal is authorized, according to the policy
+      if (myLogger.isLoggable(Logger.FINE))
       myLogger.log(Logger.FINE, "  NEW_NODE ("+nd.getName()+")  p="+requester+" c="+creds);
       permission = new ContainerPermission( "", "create");
       checkAction( requester, permission, target, creds );
@@ -245,6 +247,7 @@ public class SimpleJADEChecker extends BaseJADEChecker {
         // insert into the vertical command with the agent principal/credentials
         cmd.setPrincipal( agentPrincipal );
         cmd.setCredentials( agentCreds );
+        if (myLogger.isLoggable(Logger.FINER))
         myLogger.log(Logger.FINER, "\n    agent=("+agentPrincipal+")"+ 
                                    "\n    owner=("+agentCreds.getOwner()+")");
 
@@ -258,6 +261,7 @@ public class SimpleJADEChecker extends BaseJADEChecker {
         // check if the agent (and not the requestor) has got the permission
         if (agentPrincipal==null) {
           String msg = " Internal error,  null agentPrincipal after agent creation.";
+          if (myLogger.isLoggable(Logger.WARNING))
           myLogger.log(Logger.WARNING, msg );
           throw new JADESecurityException( msg );
         } else {
