@@ -32,6 +32,7 @@ import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
 import jade.core.*;
 import jade.wrapper.*;
+import jade.util.Logger;
 
 /**
  * This class defines a container tag to be used in any Servlet/JSP container.
@@ -59,6 +60,8 @@ public class ContainerTag extends TagSupport {
      Object beanObject;
 
      boolean init = false;
+     
+     private static Logger logger = Logger.getMyLogger(ContainerTag.class.getName());
 
 
      public void setId(String val) {
@@ -99,7 +102,7 @@ public class ContainerTag extends TagSupport {
 	 synchronized((ServletContext)
 		      pageContext.findAttribute(PageContext.APPLICATION)) {
 	     beanObject = createBean();
-	     System.out.println(" saving container for id "+id+" "+beanObject);
+	     logger.log(Logger.INFO," saving container for id "+id+" "+beanObject);
 	     pageContext.setAttribute(id, beanObject,PageContext.APPLICATION_SCOPE);
 	     setInit(true);
 	 }		
@@ -108,7 +111,7 @@ public class ContainerTag extends TagSupport {
 	
 
     private Object createBean() throws JspException {
-       	System.out.println("container jade created");
+       	logger.log(Logger.INFO,"container jade created");
 	jade.core.Runtime rt = jade.core.Runtime.instance();
 	Profile p = new ProfileImpl(host,port,id);
 	Object o =  rt.createAgentContainer(p);

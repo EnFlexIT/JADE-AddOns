@@ -3,6 +3,7 @@ package examples.jsp;
 import jade.core.*;
 import jade.core.behaviours.*;
 import jade.lang.acl.*;
+import jade.util.Logger;
 
 /**
  * This agent is to be used in a JSP page. It just sends
@@ -10,11 +11,13 @@ import jade.lang.acl.*;
  */
 public class Snooper extends Agent {
     private ACLMessage msg;
+    
+    private static Logger logger = Logger.getMyLogger(Snooper.class.getName());
 
     public Snooper() {
 	// Create the message to send to the client
         msg = new ACLMessage(ACLMessage.INFORM);
-	System.out.println("Snooper created");
+		logger.log(Logger.CONFIG,"Snooper created");
     }
 
     public void setup() {
@@ -27,10 +30,10 @@ public class Snooper extends Agent {
       addBehaviour(new jade.core.behaviours.CyclicBehaviour() {
 	      
 	      public void action() {
-		  System.out.println(" Trying... ");
+		  logger.log(Logger.INFO," Trying... ");
 		  Object obj = getO2AObject();
 		  if(obj != null) {
-		      System.out.println(" Snooping "+obj);
+		      logger.log(Logger.INFO," Snooping "+obj);
 		      snoop(obj.toString());
 		  } else { 
 		      block();

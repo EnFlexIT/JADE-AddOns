@@ -34,6 +34,7 @@ import javax.servlet.jsp.tagext.*;
 
 import jade.wrapper.*;
 import jade.core.*;
+import jade.util.Logger;
 /***********************************************************************/
 
 /**
@@ -50,8 +51,11 @@ import jade.core.*;
  */
 public class UseAgentTag extends BodyTagSupport {
 
-     String container;	
+     String container;	     
      jade.wrapper.Agent ac;
+     
+     //logger object
+     private static Logger logger = Logger.getMyLogger(UseAgentTag.class.getName());
 
      // Java Bean set properties method. 
      public void setContainer(String val) {
@@ -149,7 +153,7 @@ public class UseAgentTag extends BodyTagSupport {
 	// sinon le bean doit etre placé dans la portée (scope ).
 	
 	try {
-	    System.out.println("Creating new Agent "+id);
+	    logger.log(Logger.INFO,"Creating new Agent "+id);
 	    jade.wrapper.AgentContainer ac = 
 		(jade.wrapper.AgentContainer) pageContext.getAttribute(container, PageContext.APPLICATION_SCOPE);
 	    if (ac==null) {
