@@ -50,6 +50,9 @@ public abstract class Test implements Serializable {
   
   public static final int DEFAULT_PORT = 1099;
 
+  public static final String DEFAULT_PROTO = "http";
+  public static final String DEFAULT_MTP = "jade.mtp.http.MessageTransportProtocol";
+  
   private TestGroup myGroup;
   private TestDescriptor myDescriptor;
   
