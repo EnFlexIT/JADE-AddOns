@@ -42,7 +42,7 @@ public class SavedAgent {
 
     public SavedAgent(Agent a, java.util.List pm) {
 	myAgent = a;
-	myAID = a.getAID();
+	myName = a.getName();
 	pendingMessages = pm;
     }
 
@@ -52,19 +52,18 @@ public class SavedAgent {
 
     public void setAgentData(java.io.Serializable data) {
 	myAgent = (Agent)data;
-	myAID = myAgent.getAID();
     }
 
     public Serializable getAgentData() {
 	return myAgent;
     }
 
-    public void setAgentIdentifier(AID id) {
-	myAID = id;
+    public void setName(String name) {
+	myName = name;
     }
 
-    public AID getAgentIdentifier() {
-	return myAID;
+    public String getName() {
+	return myName;
     }
 
     public void setPendingMessages(java.util.List messages) {
@@ -76,16 +75,12 @@ public class SavedAgent {
     }
 
     public Agent getAgent() {
-	// Restore the explicitly saved attributes
-	myAgent.setAID(myAID);
-	// Restore the pending messages...
-
 	return myAgent;
     }
 
 
     private Agent myAgent;
-    private AID myAID;
+    private String myName;
 
     private java.util.List pendingMessages;
 
