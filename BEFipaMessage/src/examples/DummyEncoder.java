@@ -58,11 +58,14 @@ public class DummyEncoder {
                 try {
                         while(true) {
                                 ACLMessage m = sc.decode();
+//				byte [] __o = new byte[1800];
+//				m.setContentObject(__o);
+                                System.err.println(m.toString());
                                 os.write(m);
                                 ++c;
                         }
                 } catch (Exception e) {
-                        System.err.println("Error: "+e);
+                        System.err.println("-- Error: "+e);
                 }
                                 /*
 				 * Here we assume that whole message is

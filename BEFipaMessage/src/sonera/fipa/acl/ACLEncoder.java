@@ -198,15 +198,18 @@ public class ACLEncoder implements ACLConstants {
         private void dumpDate(Date d) {
                 if (d == null) return;
                 String s = ISO8601.toString(d);
-                byte typeDG = (byte) (bd.containsTypeDg(s) ? 0x01 : 0x00);
+                int x = 0;
+                if (s.charAt(0)=='+') x = 1;
+                else if (s.charAt(0)=='-') x = 2;
+                x += bd.containsTypeDg(s) ? 4 : x;
                 /* Output message parameter code */
                 buf.add(ACL_MSG_PARAM_REPLY_BY);
                 /* Output DateTimeToken id field (0x20-0x21) */
-                buf.add((byte) (ACL_DATE_FOLLOWS + typeDG));
+                buf.add((byte) (ACL_ABS_DATE_FOLLOWS + x));
                 /* Output the Date */
                 buf.add(bd.toBin (s), ACL_DATE_LEN);
                 /* Output (possible) type designator */
-                if (typeDG == 0x01) {
+                if ((x & 0x04) != 0x00) {
                         buf.add ((byte) s.charAt(s.length()-1));
                 }
         }

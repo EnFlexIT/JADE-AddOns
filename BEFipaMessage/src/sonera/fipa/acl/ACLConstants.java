@@ -67,11 +67,22 @@ public interface ACLConstants {
         public static final byte ACL_NEW_BLE_STR16_FOLLOWS = (byte) 0x17;
         public static final byte ACL_NEW_BLE_STR32_FOLLOWS = (byte) 0x19;
         public static final byte ACL_CT_BLE_STR_FOLLOWS = (byte) 0x18;
-        public static final byte ACL_DATE_FOLLOWS = (byte) 0x20;
-        public static final byte ACL_DATET_FOLLOWS = (byte) 0x21;
-        public static final byte ACL_DATE_LEN = 9;
+        /*
+	 * Relative time (w/ +)
+	 */
+        public static final byte ACL_DATE_POS_FOLLOWS = (byte) 0x21;
+        public static final byte ACL_DATET_POS_FOLLOWS = (byte) 0x25;
+        /*
+	 * Relative time (w/ -)
+	 */
+        public static final byte ACL_DATE_NEG_FOLLOWS = (byte) 0x22;
+        public static final byte ACL_DATET_NEG_FOLLOWS = (byte) 0x26;
+        /*
+	 * Absolute time
+	 */
         public static final byte ACL_ABS_DATE_FOLLOWS = (byte) 0x20;
-        public static final byte ACL_ABS_DATET_FOLLOWS = (byte) 0x21;
+        public static final byte ACL_ABS_DATET_FOLLOWS = (byte) 0x24;
+        public static final byte ACL_DATE_LEN = 9;
         public static final byte ACL_AID_FOLLOWS = (byte) 0x02;
         public static final byte ACL_END_OF_COLLECTION = (byte) 0x01;
         public static final byte ACL_AID_ADDRESSES = (byte) 0x02;

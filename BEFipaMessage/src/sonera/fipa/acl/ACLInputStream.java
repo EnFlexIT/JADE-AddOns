@@ -298,7 +298,7 @@ public class ACLInputStream extends BufferedInputStream
                                 m.setByteSequenceContent(__b);
                                 return;
                         case ACL_NEW_BLE_STR8_FOLLOWS:
-                                len = getByte();
+                                len = (int)((byte)getByte()&0xff);
                                 break;
                         case ACL_NEW_BLE_STR16_FOLLOWS:
                                 blen[0] = getByte();
@@ -320,7 +320,7 @@ public class ACLInputStream extends BufferedInputStream
                         }
                         m.setByteSequenceContent(__b);
                 } else {
-                        String s = ex.toText();
+                        String s = getRealString(type);
                         m.setContent(s);
                 }
         }
@@ -329,7 +329,7 @@ public class ACLInputStream extends BufferedInputStream
                 ba.reset();
                 for (int i = 0; i < ACL_DATE_LEN; ++i) ba.add(getByte());
                 String s = new BinDate().fromBin(ba.get());
-                if ((type & 0x01) != 0x00) s += (char)getByte();
+                if ((type & 0x04) != 0x00) s += (char)getByte();
                 Date d = null;
                 try {
                         d = ISO8601.toDate(s);
