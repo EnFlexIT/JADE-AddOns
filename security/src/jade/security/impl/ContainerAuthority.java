@@ -75,6 +75,7 @@ public class ContainerAuthority implements Authority {
 			if (System.getSecurityManager() == null) {
 				String policyFile = profile.getParameter(Profile.POLICY_FILE);
 				System.setProperty("java.security.policy", policyFile);
+				Policy.setPolicy(new sun.security.provider.PolicyFile());
 				//System.out.println("Setting security manager");
 				System.setSecurityManager(new SecurityManager());
 			}
@@ -156,23 +157,7 @@ public class ContainerAuthority implements Authority {
 		}
 	}
 	
-	//!!! to remove
-	public void sign(JADECertificate certificate, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
-		/*try {
-			JADECertificate signed = platform.sign(certificate, identity, delegations);
-			((BasicCertificateImpl)certificate).setSignature(((BasicCertificateImpl)signed).getSignature());
-		}
-		catch (jade.core.IMTPException e) {
-			e.printStackTrace();
-		}*/
-	}
-
 	public CertificateFolder authenticate(JADEPrincipal principal, byte[] password) throws AuthException {
-		throw new AuthorizationException("Authentication is not allowed, here");
-	}
-
-	//!!! to remove
-	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] password) throws AuthException {
 		throw new AuthorizationException("Authentication is not allowed, here");
 	}
 
@@ -245,21 +230,6 @@ public class ContainerAuthority implements Authority {
 		}
 	}
 
-	//!!! to remove
-	public Object doAsPrivileged(jade.security.PrivilegedExceptionAction action, IdentityCertificate identity, DelegationCertificate[] delegations) throws Exception {
-		return null;
-		/*verifySubject(identity, delegations);
-		ProtectionDomain domain = new ProtectionDomain(
-				new CodeSource(null, null), collectPermissions(delegations), null, null);
-		AccessControlContext acc = new AccessControlContext(new ProtectionDomain[] {domain});
-		try {
-			return AccessController.doPrivileged(action, acc);
-		}
-		catch (PrivilegedActionException e) {
-			throw e.getException();
-		}*/
-	}
-
 	private class CheckAction implements jade.security.PrivilegedExceptionAction {
 		Permission p;
 		CheckAction(Permission p) {
@@ -282,30 +252,6 @@ public class ContainerAuthority implements Authority {
 				if (certs != null) {
 					CheckAction ca = new CheckAction(p);
 					doAsPrivileged(ca, certs);
-				}
-				else
-					AccessController.checkPermission(p);
-				//System.out.println("ok");
-			}
-			catch (Exception e) {
-				System.out.println("Permissions to execute " + action + " on " + target + " are not owned.");
-				throw new AuthorizationException("Permissions to execute " + action + " on " + target + " are not owned.");
-			}
-		}
-	}
-
-	//!!! to remove
-	public void checkAction(String action, JADEPrincipal target, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
-		Permission p = null;
-		
-		CheckEntry ce = (CheckEntry)checks.get(action);
-		if (ce != null) {
-			p = createPermission(ce.getType(), target.getName(), ce.getActions());
-			try {
-				//System.out.println("Checking " + action + " on " + target);
-				if (identity != null) {
-					CheckAction ca = new CheckAction(p);
-					doAsPrivileged(ca, identity, delegations);
 				}
 				else
 					AccessController.checkPermission(p);

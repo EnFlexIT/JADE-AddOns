@@ -115,31 +115,15 @@ public class PlatformAuthority extends ContainerAuthority {
 		sign((BasicCertificateImpl)certificate);
 	}
 
-	//!!! to remove
-	public void sign(JADECertificate certificate, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
-		/*verifySubject(identity, delegations);
-
-		if (! (certificate instanceof BasicCertificateImpl))
-			throw new AuthException("unknown certificate class");
-
-		if (certificate instanceof DelegationCertificate) {
-			checkAction(AUTHORITY_SIGN_DC, certificate.getSubject(), identity, delegations);
-			PermissionCollection perms = collectPermissions(delegations);
-			for (Iterator i = ((DelegationCertificate)certificate).getPermissions().iterator(); i.hasNext(); )
-				if (!perms.implies((Permission)i.next()))
-					throw new AuthException("trying to delegate not owned permissions");
-		}
-		else if (certificate instanceof IdentityCertificate) {
-			checkAction(AUTHORITY_SIGN_IC, certificate.getSubject(), identity, delegations);
-		}
+	public CertificateFolder authenticate(JADEPrincipal principal, byte[] password) throws AuthException {
+		final PrincipalImpl p = (PrincipalImpl)principal;
 		
-		sign((BasicCertificateImpl)certificate);*/
-	}
+		IdentityCertificate identity = createIdentityCertificate();
+		identity.setSubject(p);
+		DelegationCertificate delegation = createDelegationCertificate();
+		delegation.setSubject(p);
 
-	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] password) throws AuthException {
-		final PrincipalImpl principal = (PrincipalImpl)identity.getSubject();
-
-		String name = principal.getOwnership();
+		String name = p.getOwnership();
 		String hash = Digest.digest(password, "MD5");
 		//System.out.println("authenticating");
 		//System.out.println("principal=" + principal + ";");
@@ -147,7 +131,7 @@ public class PlatformAuthority extends ContainerAuthority {
 		//System.out.println("hash=" + hash + ";");
 
 		if (users == null)
-			return;
+			return new CertificateFolder(identity, delegation);
 		else for (int i = 0; i < users.size(); i++) {
 			UserEntry entry = (UserEntry)users.elementAt(i);
 			if (entry.usr.equals(name)) {
@@ -156,12 +140,12 @@ public class PlatformAuthority extends ContainerAuthority {
 
 				// ok: user found + exact password
 				// add permissions here
-				delegation.setSubject(principal);
 				PermissionCollection perms = null;
+				//perms = getPermissions(p);
 				try {
-					perms = (PermissionCollection)doPrivileged(new jade.security.PrivilegedExceptionAction() {
+					perms = (PermissionCollection)AccessController.doPrivileged(new jade.security.PrivilegedExceptionAction() {
 						public Object run() {
-							return getPermissions((PrincipalImpl)principal);
+							return getPermissions(p);
 						}
 					});
 				}
@@ -169,14 +153,14 @@ public class PlatformAuthority extends ContainerAuthority {
 					ex.printStackTrace();
 				}
 				for (Enumeration e = perms.elements(); e.hasMoreElements();) {
-					Permission p = (Permission)e.nextElement();
-					delegation.addPermission(p);
-					//System.out.println("+" + p);
+					Permission perm = (Permission)e.nextElement();
+					delegation.addPermission(perm);
+					//System.out.println("+" + perm);
 				}
 				sign((BasicCertificateImpl)identity);
 				sign((BasicCertificateImpl)delegation);
 				//System.out.println("authentication ended");
-				return;
+				return new CertificateFolder(identity, delegation);
 			}
 		}
 		throw new AuthenticationException("Unknown user");
