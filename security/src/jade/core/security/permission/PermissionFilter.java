@@ -32,14 +32,13 @@ import jade.core.management.AgentManagementSlice;
 import jade.core.messaging.MessagingSlice;
 import jade.core.security.permission.checkers.MessagingChecker;
 import jade.core.security.permission.checkers.SimpleJADEChecker;
-import jade.security.JADEAccessController;
-import jade.security.JADESecurityException;
 import jade.security.impl.JADEAccessControllerImpl;
 import jade.util.Logger;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import jade.security.JADESecurityException;
 
 
 
@@ -58,34 +57,27 @@ public class PermissionFilter extends Filter {
 
     private static final String CHECKERTABLE_FILLER_CLASS_KEY="jade_security_permission_CheckerTableFiller";
   
-    public PermissionFilter( PermissionService service ) {
-        setPreferredPosition( FIRST );  // first filter
-        this.service = service;
+    public PermissionFilter() {
     }
-    private PermissionService service;
     
     private static Logger myLogger = Logger.getMyLogger( PermissionFilter.class.getName() );
+
+    protected PermissionService service;
+    protected AgentContainer myContainer;
+    protected Profile myProfile;
+    protected boolean direction;
 
     // this table contains the mapping:
     // (cmd name) <-> (checkers)
     public CheckerTable checkerTable = new CheckerTable();
 
-    private AgentContainer myContainer;
-    private Profile myProfile;
 
-    //private JADEAccessController myJADEAccessController;
-
-    private boolean direction;
-
-    // init the AuthorizationFilter
-    public void init( AgentContainer myContainer, Profile myProfile, boolean direction ){
-      // the container
+    // init the PermissionFilter
+    public void init( PermissionService service, AgentContainer myContainer, Profile myProfile, boolean direction ){
+      this.service = service;
       this.myContainer = myContainer;
       this.myProfile = myProfile;
-
-      // create the JADEAccessController, it is unique for the service (for both filters)
-      //service.getJADEAccessController();
-
+      setPreferredPosition( FIRST );  // first filter
       this.direction=direction;
 
       // Load rows into the checkerTable 
@@ -96,18 +88,22 @@ public class PermissionFilter extends Filter {
           ctFiller = (CheckerTableFiller) Class.forName(fillerClass).newInstance();
           // Load rows into the checkerTable by using a custom CheckerTableFiller
           ctFiller.fillChecherTable( this );
+          myLogger.log( Logger.FINE, "CheckerTable filled by:"+fillerClass );
         }
         catch (Exception ex) {
-          myLogger.log( Logger.SEVERE, "Could not load custom CheckerTableFiller: '"+ fillerClass +"'", ex);
+          myLogger.log( Logger.SEVERE, "Could not load custom CheckerTableFiller: '"+ fillerClass +
+                        "'. Please check config param: "+CHECKERTABLE_FILLER_CLASS_KEY+"", ex);
         }
       } else {
         // Load rows into the checkerTable by using the default code-wired.
         fillCheckerTable();
+        myLogger.log( Logger.FINE, "CheckerTable filled by (as default) PermssionFilter.");
       }
-    }
+    } // end init()
+
 
     public boolean getDirection() { return direction; }
-    public String getNodeName() { return myContainer.getNodeDescriptor().getName(); }
+    public String getNodeName() { return myContainer.getID().getName(); }
     
 
     /**

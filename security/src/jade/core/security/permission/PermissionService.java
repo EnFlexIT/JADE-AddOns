@@ -80,6 +80,10 @@ public class PermissionService
     public static final String SECURITY_MANAGER_DEFAULT = "jade.core.security.JADESecurityManager";
     public static final String SECURITY_MANAGER_NULL = "null"; // special value: no sec.man is installed.
 
+    private static final String PERM_FILTER_CLASS_KEY = "jade_core_security_permission_filterClass";
+    private static final String PERM_FILTER_CLASS_DEFAULT = "jade.core.security.permission.PermissionFilter";
+
+
     // The concrete agent container, providing access to LADT, etc.
     private AgentContainer myContainer;
     private Profile myProfile;
@@ -126,12 +130,20 @@ public class PermissionService
                 myLogger.log(Logger.FINER, "serviceClass="+serviceClass );
         }
 
+        // PermissionFilter class
+        String permFilterClass = myProfile.getParameter( PERM_FILTER_CLASS_KEY, PERM_FILTER_CLASS_DEFAULT);
 
         // create and initialize the filter of this service
-        permFilterDown = new PermissionFilter( this );
-        permFilterDown.init( myContainer, myProfile, Filter.OUTGOING );
-        permFilterUp = new PermissionFilter( this );
-        permFilterUp.init( myContainer, myProfile, Filter.INCOMING );
+        try {
+            permFilterDown = (PermissionFilter) Class.forName(permFilterClass).
+                newInstance();
+          permFilterDown.init( this, myContainer, myProfile, Filter.OUTGOING );
+          permFilterUp = (PermissionFilter) Class.forName(permFilterClass).newInstance();
+          permFilterUp.init( this, myContainer, myProfile, Filter.INCOMING );
+        } catch (Throwable ex) {
+          throw new ProfileException ("Unable to create permission filter: "+permFilterClass+
+                                      "\n (check config parameter: "+PERM_FILTER_CLASS_KEY, ex);
+        }
 
     } // end init
 
@@ -413,16 +425,14 @@ public class PermissionService
      *   slice-related stuff
      * *****************************************************/
 
-    private static final String[] OWNED_COMMANDS = new String[] {
+  private static final String[] OWNED_COMMANDS = new String[] {
       PermissionSlice.NAMECERT_REQ
-    };
+  };
 
 
-    private PermissionSlice localSlice = new ServiceComponent(this);
+  private PermissionSlice localSlice = new ServiceComponent(this);
 
-
-
-    public Service.Slice getLocalSlice() {
+  public Service.Slice getLocalSlice() {
       return localSlice;
     }
 
