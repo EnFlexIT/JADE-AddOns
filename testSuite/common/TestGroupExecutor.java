@@ -40,6 +40,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 	private static final String EXECUTE_TEST_STATE = "Execute-test";
 	private static final String HANDLE_RESULT_STATE = "Handle-result";
 	private static final String END_STATE = "Dummy-final";
+	private static final String PAUSE_STATE = "Pause";
 	
 	// Data store key for the result of a test
 	private static final String TEST_RESULT_KEY = "_test-result_";
@@ -48,6 +49,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 	private static final int EXIT = 0;
 	private static final int EXECUTE = 1;
 	private static final int SKIP = 2;
+	private static final int PAUSE = 3;
 	
 	// Counters for statistics
 	private int passedCnt = 0;
@@ -59,11 +61,9 @@ public class TestGroupExecutor extends FSMBehaviour {
 	
 	// The test object that is currently in execution
 	private Test currentTest;
-	
-	// The MessageTemplate used to distingush messages sent to procede 
-	// in step-by-step mode.
-	private MessageTemplate stepTemplate = MessageTemplate.MatchContent(TesterAgent.STEP);
-	private boolean stepByStepMode = false;
+
+	// Flag indicating whether the execution is currently paused
+	private boolean inPause = false;
 
 	public TestGroupExecutor(Agent a, TestGroup tg) {
 		super(a);
@@ -78,6 +78,8 @@ public class TestGroupExecutor extends FSMBehaviour {
 		registerTransition(LOAD_TEST_STATE, EXECUTE_TEST_STATE, EXECUTE);
 		registerTransition(LOAD_TEST_STATE, LOAD_TEST_STATE, SKIP);
 		registerTransition(LOAD_TEST_STATE, END_STATE, EXIT);
+		registerTransition(LOAD_TEST_STATE, PAUSE_STATE, PAUSE);
+		registerDefaultTransition(PAUSE_STATE, EXECUTE_TEST_STATE);
 		registerDefaultTransition(EXECUTE_TEST_STATE, HANDLE_RESULT_STATE);
 		registerDefaultTransition(HANDLE_RESULT_STATE, LOAD_TEST_STATE);
 		
@@ -111,7 +113,10 @@ public class TestGroupExecutor extends FSMBehaviour {
 						Behaviour b2 = currentTest.load(myAgent, getDataStore(), TEST_RESULT_KEY);
 						registerState(b2, EXECUTE_TEST_STATE);
 						
-						pause();
+						if (((TesterAgent) myAgent).getDebugMode()) {
+							ret = PAUSE;
+							inPause = true;
+						}
 					}
 					else {
 						// When next() returns null there are no more tests to execute
@@ -178,18 +183,32 @@ public class TestGroupExecutor extends FSMBehaviour {
 		};
 		b.setDataStore(getDataStore());
 		registerLastState(b, END_STATE);
+	
+		// PAUSE_STATE
+		b = new SimpleBehaviour() {
+			private boolean finished;
+			
+			public void action() {
+				if (inPause) {
+					block();
+					finished = false;
+				}
+				else {
+					finished = true;
+				}
+			}	
+			
+			public boolean done() {
+				return finished;
+			}
+		};
+		b.setDataStore(getDataStore());
+		registerState(b, PAUSE_STATE);
 	}
 	
-	private void pause() {
-		if (stepByStepMode) {
-			System.out.println("Send me a message with \""+TesterAgent.STEP+"\" as content to proceed...");
-			myAgent.blockingReceive(stepTemplate);
-			System.out.println("Go");
-		}
-	}
-	
-	public void setDebugMode(boolean b) {
-		stepByStepMode = b;
+	void resume() {
+		inPause = false;
+		super.restart();
 	}
 }
 

@@ -38,7 +38,7 @@ class OpenAction extends AbstractAction {
 	
 	public void actionPerformed(ActionEvent e) {
 		System.out.println("Open");
-		gui.selectTester();
+		gui.openTester();
 	}
 }
 	

@@ -25,46 +25,73 @@ package test.common;
 
 import jade.core.Agent;
 import jade.core.AID;
+import jade.core.behaviours.*;
 import jade.lang.acl.*;
 import jade.util.leap.List;
+import jade.content.*;
+import jade.content.lang.*;
+import jade.content.lang.sl.*;
+import jade.content.onto.*;
+import jade.content.onto.basic.*;
+import test.common.testerAgentControlOntology.*;
 
 public abstract class TesterAgent extends Agent {
-	public static final String TESTER_EXITED = "TESTER_EXITED";
-	public static final String STEP = "STEP";
+	private Codec codec;
+	private TestGroupExecutor executor;
 	
 	private boolean debugMode = false;
-	private boolean testSuiteMode = false;
-	private String testSuiteName;
+	private boolean remoteControlMode = false;
+	private String remoteControllerName;
 	
-	protected void setup() {		
+	protected void setup() {	
+		// Register language and ontology used to communicate with other
+		// agents (if any) controlling the execution of this TesterAgent 
+		// (usually the JADE TestSuiteAgent)
+		codec = new SLCodec();
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(TesterAgentControlOntology.getInstance());
+		
+		// Retrieve the TestGroup to execute
 		TestGroup tg = getTestGroup();
 		
+		// Get test group parameters
 		List args = tg.getArgumentsSpecification();
 		if (args != null && args.size() > 0) { 
 			InsertArgumentsDlg.insertValues(args);
 		}
 		tg.setArguments(args);
 		
-		TestGroupExecutor executor = new TestGroupExecutor(this, tg) {
+		// Add the behaviour to interact with other agents (if any) 
+		// controlling the execution of this TesterAgent 
+		// (usually the JADE TestSuiteAgent)
+		addBehaviour(new Controller(this));
+		
+		// Add the behaviour to execute the test group
+		executor = new TestGroupExecutor(this, tg) {
 			public int onEnd() {
 				myAgent.doDelete();
 				return 0;
 			}
 		};
-		
-		executor.setDebugMode(debugMode);
-		
 		addBehaviour(executor);
 	}	
 		
 	protected void takeDown() {
-		if (testSuiteMode) {
-			// If this tester agent is executed by the JADETestSuite
-			// notify it that this tester is exiting
+		if (remoteControlMode) {
+			// If the execution of this tester agent was controlled by 
+			// another agent (usually the JADE TestSuiteAgent),
+			// notify it about termination
 			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-			msg.addReceiver(new AID(testSuiteName, AID.ISLOCALNAME));
-			msg.setContent(TESTER_EXITED);
-			send(msg);
+			msg.addReceiver(new AID(remoteControllerName, AID.ISLOCALNAME));
+			msg.setLanguage(codec.getName());
+			msg.setOntology(TesterAgentControlOntology.getInstance().getName());
+			try {
+				getContentManager().fillContent(msg, new Terminated(getAID()));
+				send(msg);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		else {
 			// Otherwise notify the user via stdout
@@ -72,14 +99,80 @@ public abstract class TesterAgent extends Agent {
 		}
 	}
 	
+	/**
+	   Subclasses should implement this method to define the test
+	   group to be executed by this TesterAgent
+	 */
 	protected abstract TestGroup getTestGroup();
+		
 	
-	public void setDebugMode(boolean b) {
-		debugMode = b;
+	private void perform(Configure config) {
+		Boolean b = config.getDebugMode();
+		if (b != null) {
+			debugMode = b.booleanValue();
+		}
+		b = config.getRemoteControlMode();
+		if (b != null) {
+			remoteControlMode = b.booleanValue();
+		}
+		String s = config.getRemoteControllerName();
+		if (s != null) {
+			remoteControllerName = s;
+		}
+	}
+	
+	private void perform(Resume r) {
+		executor.resume();
+	}
+		
+	/**
+	   Called by the TestGroupExecutor behaviour before the execution
+	   of each test in the group to know whether to execute the test
+	   or pause.
+	 */
+	boolean getDebugMode() {
+		return debugMode;
 	} 
 	
-	public void setTestSuiteExecution(String name) {
-		testSuiteMode = true;
-		testSuiteName = name;
-	} 
+	/**
+	   Inner class Controller. This is the behaviour that handles 
+	   execution control requests from other agents (if any) 
+		 controlling the execution of this TesterAgent (usually the 
+		 JADE TestSuiteAgent)
+	 */
+	class Controller extends CyclicBehaviour {
+		private MessageTemplate mt = MessageTemplate.MatchOntology(TesterAgentControlOntology.getInstance().getName());
+		
+		Controller (Agent a) {
+			super(a);
+		}
+		
+		public void action() {
+			ACLMessage msg = receive(mt);
+			if (msg != null) {
+				try {
+					switch (msg.getPerformative()) {
+					case ACLMessage.REQUEST:
+						Action act = (Action) myAgent.getContentManager().extractContent(msg);
+						AgentAction a = (AgentAction) act.getAction();
+						if (a instanceof Configure) {
+							perform((Configure) a);
+						}
+						else if (a instanceof Resume) {
+							perform((Resume) a);
+						}
+						else {
+							System.out.println("Unknown action: "+a);
+						}
+					}
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				block();
+			}
+		}
+	}
 }

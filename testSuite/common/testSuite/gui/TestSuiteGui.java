@@ -138,37 +138,8 @@ public class TestSuiteGui extends JFrame {
 		show();
 	}
 	
-	void runTester() {
-		TesterAgent tester = loadTester();
-		if (tester != null) {
-			setStatus(RUNNING_STATE);
-			tester.setDebugMode(false);
-			GuiEvent ev = new GuiEvent(this, TestSuiteAgent.START_TESTER_EVENT); 
-			ev.addParameter(tester);
-			myAgent.postGuiEvent(ev);
-		}
-	}
-	
-	void debugTester() {
-		TesterAgent tester = loadTester();
-		if (tester != null) {
-			setStatus(DEBUGGING_STATE);
-			tester.setDebugMode(true);
-			GuiEvent ev = new GuiEvent(this, TestSuiteAgent.START_TESTER_EVENT); 
-			ev.addParameter(tester);
-			myAgent.postGuiEvent(ev);
-		}
-	}
-	
-	void exit() {
-		myAgent.postGuiEvent(new GuiEvent(this, TestSuiteAgent.EXIT_EVENT)); 
-	}
-	
-	void step() {
-		myAgent.postGuiEvent(new GuiEvent(this, TestSuiteAgent.STEP_EVENT)); 
-	}
-		
-	void selectTester() {
+	// Method called by the OpenAction
+	void openTester() {
 		GenericChooser c = new GenericChooser();
 		int i = c.showChoiceDlg(this,
 						"Select the tester agent to run",
@@ -188,30 +159,42 @@ public class TestSuiteGui extends JFrame {
 		}
 	}
 	
-	/*private Object[] getArguments() {
-		ArrayList l = new ArrayList();
-		String args = argsF.getText().trim();
-		if (args != null && (!args.equals(""))) {
-			StringTokenizer st = new StringTokenizer(args, " ");
-			while (st.hasMoreTokens()) {
-				String s = st.nextToken();
- 				l.add(s);
+	// Method called by the RunAction
+	void runTester() {
+		if (status == READY_STATE) {
+			if (currentTester != null) {
+				setStatus(RUNNING_STATE);
+				GuiEvent ev = new GuiEvent(this, TestSuiteAgent.RUN_TESTER_EVENT); 
+				ev.addParameter(currentTester);
+				myAgent.postGuiEvent(ev);
 			}
 		}
-		return l.toArray();
-	}*/
+		else {
+			// When we are in debug mode clicking on the RUN button means GO
+			setStatus(RUNNING_STATE);
+			GuiEvent ev = new GuiEvent(this, TestSuiteAgent.GO_EVENT);
+			myAgent.postGuiEvent(ev);
+		}
+	}
 	
-	private TesterAgent loadTester() {
-		try {
-			TesterAgent ta = (TesterAgent) Class.forName(currentTester).newInstance();
-			//ta.setArguments(getArguments());
-			ta.setTestSuiteExecution(myAgent.getLocalName());
-			return ta;
+	// Method called by the DebugAction
+	void debugTester() {
+		if (currentTester != null) {
+			setStatus(DEBUGGING_STATE);
+			GuiEvent ev = new GuiEvent(this, TestSuiteAgent.DEBUG_TESTER_EVENT); 
+			ev.addParameter(currentTester);
+			myAgent.postGuiEvent(ev);
 		}
-		catch (Exception e) {
-			System.out.println("Error loading tester agent. "+e);
-			return null;
-		}
+	}
+	
+	// Method called by the ExitAction
+	void exit() {
+		myAgent.postGuiEvent(new GuiEvent(this, TestSuiteAgent.EXIT_EVENT)); 
+	}
+	
+	// Method called by the StepAction
+	void step() {
+		myAgent.postGuiEvent(new GuiEvent(this, TestSuiteAgent.STEP_EVENT)); 
 	}
 		
 	public void setStatus(int status) {
@@ -221,10 +204,9 @@ public class TestSuiteGui extends JFrame {
 	
 	private void updateEnabled() {
 		openB.setEnabled(status == IDLE_STATE || status == READY_STATE);
-		runB.setEnabled(status == READY_STATE);
+		runB.setEnabled(status == READY_STATE || status == DEBUGGING_STATE);
 		debugB.setEnabled(status == READY_STATE);
 		stepB.setEnabled(status == DEBUGGING_STATE);
-		//argsF.setEnabled(status == READY_STATE);
 	}
 	
 }
