@@ -12,47 +12,46 @@
     <!-- Create the time stamp -->
     <tstamp/>
     <!-- Create the directories structure used to store files -->
-    <mkdir dir="${dist}"/>
     <mkdir dir="${lib}"/>
     <mkdir dir="${build}"/>
-    <mkdir dir="${doc}"/>
   </target>
   
 
-  <!-- Compile the javadoc code from ${src} into ${doc} -->
-  <target name="doc" depends="init" description="generate javadoc documentation">
-    <javadoc destdir="${doc}/api" author="true" windowtitle="XMLCodec" sourcepath="${src}" 	packagenames="jade/**"/>
-  </target>
- 
   <!-- Compile the java code from ${src} into ${build} -->
   <target name="compile" depends="init">
     <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on" includes="jade/**"/>
   </target>
 
   <!-- Make jars file and put in ${lib} -->
-  <target name="lib" depends="init, compile">
+  <target name="lib" depends="compile">
     <jar jarfile="${lib}/XMLCodec.jar">
       <fileset dir="${build}" includes="**/jade/**"/>
     </jar>
   </target>
  
+  <!-- Compile the examples -->
+  <target name="examples" depends="lib">
+    <javac srcdir="examples" destdir="${build}" classpath="${classpath};${lib}/XMLCodec.jar" nowarn="off" optimize="on" deprecation="on"/>
+  </target>
+
   <!-- Make distribution zip file and put in ${dist} -->
-  <target name="dist" depends="init, compile, lib">
+  <target name="dist" depends="lib">
     <jar jarfile="${dist}/XMLCodec.zip">
       <fileset dir="${dist}" includes="add-ons/XMLCodec/${src}/**"/>
+      <fileset dir="${dist}" includes="add-ons/XMLCodec/examples/**"/>
       <fileset dir="${dist}" includes="add-ons/XMLCodec/*"/>
       <fileset dir="${dist}" includes="add-ons/XMLCodec/lib/**"/>
     </jar>
   </target>
  
-  <target name="all" depends="init, doc, compile, lib, dist"/>
+  <target name="all" depends="init, compile, lib, dist"/>
  
   <!-- delete ${build} and ${lib} directories -->
   <target name="clean" description="clean up">
     <!-- Delete the ${build} directory tree -->
-    <delete includeEmptyDirs="true">
+    <delete includeEmptyDirs="true" quiet="true">
       <fileset dir="${build}"/>
-      <fileset dir="${lib}/XMLCodec.jar"/>
+      <fileset dir="${lib}" includes="XMLCodec.jar"/>
     </delete>
   </target>
 
