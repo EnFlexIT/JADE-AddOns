@@ -167,8 +167,13 @@ public class TestGroupExecutor extends FSMBehaviour {
 		// HANDLE_RESULT_STATE
 		b = new OneShotBehaviour() {
 			public void action() {
-				Integer i = (Integer) getDataStore().get(TEST_RESULT_KEY);
-  			int result = i.intValue();
+				int result = Test.NOT_AVAILABLE;
+				try {
+					Integer i = (Integer) getDataStore().get(TEST_RESULT_KEY);
+	  			result = i.intValue();
+				}
+				catch (Exception e) {
+				}
   			
   			try {
 		  		currentTest.clean(myAgent);
@@ -188,9 +193,13 @@ public class TestGroupExecutor extends FSMBehaviour {
   				l.log("Test PASSED");
   				passedCnt++;
   			}
-  			else {
+  			else if (result == Test.TEST_FAILED) {
   				l.log("Test FAILED");
   				failedCnt++;
+  			}
+  			else {
+  				l.log("WARNING: Test result not available!!!");
+  				skippedCnt++;
   			}
 			}			
 		};
@@ -207,7 +216,7 @@ public class TestGroupExecutor extends FSMBehaviour {
     			sb.append(passedCnt+" tests PASSED\n");
     			sb.append(failedCnt+" tests FAILED\n");
 	    		if (skippedCnt > 0) {
-  	  			sb.append(skippedCnt+" tests SKIPPED due to initailization problems\n");
+  	  			sb.append(skippedCnt+" tests SKIPPED due to initailization/termination problems\n");
     			}	
     			l.log(sb.toString());
     		

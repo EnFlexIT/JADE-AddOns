@@ -40,6 +40,8 @@ public abstract class Test {
 	public static final int TEST_PASSED = 1;
 	/** Constant value indicating that a test has NOT been completed successfully */
   public static final int TEST_FAILED = 0;
+	/** Constant value indicating that the test result is not available */
+  public static final int NOT_AVAILABLE = -1;
   
   public static final int DEFAULT_PORT = 1099;
 
