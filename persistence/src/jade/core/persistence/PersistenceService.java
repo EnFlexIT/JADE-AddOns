@@ -184,6 +184,11 @@ public class PersistenceService extends BaseService {
 
 
     private static final String[] OWNED_COMMANDS = new String[] {
+        PersistenceHelper.GET_NODES,
+        PersistenceHelper.GET_REPOSITORIES,
+        PersistenceHelper.GET_SAVED_AGENTS,
+        PersistenceHelper.GET_FROZEN_AGENTS,
+        PersistenceHelper.GET_SAVED_CONTAINERS,
 	PersistenceHelper.SAVE_AGENT,
 	PersistenceHelper.LOAD_AGENT,
 	PersistenceHelper.RELOAD_AGENT,
@@ -202,12 +207,18 @@ public class PersistenceService extends BaseService {
 	super.init(ac, p);
 	myContainer = ac;
 	myServiceFinder = ac.getServiceFinder();
-	myPersistenceManager = new PersistenceManager(myContainer.getID().getName());
 	amsHandler = new PersistenceManagementBehaviour();
     }
 
     public void boot(Profile p) throws ServiceException {
-	// Coordinate with the other slices to set up the repositories...
+
+        try {
+            String metaDB = p.getParameter(PersistenceHelper.META_DB, null);
+            myPersistenceManager = new PersistenceManager(metaDB, myContainer.getID().getName());
+        }
+        catch(Exception e) {
+            throw new ServiceException("Error in service manager startup", e);
+        }
 
 	// Reload this container from a repository if needed
 	final String repository = p.getParameter(PersistenceHelper.LOAD_FROM, null);
@@ -287,7 +298,22 @@ public class PersistenceService extends BaseService {
 	public void consume(VerticalCommand cmd) {
 	    try {
 		String name = cmd.getName();
-		if(name.equals(PersistenceHelper.SAVE_AGENT)) {
+		if(name.equals(PersistenceHelper.GET_NODES)) {
+		    handleGetNodes(cmd);
+		}
+		else if(name.equals(PersistenceHelper.GET_REPOSITORIES)) {
+		    handleGetRepositories(cmd);
+		}
+		else if(name.equals(PersistenceHelper.GET_SAVED_AGENTS)) {
+		    handleGetSavedAgents(cmd);
+		}
+		else if(name.equals(PersistenceHelper.GET_FROZEN_AGENTS)) {
+		    handleGetFrozenAgents(cmd);
+		}
+		else if(name.equals(PersistenceHelper.GET_SAVED_CONTAINERS)) {
+		    handleGetSavedContainers(cmd);
+		}
+		else if(name.equals(PersistenceHelper.SAVE_AGENT)) {
 		    handleSaveAgent(cmd);
 		}
 		else if(name.equals(PersistenceHelper.LOAD_AGENT)) {
@@ -343,6 +369,79 @@ public class PersistenceService extends BaseService {
 
 
 	// Vertical command handler methods
+
+	private void handleGetNodes(VerticalCommand cmd) throws ServiceException, IMTPException, NotFoundException {
+	    Service.Slice[] slices = myServiceFinder.findAllSlices(PersistenceHelper.NAME);
+	    String[] result = new String[slices.length];
+	    for(int i = 0 ; i < result.length; i++) {
+		result[i] = slices[i].getNode().getName();
+	    }
+
+	    cmd.setReturnValue(result);
+	}
+
+	private void handleGetRepositories(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
+            Object[] params = cmd.getParams();
+            String nodeName = (String)params[0];
+
+            PersistenceSlice targetSlice = (PersistenceSlice)getSlice(nodeName);
+            try {
+                cmd.setReturnValue(targetSlice.getRepositories());
+            }
+            catch(IMTPException imtpe) {
+                // Try again with a newer slice
+                targetSlice = (PersistenceSlice)getFreshSlice(nodeName);
+                cmd.setReturnValue(targetSlice.getRepositories());
+            }
+	}
+
+	private void handleGetSavedAgents(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
+            Object[] params = cmd.getParams();
+            String nodeName = (String)params[0];
+            String repository = (String)params[1];
+
+            PersistenceSlice targetSlice = (PersistenceSlice)getSlice(nodeName);
+            try {
+                cmd.setReturnValue(targetSlice.getSavedAgents(repository));
+            }
+            catch(IMTPException imtpe) {
+                // Try again with a newer slice
+                targetSlice = (PersistenceSlice)getFreshSlice(nodeName);
+                cmd.setReturnValue(targetSlice.getSavedAgents(repository));
+            }
+	}
+
+	private void handleGetFrozenAgents(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
+            Object[] params = cmd.getParams();
+            String nodeName = (String)params[0];
+            String repository = (String)params[1];
+
+            PersistenceSlice targetSlice = (PersistenceSlice)getSlice(nodeName);
+            try {
+                cmd.setReturnValue(targetSlice.getFrozenAgents(repository));
+            }
+            catch(IMTPException imtpe) {
+                // Try again with a newer slice
+                targetSlice = (PersistenceSlice)getFreshSlice(nodeName);
+                cmd.setReturnValue(targetSlice.getFrozenAgents(repository));
+            }
+	}
+
+	private void handleGetSavedContainers(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
+            Object[] params = cmd.getParams();
+            String nodeName = (String)params[0];
+            String repository = (String)params[1];
+
+            PersistenceSlice targetSlice = (PersistenceSlice)getSlice(nodeName);
+            try {
+                cmd.setReturnValue(targetSlice.getSavedContainers(repository));
+            }
+            catch(IMTPException imtpe) {
+                // Try again with a newer slice
+                targetSlice = (PersistenceSlice)getFreshSlice(nodeName);
+                cmd.setReturnValue(targetSlice.getSavedContainers(repository));
+            }
+	}
 
 	private void handleSaveAgent(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
 	    Object[] params = cmd.getParams();
@@ -580,7 +679,7 @@ public class PersistenceService extends BaseService {
 		// Activate message buffering for the frozen agent on the buffer container
 		PersistenceSlice bufferSlice = (PersistenceSlice)getSlice(bufferSliceName);
 		Long messageQueueFK;
-		try {
+    		try {
 		    messageQueueFK = bufferSlice.setupFrozenAgent(agentID, persistentID, myContainer.getID(), repository);
 		}
 		catch(IMTPException imtpe) {
@@ -656,11 +755,25 @@ public class PersistenceService extends BaseService {
 	private void handleDeleteContainer(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
 	    Object[] params = cmd.getParams();
 	    ContainerID cid = (ContainerID)params[0];
-	    String repository = (String)params[1];
+            ContainerID where = (ContainerID)params[1];
+	    String repository = (String)params[2];
 
 	    // Forward the request to delete to the proper container
+	    PersistenceSlice targetSlice = (PersistenceSlice)getSlice(where.getName());
+	    try {
+		if(targetSlice != null) {
+		    targetSlice.deleteContainer(cid, repository);
+		}
+		else {
+		    throw new NotFoundException("Node <" + where.getName() + "> not found");
+		}
+	    }
+	    catch(IMTPException imtpe) {
+		// Try to get a newer slice and repeat...
+		targetSlice = (PersistenceSlice)getFreshSlice(where.getName());
+		targetSlice.deleteContainer(cid, repository);
+	    }
 
-	    // FIXME: Do we really need this operation?
 	}
 
     } // End of CommandSourceSink class
@@ -699,6 +812,9 @@ public class PersistenceService extends BaseService {
 		else if(name.equals(PersistenceHelper.LOAD_CONTAINER)) {
 		    handleLoadContainer(cmd);
 		}
+                else if(name.equals(PersistenceHelper.DELETE_CONTAINER)) {
+                    handleDeleteContainer(cmd);
+                }
 	    }
 	    catch(ServiceException se) {
 		cmd.setReturnValue(se);
@@ -1008,6 +1124,15 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
+	private void handleDeleteContainer(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
+	    Object[] params = cmd.getParams();
+	    ContainerID cid = (ContainerID)params[0];
+	    String repository = (String)params[1];
+
+	    // Use the persistence manager to delete the agent container
+	    myPersistenceManager.deleteContainer(cid, repository);
+	}
+
     } // End of CommandTargetSink class
 
 
@@ -1259,6 +1384,16 @@ public class PersistenceService extends BaseService {
 
 		    result = gCmd;
 		}
+                else if(cmdName.equals(PersistenceSlice.H_DELETECONTAINER)) {
+		    ContainerID cid = (ContainerID)params[0];
+		    String repository = (String)params[1];
+
+		    GenericCommand gCmd = new GenericCommand(PersistenceHelper.DELETE_CONTAINER, PersistenceHelper.NAME, null);
+		    gCmd.addParam(cid);
+		    gCmd.addParam(repository);
+
+		    result = gCmd;                    
+                }
 		else if(cmdName.equals(PersistenceSlice.H_GETINSTALLEDMTPS)) {
 		    ContainerID cid = (ContainerID)params[0];
 		    cmd.setReturnValue(getInstalledMTPs(cid));
@@ -1267,6 +1402,21 @@ public class PersistenceService extends BaseService {
 		    ContainerID cid = (ContainerID)params[0];
 		    cmd.setReturnValue(getAgentIDs(cid));
 		}
+                else if(cmdName.equals(PersistenceSlice.H_GETREPOSITORIES)) {
+                    cmd.setReturnValue(getRepositories());
+                }
+                else if(cmdName.equals(PersistenceSlice.H_GETSAVEDAGENTS)) {
+                    String repository = (String)params[0];
+                    cmd.setReturnValue(getSavedAgents(repository));
+                }
+                else if(cmdName.equals(PersistenceSlice.H_GETFROZENAGENTS)) {
+                    String repository = (String)params[0];
+                    cmd.setReturnValue(getFrozenAgents(repository));
+                }
+                else if(cmdName.equals(PersistenceSlice.H_GETSAVEDCONTAINERS)) {
+                    String repository = (String)params[0];
+                    cmd.setReturnValue(getSavedContainers(repository));
+                }
 	    }
 	    catch(Throwable t) {
 		cmd.setReturnValue(t);
@@ -1396,6 +1546,23 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
+        private String[] getRepositories() throws ServiceException {
+            return myPersistenceManager.getRepositoryNames();
+        }
+
+        private String[] getSavedAgents(String repository) throws ServiceException, NotFoundException {
+            return myPersistenceManager.getSavedAgentNames(repository);
+        }
+
+        private String[] getFrozenAgents(String repository) throws ServiceException, NotFoundException {
+            return myPersistenceManager.getFrozenAgentNames(repository);
+        }
+
+        private String[] getSavedContainers(String repository) throws ServiceException, NotFoundException {
+            return myPersistenceManager.getSavedContainerNames(repository);
+        }
+
+
     } // End of ServiceComponent class
 
 
@@ -1413,6 +1580,111 @@ public class PersistenceService extends BaseService {
     private final PersistenceHelper helper = new PersistenceHelper() {
 
 	public void init(Agent a) {
+	}
+
+	public String[] getNodes() throws ServiceException, IMTPException {
+
+	    GenericCommand cmd = new GenericCommand(PersistenceHelper.GET_NODES, PersistenceHelper.NAME, null);
+	    Object result = submit(cmd);
+	    if((result != null) && (result instanceof Throwable)) {
+
+		if(result instanceof ServiceException) {
+		    throw (ServiceException)result;
+		}
+		if(result instanceof IMTPException) {
+		    throw (IMTPException)result;
+		}
+	    }
+
+	    return (String[])result;
+	}
+
+	public String[] getRepositories(String nodeName) throws ServiceException, IMTPException, NotFoundException  {
+
+	    GenericCommand cmd = new GenericCommand(PersistenceHelper.GET_REPOSITORIES, PersistenceHelper.NAME, null);
+	    cmd.addParam(nodeName);
+	    Object result = submit(cmd);
+	    if((result != null) && (result instanceof Throwable)) {
+
+		if(result instanceof ServiceException) {
+		    throw (ServiceException)result;
+		}
+		if(result instanceof IMTPException) {
+		    throw (IMTPException)result;
+		}
+		if(result instanceof NotFoundException) {
+		    throw (NotFoundException)result;
+		}
+
+	    }
+
+	    return (String[])result;
+	}
+
+	public String[] getSavedAgents(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException  {
+	    GenericCommand cmd = new GenericCommand(PersistenceHelper.GET_SAVED_AGENTS, PersistenceHelper.NAME, null);
+	    cmd.addParam(nodeName);
+	    cmd.addParam(repository);
+	    Object result = submit(cmd);
+	    if((result != null) && (result instanceof Throwable)) {
+
+		if(result instanceof ServiceException) {
+		    throw (ServiceException)result;
+		}
+		if(result instanceof IMTPException) {
+		    throw (IMTPException)result;
+		}
+		if(result instanceof NotFoundException) {
+		    throw (NotFoundException)result;
+		}
+
+	    }
+
+	    return (String[])result;
+	}
+
+	public String[] getFrozenAgents(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException {
+	    GenericCommand cmd = new GenericCommand(PersistenceHelper.GET_FROZEN_AGENTS, PersistenceHelper.NAME, null);
+	    cmd.addParam(nodeName);
+	    cmd.addParam(repository);
+	    Object result = submit(cmd);
+	    if((result != null) && (result instanceof Throwable)) {
+
+		if(result instanceof ServiceException) {
+		    throw (ServiceException)result;
+		}
+		if(result instanceof IMTPException) {
+		    throw (IMTPException)result;
+		}
+		if(result instanceof NotFoundException) {
+		    throw (NotFoundException)result;
+		}
+
+	    }
+
+	    return (String[])result;
+	}
+
+	public String[] getSavedContainers(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException {
+	    GenericCommand cmd = new GenericCommand(PersistenceHelper.GET_SAVED_CONTAINERS, PersistenceHelper.NAME, null);
+	    cmd.addParam(nodeName);
+	    cmd.addParam(repository);
+	    Object result = submit(cmd);
+	    if((result != null) && (result instanceof Throwable)) {
+
+		if(result instanceof ServiceException) {
+		    throw (ServiceException)result;
+		}
+		if(result instanceof IMTPException) {
+		    throw (IMTPException)result;
+		}
+		if(result instanceof NotFoundException) {
+		    throw (NotFoundException)result;
+		}
+
+	    }
+
+	    return (String[])result;
 	}
 
 	public void saveAgent(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException {
@@ -1649,9 +1921,10 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
-	public void deleteContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException {
+	public void deleteContainer(ContainerID cid, ContainerID where, String repository) throws ServiceException, IMTPException, NotFoundException {
 	    GenericCommand cmd = new GenericCommand(PersistenceHelper.DELETE_CONTAINER, PersistenceHelper.NAME, null);
 	    cmd.addParam(cid);
+            cmd.addParam(where);
 	    cmd.addParam(repository);
 	    Object lastException = submit(cmd);
 
