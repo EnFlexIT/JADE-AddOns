@@ -137,7 +137,11 @@ public class XMLManager {
 			factory.setValidating(true);
 			
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			doc = builder.parse(xmlFileName);
+      URL url = ClassLoader.getSystemResource(xmlFileName);
+      File f = new File(url.getFile());
+      System.out.println("Parsing file "+f);
+			doc = builder.parse(f);
+			
 			
 			NodeList list = doc.getElementsByTagName("Test");
 			td = new TestDescriptor[list.getLength()];
