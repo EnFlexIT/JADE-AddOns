@@ -27,6 +27,8 @@ import jade.imtp.rmi.ServiceManagerRMI;
 import java.net.MalformedURLException;
 import java.rmi.*;
 
+import jade.util.Logger;
+
 /**
  * A simple class to test for the existence of a JADE platform.
  * This class can be used as an application (on the command line) or also
@@ -35,6 +37,9 @@ import java.rmi.*;
  */
 public class JADEPlatformTest implements Remote {
 
+	/**the logger to be used */
+	private static Logger logger = Logger.getMyLogger(JADEPlatformTest.class.getName());
+	
 	/**the string to use for binding of the class*/
 	private static String name = "JADEPlatformTest";
 
@@ -146,14 +151,14 @@ public class JADEPlatformTest implements Remote {
 		if(mess == null)
 			mess = "RMI has no problem";
 		
-		System.out.println(mess);
+		logger.log(Logger.INFO,mess);
 				
 		mess = JADEPlatformTest.isJADERunning(null, "1099");
 		
 		if(mess == null)
 			mess = "JADE has no problem";
 		
-		System.out.println(mess);
+		logger.log(Logger.INFO,mess);
 	}
 	
 	

@@ -34,6 +34,7 @@ import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
+import jade.util.Logger;
 
 import java.io.FileInputStream;
 import java.util.Properties;
@@ -67,6 +68,8 @@ import java.util.Vector;
  **/
 public class DFFederatorAgent extends Agent {
 	private DFFederatorAgentGUI myGui;	
+	
+	private static Logger logger = Logger.getMyLogger(DFFederatorAgent.class.getName());
 	 
     /* This is the prefix string that identifies the key of a property
      * that represent a sub DF. The postfix after this key is appended
@@ -157,7 +160,7 @@ public class DFFederatorAgent extends Agent {
 		}	
 		
     void requestFederation(final AID childDF, final AID parentDF) {
-			System.out.println("Federating "+childDF.getName()+" with "+parentDF.getName());
+			logger.log(Logger.INFO,"Federating "+childDF.getName()+" with "+parentDF.getName());
 			Federate f = new Federate();
 			f.setDf(parentDF);
 			Action action = new Action(childDF, f);
@@ -185,7 +188,7 @@ public class DFFederatorAgent extends Agent {
 		}	
 				
     void requestFederationRemoval(final AID childDF, final AID parentDF) {
-			System.out.println("Removing federation between "+childDF.getName()+" and "+parentDF.getName());
+			logger.log(Logger.INFO,"Removing federation between "+childDF.getName()+" and "+parentDF.getName());
 			DeregisterFrom d = new DeregisterFrom();
 			d.setDf(parentDF);
 			DFAgentDescription dfd = new DFAgentDescription();

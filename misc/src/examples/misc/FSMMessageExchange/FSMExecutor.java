@@ -27,6 +27,7 @@ import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.util.Logger;
 
 import jade.misc.DynamicFSMBehaviour;
 
@@ -79,6 +80,8 @@ public class FSMExecutor extends Agent {
      * parses the FSM, instantiate it, and add the Behaviour to the
      * scheduler of behaviour of this Agent.
      **/
+    private static Logger logger = Logger.getMyLogger(FSMExecutor.class.getName()); 
+     
     class FSMDescriptionReceiver extends CyclicBehaviour {
 	private ACLMessage msg;
 	private MessageTemplate msgTemplate = MessageTemplate.MatchOntology("FSMOntology");
@@ -90,9 +93,9 @@ public class FSMExecutor extends Agent {
 		DynamicFSMBehaviour fsm = new DynamicFSMBehaviour(myAgent, new StringBufferInputStream(msg.getContent()));
 		if (fsm.getLoaded()) {
 		    myAgent.addBehaviour(fsm);
-		    System.out.println("LOADED A NEW FSM: "+msg);
+		    logger.log(Logger.INFO,"LOADED A NEW FSM: "+msg);
 		} else
-		    System.out.println("FAILED TO LOAD THIS FSM!");
+		    logger.log(Logger.INFO,"FAILED TO LOAD THIS FSM!");
 	    }
 	}
     }

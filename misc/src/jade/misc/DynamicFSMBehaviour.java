@@ -27,6 +27,7 @@ import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import java.io.InputStream;
+import jade.util.Logger;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Attr;
@@ -88,6 +89,8 @@ import org.w3c.dom.NodeList;
  */
 public class DynamicFSMBehaviour extends FSMBehaviour {
 
+	private static Logger logger = Logger.getMyLogger(DynamicFSMBehaviour.class.getName());
+	
 	/**flag to show if states have been loaded successfully*/
 	private boolean loaded = false;
 
@@ -417,7 +420,7 @@ public class DynamicFSMBehaviour extends FSMBehaviour {
 		}
 		
 		public void action() {
-			System.out.println("Agent: " + myAgent + " is in state: " + this.stateName);
+			logger.log(Logger.INFO,"Agent: " + myAgent + " is in state: " + this.stateName);
 		}
 	}
 

@@ -26,6 +26,7 @@ package examples.misc.FSMMessageExchange;
 import jade.core.Agent;
 import jade.core.behaviours.*; 
 import jade.lang.acl.ACLMessage;
+import jade.util.Logger;
 
 /**
  * <br> SampleReceiverTask waits until a message arrives, prints the
@@ -36,6 +37,9 @@ import jade.lang.acl.ACLMessage;
  * @version $Date$ $Revision$
  **/
 public class SampleReceiverTask extends Behaviour {
+	
+	private static Logger logger = Logger.getMyLogger(SampleReceiverTask.class.getName());
+
     ACLMessage msg, msgReceived;
     boolean done=false;
     
@@ -47,7 +51,7 @@ public class SampleReceiverTask extends Behaviour {
 	if (msg == null)
 	    block();
 	else {
-	    System.out.println(myAgent.getLocalName()+" executed SampleReceiverTask and returning value "+msg.getPerformative());
+	    logger.log(Logger.INFO,myAgent.getLocalName()+" executed SampleReceiverTask and returning value "+msg.getPerformative());
 	    msgReceived = msg;
 	    done=true;
 	}

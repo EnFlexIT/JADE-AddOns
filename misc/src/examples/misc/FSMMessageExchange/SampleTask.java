@@ -26,6 +26,7 @@ package examples.misc.FSMMessageExchange;
 import jade.core.Agent;
 import jade.core.behaviours.*; 
 import jade.lang.acl.ACLMessage;
+import jade.util.Logger;
 
 /**
  * <br> SampleTask just prints on stdout that is has been executed.
@@ -33,8 +34,11 @@ import jade.lang.acl.ACLMessage;
  * @version $Date$ $Revision$
  **/
 public class SampleTask extends OneShotBehaviour {
+    
+    private static Logger logger = Logger.getMyLogger(SampleTask.class.getName());
+    
     public void action() {
-	System.out.println(myAgent.getLocalName()+" executed SampleTask");
+	logger.log(Logger.INFO,myAgent.getLocalName()+" executed SampleTask");
     }
 }
 

@@ -25,6 +25,7 @@ package jade.misc;
 
 import jade.core.Agent;
 import jade.core.AID;
+import jade.util.Logger;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -44,6 +45,8 @@ class FederationGraphPanel extends JPanel {
 	
 	private LinkedList dfs = new LinkedList();
 	private LinkedList federations = new LinkedList();
+	
+	private static Logger logger = Logger.getMyLogger(FederationGraphPanel.class.getName());
 	
 	/** 
 	   Constructor 
@@ -172,7 +175,7 @@ class FederationGraphPanel extends JPanel {
 			repaint();
 		}
 		else {
-			System.out.println("Remove the federations this DF is involved in first.");
+			logger.log(Logger.INFO,"Remove the federations this DF is involved in first.");
 			// FIXME: Show a proper dialog
 		}			
 	}

@@ -26,6 +26,7 @@ package jade.misc;
 import jade.core.Agent;
 import jade.core.AID;
 import jade.gui.AIDGui;
+import jade.util.Logger;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -39,7 +40,8 @@ class DFFederatorAgentGUI extends JFrame {
 	private FederationGraphPanel graphPanel;
 	private JTextField childDFTxt, parentDFTxt;
 	private AID childDF, parentDF;
-
+	
+	private static Logger logger = Logger.getMyLogger(DFFederatorAgentGUI.class.getName());
 	/** 
 	   Constructor 
 	 */
@@ -196,17 +198,17 @@ class DFFederatorAgentGUI extends JFrame {
 	}
 	
 	void notifyFederationOK(AID childDF, AID parentDF) {
-		System.out.println("Federation between "+childDF.getName()+" and "+parentDF.getName()+" OK");
+		logger.log(Logger.INFO,"Federation between "+childDF.getName()+" and "+parentDF.getName()+" OK");
 		graphPanel.addFederation(childDF, parentDF);
 	}
 	
 	void notifyFederationRemoved(AID childDF, AID parentDF) {
-		System.out.println("Federation between "+childDF.getName()+" and "+parentDF.getName()+" removed");
+		logger.log(Logger.INFO,"Federation between "+childDF.getName()+" and "+parentDF.getName()+" removed");
 		graphPanel.removeFederation(childDF, parentDF);
 	}
 	
 	void notifyFailure(String msg) {
-		System.out.println(msg);
+		logger.log(Logger.WARNING,msg);
 		// FIXME: Show an error dialog
 	}
 	
