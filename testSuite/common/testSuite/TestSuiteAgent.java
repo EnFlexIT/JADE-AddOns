@@ -73,7 +73,6 @@ public class TestSuiteAgent extends GuiAgent {
 	// print the content in a report
 	private HashMap risultati = new HashMap();
 	private String currentTester;
-	private String[] listTester;
 	
 	private Codec codec;	
 	private TestSuiteGui myGui;
@@ -102,6 +101,7 @@ public class TestSuiteAgent extends GuiAgent {
 			// The user pressed "Open". If no tester is currently loaded, just load
 			// the indicated one. Otherwise kill the currently loaded tester before
 			if(myGui.getStatus() == TestSuiteGui.IDLE_STATE){
+				System.out.println("LOAD");
 				loadTester(className);
 			}
 			else {
@@ -131,14 +131,14 @@ public class TestSuiteAgent extends GuiAgent {
 		case RUNALL_EVENT:
 			System.out.println("TestSuiteAgent handling RUNALL event");
 			// The user pressed "RunAll"
-			// Add a behaviour that execute all testers, that are listed in 
-			// xml file and, on completion, sets the GUI status to READY
 			FunctionalityDescriptor[] allFunc = (FunctionalityDescriptor[]) ev.getParameter(0);
+			ArrayList l = new ArrayList();
 			if (allFunc != null) {
-				ArrayList l = new ArrayList();
 				for(int i = 0; i < allFunc.length; i++){
-					l.add(i, allFunc[i].getTesterClassName());
+					l.add(i, allFunc[i]);
 				}
+			// Add a behaviour that execute all testers, that are listed in 
+			// xml file and, on completion, sets the GUI status to IDLE
 				addBehaviour(new AllTesterExecutor(this, l));
 			}
 			break;
@@ -205,6 +205,7 @@ public class TestSuiteAgent extends GuiAgent {
 		try {
 			TestUtility.createAgent(this, TESTER_NAME, className, new String[] {new String("true")}, getAMS(), null);
 			myGui.setCurrentF(className);			
+			myGui.setStatus(TestSuiteGui.READY_STATE);
 		}
 		catch (Exception e) {
 			System.out.println("Error loading tester agent. ");
@@ -229,15 +230,18 @@ public class TestSuiteAgent extends GuiAgent {
 	 */
 	class AllTesterExecutor extends ListProcessor{
 		
-
+		ArrayList functionalities;
+		
 		public AllTesterExecutor(Agent a, ArrayList l){
 			super(a, l);
+			functionalities = l;
 		}
+
 		// take tester to run and its order in the list
 		protected void processItem(Object item, int index){
 		  		int order = index;
-		  		String testName = (String) item;
-		  		myAgent.addBehaviour(new SingleTesterExecutor(myAgent, testName, order, this));
+		  		FunctionalityDescriptor func = (FunctionalityDescriptor) item;
+		  		myAgent.addBehaviour(new SingleTesterExecutor(myAgent, func, order, this));
 		  		pause();
 		}
 		
@@ -247,15 +251,19 @@ public class TestSuiteAgent extends GuiAgent {
 			System.out.println(" ");
 			System.out.println("************ FINAL REPORT ****************");
 			System.out.println(" ");
-			Iterator it = items.iterator();
-			while (it.hasNext()) {
-				String tester = (String) it.next();
-				ArrayList ar = (ArrayList)risultati.get(tester);
-				System.out.println("Tester:  "+tester);
-				System.out.println("Passed:  "+((Integer)ar.get(0)).intValue());
-				System.out.println("Falled:  "+((Integer)ar.get(1)).intValue());
-				System.out.println("Skipped: "+((Integer)ar.get(2)).intValue());
-				System.out.println("-----------------------------------------------");
+			for(int i = 0; i < functionalities.size(); i++){	
+				String tester = ((FunctionalityDescriptor)functionalities.get(i)).getTesterClassName();
+				try{
+					ArrayList ar = (ArrayList)risultati.get(tester);
+					System.out.println("Tester:  "+tester);
+					System.out.println("Passed:  "+((Integer)ar.get(0)).intValue());
+					System.out.println("Falled:  "+((Integer)ar.get(1)).intValue());
+					System.out.println("Skipped: "+((Integer)ar.get(2)).intValue());
+					System.out.println("-----------------------------------------------");
+				}catch(Exception ex){
+					System.out.println("Some errore is verified.");
+					System.out.println("-----------------------------------------------");
+				}
 			}
 			myGui.setStatus(TestSuiteGui.IDLE_STATE);
 			myGui.setEnabled(true);
@@ -272,15 +280,15 @@ public class TestSuiteAgent extends GuiAgent {
 		private ListProcessor lpToBeResumed;
 		private int testerOrd = 0;
 		
-		public SingleTesterExecutor(Agent a, String tn, int i, ListProcessor l){
+		public SingleTesterExecutor(Agent a, FunctionalityDescriptor f, int i, ListProcessor l){
 			super(a);
-			testerName = tn;
+			testerName = f.getTesterClassName();
 			testerOrd = i;
 			lpToBeResumed = l;
 			
-			// 1th Step: kill the tester which isn't the first
-			if(myGui.getStatus() != TestSuiteGui.IDLE_STATE){
-				System.out.println("************ RELOAD KILL ****************");
+			// Once called
+			if( i == 0 && myGui.getStatus() != TestSuiteGui.IDLE_STATE){
+				System.out.println("KILL!!!");
 				addSubBehaviour(new Requester(myAgent, new Exit()){
 					public int onEnd() {
 						try {
@@ -291,20 +299,33 @@ public class TestSuiteAgent extends GuiAgent {
 						}
 						return 0;
 					}							
-				}); 	
-			}
-			
-			// 2td Step: Load a tester ti run
+				});
+			} 	
+
+			// 1td Step: Load a tester ti run
 			addSubBehaviour(new OneShotBehaviour(myAgent){
 				public void action(){
-					System.out.println("CARICATO TESTER: "+testerName);
+					System.out.println("LOADED TESTER: "+testerName);
 					currentTester = testerName;
 					loadTester(testerName);
 				}
 			});
 			
-			// 3td Step: Run the tester
+			// 2td Step: Run the tester
 			addSubBehaviour(new Requester(myAgent, new Execute(false)));
+
+			// 3th Step: kill the tester which isn't the first
+			addSubBehaviour(new Requester(myAgent, new Exit()){
+				public int onEnd() {
+					try {
+						Thread.sleep(1000);
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+					}
+					return 0;
+				}							
+			}); 	
 		}
 
 		public int onEnd() {
