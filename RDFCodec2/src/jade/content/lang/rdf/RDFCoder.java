@@ -35,6 +35,8 @@ import jade.content.abs.AbsObject;
 import jade.content.abs.AbsAggregate;
 import jade.content.abs.AbsPrimitive;
 import jade.content.schema.ObjectSchema;
+import jade.content.schema.Facet;
+import jade.content.schema.facets.TypedAggregateFacet;
 import jade.lang.acl.ISO8601;
 import starlight.util.Base64;
 import java.util.Date;
@@ -49,11 +51,14 @@ class RDFCoder {
 	Ontology ontology;
 	boolean description=false;
 	boolean type=false;
+	String seqType=null;
 	
-	protected void setOntology(Ontology o) {
+	protected void setOntology(Ontology o, String prop) {
 		ontology = o;
-		ontologyName=o.getName();
+		if (prop!=null)
+			ontologyName=o.getName();
 	}
+	
 	
 
 	String normalizeString(String text) {
@@ -77,22 +82,70 @@ class RDFCoder {
 				
 		return temp;
 	}
+	
+	
 		
-	void encodeAggregateAsTag(AbsObject content, String tag, StringBuffer sb) throws Codec.CodecException {
+	void encodeAggregateAsTag(AbsObject content,String memberExpectedType,String tag, StringBuffer sb, boolean sq,boolean last,boolean first) throws Codec.CodecException {
 		AbsAggregate absAggregate = (AbsAggregate)content;
 		for (int i=0; i < absAggregate.size(); i++) 
-			encodeAsTag(absAggregate.get(i), null, tag, sb);
-			
+			encodeAsTag(absAggregate.get(i),null, memberExpectedType,tag, sb, false,false,false);			
 	}
+
+	void encodeSequenceAsTag(AbsObject content, String memberExpectedType,String tag, StringBuffer sb) throws Codec.CodecException {
+		AbsAggregate absAggregate = (AbsAggregate)content;
+		int size=absAggregate.size();
+		if (size>0){
+		for (int i=0; i < size; i++) {
+			int k = absAggregate.size()-1;
+			if (i==0){
+				if (k==0)
+					encodeAsTag(absAggregate.get(i), null,memberExpectedType,tag, sb, true, true,true);				
+				else
+					encodeAsTag(absAggregate.get(i), null,memberExpectedType,tag, sb, true, false,true);				
+				
+				}
+			else
+				if (i!=k)					
+					encodeAsTag(absAggregate.get(i), null,memberExpectedType,tag, sb, true, false,false);				
+				else
+					encodeAsTag(absAggregate.get(i),null, memberExpectedType,tag, sb, true, true,false);			
+			}	
+		}
+		else {
+			if (seqType.equals("sequence")){
+				sb.append("<"+"rdf:Seq"+">");
+				sb.append("<"+"rdf:li"+">");
+				sb.append("<"+"rdf:object"+">");		    				
+				sb.append("<"+tag+">");
+				sb.append("</"+tag+">");
+				sb.append("</"+"rdf:object"+">");		    							
+				sb.append("</"+"rdf:li"+">");	
+				sb.append("</"+"rdf:Seq"+">");
+			}
+			else if (seqType.equals("set")){
+				sb.append("<"+"rdf:Bag"+">");
+				sb.append("<"+"rdf:li"+">");
+				sb.append("<"+"rdf:object"+">");		    				
+				sb.append("<"+tag+">");
+				sb.append("</"+tag+">");
+				sb.append("</"+"rdf:object"+">");		    							
+				sb.append("</"+"rdf:li"+">");	
+				sb.append("</"+"rdf:Bag"+">");
+			}
+			
+			
+			}		
+	}
+
 	
-	void encodeAsTag(AbsObject content, String slotExpectedType, String tag, StringBuffer sb) throws Codec.CodecException{ 
+	void encodeAsTag(AbsObject content, ObjectSchema parentSchema,String slotExpectedType, String tag, StringBuffer sb, boolean sq, boolean last, boolean first ) throws Codec.CodecException{ 
   
     	boolean hasChild = false;
     	boolean hasAttributes = false;
     	String startTag;
     	String closeTag;
 		
-		try {   
+		try {  
 					
 			// Encoding a ContentElementList
 			if (content instanceof AbsContentElementList) {		
@@ -101,7 +154,7 @@ class RDFCoder {
 				AbsContentElementList absCEList = (AbsContentElementList)content;
 				for (int i=0; i < absCEList.size(); i++) {
 					AbsObject temp = (AbsObject)absCEList.get(i);		
-					encodeAsTag(temp, temp.getTypeName(), null, sb);
+					encodeAsTag(temp, null,temp.getTypeName(), null, sb,false,false,false);
 				}
 				sb.append("</rdf:Description>");
 				sb.append("</fipa-rdf:CONTENT_ELEMENT_LIST>");
@@ -113,7 +166,13 @@ class RDFCoder {
     			AbsPrimitive absPrimitive = (AbsPrimitive)content;
     			String typeName = ((AbsObject)absPrimitive).getTypeName();
     			String temp = null;
-    			sb.append("<"+ontologyName+":"+tag+">");
+    			if (ontologyName!=null)
+    				sb.append("<"+ontologyName+":"+tag+">");
+    			else 
+    			    sb.append("<"+tag+">");
+    			 
+    			//sb.append("<"+ontologyName+":"+tag+">");
+
     			Object v = absPrimitive.getObject();
 				if (typeName.equals(BasicOntology.DATE))
 	    			temp = ISO8601.toString((Date)v);
@@ -123,21 +182,47 @@ class RDFCoder {
 		  		else if (typeName.equals(BasicOntology.BYTE_SEQUENCE))
 		  			temp = String.copyValueOf(Base64.encode((byte [])v));
 		  		else temp = normalizeString(((AbsObject)absPrimitive).toString());
-				sb.append(temp);		
-				sb.append("</"+ontologyName+":"+tag+">");
+				sb.append(temp);
+    			if (ontologyName!=null)
+    				sb.append("</"+ontologyName+":"+tag+">");
+    			else 
+    			    sb.append("</"+tag+">");
+						
+				//sb.append("</"+ontologyName+":"+tag+">");
 				return;
 				
 			}
+			
+
 		
 			// Encoding an Aggregate
 			if (content instanceof AbsAggregate) {
-    			encodeAggregateAsTag(content, tag, sb);  
+				
+				String memberExpectedType = null;
+				
+				Facet[] facets = parentSchema.getFacets(tag);
+				if(facets!=null){
+				for (int i = 0; i < facets.length; i++) {
+					if (facets[i] instanceof TypedAggregateFacet) {
+						memberExpectedType = ((TypedAggregateFacet)facets[i]).getType().getTypeName();
+					}
+				 }	
+			}
+					
+				seqType = content.getTypeName();
+				if(!seqType.equals("sequence")&&!seqType.equals("set"))
+    				encodeAggregateAsTag(content, memberExpectedType,tag, sb,false,false,false);  
+    			else {
+					encodeSequenceAsTag(content,memberExpectedType, tag, sb);
+    		}
     			return;
     		}
 
 		
 			// Encoding a Concept
-			ObjectSchema currSchema = ontology.getSchema(content.getTypeName()); 	
+			ObjectSchema currSchema = ontology.getSchema(content.getTypeName());
+			
+			
     		if (tag==null) {
     			startTag = "fipa-rdf:CONTENT_ELEMENT";		
     			closeTag = "fipa-rdf:CONTENT_ELEMENT";
@@ -148,9 +233,12 @@ class RDFCoder {
     	
     		if (slotExpectedType!=null) {
     				if (!(currSchema.getTypeName().equals(slotExpectedType))) {
-	   					//startTag = startTag.concat(" fipa-rdf:type=\""+currSchema.getTypeName() + "\"");	   					startTag = startTag.concat(" fipa-rdf:type=\""+currSchema.getTypeName() + "\"");
 	   					 description=true;
 	   					 type=true;
+					}
+					else if ((tag!=null) && (parentSchema==null)){
+	   					 description=true;
+	   					 type=true;						
 						}
 
     		}
@@ -170,24 +258,52 @@ class RDFCoder {
     			}
 
     		else {
+    			if (sq && first){
+    				sb.append("<");
+    				if (ontologyName!=null)
+    				sb.append(ontologyName+":"+startTag);
+    			else 
+    			    sb.append(startTag);
     			
-    			sb.append("<");
-				sb.append(ontologyName+":"+startTag);													
-    			sb.append(">");   
-    				sb.append ("<rdf:Description>");
-    				if(type){
-    		         	 sb.append("<fipa-rdf:type>");
-    			         sb.append(currSchema.getTypeName());
-    			         sb.append("</fipa-rdf:type>");
-    			         type=false;
-    			         }
+				//sb.append(ontologyName+":"+startTag);													
+    			sb.append(">"); 
     			}
+    			else if (!sq){
+   					sb.append("<");
+    				if (ontologyName!=null)
+    					sb.append(ontologyName+":"+startTag);
+    				else 
+    			    	sb.append(startTag);
+    			
+				//sb.append(ontologyName+":"+startTag);													
+    				sb.append(">");    				
+    				}
+    			
+    			if(!sq)
+    				sb.append ("<rdf:Description>");
+    			else{
+    				if(first)
+    				    if (seqType.equals("sequence"))
+						 sb.append("<"+"rdf:Seq"+">");
+						else if (seqType.equals("set"))
+						 sb.append("<"+"rdf:Bag"+">");
+						
+					sb.append("<"+"rdf:li"+">");
+					sb.append("<"+"rdf:object"+">");		    				
+    				}
+    				if(type){
+    		         	sb.append("<fipa-rdf:type>");
+    			     	sb.append(currSchema.getTypeName());
+    			     	sb.append("</fipa-rdf:type>");
+    			     	type=false;
+    			       	}
+    				}
      			
     			
     		String[] names = content.getNames();
 	   		for (int i=0; i < names.length; i++) {
     			AbsObject temp = content.getAbsObject(names[i]);
-   				encodeAsTag(temp, currSchema.getSchema(names[i]).getTypeName(), names[i], sb);
+   				encodeAsTag(temp, currSchema,currSchema.getSchema(names[i]).getTypeName(), names[i], sb,false, false,false);
     		} 
     		if (startTag.equals("fipa-rdf:CONTENT_ELEMENT")){
     			sb.append("</rdf:Description>");
@@ -203,10 +319,38 @@ class RDFCoder {
     			}
  
 			else{  
-			sb.append("</rdf:Description>");
-    		sb.append("</");
-    		sb.append(ontologyName+":"+closeTag);
-    		sb.append(">");
+			if (sq){
+				sb.append("</rdf:object>");
+				sb.append("</rdf:li>");	
+				if (last){
+										
+    				    if (seqType.equals("sequence"))
+						 sb.append("</rdf:Seq>");
+						else if (seqType.equals("set"))
+						 sb.append("</rdf:Bag>");
+						 										
+    				sb.append("</");
+    		
+    				if (ontologyName!=null)
+    					sb.append(ontologyName+":"+closeTag);
+    				else 
+	   					sb.append(closeTag); 
+	   					  		
+    					sb.append(">");	
+    					}		
+				}
+			
+			else{
+				sb.append("</rdf:Description>");
+    			sb.append("</");
+    		
+    			if (ontologyName!=null)
+    				sb.append(ontologyName+":"+closeTag);
+    			else 
+    				sb.append(closeTag);
+    				//sb.append(ontologyName+":"+closeTag);
+    			sb.append(">");
+    		}
     		
     		
     	}

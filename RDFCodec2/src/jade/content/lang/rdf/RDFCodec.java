@@ -34,6 +34,11 @@ import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
 import jade.content.abs.AbsContentElement;
 import jade.content.abs.AbsObject;
+import jade.util.*;
+
+import java.util.*;
+import java.io.*;
+import java.lang.*;
 
 import javax.xml.parsers.*;
 import org.xml.sax.*;
@@ -79,10 +84,11 @@ class XMLContentHandler extends DefaultHandler {
 							 String qname,
 							 Attributes attr) throws SAXException {
 		
+	
 		try {
 			lastValue = new String();
 			decoder.openTag(qname,localName, attr);		
-		} catch (OntologyException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			throw new SAXException(e.getMessage());
 		}
@@ -92,6 +98,9 @@ class XMLContentHandler extends DefaultHandler {
 	public void endElement(String namespaceURI,
 						   String localName,
 						   String qname) throws SAXException { 
+						   
+		
+									  
 		try {
    			decoder.closeTag(qname,localName, lastValue);
    		} catch (OntologyException e) {
@@ -195,9 +204,9 @@ public class RDFCodec extends StringCodec {
     	StringBuffer sb = new StringBuffer();
     	sb.append(XML_VERSION);
     	sb.append(NAMESPACE_);   	
-    	sb.append("<fipa-rdf:Object>");
-      	coder.encodeAsTag((AbsObject)content, null, null, sb);
-        sb.append("</fipa-rdf:Object>");
+    	sb.append("<rdf:object>");
+      	coder.encodeAsTag((AbsObject)content, null,null,null, sb,false,false,false);
+        sb.append("</rdf:object>");
         sb.append(TAIL);
     	return sb.toString();
   	}
@@ -213,12 +222,44 @@ public class RDFCodec extends StringCodec {
             throws CodecException {
             	
         ontologyName = ontology.getName();
-		ontologyNS ="  xmlns:"+ontologyName+"=\"http://www.fipa.org/ontologies/"+ontologyName+"#"+"\"" ;                    				
-		NAMESPACE_=NAMESPACE+ontologyNS+">";
-        coder.setOntology(ontology);
+        
+        //If the file RDFCodec.properties exists
+		//reads it to get namespace location 
+		//and sets XMLValidation true
+		//the user has to edit a file RDF.properties as follows
+		//OntologyName = namespace location
+		//if the file doesn't exist no namespace and no validation are used is used
+		
+       	String prop = null;
+       	Properties props = new Properties();
+        try{ 
+			 
+			 props.load(new FileInputStream("RDFCodec.properties"));	
+			 prop = props.getProperty(ontologyName);	 
+  			
+        		}
+       	 catch (IOException e){
+        	e.printStackTrace();
+        	}
+       
+        if (prop!=null)
+        	{
+				ontologyNS ="  xmlns:"+ontologyName+"="+"\""+prop+"#"+"\"" ;                    				
+				NAMESPACE_=NAMESPACE+ontologyNS+">";										
+       		}
+       	
+       	else 
+       		NAMESPACE_=NAMESPACE+">";
+       		
+       	coder.setOntology(ontology,prop);
+       	
         String temp = encode(content);
         return temp;
 	}
+         
+
+
+
          
 
     /**

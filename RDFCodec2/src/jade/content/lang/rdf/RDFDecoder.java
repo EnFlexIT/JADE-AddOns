@@ -49,6 +49,7 @@ class RDFDecoder {
 	String encoded=null;
 	String previousTag=null;
 	String temp=null;
+	boolean emptyAgg=false;
 
 	
 	class StackElement {
@@ -137,7 +138,7 @@ class RDFDecoder {
 					
 	
 	protected void openTag(String qName,String localName, Attributes attr) throws OntologyException {
-	if ((!qName.equals("rdf:RDF"))&&(!qName.equals("fipa-rdf:Object"))&&(!qName.equals("rdf:Description"))){	
+	if ((!qName.equals("rdf:RDF"))&&(!qName.equals("rdf:object"))&&(!qName.equals("rdf:Description"))&&(!qName.equals("rdf:Seq"))&&(!qName.equals("rdf:Bag"))){	
 		
 		ObjectSchema objectSchema = null;
 		String schemaName = null;
@@ -163,20 +164,23 @@ class RDFDecoder {
 			if (qName.equals("fipa-rdf:type")) {
 				return;
 				}
+				
+			if (qName.equals("rdf:li")) {
+				qName=stack.getPreviousComplexElement(0).tag;
+				localName=qName.substring(qName.indexOf(":")+1);
+				}	
 			
 						
 				if (schemaName==null) {
-					schemaName = localName;					
+					schemaName = localName;	
 				}				
 			// Identify the schema of the current tag
-			if (objectSchema==null)
-				objectSchema = getRelatedSchema(schemaName);					
+			if (objectSchema==null){
+				objectSchema = getRelatedSchema(schemaName);
+				}					
 				
-			if (objectSchema instanceof AggregateSchema) {
-				addToStack(localName, objectSchema);		
-			 	objectSchema = getRelatedSchema(localName);	
-			}
-			addToStack(localName,objectSchema);	
+			if (objectSchema!=null)	addToStack(localName,objectSchema);
+			else emptyAgg=true;
 		}
 										
 	}
@@ -198,10 +202,19 @@ class RDFDecoder {
 	protected void closeTag(String qName,String localName, String content) throws OntologyException {	
 
 		   boolean finalize = false;  
-		   
 		   if (qName.equals("fipa-rdf:type")){
 			   	replaceTerm(content);
 		   	}
+		   	
+		   	if (qName.equals("rdf:li")) {
+				qName=stack.getPreviousComplexElement(0).tag;
+				localName=qName.substring(qName.indexOf(":")+1);	
+				if(getRelatedSchema(localName)==null && emptyAgg){
+					emptyAgg=false;
+					return;
+				}
+						
+			}	
 		
 		   if (qName.equals("fipa-rdf:CONTENT_ELEMENT")&& !ContentElementList) {
 		   	finalize = true;
@@ -209,11 +222,11 @@ class RDFDecoder {
 		   
 		   if (qName.equals("fipa-rdf:CONTENT_ELEMENT_LIST")) finalize=true;
 		   
-		   if ((!qName.equals("rdf:RDF"))&&(!qName.equals("fipa-rdf:Object"))&&(!qName.equals("rdf:Description"))&&(!qName.equals("fipa-rdf:type"))){
+		   if ((!qName.equals("rdf:RDF"))&&(!qName.equals("rdf:object"))&&(!qName.equals("rdf:Description"))&&(!qName.equals("fipa-rdf:type"))&&(!qName.equals("rdf:Seq"))&&(!qName.equals("rdf:Bag"))){
 		   
 		 	    	
-		   do {
-				StackElement top = stack.pop();
+		   do { 
+				StackElement top = stack.pop();	
 				if (stack.size()==0) {
 					ce = (AbsContentElement)top.term;
 					initialited=false;
@@ -236,25 +249,39 @@ class RDFDecoder {
 	
 	protected ObjectSchema getRelatedSchema(String qname) throws OntologyException {
 		ObjectSchema objectSchema = null;
-		
+		boolean emptyAggregate = false;
 		try {
 			objectSchema = ontology.getSchema(qname);
 		} catch (OntologyException e) {
 		}	
 		
-		while (objectSchema==null) {
+		while (objectSchema==null && !emptyAggregate) {
 					StackElement prevElement = stack.getPreviousComplexElement(0);
 					ObjectSchema prevComplexSchema =  getConceptSchema(prevElement.term);
 					if (prevComplexSchema instanceof AggregateSchema) {
 						if (qname.equals(prevElement.tag)) {
 							ObjectSchema temp = getConceptSchema(stack.getPreviousComplexElement(1).term); 						
-							objectSchema = getContentType(temp.getFacets(qname));			
+							Facet[] facets = temp.getFacets(qname);
+							if (facets!=null){
+								objectSchema = getContentType(facets);
+								}
+							else  {
+								objectSchema = null;
+								emptyAggregate = true;
+							}
 						} else {
 							stack.pop();
 							AbsHelper.setAttribute(stack.getPreviousComplexElement(0).term, prevElement.tag, prevElement.term);
 						}	
-					} else
-						objectSchema = prevComplexSchema.getSchema(qname);
+					} else{
+						if (prevComplexSchema.containsSlot(qname)){
+							objectSchema = prevComplexSchema.getSchema(qname);
+							}
+						else {
+							objectSchema=null;
+							emptyAggregate = true;
+								}
+						}
 		}
 		
 		return objectSchema;
@@ -269,6 +296,7 @@ class RDFDecoder {
 				stackElement.term = null;
 			}
 			stack.push(stackElement);
+			
 	}
 
 		
