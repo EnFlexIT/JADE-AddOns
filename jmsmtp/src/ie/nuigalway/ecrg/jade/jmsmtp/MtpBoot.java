@@ -93,7 +93,7 @@ public class MtpBoot implements MTP {
   public TransportAddress activate (InChannel.Dispatcher disp, Profile p)
                              throws MTPException {
 
-    return mtp.activate(disp);
+    return mtp.activate(disp, p);
   }
 
   /**
@@ -105,7 +105,7 @@ public class MtpBoot implements MTP {
    */
   public void activate (InChannel.Dispatcher disp, TransportAddress ta, Profile p)
                  throws MTPException {
-    mtp.activate(disp, ta);
+    mtp.activate(disp, ta, p);
   }
 
   /**

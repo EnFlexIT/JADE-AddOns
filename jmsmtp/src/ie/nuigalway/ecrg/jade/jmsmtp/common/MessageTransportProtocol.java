@@ -80,7 +80,7 @@ public class MessageTransportProtocol implements MTP {
    * @return Trnasport Address for the address activated
    * @throws MTPException Error during address activation
    */
-  public TransportAddress activate (InChannel.Dispatcher disp)
+  public TransportAddress activate (InChannel.Dispatcher disp, jade.core.Profile p)
                              throws MTPException {
 
     if (log.isDebugEnabled()) {
@@ -99,7 +99,7 @@ public class MessageTransportProtocol implements MTP {
         log.debug("Create a Default QL");
       }
 
-      this.activate(disp, jmsTA);
+      this.activate(disp, jmsTA, p);
     } catch (Exception e) {
       log.error("Error in Addition:" + e.toString());
       throw new MTPException("Error during default activation: ", e);
@@ -119,7 +119,7 @@ public class MessageTransportProtocol implements MTP {
    * @param ta Address to activate
    * @throws MTPException Error during address activation
    */
-  public void activate (InChannel.Dispatcher disp, TransportAddress ta)
+  public void activate (InChannel.Dispatcher disp, TransportAddress ta, jade.core.Profile p)
                  throws MTPException {
 
     if (log.isDebugEnabled()) {
