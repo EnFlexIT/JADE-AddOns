@@ -36,10 +36,9 @@ import java.net.InetAddress;
 
 /**
  */
-public class InterPlatformCommunicationTesterAgent extends Agent {
-	private static final String DEFAULT_CLASSPATH = "c:\\jade\\classes";
+public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 	
-	protected void setup() {
+	protected TestGroup getTestGroup() {
 		TestGroup tg = new TestGroup(new String[] {
 			"test.interPlatform.tests.TestRemotePing"
 		}) {
@@ -48,8 +47,12 @@ public class InterPlatformCommunicationTesterAgent extends Agent {
 			
 			public void initialize(Agent a) throws TestException {
 				try {
-    			String localHost = InetAddress.getLocalHost().getHostAddress();
-					rc = TestUtility.launchJadeInstance("Remote platform", DEFAULT_CLASSPATH, new String("-host "+localHost+" -port 9002"), new String[]{"IOR"}); 
+					String classpath = System.getProperty("java.class.path");
+    			// NB Explicitly setting the local host is necessary to be sure that
+					// the remote platform name is consistent with the name we assume
+					// its AMS will have
+					String localHost = InetAddress.getLocalHost().getHostAddress();
+					rc = TestUtility.launchJadeInstance("Remote-platform", classpath, new String("-host "+localHost+" -port 9002"), new String[]{"IOR"}); 
 		
 					AID remoteAMS = new AID("ams@"+localHost+":9002/JADE", AID.ISGUID);
 					Iterator it = rc.getAddresses().iterator();
@@ -72,20 +75,9 @@ public class InterPlatformCommunicationTesterAgent extends Agent {
 			}
 		};
 		
-		addBehaviour(new TestGroupExecutor(this, tg) {
-			public int onEnd() {
-				myAgent.doDelete();
-				return 0;
-			}
-		} );
-		
-	}	
-		
-	protected void takeDown() {
-		System.out.println("Exit...");
+		return tg;
 	}
-	
-	
+		
 	// Main method that allows launching this test as a stand-alone program	
 	public static void main(String[] args) {
 		try {

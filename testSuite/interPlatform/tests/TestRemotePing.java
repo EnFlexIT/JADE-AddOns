@@ -54,7 +54,7 @@ public class TestRemotePing extends Test {
   		
 	  	Object[] args = getGroupArguments();
   		AID remoteAMS = (AID) args[0];
-  		resp = TestUtility.createResponder(a, RESPONDER_NAME, remoteAMS);
+  		resp = TestUtility.createTarget(a, RESPONDER_NAME, remoteAMS);
   		TestUtility.addBehaviour(a, resp, "test.common.behaviours.NotUnderstoodResponder");
   		
   		Behaviour b1 = new SimpleBehaviour() {
@@ -111,7 +111,7 @@ public class TestRemotePing extends Test {
 					
   public void clean(Agent a) {
   	try {
-  		TestUtility.killResponder(a, resp);
+  		TestUtility.killTarget(a, resp);
   	}
   	catch (Exception e) {
   		e.printStackTrace();
