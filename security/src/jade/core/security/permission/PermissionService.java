@@ -110,16 +110,16 @@ public class PermissionService
         // set security manager for this Java Virtual Machine
         setSecurityManager();
 
-        /*
+
         // print names of all services will start
         jade.util.leap.List l = myProfile.getSpecifiers(Profile.SERVICES);
         jade.util.leap.Iterator serviceSpecifiers = l.iterator();
         while(serviceSpecifiers.hasNext()) {
-                Specifier s = (Specifier)serviceSpecifiers.next();
+                jade.core.Specifier s = (jade.core.Specifier)serviceSpecifiers.next();
                 String serviceClass = s.getClassName();
-                System.out.println( "serviceClass="+serviceClass );
+                myLogger.log(Logger.FINER, "serviceClass="+serviceClass );
         }
-        */
+
 
         // create and initialize the filter of this service
         permFilterDown = new PermissionFilter( this );
@@ -148,6 +148,7 @@ public class PermissionService
 
       String secman_class = myProfile.getParameter( SECURITY_MANAGER_KEY, 
                                            SECURITY_MANAGER_DEFAULT);
+
       // if 'null' do not set any security manager
       if (secman_class.equals(SECURITY_MANAGER_NULL)) return;
 
