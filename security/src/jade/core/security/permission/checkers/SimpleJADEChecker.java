@@ -30,6 +30,7 @@ import jade.core.IMTPException;
 import jade.core.NodeDescriptor;
 import jade.core.Service;
 import jade.core.ServiceException;
+import jade.core.NotFoundException;
 import jade.core.management.AgentManagementSlice;
 import jade.core.security.SecurityHelper;
 import jade.core.security.SecurityService;
@@ -78,197 +79,166 @@ public class SimpleJADEChecker extends BaseJADEChecker {
 
 
     String name = cmd.getName();
-
-    //--- prepare parameters for the check ---
-
-    // principal who gets responsability for this command
-    JADEPrincipal requester = cmd.getPrincipal();
-    // 
-    Credentials creds = cmd.getCredentials();
-
-    // permission to be checked for passing this command
-    Permission permission = null;
-    // 
-    JADEPrincipal target = null;
-    // 
     Object[] params = cmd.getParams(); 
+    JADEPrincipal requester = cmd.getPrincipal();
+    Credentials creds = cmd.getCredentials();
+    OwnershipCertificate requesterOc = null;
+    if (creds == null && requester != null) {
+      // If the requester does not show any credentials, use his ownership cert
+      requesterOc = (OwnershipCertificate) service.getOwnershipCertificate(requester);
+      creds = (OwnershipCertificate) requesterOc;
+    }
+
+    Permission permission = null;
 
 
 
 //----------
     if (name.equals(Service.NEW_NODE)) {
-
-      // get prioncipal/creds from NodeDescriptor 
-      // and not from the cmd
-      PermissionFilter.log( direction, cmd );
+    	// Main container: NEW_NODE UP command issued by the underlying PlatformManagerImpl.
+      // The requester principal and credentials 
+    	// are held by the NodeDescriptor and not by the command.
+    	PermissionFilter.log( direction, cmd );
+      
       NodeDescriptor nd = (NodeDescriptor) params[0];
       String container_name = nd.getName();
       requester = nd.getOwnerPrincipal();
       creds = nd.getOwnerCredentials();
 
-      boolean startingMain = nd.getNode().hasPlatformManager();
-
-      if ( startingMain ) {
-        // check if that user/principal is authorized, according to the policy
-        if (myLogger.isLoggable(Logger.FINE))
+      if ( nd.getNode().hasPlatformManager() ) {
+      	// Node holds a Main container: Check if the requester is autorized to create a platform.
         myLogger.log(Logger.FINE, "  NEW_NODE ("+nd.getName()+")  p="+requester+" c="+creds);
         permission = new PlatformPermission( "", "create");
-        // check if that user/principal is authorized, according to the policy
-        checkAction( requester, permission, target, creds );
-      } else {
-        // if this comes from a remote container
-        // authenticate here (on the main) the remote user
+        checkAction( requester, permission, null, creds );
+      } 
+      else {
+        // Node holds a Peripheral container: authenticate the user on the basis of his username and password
         authenticateRemoteUser(nd.getUsername(), nd.getPassword());        
       }
 
-      // check if that user/principal is authorized, according to the policy
-      if (myLogger.isLoggable(Logger.FINE))
+    	// Check if the requester is autorized to create a container owned by himself.
       myLogger.log(Logger.FINE, "  NEW_NODE ("+nd.getName()+")  p="+requester+" c="+creds);
-      permission = new ContainerPermission( "", "create");
-      checkAction( requester, permission, target, creds );
+      permission = new ContainerPermission(ContainerPermission.CONTAINER_OWNER+"="+requester.getName(), "create");
+      checkAction( requester, permission, null, creds );
     }
     else
 //----------
     if (name.equals(Service.DEAD_NODE)) {
-
-// ToFix: Look at PlatformManagerImpl, line 356
-//  something is changed before ssuing the vcmd
-
-/*
-      // get prioncipal/creds from NodeDescriptor 
-      // and not from the cmd
-      PermissionFilter.log( direction, cmd );
-      NodeDescriptor nd = (NodeDescriptor) params[0];
-      String container_name = nd.getName();
-      requester = nd.getOwnerPrincipal();
-      creds = nd.getOwnerCredentials();
-
-      // if this comes from a remote container, 
-      // and this is the main container
-      if ((direction==Filter.OUTGOING) && (myContainer.getMain()!=null)) {
-        authenticateRemoteUser(nd.getUsername(), nd.getPassword());
-      }
-
-      // check if that user/principal is authorized, according to the policy
-      myLogger.log(Logger.FINE, "  NEW_NODE   p="+requester+" c="+creds);
-      permission = new ContainerPermission( "", "create");
-
-      checkAction( requester, permission, target, creds );
-*/
+    	// FIXME: Should we perform some check?
+    }
+    else
+//----------
+    if (name.equals(AgentManagementSlice.KILL_CONTAINER)) {
+    	// Main container: KILL_CONTAINER DOWN command issued by the AMS on behalf of a requester
+      jade.core.security.permission.PermissionFilter.log( direction, cmd );
+      
+      ContainerID cid = (ContainerID) params[0];
+			try {
+				String containerOwner = service.getContainerOwner(cid).getName();
+				
+	    	// Check if the requester is autorized to kill a container owned by a given owner.
+	      permission = new ContainerPermission(ContainerPermission.CONTAINER_OWNER+"="+containerOwner, "kill");				
+	      checkAction( requester, permission, null, creds );
+			}
+			catch (NotFoundException nfe) {
+				// We are killing a node that does not exist 
+				// --> just do nothing. Operation will fail.
+			}
     }
     else
 //----------
     if (name.equals(AgentManagementSlice.REQUEST_CREATE)) {
       jade.core.security.permission.PermissionFilter.log( direction, cmd );
 
-      String agentName="";
-      if (direction==Filter.OUTGOING) { // cmd 'DOWN'
-        ContainerID cid = (ContainerID) params[3];
-        JADEPrincipal owner = (JADEPrincipal) params[4];
-        Credentials initialCredentials = (Credentials) params[5];
-      } else { // cmd 'UP'
-        AID agentAID = (AID) params[0];
-        agentName=agentAID.getName();
-        String arguments[] =  (String[]) params[2];
-        JADEPrincipal owner = (JADEPrincipal) params[3];
-        Credentials initialCredentials = (Credentials) params[4];
-        Boolean startIt = (Boolean) params[5];
+      String agentName = null;
+      String containerOwner = null;
+      int ownerIndex = -1;
+      if (direction == Filter.OUTGOING) {
+      	agentName = (String) params[0];
+      	ContainerID cid = (ContainerID) params[3];
+      	try {
+      		containerOwner = service.getContainerOwner(cid).getName();
+      	}
+      	catch (NotFoundException nfe) {
+      		// We are trying to create an agent on a container that does not exist
+      		// --> just do nothing. Operation will fail
+      	}
+      	ownerIndex = 4;
       }
-
+      else {
+	      AID agentID = (AID) params[0];
+      	agentName = agentID.getName();
+      	ownerIndex = 3;
+      }
+      
       String className = (String) params[1];
-      JADEPrincipal owner;
-      Credentials initialCredentials;
+      JADEPrincipal owner = null;
+      Credentials initialCredentials = null;
 
-      if (direction==Filter.OUTGOING) { // cmd 'DOWN'
-        owner = (JADEPrincipal) params[4];
-        initialCredentials = (Credentials) params[5];
-      } else { // cmd 'UP'
-        owner = (JADEPrincipal) params[3];
-        initialCredentials = (Credentials) params[4];
+      owner = (JADEPrincipal) params[ownerIndex];
+      initialCredentials = (Credentials) params[ownerIndex+1];
+      if (owner == null && requesterOc != null) {
+      	// If no owner is specified, use the owner of the requester
+      	owner = requesterOc.getOwner();
+      	params[ownerIndex] = owner;
+      	adjustCommandParams((GenericCommand) cmd, params);
       }
 
-
-      if ((owner==null) && (direction==Filter.OUTGOING))  {
-        Object ret; // return value to be passed to the cmd
-        ret = fixOwner(cmd);
-        cmd.setReturnValue( ret );
-        // veto this cmd
-        JADESecurityException jse = new JADESecurityException("vetoed");
-        throw jse;
+      String ownerName = "NONE";
+      if (owner != null) {
+      	ownerName = owner.getName();
       }
 
-      if (creds==null) {
-        // if the requester does not show any his creds, pass his ownership cert
-        OwnershipCertificate oc = (OwnershipCertificate) service.getOwnershipCertificate(requester);
-        if (oc!=null) owner=oc.getOwner();
-        creds = (OwnershipCertificate) oc;
-      }
-
-      String ownerName="";
-      if (owner!=null) ownerName=owner.getName();
-
-      // permission to create a new agent whose class is className
-      permission = new AgentPermission( AuthPermission.AGENT_CLASS+"="+className+","+
-                                        AuthPermission.AGENT_NAME+"="+agentName+","+
-                                        AuthPermission.AGENT_OWNER+"="+ownerName 
+    	// Check if the requester is autorized to creatre an agent of class className, with name agentName owned by ownerName
+      permission = new AgentPermission( AgentPermission.AGENT_CLASS+"="+className+","+
+                                        AgentPermission.AGENT_NAME+"="+agentName+","+
+                                        AgentPermission.AGENT_OWNER+"="+ownerName+","+
+                                        AgentPermission.CONTAINER_OWNER+"="+containerOwner 
                                         , "create");
-
-      checkAction( requester, permission, target, creds );
+      checkAction( requester, permission, null, creds );
     }
     else
 //----------
     if (name.equals(AgentManagementSlice.INFORM_CREATED)) {
       jade.core.security.permission.PermissionFilter.log( direction,  cmd );
 
-      AID createdAgentID = (AID) params[0];
-
-      Agent createdAgent;
-      ContainerID createdContainer;
-      if (params[1] instanceof ContainerID) {
-        createdContainer = (ContainerID) params[1];
-        // cmd incoming (up)
-
-      } else {
-        // cmd outgoing (down)
-        // ok, agent was created, and is about to be registered 
-        createdAgent = (Agent) params[1]; 
-        String className = (String) createdAgent.getClass().getName();
-
-        // princ/creds of the guy who requested the agent creation
+      if (direction == Filter.OUTGOING) {
+        // Baptize the agent i.e. creates its principal and credentials
+        Agent createdAgent = (Agent) params[1]; 
         JADEPrincipal owner = (JADEPrincipal) params[2];
         Credentials initialCreds = (Credentials) params[3];
 
-        // baptize the agent and get his SecurityHelper
         SecurityHelper sh = baptism( createdAgent, owner ); 
-
         JADEPrincipal agentPrincipal = sh.getPrincipal();
         Credentials agentCreds = sh.getCredentials();
 
-        // insert into the vertical command with the agent principal/credentials
+        // The requester in this case is the newly started agent --> 
+        // insert hist principal and credentials into the INFORM_CREATED VC.
         cmd.setPrincipal( agentPrincipal );
         cmd.setCredentials( agentCreds );
-        if (myLogger.isLoggable(Logger.FINER))
         myLogger.log(Logger.FINER, "\n    agent=("+agentPrincipal+")"+ 
                                    "\n    owner=("+agentCreds.getOwner()+")");
-
-        String ownerName = (owner!=null) ? owner.getName() : "";
-
-        // permission to register the agent
-        permission = new AMSPermission( AuthPermission.AGENT_CLASS+"="+className+","+
-                                        AuthPermission.AGENT_OWNER+"="+ownerName 
-                                        , "register");
 
         // check if the agent (and not the requestor) has got the permission
         if (agentPrincipal==null) {
           String msg = " Internal error,  null agentPrincipal after agent creation.";
-          if (myLogger.isLoggable(Logger.WARNING))
           myLogger.log(Logger.WARNING, msg );
           throw new JADESecurityException( msg );
-        } else {
-          checkAction(agentPrincipal, permission, target, agentCreds);
-        }
+        } 
       }
+      else {
+      	// Check that the requester (a newly started agent) is authorized 
+      	// to register with the AMS.
+	      AID createdAgentID = (AID) params[0];
+	      String agentName = createdAgentID.getName();
+        String ownerName = (creds != null) ? creds.getOwner().getName() : "NONE";
 
+        permission = new AMSPermission( AMSPermission.AGENT_NAME+"="+agentName+","+
+                                        AMSPermission.AGENT_OWNER+"="+ownerName 
+                                        , "register");
+
+        checkAction(requester, permission, null, creds);
+      }
 
     } else 
 //----------
@@ -278,139 +248,107 @@ public class SimpleJADEChecker extends BaseJADEChecker {
       AID killedAgentID = (AID) params[0];
       Agent agent = null; // agent to be killed
       String className = "";
-      JADEPrincipal requester_owner = null;
       JADEPrincipal victim = null;
       String victim_owner_name = "";
-      String victim_name = victim_name = killedAgentID.getName();
-
-
-      // if the requester does not show any his creds, pass his ownership cert
-      OwnershipCertificate oc=null;
-      if (creds==null) {
-        oc = (OwnershipCertificate) service.getOwnershipCertificate(requester);
-        creds = (OwnershipCertificate) oc;
-      }
-      // get the owner of the requester
-      if (creds!=null) requester_owner = oc.getOwner();
-
-
+      String victim_name = killedAgentID.getName();
+    
       // get the owner of the agent to kill
       OwnershipCertificate oc_victim = (OwnershipCertificate) service.getOwnershipCertificate( victim_name );
-      if (oc_victim!=null) victim_owner_name = oc_victim.getOwner().getName();
+      if (oc_victim!=null) {
+      	victim_owner_name = oc_victim.getOwner().getName();
+      }
 
       agent = myContainer.acquireLocalAgent(killedAgentID);
       if (agent!=null) { className = (String) agent.getClass().getName();  }
       myContainer.releaseLocalAgent(killedAgentID);
 
+      // FIXME: Check CONTAINER_OWNER to
+      
       if (agent!=null) {
         // agent is on this container
-        permission = new AgentPermission( AuthPermission.AGENT_CLASS+"="+className+","+
-                                          AuthPermission.AGENT_OWNER+"="+victim_owner_name+","+
-                                          AuthPermission.AGENT_NAME+ "="+victim_name 
+        permission = new AgentPermission( AgentPermission.AGENT_CLASS+"="+className+","+
+                                          AgentPermission.AGENT_OWNER+"="+victim_owner_name+","+
+                                          AgentPermission.AGENT_NAME+ "="+victim_name 
                                           , "kill");
       } else {
         // agent is not on this container
-        permission = new AgentPermission( AuthPermission.AGENT_OWNER+"="+victim_owner_name+","+ 
-                                          AuthPermission.AGENT_NAME+ "="+victim_name 
+        permission = new AgentPermission( AgentPermission.AGENT_OWNER+"="+victim_owner_name+","+ 
+                                          AgentPermission.AGENT_NAME+ "="+victim_name 
                                           , "kill");
       }
-      checkAction( requester, permission, target, creds );
-
-
+      checkAction( requester, permission, null, creds );
+      
     } else 
 //----------
     if (name.equals(AgentManagementSlice.INFORM_KILLED)) {
       jade.core.security.permission.PermissionFilter.log( direction, cmd );
 
-      AID killedAgentID = (AID) params[0];
-      Agent agent = myContainer.acquireLocalAgent(killedAgentID);
-      myContainer.releaseLocalAgent(killedAgentID);
-      String className ="";
-      if (agent!=null) {
-        className = (String) agent.getClass().getName();
+      if (direction == Filter.INCOMING) {
+	    	// Check that the requester (a just dead agent) is authorized 
+	    	// to deregister from the AMS.
+	      AID killedAgentID = (AID) params[0];
+	      String agentName = killedAgentID.getName();
+	      permission = new AMSPermission(AMSPermission.AGENT_NAME+"="+agentName, "deregister");
+	      // FIXME: Should we enable this check?
+	      // checkAction( requester, permission, null, creds );
       }
-      // permission to deregister an agent 
-      permission = new AMSPermission( AuthPermission.AGENT_CLASS+"="+className 
-                                      , "deregister");
-      // TOFIX:  //checkAction( requester, permission, target, creds );
+      
     } else 
 //----------
     if (name.equals(AgentManagementSlice.REQUEST_STATE_CHANGE)) {
       jade.core.security.permission.PermissionFilter.log( direction, cmd );
 
-      AID agentID = (AID) params[0];
+      AID targetID = (AID) params[0];
+      String target_name = targetID.getName();
       int requestedState = ((AgentState) params[1]).getValue();
 
       String action="";
       switch(requestedState) {
         case Agent.AP_SUSPENDED:
-          action="suspend"; break;
+          action="suspend"; 
+          break;
         case Agent.AP_ACTIVE:
-          action="resume";  break;
+          action="resume";  
+          break;
         case Agent.AP_WAITING:
-          action="suspend"; break;
+        	// No check to perform!
+        	return;
       }
 
-      Agent agent = null; // agent the requester want to change status to
-      String className = "";
-      JADEPrincipal requester_owner = null;
-      JADEPrincipal agentPrincipal = null;
-      String agent_owner_name = "";
-      String agent_name = agentID.getName();
-
-
-      // if the requester does not show any his creds, pass his ownership cert
-      OwnershipCertificate oc=null;
-      if (creds==null) {
-        oc = (OwnershipCertificate) service.getOwnershipCertificate(requester);
-        creds = (OwnershipCertificate) oc;
+      // Get the owner of the agent the requester wants to change state to
+      String target_owner_name = "";
+      OwnershipCertificate oc_target = (OwnershipCertificate) service.getOwnershipCertificate( target_name );
+      if (oc_target != null) {
+      	target_owner_name = oc_target.getOwner().getName();
       }
-      // get the owner of the requester
-      if (creds!=null) requester_owner = oc.getOwner();
 
+      // Get the target agent class name if it is in the lovcal container
+      String targetClassName = "";
+      Agent target = myContainer.acquireLocalAgent(targetID);
+      if (target != null) { 
+      	targetClassName = target.getClass().getName();
+      }
+      myContainer.releaseLocalAgent(targetID);
 
-      // get the owner of the agent /which the requester want to change state to)
-      OwnershipCertificate oc_victim = (OwnershipCertificate) service.getOwnershipCertificate( agent_name );
-      if (oc_victim!=null) agent_owner_name = oc_victim.getOwner().getName();
-
-      agent = myContainer.acquireLocalAgent(agentID);
-      if (agent!=null) { className = (String) agent.getClass().getName();  }
-      myContainer.releaseLocalAgent(agentID);
-
-      if (agent!=null) {
+      // FIXME: Check CONTAINER_OWNER to
+      
+      if (target != null) {
         // agent is on this container
-        permission = new AgentPermission( AuthPermission.AGENT_CLASS+"="+className+","+
-                                          AuthPermission.AGENT_OWNER+"="+agent_owner_name+","+
-                                          AuthPermission.AGENT_NAME+ "="+agent_name 
+        permission = new AgentPermission( AuthPermission.AGENT_CLASS+"="+targetClassName+","+
+                                          AuthPermission.AGENT_OWNER+"="+target_owner_name+","+
+                                          AuthPermission.AGENT_NAME+ "="+target_name 
                                           , action);
       } else {
         // agent is not on this container
-        permission = new AgentPermission( AuthPermission.AGENT_OWNER+"="+agent_owner_name+","+ 
-                                          AuthPermission.AGENT_NAME+ "="+agent_name 
+        permission = new AgentPermission( AuthPermission.AGENT_OWNER+"="+target_owner_name+","+ 
+                                          AuthPermission.AGENT_NAME+ "="+target_name 
                                           , action);
       }
-      checkAction( requester, permission, target, creds );
+      checkAction( requester, permission, null, creds );
+    }
   }
-
-
-}
 //----------
 //----------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   
   
   
@@ -474,7 +412,7 @@ public class SimpleJADEChecker extends BaseJADEChecker {
     } catch (ServiceException ex) {
       throw new JADESecurityException (" Service problems in creating Agent's OwnershipCertificate. ");
     }
-
+    
     // create the OwnershipCertificate
     OwnershipCertificate ownershipCert = 
         service.getOwnershipCertificate(
@@ -556,4 +494,11 @@ public class SimpleJADEChecker extends BaseJADEChecker {
     return returnValue;
   }// end fixOwner
 
+  
+  private void adjustCommandParams(GenericCommand gCmd, Object[] params) {
+  	gCmd.clear();
+  	for (int i = 0; i < params.length; ++i) {
+  		gCmd.addParam(params[i]);
+  	}
+  }
 } // end checker class
