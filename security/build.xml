@@ -52,8 +52,10 @@
     <javadoc 
     sourcepath="${src}" 
     packagenames="
-    		jade.core.security, jade.core.security.examples.manager, 
-    		jade.core, jade.domain.FIPAAgentManagement"
+    		jade.core.security, jade.core.security.authentication, jade.core.security.authentication, 
+    		jade.core.security.permission, jade.core.security.signature, jade.core.security.encryption, 
+    		jade.security, jade.security.impl, jade.security.util, jade.security.util.DES, 
+    		jade.core, jade.imtp.rmi, jade.domain.FIPAAgentManagement"
     destdir="${doc}/api"
     
     author="true" windowtitle="JADE Security Plug-in (version 2.0)"/>
