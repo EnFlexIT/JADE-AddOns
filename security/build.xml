@@ -76,13 +76,11 @@
 	 	      jade/add-ons/security/${bin}/**,jade/add-ons/security/src-3rd/**,
 	 	      jade/add-ons/security/src/jade/security/**,
               jade/add-ons/security/${runExamples}/myfirst/**,
-              jade/add-ons/security/${src}/examples/myfirst/**,
               jade/add-ons/security/${runExamples}/send/**,
-              jade/add-ons/security/${src}/examples/send/**,
+              jade/add-ons/security/${src}/examples/security/send/**,
               jade/add-ons/security/${runExamples}/delegation/**,
-              jade/add-ons/security/${src}/examples/delegation/**,
-              jade/add-ons/security/${runExamples}/ssl/**,
-              jade/add-ons/security/${src}/examples/ssl/**"
+              jade/add-ons/security/${src}/examples/security/delegation/**,
+              jade/add-ons/security/${runExamples}/ssl/**" 
 	 	 excludes="jade/add-ons/security/*.zip,jade/add-ons/security/${doc}/api/**" />
   </target>
 
