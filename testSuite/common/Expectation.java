@@ -23,6 +23,7 @@ Boston, MA  02111-1307, USA.
 
 package test.common;
 import jade.util.leap.HashMap;
+import jade.util.leap.Iterator;
 
 /**
    @author Giovanni Caire - TILAB
@@ -51,5 +52,29 @@ public class Expectation {
 	
 	public boolean isCompleted() {
 		return receivedCnt == expected.size();
+	}
+
+	public int size() {
+		return receivedCnt;
+	}
+	
+	public int expectedSize() {
+		return expected.size();
+	}
+	
+	public String toString() {
+		StringBuffer sb = new StringBuffer("(");
+		Iterator it = expected.keySet().iterator();
+		while (it.hasNext()) {
+			Object key = it.next();
+			sb.append(key);
+			sb.append('=');
+			sb.append(expected.get(key));
+			if (it.hasNext()) {
+				sb.append(' ');
+			}
+		}
+		sb.append(')');
+		return sb.toString();
 	}
 }
