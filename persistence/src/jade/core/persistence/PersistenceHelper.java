@@ -42,9 +42,15 @@ import jade.core.NameClashException;
    saving and retrieving agents and containers to persistent storage.
 
    @author Giovanni Rimassa - FRAMeTech s.r.l.
+   @author Giovanni Caire - TILAB
 */
 public interface PersistenceHelper extends ServiceHelper {
 
+
+    /**
+       The name of this service.
+    */
+    public static final String NAME = "jade.core.persistence.Persistence";
 
     /**
        The name of a persistence-specific profile parameter, stating
@@ -58,11 +64,6 @@ public interface PersistenceHelper extends ServiceHelper {
        can be retrieved.
      */
     public static final String META_DB = "meta-db";
-
-    /**
-       The name of this service.
-    */
-    public static final String NAME = "jade.core.persistence.Persistence";
 
 
     /**
@@ -200,20 +201,53 @@ public interface PersistenceHelper extends ServiceHelper {
     String[] getFrozenAgents(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException;
     String[] getSavedContainers(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException;
 
-    void saveAgent(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException;
-    void loadAgent(AID agentID, String repository, ContainerID where) throws ServiceException, IMTPException, NotFoundException, NameClashException;
-    void reloadAgent(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException;
-    void deleteAgent(AID agentID, String repository, ContainerID where) throws ServiceException, IMTPException, NotFoundException;
-    void freezeAgent(AID agentID, String repository, ContainerID bufferContainer) throws ServiceException, NotFoundException, IMTPException;
-    void thawAgent(AID agentID, String repository, ContainerID newContainer) throws ServiceException, NotFoundException, IMTPException;
-
+    /**
+       Register a <code>Savable</code> object whose methods will
+       be called-back each time the agent associated to this 
+       <code>PersistenceHelper</code> is involved in some persistence
+       related operations (e.g. save, freeze ....)
+     */
+    void registerSavable(Savable s);
+    
+    /**
+       Make the agent associated to this <code>PersistenceHelper</code>
+       be saved on the indicated repository. 
+		   It should be noted that this method just changes the agent 
+		   state to <code>AP_SAVING</code>. The actual save operation 
+		   takes place asynchronously.
+		 */
+    void save(String repository);
+    
+    /**
+       @deprecated Use save() instead
+     */
     void saveMyself(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException;
+    
+    /**
+       Make the agent associated to this <code>PersistenceHelper</code>
+       be reloaded from the indicated repository.  
+		   It should be noted that this method just changes the agent 
+		   state to <code>AP_RELOADING</code>. The actual reload operation 
+		   takes place asynchronously.
+		 */
+    void reload(String repository);
+    
+    /**
+       @deprecated Use reload() instead
+     */
     void reloadMyself(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException;
-    void freezeMyself(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException;
-
-    void saveContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException;
-    void loadContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException;
-    void deleteContainer(ContainerID cid, ContainerID where, String repository) throws ServiceException, IMTPException, NotFoundException;
-
-
+    
+    /**
+       Make the agent associated to this <code>PersistenceHelper</code>
+       be freezed on the indicated repository.  
+		   It should be noted that this method just changes the agent 
+		   state to <code>AP_FROZEN</code>. The actual freeze operation 
+		   takes place asynchronously.
+		 */
+    void freeze(String repository, ContainerID bufferContainer);
+    
+    /**
+       @deprecated Use freeze() instead
+     */
+    void freezeMyself(AID agentID, String repository, ContainerID bufferContainer) throws ServiceException, IMTPException, NotFoundException;
 }
