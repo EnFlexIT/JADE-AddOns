@@ -83,16 +83,19 @@ public class RoundTripSender extends Agent {
 
     synchronized static void increaseNumAgents(int couples) {
 	if (agents == 0) {
-	    logger.log(Logger.INFO,"  couples="+couples+"     iterations="+iterations  );
+	    if(logger.isLoggable(Logger.INFO))
+	    	logger.log(Logger.INFO,"  couples="+couples+"     iterations="+iterations  );
 	    THR_UP = Math.round(THR_UP * couples / 100.0f);
-	    logger.log(Logger.INFO,"The roundtrippers will measure time when at least "+THR_UP+" agents have been created.");
+	    if(logger.isLoggable(Logger.INFO))
+	    	logger.log(Logger.INFO,"The roundtrippers will measure time when at least "+THR_UP+" agents have been created.");
 	}
 	agents++;
     }
 
     synchronized static void decreaseNumAgents() {
         terminatedAgents++;
-        logger.log(Logger.INFO,agents-terminatedAgents+" still active.");
+        if(logger.isLoggable(Logger.INFO))
+        	logger.log(Logger.INFO,agents-terminatedAgents+" still active.");
     }
 
     static Vector times = new Vector();
@@ -120,7 +123,8 @@ public class RoundTripSender extends Agent {
         }
         rtt = totalTime / (double)n;
         standardDev = Math.sqrt( ( n * tot1 - tot2 * tot2 ) / ( n * (n-1) ) );
-        logger.log(Logger.INFO,"Average RTT=" + rtt + " msec Dev.Std=" + standardDev );
+        if(logger.isLoggable(Logger.INFO))
+        	logger.log(Logger.INFO,"Average RTT=" + rtt + " msec Dev.Std=" + standardDev );
         return rtt;
     }
 
@@ -128,7 +132,8 @@ public class RoundTripSender extends Agent {
 			if (agents >= THR_UP) {
 				if (!startPrinted) {
 					startPrinted = true;
-					logger.log(Logger.INFO,agents+" agents are active. Start measuring...");
+					if(logger.isLoggable(Logger.INFO))
+						logger.log(Logger.INFO,agents+" agents are active. Start measuring...");
 				}
 				return true;
 			}

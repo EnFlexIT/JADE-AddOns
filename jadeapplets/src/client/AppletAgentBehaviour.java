@@ -61,14 +61,17 @@ public class AppletAgentBehaviour extends SimpleBehaviour {
             try {
                 ACLMessage msg = receiverBehaviour.getMessage();
                 if (msg != null && msg.getContent().equals("Do delete")) {
-                    logger.log(Logger.FINE,"Received message to delete applet agent.");
+                    if(logger.isLoggable(Logger.FINE))
+                    	logger.log(Logger.FINE,"Received message to delete applet agent.");
                     appletAgent.setMessage("Received message to delete applet agent.");
                     appletAgent.doDelete();
-                    logger.log(Logger.FINE,"AppletAgent killed.");
+                    if(logger.isLoggable(Logger.FINE))
+                    	logger.log(Logger.FINE,"AppletAgent killed.");
                     appletAgent.setMessage("AppletAgent killed.");
                 }
             } catch (Exception e1) {
-                logger.log(Logger.WARNING,"AppletAgentBehaviour1: " + e1.getMessage());
+                if(logger.isLoggable(Logger.WARNING))
+                	logger.log(Logger.WARNING,"AppletAgentBehaviour1: " + e1.getMessage());
             }
 
             finished = true;
@@ -79,7 +82,8 @@ public class AppletAgentBehaviour extends SimpleBehaviour {
 
             } catch (ReceiverBehaviour.NotYetReady e2) {
             } catch (Exception e3) {
-                logger.log(Logger.WARNING,"AppletAgentBehaviour3: " + e3.getMessage());
+                if(logger.isLoggable(Logger.WARNING))
+                	logger.log(Logger.WARNING,"AppletAgentBehaviour3: " + e3.getMessage());
             }
             block(2000);
         }

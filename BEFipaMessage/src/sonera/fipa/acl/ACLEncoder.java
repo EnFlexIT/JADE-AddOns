@@ -731,7 +731,8 @@ public class ACLEncoder implements ACLConstants {
                         }
                         if (b == -1) {
                                 
-                                logger.log(Logger.INFO,"String not ended correctly, treating as word");
+                                if(logger.isLoggable(Logger.INFO))
+                                	logger.log(Logger.INFO,"String not ended correctly, treating as word");
                                 index--;
                                 l = ACL_EXPR_LEVEL_DOWN;
                                 return new String (ba.get(), 0, ba.length()-1);

@@ -86,19 +86,23 @@ public class WhereIsAgent extends SimpleAchieveREInitiator {
 
         reset(request);
 
-        logger.log(Logger.CONFIG,"Try to move mobile agent to location of: " + agentName);
+        if(logger.isLoggable(Logger.CONFIG))
+        	logger.log(Logger.CONFIG,"Try to move mobile agent to location of: " + agentName);
     }
 
     protected void handleNotUnderstood(ACLMessage reply) {
-        logger.log(Logger.FINE,myAgent.getLocalName() + " handleNotUnderstood : " + reply.toString());
+        if(logger.isLoggable(Logger.FINE))
+        	logger.log(Logger.FINE,myAgent.getLocalName() + " handleNotUnderstood : " + reply.toString());
     }
 
     protected void handleRefuse(ACLMessage reply) {
-        logger.log(Logger.FINE,myAgent.getLocalName() + " handleRefuse : " + reply.toString());
+        if(logger.isLoggable(Logger.FINE))
+        	logger.log(Logger.FINE,myAgent.getLocalName() + " handleRefuse : " + reply.toString());
     }
 
     protected void handleFailure(ACLMessage reply) {
-        logger.log(Logger.FINE,myAgent.getLocalName() + " handleFailure : " + reply.toString());
+        if(logger.isLoggable(Logger.FINE))
+        	logger.log(Logger.FINE,myAgent.getLocalName() + " handleFailure : " + reply.toString());
     }
 
     protected void handleAgree(ACLMessage reply) {
@@ -116,7 +120,8 @@ public class WhereIsAgent extends SimpleAchieveREInitiator {
             }
             // location - represents the location where the given agent is located
             myAgent.doMove(location);
-            logger.log(Logger.FINE,"Agent Moved to the destination !");
+            if(logger.isLoggable(Logger.FINE))
+            	logger.log(Logger.FINE,"Agent Moved to the destination !");
 
         } catch (Exception e) {
             e.printStackTrace();

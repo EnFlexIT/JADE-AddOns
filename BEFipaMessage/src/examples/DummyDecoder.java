@@ -64,9 +64,11 @@ public class DummyDecoder {
                                 ++c;
                         }
                 } catch (Exception e) {
-                		logger.log(Logger.WARNING,e.getMessage());
+                		if(logger.isLoggable(Logger.WARNING))
+                			logger.log(Logger.WARNING,e.getMessage());
                         e.printStackTrace();
                 }
-                logger.log(Logger.INFO,c+ " message(s) parsed");
+                if(logger.isLoggable(Logger.INFO))
+                	logger.log(Logger.INFO,c+ " message(s) parsed");
         }
 }

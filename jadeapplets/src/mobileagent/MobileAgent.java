@@ -78,7 +78,8 @@ public class MobileAgent extends Agent {
     protected void afterMove() {
         if (state.equals(ON_SERVER))  {
             state = ON_CLIENT;
-            logger.log(Logger.FINE,"Mobile Agent moved to applet container.");
+            if(logger.isLoggable(Logger.FINE))
+            	logger.log(Logger.FINE,"Mobile Agent moved to applet container.");
             ContentManager contentManager = getContentManager();
             contentManager.registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL0);
             // register the mobility ontology
@@ -88,10 +89,12 @@ public class MobileAgent extends Agent {
         }
         else {
             state = ON_SERVER;
-            logger.log(Logger.FINE,"Mobile Agent moved back to server container.");
+            if(logger.isLoggable(Logger.FINE))
+            	logger.log(Logger.FINE,"Mobile Agent moved back to server container.");
             sendMessage();
             doDelete();
-            logger.log(Logger.FINE,"Mobile agent deleted.");
+            if(logger.isLoggable(Logger.FINE))
+	            logger.log(Logger.FINE,"Mobile agent deleted.");
         }
     }
 
@@ -110,7 +113,8 @@ public class MobileAgent extends Agent {
         msgToAppletAgent.setContent("Do delete");
         send(msgToAppletAgent);
 
-        logger.log(Logger.FINE,"Message 'Do delete' sent to applet agent.");
+        if(logger.isLoggable(Logger.FINE))
+        	logger.log(Logger.FINE,"Message 'Do delete' sent to applet agent.");
     }
 
 }

@@ -60,7 +60,8 @@ public class DummyBufDecoder {
                                         ba.add(b);
                         }
                 } catch (Exception e) {
-                       logger.log(Logger.WARNING,"Got exception:" +e.toString());
+                       if(logger.isLoggable(Logger.WARNING))
+                       	logger.log(Logger.WARNING,"Got exception:" +e.toString());
                 }
                 try {
                         while (true) {
@@ -78,6 +79,7 @@ public class DummyBufDecoder {
                 } catch (Exception e) {
                         e.printStackTrace();
                 }
-               logger.log(Logger.INFO,c+ " message(s) parsed");
+               if(logger.isLoggable(Logger.INFO))
+               		logger.log(Logger.INFO,c+ " message(s) parsed");
         }
 }

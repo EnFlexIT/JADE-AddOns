@@ -72,7 +72,8 @@ public class ServerAgentBehaviour extends SimpleBehaviour {
         ACLMessage msg = agent.receive(m1);
 
         if (msg != null && msg.getContent().equals("Send Mobile Agent")){
-            logger.log(Logger.FINE,"Message 'Send Mobile Agent' received.");
+            if(logger.isLoggable(Logger.FINE))
+            	logger.log(Logger.FINE,"Message 'Send Mobile Agent' received.");
             try {
                 MobileAgent mobileAgent = new MobileAgent(MobileAgent.ON_SERVER);
                 this.serverContainer.acceptNewAgent(MobileAgent.MOBILE_AGENT_NAME, mobileAgent).start();
@@ -81,7 +82,8 @@ public class ServerAgentBehaviour extends SimpleBehaviour {
                 contentManager.registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL0);
                 // register the mobility ontology
                 contentManager.registerOntology(jade.domain.mobility.MobilityOntology.getInstance());
-                logger.log(Logger.FINE,"New Mobile Agent created.");
+                if(logger.isLoggable(Logger.FINE))
+                	logger.log(Logger.FINE,"New Mobile Agent created.");
 
                 String fullAgentName = Server.getFullAgentName(ClientApplet.APPLET_AGENT_NAME, Server.jadeHostName, Server.jadePort);
                 mobileAgent.addBehaviour(new WhereIsAgent(mobileAgent, fullAgentName));

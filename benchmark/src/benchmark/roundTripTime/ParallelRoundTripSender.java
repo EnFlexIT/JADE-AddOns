@@ -82,7 +82,8 @@ public class ParallelRoundTripSender extends Agent {
     synchronized static void increaseNumAgents(int couples) {
 	if (agents == 0) {
 	    THR_UP = Math.round(THR_UP * couples / 100.0f);
-	    logger.log(Logger.INFO,"The roundtrippers will measure time when at least "+THR_UP+" agents have been created and "+THR_LOW+" agents are still working.");
+	    if(logger.isLoggable(Logger.INFO))
+	    	logger.log(Logger.INFO,"The roundtrippers will measure time when at least "+THR_UP+" agents have been created and "+THR_LOW+" agents are still working.");
 	}
 	agents++;
     }
@@ -116,7 +117,8 @@ public class ParallelRoundTripSender extends Agent {
         }
         rtt = totalTime / (double)n;
         standardDev = Math.sqrt( ( n * tot1 - tot2 * tot2 ) / ( n * (n-1) ) );
-        logger.log(Logger.INFO,"Average RTT=" + rtt + " msec Dev.Std=" + standardDev );
+        if(logger.isLoggable(Logger.INFO))
+        	logger.log(Logger.INFO,"Average RTT=" + rtt + " msec Dev.Std=" + standardDev );
         return rtt;
 	//System.exit(0);
     }

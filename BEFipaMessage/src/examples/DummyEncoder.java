@@ -65,12 +65,14 @@ public class DummyEncoder {
                                 ACLMessage m = sc.decode();
 //				byte [] __o = new byte[1800];
 //				m.setContentObject(__o);
-                                logger.log(Logger.INFO,m.toString());
+                                if(logger.isLoggable(Logger.INFO))
+                                	logger.log(Logger.INFO,m.toString());
                                 os.write(m);
                                 ++c;
                         }
                 } catch (Exception e) {
-                        logger.log(Logger.WARNING,"-- Error: "+e);
+                        if(logger.isLoggable(Logger.WARNING))
+                        	logger.log(Logger.WARNING,"-- Error: "+e);
                 }
                                 /*
 				 * Here we assume that whole message is
@@ -82,6 +84,7 @@ public class DummyEncoder {
 				 * then we can write that to stdout
 				 * using bit-efficient encoding.
 				 */
-                logger.log(Logger.INFO,c+" message(s) written to stdout");
+                if(logger.isLoggable(Logger.INFO))
+                	logger.log(Logger.INFO,c+" message(s) written to stdout");
         }
 }

@@ -121,11 +121,13 @@ public class ClientApplet extends Applet  {
         try {
             AppletAgent appletAgent = new AppletAgent(this);
             appletContainer.acceptNewAgent(APPLET_AGENT_NAME, appletAgent).start();
-            logger.log(Logger.FINE,"Applet agent created.");
+            if(logger.isLoggable(Logger.FINE))
+            	logger.log(Logger.FINE,"Applet agent created.");
             appletAgent.setMessage("Applet agent created.");
             sendMessage(appletAgent);
         } catch (Exception e) {
-            logger.log(Logger.WARNING,e.getMessage());
+            if(logger.isLoggable(Logger.WARNING))
+            	logger.log(Logger.WARNING,e.getMessage());
         }
 
     }
@@ -147,7 +149,8 @@ public class ClientApplet extends Applet  {
         msgToSA.setContent("Send Mobile Agent");
         appletAgent.send(msgToSA);
 
-        logger.log(Logger.FINE,"Message 'Send Mobile Agent' sent to server agent.");
+        if(logger.isLoggable(Logger.FINE))
+        	logger.log(Logger.FINE,"Message 'Send Mobile Agent' sent to server agent.");
         appletAgent.setMessage("Message 'Send Mobile Agent' sent to server agent.");
     }
 
