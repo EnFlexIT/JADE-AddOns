@@ -36,6 +36,8 @@ import jade.core.ServiceException;
 import jade.core.NotFoundException;
 import jade.core.NameClashException;
 
+import jade.mtp.MTPDescriptor;
+
 import jade.security.CertificateFolder;
 import jade.security.AuthException;
 
@@ -68,16 +70,26 @@ public interface PersistenceSlice extends Service.Slice {
     static final String H_SETUPTHAWEDAGENT = "8";
     static final String H_FROZENAGENT = "9";
     static final String H_THAWEDAGENT = "10";
+    static final String H_SAVECONTAINER = "11";
+    static final String H_LOADCONTAINER = "12";
+    static final String H_GETINSTALLEDMTPS = "13";
+    static final String H_GETAGENTIDS = "14";
+
 
     void saveAgent(AID agentID, String repository) throws IMTPException, NotFoundException;
-    void loadAgent(AID agentID, String repository) throws IMTPException, NotFoundException;
+    void loadAgent(AID agentID, String repository) throws IMTPException, NotFoundException, NameClashException;
     void deleteAgent(AID agentID, String repository) throws IMTPException, NotFoundException;
     void deleteFrozenAgent(AID agentID, String repository, Long agentFK) throws IMTPException, NotFoundException;
-    void freezeAgent(AID agentID, String repository, ContainerID bufferContainer) throws IMTPException, NotFoundException;
-    void thawAgent(AID agentID, String repository, ContainerID newContainer) throws IMTPException, NotFoundException;
-    Long setupFrozenAgent(AID agentID, Long agentFK, ContainerID cid, String repository) throws IMTPException, NotFoundException;
-    void setupThawedAgent(AID agentID, Long agentFK, ContainerID cid, String repository, List bufferedMessages) throws IMTPException, NotFoundException;
+    void freezeAgent(AID agentID, String repository, ContainerID bufferContainer) throws ServiceException, IMTPException, NotFoundException;
+    void thawAgent(AID agentID, String repository, ContainerID newContainer) throws ServiceException, IMTPException, NotFoundException;
+    Long setupFrozenAgent(AID agentID, Long agentFK, ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException;
+    void setupThawedAgent(AID agentID, Long agentFK, ContainerID cid, String repository, List bufferedMessages) throws ServiceException, IMTPException, NotFoundException;
     void frozenAgent(AID agentID, ContainerID home, ContainerID buffer) throws ServiceException, IMTPException, NotFoundException;
     void thawedAgent(AID agentID, ContainerID buffer, ContainerID home) throws ServiceException, IMTPException, NotFoundException;
+    void saveContainer(String repository) throws ServiceException, IMTPException, NotFoundException;
+    void loadContainer(String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException;
+
+    MTPDescriptor[] getInstalledMTPs(ContainerID cid) throws ServiceException, IMTPException, NotFoundException;
+    AID[] getAgentIDs(ContainerID cid) throws ServiceException, IMTPException, NotFoundException;
 
 }
