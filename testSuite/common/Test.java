@@ -44,7 +44,6 @@ public abstract class Test {
   private TestGroup myGroup;
   
   public abstract String getName();
-  public abstract String getDescription();
   public abstract Behaviour load(Agent a, DataStore ds, String resultKey) throws TestException;
   public void clean(Agent a) {
   }
