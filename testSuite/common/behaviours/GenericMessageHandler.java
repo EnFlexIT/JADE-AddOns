@@ -26,15 +26,46 @@ package test.common.behaviours;
 import jade.core.behaviours.*;
 import jade.lang.acl.*;
 import jade.util.leap.*;
+import test.common.TestUtility;
 
 /**
    @author Giovanni Caire - TILAB
  */
-public class NotUnderstoodResponder extends GenericMessageHandler {
-	protected void handleMessage(ACLMessage msg) {
-		ACLMessage reply = msg.createReply();
-		msg.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-		myAgent.send(reply);
+public class GenericMessageHandler extends CyclicBehaviour {
+	private List received = new LinkedList();
+	
+	public void action() {
+		ACLMessage msg = myAgent.receive();
+		if (msg != null) {
+			if (!isInReceived(msg)) {
+				// Give other behaviours a chance to process this message
+				myAgent.postMessage(msg);
+				received.add(msg);
+			}
+			else {
+				// No other behaviour has processed this message -->
+				// Handle it
+				TestUtility.log("Handling message\n"+msg);
+				handleMessage(msg);
+				received.remove(msg);
+			}
+		}
+		block();
 	}
 	
+	protected void handleMessage(ACLMessage msg) {
+	}
+	
+	private boolean isInReceived(ACLMessage msg) {
+		boolean found = false;
+		Iterator it = received.iterator();
+		while (it.hasNext()) {
+			ACLMessage recv = (ACLMessage) it.next();
+			if (msg.equals(recv)) {
+				found = true;
+				break;
+			}
+		}
+		return found;
+	}
 }
