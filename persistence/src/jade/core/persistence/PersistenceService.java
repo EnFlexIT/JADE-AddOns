@@ -646,7 +646,7 @@ public class PersistenceService extends BaseService {
 	    myContainer.addLocalAgent(agentID, loaded);
 
 	    // Start it
-	    myContainer.powerUpLocalAgent(agentID, loaded);
+	    myContainer.powerUpLocalAgent(agentID);
 	}
 
 	private void handleFreezeMyself(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
@@ -867,7 +867,9 @@ public class PersistenceService extends BaseService {
 		}
 		else {
 		    instance = myPersistenceManager.loadAgent(agentID, repository);
-		    myContainer.initAgent(agentID, instance, AgentContainer.CREATE_AND_START);
+				// FIXME: what Principal and credentials should we use?
+		    myContainer.initAgent(agentID, instance, null, null);
+		    myContainer.powerUpLocalAgent(agentID);
 		}
 	    }
 	    finally {
@@ -1122,7 +1124,8 @@ public class PersistenceService extends BaseService {
 		    instance.putBack((ACLMessage)pendingMessages.get(i - 1));
 		}
 
-		myContainer.initAgent(instance.getAID(), instance, AgentContainer.CREATE_AND_START);
+		// FIXME: what Principal and credentials should we use?
+		myContainer.initAgent(instance.getAID(), instance, null, null);
 	    }
 	}
 
@@ -1480,7 +1483,7 @@ public class PersistenceService extends BaseService {
 		mainSlice = (PersistenceSlice)getFreshSlice(MAIN_SLICE);
 		mainSlice.thawedAgent(agentID, buffer, here);
 	    }
-	    myContainer.powerUpLocalAgent(agentID, instance);
+	    myContainer.powerUpLocalAgent(agentID);
 	}
 
 	private void frozenAgent(AID agentID, ContainerID home, ContainerID buffer) throws IMTPException, NotFoundException {
