@@ -4,6 +4,7 @@
   <property name="build" value="classes"/>
   <property name="doc" value="doc"/>
   <property name="dist" value="../.."/>
+  <property name="lib" location="lib"/>
   <property name="libJADEDir" value="../../lib"/>
   <property name="classpath" value="../..;${libJADEDir}/jade.jar;${libJADEDir}/jadeTools.jar;${libJADEDir}/iiop.jar;classes;"/>
 
@@ -12,12 +13,19 @@
     <tstamp/>
     <!-- Create the directories structure used to store files -->
     <mkdir dir="${build}"/>
+    <mkdir dir="${lib}"/>
   </target>
 
   <!-- Compile the javadoc code from ${src} into ${doc} -->
   <target name="doc" depends="init">
     <mkdir dir="${doc}/api"/>
     <javadoc sourcepath="${src}" packagenames="jade.misc" destdir="${doc}/api" author="true" windowtitle="JADE Miscellaneous classes"/>
+  </target>
+
+  <target name="lib" depends="compile" description="generate jar archive">
+    <jar jarfile="${lib}/jadeMisc.jar">
+      <fileset dir="${build}" includes="**/jade/misc/*"/>
+    </jar>
   </target>
 
   <target name="compile" depends="init">
@@ -38,6 +46,7 @@
     <!-- Delete the ${build} directory tree -->
     <delete includeEmptyDirs="true">
       <fileset dir="${build}"/>
+      <fileset dir="${lib}"/>
       <fileset dir=".">
            <include name="APDescription.txt"/>
 	   <include name="MTPs-Main-Container.txt"/>
