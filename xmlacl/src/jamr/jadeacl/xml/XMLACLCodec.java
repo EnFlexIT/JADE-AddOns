@@ -81,7 +81,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
     private static final String BASE64ENCODING_VALUE = new String("Base64");
 
 
-    public static final String ACL_REPRESENTATION_NAME = "fipa.acl.rep.xml.std"; 
+    public static final String ACL_REPRESENTATION_NAME = jade.domain.FIPANames.ACLCodec.XML;
 
     public static final String HREF_ATTR="href";
     

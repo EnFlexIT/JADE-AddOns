@@ -41,7 +41,7 @@ import jade.lang.acl.ACLMessage;
  * @author Heikki Helin, Mikko Laukkanen
  */
 public class BitEffACLCodec implements ACLCodec {
-        public static final String _name = "fipa.acl.rep.bitefficient.std";
+        public static final String _name = jade.domain.FIPANames.ACLCodec.BITEFFICIENT;
         private ACLEncoder e;
         private ByteArray ba;
         /**
