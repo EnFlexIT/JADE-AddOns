@@ -1075,7 +1075,6 @@ public class PersistenceService extends BaseService {
 		Agent a = myContainer.acquireLocalAgent(agentsArray[i]);
 		a.doDelete();
 		myContainer.releaseLocalAgent(agentsArray[i]);
-		//		a.join();
 	    }
 
 	    // Remove all installed MTPs
@@ -1494,7 +1493,7 @@ public class PersistenceService extends BaseService {
 		impl.lockEntryForAgent(agentID);
 
 		// Commit transaction
-		impl.frozenAgent(agentID, myContainer.getID());
+		impl.frozenAgent(agentID, buffer);
 		impl.updateEntryForAgent(agentID, home, buffer);
 		impl.unlockEntryForAgent(agentID);
 	    }
