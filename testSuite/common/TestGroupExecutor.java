@@ -169,14 +169,6 @@ public class TestGroupExecutor extends FSMBehaviour {
 			public void action() {
 				Integer i = (Integer) getDataStore().get(TEST_RESULT_KEY);
   			int result = i.intValue();
-				if (result == Test.TEST_PASSED) {
-  				l.log("Test PASSED");
-  				passedCnt++;
-  			}
-  			else {
-  				l.log("Test FAILED");
-  				failedCnt++;
-  			}
   			
   			try {
 		  		currentTest.clean(myAgent);
@@ -184,6 +176,21 @@ public class TestGroupExecutor extends FSMBehaviour {
   			catch (Exception e) {
   				// Just print a warning
   				l.log("Warning: Exception in test cleaning ["+e.getMessage()+"]");
+  			}
+  			finally {
+  				try {
+  					Thread.sleep(1000);
+  				}
+  				catch (Exception e ) {}
+  			}
+  			
+				if (result == Test.TEST_PASSED) {
+  				l.log("Test PASSED");
+  				passedCnt++;
+  			}
+  			else {
+  				l.log("Test FAILED");
+  				failedCnt++;
   			}
 			}			
 		};

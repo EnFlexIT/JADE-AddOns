@@ -96,6 +96,10 @@ class LocalJadeController implements JadeController {
 	public void kill() {
 		if (proc != null) {
 			proc.destroy();
+			try {
+				Thread.sleep(1000);
+			}
+			catch (Exception e) {}
 		}
 	}
 	
