@@ -19,7 +19,7 @@
     </id>
 
     <property name="agentData"/>
-    <many-to-one name="agentIdentifier" cascade="all"/>
+    <property name="name"/>
 
     <list name="pendingMessages" cascade="all-delete-orphan">
       <key column="owner"/>
