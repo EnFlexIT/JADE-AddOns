@@ -47,9 +47,7 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 	public static final String REMOTE_PLATFORM_PORT = "9003";
 	
 	public static final String MTP_KEY = "mtp";
-	public static final String MTP_DEFAULT = "jade.mtp.iiop.MessageTransportProtocol";
 	public static final String PROTO_KEY = "proto";
-	public static final String PROTO_DEFAULT = "IOR";
 	public static final String MTP_URL_KEY = "url";
 	public static final String MTP_URL_DEFAULT = "";
 	public static final String ADDITIONAL_CLASSPATH_KEY = "classpath";
@@ -103,8 +101,8 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 			}
 		};
 		
-		tg.specifyArgument(MTP_KEY, "MTP", MTP_DEFAULT);
-		tg.specifyArgument(PROTO_KEY, "Protocol", PROTO_DEFAULT);
+		tg.specifyArgument(MTP_KEY, "MTP", Test.DEFAULT_MTP);
+		tg.specifyArgument(PROTO_KEY, "Protocol", Test.DEFAULT_PROTO);
 		tg.specifyArgument(MTP_URL_KEY, "Local MTP URL", MTP_URL_DEFAULT);
 		tg.specifyArgument(ADDITIONAL_CLASSPATH_KEY, "Additional classpath", ADDITIONAL_CLASSPATH_DEFAULT);
 		return tg;
