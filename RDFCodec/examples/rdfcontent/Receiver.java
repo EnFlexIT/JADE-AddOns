@@ -72,10 +72,10 @@ public class Receiver extends Agent {
 				ACLMessage reply = msg.createReply();
 				reply.setPerformative(ACLMessage.INFORM);
 				
-				AID sender = new AID("sender", false);
+				//AID sender = new AID("sender", false);
 
-				reply.setSender(getAID());
-				reply.addReceiver(sender);
+				//reply.setSender(getAID());
+				//reply.addReceiver(sender);
 				reply.setLanguage(codec.getName());
 				reply.setOntology(ontology.getName());
 
