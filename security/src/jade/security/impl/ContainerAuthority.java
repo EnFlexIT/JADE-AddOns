@@ -25,8 +25,6 @@ package jade.security.impl;
 
 import jade.security.*;
 
-import jade.security.dummy.*;
-
 import jade.core.MainContainer;
 import jade.core.Profile;
 
@@ -45,14 +43,32 @@ import java.security.spec.*;
 	@author Michele Tomaiuolo - Universita` di Parma
 	@version $Date$ $Revision$
 */
-public class ContainerAuthority extends DummyAuthority {
+public class ContainerAuthority implements Authority {
 	
 	/**
 		The public key for verifying certificates.
 	*/
 	PublicKey publicKey = null;
+	Profile profile;
+	MainContainer platform = null;
+	String name = null;
 	
 	public void init(Profile profile, MainContainer platform) {
+		this.profile = profile;
+		this.platform = platform;
+		
+		try {
+			if (System.getSecurityManager() == null) {
+				String policyFile = profile.getParameter(Profile.POLICY_FILE);
+				System.setProperty("java.security.policy", policyFile);
+				//System.out.println("setting security manager");
+				System.setSecurityManager(new SecurityManager());
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		try {
 			byte[] bytes = platform.getPublicKey();
 			if (bytes != null) {
@@ -66,11 +82,34 @@ public class ContainerAuthority extends DummyAuthority {
 		}
 	}
 	
+	public void setName(String name) {
+		if (this.name == null)
+			this.name = name;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
 	public byte[] getPublicKey() {
 		if (publicKey == null)
 			return null;
 			
 		return publicKey.getEncoded();
+	}
+	
+	public void sign(JADECertificate certificate, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+		try {
+			JADECertificate signed = platform.sign(certificate, identity, delegations);
+			certificate.decode(signed.encode());
+		}
+		catch (jade.core.IMTPException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] passwd) throws AuthException {
+		throw new AuthorizationException("Authentication is not allowed, here");
 	}
 	
 	public void verify(JADECertificate certificate) throws AuthException {
@@ -112,14 +151,22 @@ public class ContainerAuthority extends DummyAuthority {
 			throw new AuthException(e4.getMessage());
 		}
 	}
-	
-	public void checkPermission(String type, String name, String actions) throws AuthException {
-		Permission p = createPermission(type, name, actions);
-		if (p != null)
-			AccessController.checkPermission(p);
+
+	public void verifySubject(IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+		if (identity == null)
+			throw new AuthException("null identity");
+		
+		verify(identity);
+		for (int d = 0; delegations != null && d < delegations.length && delegations[d] != null; d++) {
+			if (! ((PrincipalImpl)identity.getSubject()).implies((PrincipalImpl)delegations[d].getSubject()))
+				throw new AuthException("delegation-subject doesn't match identity-subject");
+			verify(delegations[d]);
+		}
 	}
+		
 	
-	public Object doAs(jade.security.leap.PrivilegedAction action, IdentityCertificate identity, DelegationCertificate[] delegations) throws Exception {
+	public Object doAsPrivileged(jade.security.PrivilegedExceptionAction action, IdentityCertificate identity, DelegationCertificate[] delegations) throws Exception {
+		verifySubject(identity, delegations);
 		ProtectionDomain domain = new ProtectionDomain(
 				new CodeSource(null, null), collectPermissions(delegations), null, null);
 		AccessControlContext acc = new AccessControlContext(new ProtectionDomain[] {domain});
@@ -131,10 +178,21 @@ public class ContainerAuthority extends DummyAuthority {
 		}
 	}
 
+	private class CheckAction implements jade.security.PrivilegedExceptionAction {
+		Permission p;
+		CheckAction(Permission p) {
+			this.p = p;
+		}
+		public Object run() throws AuthException {
+			AccessController.checkPermission(p);
+			return null;
+		}
+	}
+	
 	public void checkAction(String action, JADEPrincipal target, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
-		Permission p= null;
+		Permission p = null;
 		if (action.startsWith("ams-")) {
-			p = createPermission("jade.security.impl.AmsPermission", target.getName(), action.substring(4, action.length()));
+			p = createPermission("jade.security.impl.AMSPermission", target.getName(), action.substring(4, action.length()));
 		}
 		if (action.startsWith("agent-")) {
 			p = createPermission("jade.security.impl.AgentPermission", target.getName(), action.substring(6, action.length()));
@@ -148,9 +206,23 @@ public class ContainerAuthority extends DummyAuthority {
 		else if (action.startsWith("authority-")) {
 			p = createPermission("jade.security.impl.AuthorityPermission", target.getName(), action.substring(10, action.length()));
 		}
-		PermissionCollection perms = collectPermissions(delegations);
-		if (p != null && !perms.implies(p))
-			throw new AuthException(action);
+
+		if (p != null) {
+			try {
+				//System.out.println("checking " + p);
+				if (identity != null) {
+					CheckAction check = new CheckAction(p);
+					doAsPrivileged(check, identity, delegations);
+				}
+				else
+					AccessController.checkPermission(p);
+				//System.out.println("ok");
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				throw new AuthorizationException(action);
+			}
+		}
 	}
 
 	public AgentPrincipal createAgentPrincipal(){
@@ -175,7 +247,7 @@ public class ContainerAuthority extends DummyAuthority {
 	
 	PermissionCollection collectPermissions(DelegationCertificate[] delegations) {
 		Permissions perms = new Permissions();
-		for (int j = 0; j < delegations.length; j++) {
+		for (int j = 0; delegations != null && j < delegations.length && delegations[j] != null; j++) {
 			for (Iterator i = delegations[j].getPermissions().iterator(); i.hasNext();) {
 				Permission p = (Permission)i.next();
 				perms.add(p);

@@ -31,7 +31,7 @@ import java.security.PermissionCollection;
 import java.util.StringTokenizer;
 
 
-public class AuthPermission extends java.security.Permission implements java.io.Serializable {
+public class AuthPermission extends java.security.Permission implements jade.util.leap.Serializable {
 
 	private int mask = 0;
 	private String name;
@@ -67,7 +67,8 @@ public class AuthPermission extends java.security.Permission implements java.io.
 		if (!getClass().isInstance(p))
 			return false;
 		AuthPermission that = (AuthPermission) p;
-		return ((this.mask & that.mask) == that.mask) && that.getTarget().implies(getTarget());
+		boolean result = ((this.mask & that.mask) == that.mask) && that.getTarget().implies(getTarget());
+		return result;
 	}
 	
 	public PermissionCollection newPermissionCollection() {

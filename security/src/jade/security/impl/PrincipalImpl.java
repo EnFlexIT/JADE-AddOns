@@ -24,56 +24,118 @@ Boston, MA  02111-1307, USA.
 package jade.security.impl;
 
 import jade.security.*;
-import jade.security.dummy.*;
+
+import jade.util.leap.List;
+import jade.util.leap.ArrayList;
 
 import jade.core.AID;
 import jade.core.ContainerID;
 
 
-public class PrincipalImpl extends DummyPrincipal implements jade.util.leap.Serializable {
+public class PrincipalImpl implements AgentPrincipal, UserPrincipal, ContainerPrincipal {
 	
-	static final char dot = '.';
+	protected static final char sep = '/';
+	protected static final char dot = '.';
 	
+	protected String name1 = null;
+	protected String name2 = null;
+
 	public PrincipalImpl() {
 		super();
 	}
 	
 	public PrincipalImpl(String name) {
-		super(name);
+		init(name);
+	}
+	
+	public void init(String name) {
+		if (name.indexOf(sep) == -1)
+			name = name + sep;
+		int pos = name.indexOf(sep);
+		
+		name1 = pos > 0 ? name.substring(0, pos) : null;
+		name2 = pos < name.length() - 1 ? name.substring(pos + 1, name.length()) : null;
+	}
+	
+	public void init(AID agentID, UserPrincipal user) {
+		name1 = user != null ? user.getName() : null;
+		name2 = agentID != null ? agentID.getName() : null;
+	}
+	
+	public void init(ContainerID containerID, UserPrincipal user) {
+		name1 = user != null ? user.getName() : null;
+		name2 = containerID != null ? containerID.getName() : null;
+	}
+	
+	public String getName() {
+		return (name1 != null ? name1 : "") + (name2 != null ? sep + name2 : "");
+	}
+	
+	public AID getAgentID() {
+		return name2 != null ? new AID(name2, AID.ISGUID) : null;
+	}
+	
+	public ContainerID getContainerID() {
+		return name2 != null ? new ContainerID(name2, null) : null;
 	}
 	
 	public UserPrincipal getUser() {
-		if (name1 == null)
-			return null;
-		else
-			return new PrincipalImpl(name1);
+		return name1 != null ? new PrincipalImpl(name1) : null;
+	}
+	
+	public String toString() {
+		return getName();
+	}
+	
+	public boolean equals(Object o) {
+		return (o != null) && getName().equals(o.toString());
 	}
 	
 	public PrincipalImpl getParent() {
 		if (name2 != null)
 			return (PrincipalImpl)getUser();
-			
-		int pos = name1.indexOf(dot);
-		if (pos != -1)
-			return new PrincipalImpl(name1.substring(0, pos));
-		else
+		
+		if (name1 == null)
 			return null;
+		int pos = name1.indexOf(dot);
+		return pos != -1 ? new PrincipalImpl(name1.substring(0, pos)) : new PrincipalImpl();
 	}
 	
 	public boolean implies(PrincipalImpl p) {
-		boolean impl2 = true;
-		if (p.name2 != null)
-			impl2 = p.name2.equals(name2);
+		boolean impl1 = (p.name1 == null) || name1 != null && (name1.startsWith(p.name1 + dot) || name1.equals(p.name1));
+		boolean impl2 = (p.name2 == null) || name2 != null && (name2.startsWith(p.name2 + '@') || name2.equals(p.name2));
 	
-		return impl2 && (p.name1.equals(name1) || p.name1.startsWith(name1 + dot));
+		return impl1 && impl2;
 	}
+	
+	public List getAllImplied() {
+		AID aid = getAgentID();
+		AID shortaid = null;
+		if (aid != null && aid.getName().indexOf('@') != -1)
+			shortaid = new AID(aid.getName().substring(0, aid.getName().indexOf('@')), AID.ISGUID);
 
-	public boolean equals(Object o) {
-		if (o instanceof String)
-			return getName().equals(o);
-		if (o instanceof PrincipalImpl)
-			return getName().equals(((PrincipalImpl)o).getName());
-		return false;
+		List implied = new ArrayList();
+		PrincipalImpl p = this;
+		while (p != null) {
+			if (aid != null) {
+				PrincipalImpl p1 = new PrincipalImpl();
+				p1.init(aid, p.getUser());
+				implied.add(p1);
+			}
+			
+			if (shortaid != null) {
+				PrincipalImpl p2 = new PrincipalImpl();
+				p2.init(shortaid, p.getUser());
+				implied.add(p2);
+			}
+			
+			PrincipalImpl p3 = new PrincipalImpl();
+			p3.init((AID)null, p.getUser());
+			implied.add(p3);
+
+			p = p.getParent();
+		}
+		return implied;
 	}
 
 }

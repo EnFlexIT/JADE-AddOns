@@ -27,8 +27,11 @@ import jade.security.*;
 
 import jade.util.leap.Iterator;
 
+import jade.core.AID;
 import jade.core.MainContainer;
 import jade.core.Profile;
+
+import jade.util.leap.List;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -85,35 +88,17 @@ public class PlatformAuthority extends ContainerAuthority {
 			catch (Exception e) {
 				e.printStackTrace();
 			}
-
-			try {
-				if (System.getSecurityManager() == null) {
-					String policyFile = profile.getParameter(Profile.POLICY_FILE);
-					System.setProperty("java.security.policy", policyFile);
-					System.setSecurityManager(new SecurityManager());
-				}
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 		
 		serial = 1;
 	}
 	
 	public void sign(JADECertificate certificate, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+		verifySubject(identity, delegations);
+
 		if (! (certificate instanceof BasicCertificateImpl))
 			throw new AuthException("unknown certificate class");
-		if (identity == null)
-			throw new AuthException("null identity");
-		
-		verify(identity);
-		for (int d = 0; d < delegations.length; d++) {
-			if (! ((PrincipalImpl)identity.getSubject()).implies((PrincipalImpl)delegations[d].getSubject()))
-				throw new AuthException("delegation-subject doesn't match identity-subject");
-			verify(delegations[d]);
-		}
-		
+
 		if (certificate instanceof DelegationCertificate) {
 			checkAction(AUTHORITY_SIGN_DC, certificate.getSubject(), identity, delegations);
 			PermissionCollection perms = collectPermissions(delegations);
@@ -140,9 +125,9 @@ public class PlatformAuthority extends ContainerAuthority {
 		else
 			throw new AuthenticationException("Unknown principal type");
 
-		System.out.println("authenticating user");
-		System.out.println("username=" + user.getName() + ";");
-		System.out.println("password=" + new String(passwd) + ";");
+		//System.out.println("authenticating");
+		//System.out.println("principal=" + principal + ";");
+		//System.out.println("password=" + new String(passwd) + ";");
 		String name = user.getName();
 		if (users == null)
 			return;
@@ -158,15 +143,16 @@ public class PlatformAuthority extends ContainerAuthority {
 
 				// ok: user found + exact password
 				// add permissions here
-				PermissionCollection perms = getPermissions(user);
+				delegation.setSubject(principal);
+				PermissionCollection perms = getPermissions((PrincipalImpl)principal);
 				for (Enumeration e = perms.elements(); e.hasMoreElements();) {
 					Permission p = (Permission)e.nextElement();
-					System.out.println("+" + p);
 					delegation.addPermission(p);
+					//System.out.println("+" + p);
 				}
 				sign((BasicCertificateImpl)identity);
 				sign((BasicCertificateImpl)delegation);
-				System.out.println("authentication ended");
+				//System.out.println("authentication ended");
 				return;
 			}
 		}
@@ -180,6 +166,7 @@ public class PlatformAuthority extends ContainerAuthority {
 		try {
 			certificate.setIssuer(new PrincipalImpl(getName()));
 			certificate.setSerial(serial++);
+			certificate.setSignature(null);
 			
 			Signature sign = Signature.getInstance("DSA");
 			sign.initSign(privateKey);
@@ -194,7 +181,7 @@ public class PlatformAuthority extends ContainerAuthority {
 	}
 	
 	private void parsePasswdFile() {
-		System.out.println("parsing passwd file " + passwdFile);
+		//System.out.println("parsing passwd file " + passwdFile);
 		if (passwdFile == null) return;
 		users = new Vector();
 		try {
@@ -213,7 +200,7 @@ public class PlatformAuthority extends ContainerAuthority {
 						entry.usr = line;
 						entry.key = null;
 					}
-					System.out.println("username=" + entry.usr + "; password=" + entry.key + ";");
+					//System.out.println("username=" + entry.usr + "; password=" + entry.key + ";");
 					users.addElement(entry);
 				}
 				line = file.readLine();
@@ -222,7 +209,7 @@ public class PlatformAuthority extends ContainerAuthority {
 		catch(Exception e) { e.printStackTrace(); }
 	}
 	
-	private PermissionCollection getPermissions(UserPrincipal user) {
+	private PermissionCollection getPermissions(PrincipalImpl principal) {
 		Policy policy = Policy.getPolicy();
 		CodeSource source = new CodeSource(null, null);
 		
@@ -231,26 +218,24 @@ public class PlatformAuthority extends ContainerAuthority {
 		PermissionCollection nullPerms = policy.getPermissions(nullDomain);
 		
 		Permissions perms = new Permissions();
-
-		while (user != null) {
-			ProtectionDomain userDomain = new ProtectionDomain(
-					source, null, getClass().getClassLoader(), new java.security.Principal[] {user});
-			PermissionCollection userPerms = policy.getPermissions(userDomain);
-
-			for (Enumeration e = userPerms.elements(); e.hasMoreElements();) {
+		List implied = principal.getAllImplied();
+		for (int i = 0; i < implied.size(); i++) {
+			ProtectionDomain principalDomain = new ProtectionDomain(
+					source, null, getClass().getClassLoader(), new java.security.Principal[] {(PrincipalImpl)implied.get(i)});
+			PermissionCollection principalPerms = policy.getPermissions(principalDomain);
+			
+			for (Enumeration e = principalPerms.elements(); e.hasMoreElements();) {
 				Permission p = (Permission)e.nextElement();
 				if (p instanceof UnresolvedPermission) {
 					//!!! hack
 					String str = p.toString();
 					p = BasicCertificateImpl.decodePermission(str.substring(str.indexOf(' ') + 1, str.length() - 1));
 				}
-				if (!nullPerms.implies(p))
+				if (! nullPerms.implies(p))
 					perms.add(p);
 			}
-			user = ((PrincipalImpl)user).getParent();
 		}
-
 		return perms;
 	}
-	
+
 }

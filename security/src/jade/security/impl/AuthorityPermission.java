@@ -26,7 +26,7 @@ package jade.security.impl;
 import jade.security.*;
 
 
-public class AuthorityPermission extends AuthPermission implements java.security.Guard, java.io.Serializable {
+public class AuthorityPermission extends AuthPermission {
 	
 	private final static String[] allActions = new String[] {
 			"sign-ic", "sign-dc"};

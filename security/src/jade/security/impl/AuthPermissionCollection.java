@@ -25,10 +25,15 @@ package jade.security.impl;
 
 import jade.security.*;
 
+import jade.core.AID;
+
+import jade.util.leap.List;
+
 import java.security.Permission;
 import java.security.PermissionCollection;
-import java.util.Hashtable;
+
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 public class AuthPermissionCollection extends PermissionCollection { 
 
@@ -58,37 +63,23 @@ public class AuthPermissionCollection extends PermissionCollection {
 	}
 
 	public boolean implies(Permission permission) {
-		if (!(permission instanceof AuthPermission))
+		if (! (permission instanceof AuthPermission))
 			return false;
 
 		AuthPermission p = (AuthPermission) permission;
-		AuthPermission x;
 
 		int desired = p.getActionsMask();
 		int effective = 0;
 
-		// strategy:
-		// Check for full match first. Then work our way up the
-		// name looking for matches on a.b.*
-
-		// work our way up the tree...
-		PrincipalImpl target = p.getTarget();
-		while (target != null) {
-			x = (AuthPermission) permissions.get(target.getName());
+		List implied = p.getTarget().getAllImplied();
+		for (int i = 0; i < implied.size(); i++) {
+			AuthPermission x = (AuthPermission)permissions.get(((PrincipalImpl)implied.get(i)).getName());
 			if (x != null) {
 				effective |= x.getActionsMask();
-				if ((effective & desired) == desired)
+				if ((effective & desired) == desired) {
 					return true;
+				}
 			}
-			target = target.getParent();
-		}
-
-		// let's take a look at the root
-		x = (AuthPermission) permissions.get("*");
-		if (x != null) {
-			effective |= x.getActionsMask();
-			if ((effective & desired) == desired)
-				return true;
 		}
 
 		return false;
