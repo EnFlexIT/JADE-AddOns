@@ -26,6 +26,7 @@ package test.common;
 import jade.core.Agent;
 import jade.core.AID;
 import jade.lang.acl.*;
+import jade.util.leap.List;
 
 public abstract class TesterAgent extends Agent {
 	public static final String TESTER_EXITED = "TESTER_EXITED";
@@ -37,7 +38,13 @@ public abstract class TesterAgent extends Agent {
 	
 	protected void setup() {		
 		TestGroup tg = getTestGroup();
-
+		
+		List args = tg.getArgumentsSpecification();
+		if (args != null && args.size() > 0) { 
+			InsertArgumentsDlg.insertValues(args);
+		}
+		tg.setArguments(args);
+		
 		TestGroupExecutor executor = new TestGroupExecutor(this, tg) {
 			public int onEnd() {
 				myAgent.doDelete();

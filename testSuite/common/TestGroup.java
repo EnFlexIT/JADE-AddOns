@@ -24,6 +24,8 @@ Boston, MA  02111-1307, USA.
 package test.common;
 
 import jade.core.Agent;
+import jade.util.leap.*;
+import java.util.Hashtable;
 
 /**
    Class representing a group of tests (often related to a given 
@@ -34,19 +36,64 @@ import jade.core.Agent;
 public class TestGroup {
 	private String[] testClassNames;
 	private int cnt;
-  private Object[] args;
+	private List argumentSpecs = new ArrayList();
+  private Hashtable args = new Hashtable();
 	
 	public TestGroup(String[] tests) {
 		testClassNames = (tests != null ? tests : new String[0]);
 		cnt = 0;
 	}
 	
-	public Test next() throws TestException {		
+	/**
+	   Specify an optional argument for this TestGroup. If the user
+	   does not provide a value for this argument, the default value
+	   will be used.
+	 */
+	public void specifyArgument(String name, String label, String defaultVal) {
+		ArgumentSpec a = new ArgumentSpec(name, label, defaultVal);
+		argumentSpecs.add(a);
+	}
+	
+	/**
+	   Specify mandatory argument for this TestGroup. The user will 
+	   always have to provide a value for this argument.
+	 */
+	public void specifyArgument(String name, String label) {
+		ArgumentSpec a = new ArgumentSpec(name, label);
+		argumentSpecs.add(a);
+	}
+	
+	protected Object getArgument(String name) {
+		return args.get(name);
+	}
+	
+	protected Object setArgument(String name, Object val) {
+		return args.put(name, val);
+	}
+	
+	/**
+	   The developer should override this method to perform initializations
+	   common to all tests in the group
+	 */
+	protected void initialize(Agent a) throws TestException {
+	}
+	
+	/**
+	   The developer should override this method to perform cleanings
+	   common to all tests in the group
+	 */
+	protected void shutdown(Agent a) {
+	}
+	
+	/**
+	   Only called by the TestGroupExecutor to get the next test to execute
+	 */
+	Test next() throws TestException {		
 		String className = null;
 		try {
 			className = testClassNames[cnt++];
 			Test t = (Test) Class.forName(className).newInstance();
-			t.setGroupArguments(args);
+			t.setGroup(this);
 			return t;
 		}
 		catch (IndexOutOfBoundsException ioobe) {
@@ -57,14 +104,26 @@ public class TestGroup {
 		}
 	}
 	
-	public void initialize(Agent a) throws TestException {
+	/**
+	   Only called by the TesterAgent to know what arguments the user 
+	   must/can input
+	 */
+	List getArgumentsSpecification() {
+		return argumentSpecs; 
 	}
 	
-	public void shutdown(Agent a) {
-	}
-	
-	public void setArguments(Object[] args) {
-		this.args = args;
+	/**
+	   Only called by the TesterAgent to set the arguments inputed by 
+	   the user
+	 */
+	void setArguments(List aa) {
+		if (aa != null) {
+			Iterator it = aa.iterator();
+			while (it.hasNext()) {
+				ArgumentSpec a = (ArgumentSpec) it.next();
+				args.put(a.getName(), a.getValue());
+			}
+		}
 	}
 }
 	

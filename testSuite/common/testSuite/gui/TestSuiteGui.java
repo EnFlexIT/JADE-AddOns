@@ -49,7 +49,7 @@ public class TestSuiteGui extends JFrame {
 	
 	private JButton exitB, openB, runB, debugB, stepB;
 	private JMenuItem exitI, openI, runI, debugI, stepI;
-	private JTextField argsF;
+	private JTextField currentF;
 	
 	public TestSuiteGui(GuiAgent myAgent, String[] testers) {
 		super();
@@ -83,6 +83,8 @@ public class TestSuiteGui extends JFrame {
 		//runB.setDisabledIcon(runImg);
 		openB.setToolTipText("Load a tester agent");
 		
+		bar.addSeparator();
+		
 		runB  = bar.add(new RunAction(this));
 		runB.setText("");
 		runB.setIcon(runImg);
@@ -106,8 +108,11 @@ public class TestSuiteGui extends JFrame {
 		
 		bar.addSeparator();
 		
-		argsF = new JTextField(20);
-		bar.add(argsF);
+		JLabel l = new JLabel("Current tester agent: "); 
+		bar.add(l);
+		currentF = new JTextField(30);
+		currentF.setEditable(false);
+		bar.add(currentF);
 		
 		getContentPane().add(bar, BorderLayout.NORTH);
 
@@ -172,6 +177,7 @@ public class TestSuiteGui extends JFrame {
 						testers);
 		if (i >= 0) {
 			currentTester = testers[i];
+			currentF.setText(currentTester);
 		}
 		
 		if (currentTester != null) {
@@ -182,7 +188,7 @@ public class TestSuiteGui extends JFrame {
 		}
 	}
 	
-	private Object[] getArguments() {
+	/*private Object[] getArguments() {
 		ArrayList l = new ArrayList();
 		String args = argsF.getText().trim();
 		if (args != null && (!args.equals(""))) {
@@ -193,12 +199,12 @@ public class TestSuiteGui extends JFrame {
 			}
 		}
 		return l.toArray();
-	}
+	}*/
 	
 	private TesterAgent loadTester() {
 		try {
 			TesterAgent ta = (TesterAgent) Class.forName(currentTester).newInstance();
-			ta.setArguments(getArguments());
+			//ta.setArguments(getArguments());
 			ta.setTestSuiteExecution(myAgent.getLocalName());
 			return ta;
 		}
@@ -218,7 +224,7 @@ public class TestSuiteGui extends JFrame {
 		runB.setEnabled(status == READY_STATE);
 		debugB.setEnabled(status == READY_STATE);
 		stepB.setEnabled(status == DEBUGGING_STATE);
-		argsF.setEnabled(status == READY_STATE);
+		//argsF.setEnabled(status == READY_STATE);
 	}
 	
 }

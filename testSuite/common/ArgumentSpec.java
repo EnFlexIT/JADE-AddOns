@@ -23,44 +23,68 @@ Boston, MA  02111-1307, USA.
 
 package test.common;
 
-import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.DataStore;
-
-import java.util.Hashtable;
-
 /**
-   Common base class for all test classes designed to be 
-   included in a <code>TestGroup</code> and executed by a 
-   <code>TestGroupExecutor</code>
+   Class representing the specification for a generic argument of a 
+   test group
    @author Giovanni Caire - TILAB
  */
-public abstract class Test {
-  public static final int TEST_PASSED = 1;
-  public static final int TEST_FAILED = 0;
-
-  private TestGroup myGroup;
-  
-  public abstract String getName();
-  public abstract String getDescription();
-  public abstract Behaviour load(Agent a, DataStore ds, String resultKey) throws TestException;
-  public void clean(Agent a) {
-  }
-  
-  protected Object getGroupArgument(String name) {
-  	return myGroup.getArgument(name);
-  }
-  
-  void setGroup(TestGroup tg) {
-  	myGroup = tg;
-  }
-  
-  /*void setGroupArguments(Hashtable args) {
-  	groupArgs = args;
-  }
-  
-  protected String getGroupArgument(String name) {
-  	return (String) groupArgs.get(name);
-  }*/
+public class ArgumentSpec {
+	private String name;
+	private String label;
+	private String value;
+	private String defaultValue;
+	private boolean mandatory;
+	
+	ArgumentSpec(String n, String l, String v) {
+		name = n;
+		label = l;
+		value = v;
+		defaultValue = v;
+		mandatory = false;
+	}
+	
+	ArgumentSpec(String n, String l) {
+		name = n;
+		label = l;
+		value = null;
+		defaultValue = null;
+		mandatory = true;
+	}
+		
+	public String getName() {
+		return name;
+	}
+	
+	/*public void setName(String n) {
+		name = n;
+	}*/
+	
+	public String getLabel() {
+		return label;
+	}
+	
+	/*public void setDescription(String d) {
+		description = d;
+	}*/
+	
+	public String getValue() {
+		return value;
+	}
+	
+	public void setValue(String v) {
+		value = v;
+	}
+	
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+	
+	/*public void setDefaultValue(String v) {
+		defaultValue = v;
+	}*/
+	
+	public boolean isMandatory() {
+		return mandatory;
+	}
 }
-
+	
