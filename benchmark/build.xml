@@ -4,9 +4,8 @@
   <property name="build" value="classes"/>
   <property name="doc" value="doc"/>
   <property name="conf" value="conf"/>
-  <property name="dist" value="dist"/>
   <property name="packageDir" value="benchmark/roundTripTime"/>
-  <property name="libJADEDir" value="../../../../lib"/>
+  <property name="libJADEDir" value="../../lib"/>
   <property name="classpath" value="../..;${libJADEDir}/jade.jar;${libJADEDir}/jadeTools.jar;${libJADEDir}/iiop.jar;${libJADEDir}/Base64.jar;"/>
   <target name="init">
     <!-- Create the time stamp -->
@@ -24,10 +23,9 @@
   </target>
   <!-- Make distribution zip file and put in ${dist} -->
   <target name="dist" depends="init">
-    <mkdir dir="${dist}"/>
-    <zip zipfile="${dist}/benchmarkAddOn.zip" basedir="../" 
-		 includes="benchmark/${src}/**, benchmark/*, benchmark/${conf}/**, benchmark/${doc}/*.doc" 
-		 excludes="benchmark/${build}/**, benchmark/${doc}/api/**, benchmark/${dist}/**"/>
+    <zip zipfile="../benchmarkAddOn.zip" basedir="../" 
+		 includes="benchmark/${src}/**, benchmark/*, benchmark/${conf}/**" 
+		 excludes="benchmark/${build}/**, benchmark/${doc}/api/**"/>
   </target>
   <target name="all" depends="init, doc, compile, dist"/>
 </project>
