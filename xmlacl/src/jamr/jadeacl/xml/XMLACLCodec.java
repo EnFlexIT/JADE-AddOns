@@ -51,6 +51,7 @@ import jade.lang.acl.ACLCodec;
 import jade.lang.acl.ACLMessage;
 import jade.core.AID;
 
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLCodec.CodecException;
 import jade.core.CaseInsensitiveString;
 
@@ -81,7 +82,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
     private static final String BASE64ENCODING_VALUE = new String("Base64");
 
 
-    public static final String ACL_REPRESENTATION_NAME = jade.domain.FIPANames.ACLCodec.XML;
+    public static final String ACL_REPRESENTATION_NAME = FIPANames.ACLCodec.XML; 
 
     public static final String HREF_ATTR="href";
     
