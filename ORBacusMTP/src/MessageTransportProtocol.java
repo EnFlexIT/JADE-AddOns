@@ -31,8 +31,9 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 import org.omg.CORBA.*;
-import org.omg.CORBA.ORBPackage.*;
 import org.omg.PortableServer.*;
+import org.omg.CosNaming.*;
+import org.omg.CosNaming.NamingContextPackage.*;
 
 // Import ORBacus-specific POAManager factory support
 import com.ooc.OBPortableServer.POAManagerFactory;
@@ -104,7 +105,7 @@ public class MessageTransportProtocol implements MTP {
      t.start();
 
    }
-   catch(InvalidName in) {
+   catch(org.omg.CORBA.ORBPackage.InvalidName in) {
      in.printStackTrace();
    }
 
@@ -448,15 +449,62 @@ public class MessageTransportProtocol implements MTP {
 
     }
     catch(ClassCastException cce) {
-      throw new MTPException("Wrong IIOP address: " + cce.getMessage());
+      try {
+	// Try with a corbaname: address
+	OBAddressNS addrNS = (OBAddressNS)ta;
+	activateNS(disp, addrNS);
+      }
+      catch(ClassCastException cce2) {
+	throw new MTPException("Wrong IIOP address: " + cce2.getMessage());
+      }
     }
     catch(UserException ue) {
       throw new MTPException("An ORBacus related exception was thrown: " + ue.getMessage(), ue);
     }
   }
 
-  public void deactivate(TransportAddress ta) throws MTPException {
 
+  private void activateNS(InChannel.Dispatcher disp, OBAddressNS addrNS) throws MTPException {
+
+    // Create a servant object on the root POA
+    MTSServant servant = new MTSServant(disp);
+
+    // Activate Servant
+    MTS objRef = servant._this(myORB);
+
+    // Contact the Naming Service the address points to and bind the
+    // object reference to it. The String points to the root of the
+    // naming service.
+    String namingServiceURL = "corbaloc::" + addrNS.getHost() + ':' + addrNS.getPort() + '/';
+    String namingServiceObjectID = addrNS.getFile();
+    if((namingServiceObjectID == null)||(namingServiceObjectID.length() == 0))
+      namingServiceObjectID = "NameService";
+    namingServiceURL = namingServiceURL.concat(namingServiceObjectID);
+
+    try {
+      org.omg.CORBA.Object o = myORB.string_to_object(namingServiceURL);
+      NamingContextExt rootCtx = NamingContextExtHelper.narrow(o);
+
+      String objName = addrNS.getAnchor();
+      if((objName == null) || (objName.length() == 0))
+	throw new MTPException("Missing Binding Name in 'corbaname' address.");
+
+      // Bind the newly created Servant into the Naming Service
+      NameComponent[] n = rootCtx.to_name(objName);
+      rootCtx.rebind(n, objRef);
+    }
+    catch(SystemException se) {
+      throw new MTPException("Error during interaction with CORBA Naming Service", se);
+    }
+    catch(UserException ue) {
+      throw new MTPException("Error during interaction with CORBA Naming Service", ue);
+    }
+
+  }
+
+
+  public void deactivate(TransportAddress ta) throws MTPException {
+    // FIXME: To be implemented...
   }
 
   public void deactivate() throws MTPException {
