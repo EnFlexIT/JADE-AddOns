@@ -2,7 +2,7 @@ ifeq (../../../Rules.mk,$(wildcard ../../../Rules.mk))
 include ../../../Rules.mk
 endif
 
-subdirs=util acl 
+subdirs=util acl
 
 all clean:
 	for i in $(subdirs); do (cd $$i; make $@); done

@@ -30,22 +30,17 @@
      (add contributor names here)
 
 ====================================================================*/
-
 package sonera.fipa.acl;
-
 import java.util.Date;
-
 /**
  * BinDate implements Bitefficient representation of "DateTimeToken"
  *
  * @author Heikki Helin, Mikko Laukkanen
  */
 public class BinDate extends BinRep implements ACLConstants {
-	private static final byte T_POS = 8;
-	private static final int MAX_DATE_LEN = 32;
-	public BinDate() {}
-
-	/**
+        private static final byte T_POS = 8;
+        private static final int MAX_DATE_LEN = 32;
+        /**
 	 * Converts ASCII representation of Date to bit-efficient 
 	 * representation.
 	 *
@@ -53,58 +48,55 @@ public class BinDate extends BinRep implements ACLConstants {
 	 *
 	 * @returns Bit-efficient representation of supplied date.
 	 */
-	public byte[] toBin(String s) {
-		byte[] b = new byte[MAX_DATE_LEN];
-		byte d;
-		int x = s.length(), j = 0;
-		if (s.charAt(T_POS) != 'T' && s.charAt(T_POS) != 't') 
-			return null;
-
-		/* First year, month, & day */
-		for (int i = 0; i < 8; i+=2) {
-			d = (byte)(encode(s.charAt(i)) << 4);
-			d |= (encode(s.charAt(i+1)) & 0x0f);
-			b[j++] = d;
-		}
-
-		/* Then Hours, Minutes, Seconds, and Milliseconds */
-		for (int i = 9; i < 17; i+=2) {
-			d = (byte)(encode(s.charAt(i)) << 4);
-			d |= (encode(s.charAt(i+1)) & 0x0f);
-			b[j++] = d;
-		}
-		b[j++] = (byte)(encode(s.charAt(17)) << 4);
-		return b;
-	}		
-	/**
+        public byte[] toBin(String s) {
+                byte[] b = new byte[MAX_DATE_LEN];
+                byte d;
+                int x = s.length(), j = 0;
+                if (s.charAt(T_POS) != 'T' && s.charAt(T_POS) != 't')
+                        return null;
+                /* First year, month, & day */
+                for (int i = 0; i < 8; i+=2) {
+                        d = (byte)(encode(s.charAt(i)) << 4);
+                        d |= (encode(s.charAt(i+1)) & 0x0f);
+                        b[j++] = d;
+                }
+                /* Then Hours, Minutes, Seconds, and Milliseconds */
+                for (int i = 9; i < 17; i+=2) {
+                        d = (byte)(encode(s.charAt(i)) << 4);
+                        d |= (encode(s.charAt(i+1)) & 0x0f);
+                        b[j++] = d;
+                }
+                b[j++] = (byte)(encode(s.charAt(17)) << 4);
+                return b;
+        }
+        /**
 	 *
 	 */
-	private char[] c = new char[ACL_DATE_LEN*2+2];
-
-	/**
+        private char[] c = new char[ACL_DATE_LEN*2+2];
+        /**
 	 * Converts bit-efficient Date to String.
 	 * 
 	 * @parameter b Bit-efficient date
 	 * @returns String containing ASCII representation of supplied date.
 	 */
-	public String fromBin(byte[] b) {
-		int i = 0, j = 0;
-		for (i = 0; i < ACL_DATE_LEN; ++i) {
-			if (j == T_POS) c[j++] = 'T';
-			c[j] = (char)decode((b[i]>>4)&0x0f);
-			c[j+1] = (char)decode(b[i]&0x0f);
-			j += 2;
-		}
-		c[j]=0;
-		return (new String(c).trim());
-	}
-	/**
+        public String fromBin(byte[] b) {
+                int i = 0, j = 0;
+                for (i = 0; i < ACL_DATE_LEN; ++i) {
+                        if (j == T_POS) c[j++] = 'T';
+                        c[j] = (char)decode((b[i]>>4)&0x0f);
+                        c[j+1] = (char)decode(b[i]&0x0f);
+                        j += 2;
+                }
+                c[j]=0;
+                return (new String(c).trim());
+        }
+        /**
 	 * Checks whether there's type designator in Date String
 	 * @parameter s String date to check
 	 * @returns true if there's type designator present, false otherwise
 	 */
-	public static boolean containsTypeDg(String s) {
-		char a = s.charAt(s.length()-1);
-		return ((a >= 'a' && a <= 'z') || (a >= 'A' && a <= 'Z'));
-	}
+        public static boolean containsTypeDg(String s) {
+                char a = s.charAt(s.length()-1);
+                return ((a >= 'a' && a <= 'z') || (a >= 'A' && a <= 'Z'));
+        }
 }

@@ -30,41 +30,37 @@
      (add contributor names here)
 
 ====================================================================*/
-
 import java.io.*;
 import java.util.*;
 import sonera.fipa.acl.*;
-
 import jade.lang.acl.*;
-
-
 public class DummyDecoder {
-	public static void main (String[] args) {
-		/*
+        public static void main (String[] args) {
+                /*
 		 * Initialize Bit-efficient ACL input stream.
 	 	 */
-		ACLInputStream in = null;
-		if (args.length!=0) {
-			in = new ACLInputStream(System.in, new Integer(args[0]).intValue());
-		} else {
-			in = new ACLInputStream(System.in);
-		}
-		int c = 0;
-		try {
-			while (true) {
-				/*
+                ACLInputStream in = null;
+                if (args.length!=0) {
+                        in = new ACLInputStream(System.in, new Integer(args[0]).intValue());
+                } else {
+                        in = new ACLInputStream(System.in);
+                }
+                int c = 0;
+                try {
+                        while (true) {
+                                /*
 				 * Read a bit-efficiently coded message
 				 */
-				ACLMessage m = in.readMsg();
-				/*
+                                ACLMessage m = in.readMsg();
+                                /*
 				 * And dump it to stdout
 				 */
-				System.out.println(m.toString());
-				++c;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.err.println(c+ " message(s) parsed");
-	}
+                                System.out.println(m.toString());
+                                ++c;
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+                System.err.println(c+ " message(s) parsed");
+        }
 }

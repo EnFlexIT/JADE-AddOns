@@ -30,76 +30,66 @@
      (add contributor names here)
 
 ====================================================================*/
-
 package sonera.fipa.acl;
-
+import sonera.fipa.util.ByteArray;
 import sonera.fipa.util.ByteArray;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-
 import jade.lang.acl.*;
-
 /**
  * OutputStream that writes fipa-bitefficient-std coded messages into stream.
  * 
  * @author Heikki Helin, Mikko Laukkanen
  */
 public class ACLOutputStream extends BufferedOutputStream {
-	private ACLEncoder e;
-	private ByteArray ba;
-
-	/**
+        private ACLEncoder e;
+        private ByteArray ba;
+        /**
 	 * Initialise the ACL output stream with given OutputStream.
 	 * 
 	 * @parameter o OutputStream to which message are written.
 	 */
-	public ACLOutputStream(OutputStream o) {
-		super(o);
-		initialize(0);
-	}
-	/**
+        public ACLOutputStream(OutputStream o) {
+                super(o);
+                initialize(0);
+        }
+        /**
 	 * Initialise the ACL output stream with given OutputStream and 
   	 * codetable size.
 	 *
 	 * @parameter o OutputStream to which message are written.
 	 * @parameter sz Size for the code table.
 	 */
-	public ACLOutputStream(OutputStream o, int sz) {
-		super(o);
-		initialize(sz);
-	}
+        public ACLOutputStream(OutputStream o, int sz) {
+                super(o);
+                initialize(sz);
+        }
         public EncoderCodetable getCodeTable() {
                 return e.getCodeTable();
         }
-
-	public void initialize(int sz) {
-		e = new ACLEncoder(sz);
-		ba = new ByteArray();
-	}
-	/**
+        public void initialize(int sz) {
+                e = new ACLEncoder(sz);
+                ba = new ByteArray();
+        }
+        /**
 	 * Writes ACL message to output stream
 	 * @param m Message to be written
 	 */
-	public void write(ACLMessage m) throws IOException {
-		ba = e.encode(m);
-		super.write(ba.get(),0,ba.length());
-		super.flush();
-	}
-	/**
+        public void write(ACLMessage m) throws Exception {
+                ba = e.encode(m);
+                super.write(ba.get(),0,ba.length());
+                super.flush();
+        }
+        /**
 	 * Writes ACL message output stream using specified coding.
 	 * @param m Message to be written 
 	 * @param c Coding scheme (ACL_BITEFFICIENT_CODETABLE or
 	 *		ACL_BITEFFICIENT_NO_CODETABLE)
 	 */
-	public void write(ACLMessage m, byte c) throws IOException {
-		ba = e.encode(m, c);
-		super.write(ba.get(),0,ba.length());
-		super.flush();
-	}
+        public void write(ACLMessage m, byte c) throws Exception {
+                ba = e.encode(m, c);
+                super.write(ba.get(),0,ba.length());
+                super.flush();
+        }
 }
-
-
-
-
-

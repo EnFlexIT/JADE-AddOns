@@ -30,22 +30,20 @@
      (add contributor names here)
 
 ====================================================================*/
-
 package sonera.fipa.acl;
-
 /**
  * 
  *
  * @author Heikki Helin, Mikko Laukkanen
  */
 public class BEParseException extends Exception {
-	public BEParseException() {
-		super("General protection error at 0x67ab0000:0x89cd7801");
-	}
-	public BEParseException(String s) {
-		super(s);
-	}
-	public BEParseException(String s, Throwable t) {
-		super(s);
-	}
+        public BEParseException() {
+                super("General protection error at 0x67ab0000:0x89cd7801");
+        }
+        public BEParseException(String s) {
+                super(s);
+        }
+        public BEParseException(String s, Throwable t) {
+                super(s);
+        }
 }

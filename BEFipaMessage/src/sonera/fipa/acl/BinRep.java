@@ -30,7 +30,6 @@
      (add contributor names here)
 
 ====================================================================*/
-
 package sonera.fipa.acl;
 /**
   * Conversion between ASCII numbers and bit-efficient numbers.
@@ -55,11 +54,11 @@ package sonera.fipa.acl;
  * @author Heikki Helin, Mikko Laukkanen
  */
 public class BinRep {
-	final static char[] ncodes = {
-		' ', '0', '1', '2', '3', '4', '5', '6', 
-		'7', '8', '9', '?', '+', 'e', '-', '.'
-	};
-	/**
+        final static char[] ncodes = {
+                ' ', '0', '1', '2', '3', '4', '5', '6',
+                '7', '8', '9', '?', '+', 'e', '-', '.'
+        };
+        /**
 	 * Converts one ASCII number to bit-efficient representation.
 	 * The ASCII number to convert must be such number that conversion
 	 * can be done (check the list above). If the ASCII number is not
@@ -69,10 +68,10 @@ public class BinRep {
 	 * @param i ASCII number to convert
  	 * @return Corresponding bit-efficient number
  	 */
-	protected static byte encode(int i) {
-		return (byte)((i != 'e' && i != 'E') ? (i+1)&0x0f : 0x0d);
-	}
-	/**
+        protected static byte encode(int i) {
+                return (byte)((i != 'e' && i != 'E') ? (i+1)&0x0f : 0x0d);
+        }
+        /**
 	 * Converts bit-efficient number to ASCII. The number to convert
 	 * must be valid bit-efficient number (i.e., number between 
 	 * 0x00-0x0f). No validity checks are done. 
@@ -80,7 +79,7 @@ public class BinRep {
 	 * @param i bit-efficient number to convert
 	 * @return Corresponding ASCII number
 	 */
-	protected static byte decode(int i) {
-		return (byte)ncodes[i];
-	}
+        protected static byte decode(int i) {
+                return (byte)ncodes[i];
+        }
 }

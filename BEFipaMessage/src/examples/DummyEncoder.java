@@ -30,45 +30,50 @@
      (add contributor names here)
 
 ====================================================================*/
-
 import java.io.*;
 import sonera.fipa.acl.*;
-
 import jade.lang.acl.*;
-
-
+import jade.core.*;
 public class DummyEncoder {
-	public static void main (String[] args) {
-		int c = 0;
-		ACLMessage aclMessage[] = new ACLMessage[100];
-		/*
+        public static void main (String[] args) {
+                int c = 0;
+                ACLMessage aclMessage[] = new ACLMessage[100];
+                /*
 		 * We are reading from standard input
 		 */
-		BufferedReader in = 
-			new BufferedReader(new InputStreamReader(System.in));
-		String line = null;
-		/*
+                BufferedReader in =
+                        new BufferedReader(new InputStreamReader(System.in));
+                String line = null;
+                /*
 	 	 * Initialize the ACL OutputStream
 	 	 */
-		ACLOutputStream os = null;
-		if (args.length!=0) {
-			os = new ACLOutputStream(System.out, 
-				new Integer(args[0]).intValue());
-		} else {
-			os = new ACLOutputStream(System.out);
-		}
-
-		StringACLCodec sc = new StringACLCodec(in, null);
-		try {
-			while(true) {
-				ACLMessage m = sc.decode();
-				os.write(m);
-				++c;
-			}
-		} catch (Exception e) {}
-
-
-		System.err.println(c+" message(s) written to stdout");
-
-	}
+                ACLOutputStream os = null;
+                if (args.length!=0) {
+                        os = new ACLOutputStream(System.out,
+                                new Integer(args[0]).intValue());
+                } else {
+                        os = new ACLOutputStream(System.out);
+                }
+                StringACLCodec sc = new StringACLCodec(in, null);
+                try {
+                        while(true) {
+                                ACLMessage m = sc.decode();
+                                os.write(m);
+                                ++c;
+                        }
+                } catch (Exception e) {
+                        System.err.println("Error: "+e);
+                }
+                                /*
+				 * Here we assume that whole message is
+				 * given in one line; stupid assumption,
+				 * but better than nothing...
+				 */
+                                /*
+				 * If we succesfully parsed the message,
+				 * then we can write that to stdout
+				 * using bit-efficient encoding.
+				 */
+                System.err.println(c+" message(s) written to stdout");
+        }
 }

@@ -30,39 +30,33 @@
      (add contributor names here)
 
 ====================================================================*/
-
 package sonera.fipa.acl;
-
 import jade.lang.acl.ACLMessage;
-
-
 /**
  *
  * @author Heikki Helin, Mikko Laukkanen
  */
 public interface MAPPING {
-
-	public static final int ACCEPTPROPOSAL =        ACLMessage.ACCEPT_PROPOSAL;
-	public static final int AGREE =                 ACLMessage.AGREE;
-	public static final int CANCEL =                ACLMessage.CANCEL;
-	public static final int CFP =                   ACLMessage.CFP;
-	public static final int CONFIRM =               ACLMessage.CONFIRM;
-	public static final int DISCONFIRM =            ACLMessage.DISCONFIRM;
-	public static final int FAILURE =               ACLMessage.FAILURE;
-	public static final int INFORM =                ACLMessage.INFORM;
-	public static final int INFORMIF =              ACLMessage.INFORM_IF;
-	public static final int INFORMREF =             ACLMessage.INFORM_REF;
-	public static final int NOTUNDERSTOOD =         ACLMessage.NOT_UNDERSTOOD;
-	public static final int PROPAGATE =             ACLMessage.PROPAGATE;
-	public static final int PROPOSE =               ACLMessage.PROPOSE;
-	public static final int PROXY =                 ACLMessage.PROXY;
-	public static final int QUERYIF =               ACLMessage.QUERY_IF;
-	public static final int QUERYREF =              ACLMessage.QUERY_REF;
-	public static final int REFUSE =                ACLMessage.REFUSE;
-	public static final int REJECTPROPOSAL =        ACLMessage.REJECT_PROPOSAL;
-	public static final int REQUEST =               ACLMessage.REQUEST;
-	public static final int REQUESTWHEN =           ACLMessage.REQUEST_WHEN;
-	public static final int REQUESTWHENEVER =       ACLMessage.REQUEST_WHENEVER;
-	public static final int SUBSCRIBE =             ACLMessage.SUBSCRIBE;
-
+        public static final int ACCEPTPROPOSAL = ACLMessage.ACCEPT_PROPOSAL;
+        public static final int AGREE = ACLMessage.AGREE;
+        public static final int CANCEL = ACLMessage.CANCEL;
+        public static final int CFP = ACLMessage.CFP;
+        public static final int CONFIRM = ACLMessage.CONFIRM;
+        public static final int DISCONFIRM = ACLMessage.DISCONFIRM;
+        public static final int FAILURE = ACLMessage.FAILURE;
+        public static final int INFORM = ACLMessage.INFORM;
+        public static final int INFORMIF = ACLMessage.INFORM_IF;
+        public static final int INFORMREF = ACLMessage.INFORM_REF;
+        public static final int NOTUNDERSTOOD = ACLMessage.NOT_UNDERSTOOD;
+        public static final int PROPAGATE = ACLMessage.PROPAGATE;
+        public static final int PROPOSE = ACLMessage.PROPOSE;
+        public static final int PROXY = ACLMessage.PROXY;
+        public static final int QUERYIF = ACLMessage.QUERY_IF;
+        public static final int QUERYREF = ACLMessage.QUERY_REF;
+        public static final int REFUSE = ACLMessage.REFUSE;
+        public static final int REJECTPROPOSAL = ACLMessage.REJECT_PROPOSAL;
+        public static final int REQUEST = ACLMessage.REQUEST;
+        public static final int REQUESTWHEN = ACLMessage.REQUEST_WHEN;
+        public static final int REQUESTWHENEVER = ACLMessage.REQUEST_WHENEVER;
+        public static final int SUBSCRIBE = ACLMessage.SUBSCRIBE;
 }

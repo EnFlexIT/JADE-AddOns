@@ -30,54 +30,50 @@
      (add contributor names here)
 
 ====================================================================*/
-
 import java.io.*;
 import java.util.*;
 import sonera.fipa.acl.*;
 import sonera.fipa.util.*;
-
 import jade.lang.acl.*;
-
-
 public class DummyBufDecoder {
-	public static void main (String[] args) {
-		/*
+        public static void main (String[] args) {
+                /*
 		 * Initialize Bit-efficient ACL input stream.
 	 	 */
-		ACLDecoder ad;
-		ByteArray ba = new ByteArray();
-		if (args.length!=0) {
-			ad = new ACLDecoder(new Integer(args[0]).intValue());
-		} else {
-			ad = new ACLDecoder();
-		}
-		int c = 0;
-		try {
-			byte b = 0;
-			while (b != -1) {
-				b = (byte)System.in.read();
-				if (b != -1) 
-					ba.add(b);
-			}
-		} catch (Exception e) {
-			System.err.println("Got exception:" +e.toString());
-		}
-		try {
-			while (true) {
-				/*
+                ACLDecoder ad;
+                ByteArray ba = new ByteArray();
+                if (args.length!=0) {
+                        ad = new ACLDecoder(new Integer(args[0]).intValue());
+                } else {
+                        ad = new ACLDecoder();
+                }
+                int c = 0;
+                try {
+                        byte b = 0;
+                        while (b != -1) {
+                                b = (byte)System.in.read();
+                                if (b != -1)
+                                        ba.add(b);
+                        }
+                } catch (Exception e) {
+                        System.err.println("Got exception:" +e.toString());
+                }
+                try {
+                        while (true) {
+                                /*
 				 * Read a bit-efficiently coded message
 				 */
-				ACLMessage m = ad.readMsg(ba.get());
-				/*
+                                ACLMessage m = ad.readMsg(ba.get());
+                                /*
 				 * And dump it to stdout
 				 */
-				System.out.println(m.toString());
-				++c;
-				System.exit(1);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.err.println(c+ " message(s) parsed");
-	}
+                                System.out.println(m.toString());
+                                ++c;
+                                System.exit(1);
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+                System.err.println(c+ " message(s) parsed");
+        }
 }

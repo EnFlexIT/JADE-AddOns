@@ -30,81 +30,74 @@
      (add contributor names here)
 
 ====================================================================*/
-
 package sonera.fipa.acl;
-
-
-
 import sonera.fipa.util.ByteArray;
 import java.io.*;
 import jade.lang.acl.ACLCodec;
 import jade.lang.acl.ACLMessage;
-
 /**
  * This class implements the FIPA Bit-efficient codec for ACLMessages.
  *
  * @author Heikki Helin, Mikko Laukkanen
  */
 public class BitEffACLCodec implements ACLCodec {
-	public static final String _name = jade.domain.FIPANames.ACLCodec.BITEFFICIENT; 
-
-	private ACLEncoder e;
-	private ByteArray ba;
-
-	/**
+        public static final String _name = "fipa.acl.rep.bitefficient.std";
+        private ACLEncoder e;
+        private ByteArray ba;
+        /**
 	 * Constructor for the codec.
 	 */
-	public BitEffACLCodec() {
-		initialize(0);
-	}
-	/**
+        public BitEffACLCodec() {
+                initialize(0);
+        }
+        /**
 	 * Constructor for the codec.
 	 */
-	public BitEffACLCodec(int sz) {
-		initialize(sz);
-	}
-	private void initialize(int sz) {
-		e = new ACLEncoder(sz);
-		ba = new ByteArray();
-	}
-	/**
+        public BitEffACLCodec(int sz) {
+                initialize(sz);
+        }
+        private void initialize(int sz) {
+                e = new ACLEncoder(sz);
+                ba = new ByteArray();
+        }
+        /**
 	 * @see ACLCodec#decode(byte[] data)
 	 */
-	public ACLMessage decode(byte[] data) throws ACLCodec.CodecException {
-		/*
+        public ACLMessage decode(byte[] data) throws ACLCodec.CodecException {
+                /*
 		 * FIXME: Codetables etc.
 		 * FIXME: This is slowest method I've ever seen.
 		 */
-		InputStream i = new ByteArrayInputStream(data);
-		ACLInputStream ai = new ACLInputStream(i);
-
-		try {	
-			return (ai.readMsg());
-		} catch (IOException e) {
-			throw new ACLCodec.CodecException("IOException:"+e, null);
-		}
-	}
-	public void write(ACLMessage msg) {
-
-	}
-	/**
+                InputStream i = new ByteArrayInputStream(data);
+                ACLInputStream ai = new ACLInputStream(i);
+                try {
+                        return (ai.readMsg());
+                } catch (IOException e) {
+                        throw new ACLCodec.CodecException("IOException:"+e, null);
+                }
+        }
+        public void write(ACLMessage msg) {
+        }
+        /**
 	 * @see ACLCodec#encode(ACLMessage msg)
 	 */
-	public byte[] encode(ACLMessage msg) {
-		ba = e.encode(msg);
-		return(ba.get());
-	}
-	public ByteArray _encode(ACLMessage msg) {
-		ba = e.encode(msg);
-		return(ba);
-	}
-
-	/**
+        public byte[] encode(ACLMessage msg) {
+                try {
+                        ba = e.encode(msg);
+                } catch (Exception e) {}
+                return(ba.get());
+        }
+        public ByteArray _encode(ACLMessage msg) {
+                try {
+                        ba = e.encode(msg);
+                } catch (Exception e) {}
+                return(ba);
+        }
+        /**
 	 * @return the name of this encoding according to the FIPA 
 	 *         specifications
 	 */
-	public String getName() {
-		return _name;
-	}
+        public String getName() {
+                return _name;
+        }
 }
-
