@@ -1492,12 +1492,12 @@ public class PersistenceService extends BaseService {
 	    MainContainer impl = myContainer.getMain();
 	    if(impl != null) {
 
-		impl.lockEntryForAgent(agentID);
+		impl.acquireAgentDescriptor(agentID);
 
 		// Commit transaction
 		impl.frozenAgent(agentID, buffer);
-		impl.updateEntryForAgent(agentID, home, buffer);
-		impl.unlockEntryForAgent(agentID);
+		impl.movedAgent(agentID, home, buffer);
+		impl.releaseAgentDescriptor(agentID);
 	    }
 	}
 
@@ -1507,12 +1507,12 @@ public class PersistenceService extends BaseService {
 	    MainContainer impl = myContainer.getMain();
 	    if(impl != null) {
 
-		impl.lockEntryForAgent(agentID);
+		impl.acquireAgentDescriptor(agentID);
 
 		// Commit transaction
 		impl.thawedAgent(agentID, home);
-		impl.updateEntryForAgent(agentID, buffer, home);
-		impl.unlockEntryForAgent(agentID);
+		impl.movedAgent(agentID, buffer, home);
+		impl.releaseAgentDescriptor(agentID);
 	    }
 	}
 
