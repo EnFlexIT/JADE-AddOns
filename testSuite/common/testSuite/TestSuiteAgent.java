@@ -33,40 +33,41 @@ import jade.lang.acl.*;
 import jade.wrapper.*;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
-
-import test.common.*;
-import test.common.testSuite.gui.*;
+import jade.util.leap.ArrayList;
+import jade.proto.AchieveREInitiator;
+import jade.proto.states.ReplySender;
 
 import jade.content.*;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
 import jade.content.onto.basic.*;
+
+import test.common.*;
+import test.common.testSuite.gui.*;
 import test.common.testerAgentControlOntology.*;
+
+import java.util.Vector;
 
 public class TestSuiteAgent extends GuiAgent {
 	private static final String NAME = "test-suite";
 	private static final String TESTER_NAME = "tester";
 	
 	// Gui event types
-	public static final int EXIT_EVENT = 0;
-	public static final int RUN_TESTER_EVENT = 1;
-	public static final int DEBUG_TESTER_EVENT = 2;
-	public static final int STEP_EVENT = 3;
-	public static final int GO_EVENT = 4;
+	public static final int LOAD_EVENT = 0;
+	public static final int RELOAD_EVENT = 1;
+	public static final int RUN_EVENT = 2;
+	public static final int DEBUG_EVENT = 3;
+	public static final int CONFIGURE_EVENT = 4;
+	public static final int STEP_EVENT = 5;
+	public static final int GO_EVENT = 6;
+	public static final int EXIT_EVENT = 7;
+	public static final int CLOSE_AND_EXIT_EVENT = 8;
 	
-	private Codec codec;
-	
-	private AgentContainer containerController;
+	private Codec codec;	
 	private TestSuiteGui myGui;
-	private MessageTemplate mt = MessageTemplate.MatchOntology(TesterAgentControlOntology.getInstance().getName());
 	
-	TestSuiteAgent(AgentContainer containerController) {
-		super();
-		this.containerController = containerController;
-	}
-	
-	protected void setup() {	
+	protected void setup() {
 		// Register language and ontology used to control the 
 		// execution of the tester agents
 		codec = new SLCodec();
@@ -83,22 +84,7 @@ public class TestSuiteAgent extends GuiAgent {
 			"test.domain.JADEManagementOntologyTesterAgent",
 			"test.proto.ContractNetTesterAgent",
 			"test.proto.AchieveRETesterAgent" } );
-		myGui.showCorrect();		
-		
-		// This behaviour receives exit notifications from the tester agents
-		addBehaviour(new CyclicBehaviour() {
-			public void action() {
-				ACLMessage msg = receive(mt);
-				if (msg != null) {
-					if (msg.getPerformative() == ACLMessage.INFORM) {
-						myGui.setStatus(TestSuiteGui.READY_STATE);
-					}
-				}
-				else {
-					block();
-				}
-			}
-		} );
+		myGui.showCorrect();				
 	}	
 		
 	protected void takeDown() {
@@ -107,71 +93,164 @@ public class TestSuiteAgent extends GuiAgent {
 	
 	protected void onGuiEvent(GuiEvent ev) {
 		switch (ev.getType()) {
-		case RUN_TESTER_EVENT:
-			try {
-				String className = (String) ev.getParameter(0);
-  	    AgentController tester = containerController.createNewAgent(TESTER_NAME, className, null);
-				Configure config = new Configure(new Boolean(false), new Boolean(true), getLocalName());
-  	    controlTester(config);
-  	    tester.start();
-			}
-			catch (Exception e) {
-				System.out.println("Error starting execution of tester agent. "+e);
-				e.printStackTrace();
-				myGui.setStatus(TestSuiteGui.IDLE_STATE);
-			}
+		case LOAD_EVENT: 
+			// The user pressed "Open" while no tester agent is currently loaded
+			String cn = (String) ev.getParameter(0);
+			System.out.println("TestSuiteAgent handling RELOAD event. Class is "+cn);
+			loadTester(cn);
 			break;
-		case DEBUG_TESTER_EVENT:
-			try {
-				String className = (String) ev.getParameter(0);
-  	    AgentController tester = containerController.createNewAgent(TESTER_NAME, className, null);
-				Configure config = new Configure(new Boolean(true), new Boolean(true), getLocalName());
-  	    controlTester(config);
-  	    tester.start();
-			}
-			catch (Exception e) {
-				System.out.println("Error starting debug of tester agent. "+e);
-				e.printStackTrace();
-				myGui.setStatus(TestSuiteGui.IDLE_STATE);
-			}
+		case RELOAD_EVENT: 
+			// The user pressed "Open" while a tester agent is currently loaded
+			// Add a behaviour that makes the currently loaded tester agent exit and,
+			// on completion, loads the newly specified tester agent.
+			final String className = (String) ev.getParameter(0);
+			System.out.println("TestSuiteAgent handling RELOAD event. Class is "+className);
+			addBehaviour(new Requester(this, new Exit()) {
+				public int onEnd() {
+					try {
+						Thread.sleep(1000);
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+					}
+					loadTester(className);
+					return 0;
+				}
+			} );
 			break;
-		case STEP_EVENT:
-			try {
-				controlTester(new Resume());
-			}
-			catch (Exception e) {
-				System.out.println("Error requesting next step to tester agent. "+e);
-				e.printStackTrace();
-			}
+		case RUN_EVENT: 
+			System.out.println("TestSuiteAgent handling RUN event");
+			// The user pressed "Run"
+			// Add a behaviour that makes the currently loaded tester agent execute
+			// its test group and, on completion, sets the GUI status to READY
+			addBehaviour(new Requester(this, new Execute(false)) {
+				public int onEnd() {
+					myGui.setStatus(TestSuiteGui.READY_STATE);
+					return 0;
+				}
+			} );
 			break;
-		case GO_EVENT:
-			try {
-				Configure config = new Configure(new Boolean(false), null, null);
-				controlTester(config);
-				controlTester(new Resume());
-			}
-			catch (Exception e) {
-				System.out.println("Error requesting next step to tester agent. "+e);
-				e.printStackTrace();
-			}
+		case DEBUG_EVENT: 
+			System.out.println("TestSuiteAgent handling DEBUG event");
+			// The user pressed "Debug"
+			// Add a behaviour that makes the currently loaded tester agent execute
+			// its test group in debug-mode and, on completion, sets the GUI status to READY
+			addBehaviour(new Requester(this, new Execute(true)) {
+				public int onEnd() {
+					myGui.setStatus(TestSuiteGui.READY_STATE);
+					return 0;
+				}
+			} );
 			break;
-		case EXIT_EVENT:
+		case CONFIGURE_EVENT: 
+			System.out.println("TestSuiteAgent handling CONFIGURE event");
+			// The user pressed "Configure"
+			// Add a behaviour that makes the currently loaded tester agent show
+			// the test group configuration gui and, on completion, sets the GUI status to READY
+			addBehaviour(new Requester(this, new Configure()) {
+				public int onEnd() {
+					myGui.setStatus(TestSuiteGui.READY_STATE);
+					return 0;
+				}
+			} );
+			break;
+		case STEP_EVENT: 
+			System.out.println("TestSuiteAgent handling STEP event");
+			// The user pressed "Step"
+			// Add a behaviour that makes the currently loaded tester agent resume
+			// the execution of its test group in debug-mode
+			addBehaviour(new Requester(this, new Resume(true)));
+			break;
+		case GO_EVENT: 
+			System.out.println("TestSuiteAgent handling GO event");
+			// The user pressed "Run" while the currently loaded tester agent is executing his test group 
+			// Add a behaviour that makes the currently loaded tester agent resume
+			// the execution of its test group in non-debug-mode
+			addBehaviour(new Requester(this, new Resume(false)));
+			break;
+		case EXIT_EVENT: 
+			System.out.println("TestSuiteAgent handling EXIT event");
+			// The user pressed "Exit" while no tester agent is currently loaded
 			doDelete();
+			break;
+		case CLOSE_AND_EXIT_EVENT: 
+			System.out.println("TestSuiteAgent handling CLOSE_AND_EXIT event");
+			// The user pressed "Exit" while a tester agent is currently loaded
+			// Add a behaviour that makes the currently loaded tester agent exit and,
+			// on completion, quits.
+			addBehaviour(new Requester(this, new Exit()) {
+				public int onEnd() {
+					doDelete();
+					return 0;
+				}
+			} );
 			break;
 		}
 	}
 	
-	private void controlTester(AgentAction a) throws Exception {
-		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-		msg.addReceiver(new AID(TESTER_NAME, AID.ISLOCALNAME));
-		msg.setLanguage(codec.getName());
-		msg.setOntology(TesterAgentControlOntology.getInstance().getName());
-		Action act = new Action(getAID(), a);
-		getContentManager().fillContent(msg, act);
-		send(msg);
+	private void loadTester(String className) {
+		try {
+			TestUtility.createAgent(this, TESTER_NAME, className, new String[] {new String("true")}, getAMS(), null);			
+		}
+		catch (Exception e) {
+			System.out.println("Error loading tester agent. ");
+			e.printStackTrace();
+			myGui.setStatus(TestSuiteGui.IDLE_STATE);
+		}
 	}
-			
+	
+	/**
+	   Inner class Requester
+	 */
+	class Requester extends AchieveREInitiator {
+		private AgentAction requestedAction;
 		
+		Requester(Agent a, AgentAction act) {
+			super(a, null);
+			requestedAction = act;
+		}
+		
+		protected Vector prepareRequests(ACLMessage request) {
+			Vector v = new Vector();
+			try {
+				AID tester = new AID(TESTER_NAME, AID.ISLOCALNAME);
+				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+				msg.addReceiver(tester);
+				msg.setLanguage(codec.getName());
+				msg.setOntology(TesterAgentControlOntology.getInstance().getName());
+				Action aa = new Action(tester, requestedAction);
+				getContentManager().fillContent(msg, aa);
+				v.addElement(msg);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+			return v;
+		}
+			
+		protected void handleInform(ACLMessage inform) {
+			if (requestedAction instanceof Execute) {
+				// FIXME: parse the message and get passed, failed and skipped
+			}	
+		}
+	
+		protected void handleRefuse(ACLMessage refuse) {
+			System.out.println("Tester agent action refused. Message is:");
+			System.out.println(refuse);
+		}
+	
+		protected void handleNotUnderstood(ACLMessage notUnderstood) {
+			System.out.println("Tester agent action not understood. Message is:");
+			System.out.println(notUnderstood);
+		}
+	
+		protected void handleFailure(ACLMessage failure) {
+			System.out.println("Tester agent action failed. Message is:");
+			System.out.println(failure);
+		}
+	}  // END of inner class Requester
+				
+				
 	// Main method that allows launching the TestSuiteAgent as a 
 	// stand-alone program 	
 	public static void main(String[] args) {
@@ -183,14 +262,14 @@ public class TestSuiteAgent extends GuiAgent {
       rt.setCloseVM(true);
 
       Profile pMain = new ProfileImpl(null, 8888, null);
-
+			pMain.setSpecifiers("mtps", new ArrayList());
+			
       MainContainer mc = rt.createMainContainer(pMain);
 
       AgentController rma = mc.createNewAgent("rma", "jade.tools.rma.rma", new Object[0]);
       rma.start();
 
-      TestSuiteAgent tsa = new TestSuiteAgent(mc);
-      AgentController testSuite = mc.acceptNewAgent(NAME, tsa);
+      AgentController testSuite = mc.createNewAgent(NAME, TestSuiteAgent.class.getName(), new Object[]{mc}); 
       testSuite.start();
 		}
 		catch (Exception e) {

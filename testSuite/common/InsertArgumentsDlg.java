@@ -36,6 +36,7 @@ public class InsertArgumentsDlg extends JDialog {
 			ArgumentSpec a = (ArgumentSpec) argSpecs.get(i);
 			labels[i] = new JLabel(a.getLabel());
 			values[i] = new JTextField();
+			values[i].setText(a.getValue());
 			defaults[i] = new JTextField();
 			defaults[i].setText(a.getDefaultValue());
 			defaults[i].setEnabled(false);
@@ -56,12 +57,20 @@ public class InsertArgumentsDlg extends JDialog {
     			for (int i = 0; i < nArgs; ++i) {
     				ArgumentSpec a = (ArgumentSpec) argSpecs.get(i);
     				String v = values[i].getText();
+    				System.out.println("Value in text field is "+v);
     				if (v != null && !v.equals("")) {
+    					System.out.println("Use inserted value");
     					a.setValue(v);
     				}
-    				if (v == null) {
-    					System.out.println("Missing value for mandatory argument "+a.getLabel());
-    					return;
+    				else {
+    					if (a.isMandatory()) {
+    						System.out.println("Missing value for mandatory argument "+a.getLabel());
+    						return;
+    					}
+    					else {
+    						System.out.println("Use default value");
+    						a.setValue(a.getDefaultValue());
+    					}
     				}
     			}
     			

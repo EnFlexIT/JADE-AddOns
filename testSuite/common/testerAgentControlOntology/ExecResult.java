@@ -29,22 +29,42 @@ import jade.content.*;
 /**
  * @author Giovanni Caire - TILAB
  */
-public class Resume implements AgentAction {
-	private boolean debugMode;
+public class ExecResult implements Concept {
+	private int passed;
+	private int failed;
+	private int skipped;
 
-	public Resume() {
-	}	
-	
-	public Resume(boolean dm) {
-		setDebugMode(dm);
+	public ExecResult() {
 	}
 	
-	public boolean getDebugMode() {
-		return debugMode;
+	public ExecResult(int p, int f, int s) {
+		setPassed(p);
+		setFailed(f);
+		setSkipped(s);
 	}
 	
-	public void setDebugMode(boolean b) {
-		debugMode = b;
+	public int getPassed() {
+		return passed;
+	}
+	
+	public void setPassed(int p) {
+		passed = p;
+	}
+	
+	public int getFailed() {
+		return failed;
+	}
+	
+	public void setFailed(int f) {
+		failed = f;
+	}
+	
+	public int getSkipped() {
+		return skipped;
+	}
+	
+	public void setSkipped(int s) {
+		skipped = s;
 	}
 }
 

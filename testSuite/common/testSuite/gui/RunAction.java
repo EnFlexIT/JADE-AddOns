@@ -38,7 +38,7 @@ class RunAction extends AbstractAction {
 	
 	public void actionPerformed(ActionEvent e) {
 		System.out.println("Run");
-		gui.runTester();
+		gui.run();
 	}
 }
 	

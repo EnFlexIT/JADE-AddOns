@@ -39,7 +39,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 	private static final String LOAD_TEST_STATE = "Load-test";
 	private static final String EXECUTE_TEST_STATE = "Execute-test";
 	private static final String HANDLE_RESULT_STATE = "Handle-result";
-	private static final String END_STATE = "Dummy-final";
+	private static final String END_STATE = "End";
 	private static final String PAUSE_STATE = "Pause";
 	
 	// Data store key for the result of a test
@@ -50,11 +50,14 @@ public class TestGroupExecutor extends FSMBehaviour {
 	private static final int EXECUTE = 1;
 	private static final int SKIP = 2;
 	private static final int PAUSE = 3;
+	private static final int ABORT = 4;
+	
+	private boolean aborted = false;
 	
 	// Counters for statistics
-	private int passedCnt = 0;
-	private int failedCnt = 0;
-	private int skippedCnt = 0;
+	protected int passedCnt = 0;
+	protected int failedCnt = 0;
+	protected int skippedCnt = 0;
 	
 	// The pool of tests to be executed 
 	private TestGroup tests;
@@ -62,9 +65,12 @@ public class TestGroupExecutor extends FSMBehaviour {
 	// The test object that is currently in execution
 	private Test currentTest;
 
+	// Flag indicating whether debug (step-by-step) execution is selected
+	private boolean debugMode = false;
 	// Flag indicating whether the execution is currently paused
 	private boolean inPause = false;
 	
+	// The Logger used to handle outputs
 	private Logger l;
 
 	public TestGroupExecutor(Agent a, TestGroup tg) {
@@ -78,6 +84,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 		
 		// Transition table
 		registerDefaultTransition(INIT_TEST_GROUP_STATE, LOAD_TEST_STATE);
+		registerTransition(INIT_TEST_GROUP_STATE, END_STATE, ABORT);
 		registerTransition(LOAD_TEST_STATE, EXECUTE_TEST_STATE, EXECUTE);
 		registerTransition(LOAD_TEST_STATE, LOAD_TEST_STATE, SKIP);
 		registerTransition(LOAD_TEST_STATE, END_STATE, EXIT);
@@ -92,11 +99,15 @@ public class TestGroupExecutor extends FSMBehaviour {
 				try {
 					tests.initialize(myAgent);
 				}
-				catch (TestException tie) {
-					l.log("Error in TestGroup initialization");
-					tie.printStackTrace();
-					myAgent.doDelete();
+				catch (TestException te) {
+					l.log("Error in TestGroup initialization. Abort");
+					te.printStackTrace();
+					aborted = true;
 				}
+			}
+			
+			public int onEnd() {
+				return (aborted ? ABORT : -1);
 			}
 		};
 		registerFirstState(b, INIT_TEST_GROUP_STATE);
@@ -117,7 +128,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 						Behaviour b2 = currentTest.load(myAgent, getDataStore(), TEST_RESULT_KEY);
 						registerState(b2, EXECUTE_TEST_STATE);
 						
-						if (((TesterAgent) myAgent).getDebugMode()) {
+						if (debugMode) {
 							ret = PAUSE;
 							inPause = true;
 						}
@@ -127,9 +138,9 @@ public class TestGroupExecutor extends FSMBehaviour {
 						ret = EXIT;
 					}
 				}
-				catch (TestException tie) {
+				catch (TestException te) {
 					// Some problems occured initializing this test. Skip it
-					l.log("Problems in test initialization ["+tie.getMessage()+"]");
+					l.log("Problems in test initialization ["+te.getMessage()+"]");
 					l.log("Skip this test.");
 					skippedCnt++;
 					ret = SKIP;
@@ -172,17 +183,19 @@ public class TestGroupExecutor extends FSMBehaviour {
 		// END_STATE
 		b = new OneShotBehaviour() {
 			public void action() {
-				StringBuffer sb = new StringBuffer("\n--------------------------------------------\n");
-				sb.append("--------------------------------------------\n");
-    		sb.append("Test summary:\n");
-    		sb.append(passedCnt+" tests PASSED\n");
-    		sb.append(failedCnt+" tests FAILED\n");
-    		if (skippedCnt > 0) {
-    			sb.append(skippedCnt+" tests SKIPPED due to initailization problems\n");
-    		}	
-    		l.log(sb.toString());
+				if (!aborted) {
+					StringBuffer sb = new StringBuffer("\n--------------------------------------------\n");
+					sb.append("--------------------------------------------\n");
+    			sb.append("Test summary:\n");
+    			sb.append(passedCnt+" tests PASSED\n");
+    			sb.append(failedCnt+" tests FAILED\n");
+	    		if (skippedCnt > 0) {
+  	  			sb.append(skippedCnt+" tests SKIPPED due to initailization problems\n");
+    			}	
+    			l.log(sb.toString());
     		
-				tests.shutdown(myAgent);
+					tests.shutdown(myAgent);
+				}
 			}			
 		};
 		b.setDataStore(getDataStore());
@@ -213,6 +226,10 @@ public class TestGroupExecutor extends FSMBehaviour {
 	void resume() {
 		inPause = false;
 		super.restart();
+	}
+	
+	void setDebugMode(boolean b) {
+		debugMode = b;
 	}
 }
 

@@ -25,28 +25,14 @@
 package test.common.testerAgentControlOntology;
 
 import jade.content.*;
-import jade.core.AID;
 
 /**
  * @author Giovanni Caire - TILAB
  */
-public class Terminated implements Predicate {
-	private AID id;
+public class Exit implements AgentAction {
 
-	public Terminated() {
-	}
-	
-	public Terminated(AID id) {
-		setId(id);
-	}
-	
-	public AID getId() {
-		return id;
-	}
-	
-	public void setId(AID id) {
-		this.id = id;
-	}
+	public Exit() {
+	}	
 }
 
 

@@ -30,42 +30,9 @@ import jade.content.*;
  * @author Giovanni Caire - TILAB
  */
 public class Configure implements AgentAction {
-	private Boolean debugMode;
-	private Boolean remoteControlMode;
-	private String remoteControllerName;
 
 	public Configure() {
-	}
-	
-	public Configure(Boolean dm, Boolean tsm, String tsn) {
-		setDebugMode(dm);
-		setRemoteControlMode(tsm);
-		setRemoteControllerName(tsn);
-	}
-	
-	public Boolean getDebugMode() {
-		return debugMode;
-	}
-	
-	public void setDebugMode(Boolean b) {
-		debugMode = b;
-	}
-	
-	public Boolean getRemoteControlMode() {
-		return remoteControlMode;
-	}
-	
-	public void setRemoteControlMode(Boolean b) {
-		remoteControlMode = b;
-	}
-	
-	public String getRemoteControllerName() {
-		return remoteControllerName;
-	}
-	
-	public void setRemoteControllerName(String name) {
-		remoteControllerName = name;
-	}
+	}	
 }
 
 

@@ -38,15 +38,20 @@ public class TesterAgentControlOntology extends Ontology {
   public static final String ONTOLOGY_NAME = "Tester-agent-control-ontology";
 	
 	// VOCABULARY
+  public static final String EXECUTE = "EXECUTE";
+  public static final String EXECUTE_DEBUG_MODE = "debug-mode";
+  
   public static final String CONFIGURE = "CONFIGURE";
-  public static final String CONFIGURE_DEBUG_MODE = "debug-mode";
-  public static final String CONFIGURE_REMOTE_CONTROL_MODE = "remote-control-mode";
-  public static final String CONFIGURE_REMOTE_CONTROLLER_NAME = "remote-controller-name";
 
   public static final String RESUME = "RESUME";
+  public static final String RESUME_DEBUG_MODE = "debug-mode";
   
-  public static final String TERMINATED = "TERMINATED";
-  public static final String TERMINATED_ID = "id";
+  public static final String EXIT = "EXIT";
+  
+  public static final String EXEC_RESULT = "EXECRESULT";
+  public static final String EXEC_RESULT_PASSED = "passed";
+  public static final String EXEC_RESULT_FAILED = "failed";
+  public static final String EXEC_RESULT_SKIPPED = "skipped";
 
   // The singleton instance of this ontology
 	private static Ontology theInstance = new TesterAgentControlOntology();
@@ -62,17 +67,22 @@ public class TesterAgentControlOntology extends Ontology {
   	super(ONTOLOGY_NAME, BasicOntology.getInstance(), new ReflectiveIntrospector());
 
     try {
+    	add(new AgentActionSchema(EXECUTE), Execute.class);
     	add(new AgentActionSchema(CONFIGURE), Configure.class);
     	add(new AgentActionSchema(RESUME), Resume.class);
-    	add(new PredicateSchema(TERMINATED), Terminated.class);
+    	add(new AgentActionSchema(EXIT), Exit.class);
+    	add(new ConceptSchema(EXEC_RESULT), ExecResult.class);
     	
-    	AgentActionSchema as = (AgentActionSchema) getSchema(CONFIGURE);
-    	as.add(CONFIGURE_DEBUG_MODE, (PrimitiveSchema) getSchema(BasicOntology.BOOLEAN), ObjectSchema.OPTIONAL);
-    	as.add(CONFIGURE_REMOTE_CONTROL_MODE, (PrimitiveSchema) getSchema(BasicOntology.BOOLEAN), ObjectSchema.OPTIONAL);
-    	as.add(CONFIGURE_REMOTE_CONTROLLER_NAME, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    	AgentActionSchema as = (AgentActionSchema) getSchema(EXECUTE);
+    	as.add(EXECUTE_DEBUG_MODE, (PrimitiveSchema) getSchema(BasicOntology.BOOLEAN));
 
-    	PredicateSchema ps = (PredicateSchema) getSchema(TERMINATED);
-    	ps.add(TERMINATED_ID, (ConceptSchema) getSchema(BasicOntology.AID));
+    	as = (AgentActionSchema) getSchema(RESUME);
+    	as.add(RESUME_DEBUG_MODE, (PrimitiveSchema) getSchema(BasicOntology.BOOLEAN));
+
+    	ConceptSchema cs = (ConceptSchema) getSchema(EXEC_RESULT);
+    	cs.add(EXEC_RESULT_PASSED, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+    	cs.add(EXEC_RESULT_FAILED, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+    	cs.add(EXEC_RESULT_SKIPPED, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
     } 
     catch (OntologyException oe) {
     	oe.printStackTrace();

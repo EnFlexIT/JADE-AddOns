@@ -29,13 +29,13 @@ import jade.content.*;
 /**
  * @author Giovanni Caire - TILAB
  */
-public class Resume implements AgentAction {
+public class Execute implements AgentAction {
 	private boolean debugMode;
 
-	public Resume() {
-	}	
+	public Execute() {
+	}
 	
-	public Resume(boolean dm) {
+	public Execute(boolean dm) {
 		setDebugMode(dm);
 	}
 	

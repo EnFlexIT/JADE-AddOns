@@ -41,14 +41,15 @@ public class TestSuiteGui extends JFrame {
 	public static final int READY_STATE = 1;
 	public static final int RUNNING_STATE = 2;
 	public static final int DEBUGGING_STATE = 3;
+	public static final int CONFIGURING_STATE = 4;
 	private int status;
 	
 	private GuiAgent myAgent;
 	private String[] testers;
 	private String currentTester = null;
 	
-	private JButton exitB, openB, runB, debugB, stepB;
-	private JMenuItem exitI, openI, runI, debugI, stepI;
+	private JButton exitB, openB, runB, debugB, stepB, configB;
+	private JMenuItem exitI, openI, runI, debugI, stepI, configI;
 	private JTextField currentF;
 	
 	public TestSuiteGui(GuiAgent myAgent, String[] testers) {
@@ -63,6 +64,7 @@ public class TestSuiteGui extends JFrame {
 		Icon runImg = GuiProperties.getIcon("run");
 		Icon debugImg = GuiProperties.getIcon("debug");
     Icon stepImg = GuiProperties.getIcon("step");
+    Icon configImg = GuiProperties.getIcon("config");
     
 		/////////////////////////////////////////////////////
 		// Add Toolbar to the NORTH part of the border layout 
@@ -90,6 +92,12 @@ public class TestSuiteGui extends JFrame {
 		runB.setIcon(runImg);
 		//runB.setDisabledIcon(runImg);
 		runB.setToolTipText("Run the current tester agent");
+		
+		configB  = bar.add(new ConfigAction(this));
+		configB.setText("");
+		configB.setIcon(configImg);
+		//runB.setDisabledIcon(runImg);
+		configB.setToolTipText("Set arguments for the current tester agent");
 		
 		bar.addSeparator();
 		
@@ -139,7 +147,7 @@ public class TestSuiteGui extends JFrame {
 	}
 	
 	// Method called by the OpenAction
-	void openTester() {
+	void open() {
 		GenericChooser c = new GenericChooser();
 		int i = c.showChoiceDlg(this,
 						"Select the tester agent to run",
@@ -147,54 +155,50 @@ public class TestSuiteGui extends JFrame {
 						"Cancel",
 						testers);
 		if (i >= 0) {
-			currentTester = testers[i];
+			String currentTester = testers[i];
 			currentF.setText(currentTester);
-		}
-		
-		if (currentTester != null) {
+			// If we are in the IDLE state --> the event to be posted to the
+			// agent is LOAD. Otherwise (a tester was already active) it is RELOAD
+			GuiEvent ev = new GuiEvent(this, (status == IDLE_STATE ? TestSuiteAgent.LOAD_EVENT : TestSuiteAgent.RELOAD_EVENT)); 
+			ev.addParameter(currentTester);
 			setStatus(READY_STATE);
-		}
-		else {
-			setStatus(IDLE_STATE);
+			myAgent.postGuiEvent(ev);
 		}
 	}
 	
 	// Method called by the RunAction
-	void runTester() {
-		if (status == READY_STATE) {
-			if (currentTester != null) {
-				setStatus(RUNNING_STATE);
-				GuiEvent ev = new GuiEvent(this, TestSuiteAgent.RUN_TESTER_EVENT); 
-				ev.addParameter(currentTester);
-				myAgent.postGuiEvent(ev);
-			}
-		}
-		else {
-			// When we are in debug mode clicking on the RUN button means GO
-			setStatus(RUNNING_STATE);
-			GuiEvent ev = new GuiEvent(this, TestSuiteAgent.GO_EVENT);
-			myAgent.postGuiEvent(ev);
-		}
+	void run() {
+		// If we are in the READY state --> the event to be posted to the
+		// agent is RUN. Otherwise (the tester was already executing his 
+		// test group in debug mode) it is GO
+		GuiEvent ev = new GuiEvent(this, (status == READY_STATE ? TestSuiteAgent.RUN_EVENT : TestSuiteAgent.GO_EVENT)); 
+		setStatus(RUNNING_STATE);
+		myAgent.postGuiEvent(ev);
 	}
 	
 	// Method called by the DebugAction
-	void debugTester() {
-		if (currentTester != null) {
-			setStatus(DEBUGGING_STATE);
-			GuiEvent ev = new GuiEvent(this, TestSuiteAgent.DEBUG_TESTER_EVENT); 
-			ev.addParameter(currentTester);
-			myAgent.postGuiEvent(ev);
-		}
+	void debug() {
+		GuiEvent ev = new GuiEvent(this, TestSuiteAgent.DEBUG_EVENT); 
+		setStatus(DEBUGGING_STATE);
+		myAgent.postGuiEvent(ev);
 	}
 	
 	// Method called by the ExitAction
 	void exit() {
-		myAgent.postGuiEvent(new GuiEvent(this, TestSuiteAgent.EXIT_EVENT)); 
+		GuiEvent ev = new GuiEvent(this, (status == IDLE_STATE ? TestSuiteAgent.EXIT_EVENT : TestSuiteAgent.CLOSE_AND_EXIT_EVENT)); 
+		myAgent.postGuiEvent(ev); 
 	}
 	
 	// Method called by the StepAction
 	void step() {
-		myAgent.postGuiEvent(new GuiEvent(this, TestSuiteAgent.STEP_EVENT)); 
+		GuiEvent ev = new GuiEvent(this, TestSuiteAgent.STEP_EVENT); 
+		myAgent.postGuiEvent(ev); 
+	}
+		
+	// Method called by the ConfigureAction
+	void config() {
+		GuiEvent ev = new GuiEvent(this, TestSuiteAgent.CONFIGURE_EVENT); 
+		myAgent.postGuiEvent(ev); 
 	}
 		
 	public void setStatus(int status) {
@@ -207,6 +211,7 @@ public class TestSuiteGui extends JFrame {
 		runB.setEnabled(status == READY_STATE || status == DEBUGGING_STATE);
 		debugB.setEnabled(status == READY_STATE);
 		stepB.setEnabled(status == DEBUGGING_STATE);
+		configB.setEnabled(status == READY_STATE);
 	}
 	
 }

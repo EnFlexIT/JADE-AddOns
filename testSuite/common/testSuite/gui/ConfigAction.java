@@ -23,34 +23,24 @@ Boston, MA  02111-1307, USA.
 
 package test.common.testSuite.gui;
 
+import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
-import java.util.Properties;
-import java.io.*;
 
-/**
- * This class encapsulates some informations related to the GUI
- */
-class GuiProperties {
-	protected static UIDefaults myDefaults;
-	protected static GuiProperties foo = new GuiProperties();
-	public static final String imagePath = "";
- 	static {
-		Object[] icons = {
-			"exit",LookAndFeel.makeIcon(foo.getClass(), "images/exit.gif"),
-			"open",LookAndFeel.makeIcon(foo.getClass(), "images/open.gif"),
-			"run",LookAndFeel.makeIcon(foo.getClass(), "images/run.gif"),
-			"debug", LookAndFeel.makeIcon(foo.getClass(), "images/debug.gif"),
-			"step", LookAndFeel.makeIcon(foo.getClass(), "images/step.gif"),
-			"config", LookAndFeel.makeIcon(foo.getClass(), "images/config.gif")
-		};
+class ConfigAction extends AbstractAction
+{
+	private TestSuiteGui gui;
 
-		myDefaults = new UIDefaults (icons);
+	public ConfigAction(TestSuiteGui gui)
+	{
+		super ("Config");
+		this.gui = gui;
 	}
-
-	// synchronized to allows several instances to use the same code. 
-	synchronized public static final Icon getIcon(String key) {
-		Icon i = myDefaults.getIcon(key);
-		return i;
+	
+	public void actionPerformed(ActionEvent e) 
+	{
+		System.out.println("Config");
+		gui.config();
 	}
 }
-
+	

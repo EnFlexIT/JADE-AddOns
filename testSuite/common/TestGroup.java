@@ -51,6 +51,7 @@ public class TestGroup {
 	 */
 	public void specifyArgument(String name, String label, String defaultVal) {
 		ArgumentSpec a = new ArgumentSpec(name, label, defaultVal);
+		a.setValue(defaultVal);
 		argumentSpecs.add(a);
 	}
 	
@@ -63,6 +64,12 @@ public class TestGroup {
 		argumentSpecs.add(a);
 	}
 	
+	/**
+	   Used by the tests in the group to get arguments specified at 
+	   group level. These include arguments inserted by the user through
+	   the InsertArgumentsDlg and arguments explicitly set (generally in
+	   the initialize() method) using the setArgument() method.
+	 */
 	protected Object getArgument(String name) {
 		return args.get(name);
 	}
@@ -124,6 +131,14 @@ public class TestGroup {
 				args.put(a.getName(), a.getValue());
 			}
 		}
+	}
+	
+	/** 
+	   Bring the test group back to the beginning. Only called by
+	   the TesterAgent.
+	 */
+	void reset() {
+		cnt = 0;
 	}
 }
 	

@@ -38,7 +38,7 @@ class DebugAction extends AbstractAction {
 	
 	public void actionPerformed(ActionEvent e) {
 		System.out.println("Debug");
-		gui.debugTester();		
+		gui.debug();		
 	}
 }
 	
