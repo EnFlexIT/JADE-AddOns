@@ -31,7 +31,8 @@
   <property name="conf" value="conf"/>
   <property name="packageDir" value="jade/core/security/example/"/>
   <property name="libJADEDir" value="../../lib"/>
-  <property name="classpath" value="${jaderoot}/classes/;${classes};${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;./lib/bc/bcprov-jdk14-119.jar" /> 
+  <property name="bc.jar" value="lib/bc/bcprov-jdk14.jar"/>
+  <property name="classpath" value="${jaderoot}/classes/;${classes};${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${bc.jar};" /> 
   <property name="boot-java-1.1-classes" value="${java-1.1-home}/lib/classes.zip"/>
 
 
@@ -75,6 +76,7 @@
   <!-- Compile examples  -->
   <target name="examples" depends="init" description="Compile JADE-S examples.">
     <echo>--- Compiling examples ---</echo>
+    <echo> ${classpath} </echo>
     <javac srcdir="${examples}" destdir="${classes}" 
 	   classpath="${classpath}" 
 	   optimize="${optimised-build}"
@@ -126,12 +128,12 @@
   </target>
 
    <!-- Make the examples.jar file in ${lib} -->
-   <target name="examples.jar" depends="examples" description="Create 'examples.jar' file in the lib/ directory. ">
+   <target name="examples.jar" depends="lib,examples" description="Create 'examples.jar' file in the lib/ directory. ">
      <echo>--- Creating examples.jar ---</echo>
      <mkdir dir="${lib}"/>
      <jar jarFile="${lib}/examples.jar" 
                   basedir="${classes}" 
- 		 includes="examples/**" 
+ 		 includes="messaging/**,exitAgent/**" 
 		 excludes=""/>
    </target>
 
@@ -224,6 +226,7 @@
   <target name="lib-all">
     <!--  call lib on jade -->
     <echo message="--- Generating jade jar files... ---" />
+    <ant dir="../../" target="clean" />
     <ant dir="../../" target="lib" />
     <echo message="--- Generating jade-s jar files... ---" />
     <antcall target="lib" />
