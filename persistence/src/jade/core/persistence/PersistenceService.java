@@ -27,6 +27,7 @@ package jade.core.persistence;
 
 
 import jade.core.ServiceFinder;
+import jade.core.Command;
 import jade.core.HorizontalCommand;
 import jade.core.VerticalCommand;
 import jade.core.GenericCommand;
@@ -39,8 +40,11 @@ import jade.core.Filter;
 import jade.core.Node;
 
 import jade.core.Profile;
+import jade.core.LifeCycle;
 import jade.core.Agent;
 import jade.core.AID;
+import jade.core.Agent.Interrupted;
+import jade.core.CallbackInvokator;
 import jade.core.CaseInsensitiveString;
 import jade.core.ContainerID;
 import jade.core.Location;
@@ -58,6 +62,7 @@ import jade.core.messaging.GenericMessage;
 import jade.lang.acl.ACLMessage;
 import jade.mtp.MTPDescriptor;
 import jade.security.JADESecurityException;
+import jade.security.CredentialsHelper;
 
 import jade.util.leap.List;
 import jade.util.leap.ArrayList;
@@ -66,6 +71,7 @@ import jade.util.leap.HashMap;
 import jade.util.leap.Iterator;
 import jade.util.Logger;
 
+import java.io.InterruptedIOException;
 
 /**
 
@@ -77,7 +83,29 @@ import jade.util.Logger;
 */
 public class PersistenceService extends BaseService {
 
+  /**
+     Represents the <code>saving</code> agent state. This is the state
+     an agent goes into when its actual storage within a persistent
+     data repository takes place.
+   */
+  public static final int AP_SAVING = 10;
+  
+  /**
+     Represents the <code>loading</code> agent state. This is the
+     state an agent goes into when its current state is about to be
+     replaced with a new one retrieved from a persistent data
+     repository.
+   */
+  public static final int AP_RELOADING = 11;
+  
+  /**
+     Represents the <code>frozen</code> agent state. This is similar
+     to the suspended state, but the agent is actually removed from
+     its container and kept on a persistent store.
+   */
+  public static final int AP_FROZEN = 12;
 
+  
     private static class FrozenAgentsEntry {
 
 	public FrozenAgentsEntry(AID id, String sn, String rep, Long pk) {
@@ -229,7 +257,7 @@ public class PersistenceService extends BaseService {
 
 		public void run() {
 		    try {
-			helper.loadContainer(myContainer.getID(), repository);
+			defaultHelper.loadContainer(myContainer.getID(), repository);
 		    }
 		    catch(ServiceException se) {
 			se.printStackTrace();
@@ -262,7 +290,7 @@ public class PersistenceService extends BaseService {
     }
 
     public ServiceHelper getHelper(Agent a) {
-	return helper;
+	return new PersistenceHelperImpl(this);
     }
 
     public Behaviour getAMSBehaviour() {
@@ -557,6 +585,7 @@ public class PersistenceService extends BaseService {
 		ContainerID cid = impl.getContainerID(agentID);
 		PersistenceSlice targetSlice = (PersistenceSlice)getSlice(cid.getName());
 		try {
+			System.out.println("Freezing agent on repository "+repository+". Buffer = "+(bufferContainer == null ? "null" : bufferContainer.getName()));
 		    targetSlice.freezeAgent(agentID, repository, bufferContainer);
 		}
 		catch(IMTPException imtpe) {
@@ -843,7 +872,14 @@ public class PersistenceService extends BaseService {
 	    try {
 		Agent target = myContainer.acquireLocalAgent(agentID);
 		if(target != null) {
-		    target.requestSave(repository);
+			try {
+				PersistenceHelper helper = (PersistenceHelper) target.getHelper(PersistenceHelper.NAME);
+				helper.save(repository);
+			}
+			catch (ServiceException se) {
+				// Should never happen
+				se.printStackTrace();
+			}
 		}
 		else {
 		    throw new NotFoundException("Agent " + agentID.getLocalName() + " not found during save-agent");
@@ -886,7 +922,14 @@ public class PersistenceService extends BaseService {
 	    try {
 		Agent target = myContainer.acquireLocalAgent(agentID);
 		if(target != null) {
-		    target.requestReload(repository);
+			try {
+				PersistenceHelper helper = (PersistenceHelper) target.getHelper(PersistenceHelper.NAME);
+				helper.reload(repository);
+			}
+			catch (ServiceException se) {
+				// Should never happen
+				se.printStackTrace();
+			}
 		}
 		else {
 		    throw new NotFoundException("Agent " + agentID.getLocalName() + " not found during reload-agent");
@@ -915,7 +958,14 @@ public class PersistenceService extends BaseService {
 	    try {
 		Agent target = myContainer.acquireLocalAgent(agentID);
 		if(target != null) {
-		    target.requestFreeze(repository, bufferContainer);
+			try {
+				PersistenceHelper helper = (PersistenceHelper) target.getHelper(PersistenceHelper.NAME);
+				helper.freeze(repository, bufferContainer);
+			}
+			catch (ServiceException se) {
+				// Should never happen
+				se.printStackTrace();
+			}
 		}
 		else {
 		    throw new NotFoundException("Agent " + agentID.getLocalName() + " not found during freeze-agent");
@@ -1011,7 +1061,14 @@ public class PersistenceService extends BaseService {
 
 		// Insert a new entry into the pending operations table
 		submitSaveContainerOp(id, op);
-		a.requestSave(repository);
+		try {
+			PersistenceHelper helper = (PersistenceHelper) a.getHelper(PersistenceHelper.NAME);
+			helper.save(repository);
+		}
+		catch (ServiceException se) {
+			// Should never happen
+			se.printStackTrace();
+		}
 		myContainer.releaseLocalAgent(id);
 	    }
 
@@ -1575,6 +1632,362 @@ public class PersistenceService extends BaseService {
 
 
 
+
+  /////////////////////////////////////////////////////////
+  // These methods are called by the PersistenceHelperImpl
+  /////////////////////////////////////////////////////////
+  LifeCycle createSavingLC(String r, Savable s) {
+  	return new SavingLifeCycle(r, s, this);
+  }
+  
+  LifeCycle createFrozenLC(String r, ContainerID cid, Savable s) {
+  	return new FrozenLifeCycle(r, cid, s, this);
+  }
+  
+  LifeCycle createReloadingLC(String r, Savable s) {
+  	return new ReloadingLifeCycle(r, s, this);
+  }
+  
+	/**
+	   Inner class SavingLifeCycle
+	 */
+  private static class SavingLifeCycle extends LifeCycle {
+  	private String repository;
+  	private Savable mySavable;
+  	private transient PersistenceService myService; 
+  	
+  	private SavingLifeCycle(String r, Savable s, PersistenceService svc) {
+  		super(AP_SAVING);
+  		repository = r;
+  		mySavable = s;
+  		myService = svc;
+  	}
+  	
+  	public void init() {
+			myAgent.restoreBufferedState();
+			mySavable.afterLoad();
+			// The PersistenceHelper is transient --> The Savable object 
+			// is no longer registered --> restore it. 
+			restoreRegisteredSavable(myAgent, mySavable);
+		}
+		
+		public void execute() throws JADESecurityException, InterruptedException, InterruptedIOException {
+  		if (mySavable == null) {
+  			mySavable = new ReflectiveSavable(myAgent, myService.createInvokator());
+  		}
+			mySavable.beforeSave();
+		  try {
+		  	// Issue an SAVE_MYSELF vertical command
+				issueSaveMyself(myAgent.getAID(), repository);
+		  }
+		  catch (Exception e) {
+		  	if (myAgent.getState() == myState) {
+			  	// Something went wrong during the save. Rollback
+					repository = null;
+					myAgent.restoreBufferedState();
+					if (e instanceof JADESecurityException) {
+						// Will be caught together with all other JADESecurityException-s
+						throw (JADESecurityException) e;
+			  	}
+			  	else {
+			  		e.printStackTrace();
+			  		return;
+			  	}
+		  	}
+		  	else {
+		  		throw new Interrupted();
+		  	}
+		  }
+		  // Once saved go back to the previous state
+		  myAgent.restoreBufferedState();
+		}
+				
+		public void end() {
+			myAgent.clean(false);
+		}
+		
+		public boolean transitionTo(LifeCycle newLF) {
+			int s = newLF.getState();
+			return (s == Agent.AP_ACTIVE || s == Agent.AP_DELETED);
+		}
+		
+		private void issueSaveMyself(AID agentID, String repository) throws ServiceException, JADESecurityException, NotFoundException, IMTPException {
+	    GenericCommand cmd = new GenericCommand(PersistenceHelper.SAVE_MYSELF, PersistenceSlice.NAME, null);
+	    cmd.addParam(agentID);
+	    cmd.addParam(repository);
+	    // Set the credentials of the agent to be saved
+	    myService.initCredentials(cmd, agentID);
+	
+	    Object ret = myService.submit(cmd);
+	    if (ret != null) {
+	    	if (ret instanceof JADESecurityException) {
+	    		throw ((JADESecurityException) ret);
+	    	}
+	    	if (ret instanceof ServiceException) {
+	    		throw ((ServiceException) ret);
+	    	}
+	    	else if (ret instanceof NotFoundException) {
+	    		throw ((NotFoundException) ret);
+	    	}
+	    	else if (ret instanceof IMTPException) {
+	    		throw ((IMTPException) ret);
+	    	}
+	    	else if (ret instanceof Throwable) {
+	    		((Throwable) ret).printStackTrace();
+	    	}
+	    }
+		}
+  } // END of inner class SavingLifeCycle
+
+  
+	/**
+	   Inner class FrozenLifeCycle
+	 */
+  private static class FrozenLifeCycle extends LifeCycle {
+  	private String repository;
+  	private ContainerID bufferContainer;
+  	private Savable mySavable;
+  	private transient PersistenceService myService; 
+  	
+  	private boolean freezeComplete = false;
+  	
+  	private FrozenLifeCycle(String r, ContainerID cid, Savable s, PersistenceService svc) {
+  		super(AP_FROZEN);
+  		repository = r;
+  		bufferContainer = cid;
+  		mySavable = s;
+  		myService = svc;
+  	}
+  	
+  	public void init() {
+			myAgent.restoreBufferedState();			
+			mySavable.afterThaw();
+			// The PersistenceHelper is transient --> The Savable object 
+			// is no longer registered --> restore it.
+			restoreRegisteredSavable(myAgent, mySavable);
+		}
+		
+		public boolean alive() {
+			return !freezeComplete;
+		}
+		
+		public void execute() throws JADESecurityException, InterruptedException, InterruptedIOException {
+  		if (mySavable == null) {
+  			mySavable = new ReflectiveSavable(myAgent, myService.createInvokator());
+  		}
+			mySavable.beforeFreeze();
+		  try {
+		  	// Issue an FREEZE_MYSELF vertical command
+				issueFreezeMyself(myAgent.getAID(), repository, bufferContainer);
+				freezeComplete = true;
+		  }
+		  catch (Exception e) {
+		  	if (myAgent.getState() == myState) {
+			  	// Something went wrong during the freeze. Rollback
+					repository = null;
+					bufferContainer = null;
+					myAgent.restoreBufferedState();
+					if (e instanceof JADESecurityException) {
+						// Will be caught together with all other JADESecurityException-s
+						throw (JADESecurityException) e;
+			  	}
+			  	else {
+			  		e.printStackTrace();
+			  	}
+		  	}
+		  	else {
+		  		throw new Interrupted();
+		  	}
+		  }
+		}
+				
+		public void end() {
+			if (!freezeComplete) {
+	    	System.err.println("***  Agent " + myAgent.getName() + " frozen in a forbidden situation ***");
+				myAgent.clean(true);
+			}
+		}	
+		
+		public boolean transitionTo(LifeCycle newLF) {
+			int s = newLF.getState();
+			return (s == Agent.AP_ACTIVE || s == Agent.AP_DELETED);
+		}
+		
+		private void issueFreezeMyself(AID agentID, String repository, ContainerID bufferContainer) throws ServiceException, JADESecurityException, NotFoundException, IMTPException {
+      GenericCommand cmd = new GenericCommand(PersistenceHelper.FREEZE_MYSELF, PersistenceHelper.NAME, null);
+      cmd.addParam(agentID);
+      cmd.addParam(repository);
+      cmd.addParam(bufferContainer);
+      // Set the credentials of the agent to be frozen
+      myService.initCredentials(cmd, agentID);
+
+      Object ret = myService.submit(cmd);
+      if (ret != null) {
+      	if (ret instanceof ServiceException) {
+      		throw ((ServiceException) ret);
+      	}
+      	if (ret instanceof JADESecurityException) {
+      		throw ((JADESecurityException) ret);
+      	}
+      	else if (ret instanceof NotFoundException) {
+      		throw ((NotFoundException) ret);
+      	}
+      	else if (ret instanceof IMTPException) {
+      		throw ((IMTPException) ret);
+      	}
+      	else if (ret instanceof Throwable) {
+      		((Throwable) ret).printStackTrace();
+      	}
+      }
+		}
+  } // END of inner class FrozenLifeCycle
+
+     
+	/**
+	   Inner class ReloadingLifeCycle
+	 */
+  private static class ReloadingLifeCycle extends LifeCycle {
+  	private String repository;
+  	private Savable mySavable;
+  	private transient PersistenceService myService;
+  	
+  	private boolean reloadComplete = false;
+  	
+  	private ReloadingLifeCycle(String r, Savable s, PersistenceService svc) {
+  		super(AP_FROZEN);
+  		repository = r;
+  		mySavable = s;
+  		myService = svc;
+  	}
+  	
+  	public void init() {
+			myAgent.restoreBufferedState();
+			mySavable.afterReload();
+			// The PersistenceHelper is transient --> The Savable object 
+			// is no longer registered --> restore it. 
+			restoreRegisteredSavable(myAgent, mySavable);
+		}
+		
+		public boolean alive() {
+			return !reloadComplete;
+		}
+		
+		public void execute() throws JADESecurityException, InterruptedException, InterruptedIOException {
+  		if (mySavable == null) {
+  			mySavable = new ReflectiveSavable(myAgent, myService.createInvokator());
+  		}
+			mySavable.beforeReload();
+		  try {
+		  	// Issue an RELOAD_MYSELF vertical command
+				issueReloadMyself(myAgent.getAID(), repository);
+				reloadComplete = true;
+		  }
+		  catch (Exception e) {
+		  	if (myAgent.getState() == myState) {
+			  	// Something went wrong during the reload. Rollback
+					repository = null;
+					myAgent.restoreBufferedState();
+					if (e instanceof JADESecurityException) {
+						// Will be caught together with all other JADESecurityException-s
+						throw (JADESecurityException) e;
+			  	}
+			  	else {
+			  		e.printStackTrace();
+			  	}
+		  	}
+		  	else {
+		  		throw new Interrupted();
+		  	}
+		  }
+		}
+				
+		public void end() {
+			if (!reloadComplete) {
+	    	System.err.println("***  Agent " + myAgent.getName() + " reloaded in a forbidden situation ***");
+				myAgent.clean(true);
+			}
+		}	
+		
+		public boolean transitionTo(LifeCycle newLF) {
+			int s = newLF.getState();
+			return (s == Agent.AP_ACTIVE || s == Agent.AP_DELETED);
+		}
+		
+		private void issueReloadMyself(AID agentID, String repository) throws ServiceException, JADESecurityException, NotFoundException, IMTPException {
+      GenericCommand cmd = new GenericCommand(PersistenceHelper.RELOAD_MYSELF, PersistenceHelper.NAME, null);
+      cmd.addParam(agentID);
+      cmd.addParam(repository);
+      // Set the credentials of the agent to be reloaded
+      myService.initCredentials(cmd, agentID);
+
+      Object ret = myService.submit(cmd);
+      if (ret != null) {
+      	if (ret instanceof ServiceException) {
+      		throw ((ServiceException) ret);
+      	}
+      	if (ret instanceof JADESecurityException) {
+      		throw ((JADESecurityException) ret);
+      	}
+      	else if (ret instanceof NotFoundException) {
+      		throw ((NotFoundException) ret);
+      	}
+      	else if (ret instanceof IMTPException) {
+      		throw ((IMTPException) ret);
+      	}
+      	else if (ret instanceof Throwable) {
+      		((Throwable) ret).printStackTrace();
+      	}
+      }
+		}
+  } // END of inner class FrozenLifeCycle
+
+
+  /**
+     Inner class ReflectiveSavable.
+     This is the default Savable if no one is registered.
+     This Savable invoke using Java reflection the proper callback
+     method (if defined) on the agent itself.
+   */
+  private static class ReflectiveSavable implements Savable {
+  	private Agent myAgent;
+  	private CallbackInvokator myInvokator;
+  	
+  	ReflectiveSavable(Agent a, CallbackInvokator ci) {
+  		myAgent = a;
+  		myInvokator = ci;
+  	}
+  	
+	  public void beforeSave(){
+	  	myInvokator.invokeCallbackMethod(myAgent, "beforeSave");
+	  }
+		public void afterLoad(){
+	  	myInvokator.invokeCallbackMethod(myAgent, "afterLoad");
+	  }
+		public void beforeReload(){
+	  	myInvokator.invokeCallbackMethod(myAgent, "beforeReload");
+	  }
+		public void afterReload(){
+	  	myInvokator.invokeCallbackMethod(myAgent, "afterReload");
+	  }
+		public void beforeFreeze(){
+	  	myInvokator.invokeCallbackMethod(myAgent, "beforeFreeze");
+	  }
+		public void afterThaw(){
+	  	myInvokator.invokeCallbackMethod(myAgent, "afterThaw");
+	  }
+  }
+  
+  private static void restoreRegisteredSavable(Agent a, Savable s) {
+		try {
+			PersistenceHelper helper = (PersistenceHelper) a.getHelper(PersistenceHelper.NAME);
+			helper.registerSavable(s);
+		}
+		catch (ServiceException se) {
+			// Should never happen
+			se.printStackTrace();
+		}
+  }
+  
     // The concrete agent container, providing access to LADT, etc.
     private AgentContainer myContainer;
 
@@ -1583,374 +1996,6 @@ public class PersistenceService extends BaseService {
 
     // The local slice for this service
     private final ServiceComponent localSlice = new ServiceComponent();
-
-    // The helper for this service (entry point for agents).
-    private final PersistenceHelper helper = new PersistenceHelper() {
-
-	public void init(Agent a) {
-	}
-
-	public String[] getNodes() throws ServiceException, IMTPException {
-
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.GET_NODES, PersistenceHelper.NAME, null);
-	    Object result = submit(cmd);
-	    if((result != null) && (result instanceof Throwable)) {
-
-		if(result instanceof ServiceException) {
-		    throw (ServiceException)result;
-		}
-		if(result instanceof IMTPException) {
-		    throw (IMTPException)result;
-		}
-	    }
-
-	    return (String[])result;
-	}
-
-	public String[] getRepositories(String nodeName) throws ServiceException, IMTPException, NotFoundException  {
-
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.GET_REPOSITORIES, PersistenceHelper.NAME, null);
-	    cmd.addParam(nodeName);
-	    Object result = submit(cmd);
-	    if((result != null) && (result instanceof Throwable)) {
-
-		if(result instanceof ServiceException) {
-		    throw (ServiceException)result;
-		}
-		if(result instanceof IMTPException) {
-		    throw (IMTPException)result;
-		}
-		if(result instanceof NotFoundException) {
-		    throw (NotFoundException)result;
-		}
-
-	    }
-
-	    return (String[])result;
-	}
-
-	public String[] getSavedAgents(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException  {
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.GET_SAVED_AGENTS, PersistenceHelper.NAME, null);
-	    cmd.addParam(nodeName);
-	    cmd.addParam(repository);
-	    Object result = submit(cmd);
-	    if((result != null) && (result instanceof Throwable)) {
-
-		if(result instanceof ServiceException) {
-		    throw (ServiceException)result;
-		}
-		if(result instanceof IMTPException) {
-		    throw (IMTPException)result;
-		}
-		if(result instanceof NotFoundException) {
-		    throw (NotFoundException)result;
-		}
-
-	    }
-
-	    return (String[])result;
-	}
-
-	public String[] getFrozenAgents(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException {
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.GET_FROZEN_AGENTS, PersistenceHelper.NAME, null);
-	    cmd.addParam(nodeName);
-	    cmd.addParam(repository);
-	    Object result = submit(cmd);
-	    if((result != null) && (result instanceof Throwable)) {
-
-		if(result instanceof ServiceException) {
-		    throw (ServiceException)result;
-		}
-		if(result instanceof IMTPException) {
-		    throw (IMTPException)result;
-		}
-		if(result instanceof NotFoundException) {
-		    throw (NotFoundException)result;
-		}
-
-	    }
-
-	    return (String[])result;
-	}
-
-	public String[] getSavedContainers(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException {
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.GET_SAVED_CONTAINERS, PersistenceHelper.NAME, null);
-	    cmd.addParam(nodeName);
-	    cmd.addParam(repository);
-	    Object result = submit(cmd);
-	    if((result != null) && (result instanceof Throwable)) {
-
-		if(result instanceof ServiceException) {
-		    throw (ServiceException)result;
-		}
-		if(result instanceof IMTPException) {
-		    throw (IMTPException)result;
-		}
-		if(result instanceof NotFoundException) {
-		    throw (NotFoundException)result;
-		}
-
-	    }
-
-	    return (String[])result;
-	}
-
-	public void saveAgent(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException {
-
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.SAVE_AGENT, PersistenceHelper.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-	    }
-	}
-
-	public void loadAgent(AID agentID, String repository, ContainerID where) throws ServiceException, IMTPException, NotFoundException, NameClashException {
-
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.LOAD_AGENT, PersistenceHelper.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    cmd.addParam(where);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-		if(lastException instanceof NameClashException) {
-		    throw (NameClashException)lastException;
-		}
-	    }
-	}
-
-	public void reloadAgent(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException {
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.RELOAD_AGENT, PersistenceHelper.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-	    }
-	}
-
-	public void deleteAgent(AID agentID, String repository, ContainerID where) throws ServiceException, IMTPException, NotFoundException {
-
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.DELETE_AGENT, PersistenceHelper.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    cmd.addParam(where);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-	    }
-	}
-
-	public void saveMyself(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException {
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.SAVE_MYSELF, PersistenceHelper.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-	    }
-	}
-
-	public void reloadMyself(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException {
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.RELOAD_MYSELF, PersistenceHelper.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-	    }
-	}
-
-	public void freezeAgent(AID agentID, String repository, ContainerID bufferContainer) throws ServiceException, NotFoundException, IMTPException {
-
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.FREEZE_AGENT, PersistenceHelper.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    cmd.addParam(bufferContainer);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-	    }
-	}
-
-	public void thawAgent(AID agentID, String repository, ContainerID newContainer) throws ServiceException, NotFoundException, IMTPException {
-
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.THAW_AGENT, PersistenceHelper.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    cmd.addParam(newContainer);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-	    }
-	}
-
-	public void freezeMyself(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException {
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.FREEZE_MYSELF, PersistenceHelper.NAME, null);
-	    cmd.addParam(agentID);
-	    cmd.addParam(repository);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-	    }
-	}
-
-	public void saveContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException {
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.SAVE_CONTAINER, PersistenceHelper.NAME, null);
-	    cmd.addParam(cid);
-	    cmd.addParam(repository);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-	    }
-	}
-
-	public void loadContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException {
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.LOAD_CONTAINER, PersistenceHelper.NAME, null);
-	    cmd.addParam(cid);
-	    cmd.addParam(repository);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-		if(lastException instanceof NameClashException) {
-		    throw (NameClashException)lastException;
-		}
-	    }
-	}
-
-	public void deleteContainer(ContainerID cid, ContainerID where, String repository) throws ServiceException, IMTPException, NotFoundException {
-	    GenericCommand cmd = new GenericCommand(PersistenceHelper.DELETE_CONTAINER, PersistenceHelper.NAME, null);
-	    cmd.addParam(cid);
-            cmd.addParam(where);
-	    cmd.addParam(repository);
-	    Object lastException = submit(cmd);
-
-	    if(lastException != null) {
-
-		if(lastException instanceof ServiceException) {
-		    throw (ServiceException)lastException;
-		}
-		if(lastException instanceof IMTPException) {
-		    throw (IMTPException)lastException;
-		}
-		if(lastException instanceof NotFoundException) {
-		    throw (NotFoundException)lastException;
-		}
-	    }
-	}
-
-    };
 
     // The command sink, source side
     private final CommandSourceSink senderSink = new CommandSourceSink();
@@ -1967,6 +2012,10 @@ public class PersistenceService extends BaseService {
     // The behaviour object to be deployed within the AMS
     private Behaviour amsHandler;
 
+    // The default persistence helper used by the service itself and not
+    // associated to any agent
+    private final PersistenceHelperImpl defaultHelper = new PersistenceHelperImpl(this);
+    
     // The table of the primary keys for the currently frozen agents
     private Map frozenAgents = new HashMap();
 
@@ -1989,5 +2038,19 @@ public class PersistenceService extends BaseService {
 	return (SaveContainerOperation)saveContainerOps.get(agentID);
     }
 
+  private void initCredentials(Command cmd, AID id) {
+  	Agent agent = myContainer.acquireLocalAgent(id);
+  	if (agent != null) {
+  		try {
+		  	CredentialsHelper ch = (CredentialsHelper) agent.getHelper("jade.core.security.Security");
+	  		cmd.setPrincipal(ch.getPrincipal());
+	  		cmd.setCredentials(ch.getCredentials());
+	  	}
+	  	catch (ServiceException se) {
+	  		// The security plug-in is not there. Just ignore it
+	  	}
+  	}  		
+  	myContainer.releaseLocalAgent(id);
+  }
 }
 

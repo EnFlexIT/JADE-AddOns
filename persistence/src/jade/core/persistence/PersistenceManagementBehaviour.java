@@ -85,7 +85,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	    try {
 		LoadAgent la = (LoadAgent)action;
 
-		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		PersistenceHelperImpl h = (PersistenceHelperImpl)myAgent.getHelper(PersistenceHelper.NAME);
 		h.loadAgent(la.getAgent(), la.getRepository(), la.getWhere());
 	    }
 	    catch(ServiceNotActiveException snae) {
@@ -100,7 +100,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	else if(action instanceof ReloadAgent) {
 	    try {
 		ReloadAgent ra = (ReloadAgent)action;
-		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		PersistenceHelperImpl h = (PersistenceHelperImpl)myAgent.getHelper(PersistenceHelper.NAME);
 		h.reloadAgent(ra.getAgent(), ra.getRepository());
 	    }
 	    catch(ServiceNotActiveException snae) {
@@ -116,7 +116,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	    try {
 		SaveAgent sa = (SaveAgent)action;
 
-		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		PersistenceHelperImpl h = (PersistenceHelperImpl)myAgent.getHelper(PersistenceHelper.NAME);
 		h.saveAgent(sa.getAgent(), sa.getRepository());
 	    }
 	    catch(ServiceNotActiveException snae) {
@@ -132,7 +132,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	    try {
 		DeleteAgent da = (DeleteAgent)action;
 
-		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		PersistenceHelperImpl h = (PersistenceHelperImpl)myAgent.getHelper(PersistenceHelper.NAME);
 		h.deleteAgent(da.getAgent(), da.getRepository(), da.getWhere());
 	    }
 	    catch(ServiceNotActiveException snae) {
@@ -148,7 +148,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	    try {
 		FreezeAgent fa = (FreezeAgent)action;
 
-		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		PersistenceHelperImpl h = (PersistenceHelperImpl)myAgent.getHelper(PersistenceHelper.NAME);
 		h.freezeAgent(fa.getAgent(), fa.getRepository(), fa.getBufferContainer());
 	    }
 	    catch(ServiceNotActiveException snae) {
@@ -164,7 +164,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	    try {
 		ThawAgent ta = (ThawAgent)action;
 
-		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		PersistenceHelperImpl h = (PersistenceHelperImpl)myAgent.getHelper(PersistenceHelper.NAME);
 		h.thawAgent(ta.getAgent(), ta.getRepository(), ta.getNewContainer());
 	    }
 	    catch(ServiceNotActiveException snae) {
@@ -180,7 +180,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	    try {
 		SaveContainer sc = (SaveContainer)action;
 
-		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		PersistenceHelperImpl h = (PersistenceHelperImpl)myAgent.getHelper(PersistenceHelper.NAME);
 		h.saveContainer(sc.getContainer(), sc.getRepository());
 	    }
 	    catch(ServiceNotActiveException snae) {
@@ -196,7 +196,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	    try {
 		LoadContainer lc = (LoadContainer)action;
 
-		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		PersistenceHelperImpl h = (PersistenceHelperImpl)myAgent.getHelper(PersistenceHelper.NAME);
 		h.loadContainer(lc.getContainer(), lc.getRepository());
 	    }
 	    catch(ServiceNotActiveException snae) {
@@ -212,7 +212,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	    try {
 		DeleteContainer dc = (DeleteContainer)action;
 
-		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		PersistenceHelperImpl h = (PersistenceHelperImpl)myAgent.getHelper(PersistenceHelper.NAME);
 		h.deleteContainer(dc.getContainer(), dc.getWhere(), dc.getRepository());
 	    }
 	    catch(ServiceNotActiveException snae) {
