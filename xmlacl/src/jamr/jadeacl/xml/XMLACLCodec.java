@@ -65,7 +65,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 	}
     }
 
-    public static final String ACL_REPRESENTATION_NAME = "fipa.acl.rep.xml.std"; 
+    public static final String ACL_REPRESENTATION_NAME = jade.domain.FIPANames.ACLCodec.XML; 
 
 
 

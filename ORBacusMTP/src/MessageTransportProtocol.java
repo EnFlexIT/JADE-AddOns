@@ -48,6 +48,7 @@ import jade.core.AID;
 
 import jade.domain.FIPAAgentManagement.Envelope;
 import jade.domain.FIPAAgentManagement.ReceivedObject;
+import jade.domain.FIPANames;
 
 import jade.mtp.InChannel;
 import jade.mtp.OutChannel;
@@ -605,7 +606,7 @@ public class MessageTransportProtocol implements MTP {
   }
 
   public String getName() {
-    return "fipa.mts.mtp.iiop.std";
+    return FIPANames.MTP.IIOP; 
   }
 
   public String[] getSupportedProtocols() {
