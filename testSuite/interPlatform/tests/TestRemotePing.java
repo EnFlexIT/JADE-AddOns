@@ -53,7 +53,7 @@ public class TestRemotePing extends Test {
 			jc = TestUtility.launchJadeInstance("Container-1", null, new String("-container -host "+TestUtility.getLocalHostName()+" -port "+String.valueOf(Test.DEFAULT_PORT)+" -mtp jade.mtp.iiop.MessageTransportProtocol"), null); 
 	  	
 			AID remoteAMS = (AID) getGroupArgument(InterPlatformCommunicationTesterAgent.REMOTE_AMS_KEY);
-			resp = TestUtility.createTarget(a, RESPONDER_NAME, remoteAMS);
+			resp = TestUtility.createAgent(a, RESPONDER_NAME, TestUtility.CONFIGURABLE_AGENT, null, remoteAMS, null);
   		TestUtility.addBehaviour(a, resp, "test.common.behaviours.NotUnderstoodResponder");
   		
   		Behaviour b1 = new SimpleBehaviour() {
