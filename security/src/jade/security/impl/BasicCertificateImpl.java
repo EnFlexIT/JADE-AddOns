@@ -120,6 +120,20 @@ public class BasicCertificateImpl {
 		return new Date(Long.parseLong(s));
 	}
 
+	public String encodeBytes(byte[] b) {
+		if (b == null)
+			return "null";
+
+		return new java.math.BigInteger(+1, b).toString(16);
+	}
+	
+	static byte[] decodeBytes(String s) {
+		if (s.equals("null"))
+			return null;
+
+		return new java.math.BigInteger(s, 16).toByteArray();
+	}
+
 	public String encodePrincipal(JADEPrincipal p) {
 		if (p == null)
 			return "null";

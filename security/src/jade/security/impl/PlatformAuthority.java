@@ -113,7 +113,7 @@ public class PlatformAuthority extends ContainerAuthority {
 		sign((BasicCertificateImpl)certificate);
 	}
 
-	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] passwd) throws AuthException {
+	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] password) throws AuthException {
 		JADEPrincipal principal = identity.getSubject();
 		UserPrincipal user = null;
 		if (principal instanceof AgentPrincipal)
@@ -125,6 +125,7 @@ public class PlatformAuthority extends ContainerAuthority {
 		else
 			throw new AuthenticationException("Unknown principal type");
 
+		String hashed = Digest.digest(password, "MD5");
 		//System.out.println("authenticating");
 		//System.out.println("principal=" + principal + ";");
 		//System.out.println("password=" + new String(passwd) + ";");
@@ -134,12 +135,8 @@ public class PlatformAuthority extends ContainerAuthority {
 		else for (int i = 0; i < users.size(); i++) {
 			UserEntry entry = (UserEntry)users.elementAt(i);
 			if (entry.usr.equals(name)) {
-				if (passwd.length != entry.key.length())
+				if (! entry.key.equals(hashed))
 					throw new AuthenticationException("Wrong password");
-				for (int j = 0; j < entry.key.length(); j++) {
-					if (entry.key.charAt(j) != passwd[j])
-						throw new AuthenticationException("Wrong password");
-				}
 
 				// ok: user found + exact password
 				// add permissions here
