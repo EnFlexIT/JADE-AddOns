@@ -48,10 +48,10 @@ public class TestResultCellRenderer extends DefaultTreeCellRenderer {
 	private static class TestIconManager {
 		static TestIconManager theIconManager = new TestIconManager();
 		
-		private Icon errorIcon = new ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/error.gif"));
-		private Icon skippedIcon = new ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/skipped.gif"));
-		private Icon successIcon = new ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/success.gif"));
-		private Icon defaultIcon = new ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/default.gif"));
+		private Icon errorIcon = new ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/failed.png"));
+		private Icon skippedIcon = new ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/skipped.png"));
+		private Icon successIcon = new ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/success.png"));
+		private Icon defaultIcon = new ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/default.png"));
 	}
 
 	private TestSuiteGui myGui;

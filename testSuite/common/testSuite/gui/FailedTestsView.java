@@ -65,7 +65,7 @@ public class FailedTestsView extends javax.swing.JPanel implements java.io.Seria
         jScrollPane = new javax.swing.JScrollPane();
         jEditorPane = new javax.swing.JEditorPane();
 
-        CopyItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/copy.gif")));
+        CopyItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/editcopy.png")));
         CopyItem.setText("Copy");
         CopyItem.setToolTipText("Copy selected text to Clipboard");
         CopyItem.addActionListener(new java.awt.event.ActionListener() {
@@ -81,7 +81,7 @@ public class FailedTestsView extends javax.swing.JPanel implements java.io.Seria
 
         jPopupMenu.add(CopyItem);
 
-        CopyAllItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/copy_all.gif")));
+        CopyAllItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/copy_all.png")));
         CopyAllItem.setMnemonic('P');
         CopyAllItem.setText("Copy All");
         CopyAllItem.setToolTipText("Copy all contents to Clipboard");
@@ -95,7 +95,7 @@ public class FailedTestsView extends javax.swing.JPanel implements java.io.Seria
 
         jPopupMenu.add(jSeparator1);
 
-        ClearItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/clear.gif")));
+        ClearItem.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/filenew.png")));
         ClearItem.setMnemonic('E');
         ClearItem.setText("Clear");
         ClearItem.setToolTipText("Clear all text");
