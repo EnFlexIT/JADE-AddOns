@@ -220,9 +220,9 @@ class AgentPlatformWindow extends javax.swing.JInternalFrame implements GUIConst
     }
 
     public void thawAgent() {
-        String where = getSelectedNode();
         String repository = getSelectedRepository();
-        
+        String where = getSelectedContainers()[0];
+
         String[] names = getSelectedFrozenAgents();
         for(int i = 0; i < names.length; i++) {
             AID agentID = new AID(names[i], AID.ISGUID);
