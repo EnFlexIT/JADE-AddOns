@@ -858,7 +858,7 @@ class AgentPlatformWindow extends javax.swing.JInternalFrame implements GUIConst
 
     private Profile myProfile;
     private jade.wrapper.AgentContainer myContainer;
-    private jade.wrapper.Agent myAgentHandle;
+    private jade.wrapper.AgentController myAgentHandle;
     private PersistenceManagerAgent myAgent;
     private ActionProcessor myActionProcessor;
     private AgentTree myAgentTree;

@@ -274,7 +274,7 @@ public class PersistenceManagerGUI extends javax.swing.JFrame implements GUICons
                 Profile p = null;
                 switch(panel.getProfileKind()) {
                     case ConnectPlatformDlgBody.PROFILE_USEDEFAULT:
-                        p = new ProfileImpl();
+                        p = new ProfileImpl(new Properties());
                         break;
                     case ConnectPlatformDlgBody.PROFILE_USEHOSTANDPORT:
                         p = new ProfileImpl(panel.getProfileHost(), panel.getProfilePort(), panel.getProfileName());
@@ -285,7 +285,7 @@ public class PersistenceManagerGUI extends javax.swing.JFrame implements GUICons
                         p = new ProfileImpl(props);
                         break;
                     default:
-                        p = new ProfileImpl();
+                        p = new ProfileImpl(new Properties());
                         break;
                 }
 
