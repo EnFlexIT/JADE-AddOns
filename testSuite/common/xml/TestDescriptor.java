@@ -1,6 +1,6 @@
 package test.common.xml;
 
-import sun.net.TelnetInputStream;
+import jade.util.leap.HashMap;
 
 /**
  * @author Elisabetta Cortese - TiLab
@@ -16,6 +16,7 @@ public class TestDescriptor {
 	private String what = "";
 	private String how = "";
 	private String passedWhen = "";
+	private HashMap args = new HashMap();
 
 	public TestDescriptor(){
 	}
@@ -84,4 +85,11 @@ public class TestDescriptor {
 		passedWhen = p;
 	}
 
+	public String getArg(String key) {
+		return (String) args.get(key);
+	}
+	
+	public void setArg(String key, String value) {
+		args.put(key, value);
+	}
 }

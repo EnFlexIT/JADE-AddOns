@@ -238,66 +238,105 @@ public class TesterListVisualizer  extends JPanel
   static final int DOCTYPE_TYPE =   Node.DOCUMENT_TYPE_NODE;
   static final int NOTATION_TYPE =  Node.NOTATION_NODE;
 
-  // Extra credit: Read the list from a file
-  // Super-extra credit: Process a DTD and build the list.
-  static String[] treeElementNames = {
-        "TesterList",
-        "Tester",
-        "ClassName",   
-        "Description",
-        "TestsListRif",
-        "TestsList",
-        "Test",
-        "WhatTest",
-        "HowWorkTest",
-        "WhenTestPass"
+  // The set of TestSuite tags that must not be displayed as 
+  // tree elements.
+  private static String[] nonTreeElementTags = {
+			 	// The FUNC_DESCRIPTION_TAG and TEST_WHAT_TAG are not 
+				// visualized in the tree as their value is displayed in 
+				// the left part when the corresponding functionality/test
+				// is selected.
+        XMLManager.FUNC_DESCRIPTION_TAG,
+        XMLManager.TEST_WHAT_TAG
   };
   
-  private boolean treeElement(String elementName) {
-    for (int i=0; i<treeElementNames.length; i++) {
-      if ( elementName.equals(treeElementNames[i]) ) 
-      return true;
+  private boolean isNonTreeElementTag(String tag) {
+    for (int i = 0; i < nonTreeElementTags.length; i++) {
+      if (tag.equalsIgnoreCase(nonTreeElementTags[i])) { 
+      	return true;
+      }
     }
     return false;
   }
 
-  // This class wraps a DOM node and returns the text we want to
-  // display in the tree. It also returns children, index values,
-  // and child counts.
+  /**
+     Inner class AdapterNode.
+     This class wraps a DOM node into an Object that has a 
+     String representation consistent with what we want to display 
+     in the tree.
+     Some utility methods to provide children, index values and 
+     child counts are also provided.
+   */
   private class AdapterNode { 
     Node domNode;
 
-    // Construct an Adapter node from a DOM node
+    /**
+       Construct an AdapterNode wrapping a given DOM node
+     */
     public AdapterNode(Node node) {
       domNode = node;
     }
 
-    // Return a string that identifies this node in the tree
+    /**
+       Return a String representation of the wrapped node consistent 
+       with what we want to display in the tree. 
+     */
     public String toString() {
+    	// Default value
       String s = typeName[domNode.getNodeType()];
-      String nodeName = domNode.getNodeName();
-      if (! nodeName.startsWith("#")) {
-         if( domNode.getNodeType() == Node.ELEMENT_NODE){
-           s = nodeName;
-           if(s.equalsIgnoreCase("tester") || s.equalsIgnoreCase("test")){
-           	s = " "+domNode.getAttributes().getNamedItem("name").getNodeValue();
-           	String checkSkip = domNode.getAttributes().getNamedItem("skip").getNodeValue();
-           	if(checkSkip.equalsIgnoreCase("true")){
-           		s += " "+"SKIPPED";
-           	}
-           }
-         }else{
-           s += ": " + nodeName;
-         }
-      }
+      
+			if (domNode instanceof Element){
+				Element e = (Element) domNode;
+				String tag = e.getTagName();
+				if(tag.equalsIgnoreCase(XMLManager.FUNC_TAG) || tag.equalsIgnoreCase(XMLManager.TEST_TAG)) {
+					// The string representation is: <name-attribute> [SKIPPED]
+					s = e.getAttribute(XMLManager.NAME_ATTR);
+					if ("true".equalsIgnoreCase(e.getAttribute(XMLManager.SKIP_ATTR))) {
+						s += " SKIPPED";
+					}
+				}
+				else if (tag.equalsIgnoreCase(XMLManager.TEST_ARG_TAG)) {
+					// The string representation is: Arg: <key-attribute> = <value-attribute>
+					s = "Arg: "+e.getAttribute(XMLManager.KEY_ATTR)+" = "+e.getAttribute(XMLManager.VALUE_ATTR);
+				}
+				else {
+					// The string representation is just the tag
+					s = tag;
+				}
+			}
+			
       if(s.equals("Notation")){
-      	s="From XML Tester list:";
+      	// The root
+      	s="JADE Test Suite";
       }
       return s;
     }
 
+    /**
+       Return the content to be displayed in the right part of the 
+       test selection window when the node wrapped by this 
+       <code>AdapterNode</code> is selected. 
+     */
     public String content() {
-      String s = "";
+    	String s = "";
+    	if (domNode instanceof Element) {
+    		Element e = (Element) domNode;
+    		String tag = e.getTagName();
+				if (tag.equalsIgnoreCase(XMLManager.FUNC_TAG)) {
+					// Display the content of the <Description> sub-element
+					s = XMLManager.getContent(XMLManager.getSubElement(e, XMLManager.FUNC_DESCRIPTION_TAG));
+				}
+				else if (tag.equalsIgnoreCase(XMLManager.TEST_TAG)) {
+					// Display the content of the <What> sub-element
+					s = XMLManager.getContent(XMLManager.getSubElement(e, XMLManager.TEST_WHAT_TAG));
+				}
+				else {
+					// Display the content of this element
+					s = XMLManager.getContent(e);
+				}
+    	}
+    	return s;
+					
+      /*String s = "";
       NodeList nodeList = domNode.getChildNodes();
       for (int i=0; i<nodeList.getLength(); i++) {
         Node node = nodeList.item(i);
@@ -342,22 +381,56 @@ public class TesterListVisualizer  extends JPanel
 				//   NOTATION_TYPE  -- nothing but binary data in here
       }
       return s;
+      */
     }
 
     /*
      * Return children, index, and count values
      */
     public int index(AdapterNode child) {
-      //System.err.println("Looking for index of " + child);
+      /*System.err.println("Looking for index of " + child);
       int count = childCount();
       for (int i=0; i<count; i++) {
         AdapterNode n = this.child(i);
         if (child.domNode == n.domNode) return i;
       }
       return -1; // Should never get here.
+      */
+      int count = 0;
+      NodeList nl = domNode.getChildNodes();
+      int length = nl.getLength();
+      for (int i = 0; i < length; i++) {
+      	Node n = nl.item(i); 
+      	if (n.getNodeType() == ELEMENT_TYPE) {
+      		String tag = n.getNodeName();
+      		if (XMLManager.isTestSuiteTag(tag) && !isNonTreeElementTag(tag)) {
+      			if (n == child.domNode) {
+      				return count;
+      			}
+      		}
+      	}
+      }
+      return -1;
     }
 
     public AdapterNode child(int searchIndex) {
+      int count = 0;
+      NodeList nl = domNode.getChildNodes();
+      int length = nl.getLength();
+      for (int i = 0; i < length; i++) {
+      	Node n = nl.item(i); 
+      	if (n.getNodeType() == ELEMENT_TYPE) {
+      		String tag = n.getNodeName();
+      		if (XMLManager.isTestSuiteTag(tag) && !isNonTreeElementTag(tag)) {
+      			if (count == searchIndex) {
+      				return new AdapterNode(n);
+      			}
+	        	++count;
+      		}
+      	}
+      }
+      return null;
+      /*
       //Note: JTree index is zero-based. 
       Node node = domNode.getChildNodes().item(searchIndex);
 //        System.out.println("AdapterNode[child] Preso Nodo: "+node.getNodeName());
@@ -375,82 +448,101 @@ public class TesterListVisualizer  extends JPanel
         }
       }
       return new AdapterNode(node); 
+      */
     }
     
     public int childCount() {
-      if (!compress) {
+      //if (!compress) {
         // Indent this
-        return domNode.getChildNodes().getLength();
-      } 
+      //  return domNode.getChildNodes().getLength();
+      //} 
       int count = 0;
-      for (int i=0; i<domNode.getChildNodes().getLength(); i++) {
-         org.w3c.dom.Node node = domNode.getChildNodes().item(i); 
-         if (node.getNodeType() == ELEMENT_TYPE && treeElement( node.getNodeName() )) 
-         {
-           // Note: 
-           //   Have to check for proper type. 
-           //   The DOCTYPE element also has the right name
-           ++count;
-         }
+      NodeList nl = domNode.getChildNodes();
+      int length = nl.getLength();
+      for (int i = 0; i < length; i++) {
+      	Node n = nl.item(i); 
+      	if (n.getNodeType() == ELEMENT_TYPE) {
+      		String tag = n.getNodeName();
+      		if (XMLManager.isTestSuiteTag(tag) && !isNonTreeElementTag(tag)) {
+	        	++count;
+      		}
+      	}
       }
       return count;
     } 
   }  // END of Inner class AdapterNode
 
-  // This adapter converts the current Document (a DOM) into 
-  // a JTree model. 
+  /**
+     Inner class DomToTreeModelAdapter.
+     This adapter converts the current Document (a DOM) into 
+     a JTree model.
+   */
   private class DomToTreeModelAdapter implements javax.swing.tree.TreeModel 
   {
-    // Basic TreeModel operations
+    /**
+       Retrieve the root element of the tree
+     */
     public Object  getRoot() {
- //     System.err.println("Returning root: " +document);
-      
       return new AdapterNode(document);
-      
     }
+    
+    /**
+       Detect whether or not a given element is a leaf in the tree
+     */
     public boolean isLeaf(Object aNode) {
-      // Determines whether the icon shows up to the left.
       // Return true for any node with no children
       AdapterNode node = (AdapterNode) aNode;
       Node n = node.domNode;
-   		if(n.getNodeName().equalsIgnoreCase("testslistrif")){
-		 	Document d = XMLManager.getDocument(n.getFirstChild().getNodeValue());
-		 	if (d == null) {
-		 		return true;
-		 	}
-		 	NodeList nl =  d.getElementsByTagName("TestsList");
-			node.domNode = (Node) nl.item(0);
-			return false;
-   		}else{
-	        if (node.childCount() > 0) 
-	        	return false;
-	        return true;
-	      }
+   		if (n.getNodeName().equalsIgnoreCase(XMLManager.FUNC_TESTSLIST_TAG)) {
+		 		Document d = XMLManager.getDocument(XMLManager.getContent((Element) n));
+		 		if (d == null) {
+		 			return true;
+		 		}
+		 		// Replace the DOM node representing the Tests-list filename with
+		 		// the DOM node representing the document inside the Tests-list file
+		 		NodeList nl =  d.getElementsByTagName(XMLManager.TESTS_TAG);
+				node.domNode = (Node) nl.item(0);
+		 		return false;
+   		}
+   		else {
+	    	return (node.childCount() == 0);
+	    }
     }
+    
+    /**
+       Return the number of child elements of an element in the tree
+     */
     public int getChildCount(Object parent) {
       AdapterNode node = (AdapterNode) parent;
       return node.childCount();
     }
 
+    /**
+       Return the child of a given element at position <code>index</code>
+     */
     public Object getChild(Object parent, int index) {
       AdapterNode node = (AdapterNode) parent;
-    //  System.out.println("DomToTreeModelAdapter[getChild]: "+node.toString());
       return node.child(index);
     }
+    
+    /**
+       Return the index of a child of a given element in the tree
+     */
     public int getIndexOfChild(Object parent, Object child) {
       AdapterNode node = (AdapterNode) parent;
       return node.index((AdapterNode) child);
     }
+    
     public void valueForPathChanged(TreePath path, Object newValue) {
       // Null. We won't be making changes in the GUI
       // If we did, we would ensure the new value was really new,
       // adjust the model, and then fire a TreeNodesChanged event.
     }
 
-    /*
-     * Use these methods to add and remove event listeners.
-     * (Needed to satisfy TreeModel interface, but not used.)
-     */
+    //////////////////////////////////////////////////////
+    // The following methods are only needed to implement 
+    // the TreeModel interface
+    //////////////////////////////////////////////////////
     private Vector listenerList = new Vector();
     
     public void addTreeModelListener(TreeModelListener listener) {
