@@ -159,6 +159,13 @@ public class TestSuiteAgent extends GuiAgent {
     // tester agents.
 	  CyclicReceiver rec = new CyclicReceiver(this);
 	  addBehaviour(rec);    
+
+		// if (runAutomatic) then: set the logger to text file, runall.
+		// at the end it will also EXIT (see AllTesterExecutor.onEnd)
+		if (System.getProperty("test.common.testSuite.TestSuiteAgent.runAutomatic") != null) {
+				Logger.getLogger().setFileLogger(Logger.TXT_LOGGER);
+				onGuiEvent(new GuiEvent(this, RUNALL_EVENT));
+		}
   } 
 
   protected void takeDown() {
@@ -477,7 +484,7 @@ public class TestSuiteAgent extends GuiAgent {
       lg.log("******************************************");
       
       myGui.getStatusLabel().setText(finalReport);
-      
+
       String gifIcon;
       if (numFailed > 0) {
         gifIcon = "failed_buttons.gif";
@@ -491,6 +498,19 @@ public class TestSuiteAgent extends GuiAgent {
       myGui.getStatusLabel().setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/"+gifIcon)));
 
       lg.addBodyCloser();
+
+			// if (runAutomatic) then ask the platform to exit and exit myself
+			if (System.getProperty("test.common.testSuite.TestSuiteAgent.runAutomatic") != null) {
+					try {
+							TestUtility.requestAMSAction(myAgent, getAMS(), new jade.domain.JADEAgentManagement.ShutdownPlatform());
+							onGuiEvent(new GuiEvent(this, EXIT_EVENT));
+					} catch (Exception any) {
+							any.printStackTrace();
+							System.exit(0);
+					}
+			}
+
+      
 
       return 0;
     } 
