@@ -685,11 +685,11 @@ public class MessageTransportProtocol implements MTP {
 	  String[] IDLencrypted = new String[0];	
 
       // Fill in the other fields of the IDL envelope ...
-      String IDLcomments = env.getComments();
+      String IDLcomments = (env.getComments() != null)?env.getComments():"";
       String IDLaclRepresentation = env.getAclRepresentation();
       Long payloadLength = env.getPayloadLength();
       int IDLpayloadLength = payloadLength.intValue();
-      String IDLpayloadEncoding = env.getPayloadEncoding();
+      String IDLpayloadEncoding = (env.getPayloadEncoding() != null)?env.getPayloadEncoding():"";
       FIPA.DateTime[] IDLdate = new FIPA.DateTime[] { marshalDateTime(env.getDate()) };
       FIPA.Property[][] IDLtransportBehaviour = new FIPA.Property[][] { };
       // Fill in the 'userdefined-properties' field of the IDL envelope
