@@ -59,7 +59,6 @@ public interface JADEAuthority {
    * Signs the raw text following the information (e.g. algorithm, etc.)
    * contained in the SecurityObject and place the signature in the SecurityObject.
    * @return the signature
-   * TODO: Should throw a JADESecurityException
    */
   SecurityData sign(String algorithm, byte[] text) throws JADESecurityException;
 
@@ -67,7 +66,7 @@ public interface JADEAuthority {
    * Verify that the signature contained in the SecurityObject is a valid signature 
    * for the given text.
    */
-  boolean verifySignature(SecurityData sd, byte[] text) throws JADESecurityException;
+  boolean verifySignature(SecurityData signature, byte[] text) throws JADESecurityException;
 
   /**
    * Encrypt the clear <code>text</code> using the information 
