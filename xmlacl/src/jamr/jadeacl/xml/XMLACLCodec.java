@@ -95,7 +95,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 
     public static final String CONTENT_TAG="content";
     public static final String LANGUAGE_TAG="language";
-    public static final String CONTENT_LANGUAGE_ENCODING_TAG="content-language-encoding";
+    public static final String CONTENT_LANGUAGE_ENCODING_TAG="encoding";
     public static final String ONTOLOGY_TAG="ontology";
     public static final String PROTOCOL_TAG="protocol";
     public static final String REPLY_WITH_TAG="reply-with";
