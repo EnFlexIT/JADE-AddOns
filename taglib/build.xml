@@ -12,6 +12,7 @@
     <!-- Create the time stamp -->
     <tstamp/>
     <!-- Create the directories structure used to store files -->
+    <mkdir dir="${web}/WEB-INF/${build}"/>
   </target>
 
   <!-- Compile the java code from ${src} into ${build} -->
