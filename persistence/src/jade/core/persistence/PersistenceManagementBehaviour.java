@@ -213,7 +213,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 		DeleteContainer dc = (DeleteContainer)action;
 
 		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
-		h.deleteContainer(dc.getContainer(), dc.getRepository());
+		h.deleteContainer(dc.getContainer(), dc.getWhere(), dc.getRepository());
 	    }
 	    catch(ServiceNotActiveException snae) {
 		// The persistence service is not installed. Abort operation.
