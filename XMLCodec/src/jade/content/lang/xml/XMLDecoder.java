@@ -165,9 +165,10 @@ class XMLDecoder {
 			if (objectSchema1 instanceof AggregateSchema) {
 				addToStack(qname, attr, objectSchema1);		
 			 	objectSchema = getRelatedSchema(schemaName);	
-			}
-								
-			addToStack(qname, attr, objectSchema);		
+			 	if (objectSchema!=null) addToStack(qname, attr, objectSchema);		
+			} else
+				addToStack(qname, attr, objectSchema);		
+			
 	}
 	
 	protected void closeTag(String qname, String content) throws OntologyException {
@@ -190,7 +191,7 @@ class XMLDecoder {
 					//try {
 						StackElement prevComplex = stack.getPreviousComplexElement(0);
 						if (prevComplex.term instanceof AbsAggregate) {
-							((AbsAggregate)prevComplex.term).add((AbsTerm)top.term);
+								((AbsAggregate)prevComplex.term).add((AbsTerm)top.term);
 						} else if (prevComplex.term instanceof AbsContentElementList) {
 							((AbsContentElementList)prevComplex.term).add((AbsContentElement)top.term);
 						} else
@@ -204,20 +205,27 @@ class XMLDecoder {
 	
 	protected ObjectSchema getRelatedSchema(String qname) throws OntologyException {
 		ObjectSchema objectSchema = null;
+		boolean emptyAggregate = false;
 		
 		try {
 			objectSchema = ontology.getSchema(qname);
 		} catch (OntologyException e) {
 		}	
 		
-		while (objectSchema==null) {
+		while (objectSchema==null && !emptyAggregate) {
 				//try {				
 					StackElement prevElement = stack.getPreviousComplexElement(0);
 					ObjectSchema prevComplexSchema =  getConceptSchema(prevElement.term);
 					if (prevComplexSchema instanceof AggregateSchema) {
 						if (qname.equals(prevElement.tag)) {
 							ObjectSchema temp = getConceptSchema(stack.getPreviousComplexElement(1).term); 
-							objectSchema = getContentType(temp.getFacets(qname));
+							Facet[] facets = temp.getFacets(qname);
+							if (facets!=null)
+								objectSchema = getContentType(facets);
+							else  {
+								objectSchema = null;
+								emptyAggregate = true;
+							}
 						} else {
 							stack.pop();
 							AbsHelper.setAttribute(stack.getPreviousComplexElement(0).term, prevElement.tag, prevElement.term);

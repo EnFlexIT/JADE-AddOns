@@ -82,8 +82,15 @@ class XMLCoder {
 							  StringBuffer sb) throws Codec.CodecException {
 		
 		AbsAggregate absAggregate = (AbsAggregate)content;
+		int size = absAggregate.size();		
+		if (size>0) {
 		for (int i=0; i < absAggregate.size(); i++) 
 			encodeAsTag(absAggregate.get(i), null, memberExpectedType, tag, sb);
+		} else {
+			// The aggregate has zero elements
+			sb.append("<"+tag+">");
+			sb.append("</"+tag+">");
+		}
 	}
 	
 	void encodeAsTag(AbsObject content, ObjectSchema parentSchema, String slotExpectedType, String tag, StringBuffer sb) throws Codec.CodecException{ 
@@ -135,12 +142,15 @@ class XMLCoder {
 			if (content instanceof AbsAggregate) {
 				String memberExpectedType = null;
 				
-				Facet[] facets = parentSchema.getFacets(tag);	
-				for (int i = 0; i < facets.length; i++) {
-					if (facets[i] instanceof TypedAggregateFacet) {
-						memberExpectedType = ((TypedAggregateFacet)facets[i]).getType().getTypeName();
-					}
-				 }		
+				Facet[] facets = parentSchema.getFacets(tag);
+				if (facets!=null) {	
+					for (int i = 0; i < facets.length; i++) {
+						if (facets[i] instanceof TypedAggregateFacet) {
+							memberExpectedType = ((TypedAggregateFacet)facets[i]).getType().getTypeName();
+						}
+				 	}		
+				 }
+
     			encodeAggregateAsTag(content, memberExpectedType, tag, sb);
     			return;
     		}
@@ -156,11 +166,13 @@ class XMLCoder {
     		} else {
     			startTag = new String(tag);
     			closeTag = startTag;
-    		}
+    		} 
     	
     		if (slotExpectedType!=null) {
     				if (!(currSchema.getTypeName().equals(slotExpectedType))) 
 	   					startTag = startTag.concat(" type=\"" + currSchema.getTypeName() + "\"");
+    		} else if ((tag!=null) && (parentSchema==null)) {
+    			startTag = startTag.concat(" type=\"" + currSchema.getTypeName() + "\"");
     		}
     	
     		sb.append("<");
