@@ -1,6 +1,6 @@
 
-Istructions for the example: "delegation"
------------------------------------------
+Instructions for the example: "delegation"
+------------------------------------------
 
 
 Summary:

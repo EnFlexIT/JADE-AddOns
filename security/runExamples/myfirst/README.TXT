@@ -1,6 +1,6 @@
 
-Istructions for the example: "myfirst"
---------------------------------------
+Instructions for the example: "myfirst"
+---------------------------------------
 
 
 Summary:

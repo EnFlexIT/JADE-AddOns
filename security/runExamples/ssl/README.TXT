@@ -1,6 +1,6 @@
 
-Istructions for the example: "ssl"
-----------------------------------
+Instructions for the example: "ssl"
+-----------------------------------
 
 
 Summary:

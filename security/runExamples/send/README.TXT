@@ -1,6 +1,6 @@
 
-Istructions for the example: "send"
------------------------------------
+Instructions for the example: "send"
+------------------------------------
 
 
 Summary:
