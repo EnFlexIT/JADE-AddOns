@@ -37,6 +37,7 @@ public class AuthPermission extends java.security.Permission implements jade.uti
   public static final String AGENT_NAME = "agent-name";
   public static final String AGENT_OWNER = "agent-owner";  
   public static final String AGENT_CLASS = "agent-class";
+  public static final String CONTAINER_OWNER = "container-owner";
 
 
 
@@ -189,6 +190,12 @@ log("--[AuthPermission] ## implies()  result="+result);
                   ) ? 1:2;
           } else 
           if (key.equals(AGENT_OWNER)) {
+            cmp = (
+                  ( val.equals("*") ) ||
+                  ( cons1.equals(cons2)  )
+                  ) ? 1:2;
+          } else 
+          if (key.equals(CONTAINER_OWNER)) {
             cmp = (
                   ( val.equals("*") ) ||
                   ( cons1.equals(cons2)  )

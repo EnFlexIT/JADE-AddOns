@@ -60,7 +60,6 @@ abstract public class SecurityFactory {
    *  @seealso#getSecurityFactory()
    */
   static public SecurityFactory getSecurityFactory(Profile p) {
-    myLogger.log(Logger.SEVERE, " \n ----- getSecurityFactory(Profile ");
     String className = p.getParameter(SECURITY_FACTORY_CLASS_KEY,
                                       SECURITY_FACTORY_CLASS_DEFAULT);
     
@@ -72,10 +71,7 @@ abstract public class SecurityFactory {
       }
       catch (Exception e) {
         //e.printStackTrace();
-        myLogger.log( Logger.SEVERE, "\nError loading jade.security SecurityFactory:" +
-                       className);
-        myLogger.log( Logger.SEVERE, "Continuing with default: " +
-                       SECURITY_FACTORY_CLASS_DEFAULT);
+        myLogger.log( Logger.SEVERE, "\nError loading jade.security SecurityFactory:"+className+"\nContinuing with default: " +SECURITY_FACTORY_CLASS_DEFAULT);
       }
 
       if (singleton == null) {
@@ -96,7 +92,6 @@ abstract public class SecurityFactory {
       }
       profile = p;
     }
-    myLogger.log(Logger.SEVERE, "singleton:" + singleton);
     return singleton;
   } // end getSecurityFactory
 
