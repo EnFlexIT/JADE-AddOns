@@ -41,6 +41,8 @@ public class Barbara extends Agent {
 
 
   protected void setup() {
+	System.out.println("\n This is Barbara.");
+	System.out.println("\n Let Anja start on the main container.\n");
 
 	addBehaviour(new SimpleBehaviour(this) {
 

@@ -43,7 +43,7 @@ public class Anja extends Agent {
   protected void setup() {
 
 	System.out.println("\n This is Anja. Now I'm going to send messages to Barbara.");
-	System.out.println("\n Press enter to start");
+	System.out.println("\n Please start the other container, then press enter to start.");
 	try { 
 		System.in.read();
 	} catch (java.io.IOException e) {}
