@@ -18,6 +18,7 @@
     <tstamp/>
     <!-- Create the directories structure used to store files -->
     <mkdir dir="${classes}"/>
+    <mkdir dir="${lib}"/>
   </target>
 
   <!-- Compile the java code from ${src} into ${classes} -->
