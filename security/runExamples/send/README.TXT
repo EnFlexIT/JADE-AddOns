@@ -1,6 +1,6 @@
 
-Istruction for the example: "send"
-----------------------------------
+Istructions for the example: "send"
+-----------------------------------
 
 
 Summary:
@@ -21,7 +21,7 @@ agents belonging to different users.
 How to run it:
 -------------
 Open two command prompt windows, 
-Change dir for both at: security\examples\send
+Change dir for both at: security\runExamples\send
 
 In the first window, type:  main-yes.bat
 wait a few seconds (until the IOR appears), 
@@ -29,7 +29,7 @@ then, in the other command prompt window,
 type:  cont.bat
 Then press "enter" on the first window.
 
-The agents "Anja" will start sending messages to "Barbara".
+The agent "Anja" will start sending messages to "Barbara".
 No exception will be fired.
 
 Now close both windows.
