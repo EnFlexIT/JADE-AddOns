@@ -42,7 +42,7 @@ import jade.core.security.permission.PermissionService;
  */
 public class SecurityTestSuite extends TestSuiteAgent {
 
-  public static final String SECURITY_SERVICES = "jade.core.security.SecurityService;jade.core.security.signature.SignatureService;jade.core.security.encryption.EncryptionService";
+  public static final String SECURITY_SERVICES = "jade.core.security.SecurityService;jade.core.security.signature.SignatureService;jade.core.security.encryption.EncryptionService;jade.core.event.NotificationService";
   
   private static final String NAME = "Security-Test-Suite";
 
@@ -51,7 +51,7 @@ public class SecurityTestSuite extends TestSuiteAgent {
   public static void main(String[] args) {
     try {   
       // Launch the Main container in a separated process with no security service
-      TestUtility.launchJadeInstance("Main", null, "-gui -nomtp -local-port "+Test.DEFAULT_PORT+" -name "+TEST_PLATFORM_NAME, null);
+      TestUtility.launchJadeInstance("Main", null, "-gui -nomtp -local-port "+Test.DEFAULT_PORT+" -name "+TEST_PLATFORM_NAME+" -services "+SECURITY_SERVICES+" -"+SecurityService.AUTHENTICATION_LOGINMODULE_KEY+" SingleUser", null);
       
       // Get a hold on JADE runtime
       Runtime rt = Runtime.instance();
@@ -64,7 +64,6 @@ public class SecurityTestSuite extends TestSuiteAgent {
       Profile p = new ProfileImpl(null, Test.DEFAULT_PORT, null);
       p.setParameter(Profile.MAIN, "false");
       p.setParameter(SecurityService.AUTHENTICATION_LOGINMODULE_KEY, "SingleUser");
-      p.setParameter(PermissionService.SECURITY_MANAGER_KEY, PermissionService.SECURITY_MANAGER_NULL);
       p.setParameter(Profile.SERVICES, SECURITY_SERVICES);
       AgentContainer  mc = rt.createAgentContainer(p);
       AgentController testSuite = mc.createNewAgent(NAME, SecurityTestSuite.class.getName(), new String[]{"test/securityTester.xml"});
