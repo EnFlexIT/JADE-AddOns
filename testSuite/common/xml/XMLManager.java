@@ -56,8 +56,8 @@ public class XMLManager {
 	public XMLManager() {
 	}
 	
-	// this metod returns testers' list, in input tale the file name where
-	// is 
+	// this metod returns testers' list, in input it takes 
+	// the XML file name where is stored the tester list
 	public static FunctionalityDescriptor[] getFunctionalities(String xmlFileName){
 		FunctionalityDescriptor[] fd = null;
 		Document doc;
@@ -69,9 +69,9 @@ public class XMLManager {
 			factory.setValidating(true);
 			
 			DocumentBuilder builder = factory.newDocumentBuilder();
-      URL url = ClassLoader.getSystemResource(xmlFileName);
-      File f = new File(url.getFile());
-      System.out.println("Parsing file "+f);
+			URL url = ClassLoader.getSystemResource(xmlFileName);
+			File f = new File(url.getFile());
+			System.out.println("Parsing file "+f);
 			doc = builder.parse(f);
 			
 			NodeList list = doc.getElementsByTagName("Tester");
@@ -80,16 +80,10 @@ public class XMLManager {
 			for (int i = 0; i < list.getLength(); i++) {
 				fd[i] = new FunctionalityDescriptor();
 				Element e = (Element)list.item(i);
-				fd[i].setName( e.getAttribute("name"));
-				fd[i].setSkip( e.getAttribute("skip"));
+				fd[i] = getFunctionalityDescriptor(e);
 				if(!fd[i].getSkip()){
 					j++;
 				}
-				
-				Node n = ((NodeList)(e.getChildNodes())).item(1);
-				fd[i].setTesterClassName((n.getChildNodes()).item(0).getNodeValue());
-				n = ((NodeList)(e.getChildNodes())).item(3);
-				fd[i].setDescription((n.getChildNodes()).item(0).getNodeValue());
 			}
 			
 		}catch(SAXParseException spe ){
@@ -127,10 +121,11 @@ public class XMLManager {
 				k++;
 			}
 		}
-//		return fd;
 		return result;
 	}
 	
+	// this metod returns testers' list, in input it takes 
+	// the XML file name where is stored the test list for each tester
 	public static TestDescriptor[] getTests(String xmlFileName){
 		TestDescriptor[] td = null;
 		Document doc;
@@ -149,20 +144,10 @@ public class XMLManager {
 
 			for (int i = 0; i < list.getLength(); i++) {
 				Element e = (Element)list.item(i);
-				td[i] = new TestDescriptor();
-				td[i].setName(e.getAttribute("name"));
-				td[i].setSkip(e.getAttribute("skip"));
+				td[i] = getTestDescriptor(e);
 				if(!td[i].getSkip()){
 					j++;
 				}
-				Node n = ((NodeList)(e.getChildNodes())).item(1);
-				td[i].setTestClass((n.getChildNodes()).item(0).getNodeValue());
-				n = ((NodeList)(e.getChildNodes())).item(3);
-				td[i].setWhat((n.getChildNodes()).item(0).getNodeValue());
-				n = ((NodeList)(e.getChildNodes())).item(5);
-				td[i].setHow((n.getChildNodes()).item(0).getNodeValue());
-				n = ((NodeList)(e.getChildNodes())).item(7);
-				td[i].setPassedWhen((n.getChildNodes()).item(0).getNodeValue());
 			}
 			
 		}catch(SAXParseException spe ){
@@ -201,8 +186,42 @@ public class XMLManager {
 				k++;
 			}
 		}
-//		return td;
 		return result;
 	}
+	
+
+	public static FunctionalityDescriptor getFunctionalityDescriptor(Element e){
+		FunctionalityDescriptor fd = new FunctionalityDescriptor();
+		
+		fd.setName( e.getAttribute("name"));
+		fd.setSkip( e.getAttribute("skip"));
+		Node n = ((NodeList)(e.getChildNodes())).item(1);
+		fd.setTesterClassName((n.getChildNodes()).item(0).getNodeValue());
+		n = ((NodeList)(e.getChildNodes())).item(3);
+		fd.setDescription((n.getChildNodes()).item(0).getNodeValue());
+
+		return fd;
+	} 
+
+
+	public static TestDescriptor getTestDescriptor(Element e){
+		TestDescriptor td = new TestDescriptor();
+
+		td = new TestDescriptor();
+		td.setName(e.getAttribute("name"));
+		td.setSkip(e.getAttribute("skip"));
+		Node n = ((NodeList)(e.getChildNodes())).item(1);
+		td.setTestClass((n.getChildNodes()).item(0).getNodeValue());
+		n = ((NodeList)(e.getChildNodes())).item(3);
+		td.setWhat((n.getChildNodes()).item(0).getNodeValue());
+		n = ((NodeList)(e.getChildNodes())).item(5);
+		td.setHow((n.getChildNodes()).item(0).getNodeValue());
+		n = ((NodeList)(e.getChildNodes())).item(7);
+		td.setPassedWhen((n.getChildNodes()).item(0).getNodeValue());
+
+		return td;
+	} 
+	
+	
 
 }
