@@ -1,0 +1,5 @@
+CHANGES IN v0.2
+=============
+- Fixed encoding related bug ( end fipa-message tag was empty tag )
+- Fixed parser related bug ( was always using default parser )
+- Update documentation to show usage case
