@@ -47,8 +47,11 @@ import com.sun.net.ssl.*;
 */
 public class RMISSLIMTPManager extends RMIIMTPManager {
 
+	SecureSocketFactory socketFactory;
+
   public RMISSLIMTPManager() {
   	super();
+  	socketFactory = new SecureSocketFactory();
   }
 
 	/**
@@ -57,7 +60,7 @@ public class RMISSLIMTPManager extends RMIIMTPManager {
 		@return The client socket factory.
 	*/
 	public RMIClientSocketFactory getClientSocketFactory() {
-		return new SecureSocketFactory();
+		return socketFactory;
 	}
 
 	/**
@@ -66,7 +69,7 @@ public class RMISSLIMTPManager extends RMIIMTPManager {
 		@return The server socket factory.
 	*/
 	public RMIServerSocketFactory getServerSocketFactory() { 
-		return new SecureSocketFactory();
+		return socketFactory;
 	}
 
 }

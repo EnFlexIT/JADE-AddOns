@@ -23,30 +23,21 @@ Boston, MA  02111-1307, USA.
 
 package jade.security.impl;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.net.Socket;
-import java.net.ServerSocket;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.FileInputStream;
-
-import java.rmi.*;
-import java.rmi.registry.*;
+import java.io.*;
+import java.net.*;
 import java.rmi.server.*;
-
 import java.security.KeyStore;
-
-import javax.security.cert.X509Certificate;
-
 import javax.net.*;
 import javax.net.ssl.*;
-
-import com.sun.net.ssl.*;
-
+import javax.security.cert.X509Certificate;
 
 public class SecureSocketFactory implements RMIClientSocketFactory, RMIServerSocketFactory, Serializable {
+
+	transient SSLSocketFactory clientSocketFactory;
+	transient SSLServerSocketFactory serverSocketFactory;
+
+	public SecureSocketFactory() {
+	}
 
 	/**
 		Creates the client socket, which will be used
@@ -56,31 +47,34 @@ public class SecureSocketFactory implements RMIClientSocketFactory, RMIServerSoc
 		@return The client socket.
 	*/
 	public Socket createSocket(String host, int port) throws IOException {
-    SSLSocketFactory factory = null;
-    /*try {
-			System.setProperty("javax.net.ssl.trustStore", "trustkeys");
+		//System.out.println("creating client socket (" + host + ", " + port + ")");
+		if (clientSocketFactory == null) {
+			//clientSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
+	    try {
+				if (System.getProperty("javax.net.ssl.keyStore") == null)
+					System.setProperty("javax.net.ssl.keyStore", "keystore");
+				if (System.getProperty("javax.net.ssl.keyStorePassword") == null)
+					System.setProperty("javax.net.ssl.keyStorePassword", "passphrase");
+				if (System.getProperty("javax.net.ssl.trustStore") == null)
+					System.setProperty("javax.net.ssl.trustStore", "truststore");
 
-			javax.net.ssl.SSLContext ctx;
-			javax.net.ssl.KeyManagerFactory kmf;
-			KeyStore ks;
-			char[] passphrase = "passphrase".toCharArray();
+				char[] passphrase = System.getProperty("javax.net.ssl.keyStorePassword").toCharArray();
+				KeyStore ks = KeyStore.getInstance("JKS");
+				ks.load(new FileInputStream(System.getProperty("javax.net.ssl.keyStore")), passphrase);
 
-			ctx = javax.net.ssl.SSLContext.getInstance("TLS");
-			kmf = javax.net.ssl.KeyManagerFactory.getInstance("SunX509");
-			ks = KeyStore.getInstance("JKS");
-
-			ks.load(new FileInputStream("clientkeys"), passphrase);
-
-			kmf.init(ks, passphrase);
-			ctx.init(kmf.getKeyManagers(), null, null);
-
-			factory = ctx.getSocketFactory();
+				KeyManagerFactory kmf = javax.net.ssl.KeyManagerFactory.getInstance("SunX509");
+				kmf.init(ks, passphrase);
+	
+				SSLContext ctx = SSLContext.getInstance("TLS");
+				ctx.init(kmf.getKeyManagers(), null, null);
+				clientSocketFactory = ctx.getSocketFactory();
+	    }
+	    catch (Exception e) {
+	    	e.printStackTrace();
+				throw new IOException(e.getMessage());
+	    }
     }
-    catch (Exception e) {
-			throw new IOException(e.getMessage());
-    }*/
-		factory = (SSLSocketFactory)SSLSocketFactory.getDefault();
-    return factory.createSocket(host, port);
+    return clientSocketFactory.createSocket(host, port);
 	}
 
 	/**
@@ -90,32 +84,38 @@ public class SecureSocketFactory implements RMIClientSocketFactory, RMIServerSoc
 		@return The server socket.
 	*/
 	public ServerSocket createServerSocket(int port) throws IOException { 
-		SSLServerSocketFactory ssf = null;
-		try {
-			System.setProperty("javax.net.ssl.trustStore", "trustkeys");
+		System.out.println("creating SSL socket ");
+		//System.out.println("creating server socket (" + port + ")");
+		if (serverSocketFactory == null) {
+			//serverSocketFactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
+			try {
+				if (System.getProperty("javax.net.ssl.keyStore") == null)
+					System.setProperty("javax.net.ssl.keyStore", "keystore");
+				if (System.getProperty("javax.net.ssl.keyStorePassword") == null)
+					System.setProperty("javax.net.ssl.keyStorePassword", "passphrase");
+				if (System.getProperty("javax.net.ssl.trustStore") == null)
+					System.setProperty("javax.net.ssl.trustStore", "truststore");
 
-			// set up key manager to do server authentication
-			javax.net.ssl.SSLContext ctx;
-			javax.net.ssl.KeyManagerFactory kmf;
-			KeyStore ks;
-			char[] passphrase = "passphrase".toCharArray();
-			
-			ctx = javax.net.ssl.SSLContext.getInstance("TLS");
-			kmf = javax.net.ssl.KeyManagerFactory.getInstance("SunX509");
-			ks = KeyStore.getInstance("JKS");
-			
-			ks.load(new FileInputStream("serverkeys"), passphrase);
-			kmf.init(ks, passphrase);
-			ctx.init(kmf.getKeyManagers(), null, null);
-			
-			ssf = ctx.getServerSocketFactory();
+				char[] passphrase = System.getProperty("javax.net.ssl.keyStorePassword").toCharArray();
+				KeyStore ks = KeyStore.getInstance("JKS");
+				ks.load(new FileInputStream(System.getProperty("javax.net.ssl.keyStore")), passphrase);
+
+				KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+				kmf.init(ks, passphrase);
+
+				SSLContext ctx = SSLContext.getInstance("TLS");
+				ctx.init(kmf.getKeyManagers(), null, null);
+				serverSocketFactory = ctx.getServerSocketFactory();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				throw new IOException(e.getMessage());
+			}
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-		ServerSocket ss = ssf.createServerSocket(port);
-		//((SSLServerSocket)ss).setNeedClientAuth(true);
-		return ss;
+
+		ServerSocket serverSocket = serverSocketFactory.createServerSocket(port);
+		((SSLServerSocket)serverSocket).setNeedClientAuth(true);
+		return serverSocket;
 	}
 
 }
