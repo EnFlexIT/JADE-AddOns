@@ -262,7 +262,7 @@ public class TestSuiteAgent extends GuiAgent {
       // Exit the JVM when there are no more containers around
       rt.setCloseVM(true);
 
-      Profile pMain = new ProfileImpl(null, 8888, null);
+      Profile pMain = new ProfileImpl(null, Test.DEFAULT_PORT, null);
 			pMain.setSpecifiers(Profile.MTPS, new ArrayList());
 			
       MainContainer mc = rt.createMainContainer(pMain);

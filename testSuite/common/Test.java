@@ -38,6 +38,8 @@ import java.util.Hashtable;
 public abstract class Test {
   public static final int TEST_PASSED = 1;
   public static final int TEST_FAILED = 0;
+  
+  public static final int DEFAULT_PORT = 1099;
 
   private TestGroup myGroup;
   
