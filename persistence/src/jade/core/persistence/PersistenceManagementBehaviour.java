@@ -97,6 +97,21 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 		throw new FailureException("load-agent failed [" + e.getMessage() + "]");
 	    }
   	}
+	else if(action instanceof ReloadAgent) {
+	    try {
+		ReloadAgent ra = (ReloadAgent)action;
+		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		h.reloadAgent(ra.getAgent(), ra.getRepository());
+	    }
+	    catch(ServiceNotActiveException snae) {
+		// The persistence service is not installed. Abort operation.
+		throw new FailureException("-- Persistence service not active --");
+	    }
+	    catch(Exception e) {
+		// some other error occurred. Throws a FIPA Failure exception.
+		throw new FailureException("reload-agent failed [" + e.getMessage() + "]");
+	    }
+	}
   	else if(action instanceof SaveAgent) {
 	    try {
 		SaveAgent sa = (SaveAgent)action;
