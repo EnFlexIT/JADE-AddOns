@@ -21,12 +21,6 @@ package jade.core.security;
 
 //#MIDP_EXCLUDE_FILE
 
-import java.io.*;
-
-//import javax.security.auth.Subject;
-//import javax.security.auth.kerberos.KerberosPrincipal;
-//import javax.security.auth.login.LoginContext;
-//import javax.security.auth.login.LoginException;
 
 import jade.core.*;
 import jade.core.security.util.*;
@@ -126,10 +120,7 @@ public class SecurityService extends BaseService {
     // simple login crdentials file
     copyProp( "jade_security_authentication_loginsimplecredfile");
     
-    // container's policy file
-    copyProp( "java.security.policy");
-
-  } // end setPropertiesFromProfile
+  } // end setPropertiesValue
   private void copyProp(String key){
     String val =  myProfile.getParameter( key, null );
     if (( val!=null) && (val.length()>0)) System.setProperty(  key, val );
@@ -147,6 +138,7 @@ public class SecurityService extends BaseService {
       SO_FORMAT = soc.getName();
     }
     catch(Exception e) {
+      if (myLogger.isLoggable(Logger.SEVERE))
       myLogger.log( Logger.SEVERE,e.toString());
     }
   }
@@ -242,53 +234,6 @@ public class SecurityService extends BaseService {
     }
   }
 
-	/**
-	 * Implementation of the abstract jade.core.security.SecurityHelper.
-   private class SecurityHelperImpl extends SecurityHelper {
-
-   // (non-Javadoc)
-   // @see jade.core.security.SecurityHelper#authenticateUser()
-   //
-   public LoginContext authenticateUser() throws ServiceException {
-   myLogger.log( Logger.FINEST, 
-   "SecurityHelperImpl -> authenticateUser() method called.");
-   GenericCommand cmd =
-   new GenericCommand(
-   SecurityHelper.AUTHENTICATE_USER,
-   getName(),
-   null);
-   Object result = submit(cmd);
-   if (result == null) {
-   myLogger.log( Logger.WARNING, 
-   "SecurityHelperImpl -> User authentication has failed due to null result.\n"
-   + "Exiting JVM...");
-   System.exit(0);
-   } else if ((result instanceof Throwable)) {
-   myLogger.log( Logger.WARNING, 
-   "SecurityHelperImpl -> User authentication has failed due to the following exception:\n"
-   + ((Throwable) result).getMessage()
-   + "\nExiting JVM...");
-   //((Throwable) result).printStackTrace();
-   System.exit(0);
-   } else if (!(result instanceof LoginContext)) {
-   myLogger.log( Logger.SEVERE, 
-   "SecurityHelperImpl -> User authentication has failed due to unexpected type of result:\n"
-   + result.getClass()
-   + "\nExiting JVM...");
-   System.exit(0);
-   }
-   // Successfull Authentication.
-   myLogger.log( Logger.INFO, 
-   "\n\nSecurityHelperImpl -> User authentication has succeeded."
-   + "\nThe login context's subject is:\n"
-   + ((Subject) ((LoginContext) result).getSubject()).toString()
-   + "\n ");
-   return (LoginContext) result;
-   };
-   }
-  */
-
-
 
 
   // called from init(), loads the container's keypair
@@ -312,7 +257,7 @@ public class SecurityService extends BaseService {
     return authority;
   }
 
- 
+
   /* 
      Authenticate against the login module (that includes asking for user/pass)
      get or create the user JADEPrincipal and its initial Credentials and 
@@ -377,6 +322,7 @@ public class SecurityService extends BaseService {
    */
   private void authenticateSingleUserMode(){
     try {
+      if (myLogger.isLoggable(Logger.INFO))
       myLogger.log(Logger.INFO, "'SingleUser' mode.  The platform has a single user named: 'jade'.");
       passUserPrincipalToTheContainer(new JADEPrincipalImpl("jade"), null);
     }
@@ -393,6 +339,7 @@ public class SecurityService extends BaseService {
     if (userPrincipal != null) {
       myContainer.getNodeDescriptor().setOwnerPrincipal(userPrincipal);
     } else {
+      if (myLogger.isLoggable(Logger.WARNING))
       myLogger.log(Logger.WARNING,
           "SecurityService -> Unable to set Container Principal from User Authenticator");
       throw new JADESecurityException("Authentication failed. Unable to set Container Principal from User Authenticator.");
@@ -410,8 +357,10 @@ public class SecurityService extends BaseService {
 
   // when authentication fails, prints out message and exit the JVM !
   private void goAway(Exception e) {
+     if (myLogger.isLoggable(Logger.SEVERE))
      myLogger.log(Logger.SEVERE, 
                   "\n ---USER NOT AUTHENTICATED---   Go away! \n");
+     if (myLogger.isLoggable(Logger.FINER))
      myLogger.log(Logger.FINER, e.getMessage());
      //e.printStackTrace();
      System.exit( -1);
