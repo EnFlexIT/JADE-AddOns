@@ -179,7 +179,7 @@
 
   <!-- Create the zip file -->
   <target name="zip">
-    <zip zipfile="./jadesecurity.zip" 
+    <zip zipfile="../../jadesecurity.zip" 
          basedir="../../../" 
 	 	 includes="jade/add-ons/security/**" 
 		 excludes="jade/add-ons/security/*.zip,jade/add-ons/security/${doc}/api/**,jade/add-ons/security/src/test/**"/>
