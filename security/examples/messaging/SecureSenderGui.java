@@ -22,7 +22,7 @@
  * Boston, MA  02111-1307, USA.
  * **************************************************************
  */ 
-package examples.security.messaging;
+package messaging;
 
 import java.awt.*;
 import java.awt.event.*;

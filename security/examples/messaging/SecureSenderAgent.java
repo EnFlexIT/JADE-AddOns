@@ -22,7 +22,7 @@
  * Boston, MA  02111-1307, USA.
  * **************************************************************
  */
-package examples.security.messaging;
+package messaging;
 
 import jade.core.*;
 import jade.core.behaviours.*;
@@ -72,7 +72,7 @@ public class SecureSenderAgent extends Agent {
   public void sendMessage(ACLMessage msg, boolean signed, boolean encrypted) {
   	if (signed) {
   		// The message must be signed
-  		mySecurityHelper.toSign(msg);
+  		mySecurityHelper.setUseSignature(msg);
   	}
   	
   	if (encrypted) {
@@ -99,7 +99,7 @@ public class SecureSenderAgent extends Agent {
   			}
   		}
   		
-  		mySecurityHelper.toEncrypt(msg);
+  		mySecurityHelper.setUseEncryption(msg);
   	}
   	
   	System.out.println(getName()+": Sending message (sign "+signed+", encrypt "+encrypted+")");
@@ -111,7 +111,7 @@ public class SecureSenderAgent extends Agent {
   	ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
   	request.addReceiver(id);
   	request.setContent(SecureReceiverAgent.GET_PRINCIPAL);
-  	mySecurityHelper.toSign(request);
+  	mySecurityHelper.setUseSignature(request);
   	ACLMessage reply = FIPAService.doFipaRequestClient(this, request, 5000);
   	if (reply != null) {
   		return mySecurityHelper.getPrincipal(reply);

@@ -22,7 +22,7 @@
  * Boston, MA  02111-1307, USA.
  * **************************************************************
  */
-package examples.security.messaging;
+package messaging;
 
 import jade.core.*;
 import jade.core.behaviours.*;
@@ -50,16 +50,16 @@ public class SecureReceiverAgent extends Agent {
 	  		public void action() {
 	  			ACLMessage msg = myAgent.receive();
 	  			if (msg != null) {
-	  				if (mySecurityHelper.isSigned(msg)) {
+	  				if (mySecurityHelper.getUseSignature(msg)) {
 	  					if (GET_PRINCIPAL.equals(msg.getContent())) {
 		  					System.out.println(myAgent.getName()+": Principal request received from "+msg.getSender().getName()+". Replying...");
 	  						ACLMessage reply = msg.createReply();
 	  						reply.setPerformative(ACLMessage.INFORM);
-	  						mySecurityHelper.toSign(reply);
+	  						mySecurityHelper.setUseSignature(reply);
 	  						myAgent.send(reply);
 	  					}
 	  					else { 
-	  						if (mySecurityHelper.isEncrypted(msg)) {
+	  						if (mySecurityHelper.getUseEncryption(msg)) {
 			  					System.out.println(myAgent.getName()+": Signed and encrypted message received:");
 	  						}
 	  						else { 
