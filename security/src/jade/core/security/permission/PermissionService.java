@@ -32,6 +32,10 @@ import jade.core.Filter;
 import jade.core.Profile;
 import jade.core.AgentContainer;
 import jade.core.ProfileException;
+import jade.core.ContainerID;
+import jade.core.NodeDescriptor;
+import jade.core.NotFoundException;
+import jade.core.MainContainer;
 import jade.core.security.authentication.NameCertificate;
 import jade.security.JADEPrincipal;
 import jade.security.CertificateEncodingException;
@@ -389,6 +393,18 @@ public class PermissionService
     }
 
 
+		public JADEPrincipal getContainerOwner(ContainerID cid) throws NotFoundException {
+			MainContainer mc = myContainer.getMain();
+			if (mc != null) {
+				NodeDescriptor nd = mc.getContainerNode(cid);
+				return nd.getOwnerPrincipal();
+			}
+			else {
+				// This is available on the main container only
+				throw new NotFoundException("Not on main");
+			}
+		}
+				
     public JADEAccessController getJADEAccessController() {
       if (myJADEAccessController==null) {
         // -- create the container JADEAccessController --
