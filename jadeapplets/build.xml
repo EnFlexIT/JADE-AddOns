@@ -13,12 +13,6 @@
             <fileset dir="${dist}/lib">
                 <include name="**/*.jar"/>
             </fileset>
-            <fileset dir="${dist}/add-ons/http/lib">
-                <include name="http.jar"/>
-            </fileset>
-            <fileset dir="${dist}/add-ons/http/lib/sax2">
-                <include name="sax2.jar"/>
-            </fileset>
         </copy>
     </target>
 
