@@ -417,7 +417,7 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
         myDialog.dispose();
     }
 
-     // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel borderPanel;
     private javax.swing.JPanel bottomPanel;
     private javax.swing.JButton browseButton;
@@ -449,44 +449,6 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
     private javax.swing.JPanel propsUrlPanel1;
     private javax.swing.JLabel slashLabel;
     private javax.swing.JPanel topPanel;
-    private javax.swing.JRadioButton useDefaultProfileRadio;
-    private javax.swing.JRadioButton useHostPortRadio;
-    private javax.swing.JRadioButton usePropertiesRadio;
-    // End of variables declaration
-   // Variables declaration - do not modify
-    private javax.swing.JPanel borderPanel;
-    private javax.swing.JPanel bottomPanel;
-    private javax.swing.JPanel bottomSpace1;
-    private javax.swing.JButton browseButton;
-    private javax.swing.JPanel browseButtonPanel;
-    private javax.swing.JButton cancelButton;
-    private javax.swing.JLabel colonLabel;
-    private javax.swing.JPanel containerKind;
-    private javax.swing.ButtonGroup createContainerGroup;
-    private javax.swing.JRadioButton createMainRadio;
-    private javax.swing.JRadioButton createPeripheralRadio;
-    private javax.swing.ButtonGroup createProfileGroup;
-    private javax.swing.JLabel defaultProfileLabel;
-    private javax.swing.JPanel hostPortProfilePanel;
-    private javax.swing.JButton metaDBBrowseButton;
-    private javax.swing.JPanel metaDBBrowseButtonPanel;
-    private javax.swing.JPanel metaDBPanel;
-    private javax.swing.JTextField metaDBUrlField;
-    private javax.swing.JPanel middlePanel;
-    private javax.swing.JTextField nickField;
-    private javax.swing.JPanel nickPanel;
-    private javax.swing.JButton okButton;
-    private javax.swing.JTextField profileHostField;
-    private javax.swing.JPanel profileKind;
-    private javax.swing.JTextField profileNameField;
-    private javax.swing.JTextField profilePortField;
-    private javax.swing.JPanel propertiesProfilePanel;
-    private javax.swing.JTextField propsUrlField;
-    private javax.swing.JPanel propsUrlPanel;
-    private javax.swing.JPanel propsUrlPanel1;
-    private javax.swing.JLabel slashLabel;
-    private javax.swing.JPanel topPanel;
-    private javax.swing.JPanel topSpace1;
     private javax.swing.JRadioButton useDefaultProfileRadio;
     private javax.swing.JRadioButton useHostPortRadio;
     private javax.swing.JRadioButton usePropertiesRadio;
