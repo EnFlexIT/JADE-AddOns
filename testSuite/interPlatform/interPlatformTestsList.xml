@@ -7,9 +7,16 @@
 	<TestsList> 
 		<Test name="Basic inter platform communication" skip="false">
 			<TestClassName>test.interPlatform.tests.TestRemotePing</TestClassName>
-			<WhatTest> Tests sending and receiving a message to/from an agent on a remote platform.</WhatTest>
+			<WhatTest> Test the correct handling of the :reply-to slot of an ACL message.</WhatTest>
 			<HowWorkTest>An agent is created on a remote platform and then a ping message is sent to it</HowWorkTest>
 			<WhenTestPass> The test passes if the agent on the remote platform receives the ping message and replies correctly and no exception is fired.</WhenTestPass>
+		</Test>
+		
+		<Test name="Reply-to" skip="false">
+			<TestClassName>test.interPlatform.tests.TestReplyTo</TestClassName>
+			<WhatTest> Tests sending and receiving a message to/from an agent on a remote platform.</WhatTest>
+			<HowWorkTest>The Tester agent sends a message to agent A specifying B in the reply-to slot. Agent A creates a reply and puts the sender of the incoming message in the reply-to slot of the reply. B does the same so that the Tester should get back a reply from B</HowWorkTest>
+			<WhenTestPass> The test passes if the tester gets back a reply from B</WhenTestPass>
 		</Test>
 		
 		<Test name="Message Envelope transfer" skip="false">
