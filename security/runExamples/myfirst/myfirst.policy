@@ -25,6 +25,17 @@ grant codebase "file:../../../../add-ons/security/lib/jadeS.jar" {
 //	permission jade.security.impl.AgentPermission "bob", "send-to,receive-from"; };
 
 
+
+//
+// --- UNCOMMENT the following, so that 'bob' is allowed to kill 'da1' on 'Container-1'  ---
+//
+//grant principal jade.security.impl.PrincipalImpl "bob" {
+//	permission jade.security.impl.AgentPermission "/da1", "kill";
+//	permission jade.security.impl.ContainerPermission "/Container-1", "kill-in";
+//	permission jade.security.impl.AMSPermission "/da1", "modify";
+//};
+
+
 // enable a set of permissions for 'bob'
 grant principal jade.security.impl.PrincipalImpl "bob" {
 	permission jade.security.impl.AgentPermission "bob", "create,kill,suspend,resume,take,send-to,send-as,receive-from,move,copy";
