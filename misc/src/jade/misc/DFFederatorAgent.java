@@ -31,10 +31,13 @@ import jade.content.ContentManager;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.lang.acl.ACLMessage;
+import jade.domain.JADEAgentManagement.ShowGui;
+import jade.domain.JADEAgentManagement.*;	   
 
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * This agent uses a property file to request a subDF to federate with a rootDF. <br>
@@ -64,6 +67,8 @@ import java.util.Enumeration;
 public class DFFederatorAgent extends Agent {
 
     /** constructor **/
+	
+	 
     public DFFederatorAgent() {
 	federate = new Federate();
 	action = new Action();
@@ -71,6 +76,19 @@ public class DFFederatorAgent extends Agent {
 	request = new ACLMessage(ACLMessage.REQUEST);
 	request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);	
 	request.setOntology(DFAppletOntology.NAME);
+	
+	
+	// action ShowGui requested to df belonging to the federation
+				  
+	showGui = new ShowGui();
+	actionShowGui = new Action();
+	actionShowGui.setAction(showGui);
+	requestShowGui = new ACLMessage(ACLMessage.REQUEST);
+	requestShowGui.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+	requestShowGui.setOntology(JADEManagementOntology.NAME);
+	// this vector contains the df that have already received a request
+	// to show a gui
+	aidDfVec = new Vector();
     }
 
     /* This is the prefix string that identifies the key of a property
@@ -85,6 +103,8 @@ public class DFFederatorAgent extends Agent {
     protected void setup() {
 	// Register the DFAppletOntology with the content manager
 	getContentManager().registerOntology(DFAppletOntology.getInstance());
+	// Register the JADEManagementOntology with the content manager
+	getContentManager().registerOntology(JADEManagementOntology.getInstance());
 	// Register the SL0 content language
 	getContentManager().registerLanguage(new SLCodec(0), FIPANames.ContentLanguage.FIPA_SL0);	
 
@@ -117,7 +137,7 @@ public class DFFederatorAgent extends Agent {
 	}
 
 	// task terminated, kill this agent
-	doDelete();
+	//doDelete();
     }
 
 
@@ -126,8 +146,11 @@ public class DFFederatorAgent extends Agent {
     private Action action;
 
     private void federate(AID childDF, AID parentDF) {
+	showGui(childDF);
+	showGui(parentDF);
 	federate.setParentDF(parentDF);
 	action.setActor(childDF);
+	request.clearAllReceiver();
 	request.addReceiver(childDF);
 	try {
 	    getContentManager().fillContent(request, action);
@@ -137,6 +160,33 @@ public class DFFederatorAgent extends Agent {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
+    }
+	
+	/**
+	  * Send a request to perform action ShowGui to all the federated dfs
+	  *
+	  **/
+	private jade.domain.JADEAgentManagement.ShowGui showGui;
+	private ACLMessage requestShowGui;
+	private Action actionShowGui;
+	private Vector aidDfVec; 
+	private void showGui(AID df) {
+		// send a request only to a new df to showgui
+		if (!aidDfVec.contains(df)) 
+		{
+			aidDfVec.addElement(df);
+			actionShowGui.setActor(df);
+			requestShowGui.clearAllReceiver();
+			requestShowGui.addReceiver(df);
+			try {
+			    getContentManager().fillContent(requestShowGui, actionShowGui);
+			    //System.out.println(request);
+			    send(requestShowGui);
+			    System.out.println(getLocalName() + " sent to " + df);
+			} catch (Exception e) {
+			    e.printStackTrace();
+			}
+		}
     }
 
 
@@ -167,6 +217,6 @@ public class DFFederatorAgent extends Agent {
      * parses the key for a subDF and return the corresponding key for the rootDF
      **/
     private String createRootDFKey(String subDFKey) {
-	return RootDFKeyPrefix + subDFKey.substring(SubDFKeyPrefix.length());
+		return RootDFKeyPrefix + subDFKey.substring(SubDFKeyPrefix.length());
     }
 }
