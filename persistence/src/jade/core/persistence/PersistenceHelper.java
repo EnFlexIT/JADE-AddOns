@@ -73,6 +73,13 @@ public interface PersistenceHelper extends ServiceHelper {
     static final String LOAD_AGENT = "Load-Agent";
 
     /**
+       This command name represents the <code>reload-agent</code>
+       action, requested by an entity external from the agent to be
+       reloaded.
+    */
+    static final String RELOAD_AGENT = "Reload-Agent";
+
+    /**
        This command name represents the <code>delete-agent</code>
        action, requested by an entity external from the agent to be
        loaded.
@@ -153,12 +160,13 @@ public interface PersistenceHelper extends ServiceHelper {
 
     void saveAgent(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException;
     void loadAgent(AID agentID, String repository, ContainerID where) throws ServiceException, IMTPException, NotFoundException, NameClashException;
+    void reloadAgent(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException;
     void deleteAgent(AID agentID, String repository, ContainerID where) throws ServiceException, IMTPException, NotFoundException;
     void freezeAgent(AID agentID, String repository, ContainerID bufferContainer) throws ServiceException, NotFoundException, IMTPException;
     void thawAgent(AID agentID, String repository, ContainerID newContainer) throws ServiceException, NotFoundException, IMTPException;
 
     void saveMyself(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException;
-    void reloadMyself(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException;
+    void reloadMyself(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException;
     void freezeMyself(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException;
 
     void saveContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException;

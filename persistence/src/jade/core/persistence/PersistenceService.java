@@ -186,6 +186,7 @@ public class PersistenceService extends BaseService {
     private static final String[] OWNED_COMMANDS = new String[] {
 	PersistenceHelper.SAVE_AGENT,
 	PersistenceHelper.LOAD_AGENT,
+	PersistenceHelper.RELOAD_AGENT,
 	PersistenceHelper.DELETE_AGENT,
 	PersistenceHelper.FREEZE_AGENT,
 	PersistenceHelper.THAW_AGENT,
@@ -292,6 +293,9 @@ public class PersistenceService extends BaseService {
 		else if(name.equals(PersistenceHelper.LOAD_AGENT)) {
 		    handleLoadAgent(cmd);
 		}
+		else if(name.equals(PersistenceHelper.RELOAD_AGENT)) {
+		    handleReloadAgent(cmd);
+		}
 		else if(name.equals(PersistenceHelper.DELETE_AGENT)) {
 		    handleDeleteAgent(cmd);
 		}
@@ -322,6 +326,9 @@ public class PersistenceService extends BaseService {
 	    }
 	    catch(IMTPException imtpe) {
 		cmd.setReturnValue(imtpe);
+	    }
+	    catch(AuthException ae) {
+		cmd.setReturnValue(ae);
 	    }
 	    catch(NotFoundException nfe) {
 		cmd.setReturnValue(nfe);
@@ -384,6 +391,34 @@ public class PersistenceService extends BaseService {
 		// Try to get a newer slice and repeat...
 		targetSlice = (PersistenceSlice)getFreshSlice(where.getName());
 		targetSlice.loadAgent(agentID, repository);
+	    }
+	}
+
+	private void handleReloadAgent(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
+	    Object[] params = cmd.getParams();
+	    AID agentID = (AID)params[0];
+	    String repository = (String)params[1];
+
+	    MainContainer impl = myContainer.getMain();
+	    if(impl != null) {
+		// On a main container, one is able to save an agent
+		// running on a different container
+		ContainerID cid = impl.getContainerID(agentID);
+		PersistenceSlice targetSlice = (PersistenceSlice)getSlice(cid.getName());
+		try {
+		    targetSlice.reloadAgent(agentID, repository);
+		}
+		catch(IMTPException imtpe) {
+		    // Try to get a newer slice and repeat...
+		    targetSlice = (PersistenceSlice)getFreshSlice(cid.getName());
+		    targetSlice.reloadAgent(agentID, repository);
+		}
+	    }
+	    else {
+		// On a peripheral container, one can directly save
+		// only an agent deployed on the local container
+		PersistenceSlice targetSlice = (PersistenceSlice)getSlice(localSlice.getNode().getName());
+		targetSlice.reloadAgent(agentID, repository);
 	    }
 	}
 
@@ -501,8 +536,17 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
-	private void handleReloadMyself(VerticalCommand cmd) throws IMTPException, ServiceException {
-	    throw new ServiceException("Command <" + cmd.getName() + "> not implemented.");
+	private void handleReloadMyself(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException, AuthException {
+	    Object[] params = cmd.getParams();
+	    AID agentID = (AID)params[0];
+	    String repository = (String)params[1];
+
+	    // Use the Persistence Manager to reload the agent and replace the old one in the LADT 
+	    Agent loaded = myPersistenceManager.loadAgent(agentID, repository);
+	    myContainer.addLocalAgent(agentID, loaded);
+
+	    // Start it
+	    myContainer.powerUpLocalAgent(agentID, loaded);
 	}
 
 	private void handleFreezeMyself(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
@@ -637,6 +681,9 @@ public class PersistenceService extends BaseService {
 		else if(name.equals(PersistenceHelper.LOAD_AGENT)) {
 		    handleLoadAgent(cmd);
 		}
+		else if(name.equals(PersistenceHelper.RELOAD_AGENT)) {
+		    handleReloadAgent(cmd);
+		}
 		else if(name.equals(PersistenceHelper.DELETE_AGENT)) {
 		    handleDeleteAgent(cmd);
 		}
@@ -697,13 +744,36 @@ public class PersistenceService extends BaseService {
 
 	    // Check if the agent already exists
 	    Agent instance = myContainer.acquireLocalAgent(agentID);
-	    if(instance != null) {
-		myContainer.releaseLocalAgent(agentID);
-		throw new NameClashException("An agent named <" + agentID.getName() + "> is already active on the platform");
+	    try {
+		if(instance != null) {
+		    throw new NameClashException("An agent named <" + agentID.getName() + "> is already active on the platform");
+		}
+		else {
+		    instance = myPersistenceManager.loadAgent(agentID, repository);
+		    myContainer.initAgent(agentID, instance, AgentContainer.CREATE_AND_START);
+		}
 	    }
-	    else {
-		instance = myPersistenceManager.loadAgent(agentID, repository);
-		myContainer.initAgent(agentID, instance, AgentContainer.CREATE_AND_START);
+	    finally {
+		myContainer.releaseLocalAgent(agentID);
+	    }
+	}
+
+	private void handleReloadAgent(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
+	    Object[] params = cmd.getParams();
+	    AID agentID = (AID)params[0];
+	    String repository = (String)params[1];
+
+	    try {
+		Agent target = myContainer.acquireLocalAgent(agentID);
+		if(target != null) {
+		    target.requestReload(repository);
+		}
+		else {
+		    throw new NotFoundException("Agent " + agentID.getLocalName() + " not found during reload-agent");
+		}
+	    }
+	    finally {
+		myContainer.releaseLocalAgent(agentID);
 	    }
 	}
 
@@ -1091,6 +1161,16 @@ public class PersistenceService extends BaseService {
 
 		    result = gCmd;
 		}
+		else if(cmdName.equals(PersistenceSlice.H_RELOADAGENT)) {
+		    AID agentID = (AID)params[0];
+		    String repository = (String)params[1];
+
+		    GenericCommand gCmd = new GenericCommand(PersistenceHelper.RELOAD_AGENT, PersistenceHelper.NAME, null);
+		    gCmd.addParam(agentID);
+		    gCmd.addParam(repository);
+
+		    result = gCmd;
+		}
 		else if(cmdName.equals(PersistenceSlice.H_DELETEAGENT)) {
 		    AID agentID = (AID)params[0];
 		    String repository = (String)params[1];
@@ -1381,6 +1461,26 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
+	public void reloadAgent(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException {
+	    GenericCommand cmd = new GenericCommand(PersistenceHelper.RELOAD_AGENT, PersistenceHelper.NAME, null);
+	    cmd.addParam(agentID);
+	    cmd.addParam(repository);
+	    Object lastException = submit(cmd);
+
+	    if(lastException != null) {
+
+		if(lastException instanceof ServiceException) {
+		    throw (ServiceException)lastException;
+		}
+		if(lastException instanceof NotFoundException) {
+		    throw (NotFoundException)lastException;
+		}
+		if(lastException instanceof IMTPException) {
+		    throw (IMTPException)lastException;
+		}
+	    }
+	}
+
 	public void deleteAgent(AID agentID, String repository, ContainerID where) throws ServiceException, IMTPException, NotFoundException {
 
 	    GenericCommand cmd = new GenericCommand(PersistenceHelper.DELETE_AGENT, PersistenceHelper.NAME, null);
@@ -1422,7 +1522,7 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
-	public void reloadMyself(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException {
+	public void reloadMyself(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException {
 	    GenericCommand cmd = new GenericCommand(PersistenceHelper.RELOAD_MYSELF, PersistenceHelper.NAME, null);
 	    cmd.addParam(agentID);
 	    cmd.addParam(repository);
@@ -1438,9 +1538,6 @@ public class PersistenceService extends BaseService {
 		}
 		if(lastException instanceof NotFoundException) {
 		    throw (NotFoundException)lastException;
-		}
-		if(lastException instanceof NameClashException) {
-		    throw (NameClashException)lastException;
 		}
 	    }
 	}
