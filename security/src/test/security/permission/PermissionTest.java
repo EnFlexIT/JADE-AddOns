@@ -101,6 +101,12 @@ public class PermissionTest
    */
   public void clean(Agent a) {
     // Kill the remote container
+    if (cont2 != null) {
+      cont2.kill();
+    }
+    if (cont1 != null) {
+      cont1.kill();
+    }
     if (newPlatform != null) {
       newPlatform.kill();
     }

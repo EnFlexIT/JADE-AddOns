@@ -19,7 +19,7 @@
  <TestClassName>
 	test.security.permission.ContainerCreateTest
  </TestClassName>
- <Argument key="conf.main" value="src/test/security/permission/conf/alice-main-ok.conf"></Argument>
+ <Argument key="conf-main" value="src/test/security/permission/conf/alice-main-ok.conf"></Argument>
  <Argument key="policy-main" value="src/test/security/permission/conf/alice-main-ok.policy"></Argument>
  <Argument key="shouldSucceed" value="true"></Argument>
  <WhatTest>
