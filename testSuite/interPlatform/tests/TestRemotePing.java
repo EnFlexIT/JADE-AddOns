@@ -116,7 +116,7 @@ public class TestRemotePing extends Test {
 					
   public void clean(Agent a) {
   	try {
-  		TestUtility.killTarget(a, resp);
+  		TestUtility.killAgent(a, resp);
   		Thread.sleep(1000);
   		jc.kill();
   	}

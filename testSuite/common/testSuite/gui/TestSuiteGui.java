@@ -36,6 +36,7 @@ import test.common.testSuite.TestSuiteAgent;
 import test.common.TestUtility;
 import test.common.TestException;
 import test.common.remote.TSDaemon;
+import test.common.remote.RemoteManager;
 
 public class TestSuiteGui extends JFrame {
 	// Gui states used to enable/disable buttons
@@ -185,14 +186,15 @@ public class TestSuiteGui extends JFrame {
 		if (daemonConf.getChanged()) {
 			if (daemonConf.getConnect()) {
 				try {
-					TestUtility.setRemoteManager(daemonConf.getHostName(), TSDaemon.DEFAULT_PORT, TSDaemon.DEFAULT_NAME);
+					RemoteManager rm = TestUtility.createRemoteManager(daemonConf.getHostName(), TSDaemon.DEFAULT_PORT, TSDaemon.DEFAULT_NAME);
+					TestUtility.setDefaultRemoteManager(rm);
 				}
 				catch (TestException te) {
 					System.out.println("Error connecting to the Test Suite Daemon. "+te.getMessage());
 				}
 			}
 			else {
-				TestUtility.resetRemoteManager();
+				TestUtility.setDefaultRemoteManager(null);
 			}
 		}
 	}

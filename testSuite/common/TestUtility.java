@@ -63,7 +63,7 @@ public class TestUtility {
  	private static jade.content.lang.Codec codec = new jade.content.lang.leap.LEAPCodec();
   private static jade.content.onto.Ontology onto = AgentConfigurationOntology.getInstance();
   
-  private static test.common.remote.RemoteManager rm = null;
+  private static test.common.remote.RemoteManager defaultRm = null;
   
   static {
   	cm.registerLanguage(codec);
@@ -89,6 +89,10 @@ public class TestUtility {
 	 */
   public static AID createAgent(Agent a, String agentName, String agentClass, String[] agentArgs, AID amsAID, String containerName) throws TestException {
     try {
+  		if (amsAID == null) {
+  			amsAID = a.getAMS();
+  		}
+  		
   		ACLMessage request = createRequestMessage(a, amsAID, SL0Codec.NAME, JADEAgentManagementOntology.NAME);
 
   		CreateAgent ca = new CreateAgent();
@@ -129,23 +133,23 @@ public class TestUtility {
     	return createNewAID(agentName, amsAID);
     }
     catch (Exception e) {
-    	throw new TestException("Error creating ResponderAgent "+agentName, e);
+    	throw new TestException("Error creating Agent "+agentName, e);
     }
   }
 
   /**
      Kill a target agent (whereever it is)
    */
-  public static void killTarget(Agent a, AID targetAID) throws TestException {
+  public static void killAgent(Agent a, AID targetAID) throws TestException {
   	AID amsAID = createNewAID("ams", targetAID);
-  	killTarget(a, targetAID, amsAID);
+  	killAgent(a, targetAID, amsAID);
   }
   
   /**
      Kill a target agent living in the platform administrated by the 
      indicated AMS
 	 */
-  public static void killTarget(Agent a, AID targetAID, AID amsAID) throws TestException {
+  public static void killAgent(Agent a, AID targetAID, AID amsAID) throws TestException {
     try {
   		ACLMessage request = createRequestMessage(a, amsAID, SL0Codec.NAME, JADEAgentManagementOntology.NAME);
 
@@ -208,10 +212,22 @@ public class TestUtility {
   }
   
   /**
-     Launch a new instance of JADE in a separate process
+     Launch a new instance of JADE in a separate process 
    */
   public static JadeController launchJadeInstance(String instanceName, String classpath, String jadeArgs, String[] protoNames) throws TestException { 
+  	return launchJadeInstance(null, instanceName, classpath, jadeArgs, protoNames);
+  }
+  
+  /**
+     Launch a new instance of JADE in a separate process using the
+     indicated RemoteManager
+   */
+  public static JadeController launchJadeInstance(RemoteManager rm, String instanceName, String classpath, String jadeArgs, String[] protoNames) throws TestException { 
 		JadeController jc = null;
+		if (rm == null) {
+			rm = defaultRm;
+		}
+		
 		if (rm != null) {
 			// If a RemoteManager is set, use it and launch the JADE instance 
 			// remotely
@@ -225,28 +241,39 @@ public class TestUtility {
 		}
 		else {
 			// Otherwise launch the JADE instance locally
-  		if (classpath == null) {
-  			classpath = System.getProperty("java.class.path");
+  		if (classpath == null || classpath.startsWith("+")) {
+  			String currentCp = System.getProperty("java.class.path");
+  			if (classpath == null) {
+  				classpath = currentCp;
+  			}
+  			else {
+  				classpath = currentCp+";"+classpath.substring(1);
+  			}
 			}
+			Logger.getLogger().log("Launching JADE. Classpath is "+classpath);
 			jc = new LocalJadeController(instanceName, new String("java -cp "+classpath+" jade.Boot "+jadeArgs), protoNames);
 		}
 		return jc;
   }
 
-  public static void setRemoteManager(String hostName, int port, String managerName) throws TestException {
+  public static RemoteManager createRemoteManager(String hostName, int port, String managerName) throws TestException {
   	String remoteManagerRMI = new String("rmi://"+hostName+":"+port+"//"+managerName);
   	try {
-  		rm = (RemoteManager) Naming.lookup(remoteManagerRMI);
+  		return (RemoteManager) Naming.lookup(remoteManagerRMI);
   	}
   	catch (Exception e) {
   		throw new TestException("Error looking up remote manager "+remoteManagerRMI, e);
   	}
   }
   
-  public static void resetRemoteManager() {
-  	rm = null;
+  public static void setDefaultRemoteManager(RemoteManager rm) {
+  	defaultRm = rm;
   }
-  	
+  
+  public static RemoteManager getDefaultRemoteManager() {
+  	return defaultRm;
+  }
+  
   public static String getLocalHostName() throws TestException {
   	try {
 			return InetAddress.getLocalHost().getHostName();

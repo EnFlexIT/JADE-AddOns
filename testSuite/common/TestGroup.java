@@ -25,7 +25,6 @@ package test.common;
 
 import jade.core.Agent;
 import jade.util.leap.*;
-import java.util.Hashtable;
 
 /**
    Class representing a group of tests (often related to a given 
@@ -37,7 +36,7 @@ public class TestGroup {
 	private String[] testClassNames;
 	private int cnt;
 	private List argumentSpecs = new ArrayList();
-  private Hashtable args = new Hashtable();
+  private HashMap args = new HashMap();
 	
 	public TestGroup(String[] tests) {
 		testClassNames = (tests != null ? tests : new String[0]);

@@ -80,9 +80,11 @@ public class TestSuiteAgent extends GuiAgent {
 			"test.content.SLOperatorsTesterAgent",
 			"test.interPlatform.InterPlatformCommunicationTesterAgent",
 			"test.behaviours.BlockTimeoutTesterAgent",
+			"test.behaviours.PerformanceTesterAgent",
 			"test.domain.df.DFTesterAgent",
 			"test.domain.JADEManagementOntologyTesterAgent",
 			"test.mobility.MobilityTesterAgent",
+			"test.roundTripTime.RoundTripTimeTesterAgent",
 			"test.proto.ContractNetTesterAgent",
 			"test.proto.AchieveRETesterAgent" } );
 		myGui.showCorrect();				
