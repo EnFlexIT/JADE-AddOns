@@ -17,16 +17,15 @@ This plug-in is distributed by TILAB under the LGPL license.
 See file COPYING for details.
 The package jade.security.impl.DES of this plug-in uses the file Crypt.java 
 by Michael Glad and Pawel Veselov distributed itself under the LGPL license.
+Included library BouncyCastle licence is into: security/lib/bc/license.txt
 
 
 SYSTEM REQUIREMENTS
 ===================
-In order to use the JADE security plug-in you need JADE 2.61 or later, 
+In order to use the JADE security plug-in you need JADE 3.2 or later, 
 and Sun Java SDK 1.4 or later. 
 The file jadeS.jar, which contains the JADE security plug-in, needs 
 to be in your CLASSPATH variable.
-There are no more requirements than the standard JADE installation, 
-and no other packages to install.
 
 
 INSTALLATION
@@ -41,20 +40,18 @@ jade/add-ons/security/lib/jadeS.jar to your Java CLASSPATH.
 USING JADE-S
 ============
 Detailed explaination of JADE-S is provided in the 
-JADE Security Administrator Guide, available at:
-http://jade.cselt.it  in the "on-line documentation" section.
+JADE Security Guide, available at:
+http://jade.tilab.com/doc/
 
 
-EXAMPLES
+DEMOS
 ========
-Examples are in the directory: jade/add-ons/security/runExamples 
-Please refer to the Security Administrator Guide and to the 
-README.txt files provided into the add-ons/security/runExamples/ 
-subdirectories in order to know how to run the examples.
-
+Several working examples are in the directory: jade/add-ons/security/demos 
+If you have Ant installed on your system, you can start each demo 
+just by typing 'ant'. (the build.xml file contains the starting class and parameters).
 
 
 
 ---
 by Giosue.Vitaglione@tilab.com
-2002-07-25
+2004-07-12
