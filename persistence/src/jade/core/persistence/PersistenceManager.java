@@ -24,6 +24,8 @@ Boston, MA  02111-1307, USA.
 
 package jade.core.persistence;
 
+import java.io.IOException;
+import java.net.URL;
 
 import net.sf.hibernate.Hibernate;
 import net.sf.hibernate.MappingException;
@@ -36,8 +38,10 @@ import net.sf.hibernate.tool.hbm2ddl.SchemaExport;
 
 import jade.core.Agent;
 import jade.core.AID;
+import jade.core.ContainerID;
 import jade.core.ServiceException;
 import jade.core.NotFoundException;
+import jade.core.NameClashException;
 
 import jade.lang.acl.ACLMessage;
 
@@ -57,59 +61,443 @@ import jade.util.leap.Properties;
 */
 public class PersistenceManager {
 
+    public static final String DEFAULT_REPOSITORY = "JADE-DB";
 
-    public PersistenceManager(String nodeName) {
-	repositories = new HashMap();
+    public PersistenceManager(String metaDB, String nodeName) throws IOException, HibernateException {
+	sessionFactories = new HashMap();
+        init(metaDB);
+    }
 
-	// Create a default repository
+    private void init(String metaDB) throws IOException, HibernateException {
+	// Create the meta-database and a default repository if needed
+	Configuration metaConf = new Configuration();
+
+        if(metaDB != null) {
+            try {
+                java.util.Properties props = new java.util.Properties();
+                props.load(new URL(metaDB).openStream());
+                metaConf.setProperties(props);
+            }
+            catch(IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+
+        metaConf.addResource("jade/core/persistence/meta.hbm.xml", getClass().getClassLoader());
+
+	System.out.println(">>> Connecting to the Meta-DB [" + metaDB + "] <<<");
+        metaSchemaMgr = new SchemaExport(metaConf);
+        metaSessions = metaConf.buildSessionFactory();
+        defaultProperties = metaConf.getProperties();
+
+        checkMetaDB(defaultProperties);
+	loadRepositories();
+    }
+
+    public synchronized void destroy() {
+        // Shut down all the active session factories
+        Object[] keys = sessionFactories.keySet().toArray();
+        for(int i = 0; i < keys.length; i++) {
+            try {
+                SessionFactory sf = (SessionFactory)sessionFactories.remove(keys[i]);
+                sf.close();
+            }
+            catch(HibernateException he) {
+                he.printStackTrace();
+            }
+        }
+    }
+    
+    public synchronized void addSessionFactory(Repository rep) throws IOException, HibernateException {
+        String name = rep.getName();
+
+        Configuration newConf = new Configuration();
+        java.util.Properties props = rep.getProperties().getProperties();
+	System.out.println("--- Loading " + props.size() + " properties ---");
+
+        if(!props.isEmpty()) {
+            newConf.setProperties(props);
+        }
+
+        // Add the system mappings
+        newConf.addResource("jade/core/persistence/common.hbm.xml", getClass().getClassLoader());
+	newConf.addClass(SavedAgent.class);
+	newConf.addClass(SavedACLMessage.class);
+	newConf.addClass(FrozenAgent.class);
+	newConf.addClass(FrozenMessageQueue.class);
+	newConf.addClass(SavedContainer.class);
+
+        // Add the repository-specific mappings
+        java.util.List mappingsList = rep.getMappings();
+        String[] mappings = (String[])mappingsList.toArray(new String[mappingsList.size()]);
+        for(int i = 0; i < mappings.length; i++) {
+            try {
+                // Try to open the URL before
+                URL mapping = new URL(mappings[i]);
+                mapping.openStream().close();
+
+                newConf.addURL(mapping);
+            }
+            catch(IOException ioe) {
+                // Ignore it and go on with the next URL
+            }
+        }
+        
+        // Build a new SessionFactory and put it in the table
+        SessionFactory sf = newConf.buildSessionFactory();
+	checkDB(name, newConf, sf);
+        sessionFactories.put(name, sf);
+    }
+
+    public synchronized void removeSessionFactory(String name) throws HibernateException {
+	SessionFactory sf = (SessionFactory)sessionFactories.remove(name);
+        sf.close();
+    }
+
+    public synchronized void addRepository(String repName) throws NameClashException, ServiceException {
+        try {
+            Session s = metaSessions.openSession();
+            Transaction tx = null;
+            try {
+                tx = s.beginTransaction();
+
+                java.util.List old = s.find("from jade.core.persistence.Repository as item where item.name = ?", repName, Hibernate.STRING);
+                if(!old.isEmpty()) {
+                    throw new NameClashException("A repository named <" + repName + "> already exists");
+                }
+
+                Repository rep = new Repository();
+                rep.setName(repName);
+		Repository.StoredProperties sp = new Repository.StoredProperties();
+		sp.setValues(defaultProperties);
+                rep.setProperties(sp);
+
+                s.save(rep);
+
+                tx.commit();
+
+                addSessionFactory(rep);
+            }
+            catch(HibernateException he) {
+                he.printStackTrace();
+                if(tx != null) {
+                    tx.rollback();
+                }
+                throw he;
+            }
+            finally {
+                s.close();
+            }
+        }
+        catch(IOException ioe) {
+            throw new ServiceException("An I/O error occurred while adding the new repository", ioe);
+        }
+        catch(HibernateException he) {
+            throw new ServiceException("An error occurred while adding a new repository", he);
+        }
+    }
+    
+    public synchronized void removeRepository(String repName) throws ServiceException {
+        try {
+            Session s = metaSessions.openSession();
+            Transaction tx = null;
+            try {
+                tx = s.beginTransaction();
+                removeSessionFactory(repName);
+                s.delete("from jade.core.persistence.Repository as item where item.name = ?", repName, Hibernate.STRING);
+                tx.commit();
+            }
+            catch(HibernateException he) {
+                he.printStackTrace();
+                if(tx != null) {
+                    tx.rollback();
+                }
+                throw he;
+            }
+            finally {
+                s.close();
+            }
+        }
+        catch(HibernateException he) {
+            throw new ServiceException("An error occurred while removing a repository", he);
+        }
+    }
+
+    public synchronized void saveRepository(Repository rep) throws ServiceException {
+        try {
+            Session s = metaSessions.openSession();
+            Transaction tx = null;
+            try {
+                tx = s.beginTransaction();
+                s.saveOrUpdate(rep);
+                tx.commit();
+            }
+            catch(HibernateException he) {
+                he.printStackTrace();
+                if(tx != null) {
+                    tx.rollback();
+                }
+                throw he;
+            }
+            finally {
+                s.close();
+            }
+        }
+        catch(HibernateException he) {
+            throw new ServiceException("An error occurred while saving a repository", he);
+        }
+    }
+    
+    public synchronized void loadRepositories() {
 	try {
-	    Configuration defaultConf = new Configuration();
+            Session s = metaSessions.openSession();
+            Transaction tx = null;
+            try {
+                tx = s.beginTransaction();
 
-	    // Insert the common class definitions
-	    defaultConf.addResource("jade/core/persistence/common.hbm.xml", getClass().getClassLoader());
+                // Retrieve all the repository descriptions from the Meta-DB
+		java.util.List resultSet = s.find("from jade.core.persistence.Repository");
+		tx.commit();
+		tx = null;
 
-	    // Insert the definitions for a saved agent and a saved
-	    // ACL message
-	    defaultConf.addClass(SavedAgent.class);
-	    defaultConf.addClass(SavedACLMessage.class);
-	    defaultConf.addClass(FrozenAgent.class);
-	    defaultConf.addClass(FrozenMessageQueue.class);
-	    defaultConf.addClass(SavedContainer.class);
-
-	    schemaManager = new SchemaExport(defaultConf);
-
-	    // Add the name of this container to the DB file
-	    String dbURL = defaultConf.getProperty("hibernate.connection.url");
-	    dbURL = dbURL + "-" + nodeName;
-	    defaultConf.setProperty("hibernate.connection.url", dbURL);
-
-	    System.out.println(">>> Connecting to the DB [" + dbURL + "] <<<");
-
-	    SessionFactory sf = defaultConf.buildSessionFactory();
-	    checkSchema("JADE-DB", sf);
-
-	    repositories.put("JADE-DB", sf);
-
-	}
+                java.util.Iterator it = resultSet.iterator();
+                while(it.hasNext()) {
+                    Repository rep = (Repository)it.next();
+                    try {
+                        addSessionFactory(rep);
+                    }
+                    catch(IOException ioe) {
+                        System.out.println("--- Could not load repository <" + rep.getName() + "> ---");
+                    }
+                    catch(HibernateException he) {
+                        he.printStackTrace();
+                        System.out.println("--- Could not load repository <" + rep.getName() + "> ---");                        
+                    }
+		}
+            }
+            catch(HibernateException he) {
+                he.printStackTrace();
+		if(tx != null) {
+                    tx.rollback();
+		}
+            }
+            finally {
+                s.close();
+            }
+        }
 	catch(HibernateException he) {
 	    he.printStackTrace();
 	}
-
     }
 
-    public synchronized void addRepository(String name, Properties p) {
-	// FIXME: To be implemented -- Should take the Hibernate
-	// configuration from the passed properties.
+    public synchronized Repository getRepository(String name) throws NotFoundException, ServiceException {
+	try {
+            Session s = metaSessions.openSession();
+            Transaction tx = null;
+            try {
+                tx = s.beginTransaction();
+
+                java.util.List resultSet = s.find("from jade.core.persistence.Repository as item where item.name = ?", name, Hibernate.STRING);
+                tx.commit();
+
+                if(resultSet.isEmpty()) {
+                    throw new NotFoundException("The repository named <" + name + "> was not found");
+                }
+                else {
+                    return (Repository)resultSet.get(0);
+                }
+            }
+            catch(HibernateException he) {
+                he.printStackTrace();
+		if(tx != null) {
+                    tx.rollback();
+		}
+                throw he;
+            }
+            finally {
+                s.close();
+            }
+        }
+	catch(HibernateException he) {
+	    he.printStackTrace();
+            throw new ServiceException("An error occurred while retrieving repository <" + name + ">", he);
+	}
     }
 
-    public synchronized void removeRepository(String name) {
-	repositories.remove(name);
+    public synchronized Repository[] getRepositories() throws ServiceException {
+	try {
+            Session s = metaSessions.openSession();
+            Transaction tx = null;
+            try {
+                tx = s.beginTransaction();
+
+                java.util.List resultSet = s.find("from jade.core.persistence.Repository");
+                tx.commit();
+
+                return (Repository[])resultSet.toArray(new Repository[resultSet.size()]);
+            }
+            catch(HibernateException he) {
+                he.printStackTrace();
+		if(tx != null) {
+                    tx.rollback();
+		}
+                throw he;
+            }
+            finally {
+                s.close();
+            }
+        }
+	catch(HibernateException he) {
+	    he.printStackTrace();
+            throw new ServiceException("An error occurred while retrieving the repository list", he);
+	}
     }
 
+    public synchronized String[] getRepositoryNames() throws ServiceException {
+	try {
+            Session s = metaSessions.openSession();
+            Transaction tx = null;
+            try {
+                tx = s.beginTransaction();
+
+                java.util.List resultSet = s.find("select item.name from jade.core.persistence.Repository as item");
+                tx.commit();
+
+                return (String[])resultSet.toArray(new String[resultSet.size()]);
+            }
+            catch(HibernateException he) {
+                he.printStackTrace();
+		if(tx != null) {
+                    tx.rollback();
+		}
+                throw he;
+            }
+            finally {
+                s.close();
+            }
+        }
+	catch(HibernateException he) {
+	    he.printStackTrace();
+            throw new ServiceException("An error occurred while retrieving the repository list", he);
+	}
+    }
+
+    public synchronized String[] getSavedAgentNames(String repository) throws ServiceException, NotFoundException {
+	try {
+            SessionFactory sf = getSessionFactory(repository);
+            if(sf != null) {
+                Session s = sf.openSession();
+                Transaction tx = null;
+                try {
+                    tx = s.beginTransaction();
+
+                    java.util.List resultSet = s.find("select item.name from jade.core.persistence.SavedAgent as item");
+                    tx.commit();
+
+                    return (String[])resultSet.toArray(new String[resultSet.size()]);
+                }
+                catch(HibernateException he) {
+                    he.printStackTrace();
+                    if(tx != null) {
+                        tx.rollback();
+                    }
+                    throw he;
+                }
+                finally {
+                    s.close();
+                }
+            }
+            else {
+                throw new NotFoundException("The repository <" + repository + "> was not found");
+            }
+        }
+	catch(HibernateException he) {
+	    he.printStackTrace();
+            throw new ServiceException("An error occurred while retrieving the repository list", he);
+	}
+    }
+
+    public synchronized String[] getFrozenAgentNames(String repository) throws ServiceException, NotFoundException {
+	try {
+            SessionFactory sf = getSessionFactory(repository);
+            if(sf != null) {
+                Session s = sf.openSession();
+                Transaction tx = null;
+                try {
+                    tx = s.beginTransaction();
+
+                    java.util.List resultSet = s.find("select item.agent.name from jade.core.persistence.FrozenAgent as item");
+                    tx.commit();
+
+                    return (String[])resultSet.toArray(new String[resultSet.size()]);
+                }
+                catch(HibernateException he) {
+                    he.printStackTrace();
+                    if(tx != null) {
+                        tx.rollback();
+                    }
+                    throw he;
+                }
+                finally {
+                    s.close();
+                }
+            }
+            else {
+                throw new NotFoundException("The repository <" + repository + "> was not found");
+            }
+        }
+	catch(HibernateException he) {
+	    he.printStackTrace();
+            throw new ServiceException("An error occurred while retrieving the repository list", he);
+	}
+    }
+
+    public synchronized String[] getSavedContainerNames(String repository) throws ServiceException, NotFoundException {
+	try {
+            SessionFactory sf = getSessionFactory(repository);
+            if(sf != null) {
+                Session s = sf.openSession();
+                Transaction tx = null;
+                try {
+                    tx = s.beginTransaction();
+
+                    java.util.List resultSet = s.find("select item.name from jade.core.persistence.SavedContainer as item");
+                    tx.commit();
+
+                    return (String[])resultSet.toArray(new String[resultSet.size()]);
+                }
+                catch(HibernateException he) {
+                    he.printStackTrace();
+                    if(tx != null) {
+                        tx.rollback();
+                    }
+                    throw he;
+                }
+                finally {
+                    s.close();
+                }
+            }
+            else {
+                throw new NotFoundException("The repository <" + repository + "> was not found");
+            }
+        }
+	catch(HibernateException he) {
+	    he.printStackTrace();
+            throw new ServiceException("An error occurred while retrieving the repository list", he);
+	}
+    }
+
+
+
+    // Retrieve the property values used in the Meta-DB itself
+    public synchronized java.util.Map getDefaultPropertyValues() {
+        return defaultProperties;
+    }
+    
     public void saveAgent(Agent target, String repository, java.util.List pendingMessages) throws ServiceException, NotFoundException {
 
 	try {
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 		// Save this agent
 		Session s = sf.openSession();
@@ -149,7 +537,7 @@ public class PersistenceManager {
 
     public Agent loadAgent(AID target, String repository) throws ServiceException, NotFoundException {
 	try {
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 
 		Session s = sf.openSession();
@@ -198,7 +586,7 @@ public class PersistenceManager {
     public void deleteAgent(AID target, String repository) throws ServiceException, NotFoundException {
 
 	try {
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 
 		Session s = sf.openSession();
@@ -232,7 +620,7 @@ public class PersistenceManager {
     public void deleteFrozenAgent(Long agentPK, String repository) throws ServiceException, NotFoundException {
 
 	try {
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 
 		Session s = sf.openSession();
@@ -267,7 +655,7 @@ public class PersistenceManager {
     public Long freezeAgent(Agent target, String repository, java.util.List pendingMessages) throws ServiceException, NotFoundException {
 
 	try {
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 		// Save this agent
 		Session s = sf.openSession();
@@ -302,7 +690,7 @@ public class PersistenceManager {
 
     public Long createFrozenMessageQueue(AID agentID, Long agentFK, String repository) throws ServiceException, NotFoundException {
 	try {
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 		// Save this agent
 		Session s = sf.openSession();
@@ -336,7 +724,7 @@ public class PersistenceManager {
 
     public void connectToMessageQueue(Long agentID, Long messageQueueFK, String repository) throws ServiceException, NotFoundException {
 	try {
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 		Session s = sf.openSession();
 		Transaction tx = null;
@@ -371,7 +759,7 @@ public class PersistenceManager {
 
     public void bufferMessage(Long queueID, String repository, ACLMessage msg) throws ServiceException, NotFoundException {
 	try {
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 		Session s = sf.openSession();
 		Transaction tx = null;
@@ -405,7 +793,7 @@ public class PersistenceManager {
     public Agent thawAgent(AID target, String repository, Long persistentID) throws ServiceException, NotFoundException {
 	try {
 
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 
 		Session s = sf.openSession();
@@ -459,7 +847,7 @@ public class PersistenceManager {
     public Long evictFrozenMessageQueue(Long id, String repository) throws ServiceException, NotFoundException {
 	try {
 
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 
 		Session s = sf.openSession();
@@ -499,7 +887,7 @@ public class PersistenceManager {
     public Long readFrozenMessageQueue(Long id, String repository, List bufferedMessages) throws ServiceException, NotFoundException {
 	try {
 
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 
 		Session s = sf.openSession();
@@ -543,7 +931,7 @@ public class PersistenceManager {
     public void saveContainer(String name, String repository, java.util.Set agents, java.util.Set mtps) throws ServiceException, NotFoundException {
 	try {
 
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 
 		Session s = sf.openSession();
@@ -586,7 +974,7 @@ public class PersistenceManager {
     public void retrieveSavedContainer(SavedContainer toFill, String repository) throws ServiceException, NotFoundException {
 	try {
 
-	    SessionFactory sf = getRepository(repository);
+	    SessionFactory sf = getSessionFactory(repository);
 	    if(sf != null) {
 
 		Session s = sf.openSession();
@@ -644,28 +1032,61 @@ public class PersistenceManager {
 	}
     }
 
+    public void deleteContainer(ContainerID cid, String repository) throws ServiceException, NotFoundException {
+	try {
+	    SessionFactory sf = getSessionFactory(repository);
+	    if(sf != null) {
 
-    private synchronized SessionFactory getRepository(String name) {
-	return (SessionFactory)repositories.get(name);
+		Session s = sf.openSession();
+		Transaction tx = null;
+		try {
+		    tx = s.beginTransaction();
+		    int deleted = s.delete("from jade.core.persistence.SavedContainer as item where item.name = ?", cid.getName(), Hibernate.STRING);
+		    tx.commit();
+		    System.out.println("--- Deleted " + deleted + " saved containers ---");
+		}
+		catch(HibernateException he) {
+		    if(tx != null) {
+			tx.rollback();
+		    }
+		    throw he;
+		}
+		finally {
+		    s.close();
+		}
+	    }
+	    else {
+		throw new NotFoundException("The repository <" + repository + "> was not found");
+	    }
+	}
+	catch(HibernateException he) {
+	    throw new ServiceException("An error occurred while deleting container <" + cid.getName() + ">", he);
+	}
     }
 
-    private void checkSchema(String repository, SessionFactory sf) throws HibernateException {
-	// Tries a simple query, and rebuild the schema if the query fails
+    private synchronized SessionFactory getSessionFactory(String name) {
+	return (SessionFactory)sessionFactories.get(name);
+    }
+
+    private void checkDB(String name, Configuration conf, SessionFactory sf) throws HibernateException {
+	// Tries a simple query, and rebuilds the schema if the query fails
 	Session s = null;
 	try {
 	    s = sf.openSession();
 	    int howMany = ((Integer)s.iterate("select count(*) from jade.core.persistence.SavedAgent").next()).intValue();
-	    System.out.println("--- The repository " + repository + " holds " + howMany + " agents ---");
+	    System.out.println("--- The DB <" + name + "> holds " + howMany + " saved agents ---");
 	}
 	catch(HibernateException he) {
-	    System.out.println("--- The repository " + repository + " does not appear to have a valid schema ---");
-	    System.out.println("--- Rebuilding DB schema ---");
+	    System.out.println("--- The DB <" + name + "> does not appear to have a valid schema ---");
+	    System.out.println("--- Rebuilding DB <" + name + "> schema ---");
+
+	    SchemaExport schemaMgr = new SchemaExport(conf);
 
 	    // Remove the DB schema
-	    schemaManager.drop(false, true);
+	    schemaMgr.drop(false, true);
 
 	    // Export the DB schema
-	    schemaManager.create(false, true);
+	    schemaMgr.create(false, true);
 	}
 	finally {
 	    if(s != null) {
@@ -674,10 +1095,66 @@ public class PersistenceManager {
 	}
     }
 
-    private Map repositories;
+    private void checkMetaDB(java.util.Properties defaultProperties) throws IOException, HibernateException {
+	// Tries a simple query, and rebuild the schema if the query fails
+	Session s = null;
+	try {
+	    s = metaSessions.openSession();
+	    int howMany = ((Integer)s.iterate("select count(*) from jade.core.persistence.Repository").next()).intValue();
+	    System.out.println("--- The Meta-DB holds " + howMany + " repositories ---");
+	}
+	catch(HibernateException he) {
+	    System.out.println("--- The Meta-DB does not appear to have a valid schema ---");
+	    System.out.println("--- Rebuilding Meta-DB schema ---");
 
-    // Hibernate-specific variables
-    private SchemaExport schemaManager;
+	    s.close();
+	    s = null;
 
+	    // Remove the DB schema
+	    metaSchemaMgr.drop(false, true);
 
+	    // Export the DB schema
+	    metaSchemaMgr.create(false, true);
+            createDefaultRepository(defaultProperties);
+	}
+	finally {
+	    if(s != null) {
+		s.close();
+	    }
+	}
+    }
+
+    private void createDefaultRepository(java.util.Properties defProps) throws IOException, HibernateException {
+
+            Session s = metaSessions.openSession();
+	    Repository defaultRep = new Repository();
+            Transaction tx = null;
+            try {
+                tx = s.beginTransaction();
+
+                defaultRep.setName(DEFAULT_REPOSITORY);
+		Repository.StoredProperties sp = new Repository.StoredProperties();
+		sp.setValues(defProps);
+                defaultRep.setProperties(sp);
+
+                s.save(defaultRep);
+		tx.commit();
+            }
+            catch(HibernateException he) {
+		he.printStackTrace();
+		if(tx != null) {
+                    tx.rollback();
+                }
+            }
+            finally {
+                s.close();
+            }
+    }
+
+    private Map sessionFactories;
+
+    // Hibernate-specific variables for JADE meta-database management
+    private SchemaExport metaSchemaMgr;
+    private SessionFactory metaSessions;
+    private java.util.Properties defaultProperties;
 }
