@@ -206,7 +206,7 @@ public class JADEAccessControllerImpl
 
       // --- Construct lnpd, a ProtectionDomain from the LocalName ---
       Policy ac_policy = Policy.getPolicy();
-      CodeSource source = new CodeSource(null, null);
+      CodeSource source = new CodeSource(null, (java.security.cert.Certificate[]) null);
 
       // this is just for testing
       //    ProtectionDomain nullDomain = new ProtectionDomain(
@@ -295,7 +295,7 @@ public class JADEAccessControllerImpl
 
         verifySubject(credential);
         ProtectionDomain domain = new ProtectionDomain(
-            new CodeSource(null, null), collectPermissions(credential), null, null);
+            new CodeSource(null, (java.security.cert.Certificate[])null), collectPermissions(credential), null, null);
 
         MyDomainCombiner myDomainCombiner = new MyDomainCombiner();
 

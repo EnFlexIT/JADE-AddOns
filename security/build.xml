@@ -72,7 +72,10 @@
     	 optimize="${optimised-build}"
 	 deprecation="on"
          includes="jade/**"
-    />     
+    >
+     <compilerarg value="-source" />
+	<compilerarg value="1.4" />
+     </javac>
   </target>
 
   <!-- Compile examples  -->
