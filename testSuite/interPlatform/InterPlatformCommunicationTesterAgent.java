@@ -46,6 +46,9 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 	public static final String REMOTE_PLATFORM_NAME = "Remote-platform";
 	public static final String REMOTE_PLATFORM_PORT = "9003";
 	
+	public static final String ADDITIONAL_CLASSPATH_KEY = "classpath";
+	public static final String ADDITIONAL_CLASSPATH_DEFAULT = "c:/jade/add-ons/http/classes";
+	
 	protected TestGroup getTestGroup() {
 		TestGroup tg = new TestGroup("test/interPlatform/interPlatformTestsList.xml"){		
 			
@@ -85,6 +88,7 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 			}
 		};
 		
+		tg.specifyArgument(ADDITIONAL_CLASSPATH_KEY, "Additional classpath", ADDITIONAL_CLASSPATH_DEFAULT);
 		return tg;
 	}
 		
