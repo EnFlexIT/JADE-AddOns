@@ -29,6 +29,7 @@ import jade.domain.*;
 import jade.core.Agent;
 import jade.core.AID;
 import jade.core.ContainerID;
+import jade.core.AgentManager;
 import jade.lang.acl.ACLMessage;
 import jade.onto.basic.Action;
 import jade.onto.*;
@@ -70,22 +71,43 @@ public class TestUtility {
   public static AID createTarget(Agent a, String respName) throws TestException {
   	return createTarget(a, respName, Agent.getAMS());
   }
-  
+    
   /**
      Create a target agent in the platform administrated by the indicated AMS
 	 */
   public static AID createTarget(Agent a, String targetName, AID amsAID) throws TestException {
+		return createAgent(a, targetName, TARGET_CLASS_NAME, null, amsAID, null);
+  }
+
+  /**
+     Create a generic agent in the platform administrated by the indicated AMS
+	 */
+  public static AID createAgent(Agent a, String agentName, String agentClass, String[] agentArgs, AID amsAID, String containerName) throws TestException {
     try {
   		ACLMessage request = createRequestMessage(a, amsAID, SL0Codec.NAME, JADEAgentManagementOntology.NAME);
 
   		CreateAgent ca = new CreateAgent();
-  		ca.setAgentName(targetName);
-  		ca.setClassName(TARGET_CLASS_NAME);
-  		if (amsAID.equals(a.getAMS())) { 
-	  		ca.setContainer((ContainerID) a.here());
+  		// Agent name
+  		ca.setAgentName(agentName);
+  		// Agent class
+  		ca.setClassName(agentClass);
+  		// Agent args
+  		if (agentArgs != null) {
+  			for (int i = 0; i < agentArgs.length; ++i) {
+  				ca.addArguments(agentArgs[i]);
+  			}
+  		}
+  		// Container where to create the agent
+  		if (containerName != null) {
+  			ca.setContainer(new ContainerID(containerName, null));
   		}
   		else {
-  			ca.setContainer(new ContainerID("Main-Container", null));
+	  		if (amsAID.equals(a.getAMS())) { 
+		  		ca.setContainer((ContainerID) a.here());
+  			}
+  			else {
+  				ca.setContainer(new ContainerID(AgentManager.MAIN_CONTAINER_NAME, null));
+  			}
   		}
   		
   		Action act = new Action();
@@ -99,10 +121,10 @@ public class TestUtility {
     	// Send message and collect reply
     	FIPAServiceCommunicator.doFipaRequestClient(a, request);
     	
-    	return createNewAID(targetName, amsAID);
+    	return createNewAID(agentName, amsAID);
     }
     catch (Exception e) {
-    	throw new TestException("Error creating ResponderAgent "+targetName, e);
+    	throw new TestException("Error creating ResponderAgent "+agentName, e);
     }
   }
 
@@ -165,6 +187,9 @@ public class TestUtility {
      Launch a new instance of JADE in a separate process
    */
   public static RemoteController launchJadeInstance(String instanceName, String classpath, String jadeArgs, String[] protoNames) throws TestException { 
+		if (classpath == null) {
+  		classpath = System.getProperty("java.class.path");
+		}
 		RemoteController rc = new RemoteController(instanceName, new String("java -cp "+classpath+" jade.Boot "+jadeArgs), protoNames);
 		return rc;
   }

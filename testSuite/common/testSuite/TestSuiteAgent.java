@@ -58,7 +58,9 @@ public class TestSuiteAgent extends GuiAgent {
 	protected void setup() {	
 		myGui = new TestSuiteGui(this, new String[] {
 			"test.content.ContentTesterAgent",
+			"test.content.SLOperatorsTesterAgent",
 			"test.interPlatform.InterPlatformCommunicationTesterAgent",
+			"test.behaviours.BlockTimeoutTesterAgent",
 			"test.domain.JADEManagementOntologyTesterAgent",
 			"test.proto.ContractNetTesterAgent",
 			"test.proto.AchieveRETesterAgent" } );
