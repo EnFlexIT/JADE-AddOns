@@ -1,7 +1,7 @@
 /*****************************************************************
 JADE - Java Agent DEvelopment Framework is a framework to develop 
 multi-agent systems in compliance with the FIPA specifications.
-Copyright (C) 2000 CSELT S.p.A. 
+Copyright (C) 2002 TILAB S.p.A. 
 
 GNU Lesser General Public License
 
@@ -108,9 +108,13 @@ public class PlatformAuthority extends ContainerAuthority {
 		if (certificate instanceof DelegationCertificate) {
 			checkAction(AUTHORITY_SIGN_DC, certificate.getSubject(), certs);
 			PermissionCollection perms = collectPermissions(certs);
-			for (Iterator i = ((DelegationCertificate)certificate).getPermissions().iterator(); i.hasNext(); )
-				if (!perms.implies((Permission)i.next()))
+			for (Iterator i = ((DelegationCertificate)certificate).getPermissions().iterator(); i.hasNext(); ) {
+				Permission temp = (Permission)i.next() ;
+				if (!perms.implies( temp )) {
+					System.out.println( "\n --- Not owned: "+ temp +"---\n");
 					throw new AuthException("trying to delegate not owned permissions");
+				}
+			}
 		}
 		else if (certificate instanceof IdentityCertificate) {
 			checkAction(AUTHORITY_SIGN_IC, certificate.getSubject(), certs);
