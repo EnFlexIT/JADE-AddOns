@@ -412,6 +412,15 @@ public class TestSuiteAgent extends GuiAgent {
 
       Profile pMain = new ProfileImpl(null, Test.DEFAULT_PORT, null);
 			pMain.setSpecifiers(Profile.MTPS, new ArrayList());
+			// Arguments
+			if (args != null) {
+				for (int i = 0; i < args.length; ++i) {
+					if (args[i].startsWith("-") && i < args.length-1) {
+						pMain.setParameter(args[i].substring(1), args[i+1]);
+						++i;
+					}
+				}
+			}
 			
       MainContainer mc = rt.createMainContainer(pMain);
       
