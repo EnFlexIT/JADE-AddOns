@@ -49,6 +49,7 @@ import jade.core.AID;
 
 import jade.domain.FIPAAgentManagement.Envelope;
 import jade.domain.FIPAAgentManagement.ReceivedObject;
+import jade.domain.FIPAAgentManagement.Property;
 import jade.domain.FIPANames;
 
 import jade.mtp.InChannel;
@@ -62,7 +63,7 @@ public class MessageTransportProtocol implements MTP {
 
   private static final String[] PROTOCOLS = new String[] { "IOR", "corbaloc", "corbaname" };
 
-  private static ORB myORB;
+  private final static ORB myORB;
   private static POA rootPOA;
   private static POAManagerFactory mgrFactory;
   private static BootManager bootMgr;
@@ -114,7 +115,7 @@ public class MessageTransportProtocol implements MTP {
   // CORBA Object Implementation class
   private static class MTSServant extends MTSPOA {
 
-    private InChannel.Dispatcher dispatcher;
+    private final InChannel.Dispatcher dispatcher;
 
     public MTSServant(InChannel.Dispatcher disp) {
       dispatcher = disp;
@@ -181,10 +182,13 @@ public class MessageTransportProtocol implements MTP {
 	if(IDLenv.received.length > 0)
 	  env.addStamp(unmarshalReceivedObj(IDLenv.received[0]));
 
-	// FIXME: need to unmarshal user properties
-
+	// Read in the 'user-defined properties' slot
+	if(IDLenv.userDefinedProperties.length > 0)
+	    env.clearAllProperties();
+	for(int i = 0; i < IDLenv.userDefinedProperties.length; i++) {
+	    env.addProperties(unmarshalProperty(IDLenv.userDefinedProperties[i]));
+ 	}
       }
-
 
       // Dispatch the message
       dispatcher.dispatchMessage(env, payload);
@@ -206,6 +210,11 @@ public class MessageTransportProtocol implements MTP {
       Date result = new Date();
       return result;
     }
+
+
+      private Property unmarshalProperty(FIPA.Property p) {
+	  return new Property(p.keyword, p.value);
+      }
 
     private ReceivedObject unmarshalReceivedObj(FIPA.ReceivedObject ro) {
       ReceivedObject result = new ReceivedObject();
@@ -673,7 +682,16 @@ public class MessageTransportProtocol implements MTP {
       String IDLpayloadEncoding = env.getPayloadEncoding();
       FIPA.DateTime[] IDLdate = new FIPA.DateTime[] { marshalDateTime(env.getDate()) };
       FIPA.Property[][] IDLtransportBehaviour = new FIPA.Property[][] { };
-      FIPA.Property[] IDLuserDefinedProperties = new FIPA.Property[] { }; // FIXME: need to marshal user properties
+      // Fill in the 'userdefined-properties' field of the IDL envelope
+      Iterator itUserDefProps = env.getAllProperties();
+      List userDefProps = new ArrayList();
+      while(itUserDefProps.hasNext()) {
+	Property p = (Property)itUserDefProps.next();
+	userDefProps.add(marshalProperty(p));
+      }
+      FIPA.Property[] IDLuserDefinedProperties = new FIPA.Property[userDefProps.size()];
+      for(int i = 0; i < userDefProps.size(); i++)
+	IDLuserDefinedProperties[i] = (FIPA.Property)userDefProps.get(i);
 
       // Fill in the list of 'received' stamps
       /* FIXME: Maybe several IDL Envelopes should be generated, one for every 'received' stamp...
@@ -746,6 +764,10 @@ public class MessageTransportProtocol implements MTP {
 
   public String[] getSupportedProtocols() {
     return PROTOCOLS;
+  }
+
+  private FIPA.Property marshalProperty(Property p) {
+      return new FIPA.Property(p.getName(), (org.omg.CORBA.Any)p.getValue());
   }
 
   private FIPA.AgentID marshalAID(AID id) {
