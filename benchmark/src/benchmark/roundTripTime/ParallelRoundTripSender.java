@@ -184,7 +184,6 @@ public class ParallelRoundTripSender extends Agent {
 						break;
 				case 1: // in this state I send iterations number of messages
 		      	send(msg);
-						block();
 						counter++;
 						if (counter == iterations) 
 								state = 2; // sent iterations messages 
