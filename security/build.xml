@@ -178,7 +178,7 @@
 
 
   <!-- Create the zip file -->
-  <target name="zip" depends="lib">
+  <target name="zip">
     <zip zipfile="./jadesecurity.zip" 
          basedir="../../../" 
 	 	 includes="jade/add-ons/security/**" 
