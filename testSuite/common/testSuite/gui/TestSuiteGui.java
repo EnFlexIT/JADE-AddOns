@@ -769,10 +769,8 @@ public class TestSuiteGui extends javax.swing.JFrame {
      Put/move a given FunctionalityDescriptor at the beginning of the history
    */
   public void addToHistory(Object element) {
-  	System.out.println("Adding el "+element +" to history");
     for (int i = 0; i < historyCB.getItemCount(); i++) {
       if (element.equals(historyCB.getItemAt(i))) {
-		  	System.out.println("El "+element +" found in position "+i);
         if (i != 0) {
           historyCB.removeItemAt(i);
         } 
