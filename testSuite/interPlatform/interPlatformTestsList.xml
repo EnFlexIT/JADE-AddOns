@@ -5,18 +5,24 @@
 	]>
 -->
 	<TestsList> 
-		<Test name="Inter platform communication via IIOP" skip="false">
+		<Test name="Basic inter platform communication" skip="false">
 			<TestClassName>test.interPlatform.tests.TestRemotePing</TestClassName>
 			<WhatTest> Tests sending and receiving a message to/from an agent on a remote platform.</WhatTest>
-			<HowWorkTest> It uses the default IIOP MTP.</HowWorkTest>
+			<HowWorkTest>An agent is created on a remote platform and then a ping message is sent to it</HowWorkTest>
 			<WhenTestPass> The test passes if the agent on the remote platform receives the ping message and replies correctly and no exception is fired.</WhenTestPass>
 		</Test>
 		
-		<Test name="Message Envelope transfer over IIOP MTP" skip="false">
+		<Test name="Message Envelope transfer" skip="false">
 			<TestClassName>test.interPlatform.tests.TestEnvelope</TestClassName>
-			<WhatTest> Test the correct transfer of the Message Envelope in communication across different platforms using the standard IIOP MTP.</WhatTest>
-			<HowWorkTest> A message is exchanged between two agents living on different platforms with an Envelope including two properties: a Serializable object and a String.
-			The message transfer occurs using the standard IIOP MTP.</HowWorkTest>
+			<WhatTest> Test the correct transfer of the Message Envelope in communication across different platforms.</WhatTest>
+			<HowWorkTest> A message is exchanged between two agents living on different platforms with an Envelope including two properties: a Serializable object and a String.</HowWorkTest>
 			<WhenTestPass> The test passes if the received Envelope includes the properties as they were set.</WhenTestPass>
+		</Test>		
+		
+		<Test name="Incoming message routing" skip="false">
+			<TestClassName>test.interPlatform.tests.TestIncomingMessageRouting</TestClassName>
+			<WhatTest> Test the "incoming message routing" mechanism i.e. the case where a message is delivered to an agent on a remote platform and living on a container different from that where the MTP that receives the message is installed.</WhatTest>
+			<HowWorkTest> A ping message is exchanged between two agents living on different platforms with an Envelope including two properties: a Serializable object and a String.</HowWorkTest>
+			<WhenTestPass> The test passes if the agent on the remote platform receives the ping message and replies correctly and no exception is fired.</WhenTestPass>
 		</Test>		
 	</TestsList>
