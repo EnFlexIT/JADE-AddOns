@@ -73,7 +73,7 @@ public class ContainerAuthority implements Authority {
 
 		try {
 			if (System.getSecurityManager() == null) {
-				String policyFile = profile.getParameter(Profile.POLICY_FILE);
+				String policyFile = profile.getParameter(Profile.POLICY_FILE, null);
 				System.setProperty("java.security.policy", policyFile);
 				Policy.setPolicy(new sun.security.provider.PolicyFile());
 

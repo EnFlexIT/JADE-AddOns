@@ -82,7 +82,7 @@ public class PlatformAuthority extends ContainerAuthority {
 
 		if (profile != null) {
 			try {
-				passwdFile = profile.getParameter(Profile.PASSWD_FILE);
+				passwdFile = profile.getParameter(Profile.PASSWD_FILE, null);
 				parsePasswdFile();
 			}
 			catch (Exception e) {
