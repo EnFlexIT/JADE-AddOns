@@ -58,6 +58,8 @@ import jade.mtp.TransportAddress;
 
 public class MessageTransportProtocol implements MTP {
 
+  private static final String[] PROTOCOLS = new String[] { "IOR", "corbaloc", "corbaname" };
+
   private static ORB myORB;
   private static POA rootPOA;
   private static POAManagerFactory mgrFactory;
@@ -288,7 +290,7 @@ public class MessageTransportProtocol implements MTP {
 	file = rep.substring(slashPos + 1);
       }
       else
-        throw new MTPException("Missing port or object key: " + rep);
+	throw new MTPException("Missing port or object key: " + rep);
     }
 
     public String getString() {
@@ -317,6 +319,72 @@ public class MessageTransportProtocol implements MTP {
 
   } // End of OBAddressURL class
 
+
+  private static class OBAddressNS extends OBAddress {
+
+    private String proto;
+    private String host;
+    private String port;
+    private String file;
+    private String anchor;
+
+    public OBAddressNS(String rep) throws MTPException {
+      if(!rep.startsWith("corbaname:"))
+        throw new MTPException("Missing 'corbaname': " + rep);
+      int secondColonPos = rep.indexOf(':', 10);
+      if(secondColonPos != -1)
+	proto = rep.substring(0, secondColonPos + 1);
+      else
+        throw new MTPException("Missing protocol name: " + rep);
+      int thirdColonPos = rep.indexOf(':', secondColonPos + 1); // Include ':'
+      int slashPos = rep.indexOf('/');
+      int poundPos = rep.indexOf('#');
+      if((thirdColonPos != -1)&&(slashPos != -1)) {
+	// The host name is between two ':', both excluded
+	host = rep.substring(secondColonPos + 1, thirdColonPos);
+	// The port number is between ':' and '/', both excluded
+	port = rep.substring(thirdColonPos + 1, slashPos);
+
+	if(poundPos != -1) {
+	  // The object key is between '/' and '#', both excluded
+	  file = rep.substring(slashPos + 1, poundPos);
+	  anchor = rep.substring(poundPos + 1);
+	}
+	else {
+	  // the object key is all that's left in the string
+	  file = rep.substring(slashPos + 1);
+	  anchor = "";
+	}
+      }
+      else
+	throw new MTPException("Missing port or object key: " + rep);
+    }
+
+    public String getString() {
+      return proto + host + ':' + port + "/" + file + "#" + anchor;
+    }
+
+    public String getProto() {
+      return proto;
+    }
+
+    public String getHost() {
+      return host;
+    }
+
+    public String getPort() {
+      return port;
+    }
+
+    public String getFile() {
+      return file;
+    }
+
+    public String getAnchor() {
+      return anchor;
+    }
+
+  } // End of OBAddressNS
 
   public TransportAddress activate(InChannel.Dispatcher disp) throws MTPException {
 
@@ -517,8 +585,12 @@ public class MessageTransportProtocol implements MTP {
   public TransportAddress strToAddr(String rep) throws MTPException {
     if(rep.startsWith("IOR:"))
       return new OBAddressIOR(rep);
-    else
+    else if(rep.startsWith("corbaloc:"))
       return new OBAddressURL(rep);
+    else if(rep.startsWith("corbaname:"))
+      return new OBAddressNS(rep);
+    else
+      throw new MTPException("Invalid protocol prefix: " + rep);
   }
 
   public String addrToStr(TransportAddress ta) throws MTPException {
@@ -533,7 +605,11 @@ public class MessageTransportProtocol implements MTP {
   }
 
   public String getName() {
-    return "iiop";
+    return "fipa.mts.mtp.iiop.std";
+  }
+
+  public String[] getSupportedProtocols() {
+    return PROTOCOLS;
   }
 
   private FIPA.AgentID marshalAID(AID id) {
