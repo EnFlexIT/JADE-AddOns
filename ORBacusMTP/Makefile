@@ -98,6 +98,10 @@ batch:
 	echo 'cd $(CLSDIR)' >> $(BATCH_MAKE)
 	echo '$(AR) $(ARFLAGS) ..\$(LIBNAME) *' >> $(BATCH_MAKE)
 	echo 'cd ..' >> $(BATCH_MAKE)
+	echo 'rmdir /S /Q $(CLSDIR)\FIPA' >> $(BATCH_MAKE)  #FOR WIN NT 4/ Win 200
+	echo 'rmdir /S /Q $(CLSDIR)\orbacus' >> $(BATCH_MAKE)  #FOR WIN NT 4/ Win2000
+	echo 'deltree /Y $(CLSDIR)\FIPA' >> $(BATCH_MAKE) #for Win 95/98
+	echo 'deltree /Y $(CLSDIR)\orbacus' >> $(BATCH_MAKE) #for Win 95/98
 	echo '$(AR) $(ARFLAGS) ..\ORBacusMTP.zip *' >> $(BATCH_MAKE)
 	echo >> $(BATCH_MAKE)
 	echo '@REM ===============================================================' > $(BATCH_CLEAN)
@@ -107,9 +111,10 @@ batch:
 	echo >> $(BATCH_CLEAN)
 	echo 'del $(subst /,\,$(IDLSTUBS))' >> $(BATCH_CLEAN)
 	echo 'del $(subst /,\,$(LIBNAME))' >> $(BATCH_CLEAN)
-	echo 'rmdir /S /Q $(CLSDIR)\*' >> $(BATCH_CLEAN) # For Win NT 4
-	echo 'deltree /Y $(CLSDIR)\*' >> $(BATCH_CLEAN)  # For Win 95/98
-
+	echo 'rmdir /S /Q $(CLSDIR)\FIPA' >> $(BATCH_CLEAN) # For Win NT 4/Windows 2000
+	echo 'rmdir /S /Q $(CLSDIR)\orbacus' >> $(BATCH_CLEAN) # For Win NT 4/Windows 2000
+	echo 'deltree /Y $(CLSDIR)\orbacus' >> $(BATCH_CLEAN)  # For Win 95/98
+	echo 'deltree /Y $(CLSDIR)\FIPA' >> $(BATCH_CLEAN) #for Win 95/98
 clean:
 	rm -rf $(IDLSTUBS) $(CLSDIR) $(LIBNAME) `find . -name '*~'` `find . -name '#*#'`
 	mkdir -p $(CLSDIR)
