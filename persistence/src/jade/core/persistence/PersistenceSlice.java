@@ -38,7 +38,6 @@ import jade.core.NameClashException;
 
 import jade.mtp.MTPDescriptor;
 
-import jade.security.CertificateFolder;
 import jade.security.AuthException;
 
 import jade.util.leap.List;
