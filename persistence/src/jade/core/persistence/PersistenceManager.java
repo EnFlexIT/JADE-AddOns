@@ -508,14 +508,29 @@ public class PersistenceManager {
 		Transaction tx = null;
 		try {
 		    tx = s.beginTransaction();
-		    SavedAgent toSave = new SavedAgent(target, pendingMessages);
+		    SavedAgent toSave = null;
 		    java.util.List resultSet = s.find("from jade.core.persistence.SavedAgent as item where item.name = ?", target.getName(), Hibernate.STRING);
 		    if(!resultSet.isEmpty()) {
 			toSave = (SavedAgent)resultSet.get(0);
 			toSave.setAgentData(target);
-			toSave.setPendingMessages(pendingMessages);
+			java.util.List savedMessages = toSave.getPendingMessages();
+			if(savedMessages != null) {
+			    if(savedMessages != pendingMessages) {
+			        savedMessages.clear();
+				java.util.Iterator it = pendingMessages.iterator();
+				while(it.hasNext()) {
+				    ACLMessage msg = (ACLMessage)it.next();
+				    savedMessages.add(msg.clone());
+				}
+			    }
+			}
+			else {
+			    toSave.setPendingMessages(pendingMessages);
+			}
 		    }
-
+		    else {
+			toSave = new SavedAgent(target, pendingMessages);
+		    }
 		    s.saveOrUpdate(toSave);
 		    tx.commit();
 		}
