@@ -167,7 +167,7 @@ public class ExitDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 10, 5);
         getContentPane().add(jButtonCancel, gridBagConstraints);
 
-        jExitIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/exit.gif")));
+        jExitIcon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/exit.png")));
         jExitIcon.setBorder(null);
         jExitIcon.setDefaultCapable(false);
         jExitIcon.setRequestFocusEnabled(false);
