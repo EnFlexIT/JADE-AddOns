@@ -36,6 +36,7 @@ import jade.lang.Codec;
 import jade.lang.sl.SL0Codec;
 import jade.domain.JADEAgentManagement.*;
 import jade.proto.FIPAProtocolNames;
+import jade.content.AgentAction;
 
 import test.common.agentConfigurationOntology.*;
 
@@ -47,7 +48,9 @@ import java.util.Date;
    @author Giovanni Caire - TILAB
  */
 public class TestUtility {
-	public static final String RESPONDER_CLASS_NAME = "test.common.ConfigurableAgent";
+	private static boolean verbose = true;
+	
+	public static final String TARGET_CLASS_NAME = "test.common.ConfigurableAgent";
 	
   private static Codec c = new SL0Codec();
   private static Ontology o = JADEAgentManagementOntology.instance();
@@ -62,23 +65,22 @@ public class TestUtility {
   }
   
   /**
-     Create an agent (that will act as a responder) in the local platform
+     Create a target agent in the local platform
 	 */
-  public static AID createResponder(Agent a, String respName) throws TestException {
-  	return createResponder(a, respName, Agent.getAMS());
+  public static AID createTarget(Agent a, String respName) throws TestException {
+  	return createTarget(a, respName, Agent.getAMS());
   }
   
   /**
-     Create an agent (that will act as a responder) in the platform
-     administrated by the indicated AMS
+     Create a target agent in the platform administrated by the indicated AMS
 	 */
-  public static AID createResponder(Agent a, String respName, AID amsAID) throws TestException {
+  public static AID createTarget(Agent a, String targetName, AID amsAID) throws TestException {
     try {
   		ACLMessage request = createRequestMessage(a, amsAID, SL0Codec.NAME, JADEAgentManagementOntology.NAME);
 
   		CreateAgent ca = new CreateAgent();
-  		ca.setAgentName(respName);
-  		ca.setClassName(RESPONDER_CLASS_NAME);
+  		ca.setAgentName(targetName);
+  		ca.setClassName(TARGET_CLASS_NAME);
   		if (amsAID.equals(a.getAMS())) { 
 	  		ca.setContainer((ContainerID) a.here());
   		}
@@ -91,72 +93,60 @@ public class TestUtility {
   		act.setAction(ca);
   		
     	synchronized(c) { //must be synchronized because this is a static method
-      	request.setContent(encode(act,c,o));
+      	request.setContent(encode(act, c, o));
     	}
     	
     	// Send message and collect reply
     	FIPAServiceCommunicator.doFipaRequestClient(a, request);
     	
-    	return createAID(respName, amsAID);
+    	return createNewAID(targetName, amsAID);
     }
     catch (Exception e) {
-    	throw new TestException("Error creating ResponderAgent "+respName, e);
+    	throw new TestException("Error creating ResponderAgent "+targetName, e);
     }
   }
 
   /**
-     Kill an agent that as acted as a responder
-	 */
-  public static void killResponder(Agent a, AID resp) throws TestException {
-  	try {
-  		ACLMessage request = createRequestMessage(a, resp, codec.getName(), onto.getName());
-  		
-  		Quit q = new Quit();
-  		synchronized (cm) {
-	  		cm.fillContent(request, q);
-  		}
-  		
-    	// Send message and collect reply
-    	FIPAServiceCommunicator.doFipaRequestClient(a, request);
-    	// Send message and don't collect reply as the responder will 
-  		// quit and therefore will not reply
-    	//a.send(request);
-    }
-    catch (Exception e) {
-    	throw new TestException("Error killing agent "+resp.getName(), e);
-    }
+     Kill a target agent (whereever it is)
+   */
+  public static void killTarget(Agent a, AID targetAID) throws TestException {
+  	AID amsAID = createNewAID("ams", targetAID);
+  	killTarget(a, targetAID, amsAID);
   }
   
   /**
+     Kill a target agent living in the platform administrated by the 
+     indicated AMS
 	 */
-  /*public static void killResponder(Agent a, String respName, AID amsAID) throws TestException {
+  public static void killTarget(Agent a, AID targetAID, AID amsAID) throws TestException {
     try {
   		ACLMessage request = createRequestMessage(a, amsAID, SL0Codec.NAME, JADEAgentManagementOntology.NAME);
 
   		KillAgent ka = new KillAgent();
-  		ka.setAgent(createAID(respName, amsAID));
+  		ka.setAgent(targetAID);
   		
   		Action act = new Action();
   		act.setActor(amsAID);
   		act.setAction(ka);
   		
     	synchronized(c) { //must be synchronized because this is a static method
-      	request.setContent(encode(act,c,o));
+      	request.setContent(encode(act, c, o));
     	}
     	
     	// Send message and collect reply
     	FIPAServiceCommunicator.doFipaRequestClient(a, request);
     }
     catch (Exception e) {
-    	throw new TestException("Error killing ResponderAgent "+respName, e);
+    	throw new TestException("Error killing TargetAgent "+targetAID.getName(), e);
     }
-  }*/
+  }
 
   /**
+     Add a behaviour of the indicated class to the indicated target agent
    */
-  public static void addBehaviour(Agent a, AID resp, String behaviourClassName) throws TestException { 
+  public static void addBehaviour(Agent a, AID targetAID, String behaviourClassName) throws TestException { 
   	try {
-  		ACLMessage request = createRequestMessage(a, resp, codec.getName(), onto.getName());
+  		ACLMessage request = createRequestMessage(a, targetAID, codec.getName(), onto.getName());
   		
   		AddBehaviour ab = new AddBehaviour(null, behaviourClassName);
   		synchronized (cm) {
@@ -167,7 +157,7 @@ public class TestUtility {
     	FIPAServiceCommunicator.doFipaRequestClient(a, request);
       }
     catch (Exception e) {
-    	throw new TestException("Error adding behaviour "+behaviourClassName+" to agent "+resp.getName(), e);
+    	throw new TestException("Error adding behaviour "+behaviourClassName+" to agent "+targetAID.getName(), e);
     }
   }
   
@@ -180,8 +170,27 @@ public class TestUtility {
   }
   
   /**
+     Make the indicated target agent perform the indicated action
    */
-  static ACLMessage createRequestMessage(Agent sender, AID receiver, String language, String ontology) {
+  public static void forceAction(Agent a, AID targetAID, AgentAction action) throws TestException { 
+  	try {
+  		ACLMessage request = createRequestMessage(a, targetAID, codec.getName(), onto.getName());
+  		
+  		synchronized (cm) {
+	  		cm.fillContent(request, action);
+  		}
+  		
+    	// Send message and collect reply
+    	FIPAServiceCommunicator.doFipaRequestClient(a, request);
+    }
+    catch (Exception e) {
+    	throw new TestException("Error forcing action "+action+" to agent "+targetAID.getName(), e);
+    }
+  }
+  
+  /**
+   */
+  private static ACLMessage createRequestMessage(Agent sender, AID receiver, String language, String ontology) {
     ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
     request.setSender(sender.getAID());
     request.addReceiver(receiver);
@@ -195,7 +204,7 @@ public class TestUtility {
 
   /**
    */
-  static String encode(Action act, Codec c, Ontology o) throws FIPAException {
+  private static String encode(Action act, Codec c, Ontology o) throws FIPAException {
     // Write the action in the :content slot of the request
     List l = new ArrayList();
     try {
@@ -207,20 +216,49 @@ public class TestUtility {
     return c.encode(l,o);
   }
   
-  static AID createAID(String localName, AID amsAID) {
-  	String amsName = amsAID.getName();
-  	String amsHap = null;
-    int atPos = amsName.lastIndexOf('@');
+  private static AID createNewAID(String newName, AID anAID) {
+  	String name = anAID.getName();
+  	String hap = null;
+    int atPos = name.lastIndexOf('@');
     if(atPos == -1)
-      amsHap = amsName;
+      hap = name;
     else
-      amsHap = amsName.substring(atPos + 1);
-    AID id = new AID(localName+"@"+amsHap, AID.ISGUID);
-    Iterator it = amsAID.getAllAddresses();
+      hap = name.substring(atPos + 1);
+      
+    AID id = new AID(newName+"@"+hap, AID.ISGUID);
+    Iterator it = anAID.getAllAddresses();
     while (it.hasNext()) {
     	id.addAddresses((String) it.next());
     }
     return id;
+  }
+  
+  /**
+   */
+  public static void log(String s) {
+    if (verbose) {
+      System.out.println(s);
+    } 
+  } 	
+		
+  /**
+   */
+  public static void log(Object o) {
+  	log(o.toString());
+  }
+  
+  /**
+   */
+  public static void log(Throwable t) {
+    if (verbose) {
+      t.printStackTrace();
+    } 
+  } 	
+		
+  /**
+   */
+  public static void setVerbose(boolean b) {
+  	verbose = b;
   }
 }
   

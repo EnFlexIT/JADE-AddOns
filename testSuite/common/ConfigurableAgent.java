@@ -35,10 +35,12 @@ import jade.content.onto.basic.Done;
 import jade.proto.*;
 import jade.domain.FIPAAgentManagement.*;
 
+import java.lang.reflect.Method;
 import java.util.Hashtable;
 
 /**
-   Generic agent that can load/unload behaviours on request
+   Generic agent that can load/unload behaviours, content languages 
+   and ontologies on request
    @author Giovanni Caire - TILAB
  */
 public class ConfigurableAgent extends Agent {
@@ -83,12 +85,18 @@ public class ConfigurableAgent extends Agent {
     			// Retrieve the action from the data store
     			ContentElement ce = (ContentElement) getDataStore().get(this.toString());
     			
-    			// Exceute the action
+    			// Exceute the requested action
     			if (ce instanceof AddBehaviour) {
     				loadBehaviour((AddBehaviour) ce);
     			}
     			else if (ce instanceof RemoveBehaviour) {
-    				unloadBehaviour((RemoveBehaviour) ce);
+    				unloadBehaviour((RemoveBehaviour) ce);    			
+    			}
+    			else if (ce instanceof LoadLanguage) {
+    				loadLanguage((LoadLanguage) ce);
+    			}
+    			else if (ce instanceof LoadOntology) {
+    				loadOntology((LoadOntology) ce);
     			}
     			else if (ce instanceof test.common.agentConfigurationOntology.Quit) {
     				registerPrepareResponse(new OneShotBehaviour() {
@@ -136,6 +144,31 @@ public class ConfigurableAgent extends Agent {
 			removeBehaviour(b);
 		}
 	}
+	
+	private void loadLanguage(LoadLanguage ll) throws Exception {
+		String languageClassName = ll.getClassName();
+		String languageName = ll.getName();
+		
+		Codec c = (Codec) Class.forName(languageClassName).newInstance();
+		if (languageName == null) {
+			languageName = c.getName();
+		}
+  	getContentManager().registerLanguage(c, languageName);
+	}
+		
+	private void loadOntology(LoadOntology lo) throws Exception {
+		String ontoClassName = lo.getClassName();
+		String ontoName = lo.getName();
+		
+		Class c = Class.forName(ontoClassName);
+		Method m = c.getMethod("getInstance", new Class[0]);
+		Ontology onto = (Ontology) m.invoke(null, null);
+		if (ontoName == null) {
+			ontoName = onto.getName();
+		}
+  	getContentManager().registerOntology(onto, ontoName);
+	}
+		
 				
 }
 

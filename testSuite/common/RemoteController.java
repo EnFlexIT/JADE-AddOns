@@ -42,10 +42,10 @@ public class RemoteController {
 	
 	public RemoteController(String instanceName, String cmdLine, String[] protoNames) throws TestException {
 		try {
-			// Start a "remote platform" as a different Process
+			// Start a JADE instance in a different Process
 			proc = java.lang.Runtime.getRuntime().exec(cmdLine);
 			
-			Thread t = new SubProcessOutputHandler(instanceName, proc, protoNames);
+			Thread t = new SubProcessManager(instanceName, proc, protoNames);
 			t.start();
 			
 			waitForJadeStartup();
@@ -71,7 +71,7 @@ public class RemoteController {
 		synchronized (lock) {
 			while (!ready) {
 				try {
-					lock.wait(20000); // Wait for 10 sec at most
+					lock.wait(10000); // Wait for 10 sec at most
 					break;
 				}
 				catch (InterruptedException ie) {
@@ -92,27 +92,25 @@ public class RemoteController {
 		}
 	}
 	
-	class SubProcessOutputHandler extends Thread {
+	class SubProcessManager extends Thread {
 		private Process subProc;
 		private BufferedReader br;
 		private String[] protoNames;
 		private String name;
 		
-		public SubProcessOutputHandler(String n, Process p, String[] names) {
+		public SubProcessManager(String n, Process p, String[] names) {
 			name = n;
 			subProc = p;
 			br = new BufferedReader(new InputStreamReader(subProc.getInputStream()));
-			if (names == null) {
-				throw new IllegalArgumentException("No protocol name specified");
-			}
-			protoNames = names;
+			protoNames = (names != null ? names : new String[0]);
 		}
 		
 		public void run() {
 			while (true) {
 				try {
+					// Check if the sub-process is still alive
 					subProc.exitValue();
-					System.out.println("Remote JADE terminated");
+					System.out.println("Remote JADE instance "+name+" terminated");
 					
 					// If ready is false then the sub-process exited prematurely
 					// Just notify the launcher
@@ -160,5 +158,5 @@ public class RemoteController {
 				}
 			}
 		}		
-	}   // END of inner class SubProcessOutputHandler
+	}   // END of inner class SubProcessManager
 }

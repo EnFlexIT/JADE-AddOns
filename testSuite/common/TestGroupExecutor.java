@@ -62,8 +62,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 	
 	// The MessageTemplate used to distingush messages sent to procede 
 	// in step-by-step mode.
-	private static final String STEP_KEYWORD = "STEP";
-	private MessageTemplate stepTemplate = MessageTemplate.MatchContent(STEP_KEYWORD);
+	private MessageTemplate stepTemplate = MessageTemplate.MatchContent(TesterAgent.STEP);
 	private boolean stepByStepMode = false;
 
 	public TestGroupExecutor(Agent a, TestGroup tg) {
@@ -183,10 +182,14 @@ public class TestGroupExecutor extends FSMBehaviour {
 	
 	private void pause() {
 		if (stepByStepMode) {
-			System.out.println("Send me a message with \""+STEP_KEYWORD+"\" as content to proceed...");
+			System.out.println("Send me a message with \""+TesterAgent.STEP+"\" as content to proceed...");
 			myAgent.blockingReceive(stepTemplate);
 			System.out.println("Go");
 		}
+	}
+	
+	public void setDebugMode(boolean b) {
+		stepByStepMode = b;
 	}
 }
 
