@@ -48,7 +48,7 @@ class RDFOntology extends Ontology {
    * Constructor
    */
   private RDFOntology() {
-  	super(ONTOLOGY_NAME, null);
+  	super(ONTOLOGY_NAME, (Introspector)null);
 
     try {
     	add(new IRESchema(RDFCodec.IOTA));
