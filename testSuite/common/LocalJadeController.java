@@ -151,7 +151,7 @@ class LocalJadeController implements JadeController {
 						catchAddress(line);
 					
 						// Notify the launcher when JADE startup is completed 
-						if (line.startsWith("Agent container") && line.endsWith("is ready.")) {
+						if (containerName == null && line.startsWith("Agent container") && line.endsWith("is ready.")) {
 							catchContainerName(line);
 							synchronized (lock) {
 								ready = true;
