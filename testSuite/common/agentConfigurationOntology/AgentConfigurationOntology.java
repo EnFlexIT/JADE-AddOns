@@ -44,6 +44,14 @@ public class AgentConfigurationOntology extends Ontology {
   public static final String REMOVE_BEHAVIOUR = "REMOVE_BEHAVIOUR";
   public static final String REMOVE_BEHAVIOUR_NAME = "name";
   
+  public static final String LOAD_LANGUAGE = "LOAD_LANGUAGE";
+  public static final String LOAD_LANGUAGE_NAME = "name";
+  public static final String LOAD_LANGUAGE_CLASS_NAME = "classname";
+
+  public static final String LOAD_ONTOLOGY = "LOAD_ONTOLOGY";
+  public static final String LOAD_ONTOLOGY_NAME = "name";
+  public static final String LOAD_ONTOLOGY_CLASS_NAME = "classname";
+
   public static final String QUIT = "QUIT";
 
   // The singleton instance of this ontology
@@ -62,6 +70,8 @@ public class AgentConfigurationOntology extends Ontology {
     try {
     	add(new AgentActionSchema(ADD_BEHAVIOUR), AddBehaviour.class);
     	add(new AgentActionSchema(REMOVE_BEHAVIOUR), RemoveBehaviour.class);
+    	add(new AgentActionSchema(LOAD_LANGUAGE), LoadLanguage.class);
+    	add(new AgentActionSchema(LOAD_ONTOLOGY), LoadOntology.class);
     	add(new AgentActionSchema(QUIT), Quit.class);
     	
     	AgentActionSchema as = (AgentActionSchema) getSchema(ADD_BEHAVIOUR);
@@ -70,6 +80,15 @@ public class AgentConfigurationOntology extends Ontology {
 
     	as = (AgentActionSchema) getSchema(REMOVE_BEHAVIOUR);
     	as.add(REMOVE_BEHAVIOUR_NAME, (PrimitiveSchema) getSchema(BasicOntology.STRING));
+
+    	as = (AgentActionSchema) getSchema(LOAD_LANGUAGE);
+    	as.add(LOAD_LANGUAGE_NAME, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    	as.add(LOAD_LANGUAGE_CLASS_NAME, (PrimitiveSchema) getSchema(BasicOntology.STRING));
+
+    	as = (AgentActionSchema) getSchema(LOAD_ONTOLOGY);
+    	as.add(LOAD_ONTOLOGY_NAME, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
+    	as.add(LOAD_ONTOLOGY_CLASS_NAME, (PrimitiveSchema) getSchema(BasicOntology.STRING));
+
     } 
     catch (OntologyException oe) {
     	oe.printStackTrace();
