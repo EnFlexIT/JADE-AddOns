@@ -38,6 +38,9 @@ import edu.stanford.smi.protege.util.*;
 
 import edu.stanford.smi.protege.widget.*;
 
+//Jade
+import jade.util.Logger;
+
 /**
  *  Main class which handles the Ontology generation
  *
@@ -47,6 +50,9 @@ import edu.stanford.smi.protege.widget.*;
  */
 public class OntologyBeanGeneratorTab extends InstancesTab {
 
+  //logging 
+  private static Logger logger = Logger.getMyLogger(OntologyBeanGeneratorTab.class.getName());
+	
   /**
    *  Get the cardinality of this slot and build the appropriate String
    *  Ultimately there are two possible outputs: For singule slots its either
@@ -344,7 +350,6 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     throws Exception {
     String slotName = converter.getSlotName(theSlot);
     slotName = ProtegeTools.toJavaString(slotName); //added by J.Picault
-    //System.out.println("slotName: " + slotName);
     if ((slotName.length() < 1) || (slotName.charAt(0) == ':')) {
       throw new Exception("Invalid slot name");
     }
@@ -451,7 +456,7 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
 
     // ignore all system classes
     if (ontologyType.toString().charAt(0) == ':') {
-      System.out.println("ignore ontology type!, returning");
+      logger.log(Logger.WARNING,"ignore ontology type!, returning");
       return;
     }
 
@@ -1213,7 +1218,7 @@ public class OntologyBeanGeneratorTab extends InstancesTab {
     add(ontologyBeanGeneratorPanel);
     Cls projectAnno = itsKB.getCls(PROJECTANNOTATION);
     if (projectAnno==null) {
-      System.out.println("Warning: Do not forget to include the project SimpeJADEAbstractOntology");
+      logger.log(Logger.WARNING,"Do not forget to include the project SimpeJADEAbstractOntology");
       //      JOptionPane.showMessageDialog(null, "Do not forget to include the project SimpeJADEAbstractOntology", "include SimpeJADEAbstractOntology",
       //       JOptionPane.ERROR_MESSAGE);
       return;

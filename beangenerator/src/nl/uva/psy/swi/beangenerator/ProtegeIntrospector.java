@@ -140,8 +140,6 @@ public class ProtegeIntrospector extends ReflectiveIntrospector {
   }
 
   private String translateName(String jadeName, Class javaClass) {
-    //System.out.print("Class: " + javaClass.getName());
-    //System.out.print(", jadeName: " + jadeName);
     SlotHolder jadeSlot = new SlotHolder(javaClass.getName(), jadeName);
     if (jadeSlot == null) {
       return null;
@@ -150,7 +148,6 @@ public class ProtegeIntrospector extends ReflectiveIntrospector {
     if (methodKey == null) {
       return null;
     }
-    //System.out.println(", methodKey: " + methodKey.slotName);
     return translateName(methodKey.slotName);
   }
   private ProtegeTools.ProtegeOntology protegeOntology;

@@ -45,7 +45,6 @@ public class NameConverter {
     if (jadeNameSlot != null) {
       Object temp = theCls.getOwnSlotValue(jadeNameSlot);
       if (temp != null) {
-        //System.out.println(temp.toString());
         className = (String) temp;
       }
     }
