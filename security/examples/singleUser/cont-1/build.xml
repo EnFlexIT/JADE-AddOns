@@ -1,0 +1,36 @@
+<!--
+   build.xml file
+   for JADE Security Plug-in
+   to be used with 'ant':
+   http://jakarta.apache.org/ant/
+-->
+
+<!-- =========  REMOTE Container  ========= -->
+
+<project name="coresec-examples" default="remote-cont" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="jaderoot" value="../../../../../"/>
+  <property name="libJADEDir" value="${jaderoot}/lib"/>
+
+  <property name="bc.jar"  value="${libJADEDir}/add-ons/coresec/lib/bc/bcprov-jdk14-119.jar" />
+
+  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/iiop.jar;${libJADEDir}/jadeTools.jar;${bc.jar};${jaderoot}/add-ons/coresec/lib/coresec.jar;" /> 
+
+
+
+  <target name="remote-cont" depends="" description="Startup a remote container." >
+
+       <java classname="jade.Boot" fork="yes">
+
+         <arg line="-conf cont-1.conf -container -host 127.0.0.1" />
+
+         <classpath>
+           <pathelement path="${classpath}"/>
+         </classpath>
+       </java>
+  </target>
+
+
+
+
+</project>

@@ -1,0 +1,30 @@
+<!--
+   build.xml file
+   for JADE Security Plug-in
+   to be used with 'ant':
+   http://jakarta.apache.org/ant/
+-->
+
+<!-- =========  MAIN  ========= -->
+
+<project name="coresec-examples" default="main" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="jaderoot" value="../../../../.." />
+  <property name="libJADEDir" value="${jaderoot}/lib" />
+
+  <property name="bc.jar"  value="${libJADEDir}/add-ons/coresec/lib/bc/bcprov-jdk14-119.jar" />
+  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/iiop.jar;${libJADEDir}/jadeTools.jar;${bc.jar};${jaderoot}/add-ons/coresec/lib/coresec.jar;" /> 
+
+
+  <target name="main" depends="" description="Startup a JADE Main-Container." >
+
+       <java classname="jade.Boot" fork="yes">
+         <arg line="-conf main.conf" />
+         <classpath>
+           <pathelement path="${classpath}"/>
+         </classpath>
+       </java>
+  </target>
+
+
+</project>
