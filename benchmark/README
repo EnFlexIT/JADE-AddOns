@@ -65,6 +65,21 @@ GETTING STARTED
     - couples is the number of couples of agents
     - agents is the list of agents to be launched
 
+
+
+PARALLEL TEST
+In the previous tests each sender sends a message and wait for a reply before sending 
+the next one, in a "serial" fashion.
+For the group of tests "parallel", a sender sends in sequence all the messages without 
+waiting for the replies.
+Some configuration files for the parallel tests are available:
+    - ParalleTestSingleContainer.conf
+	for intra-container measurements
+    - ParalleTest2Containers_TX.conf, ParalleTest2Containers_RX.conf
+	for inter-container measurements
+
+
+
 --
 Elisabetta Cortese
 elisabetta.cortese@TiLab.com
