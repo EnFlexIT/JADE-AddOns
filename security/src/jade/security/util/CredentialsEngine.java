@@ -96,21 +96,34 @@ public class CredentialsEngine  {
       DataInputStream in = new DataInputStream(new ByteArrayInputStream(enc));
       // Reads the principal's name
       String name = in.readUTF();
+      String firstString="";
+      String algo=null;
+      String format=null;
+      String[] names=null;
+      byte[] data = null;
+      int size; 
+      
       // Decodes the SDSIName
-      // Algorithm
-      String algo =  in.readUTF();
-      // Format
-      String format = in.readUTF();
-      // Data
-      int size = in.readInt();
-      byte[] data = new byte[size];
-      in.read(data,0,size);
-      // Names
-      size = in.readInt();
-      String[] names = new String[size];
-      for (int i=0; i<size; i++) {
-        names[i] = in.readUTF();
+      firstString = in.readUTF();
+      if (!firstString.equals("nullSDSIName") ) {
+        // Algorithm
+        algo = firstString;
+        // Format
+        format = in.readUTF();
+        // Data
+        size = in.readInt();
+        data = new byte[size];
+        in.read(data, 0, size);
+        // Names
+        size = in.readInt();
+        names = new String[size];
+        for (int i = 0; i < size; i++) {
+          names[i] = in.readUTF();
+        }
+      } else {
+        // it was a null SDSINameImpl
       }
+
       return new JADEPrincipalImpl(name, new SDSINameImpl(data,algo,format,names));
     }
   }
@@ -125,8 +138,10 @@ public class CredentialsEngine  {
       DataOutputStream out = new DataOutputStream(baos);
       // Writes the name
       out.writeUTF(p.getName());
+
       // Encodes the SDSIName
       SDSIName key = p.getSDSIName();
+      if (key!=null) {
       // Writes the algorithm
       out.writeUTF(key.getAlgorithm());
       // Writes the encoding format
@@ -141,6 +156,11 @@ public class CredentialsEngine  {
       for (int i=0; i<names.length; i++) {
         out.writeUTF(names[i]);
       }
+    } else {
+      out.writeUTF("nullSDSIName");
+    }
+
+
       // Flush
       return baos.toByteArray();
     }
