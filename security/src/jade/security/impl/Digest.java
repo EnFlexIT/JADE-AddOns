@@ -48,8 +48,9 @@ public class Digest {
 
 
 	public static void main(String[] args) {
-		if ( args[0].compareTo("DES")==0 ) {
-			System.out.println(digest( args[0].getBytes(),  args[1], "DES"));
+
+		if ( (args.length == 3) && (args[0].compareTo("DES")==0) ) {
+			System.out.println(digest( args[1].getBytes(), "DES", args[2]));
 		} else { 
 			if (args.length > 1) {
 				System.out.println( digest(args[1], args[0] ));
