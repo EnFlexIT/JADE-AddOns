@@ -36,7 +36,6 @@ import jade.util.leap.ArrayList;
 import jade.lang.acl.ISO8601;
 import starlight.util.Base64;
 import java.util.*;
-import jade.util.Logger;
 
 /**
  * @author Rosalba Bochicchio - TELECOM ITALIA LAB
@@ -162,7 +161,8 @@ class RDFDecoder {
 				objectSchema = ObjectSchema.getBaseSchema();
 			}
 			
-			if (qName.equals("fipa-rdf:type")) {
+			//if (qName.equals("fipa-rdf:type")) {
+			if (qName.equals("rdf:type")) {				
 				return;
 				}
 				
@@ -203,7 +203,9 @@ class RDFDecoder {
 	protected void closeTag(String qName,String localName, String content) throws OntologyException {	
 
 		   boolean finalize = false;  
-		   if (qName.equals("fipa-rdf:type")){
+		   //if (qName.equals("fipa-rdf:type")){
+		   if (qName.equals("rdf:type")){		
+		      	content = content.substring(content.indexOf('#')+1);
 			   	replaceTerm(content);
 		   	}
 		   	
@@ -223,7 +225,8 @@ class RDFDecoder {
 		   
 		   if (qName.equals("fipa-rdf:CONTENT_ELEMENT_LIST")) finalize=true;
 		   
-		   if ((!qName.equals("rdf:RDF"))&&(!qName.equals("rdf:object"))&&(!qName.equals("rdf:Description"))&&(!qName.equals("fipa-rdf:type"))&&(!qName.equals("rdf:Seq"))&&(!qName.equals("rdf:Bag"))){
+		   //if ((!qName.equals("rdf:RDF"))&&(!qName.equals("rdf:object"))&&(!qName.equals("rdf:Description"))&&(!qName.equals("fipa-rdf:type"))&&(!qName.equals("rdf:Seq"))&&(!qName.equals("rdf:Bag"))){
+		   if ((!qName.equals("rdf:RDF"))&&(!qName.equals("rdf:object"))&&(!qName.equals("rdf:Description"))&&(!qName.equals("rdf:type"))&&(!qName.equals("rdf:Seq"))&&(!qName.equals("rdf:Bag"))){		   	
 		   
 		 	    	
 		   do { 
@@ -354,7 +357,7 @@ class RDFDecoder {
        	 	element.term = abs;
 			
 		} catch (Exception e) {
-			Logger.getMyLogger(this.getClass().getName()).log(Logger.WARNING,e.getMessage());
+			System.out.println(e);
 		}
 	}
 	
