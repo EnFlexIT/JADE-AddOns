@@ -408,8 +408,23 @@ public class TestSuiteAgent extends GuiAgent {
 	// stand-alone program 	
 	public static void main(String[] args) {
 		try {
+			// Arguments
+      Profile p = new ProfileImpl(null, Test.DEFAULT_PORT, null);
+      StringBuffer argsAsString = new StringBuffer();
+			if (args != null) {
+				for (int i = 0; i < args.length; ++i) {
+					if (args[i].startsWith("-") && i < args.length-1) {
+						argsAsString.append(' ');
+						argsAsString.append(args[i]);
+						p.setParameter(args[i].substring(1), args[i+1]);
+						++i;
+						argsAsString.append(' ');
+						argsAsString.append(args[i]);
+					}
+				}
+			}
 			// Launch the Main container in a separated process
-			mainController = TestUtility.launchJadeInstance("Main", null, "-gui -nomtp -local-port "+Test.DEFAULT_PORT+" -services "+MAIN_SERVICES+" -name "+TEST_PLATFORM_NAME, null);
+			mainController = TestUtility.launchJadeInstance("Main", null, "-gui -nomtp -local-port "+Test.DEFAULT_PORT+" -services "+MAIN_SERVICES+" -name "+TEST_PLATFORM_NAME+argsAsString, null);
 			
       // Get a hold on JADE runtime
       Runtime rt = Runtime.instance();
@@ -417,19 +432,9 @@ public class TestSuiteAgent extends GuiAgent {
       // Exit the JVM when there are no more containers around
       rt.setCloseVM(true);
 
-      Profile p = new ProfileImpl(null, Test.DEFAULT_PORT, null);
 			p.setParameter(Profile.MAIN, "false");
 			p.setParameter(Profile.SERVICES, "jade.core.event.NotificationService;jade.core.mobility.AgentMobilityService;jade.core.replication.AddressNotificationService");
 			p.setSpecifiers(Profile.MTPS, new ArrayList());
-			// Arguments
-			if (args != null) {
-				for (int i = 0; i < args.length; ++i) {
-					if (args[i].startsWith("-") && i < args.length-1) {
-						p.setParameter(args[i].substring(1), args[i+1]);
-						++i;
-					}
-				}
-			}
 			
       AgentContainer mc = rt.createAgentContainer(p);
       
