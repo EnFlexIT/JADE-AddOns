@@ -45,11 +45,6 @@ public class TestRemotePing extends Test {
   	return TEST_NAME;
   }
   
-  public String getDescription() {
-  	StringBuffer sb = new StringBuffer("Tests sending and receiving a message to/from an agent on a remote platform using the default IIOP MTP");
-  	return sb.toString();
-  }
-  
   public Behaviour load(Agent a, DataStore ds, String resultKey) throws TestException { 
   	try {
   		final DataStore store = ds;
