@@ -23,7 +23,7 @@ Boston, MA  02111-1307, USA.
 package jade.misc;
 
 import jade.core.IMTPException;
-import jade.imtp.rmi.MainContainerRMI;
+import jade.imtp.rmi.ServiceManagerRMI;
 import java.net.MalformedURLException;
 import java.rmi.*;
 
@@ -39,7 +39,7 @@ public class JADEPlatformTest implements Remote {
 	private static String name = "JADEPlatformTest";
 
 	/**name of the JADE platform in the RMI registry*/
-	private static String jadeName = "JADE";	
+	private static String smName = jade.core.IMTPManager.SERVICE_MANAGER_NAME;	
 
 	/**
 	 * Checks if the RMI registry exists on the given host.
@@ -114,11 +114,11 @@ public class JADEPlatformTest implements Remote {
 			rmiHost = host;
 		
 		// create the URL
-		url = "rmi://" + rmiHost + ":" + rmiPort + "/" + jadeName;
+		url = "rmi://" + rmiHost + ":" + rmiPort + "/" + smName;
 		
 		// try to bind and unbind the object to the RMI
 		try {
-			MainContainerRMI obj = (MainContainerRMI)Naming.lookup(url);
+			ServiceManagerRMI obj = (ServiceManagerRMI)Naming.lookup(url);
 			String test = obj.getPlatformName();			
 			
 		}catch(NotBoundException e) {
@@ -134,10 +134,6 @@ public class JADEPlatformTest implements Remote {
 		catch(RemoteException e) {
 			return "RMI does not exist on host " + rmiHost + " or is not listening on port " + rmiPort;
 		}
-		catch(IMTPException e) {
-			return "An error occured; JADE is probably down";
-		}
-		
 		
 		return null;
 	}
