@@ -246,7 +246,7 @@ public class TestUtility {
   				classpath = currentCp;
   			}
   			else {
-  				classpath = currentCp+";"+classpath.substring(1);
+  				classpath = classpath.substring(1)+";"+currentCp;
   			}
 			}
 			Logger.getLogger().log("Launching JADE. Classpath is "+classpath);
