@@ -25,6 +25,9 @@ package jade.security.impl;
 
 import jade.security.*;
 
+import jade.util.leap.Iterator;
+
+import jade.core.MainContainer;
 import jade.core.Profile;
 
 import java.io.BufferedReader;
@@ -34,6 +37,8 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import java.security.*;
+import java.security.cert.*;
+import java.security.spec.*;
 
 
 /**
@@ -51,16 +56,33 @@ public class PlatformAuthority extends ContainerAuthority {
 		String key;
 	}
 	
+	int serial;
+	
 	String passwdFile;
 	Vector users = null;
 	
-	public void init(Profile profile) {
+	PrivateKey privateKey;
+	
+	public void init(Profile profile, MainContainer platform) {
+		try {
+			KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA");
+			kpg.initialize(1024);
+			KeyPair kp = kpg.generateKeyPair();
+			privateKey = kp.getPrivate();
+			publicKey = kp.getPublic();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		if (profile != null) {
 			try {
 				passwdFile = profile.getParameter(Profile.PASSWD_FILE);
 				parsePasswdFile();
 			}
-			catch (Exception e) { e.printStackTrace(); }
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 
 			try {
 				if (System.getSecurityManager() == null) {
@@ -69,13 +91,112 @@ public class PlatformAuthority extends ContainerAuthority {
 					System.setSecurityManager(new SecurityManager());
 				}
 			}
-			catch (Exception e) { e.printStackTrace(); }
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		
-		//!!! System.out.println("" + getPermissions(new UserPrincipal("all.users.tomamic")));
+		serial = 1;
 	}
 	
-	public void parsePasswdFile() {
+	public byte[] getPublicKey() {
+		if (publicKey == null)
+			return null;
+		else
+			return publicKey.getEncoded();
+	}
+	
+	public void sign(IdentityCertificate cert, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+		sign((BasicCertificateImpl)cert);
+	}
+
+	public void sign(DelegationCertificate cert, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+		if (identity == null)
+			throw new AuthException("identity == null");
+		
+		verify(identity);
+		for (int d = 0; d < delegations.length; d++) {
+			if (!((PrincipalImpl)identity.getSubject()).implies((PrincipalImpl)delegations[d].getSubject())) {
+				AuthException e = new AuthException("delegation.subject != identity.subject");
+				e.printStackTrace();
+				throw e;
+			}
+			verify(delegations[d]);
+		}
+		
+		PermissionCollection perms = collectPermissions(delegations);
+		for (Iterator i = cert.getPermissions().iterator(); i.hasNext(); )
+			if (!perms.implies((Permission)i.next()))
+				throw new AuthException("trying to delegate not owned permissions");
+
+		sign((BasicCertificateImpl)cert);
+	}
+
+	public void authenticateUser(IdentityCertificate identity, DelegationCertificate delegation, byte[] passwd) throws AuthException {
+		JADEPrincipal principal = identity.getSubject();
+		UserPrincipal user = null;
+		if (principal instanceof AgentPrincipal)
+			user = ((AgentPrincipal)principal).getUser();
+		else if (principal instanceof ContainerPrincipal)
+			user = ((ContainerPrincipal)principal).getUser();
+		else if (principal instanceof UserPrincipal)
+			user = (UserPrincipal)principal;
+		else
+			throw new AuthenticationException("Unknown principal type");
+
+		System.out.println("authenticating user");
+		System.out.println("username=" + user.getName() + ";");
+		System.out.println("password=" + new String(passwd) + ";");
+		String name = user.getName();
+		if (users == null)
+			return;
+		else for (int i = 0; i < users.size(); i++) {
+			UserEntry entry = (UserEntry)users.elementAt(i);
+			if (entry.usr.equals(name)) {
+				if (passwd.length != entry.key.length())
+					throw new AuthenticationException("Wrong password");
+				for (int j = 0; j < entry.key.length(); j++) {
+					if (entry.key.charAt(j) != passwd[j])
+						throw new AuthenticationException("Wrong password");
+				}
+
+				// ok: user found + exact password
+				// add permissions here
+				PermissionCollection perms = getPermissions(user);
+				for (Enumeration e = perms.elements(); e.hasMoreElements();) {
+					Permission p = (Permission)e.nextElement();
+					System.out.println("+" + p);
+					delegation.addPermission(p);
+				}
+				sign((BasicCertificateImpl)identity);
+				sign((BasicCertificateImpl)delegation);
+				System.out.println("authentication ended");
+				return;
+			}
+		}
+		throw new AuthenticationException("Unknown user");
+	}
+	
+	private void sign(BasicCertificateImpl cert) {
+		if (publicKey == null)
+			return;
+		try {
+			cert.setIssuer(new PrincipalImpl(getName()));
+			cert.setSerial(serial++);
+			
+			Signature sign = Signature.getInstance("DSA");
+			sign.initSign(privateKey);
+			sign.update(cert.encode().getBytes());
+			byte[] signature = sign.sign();
+			
+			cert.setSignature(signature);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void parsePasswdFile() {
 		System.out.println("parsing passwd file " + passwdFile);
 		if (passwdFile == null) return;
 		users = new Vector();
@@ -104,50 +225,8 @@ public class PlatformAuthority extends ContainerAuthority {
 		catch(Exception e) { e.printStackTrace(); }
 	}
 	
-	public void authenticateUser(IdentityCertificate identity, DelegationCertificate delegation, byte[] passwd) throws AuthException {
-		JADEPrincipal principal = identity.getSubject();
-		if (principal instanceof AgentPrincipal)
-			principal = ((AgentPrincipal)principal).getUser();
-
-		UserPrincipal user = null;
-		if (principal instanceof UserPrincipal)
-			user = (UserPrincipal)principal;
-		else
-			return;
-
-		System.out.println("authenticating user");
-		System.out.println("username=" + user.getName() + ";");
-		System.out.println("password=" + new String(passwd) + ";");
-		String name = user.getName();
-		if (users == null)
-				return;
-		else for (int i = 0; i < users.size(); i++) {
-			UserEntry entry = (UserEntry)users.elementAt(i);
-			if (entry.usr.equals(name)) {
-				if (passwd.length != entry.key.length())
-					throw new AuthenticationException("Wrong password");
-				for (int j = 0; j < entry.key.length(); j++) {
-					if (entry.key.charAt(j) != passwd[j])
-						throw new AuthenticationException("Wrong password");
-				}
-
-				// ok: user found + exact password
-				// add permissions here
-				PermissionCollection perms = getPermissions(user);
-				for (Enumeration e = perms.elements(); e.hasMoreElements();) {
-					Permission p = (Permission)e.nextElement();
-					delegation.addPermission(p);
-				}
-
-				return;
-			}
-		}
-		throw new AuthenticationException("Unknown user");
-	}
-	
 	private PermissionCollection getPermissions(UserPrincipal user) {
-		Policy policy = Policy.
-		getPolicy();
+		Policy policy = Policy.getPolicy();
 		CodeSource source = new CodeSource(null, null);
 		
 		ProtectionDomain nullDomain = new ProtectionDomain(

@@ -25,19 +25,16 @@ package jade.security.impl;
 
 import jade.security.*;
 
-import jade.security.leap.PrivilegedAction;
+import jade.security.dummy.*;
 
+import jade.core.MainContainer;
 import jade.core.Profile;
 
 import jade.util.leap.Iterator;
 
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.security.Permissions;
-import java.security.CodeSource;
-import java.security.ProtectionDomain;
-import java.security.AccessControlContext;
-import java.security.AccessController;
+import java.security.*;
+import java.security.cert.*;
+import java.security.spec.*;
 
 
 /**
@@ -49,19 +46,58 @@ import java.security.AccessController;
 	@version $Date$ $Revision$
 */
 public class ContainerAuthority extends DummyAuthority {
-
-	/*
-	public void verify(DelegationCertificate cert, PublicKey key, String sigProvider) throws CertificateException, NoSuchAlgorithmException, InvalidKeyException, NoSuchProviderException, SignatureException {
-			Signature sign = null;
-			if (sigProvider != null)
-				sign = Signature.getInstance("DSA", sigProvider);
-			else
-				sign = Signature.getInstance("DSA");
-			sign.initVerify(key);
-			sign.update(cert.encode.getBytes());
-			if (!sign.verify(getSignature())) throw new SignatureException();
-	}
+	
+	/**
+		The public key for verifying certificates.
 	*/
+	PublicKey publicKey;
+	
+	public void init(Profile profile, MainContainer platform) {
+		byte[] bytes = null;
+		try {
+			bytes = platform.getPublicKey();
+			X509EncodedKeySpec keyspec = new X509EncodedKeySpec(bytes);
+			KeyFactory keyFactory = KeyFactory.getInstance("DSA");
+			publicKey = keyFactory.generatePublic(keyspec);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void verify(IdentityCertificate cert) throws AuthException {
+		verify((BasicCertificateImpl)cert);
+	}
+	
+	public void verify(DelegationCertificate cert) throws AuthException {
+		verify((BasicCertificateImpl)cert);
+	}
+	
+	public void verify(BasicCertificateImpl cert) throws AuthException {
+		try {
+			if (cert == null)
+				throw new AuthException("null certificate");
+			byte[] certBytes = cert.encode().getBytes();
+			byte[] signBytes = cert.getSignature();
+			if (signBytes == null)
+				throw new AuthException("null signature");
+			
+			Signature sign = Signature.getInstance("DSA");
+			sign.initVerify(publicKey);
+			sign.update(certBytes);
+			if (!sign.verify(signBytes))
+				throw new AuthException("Corrupted certificate");
+		}
+		catch (NoSuchAlgorithmException e1) {
+			e1.printStackTrace();
+		}
+		catch (InvalidKeyException e2) {
+			e2.printStackTrace();
+		}
+		catch (SignatureException e3) {
+			e3.printStackTrace();
+		}
+	}
 	
 	public void checkPermission(String type, String name, String actions) throws AuthException {
 		Permission p = createPermission(type, name, actions);
@@ -69,16 +105,26 @@ public class ContainerAuthority extends DummyAuthority {
 			AccessController.checkPermission(p);
 	}
 	
-	public Object doAs(jade.security.leap.PrivilegedAction action, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+	public Object doAs(jade.security.leap.PrivilegedAction action, IdentityCertificate identity, DelegationCertificate[] delegations) throws Exception {
 		ProtectionDomain domain = new ProtectionDomain(
 				new CodeSource(null, null), collectPermissions(delegations), null, null);
 		AccessControlContext acc = new AccessControlContext(new ProtectionDomain[] {domain});
 		try {
 			return AccessController.doPrivileged(action, acc);
 		}
-		catch (java.security.AccessControlException e) {
-			throw new AuthorizationException(e.getMessage());
+		catch (PrivilegedActionException e) {
+			throw e.getException();
 		}
+	}
+
+	public void checkAction(String action, JADEPrincipal target, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+		if (!action.startsWith("agent-"))
+			return;
+		PermissionCollection perms = collectPermissions(delegations);
+		String type = "jade.security.impl.AgentPermission";
+		Permission p = createPermission(type, target.getName(), action.substring(6, action.length()));
+		if (!perms.implies(p))
+			throw new AuthException(action);
 	}
 
 	public AgentPrincipal createAgentPrincipal(){
@@ -93,10 +139,18 @@ public class ContainerAuthority extends DummyAuthority {
 		return new PrincipalImpl();
 	}
 	
+	public IdentityCertificate createIdentityCertificate() {
+		return new IdentityCertificateImpl();
+	}
+	
+	public DelegationCertificate createDelegationCertificate() {
+		return new DelegationCertificateImpl();
+	}
+	
 	PermissionCollection collectPermissions(DelegationCertificate[] delegations) {
 		Permissions perms = new Permissions();
 		for (int j = 0; j < delegations.length; j++) {
-			for (Iterator i = delegations[j].getPermissions(); i.hasNext();) {
+			for (Iterator i = delegations[j].getPermissions().iterator(); i.hasNext();) {
 				Permission p = (Permission)i.next();
 				perms.add(p);
 			}

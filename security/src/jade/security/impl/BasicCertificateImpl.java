@@ -27,6 +27,7 @@ import jade.security.*;
 
 import jade.util.leap.ArrayList;
 import jade.util.leap.Iterator;
+import jade.util.leap.List;
 
 import java.security.Permission;
 
@@ -37,6 +38,7 @@ public class BasicCertificateImpl {
 	
 	JADEPrincipal subject;
 	JADEPrincipal issuer;
+	JADEPrincipal initiator;
 	
 	Date notBefore;
 	Date notAfter;
@@ -55,6 +57,9 @@ public class BasicCertificateImpl {
 	public void setIssuer(JADEPrincipal issuer) { this.issuer = issuer; }
 	public JADEPrincipal getIssuer() { return issuer; }
 
+	public void setInitiator(JADEPrincipal initiator) { this.initiator = initiator; }
+	public JADEPrincipal getInitiator() { return initiator; }
+
 	public void setSerial(long serial) { this.serial = serial; }
 	public long getSerial() { return serial; }
 
@@ -64,8 +69,11 @@ public class BasicCertificateImpl {
 	public void setNotAfter(Date notAfter) { this.notAfter = notAfter; }
 	public Date getNotAfter() { return notAfter; }
 	
+	public void setSignature(byte[] signature) { this.signature = signature; }
+	public byte[] getSignature() { return signature; }
+	
 	public void addPermission(Object permission) { permissions.add(permission); }
-	public Iterator getPermissions() { return permissions.iterator(); }
+	public List getPermissions() { return permissions; }
 	
 	public String encode() {
 		StringBuffer str = new StringBuffer();
@@ -74,7 +82,7 @@ public class BasicCertificateImpl {
 		str.append(encodeDate(notBefore)).append('\n');
 		str.append(encodeDate(notAfter)).append('\n');
 
-		for (Iterator i = getPermissions(); i.hasNext(); ) {
+		for (Iterator i = getPermissions().iterator(); i.hasNext(); ) {
 			Permission p = (Permission)i.next();
 			str.append(encodePermission(p)).append('\n');
 		}

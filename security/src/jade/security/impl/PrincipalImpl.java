@@ -24,6 +24,7 @@ Boston, MA  02111-1307, USA.
 package jade.security.impl;
 
 import jade.security.*;
+import jade.security.dummy.*;
 
 import jade.core.AID;
 import jade.core.ContainerID;
@@ -65,6 +66,14 @@ public class PrincipalImpl extends DummyPrincipal implements jade.util.leap.Seri
 			impl2 = p.name2.equals(name2);
 	
 		return impl2 && (p.name1.equals(name1) || p.name1.startsWith(name1 + dot));
+	}
+
+	public boolean equals(Object o) {
+		if (o instanceof String)
+			return getName().equals(o);
+		if (o instanceof PrincipalImpl)
+			return getName().equals(((PrincipalImpl)o).getName());
+		return false;
 	}
 
 }

@@ -28,8 +28,9 @@ import jade.security.*;
 
 public class AgentPermission extends AuthPermission implements java.security.Guard, java.io.Serializable {
 	
-	private final static String[] allActions = new String[] {"create", "kill",
-			"suspend", "resume", "take", "send-to", "send-as", "move", "copy"};
+	private final static String[] allActions = new String[] {
+			"create", "kill", "suspend", "resume", "take",
+			"send-to", "send-as", "receive-from", "move", "copy"};
 
 	public String[] getAllActions() {
 		return allActions;
