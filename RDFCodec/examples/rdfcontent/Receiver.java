@@ -80,22 +80,18 @@ public class Receiver extends Agent {
 				reply.setLanguage(codec.getName());
 				reply.setOntology(ontology.getName());
 
-				/*AbsConcept absFather = (AbsConcept)ontology.fromObject(proposition.getFather());
+				AbsConcept absFather = (AbsConcept)ontology.fromObject(proposition.getFather());
 
-				AbsEquals absEquals = new AbsEquals();
-				absEquals.setIRE(ire);
-				absEquals.setConcept(absFather);
-				
+				AbsPredicate absEquals = new AbsPredicate(BasicOntology.EQUALS);
+				absEquals.set(BasicOntology.EQUALS_LEFT, ire);
+				absEquals.set(BasicOntology.EQUALS_RIGHT, absFather);
+
 				manager.fillContent(msg, absEquals);
-				*/
-				manager.fillContent(reply, proposition);
 
 				send(reply);
 
 				System.out.println("[" + getLocalName() + "] Received query-ref message: reply sent:");
-				//absEquals.dump();
-				AbsPredicate absPr = (AbsPredicate)ontology.fromObject(proposition);
-				absPr.dump();
+				absEquals.dump();
 				break;
 			    }
 			default:
