@@ -58,6 +58,7 @@ import java.util.Vector;
 public class TestSuiteAgent extends GuiAgent {
 	public static JadeController mainController;
 	public static final String MAIN_SERVICES = "jade.core.mobility.AgentMobilityService;jade.core.event.NotificationService;jade.core.replication.MainReplicationService;jade.core.replication.AddressNotificationService";
+	public static final String TEST_PLATFORM_NAME = "TestPlatform";
 	
 	private static final String NAME = "test-suite";
 	private static final String TESTER_NAME = "tester";
@@ -408,7 +409,7 @@ public class TestSuiteAgent extends GuiAgent {
 	public static void main(String[] args) {
 		try {
 			// Launch the Main container in a separated process
-			mainController = TestUtility.launchJadeInstance("Main", null, "-gui -nomtp -services "+MAIN_SERVICES, null);
+			mainController = TestUtility.launchJadeInstance("Main", null, "-gui -nomtp -local-port "+Test.DEFAULT_PORT+" -services "+MAIN_SERVICES+" -name "+TEST_PLATFORM_NAME, null);
 			
       // Get a hold on JADE runtime
       Runtime rt = Runtime.instance();
