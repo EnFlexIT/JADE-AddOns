@@ -24,6 +24,7 @@ Boston, MA  02111-1307, USA.
 package jade.security.impl;
 
 import jade.security.*;
+import jade.security.CertificateEncodingException;
 
 import jade.core.AID;
 import jade.core.ContainerID;
@@ -187,6 +188,9 @@ public class ContainerAuthority implements Authority {
 			sign.update(certBytes);
 			if (! sign.verify(signBytes))
 				throw new AuthException("Corrupted certificate");
+		}
+		catch (CertificateEncodingException e1) {
+			e1.printStackTrace();
 		}
 		catch (NoSuchAlgorithmException e1) {
 			e1.printStackTrace();
