@@ -179,7 +179,7 @@ public class TestSuiteGui extends javax.swing.JFrame {
 
     rootPanel.setMinimumSize(new java.awt.Dimension(484, 190));
     JToolBar.setFloatable(false);
-    exitB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/exit.gif")));
+    exitB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/exit.png")));
     exitB.setMnemonic('X');
     exitB.setText("Exit");
     exitB.setToolTipText("Exit the JADE Test Suite");
@@ -197,7 +197,7 @@ public class TestSuiteGui extends javax.swing.JFrame {
 
     JToolBar.add(exitB);
 
-    connectB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/connect.gif")));
+    connectB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/connect_to_network.png")));
     connectB.setMnemonic('C');
     connectB.setText("Connect");
     connectB.setToolTipText("Use the Test Suite Daemon to launch other JADE instances remotely");
@@ -215,7 +215,7 @@ public class TestSuiteGui extends javax.swing.JFrame {
 
     JToolBar.add(connectB);
 
-    openB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/open.gif")));
+    openB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/fileopen.png")));
     openB.setMnemonic('O');
     openB.setText("Open");
     openB.setToolTipText("Load a functionality test group");
@@ -233,7 +233,7 @@ public class TestSuiteGui extends javax.swing.JFrame {
 
     JToolBar.add(openB);
 
-    configB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/config.gif")));
+    configB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/SuSEconf.png")));
     configB.setMnemonic('G');
     configB.setText("Config");
     configB.setToolTipText("Set arguments for the current test group");
@@ -251,7 +251,7 @@ public class TestSuiteGui extends javax.swing.JFrame {
 
     JToolBar.add(configB);
 
-    selectB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/select.gif")));
+    selectB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/button_ok.png")));
     selectB.setText("Select");
     selectB.setToolTipText("Select the tests to execute within the loaded group");
     selectB.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -269,7 +269,7 @@ public class TestSuiteGui extends javax.swing.JFrame {
 
     JToolBar.add(selectB);
 
-    runB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/run.gif")));
+    runB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/misc.png")));
     runB.setMnemonic('R');
     runB.setText("Run");
     runB.setToolTipText("Run the current functionality test group");
@@ -287,7 +287,7 @@ public class TestSuiteGui extends javax.swing.JFrame {
 
     JToolBar.add(runB);
 
-    runAllB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/runall.gif")));
+    runAllB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/kbackgammon_engine.png")));
     runAllB.setMnemonic('A');
     runAllB.setText("Run All");
     runAllB.setToolTipText("Run all tests");
@@ -305,7 +305,7 @@ public class TestSuiteGui extends javax.swing.JFrame {
 
     JToolBar.add(runAllB);
 
-    debugB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/debug.gif")));
+    debugB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/search.png")));
     debugB.setMnemonic('D');
     debugB.setText("Debug");
     debugB.setToolTipText("Debug the current functionality test group");
@@ -323,7 +323,7 @@ public class TestSuiteGui extends javax.swing.JFrame {
 
     JToolBar.add(debugB);
 
-    stepB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/step.gif")));
+    stepB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/forward.png")));
     stepB.setMnemonic('N');
     stepB.setText("Next");
     stepB.setToolTipText("Execute next test");
@@ -341,7 +341,7 @@ public class TestSuiteGui extends javax.swing.JFrame {
 
     JToolBar.add(stepB);
 
-    loggerB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/logger.gif")));
+    loggerB.setIcon(new javax.swing.ImageIcon(getClass().getResource("/test/common/testSuite/gui/images/kexi.png")));
     loggerB.setText("Log");
     loggerB.setToolTipText("Select the log type");
     loggerB.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
