@@ -14,7 +14,7 @@ Summary:
 Overview:
 --------
 This example shows how to start a platform that uses SSL 
-for intre-platform communication.
+for intra-platform communication.
 
 
 How to run it:
