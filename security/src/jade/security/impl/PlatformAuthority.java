@@ -95,8 +95,29 @@ public class PlatformAuthority extends ContainerAuthority {
 		fillChecks();
 	}
 	
+	public void sign(JADECertificate certificate, CertificateFolder certs) throws AuthException {
+		verifySubject(certs);
+
+		if (! (certificate instanceof BasicCertificateImpl))
+			throw new AuthException("unknown certificate class");
+
+		if (certificate instanceof DelegationCertificate) {
+			checkAction(AUTHORITY_SIGN_DC, certificate.getSubject(), certs);
+			PermissionCollection perms = collectPermissions(certs);
+			for (Iterator i = ((DelegationCertificate)certificate).getPermissions().iterator(); i.hasNext(); )
+				if (!perms.implies((Permission)i.next()))
+					throw new AuthException("trying to delegate not owned permissions");
+		}
+		else if (certificate instanceof IdentityCertificate) {
+			checkAction(AUTHORITY_SIGN_IC, certificate.getSubject(), certs);
+		}
+		
+		sign((BasicCertificateImpl)certificate);
+	}
+
+	//!!! to remove
 	public void sign(JADECertificate certificate, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
-		verifySubject(identity, delegations);
+		/*verifySubject(identity, delegations);
 
 		if (! (certificate instanceof BasicCertificateImpl))
 			throw new AuthException("unknown certificate class");
@@ -112,7 +133,7 @@ public class PlatformAuthority extends ContainerAuthority {
 			checkAction(AUTHORITY_SIGN_IC, certificate.getSubject(), identity, delegations);
 		}
 		
-		sign((BasicCertificateImpl)certificate);
+		sign((BasicCertificateImpl)certificate);*/
 	}
 
 	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] password) throws AuthException {

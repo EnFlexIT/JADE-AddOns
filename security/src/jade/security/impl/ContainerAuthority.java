@@ -146,16 +146,32 @@ public class ContainerAuthority implements Authority {
 		return publicKey.getEncoded();
 	}
 
-	public void sign(JADECertificate certificate, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+	public void sign(JADECertificate certificate, CertificateFolder certs) throws AuthException {
 		try {
-			JADECertificate signed = platform.sign(certificate, identity, delegations);
+			JADECertificate signed = platform.sign(certificate, certs);
 			((BasicCertificateImpl)certificate).setSignature(((BasicCertificateImpl)signed).getSignature());
 		}
 		catch (jade.core.IMTPException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	//!!! to remove
+	public void sign(JADECertificate certificate, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+		/*try {
+			JADECertificate signed = platform.sign(certificate, identity, delegations);
+			((BasicCertificateImpl)certificate).setSignature(((BasicCertificateImpl)signed).getSignature());
+		}
+		catch (jade.core.IMTPException e) {
+			e.printStackTrace();
+		}*/
+	}
 
+	public CertificateFolder authenticate(JADEPrincipal principal, byte[] password) throws AuthException {
+		throw new AuthorizationException("Authentication is not allowed, here");
+	}
+
+	//!!! to remove
 	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] password) throws AuthException {
 		throw new AuthorizationException("Authentication is not allowed, here");
 	}
@@ -200,15 +216,15 @@ public class ContainerAuthority implements Authority {
 		}
 	}
 
-	public void verifySubject(IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
-		if (identity == null)
+	public void verifySubject(CertificateFolder certs) throws AuthException {
+		if (certs.getIdentityCertificate() == null)
 			throw new AuthException("Null identity");
 
-		verify(identity);
-		for (int d = 0; delegations != null && d < delegations.length && delegations[d] != null; d++) {
-			if (! ((PrincipalImpl)identity.getSubject()).implies((PrincipalImpl)delegations[d].getSubject()))
+		verify(certs.getIdentityCertificate());
+		for (int d = 0; d < certs.getDelegationCertificates().size() && certs.getDelegationCertificates().get(d) != null; d++) {
+			if (! ((PrincipalImpl)certs.getIdentityCertificate().getSubject()).implies((PrincipalImpl)((DelegationCertificate)certs.getDelegationCertificates().get(d)).getSubject()))
 				throw new AuthException("Delegation-subject doesn't match identity-subject");
-			verify(delegations[d]);
+			verify((DelegationCertificate)certs.getDelegationCertificates().get(d));
 		}
 	}
 
@@ -216,8 +232,23 @@ public class ContainerAuthority implements Authority {
 		return AccessController.doPrivileged(action);
 	}
 
+	public Object doAsPrivileged(jade.security.PrivilegedExceptionAction action, CertificateFolder certs) throws Exception {
+		verifySubject(certs);
+		ProtectionDomain domain = new ProtectionDomain(
+				new CodeSource(null, null), collectPermissions(certs), null, null);
+		AccessControlContext acc = new AccessControlContext(new ProtectionDomain[] {domain});
+		try {
+			return AccessController.doPrivileged(action, acc);
+		}
+		catch (PrivilegedActionException e) {
+			throw e.getException();
+		}
+	}
+
+	//!!! to remove
 	public Object doAsPrivileged(jade.security.PrivilegedExceptionAction action, IdentityCertificate identity, DelegationCertificate[] delegations) throws Exception {
-		verifySubject(identity, delegations);
+		return null;
+		/*verifySubject(identity, delegations);
 		ProtectionDomain domain = new ProtectionDomain(
 				new CodeSource(null, null), collectPermissions(delegations), null, null);
 		AccessControlContext acc = new AccessControlContext(new ProtectionDomain[] {domain});
@@ -226,7 +257,7 @@ public class ContainerAuthority implements Authority {
 		}
 		catch (PrivilegedActionException e) {
 			throw e.getException();
-		}
+		}*/
 	}
 
 	private class CheckAction implements jade.security.PrivilegedExceptionAction {
@@ -240,6 +271,30 @@ public class ContainerAuthority implements Authority {
 		}
 	}
 
+	public void checkAction(String action, JADEPrincipal target, CertificateFolder certs) throws AuthException {
+		Permission p = null;
+		
+		CheckEntry ce = (CheckEntry)checks.get(action);
+		if (ce != null) {
+			p = createPermission(ce.getType(), target.getName(), ce.getActions());
+			try {
+				//System.out.println("Checking " + action + " on " + target);
+				if (certs != null) {
+					CheckAction ca = new CheckAction(p);
+					doAsPrivileged(ca, certs);
+				}
+				else
+					AccessController.checkPermission(p);
+				//System.out.println("ok");
+			}
+			catch (Exception e) {
+				System.out.println("Permissions to execute " + action + " on " + target + " are not owned.");
+				throw new AuthorizationException("Permissions to execute " + action + " on " + target + " are not owned.");
+			}
+		}
+	}
+
+	//!!! to remove
 	public void checkAction(String action, JADEPrincipal target, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
 		Permission p = null;
 		
@@ -279,10 +334,10 @@ public class ContainerAuthority implements Authority {
 		return new DelegationCertificateImpl();
 	}
 
-	PermissionCollection collectPermissions(DelegationCertificate[] delegations) {
+	PermissionCollection collectPermissions(CertificateFolder certs) {
 		Permissions perms = new Permissions();
-		for (int j = 0; delegations != null && j < delegations.length && delegations[j] != null; j++) {
-			for (Iterator i = delegations[j].getPermissions().iterator(); i.hasNext();) {
+		for (int j = 0; j < certs.getDelegationCertificates().size() && certs.getDelegationCertificates().get(j) != null; j++) {
+			for (Iterator i = ((DelegationCertificate)certs.getDelegationCertificates().get(j)).getPermissions().iterator(); i.hasNext();) {
 				Permission p = (Permission)i.next();
 				perms.add(p);
 			}
