@@ -77,8 +77,10 @@ public class RoundTripSender extends Agent {
 
     synchronized static void increaseNumAgents(int couples) {
 	if (agents == 0) {
+	    System.out.println("\n  couples="+couples+"     iterations="+iterations +"\n" );
 	    THR_UP = Math.round(THR_UP * couples / 100.0f);
-	    System.out.println("The roundtrippers will measure time when at least "+THR_UP+" agents have been created and "+THR_LOW+" agents are still working.");
+	    //System.out.println("The roundtrippers will measure time when at least "+THR_UP+" agents have been created and "+THR_LOW+" agents are still working.");
+	    System.out.println("Working... \n");
 	}
 	agents++;
     }
@@ -131,10 +133,14 @@ public class RoundTripSender extends Agent {
     int couples = 0;
 		AID controller = null;
 
+
+
+
    /**
     * This agent get parameter from command line.
     */
     public void setup() {
+
 	Object[] args = getArguments();
 	String receiverName = (String)(args[0]);
         iterations = (new Long((String)(args[1]))).longValue();
