@@ -149,16 +149,28 @@ public class ContainerAuthority implements Authority {
 		return publicKey.getEncoded();
 	}
 
-	public void sign(JADECertificate certificate, CertificateFolder certs) throws AuthException {
+	public void sign(final JADECertificate certificate, final CertificateFolder certs) throws AuthException {
+		// We need full permissions to execute a (remote) call
 		try {
-			JADECertificate signed = platform.sign(certificate, certs);
-			((BasicCertificateImpl)certificate).setSignature(((BasicCertificateImpl)signed).getSignature());
-		}
-		catch (jade.core.IMTPException e) {
-			e.printStackTrace();
-		}
+			this.doPrivileged(new jade.security.PrivilegedExceptionAction() {
+		  	public Object run() throws AuthException, jade.core.IMTPException {
+
+					JADECertificate signed = platform.sign(certificate, certs);
+					((BasicCertificateImpl)certificate).setSignature(((BasicCertificateImpl)signed).getSignature());
+
+	  			return null;
+				}
+			});
+	    } catch (AuthException authe) {
+	    		// Forward the exception
+				throw authe;
+	    } catch (Exception e) {
+				// Should never happen...
+				e.printStackTrace();
+	    }
 	}
-	
+
+
 	public CertificateFolder authenticate(JADEPrincipal principal, byte[] password) throws AuthException {
 		throw new AuthorizationException("Authentication is not allowed, here");
 	}
