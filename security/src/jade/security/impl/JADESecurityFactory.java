@@ -30,6 +30,7 @@ import jade.core.security.authentication.JADEUserAuthenticatorImpl;
 import jade.security.JADEPrincipal;
 import jade.security.SDSIName;
 import jade.core.security.authentication.JADEUserAuthenticator;
+import jade.security.DelegationCertificate;
 
 
 /**
@@ -57,6 +58,10 @@ public class JADESecurityFactory extends SecurityFactory {
   }
   public JADEPrincipal newJADEPrincipal(String name, SDSIName sdsiname) {
     return new JADEPrincipalImpl(name, sdsiname);
+  }
+
+  public DelegationCertificate newDelegationCertificate() {
+    return new DelegationCertificateImpl();
   }
 } // end SecurityFactory
 
