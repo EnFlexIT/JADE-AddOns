@@ -275,7 +275,7 @@ public class TestUtility {
   				classpath = currentCp;
   			}
   			else {
-  				classpath = classpath.substring(1)+";"+currentCp;
+  				classpath = classpath.substring(1)+System.getProperty("path.separator")+currentCp;
   			}
 			}
 			jc = new LocalJadeController(instanceName, new String("java -cp "+classpath+" jade.Boot "+jadeArgs), protoNames);
