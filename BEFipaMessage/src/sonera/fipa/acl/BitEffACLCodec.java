@@ -72,9 +72,9 @@ public class BitEffACLCodec implements ACLCodec {
                 ba = new ByteArray();
         }
         /**
-	 * @see ACLCodec#decode(byte[] data)
+	 * @see ACLCodec#decode(byte[] data, String charset)
 	 */
-        public ACLMessage decode(byte[] data) throws ACLCodec.CodecException {
+        public ACLMessage decode(byte[] data, String charset) throws ACLCodec.CodecException {
 
 
 
@@ -96,9 +96,9 @@ public class BitEffACLCodec implements ACLCodec {
 
         }
         /**
-	 * @see ACLCodec#encode(ACLMessage msg)
+	 * @see ACLCodec#encode(ACLMessage msg, String charset)
 	 */
-        public byte[] encode(ACLMessage msg) {
+        public byte[] encode(ACLMessage msg, String charset) {
                 try {
                         ba = e.encode(msg);
                 } catch (Exception e) {}
