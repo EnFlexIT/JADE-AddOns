@@ -101,14 +101,15 @@ public class PeopleOntology extends Ontology {
 			add(womanSchema, Woman.class);
 			add(addressSchema, Address.class);
 
-			AggregateSchema childrenSchema = new AggregateSchema(BasicOntology.SET);
+			AggregateSchema childrenSchema = new AggregateSchema(BasicOntology.SEQUENCE);
 
 			PredicateSchema fatherOfSchema = new PredicateSchema(FATHER_OF);
 			fatherOfSchema.add(FATHER,   manSchema);
-			fatherOfSchema.add(CHILDREN, personSchema);
+			fatherOfSchema.add(CHILDREN, childrenSchema);
 
 			PredicateSchema motherOfSchema = new PredicateSchema(MOTHER_OF);
-			motherOfSchema.add(CHILDREN, personSchema);
+			motherOfSchema.add(MOTHER,   womanSchema);
+			motherOfSchema.add(CHILDREN, childrenSchema);
 
 			add(fatherOfSchema, FatherOf.class);
 			add(motherOfSchema, MotherOf.class);
