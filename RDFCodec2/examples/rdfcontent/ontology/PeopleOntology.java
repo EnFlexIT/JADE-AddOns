@@ -27,7 +27,6 @@ import jade.content.*;
 import jade.content.onto.*;
 import jade.content.abs.*;
 import jade.content.schema.*;
-import jade.content.acl.*;
 import jade.content.lang.*;
 
 import jade.util.leap.List;
