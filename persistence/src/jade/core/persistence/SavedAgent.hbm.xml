@@ -20,6 +20,7 @@
 
     <property name="agentData"/>
     <property name="name"/>
+    <property name="owned"/>
 
     <list name="pendingMessages" cascade="all-delete-orphan">
       <key column="owner"/>

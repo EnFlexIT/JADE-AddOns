@@ -391,7 +391,7 @@ public class PersistenceManager {
                 try {
                     tx = s.beginTransaction();
 
-                    java.util.List resultSet = s.find("select item.name from jade.core.persistence.SavedAgent as item");
+                    java.util.List resultSet = s.find("select item.name from jade.core.persistence.SavedAgent as item where item.owned = false");
                     tx.commit();
 
                     return (String[])resultSet.toArray(new String[resultSet.size()]);
@@ -426,7 +426,7 @@ public class PersistenceManager {
                 try {
                     tx = s.beginTransaction();
 
-                    java.util.List resultSet = s.find("select item.agent.name from jade.core.persistence.FrozenAgent as item");
+                    java.util.List resultSet = s.find("select item.agentIdentifier.name from jade.core.persistence.FrozenMessageQueue as item");
                     tx.commit();
 
                     return (String[])resultSet.toArray(new String[resultSet.size()]);
@@ -662,6 +662,7 @@ public class PersistenceManager {
 		Transaction tx = null;
 		try {
 		    SavedAgent sa = new SavedAgent(target, pendingMessages);
+                    sa.setOwned(true);
 		    FrozenAgent toFreeze = new FrozenAgent(sa);
 		    tx = s.beginTransaction();
 		    Long newID  = (Long)s.save(toFreeze);
