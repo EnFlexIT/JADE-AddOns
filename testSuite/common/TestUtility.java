@@ -168,7 +168,7 @@ public class TestUtility {
   		cm.fillContent(request,act);
     	   	
     	// Send message and collect reply
-    	ACLMessage inform = FIPAServiceCommunicator.doFipaRequestClient(a, request);
+    	ACLMessage inform = FIPAService.doFipaRequestClient(a, request);
     	
     	// Extract the result from the reply (if any)
     	ContentElement ce = cm.extractContent(inform);
@@ -205,7 +205,7 @@ public class TestUtility {
   		}
   		
     	// Send message and collect reply
-    	FIPAServiceCommunicator.doFipaRequestClient(a, request);
+    	FIPAService.doFipaRequestClient(a, request);
     }
     catch (Exception e) {
     	throw new TestException("Error adding behaviour "+behaviourClassName+" to agent "+targetAID.getName(), e);
@@ -224,7 +224,7 @@ public class TestUtility {
   		}
   		
     	// Send message and collect reply
-    	FIPAServiceCommunicator.doFipaRequestClient(a, request);
+    	FIPAService.doFipaRequestClient(a, request);
     }
     catch (Exception e) {
     	throw new TestException("Error forcing action "+action+" to agent "+targetAID.getName(), e);
