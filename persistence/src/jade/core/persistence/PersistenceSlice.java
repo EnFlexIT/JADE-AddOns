@@ -38,7 +38,7 @@ import jade.core.NameClashException;
 
 import jade.mtp.MTPDescriptor;
 
-import jade.security.AuthException;
+import jade.security.JADESecurityException;
 
 import jade.util.leap.List;
 

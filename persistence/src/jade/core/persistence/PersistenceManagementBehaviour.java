@@ -44,7 +44,7 @@ import jade.domain.persistence.*;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-import jade.security.AuthException;
+import jade.security.JADESecurityException;
 
 
 
@@ -74,7 +74,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	}
     }
 
-    protected ACLMessage performAction(Action slAction, ACLMessage request) throws AuthException, FIPAException {
+    protected ACLMessage performAction(Action slAction, ACLMessage request) throws JADESecurityException, FIPAException {
 
   	Concept action = slAction.getAction();
   	Object result = null;

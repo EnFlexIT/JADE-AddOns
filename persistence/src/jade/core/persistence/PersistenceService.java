@@ -57,7 +57,7 @@ import jade.core.messaging.GenericMessage;
 
 import jade.lang.acl.ACLMessage;
 import jade.mtp.MTPDescriptor;
-import jade.security.AuthException;
+import jade.security.JADESecurityException;
 
 import jade.util.leap.List;
 import jade.util.leap.ArrayList;
@@ -354,7 +354,7 @@ public class PersistenceService extends BaseService {
 	    catch(IMTPException imtpe) {
 		cmd.setReturnValue(imtpe);
 	    }
-	    catch(AuthException ae) {
+	    catch(JADESecurityException ae) {
 		cmd.setReturnValue(ae);
 	    }
 	    catch(NotFoundException nfe) {
@@ -636,7 +636,7 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
-	private void handleReloadMyself(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException, AuthException {
+	private void handleReloadMyself(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException, JADESecurityException {
 	    Object[] params = cmd.getParams();
 	    AID agentID = (AID)params[0];
 	    String repository = (String)params[1];
@@ -829,7 +829,7 @@ public class PersistenceService extends BaseService {
 	    catch(NameClashException nce) {
 		cmd.setReturnValue(nce);
 	    }
-	    catch(AuthException ae) {
+	    catch(JADESecurityException ae) {
 		cmd.setReturnValue(ae);
 	    }
 	}
@@ -854,7 +854,7 @@ public class PersistenceService extends BaseService {
 
 	}
 
-	private void handleLoadAgent(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException, NameClashException, AuthException {
+	private void handleLoadAgent(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException, NameClashException, JADESecurityException {
 	    Object[] params = cmd.getParams();
 	    AID agentID = (AID)params[0];
 	    String repository = (String)params[1];
@@ -925,7 +925,7 @@ public class PersistenceService extends BaseService {
 	    }
 	}
 
-	private void handleThawAgent(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException, NameClashException, AuthException {
+	private void handleThawAgent(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException, NameClashException, JADESecurityException {
 	    Object[] params = cmd.getParams();
 	    AID agentID = (AID)params[0];
 	    String repository = (String)params[1];
@@ -1051,7 +1051,7 @@ public class PersistenceService extends BaseService {
 
 	}
 
-	private void handleLoadContainer(VerticalCommand cmd) throws ServiceException, IMTPException, NotFoundException, NameClashException, AuthException {
+	private void handleLoadContainer(VerticalCommand cmd) throws ServiceException, IMTPException, NotFoundException, NameClashException, JADESecurityException {
 	    Object[] params = cmd.getParams();
 	    String repository = (String)params[0];
 
@@ -1463,7 +1463,7 @@ public class PersistenceService extends BaseService {
 	    return messageQueueID;
 	}
 
-	private void setupThawedAgent(AID agentID, Long agentFK, ContainerID buffer, String repository, List bufferedMessages) throws ServiceException, IMTPException, NotFoundException, AuthException {
+	private void setupThawedAgent(AID agentID, Long agentFK, ContainerID buffer, String repository, List bufferedMessages) throws ServiceException, IMTPException, NotFoundException, JADESecurityException {
 	    Agent instance = myPersistenceManager.thawAgent(agentID, repository, agentFK);
 
 	    // Submit the buffered messages to the newly thawed agent
