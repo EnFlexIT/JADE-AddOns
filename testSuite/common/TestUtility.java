@@ -33,7 +33,7 @@ import jade.core.AgentManager;
 import jade.lang.acl.ACLMessage;
 
 import jade.domain.JADEAgentManagement.*;
-import jade.proto.FIPAProtocolNames;
+import jade.domain.FIPANames;
 import jade.content.AgentAction;
 import jade.content.onto.basic.Action;
 import jade.content.lang.sl.SLCodec;
@@ -288,7 +288,7 @@ public class TestUtility {
     ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
     request.setSender(sender.getAID());
     request.addReceiver(receiver);
-    request.setProtocol(FIPAProtocolNames.FIPA_REQUEST);
+    request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
     request.setLanguage(language);
     request.setOntology(ontology);
     request.setReplyWith("rw"+sender.getName()+(new Date()).getTime());

@@ -34,6 +34,7 @@ import jade.content.onto.Ontology;
 import jade.content.onto.basic.Done;
 import jade.proto.*;
 import jade.domain.FIPAAgentManagement.*;
+import jade.domain.FIPANames;
 
 import java.lang.reflect.Method;
 import java.util.Hashtable;
@@ -54,7 +55,7 @@ public class ConfigurableAgent extends Agent {
 			MessageTemplate.MatchLanguage(codec.getName()),
 			MessageTemplate.MatchOntology(ontology.getName())
 		),
-		MessageTemplate.MatchProtocol(FIPAProtocolNames.FIPA_REQUEST)
+		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST)
 	);
 		
 	
