@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- An Ant build file for the a JMS imp of JADEs MTP -->
+
+<project name="JADE JMS MTP" default="build-all" basedir=".">
+
+  <!-- Allow override from local properties file -->
+  <property file=".ant.properties" />
+  
+  <!-- Override with your JBoss/Web server bundle dist location -->
+  <property name="jmsmtp.version" value="0.6"/>
+  <property name="jade.dist" value="../.."/>
+
+  <property name="src.dir" value="${basedir}/src"/>
+  <property name="doc.dir" value="${basedir}/doc"/>
+  <property name="src.resources" value="${basedir}/src/resources"/>
+  <property name="build.dir" value="${basedir}/classes"/>
+  <property name="dist.dir" value="${jade.dist}/add-ons/jmsmtp"/>
+  <property name="build.classes.dir" value="${build.dir}"/>
+
+  <path id="build.path">
+    <fileset dir="${jade.dist}/add-ons/jmsmtp/lib">
+      <include name="**/**"/>
+    </fileset>  
+
+    <fileset dir="${jade.dist}/lib">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+  
+  <path id="client.path">
+    <!-- Include JADE Files -->
+    <fileset dir="${jade.dist}/lib">
+      <include name="*.jar"/>
+    </fileset>
+
+    <!-- Include JMS MTP Files -->
+    <pathelement location="${jade.dist}/add-ons/jmsmtp/lib/jmsmtp.jar"/>
+    <pathelement location="${jade.dist}/add-ons/jmsmtp/lib"/>  
+  </path>
+  
+  <!-- Validate the jboss.dist value by looking for a the jade.jar jar -->
+  <target name="validate">
+      <available property="classpath_id" value="build.path" file="${jade.dist}/lib/jade.jar" />
+  </target>
+
+  <target name="fail_if_not_valid" unless="classpath_id">
+      <fail message="jade.dist=${jade.dist} is not a valid Jade dist directory"/>
+  </target>
+
+  <target name="init" depends="validate,fail_if_not_valid">
+      <tstamp/>
+      <property name="classpath" refid="${classpath_id}" />
+
+      <echo message="JMS-MTP Version-${jmsmtp.version}" />
+      <echo message="Using jade.dist=${jade.dist}" />
+      <echo message="Using src.dir=${src.dir}" />
+      <echo message="Using build.dir=${build.dir}" />
+      <echo message="Using dist.dir=${dist.dir}" />
+
+      <mkdir dir="${build.classes.dir}"/>	
+      <mkdir dir="${dist.dir}/lib/sonicmq" /> 
+      <mkdir dir="${dist.dir}/lib/jbossmq" /> 
+  </target>
+
+  <!-- Compile all java source under src/main -->
+  <target name="compile" depends="init">
+
+    <copy file="${src.dir}/log4j-mtp.properties" todir="${build.classes.dir}/" />
+    <javac srcdir="${src.dir}"
+         destdir="${build.classes.dir}"
+         classpathref="${classpath_id}"
+         debug="off"
+         deprecation="on"
+         optimize="on">
+
+    </javac>
+  </target>
+
+  <target name="doc" depends="init">   
+    <echo level="warning" message="Creating Docs..." />
+    <mkdir dir="${doc.dir}/api"/>
+    <javadoc author="true" 
+             destdir="${doc.dir}/api"
+             sourcepath="${src.dir}"
+             private="true"
+             version="true"   
+             windowtitle="Java Message Service-Message Transport Protocol JMS-MTP"
+             packagenames="ie.nuigalway.ecrg.jade.jmsmtp.*">
+       <classpath refid="${classpath_id}"/>
+    </javadoc> 
+  </target>   
+  
+  <target name="lib" depends="compile">
+
+    <copy file="${src.dir}/jms-mtp.properties" todir="${dist.dir}/lib" />
+    
+    <jar jarfile="${dist.dir}/lib/jmsmtp.jar">
+       <fileset dir="${build.classes.dir}" >
+         <exclude name="log4j-mtp.properties"/>
+         <exclude name="ie/nuigalway/ecrg/jade/jmsmtp/providersupport/*.class"/>
+         <exclude name="ie/nuigalway/ecrg/jade/jmsmtp/common/*.class"/>
+       </fileset>       
+    </jar>  
+
+    <jar jarfile="${dist.dir}/lib/common/jmsmtp-common.jar">
+       <fileset dir="${build.classes.dir}" >
+         <exclude name="ie/nuigalway/ecrg/jade/jmsmtp/*.class"/>
+         <exclude name="ie/nuigalway/ecrg/jade/jmsmtp/providersupport/*.class"/>
+       </fileset>
+
+   </jar>
+
+    <jar jarfile="${dist.dir}/lib/jbossmq/jmsmtp-providersupport.jar">
+       <fileset dir="${build.classes.dir}" >
+         <exclude name="log4j-mtp.properties"/>
+         <exclude name="ie/nuigalway/ecrg/jade/jmsmtp/*.class"/>
+         <exclude name="ie/nuigalway/ecrg/jade/jmsmtp/common/*.class"/>
+       </fileset>
+     </jar>    
+
+    <copy file="${dist.dir}/lib/jbossmq/jmsmtp-providersupport.jar" todir="${dist.dir}/lib/sonicmq" /> 
+  </target>   
+  
+  <!-- Make distribution zip file and put in ${dist} -->
+  <target name="dist" depends="init, doc, compile, lib">
+    <jar jarfile="${jade.dist}/jmsmtp-${jmsmtp.version}.zip">
+      <fileset dir="${dist.dir}" includes="src/**"/>
+      <fileset dir="${dist.dir}" includes="*"/>
+      <fileset dir="${dist.dir}" includes="doc/**"/>
+      <fileset dir="${dist.dir}" includes="lib/**"/>
+    </jar>
+  </target>
+
+  <target name="all" depends="init, doc, compile, lib, dist"/>
+
+  <!-- delete ${build} and ${lib} directories -->
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} directory tree -->
+    <delete includeEmptyDirs="true">
+      <fileset dir="${build.dir}"/>
+      <fileset dir="${doc.dir}/api"/>
+      </delete>
+  </target>
+
+  <target name="execute_JMS" description="Run JADE with JMS MTP">
+    <echo level="warning" message="running with JMS MTP" />
+
+    <java classname="jade.Boot" fork="yes">
+      <classpath refid="client.path"/>
+        <arg line="-port 1098 -gui -mtp ie.nuigalway.ecrg.jade.jmsmtp.MtpBoot(jms:jbossmq:xml:persistent:::localhost:1099/queue/jade/localhost)"/>
+    </java>
+  </target>
+
+</project>
+
+
