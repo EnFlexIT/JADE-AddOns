@@ -102,14 +102,17 @@ class LocalJadeController implements JadeController {
 	class SubProcessManager extends Thread {
 		private Process subProc;
 		private BufferedReader br;
+		private BufferedReader brErr;
 		private String[] protoNames;
 		private String name;
+		private Thread errorManager;
 		
 		public SubProcessManager(String n, Process p, String[] names) {
 			name = n;
 			subProc = p;
 			br = new BufferedReader(new InputStreamReader(subProc.getInputStream()));
 			protoNames = (names != null ? names : new String[0]);
+			errorManager = startErrorManager();
 		}
 		
 		public void run() {
@@ -132,9 +135,9 @@ class LocalJadeController implements JadeController {
 					// The sub-process is still alive --> go on
 				}
 				
+				
 				try {
 					String line = br.readLine();
-					
 					if (line != null) {
 						// Redirect sub-process output to standard output
 						System.out.println(name+">> "+line);
@@ -154,8 +157,10 @@ class LocalJadeController implements JadeController {
 				}
 				catch (Exception e) {
 					e.printStackTrace();
-				}
-			}
+				}				
+			}  // END of while
+			
+			stopErrorManager();
 		}   // END of run()
 		
 		private void catchAddress(String line) {
@@ -173,5 +178,38 @@ class LocalJadeController implements JadeController {
 			st.nextToken(); // Container
 			containerName = st.nextToken();
 		}
+		
+		private Thread startErrorManager() {
+			Thread t = new Thread(new Runnable() {
+				public void run() {
+					try {
+						brErr = new BufferedReader(new InputStreamReader(subProc.getErrorStream()));
+						while (true) {
+							String line = brErr.readLine();
+							if (line != null) {
+								// Redirect sub-process error to standard output
+								System.out.println(name+"-ERROR>> "+line);
+							}
+						}
+					}
+					catch (Exception e) {
+						// The process has terminated. Do nothing
+					}
+					System.out.println("ErrorManager exiting");
+				}
+			} );
+			t.start();
+			return t;
+		}
+		
+		private void stopErrorManager() {
+			try {
+				brErr.close();
+				errorManager.interrupt();
+			}
+			catch (Exception e) {
+				System.out.println("Error closing Error stream");
+			}
+		}			
 	}   // END of inner class SubProcessManager
 }
