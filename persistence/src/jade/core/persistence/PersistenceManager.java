@@ -74,6 +74,7 @@ public class PersistenceManager {
 	    defaultConf.addClass(SavedACLMessage.class);
 	    defaultConf.addClass(FrozenAgent.class);
 	    defaultConf.addClass(FrozenMessageQueue.class);
+	    defaultConf.addClass(SavedContainer.class);
 
 	    schemaManager = new SchemaExport(defaultConf);
 
@@ -116,12 +117,14 @@ public class PersistenceManager {
 		try {
 		    tx = s.beginTransaction();
 		    SavedAgent toSave = new SavedAgent(target, pendingMessages);
-		    java.util.List resultSet = s.find("from jade.core.persistence.SavedAgent as item where item.agentIdentifier.name = ?", target.getName(), Hibernate.STRING);
+		    java.util.List resultSet = s.find("from jade.core.persistence.SavedAgent as item where item.name = ?", target.getName(), Hibernate.STRING);
 		    if(!resultSet.isEmpty()) {
 			toSave = (SavedAgent)resultSet.get(0);
+			toSave.setAgentData(target);
+			toSave.setPendingMessages(pendingMessages);
 		    }
 
-		    s.save(toSave);
+		    s.saveOrUpdate(toSave);
 		    tx.commit();
 		}
 		catch(HibernateException he) {
@@ -153,7 +156,7 @@ public class PersistenceManager {
 		Transaction tx = null;
 		try {
 		    tx = s.beginTransaction();
-		    java.util.List resultSet = s.find("from jade.core.persistence.SavedAgent as item where item.agentIdentifier.name = ?", target.getName(), Hibernate.STRING);
+		    java.util.List resultSet = s.find("from jade.core.persistence.SavedAgent as item where item.name = ?", target.getName(), Hibernate.STRING);
 		    tx.commit();
 
 		    if(!resultSet.isEmpty()) {
@@ -202,8 +205,8 @@ public class PersistenceManager {
 		Transaction tx = null;
 		try {
 		    tx = s.beginTransaction();
-		    int deleted1 = s.delete("from jade.core.persistence.FrozenAgent as item where item.agent.agentIdentifier.name = ?", target.getName(), Hibernate.STRING);
-		    int deleted2 = s.delete("from jade.core.persistence.SavedAgent as item where item.agentIdentifier.name = ?", target.getName(), Hibernate.STRING);
+		    int deleted1 = s.delete("from jade.core.persistence.FrozenAgent as item where item.agent.name = ?", target.getName(), Hibernate.STRING);
+		    int deleted2 = s.delete("from jade.core.persistence.SavedAgent as item where item.name = ?", target.getName(), Hibernate.STRING);
 		    tx.commit();
 		    System.out.println("--- Deleted " + deleted1 + " frozen and " + deleted2 + " saved agents ---");
 		}
@@ -453,7 +456,7 @@ public class PersistenceManager {
 	}
     }
 
-    public Long evictFrozenMessageQueue(Long id, String repository, List bufferedMessages) throws ServiceException, NotFoundException {
+    public Long evictFrozenMessageQueue(Long id, String repository) throws ServiceException, NotFoundException {
 	try {
 
 	    SessionFactory sf = getRepository(repository);
@@ -466,15 +469,6 @@ public class PersistenceManager {
 
 		    FrozenMessageQueue frozen = (FrozenMessageQueue)s.load(FrozenMessageQueue.class, id);
 		    Long result = frozen.getAgentFK();
-
-		    if(bufferedMessages != null) {
-			bufferedMessages.clear();
-			java.util.List l = frozen.getBufferedMessages();
-			for(int i = 0; i < l.size(); i++) {
-			    ACLMessage msg = (ACLMessage)l.get(i);
-			    bufferedMessages.add(msg);
-			}
-		    }
 
 		    // Remove the frozen instance from the persistent store
 		    s.delete(frozen);
@@ -498,9 +492,158 @@ public class PersistenceManager {
 	    }
 	}
 	catch(HibernateException he) {
-	    throw new ServiceException("An error occurred while evicting a message queue", he);
+	    throw new ServiceException("An error occurred while evicting a frozen message queue", he);
 	}
     }
+
+    public Long readFrozenMessageQueue(Long id, String repository, List bufferedMessages) throws ServiceException, NotFoundException {
+	try {
+
+	    SessionFactory sf = getRepository(repository);
+	    if(sf != null) {
+
+		Session s = sf.openSession();
+		Transaction tx = null;
+		try {
+		    tx = s.beginTransaction();
+
+		    FrozenMessageQueue frozen = (FrozenMessageQueue)s.load(FrozenMessageQueue.class, id);
+		    Long result = frozen.getAgentFK();
+
+		    bufferedMessages.clear();
+		    java.util.List l = frozen.getBufferedMessages();
+		    for(int i = 0; i < l.size(); i++) {
+			ACLMessage msg = (ACLMessage)l.get(i);
+			bufferedMessages.add(msg);
+		    }
+
+		    tx.commit();
+		    return result;
+		}
+		catch(HibernateException he) {
+		    he.printStackTrace();
+		    if(tx != null) {
+			tx.rollback();
+		    }
+		    throw he;
+		}
+		finally {
+		    s.close();
+		}
+	    }
+	    else {
+		throw new NotFoundException("The repository <" + repository + "> was not found");
+	    }
+	}
+	catch(HibernateException he) {
+	    throw new ServiceException("An error occurred while reading a frozen message queue", he);
+	}
+    }
+
+    public void saveContainer(String name, String repository, java.util.Set agents, java.util.Set mtps) throws ServiceException, NotFoundException {
+	try {
+
+	    SessionFactory sf = getRepository(repository);
+	    if(sf != null) {
+
+		Session s = sf.openSession();
+		Transaction tx = null;
+		try {
+		    tx = s.beginTransaction();
+		    SavedContainer toSave = new SavedContainer(name, agents, mtps);
+		    java.util.List resultSet = s.find("from jade.core.persistence.SavedContainer as item where item.name = ?", name, Hibernate.STRING);
+		    if(!resultSet.isEmpty()) {
+			toSave = (SavedContainer)resultSet.get(0);
+			toSave.getAgents().clear();
+			toSave.getAgents().addAll(agents);
+			toSave.getInstalledMTPs().clear();
+			toSave.getInstalledMTPs().addAll(mtps);
+		    }
+
+		    s.saveOrUpdate(toSave);
+		    tx.commit();
+		}
+		catch(HibernateException he) {
+		    he.printStackTrace();
+		    if(tx != null) {
+			tx.rollback();
+		    }
+		    throw he;
+		}
+		finally {
+		    s.close();
+		}
+	    }
+	    else {
+		throw new NotFoundException("The repository <" + repository + "> was not found");
+	    }
+	}
+	catch(HibernateException he) {
+	    throw new ServiceException("An error occurred while persisting the container", he);
+	}
+    }
+
+    public void retrieveSavedContainer(SavedContainer toFill, String repository) throws ServiceException, NotFoundException {
+	try {
+
+	    SessionFactory sf = getRepository(repository);
+	    if(sf != null) {
+
+		Session s = sf.openSession();
+		Transaction tx = null;
+		try {
+		    tx = s.beginTransaction();
+		    String name = toFill.getName();
+		    java.util.List resultSet = s.find("from jade.core.persistence.SavedContainer as item where item.name = ?", name, Hibernate.STRING);
+		    tx.commit();
+
+		    if(!resultSet.isEmpty()) {
+			SavedContainer loaded = (SavedContainer)resultSet.get(0);
+
+			// Transfer data to the 'toFill' object...
+			toFill.getAgents().addAll(loaded.getAgents());
+			toFill.getInstalledMTPs().addAll(loaded.getInstalledMTPs());
+
+			// Fetch all saved agents and fill their message queue with the pending messages
+			java.util.Iterator it = toFill.getAgents().iterator();
+			while(it.hasNext()) {
+			    SavedAgent sa = (SavedAgent)it.next();
+
+			    Agent instance = sa.getAgent();
+			    java.util.List pendingMessages = sa.getPendingMessages();
+
+			    // Restore the agent message queue inserting
+			    // received messages at the start of the queue
+			    for(int i = pendingMessages.size(); i > 0; i--) {
+				instance.putBack((ACLMessage)pendingMessages.get(i - 1));
+			    }
+			}
+		    }
+		    else {
+			throw new NotFoundException("Saved container <" + name + "> was not found in repository <" + repository + ">");
+		    }
+
+		}
+		catch(HibernateException he) {
+		    he.printStackTrace();
+		    if(tx != null) {
+			tx.rollback();
+		    }
+		    throw he;
+		}
+		finally {
+		    s.close();
+		}
+	    }
+	    else {
+		throw new NotFoundException("The repository <" + repository + "> was not found");
+	    }
+	}
+	catch(HibernateException he) {
+	    throw new ServiceException("An error occurred while retrieving the saved container", he);
+	}
+    }
+
 
     private synchronized SessionFactory getRepository(String name) {
 	return (SessionFactory)repositories.get(name);
