@@ -7,7 +7,7 @@
 
   <property environment="env"/>
   <path id="project.class.path">
-    <!-- Coresec classes -->
+    <!-- jadeSecurity classes -->
     <pathelement location="classes"/>
     <!-- JADE and JADE TestSuite  classes -->
     <pathelement location="../../classes"/>
