@@ -20,7 +20,7 @@
   <!-- Class path -->
   <path id="classpath">
     <pathelement location="${build-dir}/WEB-INF/classes"/>
-    <fileset dir="C:/java_dev/JADE/jade/lib">
+    <fileset dir="../../lib">
       <include name="*.jar"/>
     </fileset>
     <fileset dir="${jwsdp.home}/common/lib">
