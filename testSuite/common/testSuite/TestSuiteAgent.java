@@ -552,7 +552,6 @@ public class TestSuiteAgent extends GuiAgent {
     public int onEnd() {
       Logger.getLogger().log("Test terminated");
       lpToBeResumed.resume();
-      TestManager.incCountGroup();
       myGui.updateProgressBar(runAllSuccessful);
       return 0;
     } 
