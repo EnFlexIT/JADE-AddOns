@@ -47,12 +47,11 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 			
 			public void initialize(Agent a) throws TestException {
 				try {
-					String classpath = System.getProperty("java.class.path");
     			// NB Explicitly setting the local host is necessary to be sure that
 					// the remote platform name is consistent with the name we assume
 					// its AMS will have
 					String localHost = InetAddress.getLocalHost().getHostAddress();
-					rc = TestUtility.launchJadeInstance("Remote-platform", classpath, new String("-host "+localHost+" -port 9002"), new String[]{"IOR"}); 
+					rc = TestUtility.launchJadeInstance("Remote-platform", null, new String("-host "+localHost+" -port 9002"), new String[]{"IOR"}); 
 		
 					AID remoteAMS = new AID("ams@"+localHost+":9002/JADE", AID.ISGUID);
 					Iterator it = rc.getAddresses().iterator();
