@@ -66,7 +66,7 @@ public class SecurityService extends BaseService {
   public static final String AUTHENTICATION_OWNER_KEY = "owner";
   public static final String AUTHENTICATE_USER = "AUTH_USR";
   public static final String CODECS = "jade_core_security_SecurityService_CODEC";
-  public static final String BASIC_CODEC_CLASS = "jade.core.security.basic.BasicSOCodec";
+  public static final String BASIC_CODEC_CLASS = "jade.security.util.BasicSOCodec";
   public static final String SECURITY_PROVIDERS_KEY = "jade_security_providers";
   public static final String SECURITY_PROVIDERS_DEFAULT = "org.bouncycastle.jce.provider.BouncyCastleProvider";
 
