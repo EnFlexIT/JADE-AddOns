@@ -75,7 +75,7 @@ public class PermissionService
     public static final String POLICY_FILE_KEY = "java.security.policy";
     public static final String POLICY_FILE_DEFAULT = "policy.txt";
 
-    public static final String SECURITY_MANAGER_KEY = "jade_security_securitymanager";
+    public static final String SECURITY_MANAGER_KEY = "jade_security_manager";
     public static final String SECURITY_MANAGER_DEFAULT = "jade.core.security.JADESecurityManager";
     public static final String SECURITY_MANAGER_NULL = "null"; // special value: no sec.man is installed.
 
