@@ -142,7 +142,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	    }
 	    catch(Exception e) {
 		// Some other error occurred. Throw a FIPA Failure exception.
-		throw new FailureException("freeze-agent failed [" + e.getMessage() + "]");
+		throw new FailureException("freeze-agent failed [" + e.getClass().getName() + ": " + e.getMessage() + "]");
 	    }
 	}
 	else if(action instanceof ThawAgent) {
@@ -158,7 +158,55 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 	    }
 	    catch(Exception e) {
 		// Some other error occurred. Throw a FIPA Failure exception.
-		throw new FailureException("thaw-agent failed [" + e.getMessage() + "]");
+		throw new FailureException("thaw-agent failed [" + e.getClass().getName() + ": " + e.getMessage() + "]");
+	    }
+	}
+	else if(action instanceof SaveContainer) {
+	    try {
+		SaveContainer sc = (SaveContainer)action;
+
+		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		h.saveContainer(sc.getContainer(), sc.getRepository());
+	    }
+	    catch(ServiceNotActiveException snae) {
+		// The persistence service is not installed. Abort operation.
+		throw new FailureException("-- Persistence service not active --");
+	    }
+	    catch(Exception e) {
+		// Some other error occurred. Throw a FIPA Failure exception.
+		throw new FailureException("save-container failed [" + e.getClass().getName() + ": " + e.getMessage() + "]");
+	    }
+	}
+	else if(action instanceof LoadContainer) {
+	    try {
+		LoadContainer lc = (LoadContainer)action;
+
+		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		h.loadContainer(lc.getContainer(), lc.getRepository());
+	    }
+	    catch(ServiceNotActiveException snae) {
+		// The persistence service is not installed. Abort operation.
+		throw new FailureException("-- Persistence service not active --");
+	    }
+	    catch(Exception e) {
+		// Some other error occurred. Throw a FIPA Failure exception.
+		throw new FailureException("load-container failed [" + e.getClass().getName() + ": " + e.getMessage() + "]");
+	    }
+	}
+	else if(action instanceof DeleteContainer) {
+	    try {
+		DeleteContainer dc = (DeleteContainer)action;
+
+		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		h.deleteContainer(dc.getContainer(), dc.getRepository());
+	    }
+	    catch(ServiceNotActiveException snae) {
+		// The persistence service is not installed. Abort operation.
+		throw new FailureException("-- Persistence service not active --");
+	    }
+	    catch(Exception e) {
+		// Some other error occurred. Throw a FIPA Failure exception.
+		throw new FailureException("delete-container failed [" + e.getClass().getName() + ": " + e.getMessage() + "]");
 	    }
 	}
   	else if(action instanceof LoadAgentGroup) {
