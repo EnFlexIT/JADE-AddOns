@@ -1429,10 +1429,9 @@ public class PersistenceService extends BaseService {
 		    result.setReturnValue(t);
 		}
 	    }
-	    finally {
-		return result;
-	    }
-	}
+
+            return result;
+        }
 
 	private void deleteFrozenAgent(AID agentID, String repository, Long agentFK) throws ServiceException, IMTPException, NotFoundException {
 	    // Use the persistence manager to delete the agent
