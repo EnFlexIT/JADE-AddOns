@@ -10,6 +10,7 @@ public class FunctionalityDescriptor  implements Serializable {
 
 	private String nameT = "";
 	private String testerClassName ="";
+	private String testsListFile;
 	private String description ="";
 	private boolean skip = false;
 	
@@ -38,6 +39,10 @@ public class FunctionalityDescriptor  implements Serializable {
 		return testerClassName;
 	}
 
+	public String getTestsListFile(){
+		return testsListFile;
+	}
+
 	public String getDescription(){
 		return description;
 	}
@@ -56,6 +61,11 @@ public class FunctionalityDescriptor  implements Serializable {
 	public void setTesterClassName(String c){
 		testerClassName = c;
 	}
+
+	public void setTestsListFile(String testsListFile){
+		this.testsListFile = testsListFile;
+	}
+
 
 	public void setDescription(String d){
 		description = d;

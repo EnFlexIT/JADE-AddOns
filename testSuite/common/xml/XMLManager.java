@@ -167,6 +167,9 @@ public class XMLManager {
 				if (tag.equals(FUNC_CLASS_TAG)) {
 					fd.setTesterClassName(getContent(e1));
 				}
+				else if (tag.equals(FUNC_TESTSLIST_TAG)) {
+					fd.setTestsListFile(getContent(e1));
+				}
 				else if (tag.equals(FUNC_DESCRIPTION_TAG)) {
 					fd.setDescription(getContent(e1));
 				}
