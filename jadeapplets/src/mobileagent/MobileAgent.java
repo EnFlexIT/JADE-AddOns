@@ -30,6 +30,7 @@ import jade.content.lang.sl.SLCodec;
 import jade.domain.FIPANames;
 import client.ClientApplet;
 import server.Server;
+import jade.util.Logger;
 
 /**
  * Implements the mobile agent.
@@ -58,6 +59,9 @@ public class MobileAgent extends Agent {
      * The state value for on client.
      */
     public static final String ON_CLIENT = "ON_CLIENT";
+    
+    //logging
+    private static Logger logger = Logger.getMyLogger(MobileAgent.class.getName());
 
     /**
      * Constructor.
@@ -74,7 +78,7 @@ public class MobileAgent extends Agent {
     protected void afterMove() {
         if (state.equals(ON_SERVER))  {
             state = ON_CLIENT;
-            System.out.println("Mobile Agent moved to applet container.");
+            logger.log(Logger.FINE,"Mobile Agent moved to applet container.");
             ContentManager contentManager = getContentManager();
             contentManager.registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL0);
             // register the mobility ontology
@@ -84,10 +88,10 @@ public class MobileAgent extends Agent {
         }
         else {
             state = ON_SERVER;
-            System.out.println("Mobile Agent moved back to server container.");
+            logger.log(Logger.FINE,"Mobile Agent moved back to server container.");
             sendMessage();
             doDelete();
-            System.out.println("Mobile agent deleted.");
+            logger.log(Logger.FINE,"Mobile agent deleted.");
         }
     }
 
@@ -106,7 +110,7 @@ public class MobileAgent extends Agent {
         msgToAppletAgent.setContent("Do delete");
         send(msgToAppletAgent);
 
-        System.out.println("Message 'Do delete' sent to applet agent.");
+        logger.log(Logger.FINE,"Message 'Do delete' sent to applet agent.");
     }
 
 }

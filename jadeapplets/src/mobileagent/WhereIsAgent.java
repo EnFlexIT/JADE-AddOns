@@ -32,6 +32,7 @@ import jade.domain.mobility.MobilityOntology;
 import jade.domain.JADEAgentManagement.WhereIsAgentAction;
 import jade.content.onto.basic.Action;
 import jade.content.onto.basic.Result;
+import jade.util.Logger;
 
 import java.util.Iterator;
 
@@ -47,6 +48,8 @@ import java.util.Iterator;
 public class WhereIsAgent extends SimpleAchieveREInitiator {
 
     private ACLMessage request;
+    
+    private static Logger logger = Logger.getMyLogger(WhereIsAgent.class.getName());
 
     /**
      * Contructor.
@@ -83,19 +86,19 @@ public class WhereIsAgent extends SimpleAchieveREInitiator {
 
         reset(request);
 
-        System.out.println("Try to move mobile agent to location of: " + agentName);
+        logger.log(Logger.CONFIG,"Try to move mobile agent to location of: " + agentName);
     }
 
     protected void handleNotUnderstood(ACLMessage reply) {
-        System.out.println(myAgent.getLocalName() + " handleNotUnderstood : " + reply.toString());
+        logger.log(Logger.FINE,myAgent.getLocalName() + " handleNotUnderstood : " + reply.toString());
     }
 
     protected void handleRefuse(ACLMessage reply) {
-        System.out.println(myAgent.getLocalName() + " handleRefuse : " + reply.toString());
+        logger.log(Logger.FINE,myAgent.getLocalName() + " handleRefuse : " + reply.toString());
     }
 
     protected void handleFailure(ACLMessage reply) {
-        System.out.println(myAgent.getLocalName() + " handleFailure : " + reply.toString());
+        logger.log(Logger.FINE,myAgent.getLocalName() + " handleFailure : " + reply.toString());
     }
 
     protected void handleAgree(ACLMessage reply) {
@@ -113,7 +116,7 @@ public class WhereIsAgent extends SimpleAchieveREInitiator {
             }
             // location - represents the location where the given agent is located
             myAgent.doMove(location);
-            System.out.println("Agent Moved to the destination !");
+            logger.log(Logger.FINE,"Agent Moved to the destination !");
 
         } catch (Exception e) {
             e.printStackTrace();

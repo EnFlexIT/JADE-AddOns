@@ -33,6 +33,7 @@ import jade.core.Specifier;
 import jade.core.AID;
 import jade.util.leap.ArrayList;
 import jade.lang.acl.ACLMessage;
+import jade.util.Logger;
 
 import javax.swing.*;
 
@@ -74,6 +75,9 @@ public class ClientApplet extends Applet  {
      * The port of the jade main platform.
      */
     public static int jadePort;
+    
+    //logging
+    private static Logger logger = Logger.getMyLogger(ClientApplet.class.getName());
 
     /**
      * Initializes the applet.
@@ -117,11 +121,11 @@ public class ClientApplet extends Applet  {
         try {
             AppletAgent appletAgent = new AppletAgent(this);
             appletContainer.acceptNewAgent(APPLET_AGENT_NAME, appletAgent).start();
-            System.out.println("Applet agent created.");
+            logger.log(Logger.FINE,"Applet agent created.");
             appletAgent.setMessage("Applet agent created.");
             sendMessage(appletAgent);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            logger.log(Logger.WARNING,e.getMessage());
         }
 
     }
@@ -143,7 +147,7 @@ public class ClientApplet extends Applet  {
         msgToSA.setContent("Send Mobile Agent");
         appletAgent.send(msgToSA);
 
-        System.out.println("Message 'Send Mobile Agent' sent to server agent.");
+        logger.log(Logger.FINE,"Message 'Send Mobile Agent' sent to server agent.");
         appletAgent.setMessage("Message 'Send Mobile Agent' sent to server agent.");
     }
 

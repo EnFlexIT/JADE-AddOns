@@ -34,6 +34,7 @@ import jade.content.lang.sl.SLCodec;
 import mobileagent.MobileAgent;
 import mobileagent.WhereIsAgent;
 import client.ClientApplet;
+import jade.util.Logger;
 
 /**
  * Implements the Server Agent's Behaviour.
@@ -49,6 +50,9 @@ public class ServerAgentBehaviour extends SimpleBehaviour {
     private boolean finished = false;
 
     private AgentContainer serverContainer;
+    
+    //logging service
+    private static Logger logger = Logger.getMyLogger(ServerAgentBehaviour.class.getName());
 
     public ServerAgentBehaviour(Agent a, AgentContainer serverContainer) {
         super(a);
@@ -68,7 +72,7 @@ public class ServerAgentBehaviour extends SimpleBehaviour {
         ACLMessage msg = agent.receive(m1);
 
         if (msg != null && msg.getContent().equals("Send Mobile Agent")){
-            System.out.println("Message 'Send Mobile Agent' received.");
+            logger.log(Logger.FINE,"Message 'Send Mobile Agent' received.");
             try {
                 MobileAgent mobileAgent = new MobileAgent(MobileAgent.ON_SERVER);
                 this.serverContainer.acceptNewAgent(MobileAgent.MOBILE_AGENT_NAME, mobileAgent).start();
@@ -77,7 +81,7 @@ public class ServerAgentBehaviour extends SimpleBehaviour {
                 contentManager.registerLanguage(new SLCodec(), FIPANames.ContentLanguage.FIPA_SL0);
                 // register the mobility ontology
                 contentManager.registerOntology(jade.domain.mobility.MobilityOntology.getInstance());
-                System.out.println("New Mobile Agent created.");
+                logger.log(Logger.FINE,"New Mobile Agent created.");
 
                 String fullAgentName = Server.getFullAgentName(ClientApplet.APPLET_AGENT_NAME, Server.jadeHostName, Server.jadePort);
                 mobileAgent.addBehaviour(new WhereIsAgent(mobileAgent, fullAgentName));

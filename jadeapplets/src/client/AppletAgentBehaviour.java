@@ -25,6 +25,7 @@ package client;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.core.behaviours.ReceiverBehaviour;
 import jade.lang.acl.ACLMessage;
+import jade.util.Logger;
 
 /**
  * Implements the behaviour of the applet agent.
@@ -38,6 +39,9 @@ public class AppletAgentBehaviour extends SimpleBehaviour {
     ReceiverBehaviour receiverBehaviour;
 
     private boolean finished = false;
+    
+    //logging
+    private static Logger logger = Logger.getMyLogger(AppletAgentBehaviour.class.getName());
 
     /**
      * Constructor.
@@ -57,14 +61,14 @@ public class AppletAgentBehaviour extends SimpleBehaviour {
             try {
                 ACLMessage msg = receiverBehaviour.getMessage();
                 if (msg != null && msg.getContent().equals("Do delete")) {
-                    System.out.println("Received message to delete applet agent.");
+                    logger.log(Logger.FINE,"Received message to delete applet agent.");
                     appletAgent.setMessage("Received message to delete applet agent.");
                     appletAgent.doDelete();
-                    System.out.println("AppletAgent killed.");
+                    logger.log(Logger.FINE,"AppletAgent killed.");
                     appletAgent.setMessage("AppletAgent killed.");
                 }
             } catch (Exception e1) {
-                System.out.println("AppletAgentBehaviour1: " + e1.getMessage());
+                logger.log(Logger.WARNING,"AppletAgentBehaviour1: " + e1.getMessage());
             }
 
             finished = true;
@@ -75,7 +79,7 @@ public class AppletAgentBehaviour extends SimpleBehaviour {
 
             } catch (ReceiverBehaviour.NotYetReady e2) {
             } catch (Exception e3) {
-                System.out.println("AppletAgentBehaviour3: " + e3.getMessage());
+                logger.log(Logger.WARNING,"AppletAgentBehaviour3: " + e3.getMessage());
             }
             block(2000);
         }
