@@ -16,6 +16,7 @@
 		<TestClassName>
 			test.security.authentication.AuthenticationTest
 		</TestClassName>
+		<Argument key="configFilesPath" value="src/test/security/authentication/conf/"></Argument>
 		<Argument key="configFile" value="auth_1.conf"></Argument>
 		<Argument key="action" value="startMainContainer"></Argument>
 		<Argument key="authenticationKind" value="successfulAuthentication"></Argument>
@@ -34,6 +35,7 @@
 		<TestClassName>
 			test.security.authentication.AuthenticationTest
 		</TestClassName>
+		<Argument key="configFilesPath" value="src/test/security/authentication/conf/"></Argument>
 		<Argument key="configFile" value="auth_2.conf"></Argument>
 		<Argument key="action" value="startMainContainer"></Argument>
 		<Argument key="authenticationKind" value="unsuccessfulAuthentication"></Argument>

@@ -24,16 +24,16 @@ import test.common.TestUtility;
  */
 public class AuthenticationTest extends Test {
 
-    private static final String CONFIG_FILE_PATH = "cfg/test/security/authentication/";
-    private static final String CONFIG_FILE = "configFile";
-    private static final String ACTION = "action";
-    private static final String START_MAIN_CONTAINER = "startMainContainer";
-    private static final String START_REMOTE_CONTAINER = "startRemoteContainer";
+    private static final String CONFIG_FILES_PATH_KEY = "configFilesPath";
+    private static final String CONFIG_FILE_KEY = "configFile";
+    private static final String ACTION_KEY = "action";
+    private static final String START_MAIN_CONTAINER_KEY = "startMainContainer";
+    private static final String START_REMOTE_CONTAINER_KEY = "startRemoteContainer";
 
-    private static final String AUTHENTICATION_KIND = "authenticationKind";
+    private static final String AUTHENTICATION_KIND_KEY = "authenticationKind";
 
-    private static final String SUCCESSFUL_AUTHENTICATION = "successfulAuthentication";
-    private static final String UNSUCCESSFUL_AUTHENTICATION = "unsuccessfulAuthentication";
+    private static final String SUCCESSFUL_AUTHENTICATION_KEY = "successfulAuthentication";
+    private static final String UNSUCCESSFUL_AUTHENTICATION_KEY = "unsuccessfulAuthentication";
 
     private static final String NEW_PLATFORM_NAME = "NewPlaform";
 
@@ -46,13 +46,13 @@ public Behaviour load(Agent a) throws TestException {
             SequentialBehaviour b1 = new SequentialBehaviour(a);
             b1.addSubBehaviour(new OneShotBehaviour(a) {
 
-                private String configFile = getTestArgument(CONFIG_FILE);
-                private String action = getTestArgument(ACTION);
-                private String authKind = getTestArgument(AUTHENTICATION_KIND);
+                private String configFile = getTestArgument(CONFIG_FILE_KEY);
+                private String action = getTestArgument(ACTION_KEY);
+                private String authKind = getTestArgument(AUTHENTICATION_KIND_KEY);
 
                 public void action() {
 
-                    if (action.equals(START_MAIN_CONTAINER)) {
+                    if (action.equals(START_MAIN_CONTAINER_KEY)) {
                         //								START MAIN CONTAINER
                         try {
                             String params = createMainParams();
@@ -60,23 +60,23 @@ public Behaviour load(Agent a) throws TestException {
                                     "TestPlatform", null, params, null);
 
                             if (newPlatform != null) {
-                                if (getTestArgument(AUTHENTICATION_KIND)
-                                        .equals(SUCCESSFUL_AUTHENTICATION)) {
+                                if (getTestArgument(AUTHENTICATION_KIND_KEY)
+                                        .equals(SUCCESSFUL_AUTHENTICATION_KEY)) {
                                     passed("New instance of the Jade platform HAS BEEN created with SUCCESSFUL authentication.");
                                 } else {
                                     failed("New instance of the Jade platform HAS BEEN created with UNsuccessful authentication.");
                                 }
                             } else {
-                                if (getTestArgument(AUTHENTICATION_KIND)
-                                        .equals(SUCCESSFUL_AUTHENTICATION)) {
+                                if (getTestArgument(AUTHENTICATION_KIND_KEY)
+                                        .equals(SUCCESSFUL_AUTHENTICATION_KEY)) {
                                     failed("New instance of the Jade platform has NOT been created with SUCCESSFUL authentication.");
                                 } else {
                                     passed("New instance of the Jade platform has NOT been created with UNsuccessful authentication.");
                                 }
                             }
                         } catch (Exception te) {
-                            if (getTestArgument(AUTHENTICATION_KIND).equals(
-                                    UNSUCCESSFUL_AUTHENTICATION)) {
+                            if (getTestArgument(AUTHENTICATION_KIND_KEY).equals(
+                                    UNSUCCESSFUL_AUTHENTICATION_KEY)) {
                                 //te.printStackTrace();
                                 passed("New instance of the Jade platform has NOT been created with UNsuccessful authentication.");
                             } else {
@@ -112,8 +112,8 @@ public Behaviour load(Agent a) throws TestException {
                 + "jade.core.security.signature.SignatureService;"
                 + "jade.core.security.encryption.EncryptionService";
 
-        String params = " -conf " + CONFIG_FILE_PATH
-                + getTestArgument(CONFIG_FILE);
+        String params = " -conf " + getTestArgument(CONFIG_FILES_PATH_KEY)
+                + getTestArgument(CONFIG_FILE_KEY);
         params += " -nomtp";
         params += " -port 1088";
         params += " -services " + services;
