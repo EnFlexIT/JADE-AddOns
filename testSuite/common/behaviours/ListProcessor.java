@@ -31,7 +31,7 @@ import jade.util.leap.*;
    @author Giovanni Caire - TILAB
  */
 public abstract class ListProcessor extends SimpleBehaviour {
-	private List items ;
+	protected List items ;
 	private int cnt = 0;
 	private boolean paused = false;
 	private boolean stopped = false;
