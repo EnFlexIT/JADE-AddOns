@@ -24,10 +24,7 @@ Boston, MA  02111-1307, USA.
 package test.common;
 
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.SerialBehaviour;
-import jade.core.behaviours.FSMBehaviour;
-import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.*;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.util.leap.*;
@@ -58,6 +55,8 @@ public abstract class Test implements Serializable {
   private DataStore myStore;
   private String myKey;
   
+  private long timeout = -1;
+  
   private boolean pauseEnabled = false;
   private static MessageTemplate resumeTemplate = MessageTemplate.MatchContent("resume");
   
@@ -74,7 +73,15 @@ public abstract class Test implements Serializable {
   	myStore = ds;
   	myKey = resultKey;
   	Behaviour b = load(a);
-  	myWrapper = new Wrapper(a, b);
+  	if (timeout > 0) {
+  		ParallelBehaviour pb = new ParallelBehaviour(a, ParallelBehaviour.WHEN_ANY);
+  		pb.addSubBehaviour(b);
+  		pb.addSubBehaviour(new WatchDog(a, timeout));
+  		myWrapper = new Wrapper(a, pb);
+  	}
+  	else {
+	  	myWrapper = new Wrapper(a, b);
+  	}
   	return myWrapper;
   }
   
@@ -123,6 +130,10 @@ public abstract class Test implements Serializable {
    */
   protected final String getTestArgument(String key) {
   	return myDescriptor.getArg(key);
+  }
+  
+  protected void setTimeout(long t) {
+  	timeout = t;
   }
   
   protected final void passed(String msg) {
@@ -233,5 +244,18 @@ public abstract class Test implements Serializable {
   	}
   	
   } // END of inner class Wrapper
+  
+  /**
+     Inner class WatchDog.
+   */
+  private class WatchDog extends WakerBehaviour {
+  	private WatchDog(Agent a, long t) {
+  		super(a, t);
+  	}
+  	
+  	protected void handleElapsedTimeout() {
+  		failed("Timeout expired");
+  	}
+  } // END of inner class WatchDog  		
 }
 

@@ -34,9 +34,15 @@ public class Expectation implements Serializable {
 	private HashMap expected = new HashMap();
 	
 	public Expectation(String[] expectedKeys) {
-		for (int i = 0;i < expectedKeys.length; ++i) {
-			expected.put(expectedKeys[i], new Boolean(false));
+		if (expectedKeys != null) {
+			for (int i = 0;i < expectedKeys.length; ++i) {
+				expected.put(expectedKeys[i], new Boolean(false));
+			}
 		}
+	}
+	
+	public void addExpectedKey(String key) {
+		expected.put(key, new Boolean(false));
 	}
 	
 	public boolean received(String key) {
