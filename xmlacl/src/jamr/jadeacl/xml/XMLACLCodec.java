@@ -523,7 +523,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 	}
 	
 	Date d=msg.getReplyByDate();
-	if( (tmp != null) && (!tmp.equals("")) ) {
+	if(d != null) {
 	    sb.append("\t<");
 	    sb.append(REPLY_BY_TAG);
 	    sb.append(" time=\"");
