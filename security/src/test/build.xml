@@ -97,7 +97,7 @@
 
 
   <!-- useful for developers -->
-  <target name="all-classes">
+  <target name="compile-all" description="Create classes of: Jade, jade test-suite, Jade-S, and the security test-suite." >
     <echo message="--- Compiling jade classes... ---" />
     <ant dir="../../" target="jade" />
     <echo message="--- Compiling jade test-suite classes... ---" />
