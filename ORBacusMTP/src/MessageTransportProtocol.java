@@ -717,11 +717,11 @@ public class MessageTransportProtocol implements MTP {
   }
 
   public TransportAddress strToAddr(String rep) throws MTPException {
-    if(rep.startsWith("IOR:"))
+    if(rep.toLowerCase().startsWith("ior:"))
       return new OBAddressIOR(rep);
-    else if(rep.startsWith("corbaloc:"))
+    else if(rep.toLowerCase().startsWith("corbaloc:"))
       return new OBAddressURL(rep);
-    else if(rep.startsWith("corbaname:"))
+    else if(rep.toLowerCase().startsWith("corbaname:"))
       return new OBAddressNS(rep);
     else
       throw new MTPException("Invalid protocol prefix: " + rep);
