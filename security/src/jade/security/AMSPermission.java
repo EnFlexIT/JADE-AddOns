@@ -36,7 +36,7 @@ public class AMSPermission extends AuthPermission {
 	}
 
 	/**
-		Creates a new AgentPermission.
+		Creates a new AMSPermission.
 		@param name The name of the permission.
 		@param actions The actions of the permission.
 	*/
