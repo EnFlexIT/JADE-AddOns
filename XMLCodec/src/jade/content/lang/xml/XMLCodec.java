@@ -169,7 +169,7 @@ public class XMLCodec extends StringCodec {
     public String encode(AbsContentElement content) 
             throws CodecException {
     	StringBuffer sb = new StringBuffer();
-        coder.encodeAsTag((AbsObject)content, null, null, sb);
+        coder.encodeAsTag((AbsObject)content, null, null, null, sb);
     	return sb.toString();
   	}
 

@@ -72,11 +72,11 @@ public class Sender extends Agent {
 
 		Man john = new Man();
 		Man bill = new Man();
-		Man tony = new Man();
+		Woman mary = new Woman();
 		
 		john.setName("John");
 		bill.setName("Bill");
-		tony.setName("Tony");
+		mary.setName("Mary");
 
 		Address johnAddress = new Address();
 		johnAddress.setCity("London");
@@ -86,9 +86,9 @@ public class Sender extends Agent {
 		billAddress.setCity("Paris");
 		bill.setAddress(billAddress);
 		
-		Address tonyAddress = new Address();
-		tonyAddress.setCity("Naples");
-		tony.setAddress(tonyAddress);
+		Address maryAddress = new Address();
+		maryAddress.setCity("Naples");
+		mary.setAddress(maryAddress);
 
 
 		FatherOf fatherOf = new FatherOf();
@@ -96,7 +96,7 @@ public class Sender extends Agent {
 
 		List children = new ArrayList();
 		children.add(bill);
-		children.add(tony);
+		children.add(mary);
 		fatherOf.setChildren(children);
 
 		// Fill the content of the message
