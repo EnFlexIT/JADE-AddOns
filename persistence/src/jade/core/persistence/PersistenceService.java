@@ -1028,7 +1028,9 @@ public class PersistenceService extends BaseService {
 			pm.add(it.next());
 		    }
 
-		    agents.add(new SavedAgent(a, pm));
+                    SavedAgent sa = new SavedAgent(a, pm);
+                    sa.setOwned(true);
+		    agents.add(sa);
 		}
 
 		myPersistenceManager.saveContainer(myContainer.getID().getName(), repository, agents, mtps);
