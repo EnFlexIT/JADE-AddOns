@@ -1,0 +1,63 @@
+
+// --- These are the basic Java permissions to allow JADE to start up---
+grant codebase "file://classes/-" {
+	permission java.util.PropertyPermission "java.rmi.server.hostname", "write";
+	permission java.util.PropertyPermission "jade.*", "read,write";
+	permission java.security.SecurityPermission "createAccessControlContext";
+	permission java.security.SecurityPermission "getPolicy";
+	permission java.net.SocketPermission "*", "listen,connect,resolve";
+	permission java.io.FilePermission "*", "read,write";
+	permission java.lang.RuntimePermission "createClassLoader";
+	permission java.awt.AWTPermission "showWindowWithoutWarningBanner";
+	permission java.security.AllPermission;
+};
+
+
+//
+// --- Below all the JADE permissions allowed for the platform ---
+//
+
+
+//
+// --- UNCOMMENT the following for allowing message exchange between agents belonging to 'alice' and 'bob' ---
+//
+//grant principal jade.security.impl.PrincipalImpl "bob" {
+//	permission jade.security.impl.AgentPermission "alice", "send-to,receive-from"; };
+//grant principal jade.security.impl.PrincipalImpl "alice" {
+//	permission jade.security.impl.AgentPermission "bob", "send-to,receive-from"; };
+
+
+
+// enable a set of permissions for 'bob'
+grant principal jade.security.impl.PrincipalImpl "bob" {
+	permission jade.security.impl.AgentPermission "bob", "create,kill,suspend,resume,take,send-to,send-as,receive-from,move,copy";
+	permission jade.security.impl.PlatformPermission "bob", "create,kill";
+	permission jade.security.impl.ContainerPermission "bob", "create,kill,create-in,kill-in";
+	permission jade.security.impl.AuthorityPermission "bob", "sign-ic,sign-dc";
+	permission jade.security.impl.AMSPermission "bob", "register,deregister,modify";
+};
+
+
+
+// enable a set of permissions for 'alice'
+grant principal jade.security.impl.PrincipalImpl "alice" {
+	permission jade.security.impl.AgentPermission "alice", "create,kill,suspend,resume,take,send-to,send-as,receive-from,move,copy";
+	permission jade.security.impl.AMSPermission "alice", "register,deregister,modify";
+	permission jade.security.impl.PlatformPermission "alice", "create,kill";
+	permission jade.security.impl.ContainerPermission "alice", "create,kill,create-in,kill-in";
+	permission jade.security.impl.AuthorityPermission "alice", "sign-ic,sign-dc";
+};
+
+
+
+
+
+// enable messaging from/to to ams 
+// and permission for anybody of delegating the ams (ability to sign delegation certificates)
+grant principal jade.security.impl.PrincipalImpl "" {
+	permission jade.security.impl.AuthorityPermission "/ams", "sign-dc";
+	permission jade.security.impl.AgentPermission "/ams", "send-to,receive-from"; 
+};
+grant principal jade.security.impl.PrincipalImpl "/ams" {
+	permission jade.security.impl.AgentPermission "", "send-to,receive-from";
+};
