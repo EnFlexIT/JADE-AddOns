@@ -43,11 +43,22 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager {
 	private Hashtable controllers = new Hashtable();
 	private int instanceCnt = 0;
 	
-  public TSDaemon() throws RemoteException {
+	private String additionalArgs = null;
+	
+  public TSDaemon(String additionalArgs) throws RemoteException {
     super();
+    this.additionalArgs = additionalArgs;
   }
 
 	public static void main(String args[]) {
+		StringBuffer sb = new StringBuffer();
+		if (args != null && args.length > 0) {
+			for (int i = 0; i < args.length; ++i) {
+				sb.append(args[i]);
+				sb.append(" ");
+			}
+		}
+		
     try {
     	// Create an RMI registry on the local host and DAEMON port
     	// (if one is already running just get it)
@@ -56,7 +67,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager {
       String registryID = new String("rmi://"+hostName+":"+DEFAULT_PORT);
       
       // Create a TSDaemon and bind it to the registry
-      TSDaemon daemon = new TSDaemon();
+      TSDaemon daemon = new TSDaemon(sb.toString());
       Naming.bind(new String(registryID+"//"+DEFAULT_NAME), daemon);
       System.out.println("Test Suite Daemon ready.");
     }
@@ -98,6 +109,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager {
   //////////////////////////////////////////
   public int launchJadeInstance(String instanceName, String classpath, String jadeArgs, String[] protoNames) throws TestException, RemoteException {
 		instanceCnt++;
+		jadeArgs = additionalArgs + jadeArgs;
   	JadeController jc = TestUtility.launchJadeInstance(instanceName, classpath, jadeArgs, protoNames);
   	controllers.put(new Integer(instanceCnt), jc);
   	return instanceCnt;
