@@ -153,7 +153,8 @@ public class UseAgentTag extends BodyTagSupport {
 	// sinon le bean doit etre placé dans la portée (scope ).
 	
 	try {
-	    logger.log(Logger.INFO,"Creating new Agent "+id);
+	    if(logger.isLoggable(Logger.INFO))
+	    	logger.log(Logger.INFO,"Creating new Agent "+id);
 	    jade.wrapper.AgentContainer ac = 
 		(jade.wrapper.AgentContainer) pageContext.getAttribute(container, PageContext.APPLICATION_SCOPE);
 	    if (ac==null) {

@@ -93,9 +93,11 @@ public class FSMExecutor extends Agent {
 		DynamicFSMBehaviour fsm = new DynamicFSMBehaviour(myAgent, new StringBufferInputStream(msg.getContent()));
 		if (fsm.getLoaded()) {
 		    myAgent.addBehaviour(fsm);
-		    logger.log(Logger.INFO,"LOADED A NEW FSM: "+msg);
-		} else
-		    logger.log(Logger.INFO,"FAILED TO LOAD THIS FSM!");
+		    if(logger.isLoggable(Logger.INFO))
+		    	logger.log(Logger.INFO,"LOADED A NEW FSM: "+msg);
+		} else{
+		    if(logger.isLoggable(Logger.INFO))
+		    	logger.log(Logger.INFO,"FAILED TO LOAD THIS FSM!");}
 	    }
 	}
     }

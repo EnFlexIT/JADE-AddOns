@@ -57,16 +57,19 @@ public class Receiver extends Agent {
 	public void action() {
 	    //for(int c = 0; c < 2; c++) {
 		try {
-		    logger.log(Logger.INFO, "[" + getLocalName() + "] Waiting for a message...");
+		    if(logger.isLoggable(Logger.INFO))
+		    	logger.log(Logger.INFO, "[" + getLocalName() + "] Waiting for a message...");
 
 		    ACLMessage msg = blockingReceive();
 
 		    if (msg!= null) {
 			    ContentElement p = manager.extractContent(msg);
-			    logger.log(Logger.INFO,"Received message  "+ msg.getContent());
+			    if(logger.isLoggable(Logger.INFO))
+			    	logger.log(Logger.INFO,"Received message  "+ msg.getContent());
 			    if(p instanceof FatherOf) {
 				proposition = (FatherOf)p;
-				logger.log(Logger.FINE,"[" + getLocalName() + "] Receiver inform message: information stored.");
+				if(logger.isLoggable(Logger.FINE))
+					logger.log(Logger.FINE,"[" + getLocalName() + "] Receiver inform message: information stored.");
 				//Estrae il contenuto del messaggio e lo stampa
 				FatherOf fo =new FatherOf();
 				fo.setFather(proposition.getFather());
@@ -80,11 +83,13 @@ public class Receiver extends Agent {
 				
 				}
 			else{
-				logger.log(Logger.WARNING,"msg null");
+				if(logger.isLoggable(Logger.WARNING))
+					logger.log(Logger.WARNING,"msg null");
 				}
 		    }
 		} catch(Exception e) { 
-			logger.log(Logger.WARNING,"Error in extracting message");
+			if(logger.isLoggable(Logger.WARNING))
+				logger.log(Logger.WARNING,"Error in extracting message");
 			e.printStackTrace(); }
 	   // }
 	    finished = true;

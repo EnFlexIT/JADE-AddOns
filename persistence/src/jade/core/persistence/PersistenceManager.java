@@ -89,7 +89,8 @@ public class PersistenceManager {
 
         metaConf.addResource("jade/core/persistence/meta.hbm.xml", getClass().getClassLoader());
 
-		logger.log(Logger.INFO,">>> Connecting to the Meta-DB [" + metaDB + "] <<<");
+		if(logger.isLoggable(Logger.INFO))
+			logger.log(Logger.INFO,">>> Connecting to the Meta-DB [" + metaDB + "] <<<");
         metaSchemaMgr = new SchemaExport(metaConf);
         metaSessions = metaConf.buildSessionFactory();
         defaultProperties = metaConf.getProperties();
@@ -117,7 +118,8 @@ public class PersistenceManager {
 
         Configuration newConf = new Configuration();
         java.util.Properties props = rep.getProperties().getProperties();
-		logger.log(Logger.INFO,"--- Loading " + props.size() + " properties ---");
+		if(logger.isLoggable(Logger.INFO))
+			logger.log(Logger.INFO,"--- Loading " + props.size() + " properties ---");
 
         if(!props.isEmpty()) {
             newConf.setProperties(props);
@@ -271,10 +273,12 @@ public class PersistenceManager {
                         addSessionFactory(rep);
                     }
                     catch(IOException ioe) {
-                        logger.log(Logger.WARNING,"--- Could not load repository <" + rep.getName() + "> ---");
+                        if(logger.isLoggable(Logger.WARNING))
+                        	logger.log(Logger.WARNING,"--- Could not load repository <" + rep.getName() + "> ---");
                     }
                     catch(HibernateException he) {
-                        logger.log(Logger.WARNING,"--- Could not load repository <" + rep.getName() + "> ---");                        
+                        if(logger.isLoggable(Logger.WARNING))
+                        	logger.log(Logger.WARNING,"--- Could not load repository <" + rep.getName() + "> ---");                        
                         he.printStackTrace();                        
                     }
 		}
@@ -615,7 +619,8 @@ public class PersistenceManager {
 		    int deleted1 = s.delete("from jade.core.persistence.FrozenAgent as item where item.agent.name = ?", target.getName(), Hibernate.STRING);
 		    int deleted2 = s.delete("from jade.core.persistence.SavedAgent as item where item.name = ?", target.getName(), Hibernate.STRING);
 		    tx.commit();
-		    logger.log(Logger.INFO,"--- Deleted " + deleted1 + " frozen and " + deleted2 + " saved agents ---");
+		    if(logger.isLoggable(Logger.INFO))
+		    	logger.log(Logger.INFO,"--- Deleted " + deleted1 + " frozen and " + deleted2 + " saved agents ---");
 		}
 		catch(HibernateException he) {
 		    if(tx != null) {
@@ -649,8 +654,8 @@ public class PersistenceManager {
 		    Object toDelete = s.load(FrozenAgent.class, agentPK);
 		    s.delete(toDelete);
 		    tx.commit();
-
-		    logger.log(Logger.INFO,"--- Deleted frozen agent <" + agentPK + "> ---");
+			if(logger.isLoggable(Logger.INFO))
+		    	logger.log(Logger.INFO,"--- Deleted frozen agent <" + agentPK + "> ---");
 		}
 		catch(HibernateException he) {
 		    if(tx != null) {
@@ -1063,7 +1068,8 @@ public class PersistenceManager {
 		    tx = s.beginTransaction();
 		    int deleted = s.delete("from jade.core.persistence.SavedContainer as item where item.name = ?", cid.getName(), Hibernate.STRING);
 		    tx.commit();
-		    logger.log(Logger.INFO,"--- Deleted " + deleted + " saved containers ---");
+		    if(logger.isLoggable(Logger.INFO))
+		    	logger.log(Logger.INFO,"--- Deleted " + deleted + " saved containers ---");
 		}
 		catch(HibernateException he) {
 		    if(tx != null) {
@@ -1094,11 +1100,16 @@ public class PersistenceManager {
 	try {
 	    s = sf.openSession();
 	    int howMany = ((Integer)s.iterate("select count(*) from jade.core.persistence.SavedAgent").next()).intValue();
-	    logger.log(Logger.INFO,"--- The DB <" + name + "> holds " + howMany + " saved agents ---");
+	    if(logger.isLoggable(Logger.INFO))
+	    	logger.log(Logger.INFO,"--- The DB <" + name + "> holds " + howMany + " saved agents ---");
 	}
 	catch(HibernateException he) {
-	    logger.log(Logger.WARNING,"--- The DB <" + name + "> does not appear to have a valid schema ---");
-	    logger.log(Logger.WARNING,"--- Rebuilding DB <" + name + "> schema ---");
+
+		    if(logger.isLoggable(Logger.INFO)){
+	    		logger.log(Logger.INFO,"--- The DB <" + name + "> does not appear to have a valid schema ---");
+	    		logger.log(Logger.INFO,"--- Rebuilding DB <" + name + "> schema ---");
+	    		}
+
 
 	    SchemaExport schemaMgr = new SchemaExport(conf);
 
@@ -1121,11 +1132,14 @@ public class PersistenceManager {
 	try {
 	    s = metaSessions.openSession();
 	    int howMany = ((Integer)s.iterate("select count(*) from jade.core.persistence.Repository").next()).intValue();
-	    logger.log(Logger.INFO,"--- The Meta-DB holds " + howMany + " repositories ---");
+	    if(logger.isLoggable(Logger.INFO))
+	    	logger.log(Logger.INFO,"--- The Meta-DB holds " + howMany + " repositories ---");
 	}
 	catch(HibernateException he) {
+		if(logger.isLoggable(Logger.WARNING)){
 	    logger.log(Logger.WARNING,"--- The Meta-DB does not appear to have a valid schema ---");
 	    logger.log(Logger.WARNING,"--- Rebuilding Meta-DB schema ---");
+	 }
 
 	    s.close();
 	    s = null;

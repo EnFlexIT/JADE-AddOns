@@ -51,7 +51,8 @@ public class SampleReceiverTask extends Behaviour {
 	if (msg == null)
 	    block();
 	else {
-	    logger.log(Logger.INFO,myAgent.getLocalName()+" executed SampleReceiverTask and returning value "+msg.getPerformative());
+	    if(logger.isLoggable(Logger.INFO))
+	    	logger.log(Logger.INFO,myAgent.getLocalName()+" executed SampleReceiverTask and returning value "+msg.getPerformative());
 	    msgReceived = msg;
 	    done=true;
 	}

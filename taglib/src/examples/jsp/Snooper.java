@@ -17,7 +17,8 @@ public class Snooper extends Agent {
     public Snooper() {
 	// Create the message to send to the client
         msg = new ACLMessage(ACLMessage.INFORM);
-		logger.log(Logger.CONFIG,"Snooper created");
+		if(logger.isLoggable(Logger.CONFIG))
+			logger.log(Logger.CONFIG,"Snooper created");
     }
 
     public void setup() {
@@ -30,10 +31,12 @@ public class Snooper extends Agent {
       addBehaviour(new jade.core.behaviours.CyclicBehaviour() {
 	      
 	      public void action() {
-		  logger.log(Logger.INFO," Trying... ");
+		  if(logger.isLoggable(Logger.INFO))
+		  	logger.log(Logger.INFO," Trying... ");
 		  Object obj = getO2AObject();
 		  if(obj != null) {
-		      logger.log(Logger.INFO," Snooping "+obj);
+		      if(logger.isLoggable(Logger.INFO))
+		      	logger.log(Logger.INFO," Snooping "+obj);
 		      snoop(obj.toString());
 		  } else { 
 		      block();

@@ -52,7 +52,9 @@ public class Receiver extends Agent {
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 	
-	 logger.log(Logger.INFO, "[" + getLocalName() + "] Waiting for a message...");
+	 if(logger.isLoggable(Logger.INFO))
+	 	logger.log(Logger.INFO, "[" + getLocalName() + "] Waiting for a message...");
+	 	
 		addBehaviour(new ReceiverBehaviour(this));
   }
   
@@ -74,7 +76,8 @@ public class Receiver extends Agent {
 			    ContentElement ce = myAgent.getContentManager().extractContent(msg);
 			    if(ce instanceof FatherOf) {
 			    	FatherOf fo = (FatherOf) ce;
-				    logger.log(Logger.INFO,"["+getLocalName()+"] "+fo.getFather().getName()+" is the father of ");
+				    if(logger.isLoggable(Logger.INFO))
+				    	logger.log(Logger.INFO,"["+getLocalName()+"] "+fo.getFather().getName()+" is the father of ");
 				    Iterator it = fo.getChildren().iterator();
 				    while (it.hasNext()) {
 				    	Person p = (Person) it.next();
@@ -84,7 +87,8 @@ public class Receiver extends Agent {
 					}
 				} 
 				catch(Exception e) { 
-					logger.log(Logger.WARNING,"Error in extracting message");
+					if(logger.isLoggable(Logger.WARNING))
+						logger.log(Logger.WARNING,"Error in extracting message");
 					e.printStackTrace(); 
 				}
 			}

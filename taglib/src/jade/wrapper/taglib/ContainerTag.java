@@ -102,7 +102,8 @@ public class ContainerTag extends TagSupport {
 	 synchronized((ServletContext)
 		      pageContext.findAttribute(PageContext.APPLICATION)) {
 	     beanObject = createBean();
-	     logger.log(Logger.INFO," saving container for id "+id+" "+beanObject);
+	     if(logger.isLoggable(Logger.INFO))
+	     	logger.log(Logger.INFO," saving container for id "+id+" "+beanObject);
 	     pageContext.setAttribute(id, beanObject,PageContext.APPLICATION_SCOPE);
 	     setInit(true);
 	 }		
@@ -111,7 +112,8 @@ public class ContainerTag extends TagSupport {
 	
 
     private Object createBean() throws JspException {
-       	logger.log(Logger.INFO,"container jade created");
+       	if(logger.isLoggable(Logger.INFO))
+       		logger.log(Logger.INFO,"container jade created");
 	jade.core.Runtime rt = jade.core.Runtime.instance();
 	Profile p = new ProfileImpl(host,port,id);
 	Object o =  rt.createAgentContainer(p);

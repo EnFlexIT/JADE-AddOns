@@ -38,7 +38,8 @@ public class SampleTask extends OneShotBehaviour {
     private static Logger logger = Logger.getMyLogger(SampleTask.class.getName());
     
     public void action() {
-	logger.log(Logger.INFO,myAgent.getLocalName()+" executed SampleTask");
+	if(logger.isLoggable(Logger.INFO))
+		logger.log(Logger.INFO,myAgent.getLocalName()+" executed SampleTask");
     }
 }
 

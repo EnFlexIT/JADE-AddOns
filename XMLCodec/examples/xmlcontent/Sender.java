@@ -60,7 +60,8 @@ public class Sender extends Agent {
 	public void action() {
 	    try {
 		// Preparing the message
-		logger.log(Logger.INFO, "[" + getLocalName() + "] Creating inform message with content fatherOf(man :name John :address London, [man :name Bill :address Paris])");
+		if(logger.isLoggable(Logger.INFO))
+			logger.log(Logger.INFO, "[" + getLocalName() + "] Creating inform message with content fatherOf(man :name John :address London, [man :name Bill :address Paris])");
 
 		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 		AID receiver = new AID("receiver", false);
@@ -108,10 +109,12 @@ public class Sender extends Agent {
 		System.out.println(msg.getContent());
 
 		// Send the message
-		logger.log(Logger.INFO, "[" + getLocalName() + "] Sending the message...");
+		if(logger.isLoggable(Logger.INFO))
+			logger.log(Logger.INFO, "[" + getLocalName() + "] Sending the message...");
 		send(msg);
 	    } catch(Exception e) { 
-	    	logger.log(Logger.WARNING,"Sender: error in sending message");
+	    	if(logger.isLoggable(Logger.WARNING))
+	    		logger.log(Logger.WARNING,"Sender: error in sending message");
 	    	e.printStackTrace(); }
 
 	    finished = true;
