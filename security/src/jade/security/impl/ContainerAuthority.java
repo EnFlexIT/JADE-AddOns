@@ -114,7 +114,7 @@ public class ContainerAuthority implements Authority {
 		checks.put(AGENT_SEND_AS, new CheckEntry("jade.security.impl.AgentPermission", "send-as"));
 		checks.put(AGENT_RECEIVE_FROM, new CheckEntry("jade.security.impl.AgentPermission", "receive-from"));
 		checks.put(AGENT_MOVE, new CheckEntry("jade.security.impl.AgentPermission", "move"));
-		checks.put(AGENT_COPY, new CheckEntry("jade.security.impl.AgentPermission", "copy"));
+		checks.put(AGENT_CLONE, new CheckEntry("jade.security.impl.AgentPermission", "clone"));
 		
 		checks.put(CONTAINER_CREATE, new CheckEntry("jade.security.impl.ContainerPermission", "create"));
 		checks.put(CONTAINER_KILL, new CheckEntry("jade.security.impl.ContainerPermission", "kill"));
@@ -122,8 +122,8 @@ public class ContainerAuthority implements Authority {
 		checks.put(CONTAINER_KILL_IN, new CheckEntry("jade.security.impl.ContainerPermission", "kill-in"));
 		checks.put(CONTAINER_MOVE_FROM, new CheckEntry("jade.security.impl.ContainerPermission", "move-from"));
 		checks.put(CONTAINER_MOVE_TO, new CheckEntry("jade.security.impl.ContainerPermission", "move-to"));
-		checks.put(CONTAINER_COPY_FROM, new CheckEntry("jade.security.impl.ContainerPermission", "copy-from"));
-		checks.put(CONTAINER_COPY_TO, new CheckEntry("jade.security.impl.ContainerPermission", "copy-to"));
+		checks.put(CONTAINER_CLONE_FROM, new CheckEntry("jade.security.impl.ContainerPermission", "clone-from"));
+		checks.put(CONTAINER_CLONE_TO, new CheckEntry("jade.security.impl.ContainerPermission", "clone-to"));
 		
 		checks.put(PLATFORM_CREATE, new CheckEntry("jade.security.impl.PlatformPermission", "create"));
 		checks.put(PLATFORM_KILL, new CheckEntry("jade.security.impl.PlatformPermission", "kill"));
@@ -249,12 +249,14 @@ public class ContainerAuthority implements Authority {
 		if (ce != null) {
 			p = createPermission(ce.getType(), target.getName(), ce.getActions());
 			try {
-				//System.out.println("Checking " + action + " on " + target);
+				//System.out.println("permission: "+p);
 				if (certs != null) {
+				//System.out.println("Checking (with certs)" + action + " on " + target);
 					CheckAction ca = new CheckAction(p);
 					doAsPrivileged(ca, certs);
 				}
 				else
+					//System.out.println("Checking " + action + " on " + target);
 					AccessController.checkPermission(p);
 				//System.out.println("ok");
 			}
