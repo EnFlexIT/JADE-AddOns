@@ -213,7 +213,7 @@ public class PlatformAuthority extends ContainerAuthority {
 			
 			Signature sign = Signature.getInstance("DSA");
 			sign.initSign(privateKey);
-			sign.update(certificate.encode().getBytes());
+			sign.update(certificate.getEncoded());
 			byte[] signature = sign.sign();
 			
 			certificate.setSignature(signature);

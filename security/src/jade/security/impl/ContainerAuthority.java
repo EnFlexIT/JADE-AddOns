@@ -176,7 +176,7 @@ public class ContainerAuthority implements Authority {
 			byte[] signBytes = ((BasicCertificateImpl)certificate).getSignature();
 			// We have to delete signature, first
 			((BasicCertificateImpl)certificate).setSignature(null);
-			byte[] certBytes = certificate.encode().getBytes();
+			byte[] certBytes = certificate.getEncoded();
 			// Now we can put signature back in its place
 			((BasicCertificateImpl)certificate).setSignature(signBytes);
 			if (signBytes == null)
@@ -281,6 +281,14 @@ public class ContainerAuthority implements Authority {
 
 	public DelegationCertificate createDelegationCertificate() {
 		return new DelegationCertificateImpl();
+	}
+
+	public DelegationCertificate createDelegationCertificate(byte[] encoded) throws jade.security.CertificateException {
+		return new DelegationCertificateImpl(encoded);
+	}
+
+	public DelegationCertificate createDelegationCertificate(String encoded) throws jade.security.CertificateException {
+		return new DelegationCertificateImpl(encoded);
 	}
 
 	PermissionCollection collectPermissions(CertificateFolder certs) {

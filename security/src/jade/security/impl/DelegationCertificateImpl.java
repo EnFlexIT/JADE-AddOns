@@ -36,4 +36,11 @@ public class DelegationCertificateImpl extends BasicCertificateImpl implements D
 	public DelegationCertificateImpl() {
 	}
 
+	public DelegationCertificateImpl(byte[] encoded) throws CertificateException  {
+		super(encoded);
+	}
+
+	public DelegationCertificateImpl(String encoded) throws CertificateException  {
+		super(encoded);
+	}
 }

@@ -53,6 +53,32 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 	public BasicCertificateImpl() {
 	}
 
+	public BasicCertificateImpl(byte[] encoded) throws CertificateException {
+		String[] lines = new String(encoded).split("\n");
+
+		setSubject(decodePrincipal(lines[0]));
+		setNotBefore(decodeDate(lines[1]));
+		setNotAfter(decodeDate(lines[2]));
+		setSignature(decodeBytes(lines[3]));
+
+		for (int i = 4; i < lines.length; i++) {
+			addPermission(decodePermission(lines[i]));
+		}
+	}
+
+	public BasicCertificateImpl(String encoded) throws CertificateException {
+		String[] lines = encoded.split("\n");
+
+		setSubject(decodePrincipal(lines[0]));
+		setNotBefore(decodeDate(lines[1]));
+		setNotAfter(decodeDate(lines[2]));
+		setSignature(decodeBytes(lines[3]));
+
+		for (int i = 4; i < lines.length; i++) {
+			addPermission(decodePermission(lines[i]));
+		}
+	}
+
 	public void setSubject(JADEPrincipal subject) {
 		this.subject = subject;
 	}
@@ -122,12 +148,17 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		return permissions;
 	}
 	
-	public String encode() {
+	public byte[] getEncoded() throws CertificateEncodingException {
+		return toString().getBytes();
+	}
+
+	public String toString() {
 		StringBuffer str = new StringBuffer();
 
 		str.append(encodePrincipal(subject)).append('\n');
 		str.append(encodeDate(notBefore)).append('\n');
 		str.append(encodeDate(notAfter)).append('\n');
+		str.append(encodeBytes(signature)).append('\n');
 
 		for (Iterator i = getPermissions().iterator(); i.hasNext(); ) {
 			Permission p = (Permission)i.next();
@@ -135,22 +166,6 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		}
 
 		return str.toString();
-	}
-
-	public String toString() {
-		return encode();
-	}
-	
-	public void decode(String encoded) {
-		String[] lines = encoded.split("\n");
-
-		setSubject(decodePrincipal(lines[0]));
-		setNotBefore(decodeDate(lines[1]));
-		setNotAfter(decodeDate(lines[2]));
-
-		for (int i = 3; i < lines.length; i++) {
-			addPermission(decodePermission(lines[i]));
-		}
 	}
 	
 	public String encodeDate(Date d) {
