@@ -356,7 +356,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
        @param msg The ACL message to encode.
        @return a byte array, containing the encoded message.
     */
-    public byte[] encode(ACLMessage msg) {       
+    public byte[] encode(ACLMessage msg, String charset) {       
 	StringBuffer sb=new StringBuffer("<");
 	sb.append(FIPA_MESSAGE_TAG);
 	sb.append(" ");
@@ -547,7 +547,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
        raw data.
        @exception CodecException If some kind of syntax error occurs.
     */
-    public ACLMessage decode(byte[] data) throws CodecException {
+    public ACLMessage decode(byte[] data, String charset) throws CodecException {
 	try {
 	    parser.parse(new InputSource(new ByteArrayInputStream(data)));
 	    checkBase64Encoding();
