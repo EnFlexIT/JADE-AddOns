@@ -50,35 +50,46 @@ public class ContainerAuthority extends DummyAuthority {
 	/**
 		The public key for verifying certificates.
 	*/
-	PublicKey publicKey;
+	PublicKey publicKey = null;
 	
 	public void init(Profile profile, MainContainer platform) {
-		byte[] bytes = null;
 		try {
-			bytes = platform.getPublicKey();
-			X509EncodedKeySpec keyspec = new X509EncodedKeySpec(bytes);
-			KeyFactory keyFactory = KeyFactory.getInstance("DSA");
-			publicKey = keyFactory.generatePublic(keyspec);
+			byte[] bytes = platform.getPublicKey();
+			if (bytes != null) {
+				X509EncodedKeySpec keyspec = new X509EncodedKeySpec(bytes);
+				KeyFactory keyFactory = KeyFactory.getInstance("DSA");
+				publicKey = keyFactory.generatePublic(keyspec);
+			}
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void verify(IdentityCertificate cert) throws AuthException {
-		verify((BasicCertificateImpl)cert);
+	public byte[] getPublicKey() {
+		if (publicKey == null)
+			return null;
+			
+		return publicKey.getEncoded();
 	}
 	
-	public void verify(DelegationCertificate cert) throws AuthException {
-		verify((BasicCertificateImpl)cert);
-	}
-	
-	public void verify(BasicCertificateImpl cert) throws AuthException {
+	public void verify(JADECertificate certificate) throws AuthException {
+		if (publicKey == null)
+			return;
+
+		if (certificate == null)
+			throw new AuthException("null certificate");
+
+		if (! (certificate instanceof BasicCertificateImpl))
+			throw new AuthException("unknown certificate class");
+
 		try {
-			if (cert == null)
-				throw new AuthException("null certificate");
-			byte[] certBytes = cert.encode().getBytes();
-			byte[] signBytes = cert.getSignature();
+			byte[] signBytes = ((BasicCertificateImpl)certificate).getSignature();
+			// we have to delete signature, first
+			((BasicCertificateImpl)certificate).setSignature(null);
+			byte[] certBytes = certificate.encode().getBytes();
+			// now we can put signature back to its place
+			((BasicCertificateImpl)certificate).setSignature(signBytes);
 			if (signBytes == null)
 				throw new AuthException("null signature");
 			
@@ -95,7 +106,10 @@ public class ContainerAuthority extends DummyAuthority {
 			e2.printStackTrace();
 		}
 		catch (SignatureException e3) {
-			e3.printStackTrace();
+			throw new AuthException(e3.getMessage());
+		}
+		catch (ClassCastException e4) {
+			throw new AuthException(e4.getMessage());
 		}
 	}
 	
@@ -118,12 +132,24 @@ public class ContainerAuthority extends DummyAuthority {
 	}
 
 	public void checkAction(String action, JADEPrincipal target, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
-		if (!action.startsWith("agent-"))
-			return;
+		Permission p= null;
+		if (action.startsWith("ams-")) {
+			p = createPermission("jade.security.impl.AmsPermission", target.getName(), action.substring(4, action.length()));
+		}
+		if (action.startsWith("agent-")) {
+			p = createPermission("jade.security.impl.AgentPermission", target.getName(), action.substring(6, action.length()));
+		}
+		else if (action.startsWith("container-")) {
+			p = createPermission("jade.security.impl.ContainerPermission", target.getName(), action.substring(10, action.length()));
+		}
+		else if (action.startsWith("platform-")) {
+			p = createPermission("jade.security.impl.PlatformPermission", target.getName(), action.substring(9, action.length()));
+		}
+		else if (action.startsWith("authority-")) {
+			p = createPermission("jade.security.impl.AuthorityPermission", target.getName(), action.substring(10, action.length()));
+		}
 		PermissionCollection perms = collectPermissions(delegations);
-		String type = "jade.security.impl.AgentPermission";
-		Permission p = createPermission(type, target.getName(), action.substring(6, action.length()));
-		if (!perms.implies(p))
+		if (p != null && !perms.implies(p))
 			throw new AuthException(action);
 	}
 

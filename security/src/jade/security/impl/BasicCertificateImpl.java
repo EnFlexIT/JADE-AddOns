@@ -73,6 +73,10 @@ public class BasicCertificateImpl {
 	public byte[] getSignature() { return signature; }
 	
 	public void addPermission(Object permission) { permissions.add(permission); }
+	public void addPermissions(List permissions) {
+		for (Iterator i = permissions.iterator(); i.hasNext(); )
+			this.permissions.add(i.next());
+	}
 	public List getPermissions() { return permissions; }
 	
 	public String encode() {
@@ -165,7 +169,7 @@ public class BasicCertificateImpl {
 		if (splitted.length > 1)
 			name = splitted[1];
 		if (splitted.length > 2)
-			actions = splitted[2];
+			actions = s.substring(type.length() + name.length() + 2, s.length()); //!!! splitted[2];
 
 		return createPermission(type, name, actions);
 	}

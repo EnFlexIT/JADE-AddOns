@@ -26,22 +26,21 @@ package jade.security.impl;
 import jade.security.*;
 
 
-public class ContainerPermission extends AuthPermission {
+public class AmsPermission extends AuthPermission implements java.security.Guard, java.io.Serializable {
 	
 	private final static String[] allActions = new String[] {
-			"create", "kill", "create-in", "kill-in",
-			"move-from", "move-to", "copy-from", "copy-to"};
+			"register", "deregister", "modify"};
 
 	public String[] getAllActions() {
 		return allActions;
 	}
 
 	/**
-		Creates a new ContainerPermission.
+		Creates a new AgentPermission.
 		@param name The name of the permission.
 		@param actions The actions of the permission.
 	*/
-	public ContainerPermission(String name, String actions) {
+	public AmsPermission(String name, String actions) {
 		super(name, actions);
 	}
 }

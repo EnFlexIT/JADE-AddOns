@@ -61,18 +61,20 @@ public class PlatformAuthority extends ContainerAuthority {
 	String passwdFile;
 	Vector users = null;
 	
-	PrivateKey privateKey;
+	PrivateKey privateKey = null;
 	
 	public void init(Profile profile, MainContainer platform) {
-		try {
-			KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA");
-			kpg.initialize(1024);
-			KeyPair kp = kpg.generateKeyPair();
-			privateKey = kp.getPrivate();
-			publicKey = kp.getPublic();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
+		if (System.getProperty("jade.security.nosign") == null) {
+			try {
+				KeyPairGenerator kpg = KeyPairGenerator.getInstance("DSA");
+				kpg.initialize(1024);
+				KeyPair kp = kpg.generateKeyPair();
+				privateKey = kp.getPrivate();
+				publicKey = kp.getPublic();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		if (profile != null) {
@@ -99,40 +101,34 @@ public class PlatformAuthority extends ContainerAuthority {
 		serial = 1;
 	}
 	
-	public byte[] getPublicKey() {
-		if (publicKey == null)
-			return null;
-		else
-			return publicKey.getEncoded();
-	}
-	
-	public void sign(IdentityCertificate cert, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
-		sign((BasicCertificateImpl)cert);
-	}
-
-	public void sign(DelegationCertificate cert, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+	public void sign(JADECertificate certificate, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
+		if (! (certificate instanceof BasicCertificateImpl))
+			throw new AuthException("unknown certificate class");
 		if (identity == null)
-			throw new AuthException("identity == null");
+			throw new AuthException("null identity");
 		
 		verify(identity);
 		for (int d = 0; d < delegations.length; d++) {
-			if (!((PrincipalImpl)identity.getSubject()).implies((PrincipalImpl)delegations[d].getSubject())) {
-				AuthException e = new AuthException("delegation.subject != identity.subject");
-				e.printStackTrace();
-				throw e;
-			}
+			if (! ((PrincipalImpl)identity.getSubject()).implies((PrincipalImpl)delegations[d].getSubject()))
+				throw new AuthException("delegation-subject doesn't match identity-subject");
 			verify(delegations[d]);
 		}
 		
-		PermissionCollection perms = collectPermissions(delegations);
-		for (Iterator i = cert.getPermissions().iterator(); i.hasNext(); )
-			if (!perms.implies((Permission)i.next()))
-				throw new AuthException("trying to delegate not owned permissions");
-
-		sign((BasicCertificateImpl)cert);
+		if (certificate instanceof DelegationCertificate) {
+			checkAction(AUTHORITY_SIGN_DC, certificate.getSubject(), identity, delegations);
+			PermissionCollection perms = collectPermissions(delegations);
+			for (Iterator i = ((DelegationCertificate)certificate).getPermissions().iterator(); i.hasNext(); )
+				if (!perms.implies((Permission)i.next()))
+					throw new AuthException("trying to delegate not owned permissions");
+		}
+		else if (certificate instanceof IdentityCertificate) {
+			checkAction(AUTHORITY_SIGN_IC, certificate.getSubject(), identity, delegations);
+		}
+		
+		sign((BasicCertificateImpl)certificate);
 	}
 
-	public void authenticateUser(IdentityCertificate identity, DelegationCertificate delegation, byte[] passwd) throws AuthException {
+	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] passwd) throws AuthException {
 		JADEPrincipal principal = identity.getSubject();
 		UserPrincipal user = null;
 		if (principal instanceof AgentPrincipal)
@@ -177,19 +173,20 @@ public class PlatformAuthority extends ContainerAuthority {
 		throw new AuthenticationException("Unknown user");
 	}
 	
-	private void sign(BasicCertificateImpl cert) {
+	private void sign(BasicCertificateImpl certificate) {
 		if (publicKey == null)
 			return;
+		
 		try {
-			cert.setIssuer(new PrincipalImpl(getName()));
-			cert.setSerial(serial++);
+			certificate.setIssuer(new PrincipalImpl(getName()));
+			certificate.setSerial(serial++);
 			
 			Signature sign = Signature.getInstance("DSA");
 			sign.initSign(privateKey);
-			sign.update(cert.encode().getBytes());
+			sign.update(certificate.encode().getBytes());
 			byte[] signature = sign.sign();
 			
-			cert.setSignature(signature);
+			certificate.setSignature(signature);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
