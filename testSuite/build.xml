@@ -39,7 +39,7 @@
   <target name="compile" depends="init" description="compile the tests">
   	
   	<!-- Compile the java code source files -->
-  	<javac srcdir="src" 
+  	<javac srcdir="add-ons\testSuite\src" 
   	       destdir="classes" 
   	       optimize="on" 
   	       deprecation="off">
@@ -55,184 +55,24 @@
     
     <!-- Copy images -->
     <copy todir="classes/test/common/testSuite/gui/images">
-      <fileset dir="src/test/common/testSuite/gui/images"/>
+      <fileset dir="add-ons/testSuite/src/test/common/testSuite/gui/images"/>
     </copy> 
     
     <!-- Copy xml configuration files -->
-    <copy todir="classes" >
-     <fileset dir="src" includes="**/*.xml **/*.dtd **/**/*.xml **/**/*.dtd **/**/**/*.xml **/**/**/*.dtd **/**/**/**/*.xml **/**/**/**/*.dtd"/>
-     <fileset dir="src" includes="**/*.properties **/**/*.properties **/**/**/*.properties **/**/**/**/*.properties"/>
+    <copy todir="classes/test" >
+     <fileset dir="add-ons/testSuite/" includes="testerList.xml"/>
     </copy>
   </target>
 
 
   <!--  __________________________________________________
-                            lib
-        __________________________________________________ -->
-  <target name="lib" depends="compile" 
-          description="Create a jar file including all Jade tests and the necessary examples">
-  	<delete file="src/test/jadeTestSuite.jar" quiet="true"/>
-		<jar jarfile="src/test/jadeTestSuite.jar">
-			<fileset dir="classes">
-				<include name="**/test/**"/>
-				<include name="**/examples/mobile/**"/>
-				<include name="**/examples/content/**"/>
-				<include name="**/examples/thanksAgent/**"/>
-  			<exclude name="**/test/mobility/separate/**"/>
-  			<exclude name="**/test/leap/midp/**"/>
-			</fileset>
-		</jar>
-	</target>
-
-	
-  <!--  __________________________________________________
-                            separate
-        __________________________________________________ -->
-  <target name="separate" depends="init" 
-          description="Compile files that must be in a separate classpath for mobility tests">
-  	<echo>NOTE that this target should be executed setting JAVA_HOME to jdk1.3 or earlier versions of Java to avoid problems when testing mobility on a PJAVA container
-  	</echo>
-  	
-  	       <!--
-	         compiler="javac1.1"
-	         -->
-  	<javac srcdir="src/test" 
-  	       destdir="classes" 
-  	       includes="**/mobility/separate/**"
-  	       target="1.2"
-	         optimize="on"
-  	       deprecation="off">
-  	  <classpath refid="project.class.path"/>
-    </javac> 
-  	<delete file="src/test/separate.jar" quiet="true"/>
-  	<delete file="src/test/separate-behaviours.jar" quiet="true"/>
-		<jar jarfile="src/test/separate.jar">
-			<fileset dir="classes">
-  			<include name="**/test/mobility/separate/**"/>
-  			<exclude name="**/test/mobility/separate/behaviours/**"/>
-			</fileset>
-		</jar>
-		<jar jarfile="src/test/separate-behaviours.jar">
-			<fileset dir="classes">
-  			<include name="**/test/mobility/separate/behaviours/**"/>
-			</fileset>
-		</jar>
-		
-		<delete dir = "classes/test/mobility/separate"/>
-	</target>
-	
-  <!--  __________________________________________________
-                            leap
-        __________________________________________________ -->
-  <target name="leap" depends="init" 
-          description="Compile files to be executed in a MIDP environment">
-  	
-  <property file="add-ons/leap/buildLEAP.properties"/>
-  <property name="leap-home" value="add-ons/leap" />
-  <property name="leapmidp" value="${leap-home}/midp/lib/JadeLeap.jar" />
-  <property name="unverified" value="src/test/unverified" />
-  <property name="verified" value="src/test/verified" />
-  <property name="minimized" value="src/test/minimized" />
-  <property name="dlc-file" value="src/test/testleap.dlc" />
-  <property name="tmp-jar-file" value="src/test/testleap-tmp.jar" />
-  <property name="manifest-file" value="src/test/testleap.manifest" />
-  <property name="jar-file" value="src/test/testleap.jar" />
-  <property name="jad-file" value="src/test/testleap.jad" />
-
-  
-  <condition property="boot-midp-classes" 
-             value="${j2me-wtk-home}/lib/midpapi.zip;${j2me-wtk-home}/lib/wma.zip">
-    <available file="${j2me-wtk-home}/lib/midpapi.zip"/>
-  </condition>
-  <condition property="boot-midp-classes" 
-             value="${j2me-wtk-home}/lib/midpapi10.jar${path.separator}${j2me-wtk-home}/lib/cldcapi10.jar">
-    <not><available file="${j2me-wtk-home}/lib/midpapi.zip"/></not>
-  </condition>
-
-
- 	 <!-- Preverifier -->
-	 <taskdef  name="preverify" classname="com.stampysoft.ant.j2me.PreverifyTask">
-  	<classpath path ="${leap-home}/resources/antTasks/StampysoftAntTasks.jar" />
-	 </taskdef>
-   <property name="j2mewtk.home" value="${j2me-wtk-home}"/>
-	 <!-- Minimizer -->
-	 <taskdef name = "minimize"    classname="leapTools.Minimizer">
-		<classpath path ="${leap-home}/resources/antTasks/leapTools.jar"/>
-	 </taskdef>
-   <!-- Jad Updater -->
-   <taskdef name="updatejad" classname="com.stampysoft.ant.j2me.UpdateJARSizeTask">
-	  <classpath path ="${leap-home}/resources/antTasks/StampysoftAntTasks.jar" />
-	  </taskdef>  
-
-		<mkdir dir = "${verified}"/>
-		<mkdir dir = "${unverified}"/>
-		<mkdir dir = "${minimized}"/>
-		
-		<!-- Compile -->
-    <echo>Bootclasspath: ${boot-midp-classes}</echo>
-    <javac srcdir="src/test" 
-  	       includes="**/leap/midp/**"
-           destdir="${unverified}" 
-           classpath="${leapmidp}" 
-		       debug="${debug-build}"
-		       optimize="${optimised-build}"
-		       deprecation="on"
-		       bootclasspath="${boot-midp-classes}"
-		       target="1.1"/>
-
-  	       
-		<!-- Unjar JADE-LEAP -->
-    <unjar src="${leapmidp}" dest="${unverified}" />
-    
-		<!-- Preverify the whole -->
-		<preverify unverified="${unverified}" verified="${verified}"/>
-		           
-  	<!-- Detect all classes that are referenced starting from the testleap.dlc file --> 
-		<java classname="leapTools.Package" fork="true">
-			<classpath>
-				<pathelement location="${leap-home}/resources/antTasks/packagingtool.jar"/>
-				<pathelement location="${boot-midp-classes}"/>
-				<pathelement location="${verified}"/>
-			</classpath>
-			<arg line="-d ${tmp-jar-file} -f ${dlc-file} -e -s"/>
-		</java>
-		
-    <!-- Minimize (Remove from verified all .class files that are not in minimized) -->
-    <unjar src="${tmp-jar-file}" dest="${minimized}" />
-		<minimize basedir="${verified}" checkdir="${minimized}" verbose="false"/>
-    
-		<!-- Update the manifest -->
-		<manifest file="${manifest-file}" mode="update">
-			<attribute name="MicroEdition-Profile" value="MIDP-${midp-version}"/>
-		</manifest>
-   
-		<!-- Create the JAR -->
-  	<delete file="${jar-file}" quiet="true"/>
-		<jar jarfile="${jar-file}" basedir="${verified}" manifest="${manifest-file}"/>
-		
-		<!-- Delete temporary things -->
-		<delete dir = "${verified}"/>
-		<delete dir = "${unverified}"/>
-		<delete dir = "${minimized}"/>
-		<delete file = "${tmp-jar-file}"/>
-		
-		<!-- Update the JAD -->
-		<copy file="${manifest-file}" toFile="${jad-file}" overWrite="yes"/>
-		<manifest file="${jad-file}" mode="update">
-			<attribute name="MIDlet-Jar-URL" value="testleap.jar"/>
-		</manifest>
-		<updatejad jad="${jad-file}" />
-	</target>
-	
-  <!--  __________________________________________________
                             clean
         __________________________________________________ -->
   <target name="clean" description="clean up">
-    <!-- Delete the ${build} directory tree -->
+    <!-- Delete the classes/test directory tree -->
     <delete includeEmptyDirs="true">
       <fileset dir="classes/test"/>
     </delete>
-    <delete file="lib/jadeTestSuite.jar"/>
   </target>
 
 
@@ -243,19 +83,10 @@
   <target name="run" description="run the test suite" depends="compile">
    <java classname="test.common.testSuite.TestSuiteAgent" fork="true">
   	  <classpath refid="project.class.path"/>
+      <!-- arg value="testerList.xml"/-->
    </java>
   </target>
 
-
-  <!--  __________________________________________________
-                            runAutomatic
-        __________________________________________________ -->
-  <target name="runAutomatic" description="run immediately and automatically the test suite" depends="compile, separate">
-   <java classname="test.common.testSuite.TestSuiteAgent" fork="true">
-      <sysproperty key="test.common.testSuite.TestSuiteAgent.runAutomatic" value="true"/>
-  	  <classpath refid="project.class.path"/>
-   </java>
-  </target>
 
   <!--  __________________________________________________
                             dist
@@ -264,17 +95,16 @@
    <echo message="REMIND TO PUT IN THIS DIRECTORY THE PDF FILE JADE_TestSuite.pdf"/>
    <mkdir dir="doc"/>
    <mkdir dir="doc/tutorials"/>
-   <copy file="src/test/JADE_TestSuite.pdf" todir="doc/tutorials"/>
-   <copy file="src/test/testerListDist.xml" tofile="src/test/testerList.xml" overwrite="true"/>
+   <copy file="add-ons/testSuite/JADE_TestSuite.pdf" todir="doc/tutorials"/>
    <jar jarfile="../JADE-testSuite-${version}.zip">
-      <fileset dir=".." includes="jade/src/test/COPYING"/>
-      <fileset dir=".." includes="jade/src/test/ChangeLog"/>
-      <fileset dir=".." includes="jade/src/test/License"/>
-      <fileset dir=".." includes="jade/src/test/build.xml"/>
-      <fileset dir=".." includes="jade/src/test/testerList.xml"/>
+      <fileset dir=".." includes="jade/add-ons/testSuite/COPYING"/>
+      <fileset dir=".." includes="jade/add-ons/testSuite/ChangeLog"/>
+      <fileset dir=".." includes="jade/add-ons/testSuite/License"/>
+      <fileset dir=".." includes="jade/add-ons/testSuite/build.xml"/>
+      <fileset dir=".." includes="jade/add-ons/testSuite/testerList.xml"/>
       <fileset dir=".." includes="jade/doc/tutorials/JADE_TestSuite.pdf"/>
-      <fileset dir=".." includes="jade/src/test/common/**"/>
-      <fileset dir=".." includes="jade/src/test/interPlatform/**"/>
+      <fileset dir=".." includes="jade/add-ons/testSuite/src/test/common/**"/>
+      <fileset dir=".." includes="jade/add-ons/testSuite/src/test/interPlatform/**"/>
    </jar>
   </target>
 
