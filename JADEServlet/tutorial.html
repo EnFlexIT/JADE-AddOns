@@ -566,7 +566,7 @@ header to reflect the configuration of your system.</span> <span
  lang="EN-US" style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">You
 should also place a copy of the libraries of JADE in the "shared/lib"
 of JWSDP; you cannot simply include them in the WAR file of the
-application because some classes won&#8217;t be found by the class loader.</span><small><span
+application because some classes won&#8217;t be found by the class loader. It is important to notice that for this reason, <b>no</b> class file is included in the WAR file; <b>every</b> classes are in the JAR file which is directly copied to the shared/lib.</span><small><span
  lang="EN-US"> (*)</span></small><br>
 <span lang="EN-US">&nbsp;<span style="font-weight: bold;">T</span>hen
 you can run the example by following this script:</span> <br>
