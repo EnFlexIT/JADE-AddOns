@@ -1,6 +1,6 @@
 # Makefile for JADE project
 
-VERSION    = 2.1
+VERSION    = 2.4
 PACKAGE    = XML-ACL
 
 ZIP = jar
@@ -19,9 +19,10 @@ JADESRCDIR=$(ROOTDIR)/../../src
 JADECLSDIR  = $(ROOTDIR)/../../classes
 JADELIBDIR  = $(ROOTDIR)/../../lib
 LIBJADE = $(JADELIBDIR)/jade.jar
+LIBBASE64 = $(JADELIBDIR)/Base64.jar
 LIBXANAME = xmlacl.jar
 LIBSAX2 = $(LIBDIR)/sax2/sax2.jar
-MAKE = make
+MAKE = gmake
 
 JC = javac
 
@@ -36,6 +37,7 @@ export ROOTDIR
 export CLSDIR
 export JADECLSDIR
 export LIBJADE
+export LIBBASE64
 export LIBSAX2
 
 # The following targets are not file names
@@ -46,7 +48,7 @@ XAROOT = 	jamr/jadeacl/xml/XMLACLCodec.java
 all: 
 	@echo Building XML-ACL sources
 	cd $(SRCDIR) ; \
-	$(JC) -classpath $(JADECLSDIR):$(LIBJADE):$(LIBSAX2) $(JFLAGS) $(XAROOT) ; \
+	$(JC) -classpath $(JADECLSDIR):$(LIBJADE):$(LIBBASE64):$(LIBSAX2) $(JFLAGS) $(XAROOT) ; \
 	cd $(ROOTDIR)
 	@echo XML-ACL sources built
 
@@ -75,7 +77,7 @@ batch:
 	echo >> $(BATCH_XA)
 	echo 'cd src' >> $(BATCH_XA)
 	echo >> $(BATCH_XA)
-	echo '$(JC) -classpath $(subst /,\,$(subst $(ROOTDIR),..,$(LIBJADE);$(LIBSAX2);$(JADECLSDIR))) $(subst /,\,$(subst $(ROOTDIR),..,$(JFLAGS))) $(subst /,\,$(XAROOT))' >> $(BATCH_XA)
+	echo '$(JC) -classpath $(subst /,\,$(subst $(ROOTDIR),..,$(LIBJADE);$(LIBBASE64);$(LIBSAX2);$(JADECLSDIR))) $(subst /,\,$(subst $(ROOTDIR),..,$(JFLAGS))) $(subst /,\,$(XAROOT))' >> $(BATCH_XA)
 	echo >> $(BATCH_XA)
 	echo 'cd ..' >> $(BATCH_XA)
 	echo '@REM ===============================================================' > $(BATCH_XALIB)

@@ -31,6 +31,7 @@ package jamr.jadeacl.xml;
    defined in FIPA spec 00071 and JADE's ACLMessage object.
 
    @author Ion Constantinescu - EPFL
+   @author Fabio Bellifemine - CSELT S.p.A.
    @version $Date$ $Revision$
 
  */
@@ -41,6 +42,7 @@ import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.FileReader;
+import java.util.Date;
 
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
@@ -48,7 +50,13 @@ import org.xml.sax.helpers.*;
 import jade.lang.acl.ACLCodec;
 import jade.lang.acl.ACLMessage;
 import jade.core.AID;
+
 import jade.lang.acl.ACLCodec.CodecException;
+import jade.core.CaseInsensitiveString;
+
+import starlight.util.Base64;
+
+import jade.lang.acl.ISO8601;
 
 public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 
@@ -65,9 +73,15 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 	}
     }
 
-    public static final String ACL_REPRESENTATION_NAME = jade.domain.FIPANames.ACLCodec.XML; 
+    /** Key of the user-defined parameter used to signal the automatic JADE
+	conversion of the content into Base64 encoding  **/
+    private static final String BASE64ENCODING_KEY = new String("X-JADE-Encoding");
+    /** Value of the user-defined parameter used to signal the automatic JADE
+	conversion of the content into Base64 encoding  **/
+    private static final String BASE64ENCODING_VALUE = new String("Base64");
 
 
+    public static final String ACL_REPRESENTATION_NAME = "fipa.acl.rep.xml.std"; 
 
     public static final String HREF_ATTR="href";
     
@@ -155,79 +169,68 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 		throw new SAXException("Could not create fipa message with empty communicative act !");
 	    }
 		    
-	    msg=new ACLMessage(ACLMessage.getAllPerformatives().indexOf(tmp.toUpperCase()));
+	    msg=new ACLMessage(ACLMessage.getInteger(tmp.toUpperCase()));
 	    
 	    stack.clear();
 	}
 	
 	if( localName.equalsIgnoreCase(SENDER_TAG) ||
-		localName.equalsIgnoreCase(RECEIVER_TAG) ||
-		localName.equalsIgnoreCase(REPLY_TO_TAG) ||
-		localName.equalsIgnoreCase(RESOLVERS_TAG) ) {
-		current=new AID("");
-		stack.addElement(current);
-	    }
-
-	    if( localName.equalsIgnoreCase(NAME_TAG) ){
-		tmp=getValueByLocalName(attributes,ID_ATTR);
-		if( tmp != null ) {
-		    ((AID)current).setName(tmp);
-		} else {
-		    throw new SAXException("Empty name value not allowed !");
-		}
-	    }
-
-	    if( localName.equalsIgnoreCase(URL_TAG) ){
-		tmp=getValueByLocalName(attributes,HREF_ATTR);
-		if( tmp != null ) {
-		    ((AID)current).addAddresses(tmp);
-		} else {
-		    throw new SAXException("Empty url value not allowed !");
-		}
-	    }
-
-	    if( localName.equalsIgnoreCase(REPLY_BY_TAG) ) {
-		tmp=getValueByLocalName(attributes,TIME_ATTR);
-		
-		if( (tmp != null) && (!tmp.equals("")) ) {
-		    msg.setReplyBy(tmp);
-		} else {
-		    throw new SAXException("Empty reply by value not allowed !");
-		}
-	    }
-	
-	    tmp=getValueByLocalName(attributes,HREF_ATTR);
-
+	    localName.equalsIgnoreCase(RECEIVER_TAG) ||
+	    localName.equalsIgnoreCase(REPLY_TO_TAG) ||
+	    localName.equalsIgnoreCase(RESOLVERS_TAG) ) {
+	    current=new AID();
+	    stack.addElement(current);
+	} else if( localName.equalsIgnoreCase(NAME_TAG) ){
+	    tmp=getValueByLocalName(attributes,ID_ATTR);
 	    if( tmp != null ) {
-		if( localName.equalsIgnoreCase(CONTENT_TAG) ) {
-		    msg.setContent(tmp);
-		} else if( localName.equalsIgnoreCase(LANGUAGE_TAG) ) {
-		    msg.setLanguage(tmp);
-		} else if( localName.equalsIgnoreCase(CONTENT_LANGUAGE_ENCODING_TAG) ) {
-		    msg.setEncoding(tmp);
-		} else if( localName.equalsIgnoreCase(ONTOLOGY_TAG) ) {
-		    msg.setOntology(tmp);
-		} else if( localName.equalsIgnoreCase(PROTOCOL_TAG) ) {
-		    msg.setProtocol(tmp);
-		} else if( localName.equalsIgnoreCase(REPLY_WITH_TAG) ) {
-		    msg.setReplyWith(tmp);
-		} else if( localName.equalsIgnoreCase(IN_REPLY_TO_TAG) ) {
-		    msg.setInReplyTo(tmp);
-		} else if( localName.equalsIgnoreCase(CONVERSATION_ID_TAG) ) {
-		    msg.setConversationId(tmp);
+		((AID)current).setName(tmp);
+	    } else {
+		throw new SAXException("Empty name value not allowed !");
+	    }
+	} else if( localName.equalsIgnoreCase(URL_TAG) ){
+	    tmp=getValueByLocalName(attributes,HREF_ATTR);
+	    if( tmp != null ) {
+		((AID)current).addAddresses(tmp);
+	    } else {
+		throw new SAXException("Empty url value not allowed !");
+	    }
+	} else if( localName.equalsIgnoreCase(REPLY_BY_TAG) ) {
+	    tmp=getValueByLocalName(attributes,TIME_ATTR);
+		
+	    if( (tmp != null) && (!tmp.equals("")) ) {
+		try {
+		    msg.setReplyByDate(ISO8601.toDate(tmp));
+		} catch( Exception exc ) {
+		    exc.printStackTrace();
 		}
 	    } else {
-		if( localName.equalsIgnoreCase(CONTENT_TAG) ||
-		    localName.equalsIgnoreCase(LANGUAGE_TAG) ||
-		    localName.equalsIgnoreCase(CONTENT_LANGUAGE_ENCODING_TAG) ||
-		    localName.equalsIgnoreCase(ONTOLOGY_TAG) ||
-		    localName.equalsIgnoreCase(PROTOCOL_TAG) ||
-		    localName.equalsIgnoreCase(REPLY_WITH_TAG) ||
-		    localName.equalsIgnoreCase(IN_REPLY_TO_TAG) ||
-		    localName.equalsIgnoreCase(CONVERSATION_ID_TAG) ) {
-		    pcdata_accumulate=true;
-		}
+		throw new SAXException("Empty reply by value not allowed !");
 	    }
+	}
+	
+	tmp=getValueByLocalName(attributes,HREF_ATTR);
+
+	if( tmp != null ) {
+	    if( localName.equalsIgnoreCase(CONTENT_TAG) ) {
+		msg.setContent(tmp);
+	    } else if( localName.equalsIgnoreCase(LANGUAGE_TAG) ) {
+		msg.setLanguage(tmp);
+	    } else if( localName.equalsIgnoreCase(CONTENT_LANGUAGE_ENCODING_TAG) ) {
+		msg.setEncoding(tmp);
+	    } else if( localName.equalsIgnoreCase(ONTOLOGY_TAG) ) {
+		msg.setOntology(tmp);
+	    } else if( localName.equalsIgnoreCase(PROTOCOL_TAG) ) {
+		msg.setProtocol(tmp);
+	    } else if( localName.equalsIgnoreCase(REPLY_WITH_TAG) ) {
+		msg.setReplyWith(tmp);
+	    } else if( localName.equalsIgnoreCase(IN_REPLY_TO_TAG) ) {
+		msg.setInReplyTo(tmp);
+	    } else if( localName.equalsIgnoreCase(CONVERSATION_ID_TAG) ) {
+		msg.setConversationId(tmp);
+	    }
+	} else {
+	    pcdata_accumulate=true;
+	}
 
     }
     
@@ -252,9 +255,15 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 	    } else if( localName.equalsIgnoreCase(IN_REPLY_TO_TAG) ) {
 		msg.setInReplyTo(pcdata_buf);
 	    } else if( localName.equalsIgnoreCase(REPLY_BY_TAG) ) {
-		msg.setReplyBy(pcdata_buf);
+		try {
+		    msg.setReplyByDate(ISO8601.toDate(pcdata_buf));
+		} catch( Exception exc ) {
+		    exc.printStackTrace();
+		}
 	    } else if( localName.equalsIgnoreCase(CONVERSATION_ID_TAG) ) {
 		msg.setConversationId(pcdata_buf);
+	    } else if( localName.startsWith("X-") ) {
+		msg.addUserDefinedParameter(localName,pcdata_buf);
 	    }
 	    pcdata_accumulate=false;
 	    pcdata_buf=null;
@@ -334,7 +343,6 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 	    sb.append(">\n");
 	}
 
-
 	sb.append(prefix);
 	sb.append("</");
 	sb.append(AID_TAG);
@@ -353,7 +361,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 	sb.append(" ");
 	sb.append(ACT_ATTR);
 	sb.append("=\"");
-	sb.append(ACLMessage.getAllPerformatives().get(msg.getPerformative()));
+	sb.append(ACLMessage.getAllPerformativeNames()[msg.getPerformative()]);
 	sb.append("\" >\n");
 	String tmp=null;
 
@@ -389,17 +397,53 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 
 	}
 
+	if (msg.hasByteSequenceContent()) {
 
-	tmp=msg.getContent();
-	if( (tmp != null) && (!tmp.equals("")) ) {
-	    sb.append("\t<");
-	    sb.append(CONTENT_TAG);
-	    sb.append(">");
-	    sb.append(tmp);
-	    sb.append("</");
-	    sb.append(CONTENT_TAG);
-	    sb.append(">\n");
+	    sb.append("\t<"+BASE64ENCODING_KEY+">"+BASE64ENCODING_VALUE+"</"+BASE64ENCODING_KEY+">\n");
+
+	    try {
+		String b64 = new String(Base64.encode(msg.getByteSequenceContent()));
+		sb.append("\t<");
+		sb.append(CONTENT_TAG);
+		sb.append(">");
+
+		sb.append(b64);
+		    
+		sb.append("</");
+		sb.append(CONTENT_TAG);
+		sb.append(">\n");
+	    
+	    } catch(java.lang.NoClassDefFoundError jlncdfe) {
+		System.err.println("\n\t===== E R R O R !!! =======\n");
+		System.err.println("Missing support for Base64 conversions");
+		System.err.println("Please refer to the documentation for details.");
+		System.err.println("=============================================\n\n");
+		System.err.println("");
+		try {
+		    Thread.currentThread().sleep(3000);
+		} catch(InterruptedException ie) {
+		}
+	    }
+	} else {
+	  String content = msg.getContent();
+
+	  if (content != null) {
+	      content = content.trim();
+	      if (content.length() > 0) {
+		  
+		  sb.append("\t<");
+		  sb.append(CONTENT_TAG);
+		  sb.append(">");
+
+		  sb.append(escape(content));
+		    
+		  sb.append("</");
+		  sb.append(CONTENT_TAG);
+		  sb.append(">\n");
+	      }
+	  }
 	}
+
 
 	tmp=msg.getLanguage();
 	if( (tmp != null) && (!tmp.equals("")) ) {
@@ -478,12 +522,12 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 	    sb.append(">\n");
 	}
 	
-	tmp=msg.getReplyBy();
+	Date d=msg.getReplyByDate();
 	if( (tmp != null) && (!tmp.equals("")) ) {
 	    sb.append("\t<");
 	    sb.append(REPLY_BY_TAG);
 	    sb.append(" time=\"");
-	    sb.append(tmp);
+	    sb.append(ISO8601.toString(d));
 	    sb.append("\" />\n");
 	}
 	
@@ -505,7 +549,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
     public ACLMessage decode(byte[] data) throws CodecException {
 	try {
 	    parser.parse(new InputSource(new ByteArrayInputStream(data)));
-
+	    checkBase64Encoding();
 	    return msg;
 
 	} catch( IOException iexc ) {
@@ -513,6 +557,56 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 	} catch( SAXException sexc ) {
 	    throw new CodecException("While decoding got ",sexc);
 	}
+    }
+
+
+  static private String escape(String s) {
+    // Make the stringBuffer a little larger than strictly
+    // necessary in case we need to insert any additional
+    // characters.  (If our size estimate is wrong, the
+    // StringBuffer will automatically grow as needed).
+    StringBuffer result = new StringBuffer(s.length()+20);
+    for( int i=0; i<s.length(); i++)
+      if( s.charAt(i) == '"' ) 
+	result.append("\\\"");
+      else 
+	result.append(s.charAt(i));
+    return result.toString();
+  }
+
+    /**
+     * if there was an automatical Base64 encoding, then it performs
+     * automatic decoding.
+     **/
+    private void checkBase64Encoding() {
+
+	// hack - this has to be fixed so the : handling is transparent to the user
+	String encoding = msg.getUserDefinedParameter(":"+BASE64ENCODING_KEY);
+
+	if (CaseInsensitiveString.equalsIgnoreCase(BASE64ENCODING_VALUE,encoding)) {
+	    try { // decode Base64
+		String content = msg.getContent();
+		if ((content != null) && (content.length() > 0)) {
+		    char[] cc = new char[content.length()];
+		    content.getChars(0,content.length(),cc,0);
+		    msg.setByteSequenceContent(Base64.decode(cc));
+		    msg.removeUserDefinedParameter(BASE64ENCODING_KEY); // reset the slot value for encoding
+		}
+	    } catch(java.lang.StringIndexOutOfBoundsException e){
+		e.printStackTrace();
+	    } catch(java.lang.NullPointerException e2){
+		e2.printStackTrace();
+	    } catch(java.lang.NoClassDefFoundError jlncdfe) {
+		System.err.println("\t\t===== E R R O R !!! =======\n");
+		System.err.println("Missing support for Base64 conversions");
+		System.err.println("Please refer to the documentation for details.");
+		System.err.println("=============================================\n\n");
+		try {
+		    Thread.currentThread().sleep(3000);
+		}catch(InterruptedException ie) {
+		}
+	    }
+	} //end of if CaseInsensitiveString
     }
 
     /**
@@ -523,6 +617,24 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
     */
     public String getName() {
 	return ACL_REPRESENTATION_NAME;
+    }
+
+    /*
+    public static void main1( String args[]  ) {
+	try {
+	    jade.lang.acl.StringACLCodec sp=new jade.lang.acl.StringACLCodec();
+	    ACLMessage acl=sp.decode("(QUERY-REF :sender  ( agent-identifier  :name da0@beta.lausanne.agentcities.net :addresses (sequence http://srv02.lausanne.agentcities.net:8080/acc ))  :receiver  (set ( agent-identifier  :name acl_ping@dilbert.broadcom.ie :addresses (sequence http://192.107.110.39 )) )  :language  PlainText)".getBytes());
+
+	    acl.setByteSequenceContent("aaaaa".getBytes());
+
+	    XMLACLCodec xp=new XMLACLCodec();
+
+	    System.out.println("finally:\n"+new String(xp.encode(acl)));
+	    
+
+	} catch( Exception exc ) {
+	    exc.printStackTrace();
+	}
     }
 
     public static void main( String args[] ) {
@@ -552,12 +664,15 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 
 	    System.out.println("msg:\n"+msg);
 
+	    System.out.println("content:\n"+new String(msg.getByteSequenceContent()));
+
 	    System.out.println("xml:\n"+new String(codec.encode(msg)));
 
 	} catch( Exception exc ){
 	    exc.printStackTrace();
 	}
-
     }
+    */
 
 }
+
