@@ -27,7 +27,6 @@ import jade.content.*;
 import jade.content.onto.*;
 import jade.content.abs.*;
 import jade.content.schema.*;
-import jade.content.acl.*;
 import jade.content.lang.*;
 
 import jade.util.leap.List;
@@ -68,7 +67,7 @@ public class PeopleOntology extends Ontology {
 	public static final String HUSBAND = "HUSBAND";
 	public static final String WIFE    = "WIFE";
 
-	private static PeopleOntology theInstance = new PeopleOntology(ACLOntology.getInstance());
+	private static PeopleOntology theInstance = new PeopleOntology(BasicOntology.getInstance());
 
 	public static PeopleOntology getInstance() {
 		return theInstance;
