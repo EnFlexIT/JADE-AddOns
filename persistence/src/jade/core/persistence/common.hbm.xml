@@ -108,7 +108,7 @@
           <index column="idx"/>
           <composite-element class="jade.domain.FIPAAgentManagement.Property">
             <property name="name"/>
-            <property name="value"/>
+            <property name="svalue"/>
           </composite-element>
         </list>
       </component>
