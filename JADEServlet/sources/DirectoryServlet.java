@@ -21,7 +21,7 @@ import jade.wrapper.*;
 
 public class DirectoryServlet extends HttpServlet
 { 
-  private static Agent theProxyAgent = null;
+  private static AgentController theProxyAgent = null;
   
   /**
     Synchronized static method called at the initialization of the servlet. It ensures that a
@@ -48,7 +48,7 @@ public class DirectoryServlet extends HttpServlet
         l_Arg[0] = l_Sync;
         
         // Create the Proxy Agent and pass it the synchronizing object as argument
-        theProxyAgent = (Agent)l_NewContainer.createNewAgent("ProxyAgent", ProxyAgent.class.getName(),l_Arg);
+        theProxyAgent = l_NewContainer.createNewAgent("ProxyAgent", ProxyAgent.class.getName(),l_Arg);
 
         // Start the Proxy Agent
         theProxyAgent.start();
@@ -82,7 +82,7 @@ public class DirectoryServlet extends HttpServlet
    // Pass the interaction to the Proxy Agent and wait for the signal that the interaction was updated
    try
    {
-     theProxyAgent.putO2AObject(l_Interac, Agent.ASYNC);
+     theProxyAgent.putO2AObject(l_Interac, AgentController.ASYNC);
      l_Interac.waitChangedResponse();
    }
    catch(Exception l_Exception) { l_Exception.printStackTrace(); }
