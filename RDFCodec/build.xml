@@ -1,0 +1,54 @@
+<project name="RDFCodec" default="compile" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="src" value="src"/>
+  <property name="build" value="classes"/>
+  <property name="lib" value="lib"/>
+  <property name="dist" value="../.."/>
+  <property name="libJADEDir" value="../../lib"/>
+  <property name="classpath" value="${libJADEDir}/jade.jar;${lib}/sax2/sax2.jar;${libJADEDir}/rdf-api-2001-01-19.jar;"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the directories structure used to store files -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <!-- Compile the java code from ${src} into ${build} -->
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on" />
+  </target>
+
+  <!-- Compile the examples code from ${src} into ${build} -->
+  <target name="examples" depends="init">
+    <javac srcdir="examples" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on"/>
+  </target>
+
+  <!-- Make jars file and put in ${lib} -->
+  <target name="lib" depends="init, compile">
+    <jar jarfile="${lib}/rdf.jar">
+      <fileset dir="${build}" includes="**/unipr/aot/rdf/*"/>
+    </jar>
+  </target>
+
+  <!-- Make distribution zip file and put in ${dist} -->
+  <target name="dist" depends="init, compile, lib">
+    <jar jarfile="${dist}/RDFCodecAddOn.zip">
+      <fileset dir="${dist}" includes="add-ons/RDFCodec/${src}/**"/>
+      <fileset dir="${dist}" includes="add-ons/RDFCodec/examples/**"/>
+      <fileset dir="${dist}" includes="add-ons/RDFCodec/*"/>
+      <fileset dir="${dist}" includes="add-ons/RDFCodec/${lib}/**"/>
+    </jar>
+  </target>
+
+  <target name="all" depends="init, compile, examples, lib, dist"/>
+
+  <!-- delete ${build} and ${lib} directories -->
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} directory tree -->
+    <delete includeEmptyDirs="true" file="${lib}/rdf.jar">
+      <fileset dir="${build}"/>
+    </delete>
+  </target>
+
+</project>
