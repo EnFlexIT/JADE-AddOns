@@ -68,6 +68,15 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
             return PROFILE_USEPROPERTIES;
         }
     }
+
+    public String getMetaDB() {
+        if(!usePropertiesRadio.isSelected()) {
+            return metaDBUrlField.getText();
+        }
+        else {
+            return null;
+        }
+    }
     
     public String getProfileHost() {
         if(useHostPortRadio.isSelected()) {
@@ -117,7 +126,9 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
      */
     private void initComponents() {//GEN-BEGIN:initComponents
         javax.swing.JPanel bottomSpace;
+        javax.swing.JPanel bottomSpace1;
         javax.swing.JPanel topSpace;
+        javax.swing.JPanel topSpace1;
 
         createContainerGroup = new javax.swing.ButtonGroup();
         createProfileGroup = new javax.swing.ButtonGroup();
@@ -132,6 +143,13 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
         useDefaultProfileRadio = new javax.swing.JRadioButton();
         useHostPortRadio = new javax.swing.JRadioButton();
         usePropertiesRadio = new javax.swing.JRadioButton();
+        metaDBPanel = new javax.swing.JPanel();
+        propsUrlPanel1 = new javax.swing.JPanel();
+        topSpace1 = new javax.swing.JPanel();
+        metaDBUrlField = new javax.swing.JTextField();
+        bottomSpace1 = new javax.swing.JPanel();
+        metaDBBrowseButtonPanel = new javax.swing.JPanel();
+        metaDBBrowseButton = new javax.swing.JButton();
         middlePanel = new javax.swing.JPanel();
         defaultProfileLabel = new javax.swing.JLabel();
         hostPortProfilePanel = new javax.swing.JPanel();
@@ -172,8 +190,8 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
         containerKind.setLayout(new javax.swing.BoxLayout(containerKind, javax.swing.BoxLayout.X_AXIS));
 
         createMainRadio.setFont(new java.awt.Font("Dialog", 0, 10));
-        createMainRadio.setSelected(true);
         createMainRadio.setText("Create Standalone Platform");
+        createMainRadio.setSelected(true);
         createContainerGroup.add(createMainRadio);
         containerKind.add(createMainRadio);
 
@@ -187,8 +205,8 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
         profileKind.setLayout(new javax.swing.BoxLayout(profileKind, javax.swing.BoxLayout.X_AXIS));
 
         useDefaultProfileRadio.setFont(new java.awt.Font("Dialog", 0, 10));
-        useDefaultProfileRadio.setSelected(true);
         useDefaultProfileRadio.setText("Use Default Profile");
+        useDefaultProfileRadio.setSelected(true);
         createProfileGroup.add(useDefaultProfileRadio);
         useDefaultProfileRadio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -223,6 +241,42 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
         topPanel.add(profileKind);
 
         add(topPanel);
+
+        metaDBPanel.setLayout(new javax.swing.BoxLayout(metaDBPanel, javax.swing.BoxLayout.X_AXIS));
+
+        metaDBPanel.setBorder(new javax.swing.border.TitledBorder(null, "Meta DB URL", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 0, 10)));
+        propsUrlPanel1.setLayout(new javax.swing.BoxLayout(propsUrlPanel1, javax.swing.BoxLayout.Y_AXIS));
+
+        propsUrlPanel1.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(2, 2, 2, 2)));
+        propsUrlPanel1.add(topSpace1);
+
+        metaDBUrlField.setColumns(40);
+        metaDBUrlField.setFont(new java.awt.Font("Dialog", 0, 10));
+        metaDBUrlField.setToolTipText("Insert the URL to load Properties from");
+        propsUrlPanel1.add(metaDBUrlField);
+
+        propsUrlPanel1.add(bottomSpace1);
+
+        metaDBPanel.add(propsUrlPanel1);
+
+        metaDBBrowseButtonPanel.setLayout(new javax.swing.BoxLayout(metaDBBrowseButtonPanel, javax.swing.BoxLayout.X_AXIS));
+
+        metaDBBrowseButtonPanel.setBorder(new javax.swing.border.EmptyBorder(new java.awt.Insets(2, 5, 2, 2)));
+        metaDBBrowseButton.setFont(new java.awt.Font("Dialog", 1, 10));
+        metaDBBrowseButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/jade/tools/persistence/images/open.gif")));
+        metaDBBrowseButton.setToolTipText("Browse Files...");
+        metaDBBrowseButton.setBorder(new javax.swing.border.EtchedBorder());
+        metaDBBrowseButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                metaDBBrowseButtonActionPerformed(evt);
+            }
+        });
+
+        metaDBBrowseButtonPanel.add(metaDBBrowseButton);
+
+        metaDBPanel.add(metaDBBrowseButtonPanel);
+
+        add(metaDBPanel);
 
         middlePanel.setLayout(new java.awt.CardLayout());
 
@@ -320,6 +374,13 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
 
     }//GEN-END:initComponents
 
+    private void metaDBBrowseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_metaDBBrowseButtonActionPerformed
+        int returnVal = metaDBFileChooser.showOpenDialog(this);
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            metaDBUrlField.setText(metaDBFileChooser.getSelectedFile().toURI().toString());
+        }
+    }//GEN-LAST:event_metaDBBrowseButtonActionPerformed
+
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         closeDialog();
     }//GEN-LAST:event_cancelButtonActionPerformed
@@ -332,7 +393,7 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
     private void browseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseButtonActionPerformed
         int returnVal = propsFileChooser.showOpenDialog(this);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
-//            propsUrlField.setText(propsFileChooser.getSelectedFile().toURI().toString());
+            propsUrlField.setText(propsFileChooser.getSelectedFile().toURI().toString());
         }
     }//GEN-LAST:event_browseButtonActionPerformed
 
@@ -356,7 +417,7 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
         myDialog.dispose();
     }
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel borderPanel;
     private javax.swing.JPanel bottomPanel;
     private javax.swing.JButton browseButton;
@@ -370,6 +431,10 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
     private javax.swing.ButtonGroup createProfileGroup;
     private javax.swing.JLabel defaultProfileLabel;
     private javax.swing.JPanel hostPortProfilePanel;
+    private javax.swing.JButton metaDBBrowseButton;
+    private javax.swing.JPanel metaDBBrowseButtonPanel;
+    private javax.swing.JPanel metaDBPanel;
+    private javax.swing.JTextField metaDBUrlField;
     private javax.swing.JPanel middlePanel;
     private javax.swing.JTextField nickField;
     private javax.swing.JPanel nickPanel;
@@ -381,8 +446,47 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
     private javax.swing.JPanel propertiesProfilePanel;
     private javax.swing.JTextField propsUrlField;
     private javax.swing.JPanel propsUrlPanel;
+    private javax.swing.JPanel propsUrlPanel1;
     private javax.swing.JLabel slashLabel;
     private javax.swing.JPanel topPanel;
+    private javax.swing.JRadioButton useDefaultProfileRadio;
+    private javax.swing.JRadioButton useHostPortRadio;
+    private javax.swing.JRadioButton usePropertiesRadio;
+    // End of variables declaration
+   // Variables declaration - do not modify
+    private javax.swing.JPanel borderPanel;
+    private javax.swing.JPanel bottomPanel;
+    private javax.swing.JPanel bottomSpace1;
+    private javax.swing.JButton browseButton;
+    private javax.swing.JPanel browseButtonPanel;
+    private javax.swing.JButton cancelButton;
+    private javax.swing.JLabel colonLabel;
+    private javax.swing.JPanel containerKind;
+    private javax.swing.ButtonGroup createContainerGroup;
+    private javax.swing.JRadioButton createMainRadio;
+    private javax.swing.JRadioButton createPeripheralRadio;
+    private javax.swing.ButtonGroup createProfileGroup;
+    private javax.swing.JLabel defaultProfileLabel;
+    private javax.swing.JPanel hostPortProfilePanel;
+    private javax.swing.JButton metaDBBrowseButton;
+    private javax.swing.JPanel metaDBBrowseButtonPanel;
+    private javax.swing.JPanel metaDBPanel;
+    private javax.swing.JTextField metaDBUrlField;
+    private javax.swing.JPanel middlePanel;
+    private javax.swing.JTextField nickField;
+    private javax.swing.JPanel nickPanel;
+    private javax.swing.JButton okButton;
+    private javax.swing.JTextField profileHostField;
+    private javax.swing.JPanel profileKind;
+    private javax.swing.JTextField profileNameField;
+    private javax.swing.JTextField profilePortField;
+    private javax.swing.JPanel propertiesProfilePanel;
+    private javax.swing.JTextField propsUrlField;
+    private javax.swing.JPanel propsUrlPanel;
+    private javax.swing.JPanel propsUrlPanel1;
+    private javax.swing.JLabel slashLabel;
+    private javax.swing.JPanel topPanel;
+    private javax.swing.JPanel topSpace1;
     private javax.swing.JRadioButton useDefaultProfileRadio;
     private javax.swing.JRadioButton useHostPortRadio;
     private javax.swing.JRadioButton usePropertiesRadio;
@@ -390,6 +494,7 @@ class ConnectPlatformDlgBody extends javax.swing.JPanel {
 
     private JDialog myDialog;
     private JFileChooser propsFileChooser = new JFileChooser();
+    private JFileChooser metaDBFileChooser = new JFileChooser();
     private boolean accepted = false;
     
 }

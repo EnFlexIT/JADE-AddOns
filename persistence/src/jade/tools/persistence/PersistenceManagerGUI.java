@@ -289,6 +289,11 @@ public class PersistenceManagerGUI extends javax.swing.JFrame implements GUICons
                         break;
                 }
 
+                String metaDBURL = panel.getMetaDB();
+                if(metaDBURL != null) {
+                    p.setParameter("meta-db", metaDBURL);
+                }
+
                 // Add the persistence service if not already listed in the profile
                 addPersistenceService(p);
 
