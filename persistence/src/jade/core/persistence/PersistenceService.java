@@ -1138,7 +1138,7 @@ public class PersistenceService extends BaseService {
     } // End of CommandTargetSink class
 
 
-    private class CommandIncomingFilter implements Filter {
+    private class CommandIncomingFilter extends Filter {
 
 	public boolean accept(VerticalCommand cmd) {
 
