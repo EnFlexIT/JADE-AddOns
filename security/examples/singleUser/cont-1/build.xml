@@ -7,14 +7,12 @@
 
 <!-- =========  REMOTE Container  ========= -->
 
-<project name="coresec-examples" default="remote-cont" basedir=".">
+<project name="SingleUser-example" default="remote-cont" basedir=".">
   <!-- set global properties for this build -->
   <property name="jaderoot" value="../../../../../"/>
   <property name="libJADEDir" value="${jaderoot}/lib"/>
 
-  <property name="bc.jar"  value="${libJADEDir}/add-ons/coresec/lib/bc/bcprov-jdk14-119.jar" />
-
-  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/iiop.jar;${libJADEDir}/jadeTools.jar;${bc.jar};${jaderoot}/add-ons/coresec/lib/coresec.jar;" /> 
+  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/iiop.jar;${libJADEDir}/jadeTools.jar;${jaderoot}/add-ons/security/lib/jadeSecurity.jar;" /> 
 
 
 
