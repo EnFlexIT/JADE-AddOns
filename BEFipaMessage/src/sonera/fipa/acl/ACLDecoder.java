@@ -30,8 +30,13 @@
      (add contributor names here)
 
 ====================================================================*/
+
+
+
+
 package sonera.fipa.acl;
 import sonera.fipa.util.ByteArray;
+
 import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -49,24 +54,35 @@ public class ACLDecoder implements ACLConstants {
 	 * bit-efficient) 
 	 */
         private static ACLPerformatives as;
+
         /** ct Codetable */
         private DecoderCodetable ct;
+
         /** bn Bit-efficient Number */
         private BinNumber bn = new BinNumber();
+
         /** size Size of the codetable */
         private int size;
+
         /** ba Buffer for parsing tokens */
         private ByteArray ba = new ByteArray();
+
         /** bb Buffer for parsing numbers */
         private ByteArray bb = new ByteArray(32);
+
         /** m ACLMessage to which the parsed message is stored */
         private ACLMessage m;
+
         /** coding Coding scheme (with or without codetables) */
         private int coding;
+
         /** ex Expression parser */
         private ExprParser ex = new ExprParser();
+
         private byte [] blen = new byte[4];
+
         private int current;
+
         /**
 	 * Initialize the ACLDecoder. If this constructor is used,
 	 * all messages are decoded without codetables.
@@ -92,21 +108,27 @@ public class ACLDecoder implements ACLConstants {
                 initialize(ct.getSize());
                 this.ct = ct;
         }
+
         public void initialize(int sz) {
                 ct = (coding==ACL_BITEFFICIENT) ? null : new DecoderCodetable(sz);
                 size = sz;
                 m = new ACLMessage(0);
                 as = new ACLPerformatives();
         }
+
         public DecoderCodetable getCodeTable() {
                 return ct;
         }
         /**
 	 * Parses an ACL message from byte array
-	 * @returns The ACL message read.
+	 * @return The ACL message read.
 	 */
-        public ACLMessage readMsg(byte [] inb) throws IOException,ACLCodec.CodecException {
+        public ACLMessage readMsg(byte [] inb) throws Exception {
+
                 m.reset();
+
+
+
                 current = 0;
                 if (getCoding(getByte(inb)) < 0)
                         throw new ACLCodec.CodecException("Unsupported coding", null);
@@ -138,13 +160,17 @@ public class ACLDecoder implements ACLConstants {
         private int getType(byte b) throws ACLCodec.CodecException {
                 if (b == -1) return -1;
                 if (b != ACL_NEW_MSGTYPE_FOLLOWS) {
+
+
+
                         m.setPerformative (as.getCA (b));
+
                 } else {
                         throw new ACLCodec.CodecException("Can t handle user defined performatives", null);
                 }
                 return 0;
         }
-        private int getMsgParam(byte [] inb) throws IOException, ACLCodec.CodecException {
+        private int getMsgParam(byte [] inb) throws Exception {
                 byte b = getByte(inb);
                 switch(b) {
                 case ACL_END_OF_MSG:
@@ -156,13 +182,21 @@ public class ACLDecoder implements ACLConstants {
                         getReceivers(inb);
                         return 0;
                 case ACL_MSG_PARAM_CONTENT:
+
                         getContent(m, inb);
+
+
+
                         return 0;
                 case ACL_MSG_PARAM_REPLY_WITH:
                         m.setReplyWith(getParam(inb));
                         return 0;
                 case ACL_MSG_PARAM_REPLY_BY:
+
                         m.setReplyByDate(getDate(inb));
+
+
+
                         return 0;
                 case ACL_MSG_PARAM_IN_REPLY_TO:
                         m.setInReplyTo(getParam(inb));
@@ -180,18 +214,18 @@ public class ACLDecoder implements ACLConstants {
                         m.setProtocol(getParam(inb));
                         return 0;
                 case ACL_MSG_PARAM_ENCODING:
-                        /*
-			 * FIPA-OS does not support :encoding parameter.
-			 * Anyway, we have to parse it, and then
-			 * discard it.
-			 */
                         m.setEncoding(getParam(inb));
+
                         return 0;
                 case ACL_MSG_PARAM_CONVERSATION_ID:
                         m.setConversationId(getParam(inb));
                         return 0;
                 case ACL_NEW_MSGPARAM_FOLLOWS:
+
+
+
                         m.addUserDefinedParameter(getParam(inb), getParam(inb));
+
                         return 0;
                 }
                 throw new ACLCodec.CodecException("Unknown component or something like that", null);
@@ -213,8 +247,12 @@ public class ACLDecoder implements ACLConstants {
                 return (getAID(b, inb));
         }
         private AID getAID(byte t, byte [] inb) throws IOException, ACLCodec.CodecException {
+
+
+
                 AID _aid = new AID();
                 byte b;
+
                 if (t != ACL_AID_FOLLOWS) {
                         if (t == ACL_END_OF_COLLECTION) return null;
                         throw new ACLCodec.CodecException("not an agent-identifier", null);
@@ -230,20 +268,35 @@ public class ACLDecoder implements ACLConstants {
                         switch(b) {
                         case ACL_AID_ADDRESSES:
                                 while((b=getByte(inb))!=ACL_END_OF_COLLECTION)
+
+
+
+
+
                                         _aid.addAddresses(getRealString(b, inb));
+
                                 break;
                         case ACL_AID_RESOLVERS:
                                 while((b=getByte(inb))!=ACL_END_OF_COLLECTION)
+
+
+
+
+
                                         _aid.addResolvers(getAID(b, inb));
+
                                 break;
                         case ACL_AID_USERDEFINED:
                                 String key = getString(inb);
                                 String value = getString(inb);
-                                /*
-				 * FIPA-OS does not support user defined
-				 * paramters in Agent Identifier.
-				 */
+
+
+
+
+
+
                                 _aid.addUserDefinedSlot(key,value);
+
                                 break;
                         default:
                                 throw new ACLCodec.CodecException("Unexpected stuff in agent-identifier", null);
@@ -270,20 +323,17 @@ public class ACLDecoder implements ACLConstants {
         private String getParam(byte [] inb) throws IOException {
                 return ex.toText(inb);
         }
-        private Date getDate(byte [] inb) throws IOException {
+
+        private Date getDate(byte [] inb) throws Exception {
                 byte type = getByte(inb);
                 ba.reset();
                 for (int i = 0; i < ACL_DATE_LEN; ++i) ba.add(getByte(inb));
                 String s = new BinDate().fromBin(ba.get());
                 if ((type & 0x01) != 0x00) s += (char)getByte(inb);
-                Date d = null;
-                try {
-                        d = ISO8601.toDate(s);
-                } catch (Exception e) {
-                        /* FIXME */
-                }
-                return d;
+                return (ISO8601.toDate(s));
         }
+
+
         private void getContent(ACLMessage m, byte [] inb) throws IOException {
                 byte type = getByte(inb);
                 if (type > 0x15 && type < 0x19) {
@@ -325,6 +375,11 @@ public class ACLDecoder implements ACLConstants {
                         m.setContent(s);
                 }
         }
+
+
+
+
+
         private String getString(byte [] inb) throws IOException {
                 byte type = getByte(inb);
                 return getRealString(type, inb);
@@ -365,6 +420,7 @@ public class ACLDecoder implements ACLConstants {
                         if ((type & 0x01) != 0x00) s += (char)getByte(inb);
                         break;
                 case ACL_DECNUM_FOLLOWS: case ACL_HEXNUM_FOLLOWS:
+
                         /* Number token */
                         bb.reset();
                         while(((b=getByte(inb)) & 0x0f) != 0x00) bb.add(b);
@@ -433,6 +489,7 @@ public class ACLDecoder implements ACLConstants {
                 System.arraycopy(src, current, dst, 0, len);
                 current += len;
         }
+
         private class ExprParser {
                 int level;
                 String s;
@@ -444,7 +501,9 @@ public class ACLDecoder implements ACLConstants {
                         ba.reset();
                         level = 0;
                         byte b, x;
+
                         boolean beginOfParameter = true;
+
                         while ((b = getByte(inb))!=-1) {
                                 if (b >= 0x40 && b < 0x60) {
                                         /* Level UP */

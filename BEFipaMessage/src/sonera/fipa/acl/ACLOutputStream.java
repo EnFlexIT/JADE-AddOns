@@ -30,13 +30,24 @@
      (add contributor names here)
 
 ====================================================================*/
+
+
+
+
+
 package sonera.fipa.acl;
+
 import sonera.fipa.util.ByteArray;
+
 import sonera.fipa.util.ByteArray;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+
+
+
 import jade.lang.acl.*;
+
 /**
  * OutputStream that writes fipa-bitefficient-std coded messages into stream.
  * 
@@ -45,10 +56,11 @@ import jade.lang.acl.*;
 public class ACLOutputStream extends BufferedOutputStream {
         private ACLEncoder e;
         private ByteArray ba;
+
         /**
 	 * Initialise the ACL output stream with given OutputStream.
 	 * 
-	 * @parameter o OutputStream to which message are written.
+	 * @param o OutputStream to which message are written.
 	 */
         public ACLOutputStream(OutputStream o) {
                 super(o);
@@ -58,8 +70,8 @@ public class ACLOutputStream extends BufferedOutputStream {
 	 * Initialise the ACL output stream with given OutputStream and 
   	 * codetable size.
 	 *
-	 * @parameter o OutputStream to which message are written.
-	 * @parameter sz Size for the code table.
+	 * @param o OutputStream to which message are written.
+	 * @param sz Size for the code table.
 	 */
         public ACLOutputStream(OutputStream o, int sz) {
                 super(o);
@@ -68,7 +80,8 @@ public class ACLOutputStream extends BufferedOutputStream {
         public EncoderCodetable getCodeTable() {
                 return e.getCodeTable();
         }
-        public void initialize(int sz) {
+
+        private void initialize(int sz) {
                 e = new ACLEncoder(sz);
                 ba = new ByteArray();
         }

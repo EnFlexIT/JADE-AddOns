@@ -30,8 +30,15 @@
      (add contributor names here)
 
 ====================================================================*/
+
+
+
+
 package sonera.fipa.acl;
+
+
 import java.util.Date;
+
 /**
  * BinDate implements Bitefficient representation of "DateTimeToken"
  *
@@ -40,13 +47,17 @@ import java.util.Date;
 public class BinDate extends BinRep implements ACLConstants {
         private static final byte T_POS = 8;
         private static final int MAX_DATE_LEN = 32;
+
+        private static char plus = '+';
+        private static char minus = '-';
+
         /**
 	 * Converts ASCII representation of Date to bit-efficient 
 	 * representation.
 	 *
-	 * @parameter s String containing ASCII representation of date
+	 * @param s String containing ASCII representation of date
 	 *
-	 * @returns Bit-efficient representation of supplied date.
+	 * @return Bit-efficient representation of supplied date.
 	 */
         public byte[] toBin(String s) {
                 byte[] b = new byte[MAX_DATE_LEN];
@@ -54,12 +65,14 @@ public class BinDate extends BinRep implements ACLConstants {
                 int x = s.length(), j = 0;
                 if (s.charAt(T_POS) != 'T' && s.charAt(T_POS) != 't')
                         return null;
+
                 /* First year, month, & day */
                 for (int i = 0; i < 8; i+=2) {
                         d = (byte)(encode(s.charAt(i)) << 4);
                         d |= (encode(s.charAt(i+1)) & 0x0f);
                         b[j++] = d;
                 }
+
                 /* Then Hours, Minutes, Seconds, and Milliseconds */
                 for (int i = 9; i < 17; i+=2) {
                         d = (byte)(encode(s.charAt(i)) << 4);
@@ -73,11 +86,12 @@ public class BinDate extends BinRep implements ACLConstants {
 	 *
 	 */
         private char[] c = new char[ACL_DATE_LEN*2+2];
+
         /**
 	 * Converts bit-efficient Date to String.
 	 * 
-	 * @parameter b Bit-efficient date
-	 * @returns String containing ASCII representation of supplied date.
+	 * @param b Bit-efficient date
+	 * @return String containing ASCII representation of supplied date.
 	 */
         public String fromBin(byte[] b) {
                 int i = 0, j = 0;
@@ -92,11 +106,29 @@ public class BinDate extends BinRep implements ACLConstants {
         }
         /**
 	 * Checks whether there's type designator in Date String
-	 * @parameter s String date to check
-	 * @returns true if there's type designator present, false otherwise
+	 * @param s String date to check
+	 * @return true if there's type designator present, false otherwise
 	 */
         public static boolean containsTypeDg(String s) {
                 char a = s.charAt(s.length()-1);
                 return ((a >= 'a' && a <= 'z') || (a >= 'A' && a <= 'Z'));
+        }
+
+        /**
+	 * Calculate correct BinDateTimeToken identifier:<br>
+	 * 0x20: Absolute time				<br>
+	 * 0x21: Relative time (+)			<br>
+	 * 0x22: Relative time (-)			<br>
+	 * 0x20: Absolute time w/ TypeDesignator 	<br>
+	 * 0x21: Relative time (+) w/ TypeDesignator 	<br>
+	 * 0x22: Relative time (-) w/ TypeDesignator 	<br>
+	 */
+        public static byte getDateFieldId(String s) {
+                int tmp = 0;
+
+                if (s.charAt(0) == plus) tmp = 1;
+                else if (s.charAt(0) == minus) tmp = 2;
+                tmp += containsTypeDg(s) ? 4 : tmp;
+                return (byte)(ACL_ABS_DATE_FOLLOWS + tmp);
         }
 }

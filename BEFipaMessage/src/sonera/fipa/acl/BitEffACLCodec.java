@@ -30,11 +30,20 @@
      (add contributor names here)
 
 ====================================================================*/
+
+
+
+
+
 package sonera.fipa.acl;
+
 import sonera.fipa.util.ByteArray;
+
+
 import java.io.*;
 import jade.lang.acl.ACLCodec;
 import jade.lang.acl.ACLMessage;
+
 /**
  * This class implements the FIPA Bit-efficient codec for ACLMessages.
  *
@@ -42,8 +51,10 @@ import jade.lang.acl.ACLMessage;
  */
 public class BitEffACLCodec implements ACLCodec {
         public static final String _name = jade.domain.FIPANames.ACLCodec.BITEFFICIENT;
+
         private ACLEncoder e;
         private ByteArray ba;
+
         /**
 	 * Constructor for the codec.
 	 */
@@ -64,19 +75,25 @@ public class BitEffACLCodec implements ACLCodec {
 	 * @see ACLCodec#decode(byte[] data)
 	 */
         public ACLMessage decode(byte[] data) throws ACLCodec.CodecException {
-                /*
-		 * FIXME: Codetables etc.
-		 * FIXME: This is slowest method I've ever seen.
-		 */
+
+
+
+
+
+
                 InputStream i = new ByteArrayInputStream(data);
                 ACLInputStream ai = new ACLInputStream(i);
+
                 try {
                         return (ai.readMsg());
                 } catch (IOException e) {
                         throw new ACLCodec.CodecException("IOException:"+e, null);
+                } catch (Exception e) {
+                        throw new ACLCodec.CodecException("Exception:"+e, null);
                 }
         }
         public void write(ACLMessage msg) {
+
         }
         /**
 	 * @see ACLCodec#encode(ACLMessage msg)
@@ -93,11 +110,10 @@ public class BitEffACLCodec implements ACLCodec {
                 } catch (Exception e) {}
                 return(ba);
         }
+
         /**
 	 * @return the name of this encoding according to the FIPA 
 	 *         specifications
 	 */
-        public String getName() {
-                return _name;
-        }
+        public String getName() { return _name; }
 }

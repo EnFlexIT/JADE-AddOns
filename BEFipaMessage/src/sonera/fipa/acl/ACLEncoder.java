@@ -30,15 +30,33 @@
      (add contributor names here)
 
 ====================================================================*/
+
+
+
+
+
+
 package sonera.fipa.acl;
+
 import sonera.fipa.util.ByteArray;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Iterator;
 import java.util.Enumeration;
 import java.util.Properties;
+
+
+
+
+
+
+
 import jade.core.AID;
 import jade.lang.acl.*;
+
+
+
 /**
  * ACLEncoder implements an encoder for bit-efficient ACLMessages.
  * 
@@ -50,25 +68,34 @@ public class ACLEncoder implements ACLConstants {
 	 * bit-efficient) 
 	 */
         private static ACLPerformatives as;
+
         /** buf Buffer to which the bit-efficient message is generated */
         private ByteArray buf = new ByteArray(1024);
+
         /** bd Bit-efficient date */
         private BinDate bd = new BinDate();
+
         /** bn Bit-efficient Number */
         private BinNumber bn = new BinNumber();
+
         /** ct Codetable */
         private EncoderCodetable ct;
+
         /** size Size of the code table */
         private int size;
+
         /** baseCoding  Default coding scheme (with or without codetables) */
         private byte baseCoding;
+
         /**
  	 * currCoding Coding scheme for current message (might be 
 	 * different than base_coding, if "0xFC" coding is used 
 	 */
         private byte currCoding;
+
         /** ex Expression parser  */
         private ExprParser ex = new ExprParser();
+
         /**
 	 * Constructor for the encoder. 
          * Initialises the ACL encoder with no codetable coding scheme.
@@ -77,10 +104,11 @@ public class ACLEncoder implements ACLConstants {
                 baseCoding = ACL_BITEFFICIENT;
                 initialize(0);
         }
+
         /**
 	 * Constructor for the encoder.
 	 * Initializes the ACL encoder with a codetable.
-	 * @parameter sz the size for the codetable in bits 
+	 * @param sz the size for the codetable in bits 
          *		(between 8 and 16)
 	 */
         public ACLEncoder(int sz) {
@@ -89,11 +117,12 @@ public class ACLEncoder implements ACLConstants {
                               : ACL_BITEFFICIENT;
                 initialize(sz);
         }
+
         /**
 	 * Constructor for the encoder.
 	 * Initializes the ACL encoder with a codetable
-	 *  @parameter sz the size for the codetable in bits.
-	 *  @parameter ct the codetable to be used in encoding process.
+	 *  @param sz the size for the codetable in bits.
+	 *  @param ct the codetable to be used in encoding process.
 	 *  @deprecated Use ACLEncoder(EncoderCodetable ct) instead
 	 */
         public ACLEncoder(int sz, EncoderCodetable ct) {
@@ -104,13 +133,14 @@ public class ACLEncoder implements ACLConstants {
         /**
 	 * Constructor for the encoder.
 	 * Initializes the ACL encoder with a codetable
-	 *  @parameter ct the codetable to be used in encoding process.
+	 *  @param ct the codetable to be used in encoding process.
 	 */
         public ACLEncoder(EncoderCodetable ct) {
                 this.ct = ct;
                 size = ct.getSize();
                 as = new ACLPerformatives();
         }
+
         private void initialize(int sz) {
                 ct = (baseCoding == ACL_BITEFFICIENT || sz == 0)
                         ? null
@@ -118,10 +148,12 @@ public class ACLEncoder implements ACLConstants {
                 size = sz;
                 as = new ACLPerformatives();
         }
+
         /**
-	 * Returns the codetable associated with this encoder
+	 * Return the codetable associated with this encoder
 	 */
         public EncoderCodetable getCodeTable() { return ct; }
+
         /**
 	 * Encodes an ACL message.
 	 * @param m Message to encode
@@ -130,6 +162,7 @@ public class ACLEncoder implements ACLConstants {
                 currCoding = baseCoding;
                 return outputMessage(m);
         }
+
         /**
 	 * Encodes an ACL message.
 	 * @param m Message to encode
@@ -156,8 +189,10 @@ public class ACLEncoder implements ACLConstants {
                 buf.reset();
                 buf.add(currCoding);
                 buf.add(ACL_VERSION);
+
                 /* Output message type (communicative act) */
                 dumpMsgType(m.getPerformative());
+
                 /* Output message parameters */
                 if ((s=m.getOntology())!=null && s.length() > 0)
                         dumpParam(s, ACL_MSG_PARAM_ONTOLOGY);
@@ -169,7 +204,12 @@ public class ACLEncoder implements ACLConstants {
                         dumpParam(s, ACL_MSG_PARAM_CONVERSATION_ID);
                 dumpAIDList(m.getAllReplyTo(), ACL_MSG_PARAM_REPLY_TO);
                 dumpDate(m.getReplyByDate());
+
+
+
+
                 dumpContent(m);
+
                 if ((s=m.getInReplyTo())!=null && s.length() > 0)
                         dumpParam(s, ACL_MSG_PARAM_IN_REPLY_TO);
                 if ((s=m.getReplyWith())!=null && s.length() > 0)
@@ -178,8 +218,10 @@ public class ACLEncoder implements ACLConstants {
                         dumpParam(m.getLanguage(), ACL_MSG_PARAM_LANGUAGE);
                 if ((s=m.getProtocol())!=null && s.length() > 0)
                         dumpWordParam(s, ACL_MSG_PARAM_PROTOCOL);
+
                 /* Possible user defined message parameters */
                 dumpAllUserDefinedParameters(m);
+
                 /* Write end-of-message marker */
                 buf.add(ACL_END_OF_MSG);
                 return buf;
@@ -188,30 +230,39 @@ public class ACLEncoder implements ACLConstants {
 	 * Output message type (performative)
 	 * FIXME: This routine cannot handle userdefined performatives.
 	 */
+
+
+
         private void dumpMsgType(int p) {
+
                 byte b = as.getCACode(p);
                 buf.add(b);
         }
+
         /*
 	 * Output DateTimeToken
 	 */
+
         private void dumpDate(Date d) {
                 if (d == null) return;
                 String s = ISO8601.toString(d);
-                int x = 0;
-                if (s.charAt(0)=='+') x = 1;
-                else if (s.charAt(0)=='-') x = 2;
-                x += bd.containsTypeDg(s) ? 4 : x;
+
+
+
+
                 /* Output message parameter code */
                 buf.add(ACL_MSG_PARAM_REPLY_BY);
-                /* Output DateTimeToken id field (0x20-0x21) */
-                buf.add((byte) (ACL_ABS_DATE_FOLLOWS + x));
+
+                /* Output DateTimeToken id field (0x20-0x26) */
+                buf.add(bd.getDateFieldId(s));
+
                 /* Output the Date */
                 buf.add(bd.toBin (s), ACL_DATE_LEN);
+
                 /* Output (possible) type designator */
-                if ((x & 0x04) != 0x00) {
+                if (bd.containsTypeDg(s) == true)
                         buf.add ((byte) s.charAt(s.length()-1));
-                }
+
         }
         /*
 	 * Output a number
@@ -224,6 +275,7 @@ public class ACLEncoder implements ACLConstants {
                 ByteArray bx = bn.toBin(_bx);
                 buf.add(bx.get(), bx.length());
         }
+
         private void dumpString(String s) {
                 dumpString(s, (byte) 0, false);
         }
@@ -238,6 +290,7 @@ public class ACLEncoder implements ACLConstants {
                 int l = ble.length();
                 int digit, result = 0;
                 int i = 1;
+
                 while (i < l) {
                         digit = Character.digit(ble.charAt(i++), 10);
                         if (digit < 0) {
@@ -258,8 +311,10 @@ public class ACLEncoder implements ACLConstants {
                 while (ble.charAt(i++)!='"') ;
                 return new String(ble.getBytes(), i, ble.length()-i);
         }
+
         private void dumpString(String s, byte h, boolean word) {
                 if (s == null || s.length() < 1) return;
+
                 /*
 		 * FIX: Can we trust that there's no white space
 		 * in the beginning of the String?
@@ -310,6 +365,7 @@ public class ACLEncoder implements ACLConstants {
         private void dumpBLEHeader(String s) {
                 dumpBLEHeader(s.length());
         }
+
         private byte getStringID(boolean word, boolean ble, int len) {
                 if (word) return (byte)ACL_NEW_WORD_FOLLOWS;
                 if (!ble) return (byte)ACL_NEW_STRING_FOLLOWS;
@@ -330,12 +386,14 @@ public class ACLEncoder implements ACLConstants {
                         buf.add((byte) n);
                 }
         }
+
         private void outputLong(int n) {
                 buf.add((byte) ((n >> 24) & 0xff));
                 buf.add((byte) ((n >> 16) & 0xff));
                 buf.add((byte) ((n >> 8) & 0xff));
                 buf.add((byte) (n & 0xff));
         }
+
         /**
 	 * Output message sender (:sender)
 	 * @param s Sender as FIPA97 agent name (i.e., foo@somewhwere)
@@ -346,6 +404,7 @@ public class ACLEncoder implements ACLConstants {
                 buf.add(t);
                 dumpAID(_aid);
         }
+
         /**
 	 * Output message receiver (:receiver)
 	 * @param ag Group of agent names
@@ -359,24 +418,20 @@ public class ACLEncoder implements ACLConstants {
                         buf.add(ACL_END_OF_COLLECTION);
                 }
         }
+
         /**
 	 * Output one agent name
 	 */
-                /* Start of agent-identifier */
-                /* Agent name (i.e., :name parameter) */
-                /* (optional) addresses */
-                /* (Optional) resolvers */
-                /*
-		 * Current version of FIPA-OS does not support user
-		 * defined slots in AgentIdentifier...so we are done. 
-		 */
         private void dumpAID(AID aid) {
                 Iterator addrs = aid.getAllAddresses();
                 Iterator rslvrs = aid.getAllResolvers();
+
                 /* Start of agent-identifier */
                 buf.add(ACL_AID_FOLLOWS);
+
                 /* Agent name (i.e., :name parameter) */
                 dumpWord(aid.getName());
+
                 /* (Optional) addresses (UrlCollection) */
                 if (addrs != null && addrs.hasNext()) {
                         buf.add(ACL_AID_ADDRESSES);
@@ -384,6 +439,7 @@ public class ACLEncoder implements ACLConstants {
                                 dumpWord((String)addrs.next());
                         buf.add(ACL_END_OF_COLLECTION);
                 }
+
                 /* (Optional) resolvers (AgentIdentifierCollection) */
                 if (rslvrs != null && rslvrs.hasNext()) {
                         buf.add(ACL_AID_RESOLVERS);
@@ -392,6 +448,7 @@ public class ACLEncoder implements ACLConstants {
                         }
                         buf.add(ACL_END_OF_COLLECTION);
                 }
+
                 /* (optional) UserDefinedSlots */
                 Properties uds = aid.getAllUserDefinedSlot();
                 Enumeration e = uds.propertyNames();
@@ -404,6 +461,8 @@ public class ACLEncoder implements ACLConstants {
                 }
                 buf.add(ACL_END_OF_COLLECTION);
         }
+
+
         private void dumpAllUserDefinedParameters(ACLMessage m) {
                 Properties u = m.getAllUserDefinedParameters();
                 if (u == null) return;
@@ -416,6 +475,7 @@ public class ACLEncoder implements ACLConstants {
                         dumpString(u.getProperty(t));
                 }
         }
+
         /**
 	 * Dump <tt>:protocol</tt> message parameter. 
 	 * <tt>:protocol</tt> is the only message parameter (currently)
@@ -437,8 +497,16 @@ public class ACLEncoder implements ACLConstants {
 	 */
         private void dumpParam(String s, byte t) throws ACLCodec.CodecException {
                 if (s == null || s.length() < 1) return;
+
+                if (s.indexOf(' ') != -1) { // contains a blank inside
+                        if (s.charAt(0) != '"') {
+                                s = '"' + escape(s) + '"';
+                        }
+                }
+
                 /* Output appropriate message parameter code */
                 buf.add(t);
+
                 /* Check if the value is expression */
                 char f = s.charAt(0);
                 switch(f) {
@@ -446,12 +514,14 @@ public class ACLEncoder implements ACLConstants {
                         ex.fromString(s);
                         break;
                 case '#': case '\"':
+                        System.err.println("Dump string...");
                         dumpString(s);
                         break;
                 default:
                         dumpWord(s);
                 }
         }
+
         private void dumpContent(ACLMessage m) {
                 if (m == null) return;
                 if (m.hasByteSequenceContent()) {
@@ -480,6 +550,19 @@ public class ACLEncoder implements ACLConstants {
                         dumpString((String)m.getContent());
                 }
         }
+        /**
+	 * @see jade.lang.acl.StringACLCodec
+	 */
+        static private String escape(String s) {
+                StringBuffer result = new StringBuffer(s.length()+20);
+                for (int i=0; i < s.length(); i++)
+                        if (s.charAt(i) == '"' )
+                                result.append("\\\"");
+                        else
+                                result.append(s.charAt(i));
+                return result.toString();
+        }
+
         private class ExprParser {
                 private int level;
                 private int index;
@@ -487,9 +570,11 @@ public class ACLEncoder implements ACLConstants {
                 private ByteArray ba;
                 private String _str;
                 byte l;
+
                 public ExprParser() {
                         ba = new ByteArray();
                 }
+
                 public void fromString(String str) throws ACLCodec.CodecException {
                         byte b;
                         level = index = 0;
@@ -506,6 +591,7 @@ public class ACLEncoder implements ACLConstants {
                                 buf.add(l);
                         }
                 }
+
                 private void parse(byte b) throws ACLCodec.CodecException {
                         if (b == '(') {
                                 if (l == ACL_EXPR_LEVEL_DOWN ||
@@ -599,6 +685,7 @@ public class ACLEncoder implements ACLConstants {
                         while (len-- > 0) ba.add(getChar());
                         return new String(ba.get(), 0, ba.length());
                 }
+
                 private String getWord(byte b) {
                         ba.reset();
                         ba.add(b);
@@ -612,13 +699,14 @@ public class ACLEncoder implements ACLConstants {
                         }
                         return new String (ba.get(), 0, ba.length());
                 }
+
                 /**
 		 * Parse a StringLiteral
 		 * Syntax for StringLiteral: <br>
 	 	 * StringLiteral = "\"" ([~"\""]|"\\\"")* "\""
 		 *
 		 * @param b Previously parsed byte
-		 * @returns Parsed StringLiteral
+		 * @return Parsed StringLiteral
 		 */
                 private String getString(byte b) {
                         ba.reset();
@@ -648,6 +736,7 @@ public class ACLEncoder implements ACLConstants {
                         }
                         return new String (ba.get(), 0, ba.length());
                 }
+
                 private byte getChar() {
                         return (index < len)
                                 ? (byte) _str.charAt(index++)

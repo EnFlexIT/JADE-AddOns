@@ -1,5 +1,5 @@
 FIPA Message Representation in Bit-Efficient Encoding package.
-Version 0.1.7
+Version 0.1.8
 
 INTRODUCTION
 This package contains a Java implementation of FIPA Message
@@ -13,24 +13,18 @@ See LICENSE file for license information.
 
 SOFTWARE VERSIONS
 This version of the package was tested using the following software:
-  - JDK 1.3
-  - JADE 2.4/FIPA-OSv1.3.3
-
-Notice that this package contains either JADE version or FIPA-OS version; 
-not both.
-
+  - JDK 1.4.1
+  - JADE 2.61
 
 COMPILING
 Edit Rules.mk file. Especially check PLATFORM_CLASSES.
 Notice that the Makefiles are for gmake (Linux/Unix). In Windows 
 environment you may try cygwin package...or compile by hand...
 
-
 PACKAGE CONTENTS
 Enclosed in this package is the source code and binaries (jar file(s)) 
 for the bit-efficient FIPA message representation, and some 
 documentation. 
-
 
 GETTING STARTED
 examples/*.java :-)

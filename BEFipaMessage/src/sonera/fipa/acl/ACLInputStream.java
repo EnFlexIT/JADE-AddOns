@@ -30,8 +30,15 @@
      (add contributor names here)
 
 ====================================================================*/
+
+
+
+
+
 package sonera.fipa.acl;
+
 import sonera.fipa.util.ByteArray;
+
 import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -51,23 +58,33 @@ public class ACLInputStream extends BufferedInputStream
 	 * bit-efficient) 
 	 */
         private static ACLPerformatives as;
+
         /** ct Codetable */
         private DecoderCodetable ct;
+
         /** bn Bit-efficient Number */
         private BinNumber bn = new BinNumber();
+
         /** size Size of the codetable */
         private int size;
+
         /** ba Buffer for parsing tokens */
         private ByteArray ba = new ByteArray();
+
         /** bb Buffer for parsing numbers */
         private ByteArray bb = new ByteArray(32);
+
         /** m ACLMessage to which the parsed message is stored */
         private ACLMessage m;
+
         /** coding Coding scheme (with or without codetables) */
         private int coding;
+
         /** ex Expression parser */
         private ExprParser ex = new ExprParser();
+
         private byte [] blen = new byte[4];
+
         /**
 	 * Initialize the ACLInputStream. If this constructor is used,
 	 * the stream assumes that all messages are coded without 
@@ -114,15 +131,20 @@ public class ACLInputStream extends BufferedInputStream
                 m = new ACLMessage(0);
                 as = new ACLPerformatives();
         }
+
         public DecoderCodetable getCodeTable() {
                 return ct;
         }
         /**
 	 * Reads an ACL message from the input stream.
-	 * @returns The ACL message read.
+	 * @return The ACL message read.
 	 */
-        public ACLMessage readMsg() throws IOException,ACLCodec.CodecException {
+        public ACLMessage readMsg() throws Exception {
+
                 m.reset();
+
+
+
                 if (getCoding(getByte()) < 0)
                         throw new ACLCodec.CodecException("Unsupported coding", null);
                 if (getVersion(getByte()) < 0)
@@ -130,6 +152,7 @@ public class ACLInputStream extends BufferedInputStream
                 if (getType(getByte()) < 0)
                         throw new ACLCodec.CodecException("Unsupported type", null);
                 while (getMsgParam() != -1) ;
+
                 return m;
         }
         /**
@@ -153,13 +176,17 @@ public class ACLInputStream extends BufferedInputStream
         private int getType(byte b) throws ACLCodec.CodecException {
                 if (b == -1) return -1;
                 if (b != ACL_NEW_MSGTYPE_FOLLOWS) {
+
+
+
                         m.setPerformative (as.getCA (b));
+
                 } else {
                         throw new ACLCodec.CodecException("Can t handle user defined performatives", null);
                 }
                 return 0;
         }
-        private int getMsgParam() throws IOException, ACLCodec.CodecException {
+        private int getMsgParam() throws Exception {
                 byte b = getByte();
                 switch(b) {
                 case ACL_END_OF_MSG:
@@ -171,13 +198,21 @@ public class ACLInputStream extends BufferedInputStream
                         getReceivers();
                         return 0;
                 case ACL_MSG_PARAM_CONTENT:
+
                         getContent(m);
+
+
+
                         return 0;
                 case ACL_MSG_PARAM_REPLY_WITH:
                         m.setReplyWith(getParam());
                         return 0;
                 case ACL_MSG_PARAM_REPLY_BY:
+
                         m.setReplyByDate(getDate());
+
+
+
                         return 0;
                 case ACL_MSG_PARAM_IN_REPLY_TO:
                         m.setInReplyTo(getParam());
@@ -195,18 +230,18 @@ public class ACLInputStream extends BufferedInputStream
                         m.setProtocol(getParam());
                         return 0;
                 case ACL_MSG_PARAM_ENCODING:
-                        /*
-			 * FIPA-OS does not support :encoding parameter.
-			 * Anyway, we have to parse it, and then
-			 * discard it.
-			 */
                         m.setEncoding(getParam());
+
                         return 0;
                 case ACL_MSG_PARAM_CONVERSATION_ID:
                         m.setConversationId(getParam());
                         return 0;
                 case ACL_NEW_MSGPARAM_FOLLOWS:
+
+
+
                         m.addUserDefinedParameter(getParam(), getParam());
+
                         return 0;
                 }
                 throw new ACLCodec.CodecException("Unknown component or something like that", null);
@@ -228,8 +263,12 @@ public class ACLInputStream extends BufferedInputStream
                 return (getAID(b));
         }
         private AID getAID(byte t) throws IOException, ACLCodec.CodecException {
+
+
+
                 AID _aid = new AID();
                 byte b;
+
                 if (t != ACL_AID_FOLLOWS) {
                         if (t == ACL_END_OF_COLLECTION) return null;
                         throw new ACLCodec.CodecException("not an agent-identifier", null);
@@ -245,20 +284,35 @@ public class ACLInputStream extends BufferedInputStream
                         switch(b) {
                         case ACL_AID_ADDRESSES:
                                 while((b=getByte())!=ACL_END_OF_COLLECTION)
+
+
+
+
+
                                         _aid.addAddresses(getRealString(b));
+
                                 break;
                         case ACL_AID_RESOLVERS:
                                 while((b=getByte())!=ACL_END_OF_COLLECTION)
+
+
+
+
+
                                         _aid.addResolvers(getAID(b));
+
                                 break;
                         case ACL_AID_USERDEFINED:
                                 String key = getString();
                                 String value = getString();
-                                /*
-				 * FIPA-OS does not support user defined
-				 * paramters in Agent Identifier.
-				 */
+
+
+
+
+
+
                                 _aid.addUserDefinedSlot(key,value);
+
                                 break;
                         default:
                                 throw new ACLCodec.CodecException("Unexpected stuff in agent-identifier", null);
@@ -284,6 +338,11 @@ public class ACLInputStream extends BufferedInputStream
         private String getParam() throws IOException {
                 return ex.toText();
         }
+
+
+
+
+
         private void getContent(ACLMessage msg) throws IOException {
                 byte type = getByte();
                 if (type > 0x15 && type < 0x19) {
@@ -324,20 +383,15 @@ public class ACLInputStream extends BufferedInputStream
                         m.setContent(s);
                 }
         }
-        private Date getDate() throws IOException {
+        private Date getDate() throws Exception {
                 byte type = getByte();
                 ba.reset();
                 for (int i = 0; i < ACL_DATE_LEN; ++i) ba.add(getByte());
                 String s = new BinDate().fromBin(ba.get());
                 if ((type & 0x04) != 0x00) s += (char)getByte();
-                Date d = null;
-                try {
-                        d = ISO8601.toDate(s);
-                } catch (Exception e) {
-                        /* FIXME */
-                }
-                return d;
+                return (ISO8601.toDate(s));
         }
+
         private String getString() throws IOException {
                 byte type = getByte();
                 return getRealString(type);
@@ -372,12 +426,14 @@ public class ACLInputStream extends BufferedInputStream
                         s = ct.lookupStr(inputCode());
                         break;
                 case ACL_ABS_DATE_FOLLOWS: case ACL_ABS_DATET_FOLLOWS:
+
                         /* DateTimeToken */
                         for (i = 0; i < ACL_DATE_LEN; ++i) ba.add(getByte());
                         s = new BinDate().fromBin(ba.get());
                         if ((type & 0x01) != 0x00) s += (char)getByte();
                         break;
                 case ACL_DECNUM_FOLLOWS: case ACL_HEXNUM_FOLLOWS:
+
                         /* Number token */
                         bb.reset();
                         while(((b=getByte()) & 0x0f) != 0x00) bb.add(b);
@@ -452,7 +508,9 @@ public class ACLInputStream extends BufferedInputStream
                         ba.reset();
                         level = 0;
                         byte b, x;
+
                         boolean beginOfParameter = true;
+
                         while ((b = getByte())!=-1) {
                                 if (b >= 0x40 && b < 0x60) {
                                         /* Level UP */

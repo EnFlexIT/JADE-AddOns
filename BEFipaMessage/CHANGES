@@ -1,3 +1,11 @@
+[11-Mar-03] Version 0.1.8
+-- DateTimeToken parsing exceptions thrown to user (previously they were
+   silently discarded...)
+-- Fixed String handling in slot values (escaping, etc.)
+-- Improved documentation
+-- Makefile -> ant build.xml
+-- Some cleanups in the code
+
 [03-Sep-02] Version 0.1.7
 -- Fixed BLE content decoding when the length is between 1 and 256
 -- Made FIPA X2S modifications:

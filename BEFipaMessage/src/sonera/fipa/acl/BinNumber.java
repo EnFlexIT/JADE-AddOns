@@ -30,8 +30,17 @@
      (add contributor names here)
 
 ====================================================================*/
+
+
+
+
+
+
 package sonera.fipa.acl;
+
 import sonera.fipa.util.ByteArray;
+
+
 /**
  * Bitefficient number
  *
@@ -44,6 +53,7 @@ public class BinNumber extends BinRep {
         private Float fNumber;
         private ByteArray ba = new ByteArray(32);
         byte tag;
+
         public BinNumber() {}
         /**
 	 * Initialize BinNumber from Integer
@@ -89,12 +99,14 @@ public class BinNumber extends BinRep {
                         else d |= 0x00;
                         ba.add(d);
                 }
-                int div = 0;
                 if ((x % 2) == 0) { // Even, additional 0x00 to the end.
                         ba.add ((byte) 0x00);
                 }
                 return ba;
         }
+        /**
+	 * Converts String representation to ByteArray
+	 */
         public ByteArray toBin(String s) {
                 int x = s.length(), j = 0;
                 byte d;
