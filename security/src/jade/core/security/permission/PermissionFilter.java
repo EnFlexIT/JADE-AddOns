@@ -73,7 +73,7 @@ public class PermissionFilter extends Filter {
     private AgentContainer myContainer;
     private Profile myProfile;
 
-    private JADEAccessController myJADEAccessController;
+    //private JADEAccessController myJADEAccessController;
 
     private boolean direction;
 
@@ -83,11 +83,8 @@ public class PermissionFilter extends Filter {
       this.myContainer = myContainer;
       this.myProfile = myProfile;
 
-      // it is unique for the service (for both filters)
-      myJADEAccessController = service.getJADEAccessController();
-
-      // the PermissionService acts also as NameAuthority
-      ((JADEAccessControllerImpl)myJADEAccessController).setNameAuthority( service );
+      // create the JADEAccessController, it is unique for the service (for both filters)
+      //service.getJADEAccessController();
 
       this.direction=direction;
 
@@ -98,7 +95,6 @@ public class PermissionFilter extends Filter {
         try {
           ctFiller = (CheckerTableFiller) Class.forName(fillerClass).newInstance();
           // Load rows into the checkerTable by using a custom CheckerTableFiller
-          ctFiller.setDirection( direction );
           ctFiller.fillChecherTable( this );
         }
         catch (Exception ex) {
@@ -110,13 +106,16 @@ public class PermissionFilter extends Filter {
       }
     }
 
+    public boolean getDirection() { return direction; }
+    public String getNodeName() { return myContainer.getNodeDescriptor().getName(); }
+    
 
     /**
      *    Load rows into the checkerTable.
      */
     protected void fillCheckerTable() {
       SimpleJADEChecker.setDefaultProfile( myProfile );
-      SimpleJADEChecker.setDefaultJADEAccessController( myJADEAccessController );
+      SimpleJADEChecker.setDefaultJADEAccessController( service.getJADEAccessController() );
       SimpleJADEChecker.setDefaultContainer( myContainer );
       SimpleJADEChecker.setDefaultPermissionService( service );
 
@@ -321,6 +320,5 @@ public class CheckerTable {
 
 public interface CheckerTableFiller {
       public void fillChecherTable( PermissionFilter pf );
-      public void setDirection(boolean direction);
-}
+  }
 } // end class PermissionFilter

@@ -57,6 +57,7 @@ import jade.util.Logger;
 import jade.core.security.authentication.OwnershipCertificate;
 import java.util.Enumeration;
 import java.io.*;
+import jade.security.impl.JADEAccessControllerImpl;
 
 
 
@@ -92,7 +93,7 @@ public class PermissionService
     private PermissionFilter permFilterUp = null;
     private PermissionFilter permFilterDown = null;    
 
-    // unique for both filters
+    // unique for both filters, it is instantiated the first time you call getJADEAccessController()
     private JADEAccessController myJADEAccessController = null;
 
     static final String NAME = "jade.core.security.permission.Permission";
@@ -397,6 +398,10 @@ public class PermissionService
           null, 
           policyFileName
         );
+
+        // the PermissionService acts also as NameAuthority
+        ( (JADEAccessControllerImpl) myJADEAccessController ).setNameAuthority( this );
+
       }
 
       return myJADEAccessController;
