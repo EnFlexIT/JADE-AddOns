@@ -1,6 +1,7 @@
 package test.common.xml;
 
 import jade.util.leap.HashMap;
+import jade.util.leap.Serializable;
 
 /**
  * @author Elisabetta Cortese - TiLab
@@ -8,7 +9,7 @@ import jade.util.leap.HashMap;
  */
 
 // FOR EACH TEST
-public class TestDescriptor {
+public class TestDescriptor implements Serializable {
 	
 	private String name = "";
 	private boolean skip = false;

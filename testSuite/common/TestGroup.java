@@ -33,7 +33,7 @@ import test.common.xml.*;
    require similar configurations
    @author Giovanni Caire - TILAB
  */
-public class TestGroup {
+public class TestGroup implements Serializable {
 	//private String[] testClassNames;
 	private TestDescriptor[] myTests;
 	private int cnt;

@@ -24,11 +24,12 @@ Boston, MA  02111-1307, USA.
 package test.common;
 import jade.util.leap.HashMap;
 import jade.util.leap.Iterator;
+import jade.util.leap.Serializable;
 
 /**
    @author Giovanni Caire - TILAB
  */
-public class Expectation {
+public class Expectation implements Serializable {
 	private int receivedCnt = 0;
 	private HashMap expected = new HashMap();
 	

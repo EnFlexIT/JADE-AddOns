@@ -1,10 +1,12 @@
 package test.common.xml;
 
+import jade.util.leap.Serializable;
+
 /**
  * @author Elisabetta Cortese - TiLab
  *
  */
-public class FunctionalityDescriptor {
+public class FunctionalityDescriptor  implements Serializable {
 
 	private String nameT = "";
 	private String testerClassName ="";

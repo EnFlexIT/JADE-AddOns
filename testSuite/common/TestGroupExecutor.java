@@ -71,12 +71,8 @@ public class TestGroupExecutor extends FSMBehaviour {
 	// Flag indicating whether the execution is currently paused
 	private boolean inPause = false;
 	
-	// The Logger used to handle outputs
-	private Logger l;
-
 	public TestGroupExecutor(Agent a, TestGroup tg) {
 		super(a);
-		l = Logger.getLogger();
 		
 		if (tg == null) {
 			throw new IllegalArgumentException("Null test group");
@@ -101,7 +97,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 					tests.initialize(myAgent);
 				}
 				catch (TestException te) {
-					l.log("Error in TestGroup initialization. Abort");
+					log("Error in TestGroup initialization. Abort");
 					te.printStackTrace();
 					aborted = true;
 				}
@@ -128,7 +124,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 						sb.append("WHAT: "+td.getWhat()+"\n");
 						sb.append("HOW:  "+td.getHow()+"\n");
 						sb.append("PASSED WHEN: "+td.getPassedWhen()+"\n\n");
-						l.log(sb.toString());
+						log(sb.toString());
 						Behaviour b2 = currentTest.load(myAgent, getDataStore(), TEST_RESULT_KEY);
 						registerState(b2, EXECUTE_TEST_STATE);
 						
@@ -144,8 +140,8 @@ public class TestGroupExecutor extends FSMBehaviour {
 				}
 				catch (TestException te) {
 					// Some problems occured initializing this test. Skip it
-					l.log("Problems in test initialization ["+te.getMessage()+"]");
-					l.log("Skip this test.");
+					log("Problems in test initialization ["+te.getMessage()+"]");
+					log("Skip this test.");
 					skippedCnt++;
 					ret = SKIP;
 				}
@@ -180,7 +176,7 @@ public class TestGroupExecutor extends FSMBehaviour {
   			}
   			catch (Exception e) {
   				// Just print a warning
-  				l.log("Warning: Exception in test cleaning ["+e.getMessage()+"]");
+  				log("Warning: Exception in test cleaning ["+e.getMessage()+"]");
   			}
   			finally {
   				try {
@@ -190,15 +186,15 @@ public class TestGroupExecutor extends FSMBehaviour {
   			}
   			
 				if (result == Test.TEST_PASSED) {
-  				l.log("Test PASSED");
+  				log("Test PASSED");
   				passedCnt++;
   			}
   			else if (result == Test.TEST_FAILED) {
-  				l.log("Test FAILED");
+  				log("Test FAILED");
   				failedCnt++;
   			}
   			else {
-  				l.log("WARNING: Test result not available!!!");
+  				log("WARNING: Test result not available!!!");
   				skippedCnt++;
   			}
 			}			
@@ -218,7 +214,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 	    		if (skippedCnt > 0) {
   	  			sb.append(skippedCnt+" tests SKIPPED due to initailization/termination problems\n");
     			}	
-    			l.log(sb.toString());
+    			log(sb.toString());
     		
 					tests.shutdown(myAgent);
 				}
@@ -270,6 +266,10 @@ public class TestGroupExecutor extends FSMBehaviour {
 		while (myAgent.receive() != null) {
 			;
 		}
+	}
+	
+	private void log(String s) {
+		Logger.getLogger().log(s);
 	}
 }
 

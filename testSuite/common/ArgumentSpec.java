@@ -23,12 +23,14 @@ Boston, MA  02111-1307, USA.
 
 package test.common;
 
+import jade.util.leap.Serializable;
+
 /**
    Class representing the specification for a generic argument of a 
    test group
    @author Giovanni Caire - TILAB
  */
-public class ArgumentSpec {
+public class ArgumentSpec implements Serializable {
 	private String name;
 	private String label;
 	private String value;
@@ -55,17 +57,9 @@ public class ArgumentSpec {
 		return name;
 	}
 	
-	/*public void setName(String n) {
-		name = n;
-	}*/
-	
 	public String getLabel() {
 		return label;
 	}
-	
-	/*public void setDescription(String d) {
-		description = d;
-	}*/
 	
 	public String getValue() {
 		return value;
@@ -78,10 +72,6 @@ public class ArgumentSpec {
 	public String getDefaultValue() {
 		return defaultValue;
 	}
-	
-	/*public void setDefaultValue(String v) {
-		defaultValue = v;
-	}*/
 	
 	public boolean isMandatory() {
 		return mandatory;

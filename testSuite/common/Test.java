@@ -37,7 +37,7 @@ import java.util.Hashtable;
    executed within the JADE test suite
    @author Giovanni Caire - TILAB
  */
-public abstract class Test {
+public abstract class Test implements Serializable {
 	/** Constant value indicating that a test has been completed successfully */
 	public static final int TEST_PASSED = 1;
 	/** Constant value indicating that a test has NOT been completed successfully */
