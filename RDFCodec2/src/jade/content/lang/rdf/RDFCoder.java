@@ -1,0 +1,221 @@
+/**
+ * ***************************************************************
+ * JADE - Java Agent DEvelopment Framework is a framework to develop
+ * multi-agent systems in compliance with the FIPA specifications.
+ * Copyright (C) 2000 CSELT S.p.A.
+ * 
+ * GNU Lesser General Public License
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation,
+ * version 2.1 of the License.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA  02111-1307, USA.
+ * **************************************************************
+ */
+
+package jade.content.lang.rdf;
+
+import jade.content.lang.Codec;
+import jade.content.onto.Ontology;
+import jade.content.onto.BasicOntology;
+import jade.content.onto.OntologyException;
+import jade.content.abs.AbsContentElement;
+import jade.content.abs.AbsContentElementList;
+import jade.content.abs.AbsObject;
+import jade.content.abs.AbsAggregate;
+import jade.content.abs.AbsPrimitive;
+import jade.content.schema.ObjectSchema;
+import jade.lang.acl.ISO8601;
+import starlight.util.Base64;
+import java.util.Date;
+
+/**
+ * @author Rosalba Bochicchio - TELECOM ITALIA LAB
+ */
+
+class RDFCoder {		
+                   				
+	String ontologyName=null;
+	Ontology ontology;
+	boolean description=false;
+	boolean type=false;
+	
+	protected void setOntology(Ontology o) {
+		ontology = o;
+		ontologyName=o.getName();
+	}
+	
+
+	String normalizeString(String text) {
+		String temp;
+			
+		if ((text.indexOf("<")>-1) || (text.indexOf(">")>-1)) {
+			temp = new String();
+			
+			for (int i=0; i < text.length(); i++) 
+				switch (text.charAt(i)) {
+					case '>':
+						temp = temp.concat("&gt;");
+						break;
+					case '<':
+						temp = temp.concat("&lt;");
+						break;
+					default:
+						temp = temp.concat(String.valueOf(text.charAt(i)));
+				}
+		} else temp = text;
+				
+		return temp;
+	}
+		
+	void encodeAggregateAsTag(AbsObject content, String tag, StringBuffer sb) throws Codec.CodecException {
+		AbsAggregate absAggregate = (AbsAggregate)content;
+		for (int i=0; i < absAggregate.size(); i++) 
+			encodeAsTag(absAggregate.get(i), null, tag, sb);
+			
+	}
+	
+	void encodeAsTag(AbsObject content, String slotExpectedType, String tag, StringBuffer sb) throws Codec.CodecException{ 
+  
+    	boolean hasChild = false;
+    	boolean hasAttributes = false;
+    	String startTag;
+    	String closeTag;
+		
+		try {   
+					
+			// Encoding a ContentElementList
+			if (content instanceof AbsContentElementList) {		
+				sb.append("<fipa-rdf:CONTENT_ELEMENT_LIST>");
+				sb.append("<rdf:Description>");
+				AbsContentElementList absCEList = (AbsContentElementList)content;
+				for (int i=0; i < absCEList.size(); i++) {
+					AbsObject temp = (AbsObject)absCEList.get(i);		
+					encodeAsTag(temp, temp.getTypeName(), null, sb);
+				}
+				sb.append("</rdf:Description>");
+				sb.append("</fipa-rdf:CONTENT_ELEMENT_LIST>");
+				return;
+			}
+		
+			// Encoding a Primitive 
+    		if (content instanceof AbsPrimitive) {
+    			AbsPrimitive absPrimitive = (AbsPrimitive)content;
+    			String typeName = ((AbsObject)absPrimitive).getTypeName();
+    			String temp = null;
+    			sb.append("<"+ontologyName+":"+tag+">");
+    			Object v = absPrimitive.getObject();
+				if (typeName.equals(BasicOntology.DATE))
+	    			temp = ISO8601.toString((Date)v);
+				else if (typeName.equals(BasicOntology.FLOAT) ||
+						 typeName.equals(BasicOntology.INTEGER))
+		  			temp = v.toString();
+		  		else if (typeName.equals(BasicOntology.BYTE_SEQUENCE))
+		  			temp = String.copyValueOf(Base64.encode((byte [])v));
+		  		else temp = normalizeString(((AbsObject)absPrimitive).toString());
+				sb.append(temp);		
+				sb.append("</"+ontologyName+":"+tag+">");
+				return;
+				
+			}
+		
+			// Encoding an Aggregate
+			if (content instanceof AbsAggregate) {
+    			encodeAggregateAsTag(content, tag, sb);  
+    			return;
+    		}
+
+		
+			// Encoding a Concept
+			ObjectSchema currSchema = ontology.getSchema(content.getTypeName()); 	
+    		if (tag==null) {
+    			startTag = "fipa-rdf:CONTENT_ELEMENT";		
+    			closeTag = "fipa-rdf:CONTENT_ELEMENT";
+    		} else {
+    			startTag = new String(tag);
+    			closeTag = startTag;
+    		}
+    	
+    		if (slotExpectedType!=null) {
+    				if (!(currSchema.getTypeName().equals(slotExpectedType))) {
+	   					//startTag = startTag.concat(" fipa-rdf:type=\""+currSchema.getTypeName() + "\"");	   					startTag = startTag.concat(" fipa-rdf:type=\""+currSchema.getTypeName() + "\"");
+	   					 description=true;
+	   					 type=true;
+						}
+
+    		}
+    		if (startTag.equals("fipa-rdf:CONTENT_ELEMENT")){    		
+    			sb.append("<");
+				sb.append(startTag);
+    			sb.append(">");
+    			sb.append("<rdf:Description>");
+    			sb.append("<fipa-rdf:type>");
+    			sb.append(content.getTypeName());
+    			sb.append("</fipa-rdf:type>");
+    			}
+    		else if (startTag.equals("fipa-rdf:CONTENT_ELEMENT_LIST")){
+    			sb.append("<");
+				sb.append(startTag);
+    			sb.append(">");
+    			}
+
+    		else {
+    			
+    			sb.append("<");
+				sb.append(ontologyName+":"+startTag);													
+    			sb.append(">");   
+    				sb.append ("<rdf:Description>");
+    				if(type){
+    		         	 sb.append("<fipa-rdf:type>");
+    			         sb.append(currSchema.getTypeName());
+    			         sb.append("</fipa-rdf:type>");
+    			         type=false;
+    			         }
+    			}
+     			
+    			
+    		String[] names = content.getNames();
+	   		for (int i=0; i < names.length; i++) {
+    			AbsObject temp = content.getAbsObject(names[i]);
+   				encodeAsTag(temp, currSchema.getSchema(names[i]).getTypeName(), names[i], sb);
+    		} 
+    		if (startTag.equals("fipa-rdf:CONTENT_ELEMENT")){
+    			sb.append("</rdf:Description>");
+    			sb.append("</");
+    			sb.append(closeTag);
+    			sb.append(">");
+    			}
+    		else if (startTag.equals("fipa-rdf:CONTENT_ELEMENT_LIST")){
+    			sb.append("</rdf:Description>");
+    			sb.append("</");
+    			sb.append(closeTag);
+    			sb.append(">");
+    			}
+ 
+			else{  
+			sb.append("</rdf:Description>");
+    		sb.append("</");
+    		sb.append(ontologyName+":"+closeTag);
+    		sb.append(">");
+    		
+    		
+    	}
+    	 } catch (OntologyException e) {
+    		e.printStackTrace();	
+		 } catch (Exception e) {
+		 	throw new Codec.CodecException(e.getMessage());
+		 }
+	}	
+
+	
+}
