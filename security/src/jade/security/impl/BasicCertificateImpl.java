@@ -25,6 +25,8 @@ Boston, MA  02111-1307, USA.
 package jade.security.impl;
 
 import jade.security.*;
+import jade.core.security.util.SecurityData;
+import jade.core.security.util.CredentialsEngine;
 
 import jade.util.leap.ArrayList;
 import jade.util.leap.Iterator;
@@ -33,46 +35,50 @@ import jade.util.leap.List;
 import java.security.Permission;
 
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Vector;
 
+import java.io.*;
 
-public class BasicCertificateImpl implements jade.util.leap.Serializable {
+//public class BasicCertificateImpl implements jade.security.JADECertificate, jade.util.leap.Serializable {
+public class BasicCertificateImpl implements jade.security.JADECertificate {
 	
-	JADEPrincipal subject;
-	JADEPrincipal issuer;
-	JADEPrincipal initiator;
+	private JADEPrincipal subject;
+	private JADEPrincipal issuer;
+	private JADEPrincipal initiator;
 	
-	Date notBefore;
-	Date notAfter;
+	private Date notBefore;
+	private Date notAfter;
 
-	long serial;
+	private long serial;
 	
-	ArrayList permissions = new ArrayList();
+	private ArrayList permissions = new ArrayList();
 	
-	byte[] signature;
+	private SecurityData signature;
 	
 	public BasicCertificateImpl() {
 	}
 
-	BasicCertificateImpl(byte[] encoded) throws CertificateException {
+	public BasicCertificateImpl(byte[] encoded) throws CertificateException {
 		String[] lines = new String(encoded).split("\n");
 
 		setSubject(decodePrincipal(lines[0]));
 		setNotBefore(decodeDate(lines[1]));
 		setNotAfter(decodeDate(lines[2]));
-		setSignature(decodeBytes(lines[3]));
+		this.signature.data = decodeBytes(lines[3]);
 
 		for (int i = 4; i < lines.length; i++) {
 			addPermission(decodePermission(lines[i]));
 		}
 	}
 
-	BasicCertificateImpl(String encoded) throws CertificateException {
+	public BasicCertificateImpl(String encoded) throws CertificateException {
 		String[] lines = encoded.split("\n");
 
 		setSubject(decodePrincipal(lines[0]));
 		setNotBefore(decodeDate(lines[1]));
 		setNotAfter(decodeDate(lines[2]));
-		setSignature(decodeBytes(lines[3]));
+		this.signature.data = decodeBytes(lines[3]);
 
 		for (int i = 4; i < lines.length; i++) {
 			addPermission(decodePermission(lines[i]));
@@ -127,11 +133,11 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		return notAfter;
 	}
 	
-	public void setSignature(byte[] signature) {
+	public void setSignature(SecurityData signature) {
 		this.signature = signature;
 	}
 
-	public byte[] getSignature() {
+	public SecurityData getSignature() {
 		return signature;
 	}
 	
@@ -152,19 +158,58 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		return toString().getBytes();
 	}
 
+  /*
+   * Implementation of "Credentials.decode()".
+   * Currently the encoding only contains the Subject and the Signature 
+   */
+  public Credentials decode(byte[] enc) throws IOException {
+    DataInputStream in = new DataInputStream(new ByteArrayInputStream(enc));
+    // Decodes the subject Principal
+    int size = in.readInt();
+    byte[] data = new byte[size];
+    in.read(data,0,size);
+    subject = CredentialsEngine.decodePrincipal(data);
+    // Decode the signature
+    size = in.readInt();
+    data = new byte[size];
+    in.read(data,0,size);
+    signature = CredentialsEngine.decodeSignature(data);    
+    return this;
+  }
+  
+  /*
+   * Implementation of "Credentials.encode()".
+   * Currently only encodes the Subject and the Signature 
+   */
+  public byte[] encode() throws IOException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    DataOutputStream out = new DataOutputStream(baos);
+    // Writes the subject
+    byte[] tmp = CredentialsEngine.encodePrincipal(subject);
+    out.writeInt(tmp.length);
+    out.write(tmp,0,tmp.length);
+    // Write the signature
+    tmp = CredentialsEngine.encodeSignature(signature);
+    out.writeInt(tmp.length);
+    out.write(tmp,0,tmp.length);
+    // Flush
+    return baos.toByteArray();
+  }
+
+  /*
+   * Prints out this certificate.
+   * As this method is also used by encode to compute the signature,
+   * The printout must not contain the signature
+   */
 	public String toString() {
 		StringBuffer str = new StringBuffer();
-
 		str.append(encodePrincipal(subject)).append('\n');
 		str.append(encodeDate(notBefore)).append('\n');
 		str.append(encodeDate(notAfter)).append('\n');
-		str.append(encodeBytes(signature)).append('\n');
-
 		for (Iterator i = getPermissions().iterator(); i.hasNext(); ) {
 			Permission p = (Permission)i.next();
 			str.append(encodePermission(p)).append('\n');
 		}
-
 		return str.toString();
 	}
 	
@@ -189,7 +234,7 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		return new java.math.BigInteger(+1, b).toString(16);
 	}
 	
-	static byte[] decodeBytes(String s) {
+	static private byte[] decodeBytes(String s) {
 		if (s.equals("null"))
 			return null;
 
@@ -200,10 +245,10 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		if (p == null)
 			return "null";
 
-		return p.getClass().getName() + ' ' + p.getName();
+		return p.getClass().getName() + ' ' + p.toString();
 	}
 	
-	static JADEPrincipal decodePrincipal(String s) {
+	static private JADEPrincipal decodePrincipal(String s) {
 		if (s.equals("null"))
 			return null;
 
@@ -218,7 +263,7 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		return p;
 	}
 	
-	static String encodePermission(Permission p) {
+	static private String encodePermission(Permission p) {
 		if (p == null)
 			return "null";
 
@@ -232,7 +277,7 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		return str.toString();
 	}
 	
-	static Permission decodePermission(String s) {
+	static private Permission decodePermission(String s) {
 		if (s.equals("null"))
 			return null;
 
@@ -251,7 +296,7 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		return createPermission(type, name, actions);
 	}
 
-	static Permission createPermission(String type, String name, String actions) {
+	static private Permission createPermission(String type, String name, String actions) {
 		Permission p = null;
 		try {
 			if (actions != null)
@@ -266,4 +311,19 @@ public class BasicCertificateImpl implements jade.util.leap.Serializable {
 		}
 		return p;
 	}
+
+
+      // --- implementation of Credentials interface
+      public JADEPrincipal getOwner() {
+        return null;
+      }
+    
+      public Enumeration elements() {
+        Vector v = (new Vector(1));
+        v.add(this);
+        return v.elements();
+      }
+    
+
+
 }

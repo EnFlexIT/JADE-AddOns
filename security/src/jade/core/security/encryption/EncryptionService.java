@@ -1,0 +1,132 @@
+/*****************************************************************
+JADE - Java Agent DEvelopment Framework is a framework to develop
+multi-agent systems in compliance with the FIPA specifications.
+Copyright (C) 2000 CSELT S.p.A.
+
+GNU Lesser General Public License
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation,
+version 2.1 of the License.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA  02111-1307, USA.
+*****************************************************************/
+
+package jade.core.security.encryption;
+
+//#MIDP_EXCLUDE_FILE
+
+import jade.core.ServiceFinder;
+import jade.core.HorizontalCommand;
+import jade.core.VerticalCommand;
+import jade.core.GenericCommand;
+import jade.core.Service;
+import jade.core.BaseService;
+import jade.core.ServiceException;
+import jade.core.Sink;
+import jade.core.Filter;
+import jade.core.Node;
+
+import jade.core.Profile;
+import jade.core.Agent;
+import jade.core.AID;
+import jade.core.CaseInsensitiveString;
+import jade.core.ContainerID;
+import jade.core.Location;
+import jade.core.AgentContainer;
+import jade.core.MainContainer;
+
+import jade.core.ProfileException;
+import jade.core.IMTPException;
+import jade.core.NameClashException;
+import jade.core.NotFoundException;
+import jade.core.UnreachableException;
+
+import jade.core.ServiceHelper;
+
+
+/**
+ * Implementation of the EncryptionService,
+ * which role is to encrypt or decrupt messages before they are delivered to agents
+ * Incoming messages: must have been previously verified by the SignatureService
+ * and need then to be decoded by the EncodingService
+ * Outgoing messages: must have been encoded by the EncodingService
+ * and need then to be signed by the SignatureService
+ *
+ * @author Nicolas Lhuillier - Motorola Labs
+ * @author jerome Picault - Motorola Labs
+ */
+public class EncryptionService extends BaseService {
+
+  // the filter performing the real authorization check
+  private EncryptionFilter filter;
+
+  // logging verbosity
+  private int verbosity;
+
+  private static final String VERBOSITY_KEY = "jade_core_security_SecurityService_verbosity";
+
+  public String getName() {
+    return EncryptionSlice.NAME;
+  }
+
+  public void init(AgentContainer ac, Profile p) throws ProfileException {
+    super.init(ac, p);
+
+    // set verbosity level for logging
+    try {
+      verbosity = Integer.parseInt(p.getParameter(VERBOSITY_KEY,"0"));
+    }
+    catch (Exception e) {
+      // Ignore and keep default (0)
+    }
+
+    // create and initialize the filter of this service
+    filter = new EncryptionFilter();
+    filter.init(ac);
+  }
+
+  public Filter getCommandFilter(boolean direction) {
+
+    if (direction == Filter.INCOMING) {
+      return filter.in;
+    }
+    else {
+      return filter.out;
+    }
+
+  }
+
+  /* *****************************************************
+   *   Dummy implementation of Sink and Slice interfaces
+   * *****************************************************/
+
+  public Class getHorizontalInterface() {
+    return null;
+  }
+
+  public Service.Slice getLocalSlice() {
+    return null;
+  }
+
+  public Sink getCommandSink(boolean side) {
+    return null;
+  }
+
+  public String[] getOwnedCommands() {
+    return null;
+  }
+
+  public ServiceHelper getHelper(Agent a) {
+    return null;
+  }
+}
