@@ -69,9 +69,12 @@ public class TestSuiteAgent extends GuiAgent {
 	public static final int GO_EVENT = 6;
 	public static final int EXIT_EVENT = 7;
 
-	// for each tester we save results, on the end 
-	// print the content in a report
-	private HashMap risultati = new HashMap();
+	// Maps a tester with the results of the tests it performed 
+	// Used in RUN_ALL to print the final report
+	private HashMap runAllResults = new HashMap();
+	private boolean runAllOngoing = false;
+	
+	// The tester agent that is currently loaded
 	private String currentTester;
 	
 	private Codec codec;	
@@ -119,7 +122,7 @@ public class TestSuiteAgent extends GuiAgent {
 			System.out.println("TestSuiteAgent handling RUN event");
 			// The user pressed "Run"
 			// Add a behaviour that makes the currently loaded tester agent execute
-			// its test group and, on completion, sets the GUI status to READY
+			// its test group and, on completion, sets the GUI status back to READY
 			addBehaviour(new Requester(this, new Execute(false)) {
 				public int onEnd() {
 					myGui.setStatus(TestSuiteGui.READY_STATE);
@@ -129,23 +132,34 @@ public class TestSuiteAgent extends GuiAgent {
 			break;
 		case RUNALL_EVENT:
 			System.out.println("TestSuiteAgent handling RUNALL event");
-			// The user pressed "RunAll"
+			// The user pressed "RunAll". 
 			FunctionalityDescriptor[] allFunc = (FunctionalityDescriptor[]) ev.getParameter(0);
-			ArrayList l = new ArrayList();
+			final ArrayList l = new ArrayList();
 			if (allFunc != null) {
 				for(int i = 0; i < allFunc.length; i++){
 					l.add(i, allFunc[i]);
 				}
-			// Add a behaviour that execute all testers, that are listed in 
-			// xml file and, on completion, sets the GUI status to IDLE
-				addBehaviour(new AllTesterExecutor(this, l));
+				// Add a behaviour that executes all testers in sequence. If there is 
+				// a tester currently loaded, kill it before.
+				if(myGui.getStatus() == TestSuiteGui.IDLE_STATE){
+					addBehaviour(new AllTesterExecutor(this, l));
+				}
+				else {
+					addBehaviour(new Requester(this, new Exit()){
+						public int onEnd() {
+							waitABit();
+							addBehaviour(new AllTesterExecutor(myAgent, l));
+							return 0;
+						}							
+					});
+				}
 			}
 			break;
 		case DEBUG_EVENT: 
 			System.out.println("TestSuiteAgent handling DEBUG event");
 			// The user pressed "Debug"
 			// Add a behaviour that makes the currently loaded tester agent execute
-			// its test group in debug-mode and, on completion, sets the GUI status to READY
+			// its test group in debug-mode and, on completion, sets the GUI status back to READY
 			addBehaviour(new Requester(this, new Execute(true)) {
 				public int onEnd() {
 					myGui.setStatus(TestSuiteGui.READY_STATE);
@@ -157,7 +171,7 @@ public class TestSuiteAgent extends GuiAgent {
 			System.out.println("TestSuiteAgent handling CONFIGURE event");
 			// The user pressed "Configure"
 			// Add a behaviour that makes the currently loaded tester agent show
-			// the test group configuration gui and, on completion, sets the GUI status to READY
+			// the test group configuration gui and, on completion, sets the GUI status back to READY
 			addBehaviour(new Requester(this, new Configure()) {
 				public int onEnd() {
 					myGui.setStatus(TestSuiteGui.READY_STATE);
@@ -176,7 +190,7 @@ public class TestSuiteAgent extends GuiAgent {
 			System.out.println("TestSuiteAgent handling GO event");
 			// The user pressed "Run" while the currently loaded tester agent is executing his test group 
 			// Add a behaviour that makes the currently loaded tester agent resume
-			// the execution of its test group in non-debug-mode
+			// the execution of its test group in normal-mode
 			addBehaviour(new Requester(this, new Resume(false)));
 			break;
 		case EXIT_EVENT: 
@@ -203,71 +217,69 @@ public class TestSuiteAgent extends GuiAgent {
 	private void loadTester(String className) {
 		try {
 			TestUtility.createAgent(this, TESTER_NAME, className, new String[] {new String("true")}, getAMS(), null);
-			myGui.setCurrentF(className);			
-			myGui.setStatus(TestSuiteGui.READY_STATE);
+			myGui.setCurrentF(className);		
+			if (!runAllOngoing) {
+				myGui.setStatus(TestSuiteGui.READY_STATE);
+			}
 		}
 		catch (Exception e) {
 			System.out.println("Error loading tester agent. ");
 			e.printStackTrace();
-			myGui.setStatus(TestSuiteGui.IDLE_STATE);
-		}
-	}
-
-	private void waitABit() {
-		try {
-			Thread.sleep(1000);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
+			if (!runAllOngoing) {
+				myGui.setStatus(TestSuiteGui.IDLE_STATE);
+			}
 		}
 	}
 
 	/**
 	 * INNER CLASS: AllTesterExecutor
-	 * This class extends <code>ListProcessor</code>, it used to 
-	 * execute all tester in sequence: each tester start only when
+	 * This behaviour executes a sequence of TesterAgents one by one.
+	 * On completion, print a report and, as no tester is alive, 
+	 * set the GUI status to IDLE.
 	 */
 	class AllTesterExecutor extends ListProcessor{
 		
-		ArrayList functionalities;
-		
 		public AllTesterExecutor(Agent a, ArrayList l){
 			super(a, l);
-			functionalities = l;
 		}
-
-		// take tester to run and its order in the list
-		protected void processItem(Object item, int index){
-		  		int order = index;
-		  		FunctionalityDescriptor func = (FunctionalityDescriptor) item;
-		  		myAgent.addBehaviour(new SingleTesterExecutor(myAgent, func, order, this));
-		  		pause();
+			
+		public void onStart() {
+			myGui.setStatus(TestSuiteGui.RUNNING_STATE);
+			runAllOngoing = true;
 		}
 		
-  		public int onEnd() {
-			// FIXME: PRINT A REPORT
+		// take tester to run and its order in the list
+		protected void processItem(Object item, int index){
+  		FunctionalityDescriptor fDsc = (FunctionalityDescriptor) item;
+  		myAgent.addBehaviour(new SingleTesterExecutor(myAgent, fDsc, this));
+  		pause();
+		}
+		
+  	public int onEnd() {
 			System.out.println(" ");
 			System.out.println(" ");
 			System.out.println("************ FINAL REPORT ****************");
 			System.out.println(" ");
-			for(int i = 0; i < functionalities.size(); i++){	
-				String tester = ((FunctionalityDescriptor)functionalities.get(i)).getTesterClassName();
-				try{
-					ArrayList ar = (ArrayList)risultati.get(tester);
-					System.out.println("Tester:  "+tester);
-					System.out.println("Passed:  "+((Integer)ar.get(0)).intValue());
-					System.out.println("Falled:  "+((Integer)ar.get(1)).intValue());
-					System.out.println("Skipped: "+((Integer)ar.get(2)).intValue());
-					System.out.println("-----------------------------------------------");
-				}catch(Exception ex){
-					System.out.println("Some errore is verified.");
-					System.out.println("-----------------------------------------------");
+			for(int i = 0; i < items.size(); i++){	
+				FunctionalityDescriptor fDsc = (FunctionalityDescriptor) items.get(i);
+				String className = fDsc.getTesterClassName();
+				ExecResult res = (ExecResult) runAllResults.get(className);
+				System.out.println("Functionality:  "+fDsc.getName());
+				if (res != null) {
+					System.out.println("Passed:  "+res.getPassed());
+					System.out.println("Failed:  "+res.getFailed());
+					System.out.println("Skipped: "+res.getSkipped());
 				}
+				else {
+					System.out.println("No result available");
+				}
+				System.out.println("-----------------------------------------------");
 			}
+			runAllOngoing = false;
+			myGui.setCurrentF(null);		
 			myGui.setStatus(TestSuiteGui.IDLE_STATE);
-			myGui.setEnabled(true);
-  			return 0;
-  		}  			
+  		return 0;
+  	}  			
 	}
 	
 	/**
@@ -277,51 +289,28 @@ public class TestSuiteAgent extends GuiAgent {
 		
 		private String testerName= null;
 		private ListProcessor lpToBeResumed;
-		private int testerOrd = 0;
 		
-		public SingleTesterExecutor(Agent a, FunctionalityDescriptor f, int i, ListProcessor l){
+		public SingleTesterExecutor(Agent a, FunctionalityDescriptor f, ListProcessor l){
 			super(a);
 			testerName = f.getTesterClassName();
-			testerOrd = i;
 			lpToBeResumed = l;
 			
-			// Once called
-			if( i == 0 && myGui.getStatus() != TestSuiteGui.IDLE_STATE){
-				System.out.println("KILL!!!");
-				addSubBehaviour(new Requester(myAgent, new Exit()){
-					public int onEnd() {
-						try {
-							Thread.sleep(1000);
-						}
-						catch (Exception e) {
-							e.printStackTrace();
-						}
-						return 0;
-					}							
-				});
-			} 	
-
-			// 1td Step: Load a tester ti run
+			// 1st Step: Load the tester to run
 			addSubBehaviour(new OneShotBehaviour(myAgent){
 				public void action(){
-					System.out.println("LOADED TESTER: "+testerName);
+					System.out.println("Loading TESTER: "+testerName);
 					currentTester = testerName;
 					loadTester(testerName);
 				}
 			});
 			
-			// 2td Step: Run the tester
+			// 2nd Step: Run the tester
 			addSubBehaviour(new Requester(myAgent, new Execute(false)));
 
-			// 3th Step: kill the tester which isn't the first
+			// 3th Step: kill the tester 
 			addSubBehaviour(new Requester(myAgent, new Exit()){
 				public int onEnd() {
-					try {
-						Thread.sleep(1000);
-					}
-					catch (Exception e) {
-						e.printStackTrace();
-					}
+					waitABit();
 					return 0;
 				}							
 			}); 	
@@ -363,20 +352,14 @@ public class TestSuiteAgent extends GuiAgent {
 			return v;
 		}
 			
-		// Elisabetta: modified handleIngform to print report
+		// Store results 
 		protected void handleInform(ACLMessage inform) {
 			if (requestedAction instanceof Execute) {
 				try{
 					Result res = (Result) getContentManager().extractContent(inform);
 					ArrayList lRes = (ArrayList)res.getItems();
 					ExecResult exRes = (ExecResult) lRes.get(0);
-					
-					ArrayList ls = new ArrayList();
-					ls.add(new Integer(exRes.getPassed()));
-					ls.add(new Integer(exRes.getFailed()));
-					ls.add(new Integer(exRes.getSkipped()));
-					risultati.put(currentTester, ls);
-					
+					runAllResults.put(currentTester, exRes);
 				}catch(Exception e){
 					e.printStackTrace();
 				}
@@ -432,4 +415,15 @@ public class TestSuiteAgent extends GuiAgent {
 		}
 	}
  
+	/** 
+	   Silly utility method to wait one sec without annoying exceptions to catch
+	 */
+	private void waitABit() {
+		try {
+			Thread.sleep(1000);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

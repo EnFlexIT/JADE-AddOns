@@ -219,6 +219,8 @@ public class TestSuiteGui extends JFrame {
 		FunctionalityDescriptor[] allFunc = XMLManager.getFunctionalities(xmlFileName);
 		GuiEvent ev = new GuiEvent(this, ((status == IDLE_STATE || status == READY_STATE) ? TestSuiteAgent.RUNALL_EVENT : TestSuiteAgent.GO_EVENT)); 
 		ev.addParameter(allFunc);
+		// NOTE that we don't set the GUI status to RUNNING here otherwise the 
+		// TestSuiteAgent cannot know whether a tester is currently loaded or not.
 		myAgent.postGuiEvent(ev);
 	}
 	
