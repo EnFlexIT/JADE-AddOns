@@ -47,6 +47,12 @@ public interface PersistenceHelper extends ServiceHelper {
 
 
     /**
+       The name of a persistence-specific profile parameter, stating
+       which repository to load the current container from.
+    */
+    public static final String LOAD_FROM = "load-from";
+
+    /**
        The name of this service.
     */
     public static final String NAME = "jade.core.persistence.Persistence";
@@ -126,6 +132,25 @@ public interface PersistenceHelper extends ServiceHelper {
     static final String LOAD_AGENT_GROUP = "Load-Agent-Group";
 
 
+    /**
+       This command name represents the <code>save-container</code>
+       action.
+    */
+    static final String SAVE_CONTAINER = "save-container";
+
+    /**
+       This command name represents the <code>load-container</code>
+       action.
+    */
+    static final String LOAD_CONTAINER = "load-container";
+
+    /**
+       This command name represents the <code>delete-container</code>
+       action.
+    */
+    static final String DELETE_CONTAINER = "delete-container";
+
+
     void saveAgent(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException;
     void loadAgent(AID agentID, String repository, ContainerID where) throws ServiceException, IMTPException, NotFoundException, NameClashException;
     void deleteAgent(AID agentID, String repository, ContainerID where) throws ServiceException, IMTPException, NotFoundException;
@@ -136,14 +161,16 @@ public interface PersistenceHelper extends ServiceHelper {
     void reloadMyself(AID agentID, String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException;
     void freezeMyself(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException;
 
+    void saveContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException;
+    void loadContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException;
+    void deleteContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException;
+
+
     /***
 	TO BE IMPLEMENTED
 
     void saveAgentGroup(...) throws ServiceException, IMTPException...
     void loadAgentGroup(...) throws ServiceException, IMTTPException...
-
-    void saveContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException;
-    void loadContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException;
 
     Some more management methods...
 
