@@ -53,6 +53,7 @@ import jade.core.security.authentication.UserPassCredential;
 
 import starlight.util.Base64;
 import java.io.IOException;
+import jade.security.SecurityFactory;
 
 /* 
 *  Note: this class shall not make any reference (e.g. import) to any 
@@ -105,9 +106,6 @@ public class SecurityHelper
   // Constant for credential user-defined parameter in ACLMessage
   public static final String CREDENTIALS = "credentials";
   
-  // JADE Authority class
-  public static final String AUTH = "jade_core_security_SecurityService_AUTHORITY";
-  private String DEFAULT_AUTH = "jade.security.impl.JADEAuthorityImpl";
 
   // Algorithm parameters and default values
   private String  symAlgo;
@@ -131,8 +129,8 @@ public class SecurityHelper
       myLogger.log(Logger.FINEST,"SecurityHelper: init(Agent) ");
       keyring = new Hashtable();
       // Creates the authority
-      String authClass = myProfile.getParameter(AUTH,DEFAULT_AUTH);
-      authority = (JADEAuthority) Class.forName(authClass).newInstance();
+      authority = SecurityFactory.getSecurityFactory().newJADEAuthority();
+
       if (a.getAID()!= null) { 
         name = a.getAID().getName();
       }
