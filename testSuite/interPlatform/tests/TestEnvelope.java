@@ -49,12 +49,15 @@ public class TestEnvelope extends Test {
 	private AID resp = null;
 	
   public Behaviour load(Agent a) throws TestException { 
+  	// The test must complete in 10 sec
+  	setTimeout(10000);
+  	
   	try {
 			AID remoteAMS = (AID) getGroupArgument(InterPlatformCommunicationTesterAgent.REMOTE_AMS_KEY);
 			resp = TestUtility.createAgent(a, RESPONDER_NAME, getClass().getName()+"$CheckEnvelopeAgent", null, remoteAMS, null);
 			log("Responder correctly started on remote platform");
 			
-  		Behaviour b1 = new SimpleBehaviour() {
+  		Behaviour b = new SimpleBehaviour() {
   			private boolean finished = false;
   			public void onStart() {
   				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
@@ -89,17 +92,6 @@ public class TestEnvelope extends Test {
   			}
   		};
   	
-  		// If we don't receive any answer in 10 sec --> TEST_FAILED
-  		Behaviour b2 = new WakerBehaviour(a, 10000) {
-				protected void handleElapsedTimeout() {
-					failed("Timeout expired");
-				}
-  		};
-  		
-  		ParallelBehaviour b = new ParallelBehaviour(a, ParallelBehaviour.WHEN_ANY); 
-  		b.addSubBehaviour(b1);
-  		b.addSubBehaviour(b2);
-  		
   		return b;
   	}
   	catch (TestException te) {
