@@ -25,6 +25,8 @@ package test.common;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.SerialBehaviour;
+import jade.util.leap.*;
 import jade.core.behaviours.DataStore;
 import test.common.xml.TestDescriptor;
 
@@ -48,6 +50,10 @@ public abstract class Test {
   private TestGroup myGroup;
   private TestDescriptor myDescriptor;
   
+  private Wrapper myWrapper;
+  private DataStore myStore;
+  private String myKey;
+  
   /**
      Specific tests must re-define this method to perform test specific 
      initializations and to create the <code>Behaviour</code> that will
@@ -57,7 +63,24 @@ public abstract class Test {
      @param resultKey The <code>DataStore</code> key for the test result
      @return the <code>Behaviour</code> that will actually perform the test
    */
-  public abstract Behaviour load(Agent a, DataStore ds, String resultKey) throws TestException;
+  public Behaviour load(Agent a, DataStore ds, String resultKey) throws TestException {
+  	myStore = ds;
+  	myKey = resultKey;
+  	Behaviour b = load(a);
+  	myWrapper = new Wrapper(a, b);
+  	return myWrapper;
+  }
+  
+  /**
+     Specific tests must re-define this method to perform test specific 
+     initializations and to create the <code>Behaviour</code> that will
+     actually perform the test.
+     @param a The agent that executes the test
+     @return the <code>Behaviour</code> that will actually perform the test
+   */
+  public Behaviour load(Agent a) throws TestException {
+	  return null;
+  }
   
   /**
      Specific tests can re-define this method to perform test specific 
@@ -95,6 +118,22 @@ public abstract class Test {
   	return myDescriptor.getArg(key);
   }
   
+  protected void passed(String msg) {
+  	log(msg);
+  	myStore.put(myKey, new Integer(TEST_PASSED));
+  	myWrapper.stop();
+  }
+  
+  protected void failed(String reason) {
+  	log(reason);
+  	myStore.put(myKey, new Integer(TEST_FAILED));
+  	myWrapper.stop();
+  }
+  
+  protected void log(String s) {
+  	Logger.getLogger().log(s);
+  }
+  
   //////////////////////////////////////
   // Private and package-scoped methods
   //////////////////////////////////////
@@ -116,5 +155,49 @@ public abstract class Test {
   void setGroup(TestGroup tg) {
   	myGroup = tg;
   }
+  
+  /**
+     Inner class Wrapper
+   */
+  private class Wrapper extends SerialBehaviour {
+  	private boolean stopped = false;
+  	private Behaviour wrapped;
+  	private List children = new ArrayList();
+  	
+  	private Wrapper(Agent a, Behaviour b) {
+  		super(a);
+  		wrapped = b;
+  		registerAsChild(wrapped);
+  		children.add(wrapped);
+  	}
+  	
+	  protected void scheduleFirst() {
+	  }
+	  
+	  protected void scheduleNext(boolean currentDone, int currentResult) {
+	  }
+	  
+	  protected boolean checkTermination(boolean currentDone, int currentResult) {
+	  	return stopped || currentDone;
+	  }
+	  
+	  protected Behaviour getCurrent() {
+	  	return wrapped;
+	  }
+	  
+	  public Collection getChildren() {
+	  	return children;
+	  }
+
+  	private void stop() {
+  		stopped = true;
+  	}
+  	
+  	public void reset() {
+  		stopped = false;
+  		super.reset();
+  	}
+  	
+  } // END of inner class Wrapper
 }
 
