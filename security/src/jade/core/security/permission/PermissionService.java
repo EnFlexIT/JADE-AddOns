@@ -107,6 +107,10 @@ public class PermissionService
 	myContainer = ac;
         myProfile = profile;
 
+
+        // set properly various profile parameters and system properties
+        setPropertiesValue();
+
         // set security manager for this Java Virtual Machine
         setSecurityManager();
 
@@ -117,6 +121,7 @@ public class PermissionService
         while(serviceSpecifiers.hasNext()) {
                 jade.core.Specifier s = (jade.core.Specifier)serviceSpecifiers.next();
                 String serviceClass = s.getClassName();
+                if (myLogger.isLoggable(Logger.FINER))
                 myLogger.log(Logger.FINER, "serviceClass="+serviceClass );
         }
 
@@ -138,9 +143,23 @@ public class PermissionService
       retrieveAMSNameCertificate();
       JADEPrincipal amsPrincipal = getAMSJADEPrincipal();
       if (amsPrincipal!=null) {
+        if (myLogger.isLoggable(Logger.FINE))
         myLogger.log( Logger.FINE, "getAMSJADEPrincipal=" + amsPrincipal.toString());
       }
     }
+
+
+    private void setPropertiesValue() {
+      // container's policy file
+      copyProp( POLICY_FILE_KEY, POLICY_FILE_DEFAULT);
+    } // end setPropertiesValue
+    private void copyProp(String key, String defaultVal){
+      String val =  myProfile.getParameter( key, null );
+      if (( val!=null) && (val.length()>0)) { 
+        System.setProperty(  key, val ); 
+      } else {
+        System.setProperty(  key, defaultVal ); }
+    } // end copyProp
 
 
     // for the whole JVM
@@ -154,10 +173,11 @@ public class PermissionService
 
       try {
         if (System.getSecurityManager() == null) {
-          myLogger.log(Logger.INFO,
-                       "Installing JADESecurityManager.  ");
+          if (myLogger.isLoggable(Logger.INFO))
+          myLogger.log(Logger.INFO, "Installing JADESecurityManager.  ");
         }
         else {
+          if (myLogger.isLoggable(Logger.INFO))
           myLogger.log(Logger.INFO,
               "Replacing existing SecurityManager with a JADESecurityManager.  (" +
               System.getSecurityManager() + ")");
@@ -167,6 +187,7 @@ public class PermissionService
         );
       }
       catch (Exception e) {
+        if (myLogger.isLoggable(Logger.FINER))
         myLogger.log(Logger.FINER, e.getMessage());
         e.printStackTrace();
       }
@@ -357,10 +378,16 @@ public class PermissionService
 
     public JADEAccessController getJADEAccessController() {
       if (myJADEAccessController==null) {
+        // -- create the container JADEAccessController --
+
+        // retrieve policy file name from the configuration
         String policyFileName=myProfile.getParameter(POLICY_FILE_KEY, POLICY_FILE_DEFAULT);
+
+        if (myLogger.isLoggable(Logger.INFO))
         myLogger.log( Logger.INFO, "Loading security policy: "+policyFileName);
         // check if policy file exists
         if (!(new File(policyFileName).exists())) {
+          if (myLogger.isLoggable(Logger.INFO))
           myLogger.log( Logger.SEVERE, "Security policy file not found: "+policyFileName);
         }
 
