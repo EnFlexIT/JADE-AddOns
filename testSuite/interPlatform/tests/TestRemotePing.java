@@ -27,6 +27,7 @@ import jade.core.*;
 import jade.core.behaviours.*;
 import jade.lang.acl.*;
 import test.common.*;
+import test.interPlatform.InterPlatformCommunicationTesterAgent;
 
 /**
    @author Giovanni Caire - TILAB
@@ -52,8 +53,9 @@ public class TestRemotePing extends Test {
   		final DataStore store = ds;
   		final String key = resultKey;
   		
-	  	Object[] args = getGroupArguments();
-  		AID remoteAMS = (AID) args[0];
+	  	//Object[] args = getGroupArguments();
+	  	//AID remoteAMS = (AID) args[0];
+	  	AID remoteAMS = (AID) getGroupArgument(InterPlatformCommunicationTesterAgent.REMOTE_AMS_NAME);
   		resp = TestUtility.createTarget(a, RESPONDER_NAME, remoteAMS);
   		TestUtility.addBehaviour(a, resp, "test.common.behaviours.NotUnderstoodResponder");
   		

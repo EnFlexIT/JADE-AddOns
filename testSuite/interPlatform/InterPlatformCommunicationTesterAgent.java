@@ -35,8 +35,12 @@ import java.io.*;
 import java.net.InetAddress;
 
 /**
+   @author Givanni Caire - TILAB
  */
 public class InterPlatformCommunicationTesterAgent extends TesterAgent {
+	// Names and default values for group arguments
+	public static final String REMOTE_AMS_NAME = "remote-ams";
+	
 	
 	protected TestGroup getTestGroup() {
 		TestGroup tg = new TestGroup(new String[] {
@@ -59,7 +63,7 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 						remoteAMS.addAddresses((String) it.next());
 					}
 					
-					setArguments(new Object[] {remoteAMS});
+					setArgument(REMOTE_AMS_NAME, remoteAMS);
 				}
 				catch (TestException te) {
 					throw te;
