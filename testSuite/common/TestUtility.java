@@ -31,13 +31,12 @@ import jade.core.AID;
 import jade.core.ContainerID;
 import jade.core.AgentManager;
 import jade.lang.acl.ACLMessage;
-import jade.onto.basic.Action;
-import jade.onto.*;
-import jade.lang.Codec;
-import jade.lang.sl.SL0Codec;
+
 import jade.domain.JADEAgentManagement.*;
 import jade.proto.FIPAProtocolNames;
 import jade.content.AgentAction;
+import jade.content.onto.basic.Action;
+import jade.content.lang.sl.SLCodec;
 
 import test.common.agentConfigurationOntology.*;
 import test.common.remote.RemoteManager;
@@ -56,18 +55,18 @@ public class TestUtility {
 	
 	public static final String TARGET_CLASS_NAME = "test.common.ConfigurableAgent";
 	
-  private static Codec c = new SL0Codec();
-  private static Ontology o = JADEAgentManagementOntology.instance();
-
-  private static jade.content.ContentManager cm = new jade.content.ContentManager();
- 	private static jade.content.lang.Codec codec = new jade.content.lang.leap.LEAPCodec();
-  private static jade.content.onto.Ontology onto = AgentConfigurationOntology.getInstance();
   
+  private static jade.content.ContentManager cm = new jade.content.ContentManager();
+  private static jade.content.lang.Codec codec = new jade.content.lang.leap.LEAPCodec();
+  private static jade.content.onto.Ontology onto = AgentConfigurationOntology.getInstance();
+      
   private static test.common.remote.RemoteManager defaultRm = null;
   
   static {
   	cm.registerLanguage(codec);
   	cm.registerOntology(onto);
+  	cm.registerLanguage(new SLCodec(0), FIPANames.ContentLanguage.FIPA_SL0);
+  	cm.registerOntology(JADEManagementOntology.getInstance());
   }
   
   /**
@@ -93,7 +92,7 @@ public class TestUtility {
   			amsAID = a.getAMS();
   		}
   		
-  		ACLMessage request = createRequestMessage(a, amsAID, SL0Codec.NAME, JADEAgentManagementOntology.NAME);
+  		ACLMessage request = createRequestMessage(a, amsAID, FIPANames.ContentLanguage.FIPA_SL0, JADEManagementVocabulary.NAME);
 
   		CreateAgent ca = new CreateAgent();
   		// Agent name
@@ -123,9 +122,9 @@ public class TestUtility {
   		act.setActor(amsAID);
   		act.setAction(ca);
   		
-    	synchronized(c) { //must be synchronized because this is a static method
-      	request.setContent(encode(act, c, o));
-    	}
+  		request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+  		request.setOntology(JADEManagementVocabulary.NAME);
+  		cm.fillContent(request,act);
     	
     	// Send message and collect reply
     	FIPAServiceCommunicator.doFipaRequestClient(a, request);
@@ -151,7 +150,7 @@ public class TestUtility {
 	 */
   public static void killAgent(Agent a, AID targetAID, AID amsAID) throws TestException {
     try {
-  		ACLMessage request = createRequestMessage(a, amsAID, SL0Codec.NAME, JADEAgentManagementOntology.NAME);
+  		ACLMessage request = createRequestMessage(a, amsAID, FIPANames.ContentLanguage.FIPA_SL0, JADEManagementVocabulary.NAME);
 
   		KillAgent ka = new KillAgent();
   		ka.setAgent(targetAID);
@@ -160,10 +159,10 @@ public class TestUtility {
   		act.setActor(amsAID);
   		act.setAction(ka);
   		
-    	synchronized(c) { //must be synchronized because this is a static method
-      	request.setContent(encode(act, c, o));
-    	}
-    	
+  		request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+  		request.setOntology(JADEManagementVocabulary.NAME);
+  		cm.fillContent(request,act);
+    	   	
     	// Send message and collect reply
     	FIPAServiceCommunicator.doFipaRequestClient(a, request);
     }
@@ -297,19 +296,6 @@ public class TestUtility {
     return request;
   }
 
-  /**
-   */
-  private static String encode(Action act, Codec c, Ontology o) throws FIPAException {
-    // Write the action in the :content slot of the request
-    List l = new ArrayList();
-    try {
-      Frame f = o.createFrame(act, o.getRoleName(act.getClass()));
-      l.add(f);
-    } catch (OntologyException oe) {
-      throw new FIPAException(oe.getMessage());
-    }
-    return c.encode(l,o);
-  }
   
   private static AID createNewAID(String newName, AID anAID) {
   	String name = anAID.getName();
