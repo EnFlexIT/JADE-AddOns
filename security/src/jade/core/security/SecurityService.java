@@ -67,23 +67,25 @@ public class SecurityService extends BaseService {
   public static final String AUTHENTICATE_USER = "AUTH_USR";
   public static final String CODECS = "jade_core_security_SecurityService_CODEC";
   public static final String BASIC_CODEC_CLASS = "jade.core.security.basic.BasicSOCodec";
+  public static final String SECURITY_PROVIDERS_KEY = "jade_security_providers";
+  public static final String SECURITY_PROVIDERS_DEFAULT = "org.bouncycastle.jce.provider.BouncyCastleProvider";
 
-  private Logger myLogger = Logger.getMyLogger( this.getClass().getName() );
+  private static Logger myLogger = Logger.getMyLogger( SecurityService.class.getName() );
 
-	// The concrete agent container, providing access to LADT, etc.
-	private AgentContainer myContainer;
-	private Profile myProfile;
-  
+  // The concrete agent container, providing access to LADT, etc.
+  private AgentContainer myContainer;
+  private Profile myProfile;
+
   // Table of SecurityObject codecs
   private Hashtable codecs;
 
   // Constant for default encoding format
   public static String SO_FORMAT;
 
-	public static final String NAME = "jade.core.security.Security";
-	public String getName() {
-		return SecurityService.NAME;
-	}
+  public static final String NAME = "jade.core.security.Security";
+  public String getName() {
+    return SecurityService.NAME;
+  }
 
   // authority for this container
   private JADEAuthority authority = null;
@@ -96,6 +98,9 @@ public class SecurityService extends BaseService {
 
     // set properly various profile parameters and system properties
     setPropertiesValue();
+
+    // load JCE providers for cryptography operations
+    setJCEProviders();
 
     // ask for user/pass, authenticate, 
     // and pass principal/credentials to myContainer
@@ -323,7 +328,7 @@ public class SecurityService extends BaseService {
   private void authenticateSingleUserMode(){
     try {
       if (myLogger.isLoggable(Logger.INFO))
-      myLogger.log(Logger.INFO, "'SingleUser' mode.  The platform has a single user named: 'jade'.");
+      myLogger.log(Logger.FINE, "'SingleUser' mode.  The platform has a single user named: 'jade'.");
       passUserPrincipalToTheContainer(new JADEPrincipalImpl("jade"), null);
     }
     catch (JADESecurityException ex) {
@@ -365,6 +370,45 @@ public class SecurityService extends BaseService {
      //e.printStackTrace();
      System.exit( -1);
   }
+
+  private void setJCEProviders() {
+    showProviders();
+    // load items from jade.security.providers 
+    String providers = myProfile.getParameter(SECURITY_PROVIDERS_KEY, SECURITY_PROVIDERS_DEFAULT);
+    boolean noExplicitProv = providers.equals(SECURITY_PROVIDERS_DEFAULT);
+    String[] provArray = providers.split(";");
+
+    for (int i = 0; i < provArray.length; i++) {
+      String provClass = provArray[i].trim();
+      if (provClass.length()>0) {
+        try {
+          java.security.Security.addProvider( 
+              (java.security.Provider)
+              Class.forName( provClass ).newInstance() );
+        } catch (Throwable t) {
+          myLogger.log(Logger.FINE, t.getMessage(), t);
+          myLogger.log( noExplicitProv ?  Logger.CONFIG : Logger.WARNING, 
+                        "Could not load JCE provider: '"+ provClass+"'");
+        }
+        showProviders();
+      }
+    } // end for
+  }// end setJCEProviders
+
+  static java.util.logging.Level LEV = Logger.FINE;
+  public static void showProviders() {	
+    if (!myLogger.isLoggable(LEV)) return;
+    StringBuffer sb = new StringBuffer();
+    sb.append("\n------ Security Providers installed on this system: ------\n");
+    java.security.Provider[] prop = java.security.Security.getProviders();
+    for(int i = 0; i < prop.length ; i++) {
+      sb.append(prop[i].getName() + "\n");
+    }
+    sb.append("------      ---      --------      ---              ------\n\n");
+    myLogger.log(LEV, sb.toString() );
+  }
+
+
 
   /**
    */
