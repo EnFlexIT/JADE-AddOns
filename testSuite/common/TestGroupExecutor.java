@@ -109,8 +109,8 @@ public class TestGroupExecutor extends FSMBehaviour {
 						System.out.println("\n--------------------------------------------");
 						System.out.println("Executing test: "+currentTest.getName());
 						System.out.println("Description: "+currentTest.getDescription());
-						Behaviour b = currentTest.load(myAgent, getDataStore(), TEST_RESULT_KEY);
-						registerState(b, EXECUTE_TEST_STATE);
+						Behaviour b2 = currentTest.load(myAgent, getDataStore(), TEST_RESULT_KEY);
+						registerState(b2, EXECUTE_TEST_STATE);
 						
 						pause();
 					}
