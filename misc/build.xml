@@ -34,7 +34,7 @@
 
   <!-- Make distribution zip file and put in ${dist} -->
   <target name="dist" depends="init, clean">
-    <jar jarfile="${dist}/miscAdd-on.zip">
+    <jar jarfile="${dist}/miscAddon.zip">
       <fileset dir="${dist}" includes="add-ons/misc/${src}/**"/>
       <fileset dir="${dist}" includes="add-ons/misc/*"/>
       <fileset dir="${dist}" includes="add-ons/misc/resources/**"/>
