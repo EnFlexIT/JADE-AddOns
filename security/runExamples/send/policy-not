@@ -1,15 +1,12 @@
-
+//
 // --- These are the basic Java permissions to allow JADE to start up---
-grant codebase "file://classes/-" {
-	permission java.util.PropertyPermission "java.rmi.server.hostname", "write";
-	permission java.util.PropertyPermission "jade.*", "read,write";
-	permission java.security.SecurityPermission "createAccessControlContext";
-	permission java.security.SecurityPermission "getPolicy";
-	permission java.net.SocketPermission "*", "listen,connect,resolve";
-	permission java.io.FilePermission "*", "read,write";
-	permission java.lang.RuntimePermission "createClassLoader";
-	permission java.awt.AWTPermission "showWindowWithoutWarningBanner";
-	permission java.security.AllPermission;
+//
+grant codebase "file:../../../../lib/jade.jar" {
+	permission java.security.AllPermission; };
+grant codebase "file:../../../../lib/jadeTools.jar" {
+	permission java.security.AllPermission; };
+grant codebase "file:../../../../add-ons/security/lib/jadeS.jar" {
+	permission java.security.AllPermission; 
 };
 
 
