@@ -1097,8 +1097,8 @@ public class PersistenceManager {
 	    logger.log(Logger.INFO,"--- The DB <" + name + "> holds " + howMany + " saved agents ---");
 	}
 	catch(HibernateException he) {
-	    logger.log(Logger.INFO,"--- The DB <" + name + "> does not appear to have a valid schema ---");
-	    logger.log(Logger.INFO,"--- Rebuilding DB <" + name + "> schema ---");
+	    logger.log(Logger.WARNING,"--- The DB <" + name + "> does not appear to have a valid schema ---");
+	    logger.log(Logger.WARNING,"--- Rebuilding DB <" + name + "> schema ---");
 
 	    SchemaExport schemaMgr = new SchemaExport(conf);
 
