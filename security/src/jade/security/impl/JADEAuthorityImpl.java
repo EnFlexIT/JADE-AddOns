@@ -111,6 +111,12 @@ public class JADEAuthorityImpl implements jade.security.JADEAuthority {
     return val;
   }
 
+
+  private void setCryptoParameters(){
+    keyAlgo= getProperty( SecurityHelper.ASYM_ALGO_KEY, SecurityHelper.ASYM_ALGO_DEFAULT );
+    keySize = Integer.parseInt( getProperty( SecurityHelper.ASYM_KEYSIZE_KEY, SecurityHelper.ASYM_KEYSIZE_DEFAULT ) );
+  }
+
   /**
    * Default initialization method for an agent who does not have a key pair
    */
@@ -135,7 +141,7 @@ public class JADEAuthorityImpl implements jade.security.JADEAuthority {
     propHolder = prof; 
     init(authName, initCreds);
   }
-  
+
   /*
     public void init(String authorityName, Agent myAgent) {
     // myAgent is only used to get the Profile
@@ -176,11 +182,7 @@ public class JADEAuthorityImpl implements jade.security.JADEAuthority {
   private void init (String name, Credentials initCreds) {
 
     // Load some configurable parameters from the Profile
-    /*
-      // TBD later (NL)
-      asymAlgo = getProperty("jade.security.AsymAlgorithm","RSA");
-      asymKeySize = Integer.parseInt(getProperty("jade.security.AsymKeySize","1024"));
-    */
+    setCryptoParameters();
 
     // this is the asymmetric Chipher for encryption and signature
     // aCipher = Cipher.getInstance(encryptionAlgo); // Use default provider
