@@ -168,7 +168,7 @@ public class ConfigurableAgent extends Agent {
 		
 		Class c = Class.forName(ontoClassName);
 		Method m = c.getMethod("getInstance", new Class[0]);
-		Ontology onto = (Ontology) m.invoke(null, null);
+		Ontology onto = (Ontology) m.invoke(null, new Object[]{});
 		if (ontoName == null) {
 			ontoName = onto.getName();
 		}
