@@ -35,7 +35,10 @@ import jade.lang.acl.ACLMessage;
 import jade.domain.JADEAgentManagement.*;
 import jade.domain.FIPANames;
 import jade.content.AgentAction;
+import jade.content.ContentElement;
 import jade.content.onto.basic.Action;
+import jade.content.onto.basic.Done;
+import jade.content.onto.basic.Result;
 import jade.content.lang.sl.SLCodec;
 
 import test.common.agentConfigurationOntology.*;
@@ -46,14 +49,15 @@ import java.rmi.*;
 import java.net.InetAddress;
 
 /**
-   Class including static methods useful during test setup/takedown
-   to launch/kill responder agents as needed during the test 
+   Class including utility static methods for launching/killing
+   agents, requesting generic AMS actions and creating remote JADE
+   instances.
    @author Giovanni Caire - TILAB
  */
 public class TestUtility {
 	private static boolean verbose = true;
 	
-	public static final String TARGET_CLASS_NAME = "test.common.ConfigurableAgent";
+	public static final String CONFIGURABLE_AGENT = "test.common.ConfigurableAgent";
 	
   
   private static jade.content.ContentManager cm = new jade.content.ContentManager();
@@ -70,109 +74,126 @@ public class TestUtility {
   }
   
   /**
-     Create a target agent in the local platform
+     Create a generic agent in the local container of the local platform
 	 */
-  public static AID createTarget(Agent a, String respName) throws TestException {
-  	return createTarget(a, respName, a.getAMS());
-  }
-    
-  /**
-     Create a target agent in the platform administrated by the indicated AMS
-	 */
-  public static AID createTarget(Agent a, String targetName, AID amsAID) throws TestException {
-		return createAgent(a, targetName, TARGET_CLASS_NAME, null, amsAID, null);
+  public static AID createAgent(Agent a, String agentName, String agentClass, String[] agentArgs) throws TestException {
+		return createAgent(a, agentName, agentClass, agentArgs, null, null);
   }
 
   /**
      Create a generic agent in the platform administrated by the indicated AMS
 	 */
   public static AID createAgent(Agent a, String agentName, String agentClass, String[] agentArgs, AID amsAID, String containerName) throws TestException {
+		if (amsAID == null) {
+			amsAID = a.getAMS();
+		}
+		
+		CreateAgent ca = new CreateAgent();
+		// Agent name
+		ca.setAgentName(agentName);
+		// Agent class
+		ca.setClassName(agentClass);
+		// Agent args
+		if (agentArgs != null) {
+			for (int i = 0; i < agentArgs.length; ++i) {
+				ca.addArguments(agentArgs[i]);
+			}
+		}
+		// Container where to create the agent
+		if (containerName != null) {
+			ca.setContainer(new ContainerID(containerName, null));
+		}
+		else {
+  		if (amsAID.equals(a.getAMS())) { 
+	  		ca.setContainer((ContainerID) a.here());
+			}
+			else {
+				ca.setContainer(new ContainerID(AgentManager.MAIN_CONTAINER_NAME, null));
+			}
+		}
+  		
     try {
-  		if (amsAID == null) {
-  			amsAID = a.getAMS();
-  		}
-  		
-  		ACLMessage request = createRequestMessage(a, amsAID, FIPANames.ContentLanguage.FIPA_SL0, JADEManagementVocabulary.NAME);
-
-  		CreateAgent ca = new CreateAgent();
-  		// Agent name
-  		ca.setAgentName(agentName);
-  		// Agent class
-  		ca.setClassName(agentClass);
-  		// Agent args
-  		if (agentArgs != null) {
-  			for (int i = 0; i < agentArgs.length; ++i) {
-  				ca.addArguments(agentArgs[i]);
-  			}
-  		}
-  		// Container where to create the agent
-  		if (containerName != null) {
-  			ca.setContainer(new ContainerID(containerName, null));
-  		}
-  		else {
-	  		if (amsAID.equals(a.getAMS())) { 
-		  		ca.setContainer((ContainerID) a.here());
-  			}
-  			else {
-  				ca.setContainer(new ContainerID(AgentManager.MAIN_CONTAINER_NAME, null));
-  			}
-  		}
-  		
-  		Action act = new Action();
-  		act.setActor(amsAID);
-  		act.setAction(ca);
-  		
-  		request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
-  		request.setOntology(JADEManagementVocabulary.NAME);
-  		cm.fillContent(request,act);
-    	
-    	// Send message and collect reply
-    	FIPAServiceCommunicator.doFipaRequestClient(a, request);
-    	
+  		requestAMSAction(a, amsAID, ca);
     	return createNewAID(agentName, amsAID);
     }
-    catch (Exception e) {
-    	throw new TestException("Error creating Agent "+agentName, e);
+    catch (TestException te) {
+    	throw new TestException("Error creating Agent "+agentName, te.getNested());
     }
   }
 
   /**
-     Kill a target agent (whereever it is)
+     Kill an agent
    */
-  public static void killAgent(Agent a, AID targetAID) throws TestException {
-  	AID amsAID = createNewAID("ams", targetAID);
-  	killAgent(a, targetAID, amsAID);
+  public static void killAgent(Agent a, AID agentAID) throws TestException {
+  	killAgent(a, agentAID, null);
   }
   
   /**
-     Kill a target agent living in the platform administrated by the 
+     Kill an agent living in the platform administrated by the 
      indicated AMS
 	 */
-  public static void killAgent(Agent a, AID targetAID, AID amsAID) throws TestException {
+  public static void killAgent(Agent a, AID agentAID, AID amsAID) throws TestException {
+  	if (amsAID == null) {
+			amsAID = createNewAID("ams", agentAID);
+  	}
+  	
+		ACLMessage request = createRequestMessage(a, amsAID, FIPANames.ContentLanguage.FIPA_SL0, JADEManagementVocabulary.NAME);
+
+		KillAgent ka = new KillAgent();
+		ka.setAgent(agentAID);
+		
     try {
+  		requestAMSAction(a, amsAID, ka);
+    }
+    catch (TestException te) {
+    	throw new TestException("Error killing TargetAgent "+agentAID.getName(), te.getNested());
+    }
+  }
+  
+  /**
+     Request an AMS agent to perform a given action in the JADE
+     management ontology.
+   */
+  public static Object requestAMSAction(Agent a, AID amsAID, AgentAction action) throws TestException {
+    try {
+    	// Prepare the request
   		ACLMessage request = createRequestMessage(a, amsAID, FIPANames.ContentLanguage.FIPA_SL0, JADEManagementVocabulary.NAME);
 
-  		KillAgent ka = new KillAgent();
-  		ka.setAgent(targetAID);
-  		
   		Action act = new Action();
   		act.setActor(amsAID);
-  		act.setAction(ka);
+  		act.setAction(action);
   		
   		request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
   		request.setOntology(JADEManagementVocabulary.NAME);
   		cm.fillContent(request,act);
     	   	
     	// Send message and collect reply
-    	FIPAServiceCommunicator.doFipaRequestClient(a, request);
+    	ACLMessage inform = FIPAServiceCommunicator.doFipaRequestClient(a, request);
+    	
+    	// Extract the result from the reply (if any)
+    	ContentElement ce = cm.extractContent(inform);
+    	if (ce instanceof Done) {
+    		// No result to return
+    		return null;
+    	}
+    	else if (ce instanceof Result) {
+    		return ((Result) ce).getValue();
+    	}
+    	else {
+    		throw new TestException("Unknown notification received from "+amsAID);
+    	}
     }
     catch (Exception e) {
-    	throw new TestException("Error killing TargetAgent "+targetAID.getName(), e);
+    	throw new TestException("Error executing action "+action, e);
     }
   }
-
+  	
+  /////////////////////////////////////////////
+  // Methods to configure a ConfigurableAgent 
+  /////////////////////////////////////////////
+  
   /**
-     Add a behaviour of the indicated class to the indicated target agent
+     Add a behaviour of the indicated class to the indicated ConfigurableAgent
    */
   public static void addBehaviour(Agent a, AID targetAID, String behaviourClassName) throws TestException { 
   	try {
@@ -185,14 +206,14 @@ public class TestUtility {
   		
     	// Send message and collect reply
     	FIPAServiceCommunicator.doFipaRequestClient(a, request);
-      }
+    }
     catch (Exception e) {
     	throw new TestException("Error adding behaviour "+behaviourClassName+" to agent "+targetAID.getName(), e);
     }
   }
   
   /**
-     Make the indicated target agent perform the indicated action
+     Make the indicated ConfigurableAgent perform the indicated action
    */
   public static void forceAction(Agent a, AID targetAID, AgentAction action) throws TestException { 
   	try {
@@ -209,6 +230,11 @@ public class TestUtility {
     	throw new TestException("Error forcing action "+action+" to agent "+targetAID.getName(), e);
     }
   }
+  
+  /////////////////////////////////////////////
+  // Methods to launch remote JADE instances 
+  // and to configure the RemoteManager 
+  /////////////////////////////////////////////
   
   /**
      Launch a new instance of JADE in a separate process 
