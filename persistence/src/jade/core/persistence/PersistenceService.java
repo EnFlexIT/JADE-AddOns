@@ -53,6 +53,7 @@ import jade.core.NameClashException;
 import jade.core.NotFoundException;
 import jade.core.UnreachableException;
 import jade.core.behaviours.Behaviour;
+import jade.core.messaging.GenericMessage;
 
 import jade.lang.acl.ACLMessage;
 import jade.mtp.MTPDescriptor;
@@ -1165,9 +1166,12 @@ public class PersistenceService extends BaseService {
 
 	private boolean handleSendMessage(VerticalCommand cmd) throws ServiceException, IMTPException, NotFoundException {
 	    Object[] params = cmd.getParams();
-	    ACLMessage msg = (ACLMessage)params[0];
-	    AID receiver = (AID)params[1];
+            AID sender = (AID)params[0];
+	    GenericMessage genMsg = (GenericMessage)params[1];
+	    AID receiver = (AID)params[2];
 
+            // FIXME: Should directly use the GenericMessage...
+            ACLMessage msg = genMsg.getACLMessage();
 	    FrozenAgentsEntry e = (FrozenAgentsEntry)frozenAgents.get(receiver);	    
 	    if(e == null) {
 		return true;
