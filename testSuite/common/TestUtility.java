@@ -31,6 +31,7 @@ import jade.core.AID;
 import jade.core.ContainerID;
 import jade.core.AgentManager;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 
 import jade.domain.JADEAgentManagement.*;
 import jade.domain.FIPANames;
@@ -58,6 +59,8 @@ public class TestUtility {
 	private static boolean verbose = true;
 	
 	public static final String CONFIGURABLE_AGENT = "test.common.ConfigurableAgent";
+	
+	private static final String SPY_NOTIFICATION = "spy-notification";
 	
   
   private static jade.content.ContentManager cm = new jade.content.ContentManager();
@@ -299,12 +302,39 @@ public class TestUtility {
   	return defaultRm;
   }
   
+  /**
+     @return the name of the local host
+   */
   public static String getLocalHostName() throws TestException {
   	try {
 			return InetAddress.getLocalHost().getHostName();
   	}
   	catch (Exception e) {
   		throw new TestException("Can't get local host name", e);
+  	}
+  }
+  
+  /**
+     @return the name of the host a given container is running on
+   */
+  public static String getContainerHostName(Agent a, String containerName) throws TestException {
+  	try {
+  		AID spy = TestUtility.createAgent(a, "spy", "test.common.TestUtility$HostSpyAgent", new String[] {a.getLocalName()}, null, containerName);
+  		ACLMessage msg = a.blockingReceive(MessageTemplate.MatchConversationId(SPY_NOTIFICATION), 10000);
+  		if (msg != null) {
+	  		if (msg.getPerformative() == ACLMessage.INFORM) {
+	  			return msg.getContent();
+	  		}
+	  		else {
+	  			throw new TestException("Can't get hostname for container "+containerName+": FAILURE received");
+	  		}
+  		}
+  		else {
+  			throw new TestException("Can't get hostname for container "+containerName+": timeout expired");
+  		}
+  	}
+  	catch (Exception e) {
+  		throw new TestException("Can't get hostname for container "+containerName, e);
   	}
   }
   
@@ -367,6 +397,32 @@ public class TestUtility {
   public static void setVerbose(boolean b) {
   	verbose = b;
   }
+  
+  /**
+     Inner class HostSpyAgent.
+     This agent is used to get the hostname a container is running on.
+   */
+  public static class HostSpyAgent extends Agent {
+  	protected void setup() {
+  		Object[] args = getArguments();
+  		if (args.length > 0) {
+  			AID receiver = new AID((String) args[0], AID.ISLOCALNAME);
+				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+				msg.addReceiver(receiver);
+				msg.setConversationId(SPY_NOTIFICATION);
+  			try {
+  				msg.setContent(TestUtility.getLocalHostName());
+  			}
+  			catch (Exception e) {
+  				e.printStackTrace();
+  				msg.setPerformative(ACLMessage.FAILURE);
+  			}
+				send(msg);
+  		}
+  		doDelete();
+  	}
+  } // END of inner class HostSpyAgent
+  		
 }
   
   
