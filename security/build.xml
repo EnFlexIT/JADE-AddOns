@@ -8,7 +8,7 @@
    http://jakarta.apache.org/ant/
 
 -->
-<project name="Benchmark" default="examples" basedir=".">
+<project name="Benchmark" default="myDefaultTarget" basedir=".">
   <!-- set global properties for this build -->
   <property name="src" value="src"/>
   <property name="classes" value="classes"/>
@@ -22,6 +22,9 @@
   <property name="libJADEDir" value="../../lib"/>
   <property name="classpath" value="../..;../../classes;${libJADEDir}/jade.jar;${libJADEDir}/jadeTools.jar;${libJADEDir}/iiop.jar;${libJADEDir}/Base64.jar;"/>
 
+
+  <target name="myDefaultTarget" depends="compile,lib" />
+  
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
@@ -108,7 +111,7 @@
 
 
   <!-- Make distribution zip file and put in ${dist} -->
-  <target name="dist" depends="init,lib,zip">
+  <target name="dist" depends="init,clean,compile,lib,zip">
   <echo>--- 'jadesecurity.zip' distribution file created.---</echo>
   </target>
 
