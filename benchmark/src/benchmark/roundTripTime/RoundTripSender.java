@@ -64,9 +64,10 @@ public class RoundTripSender extends Agent {
      * This method send message to receiver. and wait until
      * the same message returns.
      */
-    void roundTripTime() {
-	send(msg);
-        ACLMessage msg2 = blockingReceive();
+    void roundTripTime(int counter) {
+    	msg.setContent(String.valueOf(counter));
+			send(msg);
+      ACLMessage msg2 = blockingReceive();
     }
 
     static int THR_UP = 95; // percentage of agents that must have been created before starting to count roundtrip
@@ -74,19 +75,20 @@ public class RoundTripSender extends Agent {
     private static int agents = 0;
     private static int terminatedAgents = 0;
     private static boolean resultPrinted = false;
+    private static boolean startPrinted = false;
 
     synchronized static void increaseNumAgents(int couples) {
 	if (agents == 0) {
 	    System.out.println("\n  couples="+couples+"     iterations="+iterations +"\n" );
 	    THR_UP = Math.round(THR_UP * couples / 100.0f);
-	    //System.out.println("The roundtrippers will measure time when at least "+THR_UP+" agents have been created and "+THR_LOW+" agents are still working.");
-	    System.out.println("Working... \n");
+	    System.out.println("The roundtrippers will measure time when at least "+THR_UP+" agents have been created.");
 	}
 	agents++;
     }
 
     synchronized static void decreaseNumAgents() {
         terminatedAgents++;
+        System.out.println(agents-terminatedAgents+" still active.");
     }
 
     static Vector times = new Vector();
@@ -116,11 +118,17 @@ public class RoundTripSender extends Agent {
         standardDev = Math.sqrt( ( n * tot1 - tot2 * tot2 ) / ( n * (n-1) ) );
         System.out.println( "Average RTT=" + rtt + " msec Dev.Std=" + standardDev );
         return rtt;
-	//System.exit(0);
     }
 
     synchronized static boolean startMeasuring() {
-	return ( agents >= THR_UP);
+			if (agents >= THR_UP) {
+				if (!startPrinted) {
+					startPrinted = true;
+					System.out.println(agents+" agents are active. Start measuring...");
+				}
+				return true;
+			}
+			return false;
     }
 
     synchronized static boolean stopTripping(int couples) {
@@ -150,7 +158,7 @@ public class RoundTripSender extends Agent {
         if(ior.length() > 9){ //is GUID
             receiver.addAddresses(ior);
 	}
-	msg.setContent("CONTENT");
+	//msg.setContent("CONTENT");
         msg.addReceiver(receiver);
 
   if (args.length == 5) {
@@ -197,7 +205,7 @@ public class RoundTripSender extends Agent {
 			  break;
 		      default:
 		    }
-		    roundTripTime();
+		    roundTripTime(counter);
 		}
             });
     }
