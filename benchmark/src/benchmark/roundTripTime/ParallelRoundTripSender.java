@@ -27,6 +27,7 @@ import jade.core.Agent;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 
 import java.io.*;
 import java.util.Iterator;
@@ -129,6 +130,7 @@ public class ParallelRoundTripSender extends Agent {
     String ior = "";
     int couples = 0;
 		AID controller = null;
+		int rxMsg = 0; // number of received messages
 
    /**
     * This agent get parameter from command line.
@@ -151,31 +153,47 @@ public class ParallelRoundTripSender extends Agent {
   }
         
 	increaseNumAgents(couples);
+	
+	// this behaviour counts the received messages
+	addBehaviour(new SimpleBehaviour(this) {
+					ACLMessage rMsg;
+					public void action() {
+							rMsg = myAgent.receive();
+							if (rMsg != null) 
+									rxMsg++;
+							else
+									block();
+					}
+					public boolean done() {
+							return (rxMsg >= iterations);
+					}
+			});
 
-        addBehaviour( new CyclicBehaviour(this) {
+	addBehaviour( new CyclicBehaviour(this) {
 		int counter = 0;
-		int measuring = 0;
+		int state = 0;
 		public void action() {
 			//System.out.println(measuring+" "+THR_LOW+" "+THR_UP);
-		    switch (measuring) {
-		      case 0:
-			  if ( startMeasuring() ) {
-			      measuring = 1;
-			      startTime = System.currentTimeMillis();
-			      counter = 0;
-			  }
-			  break;
-		      case 1: // in this state I send iterations number of messages
+		    switch (state) {
+				case 0:
+						if ( startMeasuring() ) {
+								state = 1;
+								startTime = System.currentTimeMillis();
+								counter = 0;
+						}
+						break;
+				case 1: // in this state I send iterations number of messages
 		      	send(msg);
-			counter++;
-			if (counter == iterations) 
-				measuring = 2;
-			break;
-		      case 2: // in this state I receive iterations number of messages
-		      	msg=blockingReceive();
-			counter--;
-			if (counter == 0)  {
-				// take the result	
+						block();
+						counter++;
+						if (counter == iterations) 
+								state = 2; // sent iterations messages 
+						break;
+				case 2:
+						if (rxMsg >= iterations)
+								state = 3;
+						break;
+				case 3: // take the result	
 			      stopTime = System.currentTimeMillis();
 			      decreaseNumAgents();
 			      updateResults(startTime, stopTime, iterations);
@@ -195,11 +213,8 @@ public class ParallelRoundTripSender extends Agent {
 				    	}
 			      }
 			  }
-			  break;
-		      default:
-		    }
-		}
-            });
-    }
+		} // end of action
+			});
+    } // end of setup
 
 }
