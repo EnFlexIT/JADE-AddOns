@@ -278,7 +278,6 @@ public class TestUtility {
   				classpath = classpath.substring(1)+";"+currentCp;
   			}
 			}
-			Logger.getLogger().log("Launching JADE. Classpath is "+classpath);
 			jc = new LocalJadeController(instanceName, new String("java -cp "+classpath+" jade.Boot "+jadeArgs), protoNames);
 		}
 		return jc;

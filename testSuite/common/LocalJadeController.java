@@ -46,6 +46,7 @@ class LocalJadeController implements JadeController {
 	public LocalJadeController(String instanceName, String cmdLine, String[] protoNames) throws TestException {
 		try {
 			// Start a JADE instance in a different Process
+			System.out.println("Starting JADE with command line: "+cmdLine);
 			proc = java.lang.Runtime.getRuntime().exec(cmdLine);
 			
 			Thread t = new SubProcessManager(instanceName, proc, protoNames);
