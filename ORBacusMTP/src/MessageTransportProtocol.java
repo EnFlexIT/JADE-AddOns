@@ -61,6 +61,8 @@ import jade.mtp.MTP;
 import jade.mtp.MTPException;
 import jade.mtp.TransportAddress;
 
+import jade.util.Logger;
+
 
 public class MessageTransportProtocol implements MTP {
 
@@ -70,6 +72,7 @@ public class MessageTransportProtocol implements MTP {
   private static POA rootPOA;
   private static POAManagerFactory mgrFactory;
   private static BootManager bootMgr;
+  private static Logger logger = Logger.getMyLogger(MessageTransportProtocol.class.getName());
 
   static {
    // Initialize the CORBA ORB
@@ -330,7 +333,7 @@ public class MessageTransportProtocol implements MTP {
     }
 
     public void deactivate() throws MTPException {
-      System.out.println("Deactivating " + getString() + " ...");
+     logger.log(Logger.CONFIG,"Deactivating " + getString() + " ...");
       // Retrieve the POA for this address port.
       try {
 	// Name for the POA at the given address
@@ -341,7 +344,7 @@ public class MessageTransportProtocol implements MTP {
 	// Close the POA and the managed object, waiting for pending
 	// calls to complete
 	myPOA.destroy(true, true);
-	System.out.println("Done");
+	logger.log(Logger.CONFIG,"Done");
       }
       catch(org.omg.PortableServer.POAPackage.AdapterNonExistent ane) {
 	throw new MTPException("No POA is active on the port " + getPort(), ane);
@@ -417,7 +420,7 @@ public class MessageTransportProtocol implements MTP {
 
     public void deactivate() throws MTPException {
 
-      System.out.println("Deactivating " + getString() + " ...");
+      logger.log(Logger.CONFIG,"Deactivating " + getString() + " ...");
       // Contact the Naming Service the address points to and bind the
       // object reference to it. The String points to the root of the
       // naming service.
@@ -445,7 +448,7 @@ public class MessageTransportProtocol implements MTP {
 	// Deactivate the Servant
 	byte[] oid = rootPOA.reference_to_id(objRef);
 	rootPOA.deactivate_object(oid);
-	System.out.println("Done");
+	logger.log(Logger.CONFIG,"Done");
       }
       catch(SystemException se) {
 	throw new MTPException("Error during 'corbaname' address deactivation", se);
