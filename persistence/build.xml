@@ -1,0 +1,68 @@
+<project name="JADE Persistence" default="compile" basedir=".">
+
+  <!-- Adapt these to your Hibernate installation -->
+  <property name="hibernate-home" value="E:/Libs/hibernate-2.0.3"/>
+
+
+  <!-- set global properties for this build -->
+  <property name="src" value="src"/>
+  <property name="build" value="classes"/>
+  <property name="lib" value="lib"/>
+  <property name="libName" value="JADEPersistence"/>
+  <property name="dist" value="../.."/>
+  <property name="libJADEDir" value="../../lib"/>
+  <property name="build.compiler" value="modern"/>
+  <property name="javac.optimize" value="off"/>
+  <property name="javac.debug" value="on"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <mkdir dir="${build}" />
+    <mkdir dir="${lib}" />
+  </target>
+  
+  <!-- Compile the java code from ${src} into ${build} -->
+  <target name="compile" depends="init">
+
+    <javac srcdir="${src}" destdir="${build}" nowarn="off" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="on">
+      <classpath>
+        <fileset dir="${libJADEDir}" includes="*.jar"/>
+        <fileset dir="${hibernate-home}" includes="hibernate2.jar"/>
+        <fileset dir="${hibernate-home}" includes="lib/**/*.jar"/>
+      </classpath>
+    </javac>
+
+    <copy todir="${build}">
+      <fileset dir="." includes="hibernate.properties"/>
+      <fileset dir="src" includes="**/*.hbm.xml"/>
+    </copy>
+
+  </target>
+
+  <!-- Make jars file and put in ${lib} -->
+  <target name="lib" depends="init, compile">
+    <jar jarfile="${lib}/${libName}.jar" >
+      <fileset dir="${build}"/>
+    </jar>
+  </target>
+
+  <!-- Make distribution zip file and put in ${dist} -->
+  <target name="dist" depends="init, lib">
+    <jar jarfile="${dist}/${libName}AddOn.zip">
+      <fileset dir="${dist}" includes="add-ons/persistence/${src}/**"/>
+      <fileset dir="${dist}" includes="add-ons/persistence/*"/>
+      <fileset dir="${dist}" includes="add-ons/persistence/${lib}/*"/>
+    </jar>
+  </target>
+
+  <target name="all" depends="compile, lib, dist"/>
+
+  <!-- delete ${build} and ${lib} directories -->
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} directory tree -->
+    <delete includeEmptyDirs="true" file="${lib}/${jarName}.jar">
+      <fileset dir="${build}"/>
+    </delete>
+  </target>
+</project>

@@ -1,0 +1,201 @@
+/*****************************************************************
+JADE - Java Agent DEvelopment Framework is a framework to develop 
+multi-agent systems in compliance with the FIPA specifications.
+Copyright (C) 2000 CSELT S.p.A. 
+
+GNU Lesser General Public License
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation, 
+version 2.1 of the License. 
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA  02111-1307, USA.
+*****************************************************************/
+
+
+package jade.core.persistence;
+
+//#MIDP_EXCLUDE_FILE
+
+import jade.core.ServiceNotActiveException;
+
+import jade.content.onto.Ontology;
+import jade.content.Concept;
+import jade.content.Predicate;
+import jade.content.onto.basic.Action;
+import jade.content.onto.basic.Done;
+import jade.content.onto.basic.Result;
+
+import jade.domain.RequestManagementBehaviour;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.FailureException;
+import jade.domain.FIPAAgentManagement.UnsupportedFunction;
+import jade.domain.persistence.*;
+
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+
+import jade.security.AuthException;
+
+
+
+/**
+   This behaviour serves the actions of the persistent management
+   ontology supported by the AMS.
+
+   @author Giovanni Rimassa - FRAMeTech
+*/
+public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
+
+    public PersistenceManagementBehaviour() {
+	// Matches all REQUEST messages with the JADE-Persistence ontology
+	super(null, MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), MessageTemplate.MatchOntology(PersistenceVocabulary.NAME)));
+    }
+
+    public void onStart() {
+
+	if(firstTime) {
+	    firstTime = false;
+
+	    // Register the persistence ontology, if it's not already there
+	    Ontology o = myAgent.getContentManager().lookupOntology(PersistenceVocabulary.NAME);
+	    if(o == null) {
+		myAgent.getContentManager().registerOntology(PersistenceOntology.getInstance());
+	    }
+	}
+    }
+
+    protected ACLMessage performAction(Action slAction, ACLMessage request) throws AuthException, FIPAException {
+
+  	Concept action = slAction.getAction();
+  	Object result = null;
+  	boolean resultNeeded = false;
+
+
+  	if(action instanceof LoadAgent) {
+	    try {
+		LoadAgent la = (LoadAgent)action;
+
+		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		h.loadAgent(la.getAgent(), la.getRepository(), la.getWhere());
+	    }
+	    catch(ServiceNotActiveException snae) {
+		// The persistence service is not installed. Abort operation.
+		throw new FailureException("-- Persistence service not active --");
+	    }
+	    catch(Exception e) {
+		// Some other error occurred. Throw a FIPA Failure exception.
+		throw new FailureException("load-agent failed [" + e.getMessage() + "]");
+	    }
+  	}
+  	else if(action instanceof SaveAgent) {
+	    try {
+		SaveAgent sa = (SaveAgent)action;
+
+		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		h.saveAgent(sa.getAgent(), sa.getRepository());
+	    }
+	    catch(ServiceNotActiveException snae) {
+		// The persistence service is not installed. Abort operation.
+		throw new FailureException("-- Persistence service not active --");
+	    }
+	    catch(Exception e) {
+		// Some other error occurred. Throw a FIPA Failure exception.
+		throw new FailureException("save-agent failed [" + e.getMessage() + "]");
+	    }
+  	}
+  	else if(action instanceof DeleteAgent) {
+	    try {
+		DeleteAgent da = (DeleteAgent)action;
+
+		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		h.deleteAgent(da.getAgent(), da.getRepository(), da.getWhere());
+	    }
+	    catch(ServiceNotActiveException snae) {
+		// The persistence service is not installed. Abort operation.
+		throw new FailureException("-- Persistence service not active --");
+	    }
+	    catch(Exception e) {
+		// Some other error occurred. Throw a FIPA Failure exception.
+		throw new FailureException("delete-agent failed [" + e.getMessage() + "]");
+	    }
+  	}
+	else if(action instanceof FreezeAgent) {
+	    try {
+		FreezeAgent fa = (FreezeAgent)action;
+
+		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		h.freezeAgent(fa.getAgent(), fa.getRepository(), fa.getBufferContainer());
+	    }
+	    catch(ServiceNotActiveException snae) {
+		// The persistence service is not installed. Abort operation.
+		throw new FailureException("-- Persistence service not active --");
+	    }
+	    catch(Exception e) {
+		// Some other error occurred. Throw a FIPA Failure exception.
+		throw new FailureException("freeze-agent failed [" + e.getMessage() + "]");
+	    }
+	}
+	else if(action instanceof ThawAgent) {
+	    try {
+		ThawAgent ta = (ThawAgent)action;
+
+		PersistenceHelper h = (PersistenceHelper)myAgent.getHelper(PersistenceHelper.NAME);
+		h.thawAgent(ta.getAgent(), ta.getRepository(), ta.getNewContainer());
+	    }
+	    catch(ServiceNotActiveException snae) {
+		// The persistence service is not installed. Abort operation.
+		throw new FailureException("-- Persistence service not active --");
+	    }
+	    catch(Exception e) {
+		// Some other error occurred. Throw a FIPA Failure exception.
+		throw new FailureException("thaw-agent failed [" + e.getMessage() + "]");
+	    }
+	}
+  	else if(action instanceof LoadAgentGroup) {
+	    throw new UnsupportedFunction("load-agent-group");
+  	}
+  	else if(action instanceof SaveAgentGroup) {
+	    throw new UnsupportedFunction("save-agent-group");
+  	}
+	else if(action instanceof DeleteAgentGroup) {
+	    throw new UnsupportedFunction("delete-agent-group");
+	}
+  	else {
+	    throw new UnsupportedFunction();
+  	}
+
+  	// Prepare the notification
+  	ACLMessage notification = request.createReply();
+  	notification.setPerformative(ACLMessage.INFORM);
+  	Predicate p = null;
+  	if (resultNeeded) {
+	    // The action produced a result
+	    p = new Result(slAction, result);
+  	}
+  	else {
+	    p = new Done(slAction);
+  	}
+  	try {
+	    myAgent.getContentManager().fillContent(notification, p);
+  	}
+  	catch (Exception e) {
+	    // Should never happen
+	    e.printStackTrace();
+  	}
+  	
+	return notification;
+    }
+
+    private boolean firstTime = true;
+
+}
