@@ -22,7 +22,7 @@ by Michael Glad and Pawel Veselov distributed itself under the LGPL license.
 SYSTEM REQUIREMENTS
 ===================
 In order to use the JADE security plug-in you need JADE 2.61 or later, 
-and Sun Java SDK 1.4. 
+and Sun Java SDK 1.4 or later. 
 The file jadeS.jar, which contains the JADE security plug-in, needs 
 to be in your CLASSPATH variable.
 There are no more requirements than the standard JADE installation, 
@@ -47,10 +47,10 @@ http://jade.cselt.it  in the "on-line documentation" section.
 
 EXAMPLES
 ========
-Examples are in the directory: jade/add-ons/security/examples 
-Refer to the Security Administrator Guide and to the files 
-provided in the directory add-ons/security/examples/ in order 
-to know how to run the examples.
+Examples are in the directory: jade/add-ons/security/runExamples 
+Please refer to the Security Administrator Guide and to the 
+README.txt files provided into the add-ons/security/runExamples/ 
+subdirectories in order to know how to run the examples.
 
 
 
