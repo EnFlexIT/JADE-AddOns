@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE TestsList SYSTEM "../common/xml/listTests.dtd" [
+	<!ENTITY % inline "#PCDATA|em|br|UL|LI|b">
+	]>
+	<TestsList> 
+		<Test name="Stress-test-for-timeout-blocking-mechanism" skip="false">
+			<TestClassName>test.interPlatform.tests.TestRemotePing</TestClassName>
+			<WhatTest> Tests sending and receiving a message to/from an agent on a remote platform.</WhatTest>
+			<HowWorkTest> It uses the default IIOP MTP.</HowWorkTest>
+			<WhenTestPass> The test passes if no exception is fired.</WhenTestPass>
+		</Test>		
+	</TestsList>
