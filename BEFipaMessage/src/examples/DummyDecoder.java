@@ -34,7 +34,12 @@ import java.io.*;
 import java.util.*;
 import sonera.fipa.acl.*;
 import jade.lang.acl.*;
+import jade.util.Logger;
+
 public class DummyDecoder {
+        
+        private static Logger logger = Logger.getMyLogger(DummyDecoder.class.getName());
+        
         public static void main (String[] args) {
                 /*
 		 * Initialize Bit-efficient ACL input stream.
@@ -59,8 +64,9 @@ public class DummyDecoder {
                                 ++c;
                         }
                 } catch (Exception e) {
+                		logger.log(Logger.WARNING,e.getMessage());
                         e.printStackTrace();
                 }
-                System.err.println(c+ " message(s) parsed");
+                logger.log(Logger.INFO,c+ " message(s) parsed");
         }
 }

@@ -34,7 +34,12 @@ import java.io.*;
 import sonera.fipa.acl.*;
 import jade.lang.acl.*;
 import jade.core.*;
+import jade.util.Logger;
+
 public class DummyEncoder {
+        
+        private static Logger logger = Logger.getMyLogger(DummyEncoder.class.getName());
+        
         public static void main (String[] args) {
                 int c = 0;
                 ACLMessage aclMessage[] = new ACLMessage[100];
@@ -60,12 +65,12 @@ public class DummyEncoder {
                                 ACLMessage m = sc.decode();
 //				byte [] __o = new byte[1800];
 //				m.setContentObject(__o);
-                                System.err.println(m.toString());
+                                logger.log(Logger.INFO,m.toString());
                                 os.write(m);
                                 ++c;
                         }
                 } catch (Exception e) {
-                        System.err.println("-- Error: "+e);
+                        logger.log(Logger.WARNING,"-- Error: "+e);
                 }
                                 /*
 				 * Here we assume that whole message is
@@ -77,6 +82,6 @@ public class DummyEncoder {
 				 * then we can write that to stdout
 				 * using bit-efficient encoding.
 				 */
-                System.err.println(c+" message(s) written to stdout");
+                logger.log(Logger.INFO,c+" message(s) written to stdout");
         }
 }

@@ -54,7 +54,7 @@ import java.util.Properties;
 
 import jade.core.AID;
 import jade.lang.acl.*;
-
+import jade.util.Logger;
 
 
 /**
@@ -100,6 +100,8 @@ public class ACLEncoder implements ACLConstants {
 	 * Constructor for the encoder. 
          * Initialises the ACL encoder with no codetable coding scheme.
 	 */
+        private static Logger logger = Logger.getMyLogger(ACLEncoder.class.getName());
+        
         public ACLEncoder() {
                 baseCoding = ACL_BITEFFICIENT;
                 initialize(0);
@@ -728,8 +730,8 @@ public class ACLEncoder implements ACLConstants {
                                 prev = b;
                         }
                         if (b == -1) {
-                                System.out.println
-                                        ("String not ended correctly, treating as word");
+                                
+                                logger.log(Logger.INFO,"String not ended correctly, treating as word");
                                 index--;
                                 l = ACL_EXPR_LEVEL_DOWN;
                                 return new String (ba.get(), 0, ba.length()-1);

@@ -35,7 +35,11 @@ import java.util.*;
 import sonera.fipa.acl.*;
 import sonera.fipa.util.*;
 import jade.lang.acl.*;
+import jade.util.Logger;
+
 public class DummyBufDecoder {
+	
+		private static Logger logger = Logger.getMyLogger(DummyBufDecoder.class.getName());
         public static void main (String[] args) {
                 /*
 		 * Initialize Bit-efficient ACL input stream.
@@ -56,7 +60,7 @@ public class DummyBufDecoder {
                                         ba.add(b);
                         }
                 } catch (Exception e) {
-                        System.err.println("Got exception:" +e.toString());
+                       logger.log(Logger.WARNING,"Got exception:" +e.toString());
                 }
                 try {
                         while (true) {
@@ -74,6 +78,6 @@ public class DummyBufDecoder {
                 } catch (Exception e) {
                         e.printStackTrace();
                 }
-                System.err.println(c+ " message(s) parsed");
+               logger.log(Logger.INFO,c+ " message(s) parsed");
         }
 }
