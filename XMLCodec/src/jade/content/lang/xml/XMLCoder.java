@@ -35,6 +35,8 @@ import jade.content.abs.AbsObject;
 import jade.content.abs.AbsAggregate;
 import jade.content.abs.AbsPrimitive;
 import jade.content.schema.ObjectSchema;
+import jade.content.schema.Facet;
+import jade.content.schema.facets.TypedAggregateFacet;
 import jade.lang.acl.ISO8601;
 import starlight.util.Base64;
 import java.util.Date;
@@ -74,14 +76,17 @@ class XMLCoder {
 		return temp;
 	}
 		
-	void encodeAggregateAsTag(AbsObject content, String tag, StringBuffer sb) throws Codec.CodecException {
-		AbsAggregate absAggregate = (AbsAggregate)content;
+	void encodeAggregateAsTag(AbsObject content, 
+							  String memberExpectedType,
+							  String tag, 
+							  StringBuffer sb) throws Codec.CodecException {
 		
+		AbsAggregate absAggregate = (AbsAggregate)content;
 		for (int i=0; i < absAggregate.size(); i++) 
-			encodeAsTag(absAggregate.get(i), null, tag, sb);
+			encodeAsTag(absAggregate.get(i), null, memberExpectedType, tag, sb);
 	}
 	
-	void encodeAsTag(AbsObject content, String slotExpectedType, String tag, StringBuffer sb) throws Codec.CodecException{ 
+	void encodeAsTag(AbsObject content, ObjectSchema parentSchema, String slotExpectedType, String tag, StringBuffer sb) throws Codec.CodecException{ 
   
     	boolean hasChild = false;
     	boolean hasAttributes = false;
@@ -97,7 +102,7 @@ class XMLCoder {
 				AbsContentElementList absCEList = (AbsContentElementList)content;
 				for (int i=0; i < absCEList.size(); i++) {
 					AbsObject temp = (AbsObject)absCEList.get(i);		
-					encodeAsTag(temp, temp.getTypeName(), null, sb);
+					encodeAsTag(temp, null, temp.getTypeName(), null, sb);
 				}
 				//sb.append("</CONTENT>");
 				sb.append("</CONTENT_ELEMENT_LIST>");
@@ -128,7 +133,15 @@ class XMLCoder {
 		
 			// Encoding an Aggregate
 			if (content instanceof AbsAggregate) {
-    			encodeAggregateAsTag(content, tag, sb);
+				String memberExpectedType = null;
+				
+				Facet[] facets = parentSchema.getFacets(tag);	
+				for (int i = 0; i < facets.length; i++) {
+					if (facets[i] instanceof TypedAggregateFacet) {
+						memberExpectedType = ((TypedAggregateFacet)facets[i]).getType().getTypeName();
+					}
+				 }		
+    			encodeAggregateAsTag(content, memberExpectedType, tag, sb);
     			return;
     		}
 
@@ -158,7 +171,7 @@ class XMLCoder {
 		
 	   		for (int i=0; i < names.length; i++) {
     			AbsObject temp = content.getAbsObject(names[i]);
-   				encodeAsTag(temp, currSchema.getSchema(names[i]).getTypeName(), names[i], sb);
+   				encodeAsTag(temp, currSchema, currSchema.getSchema(names[i]).getTypeName(), names[i], sb);
     		} 
     	
     		sb.append("</");
