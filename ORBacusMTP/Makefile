@@ -15,7 +15,7 @@ ARFLAGS = cvf
 MAKE = make
 IDLCC = jidl
 JC = javac
-JFLAGS = -deprecation -O -d $(CLSDIR) -classpath .;$(JADELIB);$(ORBACUSLIB)
+JFLAGS = -deprecation -O -d $(CLSDIR) -classpath .:$(JADELIB):$(ORBACUSLIB)
 
 SOURCES     = 	MessageTransportProtocol.java
 IDLSPEC     =   fipa.idl
@@ -93,7 +93,7 @@ batch:
 	echo >> $(BATCH_MAKE)
 	echo $(IDLCC) $(IDLSPEC) >> $(BATCH_MAKE)
 	echo >> $(BATCH_MAKE)
-	echo '$(JC) $(subst /,\,$(JFLAGS)) $(subst /,\,$(SOURCES))' >> $(BATCH_MAKE)
+	echo '$(JC) $(subst :,;,$(subst /,\,$(JFLAGS))) $(subst /,\,$(SOURCES))' >> $(BATCH_MAKE)
 	echo >> $(BATCH_MAKE)
 	echo 'cd $(CLSDIR)' >> $(BATCH_MAKE)
 	echo '$(AR) $(ARFLAGS) ..\$(LIBNAME) *' >> $(BATCH_MAKE)
