@@ -21,14 +21,16 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package jade.wrapper.taglib;
 
-import javax.servlet.jsp.tagext.*;
+import javax.servlet.jsp.tagext.TagData;
+import javax.servlet.jsp.tagext.TagExtraInfo;
+import javax.servlet.jsp.tagext.VariableInfo;
 
 public class UseAgentTEI extends TagExtraInfo {
     
     public VariableInfo[] getVariableInfo(TagData data) {
 	String type = data.getAttributeString("type");
 	if (type==null) {
-	    type = "jade.wrapper.Agent";
+	    type = "jade.wrapper.AgentController";
 	}
         return new VariableInfo[] 
             {
