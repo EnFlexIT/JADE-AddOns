@@ -107,6 +107,31 @@ public class PersistenceProxy extends Service.SliceProxy implements PersistenceS
 	}
     }
 
+    public void reloadAgent(AID agentID, String repository) throws IMTPException, NotFoundException {
+	try {
+	    GenericCommand cmd = new GenericCommand(H_RELOADAGENT, PersistenceSlice.NAME, null);
+	    cmd.addParam(agentID);
+	    cmd.addParam(repository);
+
+	    Node n = getNode();
+	    Object result = n.accept(cmd);
+	    if((result != null) && (result instanceof Throwable)) {
+		if(result instanceof IMTPException) {
+		    throw (IMTPException)result;
+		}
+		else if(result instanceof NotFoundException) {
+		    throw (NotFoundException)result;
+		}
+		else {
+		    throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+		}
+	    }
+	}
+	catch(ServiceException se) {
+	    throw new IMTPException("Unable to access remote node", se);
+	}
+    }
+
     public void deleteAgent(AID agentID, String repository) throws IMTPException, NotFoundException {
 	try {
 	    GenericCommand cmd = new GenericCommand(H_DELETEAGENT, PersistenceSlice.NAME, null);
