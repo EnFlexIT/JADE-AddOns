@@ -101,7 +101,6 @@ public class TestSuiteAgent extends GuiAgent {
 			// The user pressed "Open". If no tester is currently loaded, just load
 			// the indicated one. Otherwise kill the currently loaded tester before
 			if(myGui.getStatus() == TestSuiteGui.IDLE_STATE){
-				System.out.println("LOAD");
 				loadTester(className);
 			}
 			else {
