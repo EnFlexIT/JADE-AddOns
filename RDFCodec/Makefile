@@ -3,7 +3,7 @@
 JADELIB     	=   	../../../lib/jade.jar
 LIBDIR      	=   	../lib
 LIBNAME     	=   	rdf.jar
-PARSERSLIB  	=   	$(LIBDIR)/sax2.jar:$(LIBDIR)/rdf-api-2001-01-19.jar
+PARSERSLIB  	=   	$(LIBDIR)/sax2.jar:../../../lib/rdf-api-2001-01-19.jar
 CLSDIR      	=	classes
 SRCDIR      	=   	src
 EXAMPLESDIR 	= 	examples
