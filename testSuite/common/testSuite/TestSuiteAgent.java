@@ -56,6 +56,9 @@ import java.util.Vector;
  */
 
 public class TestSuiteAgent extends GuiAgent {
+	public static JadeController mainController;
+	public static final String MAIN_SERVICES = "jade.core.mobility.AgentMobilityService;jade.core.event.NotificationService;jade.core.replication.MainReplicationService;jade.core.replication.AddressNotificationService";
+	
 	private static final String NAME = "test-suite";
 	private static final String TESTER_NAME = "tester";
 	
@@ -404,35 +407,31 @@ public class TestSuiteAgent extends GuiAgent {
 	// stand-alone program 	
 	public static void main(String[] args) {
 		try {
+			// Launch the Main container in a separated process
+			mainController = TestUtility.launchJadeInstance("Main", null, "-gui -nomtp -services "+MAIN_SERVICES, null);
+			
       // Get a hold on JADE runtime
       Runtime rt = Runtime.instance();
 
       // Exit the JVM when there are no more containers around
       rt.setCloseVM(true);
 
-      Profile pMain = new ProfileImpl(null, Test.DEFAULT_PORT, null);
-			pMain.setSpecifiers(Profile.MTPS, new ArrayList());
+      Profile p = new ProfileImpl(null, Test.DEFAULT_PORT, null);
+			p.setParameter(Profile.MAIN, "false");
+			p.setParameter(Profile.SERVICES, "jade.core.event.NotificationService;jade.core.mobility.AgentMobilityService;jade.core.replication.AddressNotificationService");
+			p.setSpecifiers(Profile.MTPS, new ArrayList());
 			// Arguments
 			if (args != null) {
 				for (int i = 0; i < args.length; ++i) {
 					if (args[i].startsWith("-") && i < args.length-1) {
-						pMain.setParameter(args[i].substring(1), args[i+1]);
+						p.setParameter(args[i].substring(1), args[i+1]);
 						++i;
 					}
 				}
 			}
 			
-      MainContainer mc = rt.createMainContainer(pMain);
+      AgentContainer mc = rt.createAgentContainer(p);
       
-      try {
-	      AgentController rma = mc.createNewAgent("rma", "jade.tools.rma.rma", new Object[0]);
-  	    rma.start();
-      }
-      catch (Exception ex) {
-      	System.out.println("Error launching the RMA agent");
-      	ex.printStackTrace();
-      }
-
       AgentController testSuite = mc.createNewAgent(NAME, TestSuiteAgent.class.getName(), new Object[]{mc}); 
       testSuite.start();
 		}
