@@ -68,18 +68,20 @@ public class TestEnvelope extends Test {
   			public void onStart() {
   				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
   				msg.setConversationId(CONV_ID);
-  				msg.addReceiver(resp);
+  				//msg.addReceiver(resp);
   				msg.setDefaultEnvelope();
   				Envelope env = msg.getEnvelope();
-  				//env.addTo(resp);
+  				env.addTo(resp);
   				env.addProperties(new Property(KEY1, TEST_SERIALIZABLE));
   				env.addProperties(new Property(KEY2, TEST_STRING));
+  				System.out.println("Sending test message");
   				myAgent.send(msg);
   			}
   			
   			public void action() {
   				ACLMessage msg = myAgent.receive(MessageTemplate.MatchConversationId(CONV_ID)); 
 					if (msg != null) { 
+						System.out.println("Reply received: "+msg);
 						AID sender = msg.getSender();
 						if (sender.equals(resp) && msg.getPerformative() == ACLMessage.INFORM) {
 							l.log("Message envelope OK");
@@ -124,7 +126,6 @@ public class TestEnvelope extends Test {
   }
 					
   public void clean(Agent a) {
-  	System.out.println("Cleaning...");
   	try {
   		TestUtility.killAgent(a, resp);
   		Thread.sleep(1000);
@@ -142,7 +143,9 @@ public class TestEnvelope extends Test {
    */
   public static class CheckEnvelopeAgent extends Agent {
   	protected void setup() {
+  		System.out.println("Responder started.");
   		ACLMessage msg = blockingReceive(MessageTemplate.MatchConversationId(CONV_ID));
+  		System.out.println("Responder received test message.");
   		ACLMessage reply = msg.createReply();
   		reply.setPerformative(ACLMessage.FAILURE);
   		
