@@ -922,7 +922,7 @@ public class PersistenceManager {
 		    java.util.List l = frozen.getBufferedMessages();
 		    for(int i = 0; i < l.size(); i++) {
 			ACLMessage msg = (ACLMessage)l.get(i);
-			bufferedMessages.add(msg);
+			bufferedMessages.add(msg.clone());
 		    }
 
 		    tx.commit();

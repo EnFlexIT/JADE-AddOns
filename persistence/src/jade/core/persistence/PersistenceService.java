@@ -671,7 +671,8 @@ public class PersistenceService extends BaseService {
 		java.util.List pm = new java.util.ArrayList(pendingMessages.size());
 		Iterator it = pendingMessages.iterator();
 		while(it.hasNext()) {
-		    pm.add(it.next());
+		    ACLMessage msg = (ACLMessage)it.next();
+		    pm.add(msg);
 		}
 
 		// Use the Persistence Manager to freeze the agent and remove it from the LADT
