@@ -49,6 +49,8 @@ import jade.core.BaseService;
 import jade.core.*;
 
 
+
+
 /**
 
    This is the filter used into the PermissionService.
@@ -60,6 +62,9 @@ import jade.core.*;
 */
 public class PermissionFilter extends Filter {
 
+
+    private static final String CHECKERTABLE_FILLER_CLASS_KEY="jade_security_permission_CheckerTableFiller";
+  
     public PermissionFilter( PermissionService service ) {
         setPreferredPosition( FIRST );  // first filter
         this.service = service;
@@ -70,9 +75,10 @@ public class PermissionFilter extends Filter {
 
     // this table contains the mapping:
     // (cmd name) <-> (checkers)
-    private CheckerTable checkerTable = new CheckerTable();
+    public CheckerTable checkerTable = new CheckerTable();
 
-    //private AgentContainer myContainer;
+    private AgentContainer myContainer;
+    private Profile myProfile;
 
     private JADEAccessController myJADEAccessController;
 
@@ -81,18 +87,41 @@ public class PermissionFilter extends Filter {
     // init the AuthorizationFilter
     public void init( AgentContainer myContainer, Profile myProfile, boolean direction ){
       // the container
-      // this.myContainer = myContainer; // is that any useful? We'll see...
+      this.myContainer = myContainer;
+      this.myProfile = myProfile;
 
       // it is unique for the service (for both filters)
       myJADEAccessController = service.getJADEAccessController();
-
-//      java.security.policy=myfirst.policy
 
       // the PermissionService acts also as NameAuthority
       ((JADEAccessControllerImpl)myJADEAccessController).setNameAuthority( service );
 
       this.direction=direction;
-      
+
+      // Load rows into the checkerTable 
+      String fillerClass = myProfile.getParameter(CHECKERTABLE_FILLER_CLASS_KEY, null);
+      if (fillerClass!=null) {
+        CheckerTableFiller ctFiller;
+        try {
+          ctFiller = (CheckerTableFiller) Class.forName(fillerClass).newInstance();
+          // Load rows into the checkerTable by using a custom CheckerTableFiller
+          ctFiller.setDirection( direction );
+          ctFiller.fillChecherTable( this );
+        }
+        catch (Exception ex) {
+          myLogger.log( Logger.SEVERE, "Could not load custom CheckerTableFiller: '"+ fillerClass +"'", ex);
+        }
+      } else {
+        // Load rows into the checkerTable by using the default code-wired.
+        fillCheckerTable();
+      }
+    }
+
+
+    /**
+     *    Load rows into the checkerTable.
+     */
+    protected void fillCheckerTable() {
       SimpleJADEChecker.setDefaultProfile( myProfile );
       SimpleJADEChecker.setDefaultJADEAccessController( myJADEAccessController );
       SimpleJADEChecker.setDefaultContainer( myContainer );
@@ -177,8 +206,7 @@ public class PermissionFilter extends Filter {
       // ...format to be discussed...
 
 
-    } // end Filter init
-
+    } // end fillCheckerTable()
 
 
 
@@ -281,7 +309,7 @@ public static synchronized void log(jade.core.Command cmd) {
 }
 
 // this contains the mapping  (cmd name) <-> (checkers)
-private class CheckerTable {
+public class CheckerTable {
       private Hashtable map = new Hashtable();
       public void add( String command_name, CommandChecker checker ) {
         Vector checkers = (Vector)map.get( command_name );
@@ -298,4 +326,8 @@ private class CheckerTable {
       public int size() { return map.size(); }
 } // end CheckerTable
 
+public interface CheckerTableFiller {
+      public void fillChecherTable( PermissionFilter pf );
+      public void setDirection(boolean direction);
+}
 } // end class PermissionFilter
