@@ -272,18 +272,21 @@ log("--[AuthPermission] ## implies()  result="+result);
     return res;
   }
 
-  // returns true if val2 is equal to val (val can contain * and ? wildcards)
-  private static boolean wildEquals(String val2, String val) {
-    // val2=blabla  val=bla*  -> true
-    // val2=blabla  val=bla???      -> true
+  // returns true if val2 is equal to pat (pat can contain * and ? wildcards)
+  private static boolean wildEquals(String val2, String pat) {
+    // val2=blabla  pat=bla*  -> true
+    // val2=blabla  pat=bla???      -> true
     boolean equal = true;
     int i=-1;
-    while( (++i<val.length()) && (equal) ) {
-      char p = val.charAt(i); // val is the pattern
+    int n=pat.length(); 
+    if (n>val2.length()) n=val2.length();
+    while( (++i<n) && (equal) ) {
+      char p = pat.charAt(i); // pat is the pattern
+      //System.out.println(" i="+i+"     p="+p+"    p==?"+(p=='?'));
       if (p=='*') { 
-        i=val.length(); // skip the rest
+        i=pat.length(); // skip the rest
       } else {
-        if (! (p==val2.charAt(i)) || (p=='?') ) { equal=false; }
+        if (! ((p==val2.charAt(i)) || (p=='?')) ) { equal=false; }
       }
     }// end for
     return equal;
