@@ -36,6 +36,7 @@ import jade.util.leap.ArrayList;
 import jade.lang.acl.ISO8601;
 import starlight.util.Base64;
 import java.util.*;
+import jade.util.Logger;
 
 /**
  * @author Rosalba Bochicchio - TELECOM ITALIA LAB
@@ -353,7 +354,7 @@ class RDFDecoder {
        	 	element.term = abs;
 			
 		} catch (Exception e) {
-			System.out.println(e);
+			Logger.getMyLogger(this.getClass().getName()).log(Logger.WARNING,e.getMessage());
 		}
 	}
 	

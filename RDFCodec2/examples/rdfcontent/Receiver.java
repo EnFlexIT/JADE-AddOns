@@ -27,6 +27,7 @@ import jade.core.*;
 import jade.core.behaviours.*;
 import jade.lang.acl.ACLMessage;
 import jade.util.leap.Iterator;
+import jade.util.Logger;
 
 import jade.content.*;
 import jade.content.lang.rdf.*;
@@ -42,13 +43,16 @@ public class Receiver extends Agent {
   private Codec          codec       = new RDFCodec();
   // This agent understands terms about people relationships
   private Ontology   ontology    = PeopleOntology.getInstance();
+  
+  //logging
+  private static Logger logger = Logger.getMyLogger(Receiver.class.getName());
 
   
   protected void setup() {
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 	
-	  System.out.println( "[" + getLocalName() + "] Waiting for a message...");
+	 logger.log(Logger.INFO, "[" + getLocalName() + "] Waiting for a message...");
 		addBehaviour(new ReceiverBehaviour(this));
   }
   
@@ -70,18 +74,17 @@ public class Receiver extends Agent {
 			    ContentElement ce = myAgent.getContentManager().extractContent(msg);
 			    if(ce instanceof FatherOf) {
 			    	FatherOf fo = (FatherOf) ce;
-				    System.out.print("["+getLocalName()+"] "+fo.getFather().getName()+" is the father of ");
+				    logger.log(Logger.INFO,"["+getLocalName()+"] "+fo.getFather().getName()+" is the father of ");
 				    Iterator it = fo.getChildren().iterator();
 				    while (it.hasNext()) {
 				    	Person p = (Person) it.next();
 			    		System.out.print(p.getName()+" ");
 				    }
-				    System.out.println();
 				    finished = true;
 					}
 				} 
 				catch(Exception e) { 
-					System.out.println("Error in extracting message");
+					logger.log(Logger.WARNING,"Error in extracting message");
 					e.printStackTrace(); 
 				}
 			}
