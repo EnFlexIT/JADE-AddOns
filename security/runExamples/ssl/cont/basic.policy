@@ -1,0 +1,11 @@
+//
+// --- These are the basic Java permissions to allow JADE to start up---
+//
+grant codebase "file:../../../../../lib/jade.jar" {
+	permission java.security.AllPermission; };
+grant codebase "file:../../../../../lib/jadeTools.jar" {
+	permission java.security.AllPermission; };
+grant codebase "file:../../../../../add-ons/security/lib/jadeS.jar" {
+	permission java.security.AllPermission; 
+};
+
