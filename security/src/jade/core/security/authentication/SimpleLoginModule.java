@@ -308,7 +308,7 @@ public class SimpleLoginModule implements LoginModule {
             String pswd = pwdfile.getProperty(userName);
 
             if (pwdfile.getProperty(userName.trim(),"username").trim().equals(pass.trim())) {
-              System.out.println("User Successfully Authenticated.\n");
+              System.out.println("User '"+userName+"' Successfully Authenticated.\n");
               is.close();
               return true;
             } 
