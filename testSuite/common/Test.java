@@ -55,12 +55,5 @@ public abstract class Test {
   	myGroup = tg;
   }
   
-  /*void setGroupArguments(Hashtable args) {
-  	groupArgs = args;
-  }
-  
-  protected String getGroupArgument(String name) {
-  	return (String) groupArgs.get(name);
-  }*/
 }
 

@@ -74,6 +74,9 @@ public class TestGroup {
 		return args.get(name);
 	}
 	
+	/**
+	   @see getArgument()
+	 */
 	protected Object setArgument(String name, Object val) {
 		return args.put(name, val);
 	}

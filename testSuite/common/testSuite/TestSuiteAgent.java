@@ -82,6 +82,7 @@ public class TestSuiteAgent extends GuiAgent {
 			"test.behaviours.BlockTimeoutTesterAgent",
 			"test.domain.df.DFTesterAgent",
 			"test.domain.JADEManagementOntologyTesterAgent",
+			"test.mobility.MobilityTesterAgent",
 			"test.proto.ContractNetTesterAgent",
 			"test.proto.AchieveRETesterAgent" } );
 		myGui.showCorrect();				
@@ -265,9 +266,15 @@ public class TestSuiteAgent extends GuiAgent {
 			pMain.setSpecifiers("mtps", new ArrayList());
 			
       MainContainer mc = rt.createMainContainer(pMain);
-
-      AgentController rma = mc.createNewAgent("rma", "jade.tools.rma.rma", new Object[0]);
-      rma.start();
+      
+      try {
+	      AgentController rma = mc.createNewAgent("rma", "jade.tools.rma.rma", new Object[0]);
+  	    rma.start();
+      }
+      catch (Exception ex) {
+      	System.out.println("Error launching the RMA agent");
+      	ex.printStackTrace();
+      }
 
       AgentController testSuite = mc.createNewAgent(NAME, TestSuiteAgent.class.getName(), new Object[]{mc}); 
       testSuite.start();

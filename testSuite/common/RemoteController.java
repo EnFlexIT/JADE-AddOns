@@ -31,6 +31,7 @@ import jade.wrapper.*;
 import jade.util.leap.*;
 import test.common.*;
 import java.io.*;
+import java.util.StringTokenizer;
 
 /**
  */
@@ -38,6 +39,7 @@ public class RemoteController {
 	private Object lock = new Object();
 	private boolean ready = false;
 	private List addresses = new ArrayList();
+	private String containerName = null;
 	private Process proc;
 	
 	public RemoteController(String instanceName, String cmdLine, String[] protoNames) throws TestException {
@@ -84,6 +86,10 @@ public class RemoteController {
 	
 	public List getAddresses() {
 		return addresses;
+	}
+	
+	public String getContainerName() {
+		return containerName;
 	}
 		
 	public void kill() {
@@ -137,6 +143,7 @@ public class RemoteController {
 					
 						// Notify the launcher when JADE startup is completed 
 						if (line.startsWith("Agent container") && line.endsWith("is ready.")) {
+							catchContainerName(line);
 							synchronized (lock) {
 								ready = true;
 								lock.notifyAll();
@@ -157,6 +164,13 @@ public class RemoteController {
 					break;
 				}
 			}
-		}		
+		}	
+		
+		private void catchContainerName(String line) {
+			StringTokenizer st = new StringTokenizer(line, " @");
+			st.nextToken(); // Agent
+			st.nextToken(); // Container
+			containerName = st.nextToken();
+		}
 	}   // END of inner class SubProcessManager
 }
