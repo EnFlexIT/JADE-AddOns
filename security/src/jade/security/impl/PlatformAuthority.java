@@ -91,6 +91,8 @@ public class PlatformAuthority extends ContainerAuthority {
 		}
 		
 		serial = 1;
+		
+		fillChecks();
 	}
 	
 	public void sign(JADECertificate certificate, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
@@ -114,34 +116,37 @@ public class PlatformAuthority extends ContainerAuthority {
 	}
 
 	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] password) throws AuthException {
-		JADEPrincipal principal = identity.getSubject();
-		UserPrincipal user = null;
-		if (principal instanceof AgentPrincipal)
-			user = ((AgentPrincipal)principal).getUser();
-		else if (principal instanceof ContainerPrincipal)
-			user = ((ContainerPrincipal)principal).getUser();
-		else if (principal instanceof UserPrincipal)
-			user = (UserPrincipal)principal;
-		else
-			throw new AuthenticationException("Unknown principal type");
+		final PrincipalImpl principal = (PrincipalImpl)identity.getSubject();
 
-		String hashed = Digest.digest(password, "MD5");
+		String name = principal.getOwnership();
+		String hash = Digest.digest(password, "MD5");
 		//System.out.println("authenticating");
 		//System.out.println("principal=" + principal + ";");
-		//System.out.println("password=" + new String(passwd) + ";");
-		String name = user.getName();
+		//System.out.println("password=" + new String(password) + ";");
+		//System.out.println("hash=" + hash + ";");
+
 		if (users == null)
 			return;
 		else for (int i = 0; i < users.size(); i++) {
 			UserEntry entry = (UserEntry)users.elementAt(i);
 			if (entry.usr.equals(name)) {
-				if (! entry.key.equals(hashed))
+				if (! entry.key.equals(hash))
 					throw new AuthenticationException("Wrong password");
 
 				// ok: user found + exact password
 				// add permissions here
 				delegation.setSubject(principal);
-				PermissionCollection perms = getPermissions((PrincipalImpl)principal);
+				PermissionCollection perms = null;
+				try {
+					perms = (PermissionCollection)doPrivileged(new jade.security.PrivilegedExceptionAction() {
+						public Object run() {
+							return getPermissions((PrincipalImpl)principal);
+						}
+					});
+				}
+				catch (Exception ex) {
+					ex.printStackTrace();
+				}
 				for (Enumeration e = perms.elements(); e.hasMoreElements();) {
 					Permission p = (Permission)e.nextElement();
 					delegation.addPermission(p);
@@ -203,7 +208,7 @@ public class PlatformAuthority extends ContainerAuthority {
 				line = file.readLine();
 			}
 		}
-		catch(Exception e) { e.printStackTrace(); }
+		catch (Exception e) { e.printStackTrace(); }
 	}
 	
 	private PermissionCollection getPermissions(PrincipalImpl principal) {

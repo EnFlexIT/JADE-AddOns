@@ -31,7 +31,7 @@ import jade.util.leap.ArrayList;
 import jade.util.leap.Iterator;
 
 
-public class DelegationCertificateImpl extends BasicCertificateImpl implements DelegationCertificate {
+public class DelegationCertificateImpl extends BasicCertificateImpl implements DelegationCertificate, jade.util.leap.Serializable {
 	
 	public DelegationCertificateImpl() {
 	}

@@ -34,7 +34,7 @@ import java.security.Permission;
 import java.util.Date;
 
 
-public class BasicCertificateImpl {
+public class BasicCertificateImpl implements jade.util.leap.Serializable {
 	
 	JADEPrincipal subject;
 	JADEPrincipal issuer;
@@ -49,35 +49,77 @@ public class BasicCertificateImpl {
 	
 	byte[] signature;
 	
-	public BasicCertificateImpl() {}
+	public BasicCertificateImpl() {
+	}
 
-	public void setSubject(JADEPrincipal subject) { this.subject = subject; }
-	public JADEPrincipal getSubject() { return subject; }
+	public void setSubject(JADEPrincipal subject) {
+		this.subject = subject;
+	}
 
-	public void setIssuer(JADEPrincipal issuer) { this.issuer = issuer; }
-	public JADEPrincipal getIssuer() { return issuer; }
+	public JADEPrincipal getSubject() {
+		return subject;
+	}
 
-	public void setInitiator(JADEPrincipal initiator) { this.initiator = initiator; }
-	public JADEPrincipal getInitiator() { return initiator; }
+	public void setIssuer(JADEPrincipal issuer) {
+		this.issuer = issuer;
+	}
 
-	public void setSerial(long serial) { this.serial = serial; }
-	public long getSerial() { return serial; }
+	public JADEPrincipal getIssuer() {
+		return issuer;
+	}
 
-	public void setNotBefore(Date notBefore) { this.notBefore = notBefore; }
-	public Date getNotBefore() { return notBefore; }
+	public void setInitiator(JADEPrincipal initiator) {
+		this.initiator = initiator;
+	}
 
-	public void setNotAfter(Date notAfter) { this.notAfter = notAfter; }
-	public Date getNotAfter() { return notAfter; }
+	public JADEPrincipal getInitiator() {
+		return initiator;
+	}
+
+	public void setSerial(long serial) {
+		this.serial = serial;
+	}
+
+	public long getSerial() {
+		return serial;
+	}
+
+	public void setNotBefore(Date notBefore) {
+		this.notBefore = notBefore;
+	}
+
+	public Date getNotBefore() {
+		return notBefore;
+	}
+
+	public void setNotAfter(Date notAfter) {
+		this.notAfter = notAfter;
+	}
 	
-	public void setSignature(byte[] signature) { this.signature = signature; }
-	public byte[] getSignature() { return signature; }
+	public Date getNotAfter() {
+		return notAfter;
+	}
 	
-	public void addPermission(Object permission) { permissions.add(permission); }
+	public void setSignature(byte[] signature) {
+		this.signature = signature;
+	}
+
+	public byte[] getSignature() {
+		return signature;
+	}
+	
+	public void addPermission(Object permission) {
+		permissions.add(permission);
+	}
+	
 	public void addPermissions(List permissions) {
 		for (Iterator i = permissions.iterator(); i.hasNext(); )
 			this.permissions.add(i.next());
 	}
-	public List getPermissions() { return permissions; }
+	
+	public List getPermissions() {
+		return permissions;
+	}
 	
 	public String encode() {
 		StringBuffer str = new StringBuffer();
@@ -148,10 +190,11 @@ public class BasicCertificateImpl {
 		JADEPrincipal p = null;
 		String[] splitted = s.split(" ");
 		try {
-			p = (JADEPrincipal)Class.forName(splitted[0]).newInstance();
-			p.init(splitted[1]);
+			p = (JADEPrincipal)Class.forName(splitted[0]).getConstructor(new Class[] {String.class}).newInstance(new Object[] {splitted[1]});
 		}
-		catch (Exception e) { e.printStackTrace(); }
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 		return p;
 	}
 	
@@ -183,7 +226,7 @@ public class BasicCertificateImpl {
 		if (splitted.length > 1)
 			name = splitted[1];
 		if (splitted.length > 2)
-			actions = s.substring(type.length() + name.length() + 2, s.length()); //!!! splitted[2];
+			actions = s.substring(type.length() + name.length() + 2, s.length());
 
 		return createPermission(type, name, actions);
 	}
@@ -198,7 +241,9 @@ public class BasicCertificateImpl {
 			else
 				p = (Permission)Class.forName(type).newInstance();
 		}
-		catch (Exception e) { e.printStackTrace(); }
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 		return p;
 	}
 }

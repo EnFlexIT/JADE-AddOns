@@ -1,14 +1,14 @@
 /*****************************************************************
-JADE - Java Agent DEvelopment Framework is a framework to develop 
+JADE - Java Agent DEvelopment Framework is a framework to develop
 multi-agent systems in compliance with the FIPA specifications.
-Copyright (C) 2000 CSELT S.p.A. 
+Copyright (C) 2000 CSELT S.p.A.
 
 GNU Lesser General Public License
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation, 
-version 2.1 of the License. 
+License as published by the Free Software Foundation,
+version 2.1 of the License.
 
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,10 +25,14 @@ package jade.security.impl;
 
 import jade.security.*;
 
+import jade.core.AID;
+import jade.core.ContainerID;
 import jade.core.MainContainer;
 import jade.core.Profile;
 
 import jade.util.leap.Iterator;
+import jade.util.leap.Map;
+import jade.util.leap.HashMap;
 
 import java.security.*;
 import java.security.cert.*;
@@ -39,12 +43,22 @@ import java.security.spec.*;
 	The <code>Authority</code> class is an abstract class which represents
 	the authorities of the platform. It has methods for signing certificates
 	and for verifying their validity.
-	
+
 	@author Michele Tomaiuolo - Universita` di Parma
 	@version $Date$ $Revision$
 */
 public class ContainerAuthority implements Authority {
-	
+
+	class CheckEntry {
+		String type;
+		String actions;
+		CheckEntry(String t, String a) { type = t; actions = a; }
+		String getType() { return type; }
+		String getActions() { return actions; }
+	}
+
+	Map checks = new HashMap();
+
 	/**
 		The public key for verifying certificates.
 	*/
@@ -52,16 +66,16 @@ public class ContainerAuthority implements Authority {
 	Profile profile;
 	MainContainer platform = null;
 	String name = null;
-	
+
 	public void init(Profile profile, MainContainer platform) {
 		this.profile = profile;
 		this.platform = platform;
-		
+
 		try {
 			if (System.getSecurityManager() == null) {
 				String policyFile = profile.getParameter(Profile.POLICY_FILE);
 				System.setProperty("java.security.policy", policyFile);
-				//System.out.println("setting security manager");
+				//System.out.println("Setting security manager");
 				System.setSecurityManager(new SecurityManager());
 			}
 		}
@@ -80,62 +94,96 @@ public class ContainerAuthority implements Authority {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		fillChecks();
 	}
 	
+	public void fillChecks() {
+		checks.put(AMS_REGISTER, new CheckEntry("jade.security.impl.AMSPermission", "register"));
+		checks.put(AMS_DEREGISTER, new CheckEntry("jade.security.impl.AMSPermission", "deregister"));
+		checks.put(AMS_MODIFY, new CheckEntry("jade.security.impl.AMSPermission", "modify"));
+		
+		checks.put(AGENT_CREATE, new CheckEntry("jade.security.impl.AgentPermission", "create"));
+		checks.put(AGENT_KILL, new CheckEntry("jade.security.impl.AgentPermission", "kill"));
+		checks.put(AGENT_SUSPEND, new CheckEntry("jade.security.impl.AgentPermission", "suspend"));
+		checks.put(AGENT_RESUME, new CheckEntry("jade.security.impl.AgentPermission", "resume"));
+		checks.put(AGENT_TAKE, new CheckEntry("jade.security.impl.AgentPermission", "take"));
+		checks.put(AGENT_SEND_TO, new CheckEntry("jade.security.impl.AgentPermission", "send-to"));
+		checks.put(AGENT_SEND_AS, new CheckEntry("jade.security.impl.AgentPermission", "send-as"));
+		checks.put(AGENT_RECEIVE_FROM, new CheckEntry("jade.security.impl.AgentPermission", "receive-from"));
+		checks.put(AGENT_MOVE, new CheckEntry("jade.security.impl.AgentPermission", "move"));
+		checks.put(AGENT_COPY, new CheckEntry("jade.security.impl.AgentPermission", "copy"));
+		
+		checks.put(CONTAINER_CREATE, new CheckEntry("jade.security.impl.ContainerPermission", "create"));
+		checks.put(CONTAINER_KILL, new CheckEntry("jade.security.impl.ContainerPermission", "kill"));
+		checks.put(CONTAINER_CREATE_IN, new CheckEntry("jade.security.impl.ContainerPermission", "create-in"));
+		checks.put(CONTAINER_KILL_IN, new CheckEntry("jade.security.impl.ContainerPermission", "kill-in"));
+		checks.put(CONTAINER_MOVE_FROM, new CheckEntry("jade.security.impl.ContainerPermission", "move-from"));
+		checks.put(CONTAINER_MOVE_TO, new CheckEntry("jade.security.impl.ContainerPermission", "move-to"));
+		checks.put(CONTAINER_COPY_FROM, new CheckEntry("jade.security.impl.ContainerPermission", "copy-from"));
+		checks.put(CONTAINER_COPY_TO, new CheckEntry("jade.security.impl.ContainerPermission", "copy-to"));
+		
+		checks.put(PLATFORM_CREATE, new CheckEntry("jade.security.impl.PlatformPermission", "create"));
+		checks.put(PLATFORM_KILL, new CheckEntry("jade.security.impl.PlatformPermission", "kill"));
+		
+		checks.put(AUTHORITY_SIGN_IC, new CheckEntry("jade.security.impl.AuthorityPermission", "sign-ic"));
+		checks.put(AUTHORITY_SIGN_DC, new CheckEntry("jade.security.impl.AuthorityPermission", "sign-dc"));
+	}
+
 	public void setName(String name) {
 		if (this.name == null)
 			this.name = name;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public byte[] getPublicKey() {
 		if (publicKey == null)
 			return null;
-			
+
 		return publicKey.getEncoded();
 	}
-	
+
 	public void sign(JADECertificate certificate, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
 		try {
 			JADECertificate signed = platform.sign(certificate, identity, delegations);
-			certificate.decode(signed.encode());
+			((BasicCertificateImpl)certificate).setSignature(((BasicCertificateImpl)signed).getSignature());
 		}
 		catch (jade.core.IMTPException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] passwd) throws AuthException {
+
+	public void authenticate(IdentityCertificate identity, DelegationCertificate delegation, byte[] password) throws AuthException {
 		throw new AuthorizationException("Authentication is not allowed, here");
 	}
-	
+
 	public void verify(JADECertificate certificate) throws AuthException {
 		if (publicKey == null)
 			return;
 
 		if (certificate == null)
-			throw new AuthException("null certificate");
+			throw new AuthException("Null certificate");
 
 		if (! (certificate instanceof BasicCertificateImpl))
-			throw new AuthException("unknown certificate class");
+			throw new AuthException("Unknown certificate class");
 
 		try {
 			byte[] signBytes = ((BasicCertificateImpl)certificate).getSignature();
-			// we have to delete signature, first
+			// We have to delete signature, first
 			((BasicCertificateImpl)certificate).setSignature(null);
 			byte[] certBytes = certificate.encode().getBytes();
-			// now we can put signature back to its place
+			// Now we can put signature back in its place
 			((BasicCertificateImpl)certificate).setSignature(signBytes);
 			if (signBytes == null)
-				throw new AuthException("null signature");
-			
+				throw new AuthException("Null signature");
+
 			Signature sign = Signature.getInstance("DSA");
 			sign.initVerify(publicKey);
 			sign.update(certBytes);
-			if (!sign.verify(signBytes))
+			if (! sign.verify(signBytes))
 				throw new AuthException("Corrupted certificate");
 		}
 		catch (NoSuchAlgorithmException e1) {
@@ -154,17 +202,20 @@ public class ContainerAuthority implements Authority {
 
 	public void verifySubject(IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
 		if (identity == null)
-			throw new AuthException("null identity");
-		
+			throw new AuthException("Null identity");
+
 		verify(identity);
 		for (int d = 0; delegations != null && d < delegations.length && delegations[d] != null; d++) {
 			if (! ((PrincipalImpl)identity.getSubject()).implies((PrincipalImpl)delegations[d].getSubject()))
-				throw new AuthException("delegation-subject doesn't match identity-subject");
+				throw new AuthException("Delegation-subject doesn't match identity-subject");
 			verify(delegations[d]);
 		}
 	}
-		
-	
+
+	public Object doPrivileged(jade.security.PrivilegedExceptionAction action) throws Exception {
+		return AccessController.doPrivileged(action);
+	}
+
 	public Object doAsPrivileged(jade.security.PrivilegedExceptionAction action, IdentityCertificate identity, DelegationCertificate[] delegations) throws Exception {
 		verifySubject(identity, delegations);
 		ProtectionDomain domain = new ProtectionDomain(
@@ -188,63 +239,46 @@ public class ContainerAuthority implements Authority {
 			return null;
 		}
 	}
-	
+
 	public void checkAction(String action, JADEPrincipal target, IdentityCertificate identity, DelegationCertificate[] delegations) throws AuthException {
 		Permission p = null;
-		if (action.startsWith("ams-")) {
-			p = createPermission("jade.security.impl.AMSPermission", target.getName(), action.substring(4, action.length()));
-		}
-		if (action.startsWith("agent-")) {
-			p = createPermission("jade.security.impl.AgentPermission", target.getName(), action.substring(6, action.length()));
-		}
-		else if (action.startsWith("container-")) {
-			p = createPermission("jade.security.impl.ContainerPermission", target.getName(), action.substring(10, action.length()));
-		}
-		else if (action.startsWith("platform-")) {
-			p = createPermission("jade.security.impl.PlatformPermission", target.getName(), action.substring(9, action.length()));
-		}
-		else if (action.startsWith("authority-")) {
-			p = createPermission("jade.security.impl.AuthorityPermission", target.getName(), action.substring(10, action.length()));
-		}
-
-		if (p != null) {
+		
+		CheckEntry ce = (CheckEntry)checks.get(action);
+		if (ce != null) {
+			p = createPermission(ce.getType(), target.getName(), ce.getActions());
 			try {
-				//System.out.println("checking " + p);
+				//System.out.println("Checking " + action + " on " + target);
 				if (identity != null) {
-					CheckAction check = new CheckAction(p);
-					doAsPrivileged(check, identity, delegations);
+					CheckAction ca = new CheckAction(p);
+					doAsPrivileged(ca, identity, delegations);
 				}
 				else
 					AccessController.checkPermission(p);
 				//System.out.println("ok");
 			}
 			catch (Exception e) {
-				e.printStackTrace();
-				throw new AuthorizationException(action);
+				System.out.println("Permissions to execute " + action + " on " + target + " are not owned.");
+				throw new AuthorizationException("Permissions to execute " + action + " on " + target + " are not owned.");
 			}
 		}
 	}
 
-	public AgentPrincipal createAgentPrincipal(){
-		return new PrincipalImpl();
+	public AgentPrincipal createAgentPrincipal(AID aid, String ownership){
+		return new PrincipalImpl(aid, ownership);
 	}
 
-	public ContainerPrincipal createContainerPrincipal() {
-		return new PrincipalImpl();
+	public ContainerPrincipal createContainerPrincipal(ContainerID cid, String ownership) {
+		return new PrincipalImpl(cid, ownership);
 	}
-	
-	public UserPrincipal createUserPrincipal() {
-		return new PrincipalImpl();
-	}
-	
+
 	public IdentityCertificate createIdentityCertificate() {
 		return new IdentityCertificateImpl();
 	}
-	
+
 	public DelegationCertificate createDelegationCertificate() {
 		return new DelegationCertificateImpl();
 	}
-	
+
 	PermissionCollection collectPermissions(DelegationCertificate[] delegations) {
 		Permissions perms = new Permissions();
 		for (int j = 0; delegations != null && j < delegations.length && delegations[j] != null; j++) {
@@ -255,7 +289,7 @@ public class ContainerAuthority implements Authority {
 		}
 		return perms;
 	}
-	
+
 	Permission createPermission(String type, String name, String actions) {
 		Permission p = null;
 		try {

@@ -32,7 +32,7 @@ import jade.core.AID;
 import jade.core.ContainerID;
 
 
-public class PrincipalImpl implements AgentPrincipal, UserPrincipal, ContainerPrincipal {
+public class PrincipalImpl implements AgentPrincipal, ContainerPrincipal, jade.util.leap.Serializable {
 	
 	protected static final char sep = '/';
 	protected static final char dot = '.';
@@ -41,14 +41,9 @@ public class PrincipalImpl implements AgentPrincipal, UserPrincipal, ContainerPr
 	protected String name2 = null;
 
 	public PrincipalImpl() {
-		super();
 	}
 	
 	public PrincipalImpl(String name) {
-		init(name);
-	}
-	
-	public void init(String name) {
 		if (name.indexOf(sep) == -1)
 			name = name + sep;
 		int pos = name.indexOf(sep);
@@ -57,18 +52,22 @@ public class PrincipalImpl implements AgentPrincipal, UserPrincipal, ContainerPr
 		name2 = pos < name.length() - 1 ? name.substring(pos + 1, name.length()) : null;
 	}
 	
-	public void init(AID agentID, UserPrincipal user) {
-		name1 = user != null ? user.getName() : null;
+	public PrincipalImpl(AID agentID, String ownership) {
+		name1 = ownership != null ? ownership : null;
 		name2 = agentID != null ? agentID.getName() : null;
 	}
 	
-	public void init(ContainerID containerID, UserPrincipal user) {
-		name1 = user != null ? user.getName() : null;
+	public PrincipalImpl(ContainerID containerID, String ownership) {
+		name1 = ownership != null ? ownership : null;
 		name2 = containerID != null ? containerID.getName() : null;
 	}
 	
+	public String getOwnership() {
+		return (name1 != null) ? name1 : "";
+	}
+	
 	public String getName() {
-		return (name1 != null ? name1 : "") + (name2 != null ? sep + name2 : "");
+		return ((name1 != null) ? name1 : "") + ((name2 != null) ? sep + name2 : "");
 	}
 	
 	public AID getAgentID() {
@@ -77,10 +76,6 @@ public class PrincipalImpl implements AgentPrincipal, UserPrincipal, ContainerPr
 	
 	public ContainerID getContainerID() {
 		return name2 != null ? new ContainerID(name2, null) : null;
-	}
-	
-	public UserPrincipal getUser() {
-		return name1 != null ? new PrincipalImpl(name1) : null;
 	}
 	
 	public String toString() {
@@ -93,7 +88,7 @@ public class PrincipalImpl implements AgentPrincipal, UserPrincipal, ContainerPr
 	
 	public PrincipalImpl getParent() {
 		if (name2 != null)
-			return (PrincipalImpl)getUser();
+			return new PrincipalImpl(getOwnership());
 		
 		if (name1 == null)
 			return null;
@@ -101,6 +96,10 @@ public class PrincipalImpl implements AgentPrincipal, UserPrincipal, ContainerPr
 		return pos != -1 ? new PrincipalImpl(name1.substring(0, pos)) : new PrincipalImpl();
 	}
 	
+	public boolean implies(JADEPrincipal p) {
+		return (p instanceof PrincipalImpl) ? implies((PrincipalImpl)p) : false;
+	}
+
 	public boolean implies(PrincipalImpl p) {
 		boolean impl1 = (p.name1 == null) || name1 != null && (name1.startsWith(p.name1 + dot) || name1.equals(p.name1));
 		boolean impl2 = (p.name2 == null) || name2 != null && (name2.startsWith(p.name2 + '@') || name2.equals(p.name2));
@@ -118,19 +117,16 @@ public class PrincipalImpl implements AgentPrincipal, UserPrincipal, ContainerPr
 		PrincipalImpl p = this;
 		while (p != null) {
 			if (aid != null) {
-				PrincipalImpl p1 = new PrincipalImpl();
-				p1.init(aid, p.getUser());
+				PrincipalImpl p1 = new PrincipalImpl(aid, p.getOwnership());
 				implied.add(p1);
 			}
 			
 			if (shortaid != null) {
-				PrincipalImpl p2 = new PrincipalImpl();
-				p2.init(shortaid, p.getUser());
+				PrincipalImpl p2 = new PrincipalImpl(shortaid, p.getOwnership());
 				implied.add(p2);
 			}
 			
-			PrincipalImpl p3 = new PrincipalImpl();
-			p3.init((AID)null, p.getUser());
+			PrincipalImpl p3 = new PrincipalImpl((AID)null, p.getOwnership());
 			implied.add(p3);
 
 			p = p.getParent();

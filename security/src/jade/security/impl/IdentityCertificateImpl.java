@@ -31,7 +31,7 @@ import jade.util.leap.ArrayList;
 import jade.util.leap.Iterator;
 
 
-public class IdentityCertificateImpl extends BasicCertificateImpl implements IdentityCertificate {
+public class IdentityCertificateImpl extends BasicCertificateImpl implements IdentityCertificate, jade.util.leap.Serializable {
 	
 	public IdentityCertificateImpl() {
 	}
