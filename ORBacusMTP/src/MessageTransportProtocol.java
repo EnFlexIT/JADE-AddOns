@@ -513,9 +513,9 @@ public class MessageTransportProtocol implements MTP {
       catch(org.omg.PortableServer.POAPackage.AdapterNonExistent ane) {
 
 	// Create a new POA manager and set host and port properties for it.
-	Properties p = System.getProperties();
-	p.setProperty("ooc.iiop.acceptor." + mgrName + ".host", ta.getHost());
-	p.setProperty("ooc.iiop.acceptor." + mgrName + ".port", ta.getPort());
+	Properties ps = System.getProperties();
+	ps.setProperty("ooc.iiop.acceptor." + mgrName + ".host", ta.getHost());
+	ps.setProperty("ooc.iiop.acceptor." + mgrName + ".port", ta.getPort());
 	POAManager mgr = mgrFactory.create_poa_manager(mgrName);
 
 
