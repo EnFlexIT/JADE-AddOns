@@ -30,6 +30,8 @@ import test.common.*;
 import test.interPlatform.InterPlatformCommunicationTesterAgent;
 
 /**
+   Test sending and receiving messages across different platforms using 
+   the standard IIOP MTP.
    @author Giovanni Caire - TILAB
  */
 public class TestRemotePing extends Test {
