@@ -46,10 +46,12 @@ public class Sender extends Agent {
     // This agent complies with the People ontology
     private Ontology   ontology = PeopleOntology.getInstance();
 
+  private static Logger logger = Logger.getMyLogger(Sender.class.getName());
+
     class SenderBehaviour extends SimpleBehaviour {
 	private boolean finished = false;
 	
-	private static Logger logger = Logger.getMyLogger(Sender.class.getName());
+	//private static Logger logger = Logger.getMyLogger(Sender.class.getName());
 
 	public SenderBehaviour(Agent a) { super(a); }
 
