@@ -62,22 +62,24 @@ public interface PersistenceSlice extends Service.Slice {
     // Constants for the names of horizontal commands associated to methods
     static final String H_SAVEAGENT = "1";
     static final String H_LOADAGENT = "2";
-    static final String H_DELETEAGENT = "3";
-    static final String H_DELETEFROZENAGENT = "4";
-    static final String H_FREEZEAGENT = "5";
-    static final String H_THAWAGENT = "6";
-    static final String H_SETUPFROZENAGENT = "7";
-    static final String H_SETUPTHAWEDAGENT = "8";
-    static final String H_FROZENAGENT = "9";
-    static final String H_THAWEDAGENT = "10";
-    static final String H_SAVECONTAINER = "11";
-    static final String H_LOADCONTAINER = "12";
-    static final String H_GETINSTALLEDMTPS = "13";
-    static final String H_GETAGENTIDS = "14";
+    static final String H_RELOADAGENT = "3";
+    static final String H_DELETEAGENT = "4";
+    static final String H_DELETEFROZENAGENT = "5";
+    static final String H_FREEZEAGENT = "6";
+    static final String H_THAWAGENT = "7";
+    static final String H_SETUPFROZENAGENT = "8";
+    static final String H_SETUPTHAWEDAGENT = "9";
+    static final String H_FROZENAGENT = "10";
+    static final String H_THAWEDAGENT = "11";
+    static final String H_SAVECONTAINER = "12";
+    static final String H_LOADCONTAINER = "13";
+    static final String H_GETINSTALLEDMTPS = "14";
+    static final String H_GETAGENTIDS = "15";
 
 
     void saveAgent(AID agentID, String repository) throws IMTPException, NotFoundException;
     void loadAgent(AID agentID, String repository) throws IMTPException, NotFoundException, NameClashException;
+    void reloadAgent(AID agentID, String repository) throws IMTPException, NotFoundException;
     void deleteAgent(AID agentID, String repository) throws IMTPException, NotFoundException;
     void deleteFrozenAgent(AID agentID, String repository, Long agentFK) throws IMTPException, NotFoundException;
     void freezeAgent(AID agentID, String repository, ContainerID bufferContainer) throws ServiceException, IMTPException, NotFoundException;
