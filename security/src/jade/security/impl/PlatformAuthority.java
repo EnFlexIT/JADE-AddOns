@@ -66,6 +66,8 @@ public class PlatformAuthority extends ContainerAuthority {
 	
 	PrivateKey privateKey = null;
 	
+	Profile profile=null;
+	
 	public void init(Profile profile, MainContainer platform) {
 		if (System.getProperty("jade.security.nosign") == null) {
 			try {
@@ -81,7 +83,9 @@ public class PlatformAuthority extends ContainerAuthority {
 		}
 
 		if (profile != null) {
+			this.profile = profile;
 			try {
+
 				passwdFile = profile.getParameter(Profile.PASSWD_FILE, null);
 				parsePasswdFile();
 			}
@@ -124,17 +128,43 @@ public class PlatformAuthority extends ContainerAuthority {
 		delegation.setSubject(p);
 
 		String name = p.getOwnership();
-		String hash = Digest.digest(password, "MD5");
-		//System.out.println("authenticating");
-		//System.out.println("principal=" + principal + ";");
-		//System.out.println("password=" + new String(password) + ";");
-		//System.out.println("hash=" + hash + ";");
+
+ 		//System.out.println("authenticating");
+ 		//System.out.println("principal=" + principal + ";");
+ 		//System.out.println("password=" + new String(password) + ";");
+ 		//System.out.println("hash=" + hash + ";");
 
 		if (users == null)
 			return new CertificateFolder(identity, delegation);
 		else for (int i = 0; i < users.size(); i++) {
 			UserEntry entry = (UserEntry)users.elementAt(i);
 			if (entry.usr.equals(name)) {
+
+				// Calculate hash of provided password
+			    // using the Digest Algorithm choosen in the Jade profile
+				String hash ="";
+
+				String digest_alg = profile.getParameter(Profile.PWD_HASH_ALGORITHM, "DES");
+				// default is "DES"
+
+				if (digest_alg.compareTo("DES")==0 ) {
+				
+					// first two password chars is the salt
+					String salt = entry.key.substring(0, 2);
+					
+					// create the hash of the provided password
+					hash = Digest.digest(password, "DES", salt);
+				
+					//System.out.println("     hash="+hash);
+					//System.out.println("entry.key="+entry.key+ "\n");
+				} else {
+					// other digest algorithms (es. MD5, MD2, SHA-1)
+					hash = Digest.digest(password, digest_alg );
+				}
+
+
+				// Compare the hash of provided password
+				// to the entry in the password file
 				if (! entry.key.equals(hash))
 					throw new AuthenticationException("Wrong password");
 
@@ -199,9 +229,18 @@ public class PlatformAuthority extends ContainerAuthority {
 				if (line.length() > 0) {
 					UserEntry entry = new UserEntry();
 					int sep = line.indexOf(':');
+					int sep2 = line.indexOf(':', sep+1);
+					//System.out.println(sep +" , "+ sep2);
+					//System.out.println( line );
+					// The password can be after a ":" 
+					// or in between two ":"
 					if (sep != -1) {
 						entry.usr = line.substring(0, sep);
-						entry.key = line.substring(sep + 1, line.length());
+						if (sep2 != -1) {
+							entry.key = line.substring(sep + 1, sep2 );
+						} else {
+							entry.key = line.substring(sep + 1, line.length());
+						}
 					}
 					else {
 						entry.usr = line;
@@ -215,6 +254,7 @@ public class PlatformAuthority extends ContainerAuthority {
 		}
 		catch (Exception e) { e.printStackTrace(); }
 	}
+
 	
 	private PermissionCollection getPermissions(PrincipalImpl principal) {
 		Policy policy = Policy.getPolicy();
