@@ -416,17 +416,6 @@ public class TesterListVisualizer  extends JPanel
           if (node.getNodeType() == ELEMENT_TYPE 
           		&& treeElement( node.getNodeName() )
 		           	&& elementNodeIndex++ == searchIndex) {
-		           		if(node.getNodeName().equalsIgnoreCase("testslistrif")){
-     // String prova = node.getFirstChild().getNodeValue();
-     // System.out.println("AdapterNode[child] nome: "+prova);
-//							 	Document d = getDocument("test\\pingAgent\\testsList.xml");
-						 	Document d = getDocument(node.getFirstChild().getNodeValue());
-						 	NodeList nl =  d.getElementsByTagName("TestsList");
-						 	Node n = (Node) nl.item(0);
-//							 	return new AdapterNode(nl);
-							return new AdapterNode(n);	           				           			
-//							 	return new AdapterNode(d);	           			
-		           		}
 		           		
              break; 
           }
@@ -471,10 +460,18 @@ public class TesterListVisualizer  extends JPanel
       // Return true for any node with no children
   //    System.out.println("DomToTreeModelAdapter[isLeaf]");
       AdapterNode node = (AdapterNode) aNode;
-      
-      if (node.childCount() > 0) 
-      	return false;
-      return true;
+        Node n = node.domNode;
+   		if(n.getNodeName().equalsIgnoreCase("testslistrif")){
+			System.out.println("Chiamato getDocument testListRif ");
+		 	Document d = getDocument(n.getFirstChild().getNodeValue());
+		 	NodeList nl =  d.getElementsByTagName("TestsList");
+			node.domNode = (Node) nl.item(0);
+			return false;
+   		}else{
+	        if (node.childCount() > 0) 
+	        	return false;
+	        return true;
+	      }
     }
     public int getChildCount(Object parent) {
       AdapterNode node = (AdapterNode) parent;
