@@ -323,7 +323,7 @@ public class TestUtility {
   }
 
   
-  private static AID createNewAID(String newName, AID anAID) {
+  public static AID createNewAID(String newName, AID anAID) {
   	String name = anAID.getName();
   	String hap = null;
     int atPos = name.lastIndexOf('@');
