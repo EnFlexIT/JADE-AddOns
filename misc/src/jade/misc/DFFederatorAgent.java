@@ -31,7 +31,8 @@ import jade.content.ContentManager;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.lang.acl.ACLMessage;
-import jade.domain.JADEAgentManagement.ShowGui;
+import jade.proto.AchieveREInitiator;
+//import jade.domain.JADEAgentManagement.ShowGui;
 import jade.domain.JADEAgentManagement.*;	   
 
 import java.io.FileInputStream;
@@ -65,22 +66,23 @@ import java.util.Vector;
  * @see <a href="../../../../resources/DFFederatorAgent.properties">sample properties file </a>
  **/
 public class DFFederatorAgent extends Agent {
+	private DFFederatorAgentGUI myGui;
 
     /** constructor **/
 	
 	 
     public DFFederatorAgent() {
-	federate = new Federate();
+	/*federate = new Federate();
 	action = new Action();
 	action.setAction(federate);
 	request = new ACLMessage(ACLMessage.REQUEST);
 	request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);	
 	request.setOntology(DFAppletOntology.NAME);
-	
+	*/
 	
 	// action ShowGui requested to df belonging to the federation
 				  
-	showGui = new ShowGui();
+	/*showGui = new ShowGui();
 	actionShowGui = new Action();
 	actionShowGui.setAction(showGui);
 	requestShowGui = new ACLMessage(ACLMessage.REQUEST);
@@ -88,7 +90,7 @@ public class DFFederatorAgent extends Agent {
 	requestShowGui.setOntology(JADEManagementOntology.NAME);
 	// this vector contains the df that have already received a request
 	// to show a gui
-	aidDfVec = new Vector();
+	aidDfVec = new Vector();*/
     }
 
     /* This is the prefix string that identifies the key of a property
@@ -108,40 +110,52 @@ public class DFFederatorAgent extends Agent {
 	// Register the SL0 content language
 	getContentManager().registerLanguage(new SLCodec(0), FIPANames.ContentLanguage.FIPA_SL0);	
 
-	// read the name of the file that contains the list of properties
+	myGui = new DFFederatorAgentGUI(this);
+	myGui.showCorrect();
+	
+	// read the name of the file (if any) that contains the specification
+	// of the initial federations
 	Object[] args = getArguments();
-	String fileName = (String)(args[0]);
-	// load the list of properties from the file
-	Properties p = new Properties();
-	try {
-	    p.load(new FileInputStream(fileName));
-	} catch (Exception e) {
-	    System.err.println("Some problems in reading the list of properties for "+getLocalName());
-	    e.printStackTrace();
+	if (args != null && args.length > 0) {
+		String fileName = (String)(args[0]);
+		// load the list of properties from the file
+		Properties p = new Properties();
+		try {
+		    p.load(new FileInputStream(fileName));
+		} catch (Exception e) {
+		    System.err.println("Some problems in reading the list of properties for "+getLocalName());
+		    e.printStackTrace();
+		}
+		// dump this list of properties on standard output
+		//System.out.println("List of properties for "+getLocalName());
+		//p.list(System.out);    
+	
+		for (Enumeration e=p.propertyNames(); e.hasMoreElements(); ) {
+		    String key = (String)e.nextElement();
+		    if (key.startsWith(SubDFKeyPrefix)) {
+			String value = p.getProperty(key);
+			AID childDF = createAID(value);
+			myGui.addDF(childDF);
+			String rootKey = createRootDFKey(key);
+			value = p.getProperty(rootKey);
+			AID parentDF = createAID(value);
+			myGui.addDF(parentDF);
+			//System.out.println("FEDERATE " + childDF.toString() + "\n WITH " + parentDF.toString());
+			//federate(childDF, parentDF);
+			requestFederation(childDF, parentDF);
+		    }
+		}
 	}
-	// dump this list of properties on standard output
-	//System.out.println("List of properties for "+getLocalName());
-	//p.list(System.out);    
-
-	for (Enumeration e=p.propertyNames(); e.hasMoreElements(); ) {
-	    String key = (String)e.nextElement();
-	    if (key.startsWith(SubDFKeyPrefix)) {
-		String value = p.getProperty(key);
-		AID childDF = createAID(value);
-		String rootKey = createRootDFKey(key);
-		value = p.getProperty(rootKey);
-		AID parentDF = createAID(value);
-		//System.out.println("FEDERATE " + childDF.toString() + "\n WITH " + parentDF.toString());
-		federate(childDF, parentDF);
-	    }
-	}
-
-	// task terminated, kill this agent
-	//doDelete();
+	
+    }
+    
+    protected void takeDown() {
+    	if (myGui != null) {
+    		myGui.dispose();
+    	}
     }
 
-
-    private Federate federate; 
+    /*private Federate federate; 
     private ACLMessage request;
     private Action action;
 
@@ -160,13 +174,13 @@ public class DFFederatorAgent extends Agent {
 	} catch (Exception e) {
 	    e.printStackTrace();
 	}
-    }
+    }*/
 	
 	/**
 	  * Send a request to perform action ShowGui to all the federated dfs
 	  *
 	  **/
-	private jade.domain.JADEAgentManagement.ShowGui showGui;
+	/*private jade.domain.JADEAgentManagement.ShowGui showGui;
 	private ACLMessage requestShowGui;
 	private Action actionShowGui;
 	private Vector aidDfVec; 
@@ -187,7 +201,7 @@ public class DFFederatorAgent extends Agent {
 			    e.printStackTrace();
 			}
 		}
-    }
+    }*/
 
 
     /**
@@ -199,7 +213,7 @@ public class DFFederatorAgent extends Agent {
      **/
     private AID createAID(String value) {
 	AID aid;
-	// before to comma is the AID.name, after the comma is the AID.address
+	// before the comma is the AID.name, after the comma is the AID.address
 	int ind = value.indexOf(',');
 	if (ind < 0) {
 	    // if no comma was found, then assume is a local agent
@@ -207,7 +221,7 @@ public class DFFederatorAgent extends Agent {
 	} else {
 	    String aidName = value.substring(0,ind).trim();
 	    String aidAddress = value.substring(ind+1).trim();
-	    aid = new AID(aidName);
+	    aid = new AID(aidName, AID.ISGUID);
 	    aid.addAddresses(aidAddress);
 	}
 	return aid;
@@ -217,6 +231,59 @@ public class DFFederatorAgent extends Agent {
      * parses the key for a subDF and return the corresponding key for the rootDF
      **/
     private String createRootDFKey(String subDFKey) {
-		return RootDFKeyPrefix + subDFKey.substring(SubDFKeyPrefix.length());
+	return RootDFKeyPrefix + subDFKey.substring(SubDFKeyPrefix.length());
+    }
+	
+    void requestShowGui(final AID df) {
+    	Action action = new Action(df, new ShowGui());
+			ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+			request.addReceiver(df);
+			request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);	
+			request.setOntology(JADEManagementOntology.NAME);
+			try {
+	    	getContentManager().fillContent(request, action);
+    		addBehaviour(new AchieveREInitiator(this, request) {
+    			protected void handleFailure(ACLMessage failure) {
+    				myGui.notifyShowGuiFailed(df);
+    			}
+    		} );
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+    		myGui.notifyShowGuiFailed(df);
+			}
+		}	
+		
+    void requestFederation(final AID childDF, final AID parentDF) {
+			System.out.println("Federating "+childDF.getName()+" with "+parentDF.getName());
+			Federate f = new Federate();
+			f.setParentDF(parentDF);
+			Action action = new Action(childDF, f);
+			ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+			request.addReceiver(childDF);
+			request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);	
+			request.setOntology(DFAppletOntology.NAME);
+			try {
+	    	getContentManager().fillContent(request, action);
+    		addBehaviour(new AchieveREInitiator(this, request) {
+    			protected void handleInform(ACLMessage inform) {
+    				myGui.notifyFederationOK(childDF, parentDF);
+    			}
+    			protected void handleFailure(ACLMessage failure) {
+    				System.out.println(failure);
+    				myGui.notifyFederationFailed(childDF, parentDF);
+    			}
+    		} );
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+    		myGui.notifyFederationFailed(childDF, parentDF);
+			}
+		}	
+				
+    void requestFederationRemoval(final AID childDF, final AID parentDF) {
+			System.out.println("Removing federation between "+childDF.getName()+" and "+parentDF.getName());
+    	// FIXME: TBD
+    	System.out.println("Federation removal not yet implemented");
     }
 }
