@@ -35,7 +35,7 @@ import java.util.Hashtable;
 
 /**
    Common base class for all test classes designed to be 
-   executed within the JADE test suite
+   executed within the JADE test suite framework
    @author Giovanni Caire - TILAB
  */
 public abstract class Test implements Serializable {
@@ -43,6 +43,8 @@ public abstract class Test implements Serializable {
 	public static final int TEST_PASSED = 1;
 	/** Constant value indicating that a test has NOT been completed successfully */
   public static final int TEST_FAILED = 0;
+	/** Constant value indicating that a test has been skipped */
+  public static final int TEST_SKIPPED = 2;
 	/** Constant value indicating that the test result is not available */
   public static final int NOT_AVAILABLE = -1;
   
@@ -54,20 +56,26 @@ public abstract class Test implements Serializable {
   private Wrapper myWrapper;
   private DataStore myStore;
   private String myKey;
+  private String errorMsg = null;
   
   private long timeout = -1;
   
   private boolean pauseEnabled = false;
   private static MessageTemplate resumeTemplate = MessageTemplate.MatchContent("resume");
-  
+
   /**
      Specific tests must re-define this method to perform test specific 
      initializations and to create the <code>Behaviour</code> that will
      actually perform the test.
      @param a The agent that executes the test
-     @param ds The <code>DataStore</code> where to put the test result
-     @param resultKey The <code>DataStore</code> key for the test result
      @return the <code>Behaviour</code> that will actually perform the test
+   */
+  public Behaviour load(Agent a) throws TestException {
+	  return null;
+  }
+  
+  /**
+     This method is not intended to be called or redefined by test developers
    */
   public Behaviour load(Agent a, DataStore ds, String resultKey) throws TestException {
   	myStore = ds;
@@ -83,17 +91,6 @@ public abstract class Test implements Serializable {
 	  	myWrapper = new Wrapper(a, b);
   	}
   	return myWrapper;
-  }
-  
-  /**
-     Specific tests must re-define this method to perform test specific 
-     initializations and to create the <code>Behaviour</code> that will
-     actually perform the test.
-     @param a The agent that executes the test
-     @return the <code>Behaviour</code> that will actually perform the test
-   */
-  public Behaviour load(Agent a) throws TestException {
-	  return null;
   }
   
   /**
@@ -131,23 +128,41 @@ public abstract class Test implements Serializable {
   protected final String getTestArgument(String key) {
   	return myDescriptor.getArg(key);
   }
-  
+
+  /**
+     Specify a timeout for the test. If test execution does not 
+     complete within the specified timeout the test automatically 
+     fails.
+   */
   protected void setTimeout(long t) {
   	timeout = t;
   }
   
+  /**
+     Terminates the tests marking it as successful.
+     @param msg A test completion message that is appended to the log.
+   */
   protected final void passed(String msg) {
   	log(msg);
   	myStore.put(myKey, new Integer(TEST_PASSED));
   	myWrapper.stop();
   }
   
+  /**
+     Terminates the tests marking it as failed.
+     @param msg An error message that is appended to the log and can
+     be viewed in the test suite GUI.
+   */
   protected final void failed(String reason) {
   	log(reason);
+  	errorMsg = reason;
   	myStore.put(myKey, new Integer(TEST_FAILED));
   	myWrapper.stop();
   }
   
+  /**
+     Log a given String
+   */
   protected final void log(String s) {
   	Logger.getLogger().log(s);
   }
@@ -172,6 +187,20 @@ public abstract class Test implements Serializable {
    */
   TestDescriptor getDescriptor() {
   	return myDescriptor;
+  }
+  
+  /** 
+     Only called by the TestGroupExecutor
+   */
+  String getErrorMsg() {
+  	return errorMsg;
+  }
+  
+  /** 
+     Only called by the TestGroupExecutor
+   */
+  void setErrorMsg(String msg) {
+  	errorMsg = msg;
   }
   
   /** 

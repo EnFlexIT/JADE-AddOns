@@ -29,19 +29,27 @@ import test.common.xml.*;
 
 /**
    Class representing a group of tests (often related to a given 
-   single functionality) that have to be executed in sequence and 
-   require similar configurations
+   functionality) that have to be executed in sequence and 
+   require similar configuration, initialization and clean-up operations.
+   A <code>TestGroup</code> is executed by a <code>TesterAgent</code>.
+   @see test.common.TesterAgent
+   @see test.common.Test
    @author Giovanni Caire - TILAB
+   @version $Date: December 2003
  */
-public class TestGroup implements Serializable {
+public class TestGroup implements Serializable{
 	//private String[] testClassNames;
 	private TestDescriptor[] myTests;
 	private int cnt;
 	private List argumentSpecs = new ArrayList();
   private HashMap args = new HashMap();
-	
+
+  /**
+     Creates a <code>TestGroup</code> object including the tests specified
+     in the <code>filename</code> file.
+   */
 	public TestGroup(String filename) {
-		myTests = XMLManager.getTests(filename);
+		myTests = XMLManager.getTests(filename);		
 		cnt = 0;
 	}
 	
@@ -66,17 +74,20 @@ public class TestGroup implements Serializable {
 	}
 	
 	/**
-	   Used by the tests in the group to get arguments specified at 
-	   group level. These include arguments inserted by the user through
-	   the InsertArgumentsDlg and arguments explicitly set (generally in
-	   the initialize() method) using the setArgument() method.
+	   This method retrieves an argument specified at the group level.
+	   Developers may use it from the <code>initialize()<code> method
+	   to retrieve arguments inserted through 
+	   the InsertArgumentsDlg dialog window.
 	 */
 	protected Object getArgument(String name) {
 		return args.get(name);
 	}
 	
 	/**
-	   @see getArgument()
+	   Store a group argument so that it will be accessible by 
+	   tests in the group by means of the <code>getGroupArgument()</code>
+	   method of the <code>Test</code> class.
+	   @see test.common.Test#getGroupArgument(String)
 	 */
 	protected Object setArgument(String name, Object val) {
 		return args.put(name, val);
@@ -95,8 +106,7 @@ public class TestGroup implements Serializable {
 	 */
 	protected void shutdown(Agent a) {
 	}
-	
-	
+		
 	/**
 	   Only called by the TestGroupExecutor to set which tests to execute and
 	   which one to skip
@@ -108,24 +118,30 @@ public class TestGroup implements Serializable {
 	/**
 	   Only called by the TestGroupExecutor to get the next test to execute
 	 */
-	Test next() throws TestException {		
+	Test next() throws SkippedException {		
 		String className = null;
+		TestDescriptor dsc = null;
 		try {
-			while (true) {
-				TestDescriptor dsc = myTests[cnt++];
-				if (!dsc.getSkip()) {
-					Test t = (Test) Class.forName(dsc.getTestClassName()).newInstance();
-					t.setGroup(this);
-					t.setDescriptor(dsc);
-					return t;
-				}
+			dsc = myTests[cnt++];
+			if (!dsc.getSkip()) {
+				Test t = (Test) Class.forName(dsc.getTestClassName()).newInstance();
+				t.setGroup(this);
+				t.setDescriptor(dsc);
+				return t;
+			}
+			else {
+				throw new SkippedException(dsc);
 			}
 		}
 		catch (IndexOutOfBoundsException ioobe) {
 			return null;
 		}
+		catch (SkippedException se) {
+			// Re-throw it
+			throw se;
+		}
 		catch (Exception e) {
-			throw new TestException("Error creating test "+className, e);
+			throw new SkippedException(dsc, "Can't instantiate test "+dsc.getName()+" ["+e+"]");
 		}
 	}
 	
@@ -158,5 +174,12 @@ public class TestGroup implements Serializable {
 	void reset() {
 		cnt = 0;
 	}
+	
+  /** 
+     Return the number of tests in the TestGroup
+   */
+  public int size() {
+		return myTests.length;  
+  }        
 }
 	

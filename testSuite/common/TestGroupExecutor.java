@@ -26,7 +26,12 @@ package test.common;
 import jade.core.Agent;
 import jade.core.behaviours.*;
 import jade.lang.acl.MessageTemplate;
+import jade.lang.acl.ACLMessage;
+import jade.core.AID;
+
 import test.common.xml.TestDescriptor;
+import test.common.testerAgentControlOntology.TestResult;
+
 
 /**
    Generic behaviour that executes the tests included in a 
@@ -34,7 +39,7 @@ import test.common.xml.TestDescriptor;
    @author Giovanni Caire - TILAB
  */
 public class TestGroupExecutor extends FSMBehaviour {
-	
+ 
 	// State names 
 	private static final String INIT_TEST_GROUP_STATE = "Init-test-group";
 	private static final String LOAD_TEST_STATE = "Load-test";
@@ -118,13 +123,15 @@ public class TestGroupExecutor extends FSMBehaviour {
 					currentTest = tests.next();
 					if (currentTest != null) {
 						ret = EXECUTE;
-						StringBuffer sb = new StringBuffer("\n--------------------------------------------\n");
-						TestDescriptor td = currentTest.getDescriptor();
-						sb.append("Executing test: "+td.getName()+"\n");
-						sb.append("WHAT: "+td.getWhat()+"\n");
-						sb.append("HOW:  "+td.getHow()+"\n");
-						sb.append("PASSED WHEN: "+td.getPassedWhen()+"\n\n");
-						log(sb.toString());
+            TestDescriptor td = currentTest.getDescriptor();
+
+            log("--------------------------------------------");                        
+            log("Executing test: "+td.getName());
+            log("WHAT: "+td.getWhat());
+            log("HOW:  "+td.getHow());
+            log("PASSED WHEN: "+td.getPassedWhen());
+            Logger.loggedCurrentTest = td.getName();
+					
 						Behaviour b2 = currentTest.load(myAgent, getDataStore(), TEST_RESULT_KEY);
 						registerState(b2, EXECUTE_TEST_STATE);
 						
@@ -139,10 +146,25 @@ public class TestGroupExecutor extends FSMBehaviour {
 					}
 				}
 				catch (TestException te) {
-					// Some problems occured initializing this test. Skip it
-					log("Problems in test initialization ["+te.getMessage()+"]");
-					log("Skip this test.");
-					skippedCnt++;
+					boolean expected = false;
+					if (te instanceof SkippedException) {
+						SkippedException se = (SkippedException) te;
+						expected = se.getExpected();
+						currentTest = new DummyTest(se.getDescriptor());
+					}
+					
+					if (!expected) {
+						// Some problems occured initializing this test. Skip it
+						log("Problems in test initialization ["+te.getMessage()+"]");
+						log("Skip this test.");
+						skippedCnt++;
+						currentTest.setErrorMsg(te.getMessage());
+					}
+					else {
+						currentTest.setErrorMsg("Set to skipped");
+					}
+					     
+          sendTestResultNotification(Test.TEST_SKIPPED);
 					ret = SKIP;
 				}
 			}
@@ -169,6 +191,8 @@ public class TestGroupExecutor extends FSMBehaviour {
 	  			result = i.intValue();
 				}
 				catch (Exception e) {
+					System.out.println("TestGroupExecutor exception");
+					e.printStackTrace();
 				}
   			
   			try {
@@ -188,10 +212,14 @@ public class TestGroupExecutor extends FSMBehaviour {
 				if (result == Test.TEST_PASSED) {
   				log("Test PASSED");
   				passedCnt++;
+  				
+  				sendTestResultNotification(Test.TEST_PASSED);
   			}
   			else if (result == Test.TEST_FAILED) {
   				log("Test FAILED");
   				failedCnt++;
+  				
+  				sendTestResultNotification(Test.TEST_FAILED);
   			}
   			else {
   				log("WARNING: Test result not available!!!");
@@ -261,6 +289,17 @@ public class TestGroupExecutor extends FSMBehaviour {
 	void setDebugMode(boolean b) {
 		debugMode = b;
 	}
+        
+ 
+  private void sendTestResultNotification(int result) {
+    String name = currentTest.getDescriptor().getName();
+    String errorMsg = null;
+    if (result != Test.TEST_PASSED) {
+    	errorMsg = currentTest.getErrorMsg();
+    }
+  	TestResult tr = new TestResult(name, result, errorMsg);
+  	((TesterAgent) myAgent).notifyController(tr);
+  }
 	
 	private void flushMessageQueue() {
 		while (myAgent.receive() != null) {
@@ -271,5 +310,18 @@ public class TestGroupExecutor extends FSMBehaviour {
 	private void log(String s) {
 		Logger.getLogger().log(s);
 	}
+	
+	/**
+	   Inner class DummyTest.
+	   This class is used to treat in a uniform way the notification
+	   of performed and skipped tests 
+	 */
+	private class DummyTest extends Test {
+		private DummyTest(TestDescriptor td) {
+			super();
+			setDescriptor(td);
+		}
+	}
+	
 }
 

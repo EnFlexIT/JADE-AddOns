@@ -55,6 +55,14 @@ public class TesterAgentControlOntology extends Ontology {
   public static final String EXEC_RESULT_FAILED = "failed";
   public static final String EXEC_RESULT_SKIPPED = "skipped";
 
+  public static final String NUMBER_OF_TESTS = "NUMBEROFTESTS";
+  public static final String NUMBER_OF_TESTS_N = "n";
+  
+  public static final String TEST_RESULT = "TESTRESULT";
+  public static final String TEST_RESULT_NAME = "name";
+  public static final String TEST_RESULT_RESULT = "result";
+  public static final String TEST_RESULT_ERROR_MSG = "error-msg";
+  
   // The singleton instance of this ontology
 	private static Ontology theInstance = new TesterAgentControlOntology();
 	
@@ -75,6 +83,8 @@ public class TesterAgentControlOntology extends Ontology {
     	add(new AgentActionSchema(RESUME), Resume.class);
     	add(new AgentActionSchema(EXIT), Exit.class);
     	add(new ConceptSchema(EXEC_RESULT), ExecResult.class);
+    	add(new PredicateSchema(NUMBER_OF_TESTS), NumberOfTests.class);
+    	add(new PredicateSchema(TEST_RESULT), TestResult.class);
     	
     	AgentActionSchema as = (AgentActionSchema) getSchema(EXECUTE);
     	as.add(EXECUTE_DEBUG_MODE, (PrimitiveSchema) getSchema(BasicOntology.BOOLEAN));
@@ -86,9 +96,17 @@ public class TesterAgentControlOntology extends Ontology {
     	cs.add(EXEC_RESULT_PASSED, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
     	cs.add(EXEC_RESULT_FAILED, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
     	cs.add(EXEC_RESULT_SKIPPED, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+    	
+    	PredicateSchema ps = (PredicateSchema) getSchema(NUMBER_OF_TESTS);
+    	ps.add(NUMBER_OF_TESTS_N, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+    	
+    	ps = (PredicateSchema) getSchema(TEST_RESULT);
+    	ps.add(TEST_RESULT_NAME, (PrimitiveSchema) getSchema(BasicOntology.STRING));
+    	ps.add(TEST_RESULT_RESULT, (PrimitiveSchema) getSchema(BasicOntology.INTEGER));
+    	ps.add(TEST_RESULT_ERROR_MSG, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
     } 
-    catch (OntologyException oe) {
-    	oe.printStackTrace();
+    catch (Exception e) {
+    	e.printStackTrace();
     } 
 	}
 

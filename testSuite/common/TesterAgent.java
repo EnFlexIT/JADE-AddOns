@@ -39,18 +39,63 @@ import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.proto.AchieveREResponder;
 import jade.proto.states.ReplySender;
+import test.common.testSuite.gui.SelectTestsDlg;
+import test.common.testSuite.gui.InsertArgumentsDlg;
 import test.common.testerAgentControlOntology.*;
+import test.common.Logger;
 import test.common.xml.TestDescriptor;
 
+/**
+   Base class for agents performing tests within the JADE 
+   test suite framework.
+   A <code>TesterAgent</code> is in charge of testing a given 
+   functionality within the system under test and does that by 
+   performing a group of tests implemented 
+   as an instance of the <code>TestGroup</code> class.
+   Each test in the group focuses on a specific case
+   within the addressed functionality and is implemented as an instance
+   of the Test class.
+   <br>
+   A TesterAgent just keeps all the tests included in its TestGroup 
+   and executes them in sequence so that in general implementing a 
+   TesterAgent for a given functionality is as simple as redefining 
+   the <code>getTestGroup()</code> methods so that it returns the
+   proper TestGroup.
+   The tests in a <code>TestGroup</code> are described into an xml file.
+   The sample code below shows how a TesterAgent in charge of testing 
+   the FFF functionality looks like.
+   
+	 <pr><hr><blockquote><pre>
+	 public class FFFTesterAgent extends TesterAgent {
+	 	protected TestGroup getTestGroup() {
+	 		return new TestGroup(<xml file name>) {
+	 			protecetd void initialize(Agent a) throws TestException {
+	 				// Put here all initialization operations common to all 
+	 				// tests in the group
+	 			}
+	 			
+	 			protected void shutdown(Agent a) {
+	 				// Put here all clean-up operations common to all 
+	 				// tests in the group
+	 			}
+	 		};
+	 	}
+	 }				
+	 </pre></blockquote><hr>
+	 
+	 @author Giovanni Caire -TILAB
+ */
 public abstract class TesterAgent extends Agent {
-	//private Codec codec;
-	//private TestGroupExecutor executor;
+  public static final String TEST_NOTIFICATION = "test-notification";
+  
+  private Codec codec = new SLCodec();
+  private Ontology onto = TesterAgentControlOntology.getInstance();  
+  
 	private TestGroup theTestGroup = null;
 	
 	private boolean remoteControlMode = false;
-	//private String remoteControllerAID = null;
+	private AID remoteControllerAID = null;
 	private ACLMessage exitNotification = null;
-	//private boolean debugMode = false;
 	
 	protected void setup() {	
 		// Get the execution mode (passed as agent parameter)
@@ -59,23 +104,31 @@ public abstract class TesterAgent extends Agent {
 			if ("true".equalsIgnoreCase((String) args[0])) {
 				remoteControlMode = true;
 			}
+			String c = (String) args[1];
+			remoteControllerAID = new AID(c, AID.ISLOCALNAME);
+			System.out.println("TesterAgent "+getLocalName()+" running in controlled mode: controller is "+c);
 		}
 		catch (Exception e) {
 			// Just do nothing --> stand-alone execution mode
+			System.out.println("TesterAgent "+getLocalName()+" running in stand-alone mode");
 		}
 		
 		// Load the TestGroup to execute
 		theTestGroup = getTestGroup();
+
 		theTestGroup.setArguments(theTestGroup.getArgumentsSpecification());
-		
+
 		if (remoteControlMode) {
 			// REMOTE CONTROL EXECUTION MODE
-			getContentManager().registerLanguage(new SLCodec());
-			getContentManager().registerOntology(TesterAgentControlOntology.getInstance());
-		
+			getContentManager().registerLanguage(codec);
+			getContentManager().registerOntology(onto);
+			
 			// Add the behaviour that handles commands from a remote 
 			// controller agent (usually the JADE TestSuiteAgent)
 			addBehaviour(new Controller(this));
+			
+      // Notify the remote controller about the number of tests in the group
+      notifyController(new NumberOfTests(theTestGroup.size()));
 		}
 		else {
 			// STAND-ALONE EXECUTION MODE
@@ -99,7 +152,8 @@ public abstract class TesterAgent extends Agent {
 		}
 		else {
 			// Otherwise notify the user via stdout
-			System.out.println("Exit...");
+			Logger.getLogger().log("Exit...");
+      Logger.getLogger().closeLogger();
 		}
 	}
 	
@@ -108,6 +162,22 @@ public abstract class TesterAgent extends Agent {
 	   group to be executed by this TesterAgent
 	 */
 	protected abstract TestGroup getTestGroup();
+  
+	// This is package-scoped since it is also called by the TestGroupExecutor
+  void notifyController(Predicate p) {
+    ACLMessage msg = new ACLMessage(ACLMessage.INFORM);    
+    msg.addReceiver(remoteControllerAID);
+    msg.setLanguage(codec.getName());
+    msg.setOntology(onto.getName());
+    msg.setConversationId(TEST_NOTIFICATION);
+    try {
+    	getContentManager().fillContent(msg, p);
+	    send(msg);
+    }
+    catch (Exception e) {
+    	e.printStackTrace();
+    }
+  }
 
 	/**
 	   Inner class Controller. This is the behaviour that handles 
@@ -126,7 +196,7 @@ public abstract class TesterAgent extends Agent {
 		protected ACLMessage prepareResponse(ACLMessage request) throws NotUnderstoodException, RefuseException {
 			try {
 				aa = (Action) myAgent.getContentManager().extractContent(request);
-				requestedAction = (AgentAction) aa.getAction();
+				requestedAction = (AgentAction) aa.getAction();				
 			}
 			catch (Exception e) {
 				throw new NotUnderstoodException(e.getMessage());
@@ -203,7 +273,7 @@ public abstract class TesterAgent extends Agent {
 				myAgent.getContentManager().fillContent(inform, d);
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				Logger.getLogger().logStackTrace(e);
 			}
 			return inform;
 		}
@@ -219,7 +289,7 @@ public abstract class TesterAgent extends Agent {
 				myAgent.getContentManager().fillContent(inform, r);
 			}
 			catch (Exception e) {
-				e.printStackTrace();
+				Logger.getLogger().logStackTrace(e);
 			}
 			return inform;
 		}

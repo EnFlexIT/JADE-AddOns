@@ -8,7 +8,7 @@ import jade.util.leap.Serializable;
  */
 public class FunctionalityDescriptor  implements Serializable {
 
-	private String nameT = "";
+	private String name = "";
 	private String testerClassName ="";
 	private String testsListFile;
 	private String description ="";
@@ -18,7 +18,7 @@ public class FunctionalityDescriptor  implements Serializable {
 	 * Constructor for FunctionalityDescriptor.
 	 */
 	public FunctionalityDescriptor(String n, boolean s, String c, String d) {
-		nameT = n;
+		name = n;
 		skip = s;
 		testerClassName = c;
 		description = d;
@@ -28,7 +28,7 @@ public class FunctionalityDescriptor  implements Serializable {
 	}
 	
 	public String getName(){
-		return nameT;
+		return name;
 	}
 
 	public boolean getSkip(){
@@ -48,7 +48,7 @@ public class FunctionalityDescriptor  implements Serializable {
 	}
 
 	public void setName(String n){
-		nameT = n;
+		name = n;
 	}
 
 	public void setSkip(String s){
@@ -71,5 +71,20 @@ public class FunctionalityDescriptor  implements Serializable {
 		description = d;
 	}
 
-
+	public String toString() {
+		return name;
+	}
+	
+	public boolean equals(Object obj) {
+		if (obj instanceof FunctionalityDescriptor) {
+			return name.equals(((FunctionalityDescriptor) obj).name);
+		}
+		else {
+			return false;
+		}
+	}
+	
+	public int hashCode() {
+		return name.hashCode();
+	}
 }

@@ -21,26 +21,35 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package test.common.testSuite.gui;
+package test.common;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import test.common.xml.TestDescriptor;
 
-class ConfigAction extends AbstractAction
-{
-	private TestSuiteGui gui;
-
-	public ConfigAction(TestSuiteGui gui)
-	{
-		super ("Config");
-		this.gui = gui;
+/**
+   @author Giovanni Caire - TILAB
+ */
+class SkippedException extends TestException {
+	private TestDescriptor myDescriptor;
+	private boolean expected;
+	
+	public SkippedException(TestDescriptor td) {
+		super(null);
+		myDescriptor = td;
+		expected = true;
 	}
 	
-	public void actionPerformed(ActionEvent e) 
-	{
-		System.out.println("Config");
-		gui.config();
+	public SkippedException(TestDescriptor td, String msg) {
+		super(msg);
+		myDescriptor = td;
+		expected = false;
+	}
+	
+	TestDescriptor getDescriptor() {
+		return myDescriptor;
+	}
+	
+	boolean getExpected() {
+		return expected;
 	}
 }
-	
+

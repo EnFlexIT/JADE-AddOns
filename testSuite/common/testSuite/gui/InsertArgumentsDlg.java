@@ -21,78 +21,94 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package test.common;
+package test.common.testSuite.gui;
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-
 import jade.util.leap.List;
-import test.common.xml.TestDescriptor;
+
+import test.common.ArgumentSpec;
 
 /**
    @author Giovanni Caire - TILAB
  */
-public class SelectTestsDlg extends JDialog {
+public class InsertArgumentsDlg extends JDialog {
 
-	private JCheckBox[] names;
-	private JButton okB, cancelB;
+	private List argSpecs;
+	private JButton okB;
+	private JLabel[] labels;
+	private JTextField[] values;
+	private JTextField[] defaults;
 	
-	private SelectTestsDlg(Frame parent, final TestDescriptor[] tests) {
+	private InsertArgumentsDlg(Frame parent, List l) {
 		super(parent);
 		setModal(true);
-		setTitle("Tests");
+		setTitle("Test group arguments");
 		setResizable(false);
 		
 		// Text fields for inserting values in the CENTER part 
-		final int nTests = tests.length;
+		argSpecs = l;
+		final int nArgs = argSpecs.size();
 		
 		JPanel p = new JPanel();
-		p.setLayout(new GridLayout(nTests, 1));
+		p.setLayout(new GridLayout(nArgs+1, 3));
+		p.add(new JLabel(""));
+		p.add(new JLabel("Value"));
+		p.add(new JLabel("Default"));
 		
-		names = new JCheckBox[nTests];
-		for (int i = 0; i < nTests; ++i) {
-			names[i] = new JCheckBox(tests[i].getName(), !(tests[i].getSkip()));
-			p.add(names[i]);
+		labels = new JLabel[nArgs];
+		values = new JTextField[nArgs];
+		defaults = new JTextField[nArgs];
+		for (int i = 0; i < nArgs; ++i) {
+			ArgumentSpec a = (ArgumentSpec) argSpecs.get(i);
+			labels[i] = new JLabel(a.getLabel());
+			values[i] = new JTextField();
+			values[i].setText(a.getValue());
+			defaults[i] = new JTextField();
+			defaults[i].setText(a.getDefaultValue());
+			defaults[i].setEnabled(false);
+			p.add(labels[i]);
+			p.add(values[i]);
+			p.add(defaults[i]);
 		}
 		
 		getContentPane().add(p, BorderLayout.CENTER);
 		
-		// OK and Cancel Buttons in the SOUTH part
+		// OK Button in the SOUTH part
 		p = new JPanel();
 		
 		okB = new JButton("OK");
 		okB.addActionListener(new ActionListener(){
-    		public void actionPerformed(ActionEvent e) {
-    			for (int i = 0; i < tests.length; ++i) {
-    				if (names[i].isSelected()) {
-    					tests[i].setSkip(false);
+    		public void actionPerformed(ActionEvent e)
+    		{
+    			for (int i = 0; i < nArgs; ++i) {
+    				ArgumentSpec a = (ArgumentSpec) argSpecs.get(i);
+    				String v = values[i].getText();
+    				if (v != null && !v.equals("")) {
+    					a.setValue(v);
     				}
     				else {
-    					tests[i].setSkip(true);
+    					if (a.isMandatory()) {
+    						return;
+    					}
+    					else {
+    						a.setValue(a.getDefaultValue());
+    					}
     				}
     			}
-    			SelectTestsDlg.this.dispose();
+    			
+    			//okFlag = true;
+    			InsertArgumentsDlg.this.dispose();
     		}
 		} );
 		p.add(okB);
 
-		cancelB = new JButton("Cancel");
-		cancelB.addActionListener(new ActionListener() {
-    		public void actionPerformed(ActionEvent e) {
-    			SelectTestsDlg.this.dispose();
-    		}
-		} );
-		p.add(cancelB);
-
-		// Adjust the buttons so that they have the same size
-		okB.setPreferredSize(cancelB.getPreferredSize());
-		
 		getContentPane().add(p, BorderLayout.SOUTH);
 	}
 	
-	public static void selectTests(TestDescriptor[] tests) {
-		SelectTestsDlg dlg = new SelectTestsDlg(null, tests);
+	public static void insertValues(List argSpecs) {
+		InsertArgumentsDlg dlg = new InsertArgumentsDlg(null, argSpecs);
 		dlg.pack();
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int centerX = (int)screenSize.getWidth() / 2;
