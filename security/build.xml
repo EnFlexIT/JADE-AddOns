@@ -61,20 +61,29 @@
   <target name="lib" depends="init" description="Create 'jadeS.jar' in the lib/ directory. ">
     <echo>--- Creating jadeS.jar ---</echo>
     <mkdir dir="${lib}"/>
-    <jar destfile="${lib}/jadeS.jar" 
+    <jar jarFile="${lib}/jadeS.jar" 
                  basedir="${classes}" 
 		 includes="jade/security/impl/**" 
 		 excludes=""/>
   </target>
 
+
   <!-- Create the zip file -->
   <target name="zip" depends="init">
     <zip zipfile="./jadesecurity.zip" 
          basedir="../../../" 
-	 includes="jade/add-ons/security/*, jade/add-ons/security/${lib}/**, jade/add-ons/security/${bin}/**, jade/add-ons/security/src-3rd/**,
-                  jade/add-ons/security/${runExamples}/myfirst/**,
-                  jade/add-ons/security/${src}/examples/myfirst/**"
-	 excludes="jade/add-ons/security/*.zip,jade/add-ons/security/${doc}/api/**"/>
+	 	 includes="jade/add-ons/security/*,jade/add-ons/security/${lib}/**,
+	 	      jade/add-ons/security/${bin}/**,jade/add-ons/security/src-3rd/**,
+	 	      jade/add-ons/security/src/jade/security/**,
+              jade/add-ons/security/${runExamples}/myfirst/**,
+              jade/add-ons/security/${src}/examples/myfirst/**,
+              jade/add-ons/security/${runExamples}/send/**,
+              jade/add-ons/security/${src}/examples/send/**,
+              jade/add-ons/security/${runExamples}/delegation/**,
+              jade/add-ons/security/${src}/examples/delegation/**,
+              jade/add-ons/security/${runExamples}/ssl/**,
+              jade/add-ons/security/${src}/examples/ssl/**"
+	 	 excludes="jade/add-ons/security/*.zip,jade/add-ons/security/${doc}/api/**" />
   </target>
 
   <!-- Clean all the class files created -->
