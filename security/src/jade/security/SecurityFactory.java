@@ -49,7 +49,7 @@ abstract public class SecurityFactory {
   private static SecurityFactory singleton = null;
 
   // the first profile registered with the SecurityFactory
-  private static Profile profile = null; // see NOTE above
+  protected static Profile profile = null; // see NOTE above
 
 
   /*  Returns the SecurityFactory according the Profile p,
@@ -135,5 +135,7 @@ public static String getParameter(String key, String defaultVal) {
 
 abstract public JADEPrincipal newJADEPrincipal(SDSIName sdsiname);
 abstract public JADEPrincipal newJADEPrincipal(String string, SDSIName sdsiname1);
-  
+
+abstract public DelegationCertificate newDelegationCertificate();
+
 } // end SecurityFactory
