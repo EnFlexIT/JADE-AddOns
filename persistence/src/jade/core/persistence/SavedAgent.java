@@ -66,6 +66,14 @@ public class SavedAgent {
 	return myName;
     }
 
+    public void setOwned(boolean o) {
+        owned = o;
+    }
+    
+    public boolean isOwned() {
+        return owned;
+    }
+    
     public void setPendingMessages(java.util.List messages) {
 	pendingMessages = messages;
     }
@@ -81,6 +89,7 @@ public class SavedAgent {
 
     private Agent myAgent;
     private String myName;
+    private boolean owned;
 
     private java.util.List pendingMessages;
 
