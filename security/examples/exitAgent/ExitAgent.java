@@ -1,4 +1,4 @@
-package examples.exitAgent;
+package exitAgent;
 
 import jade.core.Agent;
 
