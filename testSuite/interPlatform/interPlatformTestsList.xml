@@ -10,5 +10,13 @@
 			<WhatTest> Tests sending and receiving a message to/from an agent on a remote platform.</WhatTest>
 			<HowWorkTest> It uses the default IIOP MTP.</HowWorkTest>
 			<WhenTestPass> The test passes if the agent on the remote platform receives the ping message and replies correctly and no exception is fired.</WhenTestPass>
+		</Test>
+		
+		<Test name="Message Envelope transfer over IIOP MTP" skip="false">
+			<TestClassName>test.interPlatform.tests.TestEnvelope</TestClassName>
+			<WhatTest> Test the correct transfer of the Message Envelope in communication across different platforms using the standard IIOP MTP.</WhatTest>
+			<HowWorkTest> A message is exchanged between two agents living on different platforms with an Envelope including two properties: a Serializable object and a String.
+			The message transfer occurs using the standard IIOP MTP.</HowWorkTest>
+			<WhenTestPass> The test passes if the received Envelope includes the properties as they were set.</WhenTestPass>
 		</Test>		
 	</TestsList>
