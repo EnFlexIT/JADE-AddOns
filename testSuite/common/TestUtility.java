@@ -314,11 +314,39 @@ public class TestUtility {
   }
   
   /**
-     @return the name of the host a given container is running on
+     @return the name of the host a given container in the local
+     platform is running on
    */
   public static String getContainerHostName(Agent a, String containerName) throws TestException {
+  	return getContainerHostName(a, null, containerName);
+  }
+  
+  /**
+     @return the name of the host a given container in the platform
+     managed by the specified AMS is running on
+   */
+  public static String getContainerHostName(Agent a, AID ams, String containerName) throws TestException {
   	try {
-  		AID spy = TestUtility.createAgent(a, "spy", "test.common.TestUtility$HostSpyAgent", new String[] {a.getLocalName()}, null, containerName);
+  		String[] args = null;
+  		if (ams == null || a.getAMS().equals(ams)) {
+  			// The containe is in the local platform --> arg0 is the localName
+  			args = new String[] {a.getLocalName()};
+  		}
+  		else {
+				// The containe is in a remote platform --> arg0 is the GUID and arg1 following 
+				// args are the addresses
+  			List l = new ArrayList();
+  			l.add(a.getName());
+  			Iterator it = a.getAID().getAllAddresses();
+  			while (it.hasNext()) {
+  				l.add(it.next());
+  			}
+  			args = new String[l.size()];
+  			for (int i = 0; i < l.size(); ++i) {
+  				args[i] = (String) l.get(i);
+  			}
+  		}
+  		AID spy = TestUtility.createAgent(a, "spy", "test.common.TestUtility$HostSpyAgent", args, ams, containerName);
   		ACLMessage msg = a.blockingReceive(MessageTemplate.MatchConversationId(SPY_NOTIFICATION), 10000);
   		if (msg != null) {
 	  		if (msg.getPerformative() == ACLMessage.INFORM) {
@@ -405,7 +433,19 @@ public class TestUtility {
   	protected void setup() {
   		Object[] args = getArguments();
   		if (args.length > 0) {
-  			AID receiver = new AID((String) args[0], AID.ISLOCALNAME);
+  			AID receiver = null;
+  			if (args.length == 1) {
+  				// Receiver is in the same platform --> arg0 is the localName
+  				receiver = new AID((String) args[0], AID.ISLOCALNAME);
+  			}
+  			else {
+  				// Receiver is remote --> arg0 is the GUID and arg1 following 
+  				// args are the addresses
+  				receiver = new AID((String) args[0], AID.ISGUID);
+  				for (int i = 1; i < args.length; ++i) {
+  					receiver.addAddresses((String) args[i]);
+  				}
+  			}
 				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 				msg.addReceiver(receiver);
 				msg.setConversationId(SPY_NOTIFICATION);
