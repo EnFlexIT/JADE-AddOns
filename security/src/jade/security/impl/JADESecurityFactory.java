@@ -40,8 +40,21 @@ import jade.security.DelegationCertificate;
 */
 public class JADESecurityFactory extends SecurityFactory {
 
+
+  // JADE Authority class
+  public static final String AUTH_CLASS_KEY = "jade_core_security_SecurityService_Authority";
+  private String AUTH_CLASS_DEFAULT = "jade.security.impl.JADEAuthorityImpl";
+
   public JADEAuthority newJADEAuthority() {
-    return new JADEAuthorityImpl();
+    JADEAuthority ja=null;
+    try {
+      ja = (JADEAuthority) 
+          Class.forName( 
+          profile.getParameter(AUTH_CLASS_KEY, 
+                               AUTH_CLASS_DEFAULT) ).newInstance();
+    } catch (Exception ex) {
+    }
+    return ja;
   }
 
   public JADEAccessController newJADEAccessController(
