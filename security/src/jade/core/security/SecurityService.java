@@ -27,7 +27,6 @@ import jade.security.util.*;
 import jade.core.security.authentication.UserAuthenticator;
 import jade.core.security.authentication.UserPassCredential;
 import jade.core.messaging.GenericMessage;
-import jade.core.messaging.MessagingSlice;
 import jade.domain.FIPAAgentManagement.Envelope;
 import jade.domain.FIPAAgentManagement.SecurityObject;
 import jade.domain.FIPAAgentManagement.Property;

@@ -24,9 +24,6 @@ Boston, MA  02111-1307, USA.
 
 package jade.core.security.authentication;
 
-/* JAAS imports */
-import jade.util.Logger;
-
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Iterator;

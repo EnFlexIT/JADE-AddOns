@@ -27,18 +27,6 @@ package jade.core.security;
 
 
 import jade.core.Service;
-import jade.core.Filter;
-import jade.core.AID;
-import jade.core.ContainerID;
-import jade.core.Location;
-import jade.core.IMTPException;
-import jade.core.ServiceException;
-import jade.core.NotFoundException;
-import jade.core.NameClashException;
-
-import jade.security.JADESecurityException;
-
-import jade.util.leap.List;
 
 /**
 

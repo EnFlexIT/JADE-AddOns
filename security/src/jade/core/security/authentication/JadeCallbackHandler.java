@@ -30,7 +30,6 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.TextOutputCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.swing.JOptionPane;
 
 import java.awt.Component;
 import java.util.ArrayList;

@@ -25,35 +25,26 @@
 package jade.core.security;
 
 import jade.core.Agent;
-import jade.core.AID;
-import jade.core.ContainerID;
-
-import java.util.Hashtable;
-
-import jade.lang.acl.ACLMessage;
+import jade.core.Profile;
+import jade.core.security.authentication.UserPassCredential;
 import jade.domain.FIPAAgentManagement.Envelope;
 import jade.domain.FIPAAgentManagement.Property;
 import jade.domain.FIPAAgentManagement.SecurityObject;
-import jade.util.leap.*;
-import jade.util.Logger;
-
-import jade.security.SDSIName;
-import jade.security.JADEPrincipal;
-import jade.security.JADEAuthority;
+import jade.lang.acl.ACLMessage;
 import jade.security.Credentials;
+import jade.security.JADEAuthority;
+import jade.security.JADEPrincipal;
 import jade.security.JADESecurityException;
-import jade.security.PrivilegedExceptionAction;
-import jade.security.CertificateException;
-import jade.security.DelegationCertificate;
-import jade.security.impl.*;
-import jade.security.util.*;
-import jade.core.ServiceException;
-import jade.core.Profile;
-import jade.core.security.authentication.UserPassCredential;
+import jade.security.SecurityFactory;
+import jade.security.util.CredentialsEngine;
+import jade.security.util.SecurityData;
+import jade.util.Logger;
+import jade.util.leap.Iterator;
+
+import java.io.IOException;
+import java.util.Hashtable;
 
 import starlight.util.Base64;
-import java.io.IOException;
-import jade.security.SecurityFactory;
 
 /* 
 *  Note: this class shall not make any reference (e.g. import) to any 

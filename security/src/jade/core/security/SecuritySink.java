@@ -27,8 +27,6 @@ package jade.core.security;
 import jade.core.GenericCommand;
 import jade.core.Sink;
 import jade.core.VerticalCommand;
-import jade.core.security.authentication.UserAuthenticator;
-import jade.util.Logger;
 
 /**
  * @author Ivan Trencansky - Whitestein Technologies
