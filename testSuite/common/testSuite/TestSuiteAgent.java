@@ -694,7 +694,7 @@ public class TestSuiteAgent extends GuiAgent {
         } 
       } 
       // Launch the Main container in a separated process
-      mainController = TestUtility.launchJadeInstance("Main", null, "-gui -nomtp -local-port "+Test.DEFAULT_PORT+" -services "+MAIN_SERVICES+" -name "+TEST_PLATFORM_NAME+argsAsString, null);
+      mainController = TestUtility.launchJadeInstance("Main", null, "-gui -nomtp -local-port "+Test.DEFAULT_PORT+" -services "+MAIN_SERVICES+" -name "+TEST_PLATFORM_NAME+argsAsString+" -jade_domain_df_autocleanup true", null);
 
       // Get a hold on JADE runtime
       Runtime rt = Runtime.instance();
