@@ -37,7 +37,12 @@ import test.common.TestUtility;
 import test.common.TestException;
 import test.common.remote.TSDaemon;
 import test.common.remote.RemoteManager;
+import test.common.xml.*;
 
+/**
+ * @author Giovanni Caire - TiLab
+ * @author Elisabetta Cortese - TiLab
+*/
 public class TestSuiteGui extends JFrame {
 	// Gui states used to enable/disable buttons
 	public static final int IDLE_STATE = 0;
@@ -48,24 +53,25 @@ public class TestSuiteGui extends JFrame {
 	private int status;
 	
 	private GuiAgent myAgent;
-	private String[] testers;
-	private String currentTester = null;
+	private String xmlFileName;
+	//private String currentTester = null;
 	private TSDaemonConnectionConfiguration daemonConf = new TSDaemonConnectionConfiguration();
 		
-	private JButton exitB, openB, runB, debugB, stepB, configB, connectB;
-	private JMenuItem exitI, openI, runI, debugI, stepI, configI, connectI;
+	private JButton exitB, openB, runB, debugB, stepB, configB, connectB, runAllB;
+	private JMenuItem exitI, openI, runI, debugI, stepI, configI, connectI, runAllI;
 	private JTextField currentF;
 	
-	public TestSuiteGui(GuiAgent myAgent, String[] testers) {
+	public TestSuiteGui(GuiAgent myAgent, String xmlFileName) {
 		super();
 		this.myAgent = myAgent;
-		this.testers = testers;
+		this.xmlFileName = xmlFileName;
 		
 		setTitle("JADE Test Suite toolbar");
 		
     Icon exitImg = GuiProperties.getIcon("exit");
     Icon openImg = GuiProperties.getIcon("open");
 		Icon runImg = GuiProperties.getIcon("run");
+		Icon runAllImg = GuiProperties.getIcon("runAll");
 		Icon debugImg = GuiProperties.getIcon("debug");
     Icon stepImg = GuiProperties.getIcon("step");
     Icon configImg = GuiProperties.getIcon("config");
@@ -98,19 +104,25 @@ public class TestSuiteGui extends JFrame {
 		//runB.setDisabledIcon(runImg);
 		openB.setToolTipText("Load a tester agent");
 		
-		// RUN button
-		runB  = bar.add(new RunAction(this));
-		runB.setText("");
-		runB.setIcon(runImg);
-		//runB.setDisabledIcon(runImg);
-		runB.setToolTipText("Run the current tester agent");
-		
 		// CONFIG button
 		configB  = bar.add(new ConfigAction(this));
 		configB.setText("");
 		configB.setIcon(configImg);
 		//runB.setDisabledIcon(runImg);
 		configB.setToolTipText("Set arguments for the current tester agent");
+		
+		// RUN button
+		runB  = bar.add(new RunAction(this));
+		runB.setText("");
+		runB.setIcon(runImg);
+		//runB.setDisabledIcon(runImg);
+		runB.setToolTipText("Run the current tester agent");
+	
+		// RUN-ALL button
+		runAllB = bar.add(new RunAllAction(this));
+		runAllB.setText("");
+		runAllB.setIcon(runAllImg);
+		runAllB.setToolTipText("Run all tester agents");
 		
 		bar.addSeparator();
 		
@@ -162,19 +174,12 @@ public class TestSuiteGui extends JFrame {
 	
 	// Method called by the OpenAction
 	void open() {
-		GenericChooser c = new GenericChooser();
-		int i = c.showChoiceDlg(this,
-						"Select the tester agent to run",
-						"OK",
-						"Cancel",
-						testers);
-		if (i >= 0) {
-			String currentTester = testers[i];
-			currentF.setText(currentTester);
-			// If we are in the IDLE state --> the event to be posted to the
-			// agent is LOAD. Otherwise (a tester was already active) it is RELOAD
-			GuiEvent ev = new GuiEvent(this, (status == IDLE_STATE ? TestSuiteAgent.LOAD_EVENT : TestSuiteAgent.RELOAD_EVENT)); 
-			ev.addParameter(currentTester);
+		FunctionalityDescriptor func = TesterListVisualizer.showSelectionDlg(this, xmlFileName);
+		if (func != null) {
+			System.out.println("Functionality selected: "+func.getName());
+			currentF.setText(func.getName());
+			GuiEvent ev = new GuiEvent(this, TestSuiteAgent.LOAD_EVENT); 
+			ev.addParameter(func.getTesterClassName());
 			setStatus(READY_STATE);
 			myAgent.postGuiEvent(ev);
 		}
@@ -208,6 +213,15 @@ public class TestSuiteGui extends JFrame {
 		setStatus(RUNNING_STATE);
 		myAgent.postGuiEvent(ev);
 	}
+
+	// Method called by the RunAllAction
+	void runAll() {
+		FunctionalityDescriptor[] allFunc = XMLManager.getFunctionalities(xmlFileName);
+		GuiEvent ev = new GuiEvent(this, ((status == IDLE_STATE || status == READY_STATE) ? TestSuiteAgent.RUNALL_EVENT : TestSuiteAgent.GO_EVENT)); 
+		ev.addParameter(allFunc);
+		setStatus(RUNNING_STATE);
+		myAgent.postGuiEvent(ev);
+	}
 	
 	// Method called by the DebugAction
 	void debug() {
@@ -218,7 +232,7 @@ public class TestSuiteGui extends JFrame {
 	
 	// Method called by the ExitAction
 	void exit() {
-		GuiEvent ev = new GuiEvent(this, (status == IDLE_STATE ? TestSuiteAgent.EXIT_EVENT : TestSuiteAgent.CLOSE_AND_EXIT_EVENT)); 
+		GuiEvent ev = new GuiEvent(this, TestSuiteAgent.EXIT_EVENT); 
 		myAgent.postGuiEvent(ev); 
 	}
 	
@@ -238,10 +252,18 @@ public class TestSuiteGui extends JFrame {
 		this.status = status;
 		updateEnabled();
 	}
+	//Elisabetta 
+	public int getStatus() {
+		return this.status;
+	}
+	public void setCurrentF(String c){
+		currentF.setText(c);
+	}
 	
 	private void updateEnabled() {
 		openB.setEnabled(status == IDLE_STATE || status == READY_STATE);
 		runB.setEnabled(status == READY_STATE || status == DEBUGGING_STATE);
+		runAllB.setEnabled(status == IDLE_STATE || status == READY_STATE);
 		debugB.setEnabled(status == READY_STATE);
 		stepB.setEnabled(status == DEBUGGING_STATE);
 		configB.setEnabled(status == READY_STATE);

@@ -33,7 +33,7 @@ import jade.lang.acl.*;
 import jade.wrapper.*;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
-import jade.util.leap.ArrayList;
+import jade.util.leap.*;
 import jade.proto.AchieveREInitiator;
 import jade.proto.states.ReplySender;
 
@@ -44,10 +44,16 @@ import jade.content.onto.*;
 import jade.content.onto.basic.*;
 
 import test.common.*;
+import test.common.behaviours.ListProcessor;
 import test.common.testSuite.gui.*;
 import test.common.testerAgentControlOntology.*;
+import test.common.xml.*;
 
 import java.util.Vector;
+/**
+ * @author Giovanni Caire - TiLab
+ * @author Elisabetta Cortese - TiLab
+ */
 
 public class TestSuiteAgent extends GuiAgent {
 	private static final String NAME = "test-suite";
@@ -55,14 +61,19 @@ public class TestSuiteAgent extends GuiAgent {
 	
 	// Gui event types
 	public static final int LOAD_EVENT = 0;
-	public static final int RELOAD_EVENT = 1;
 	public static final int RUN_EVENT = 2;
+	public static final int RUNALL_EVENT = 9;
 	public static final int DEBUG_EVENT = 3;
 	public static final int CONFIGURE_EVENT = 4;
 	public static final int STEP_EVENT = 5;
 	public static final int GO_EVENT = 6;
 	public static final int EXIT_EVENT = 7;
-	public static final int CLOSE_AND_EXIT_EVENT = 8;
+
+	// for each tester we save results, on the end 
+	// print the content in a report
+	private HashMap risultati = new HashMap();
+	private String currentTester;
+	private String[] listTester;
 	
 	private Codec codec;	
 	private TestSuiteGui myGui;
@@ -74,19 +85,8 @@ public class TestSuiteAgent extends GuiAgent {
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(TesterAgentControlOntology.getInstance());
 		
-		// Create and show the GUI
-		myGui = new TestSuiteGui(this, new String[] {
-			"test.content.ContentTesterAgent",
-			"test.content.SLOperatorsTesterAgent",
-			"test.interPlatform.InterPlatformCommunicationTesterAgent",
-			"test.behaviours.BlockTimeoutTesterAgent",
-			"test.behaviours.PerformanceTesterAgent",
-			"test.domain.df.DFTesterAgent",
-			"test.domain.JADEManagementOntologyTesterAgent",
-			"test.mobility.MobilityTesterAgent",
-			"test.roundTripTime.RoundTripTimeTesterAgent",
-			"test.proto.ContractNetTesterAgent",
-			"test.proto.AchieveRETesterAgent" } );
+		// Create the GUI
+		myGui = new TestSuiteGui(this, "test//testerList.xml"); 
 		myGui.showCorrect();				
 	}	
 		
@@ -97,29 +97,24 @@ public class TestSuiteAgent extends GuiAgent {
 	protected void onGuiEvent(GuiEvent ev) {
 		switch (ev.getType()) {
 		case LOAD_EVENT: 
-			// The user pressed "Open" while no tester agent is currently loaded
-			String cn = (String) ev.getParameter(0);
-			System.out.println("TestSuiteAgent handling RELOAD event. Class is "+cn);
-			loadTester(cn);
-			break;
-		case RELOAD_EVENT: 
-			// The user pressed "Open" while a tester agent is currently loaded
-			// Add a behaviour that makes the currently loaded tester agent exit and,
-			// on completion, loads the newly specified tester agent.
 			final String className = (String) ev.getParameter(0);
-			System.out.println("TestSuiteAgent handling RELOAD event. Class is "+className);
-			addBehaviour(new Requester(this, new Exit()) {
-				public int onEnd() {
-					try {
-						Thread.sleep(1000);
+			System.out.println("TestSuiteAgent handling LOAD event. Class is "+className);
+			// The user pressed "Open". If no tester is currently loaded, just load
+			// the indicated one. Otherwise kill the currently loaded tester before
+			if(myGui.getStatus() == TestSuiteGui.IDLE_STATE){
+				loadTester(className);
+			}
+			else {
+				// Add a behaviour that makes the currently loaded tester agent exit and,
+				// on completion, loads the newly specified tester agent.
+				addBehaviour(new Requester(this, new Exit()) {
+					public int onEnd() {
+						waitABit();
+						loadTester(className);
+						return 0;
 					}
-					catch (Exception e) {
-						e.printStackTrace();
-					}
-					loadTester(className);
-					return 0;
-				}
-			} );
+				} );
+			}
 			break;
 		case RUN_EVENT: 
 			System.out.println("TestSuiteAgent handling RUN event");
@@ -132,6 +127,20 @@ public class TestSuiteAgent extends GuiAgent {
 					return 0;
 				}
 			} );
+			break;
+		case RUNALL_EVENT:
+			System.out.println("TestSuiteAgent handling RUNALL event");
+			// The user pressed "RunAll"
+			// Add a behaviour that execute all testers, that are listed in 
+			// xml file and, on completion, sets the GUI status to READY
+			FunctionalityDescriptor[] allFunc = (FunctionalityDescriptor[]) ev.getParameter(0);
+			if (allFunc != null) {
+				ArrayList l = new ArrayList();
+				for(int i = 0; i < allFunc.length; i++){
+					l.add(i, allFunc[i].getTesterClassName());
+				}
+				addBehaviour(new AllTesterExecutor(this, l));
+			}
 			break;
 		case DEBUG_EVENT: 
 			System.out.println("TestSuiteAgent handling DEBUG event");
@@ -173,32 +182,135 @@ public class TestSuiteAgent extends GuiAgent {
 			break;
 		case EXIT_EVENT: 
 			System.out.println("TestSuiteAgent handling EXIT event");
-			// The user pressed "Exit" while no tester agent is currently loaded
-			doDelete();
-			break;
-		case CLOSE_AND_EXIT_EVENT: 
-			System.out.println("TestSuiteAgent handling CLOSE_AND_EXIT event");
-			// The user pressed "Exit" while a tester agent is currently loaded
-			// Add a behaviour that makes the currently loaded tester agent exit and,
-			// on completion, quits.
-			addBehaviour(new Requester(this, new Exit()) {
-				public int onEnd() {
-					doDelete();
-					return 0;
-				}
-			} );
+			// The user pressed "Exit". If no tester is currently loaded, just exit.
+			// Otherwise kill the currently loaded tester before
+			if(myGui.getStatus() == TestSuiteGui.IDLE_STATE){
+				doDelete();
+			}
+			else {
+				// Add a behaviour that makes the currently loaded tester agent exit and,
+				// on completion, exit.
+				addBehaviour(new Requester(this, new Exit()) {
+					public int onEnd() {
+						doDelete();
+						return 0;
+					}
+				} );
+			}
 			break;
 		}
 	}
 	
 	private void loadTester(String className) {
 		try {
-			TestUtility.createAgent(this, TESTER_NAME, className, new String[] {new String("true")}, getAMS(), null);			
+			TestUtility.createAgent(this, TESTER_NAME, className, new String[] {new String("true")}, getAMS(), null);
+			myGui.setCurrentF(className);			
 		}
 		catch (Exception e) {
 			System.out.println("Error loading tester agent. ");
 			e.printStackTrace();
 			myGui.setStatus(TestSuiteGui.IDLE_STATE);
+		}
+	}
+
+	private void waitABit() {
+		try {
+			Thread.sleep(1000);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * INNER CLASS: AllTesterExecutor
+	 * This class extends <code>ListProcessor</code>, it used to 
+	 * execute all tester in sequence: each tester start only when
+	 */
+	class AllTesterExecutor extends ListProcessor{
+		
+
+		public AllTesterExecutor(Agent a, ArrayList l){
+			super(a, l);
+		}
+		// take tester to run and its order in the list
+		protected void processItem(Object item, int index){
+		  		int order = index;
+		  		String testName = (String) item;
+		  		myAgent.addBehaviour(new SingleTesterExecutor(myAgent, testName, order, this));
+		  		pause();
+		}
+		
+  		public int onEnd() {
+			// FIXME: PRINT A REPORT
+			System.out.println(" ");
+			System.out.println(" ");
+			System.out.println("************ FINAL REPORT ****************");
+			System.out.println(" ");
+			Iterator it = items.iterator();
+			while (it.hasNext()) {
+				String tester = (String) it.next();
+				ArrayList ar = (ArrayList)risultati.get(tester);
+				System.out.println("Tester:  "+tester);
+				System.out.println("Passed:  "+((Integer)ar.get(0)).intValue());
+				System.out.println("Falled:  "+((Integer)ar.get(1)).intValue());
+				System.out.println("Skipped: "+((Integer)ar.get(2)).intValue());
+				System.out.println("-----------------------------------------------");
+			}
+			myGui.setStatus(TestSuiteGui.IDLE_STATE);
+			myGui.setEnabled(true);
+  			return 0;
+  		}  			
+	}
+	
+	/**
+	 * INNER CLASS: SingleTesterExecutor
+	 */
+	class SingleTesterExecutor extends SequentialBehaviour{
+		
+		private String testerName= null;
+		private ListProcessor lpToBeResumed;
+		private int testerOrd = 0;
+		
+		public SingleTesterExecutor(Agent a, String tn, int i, ListProcessor l){
+			super(a);
+			testerName = tn;
+			testerOrd = i;
+			lpToBeResumed = l;
+			
+			// 1th Step: kill the tester which isn't the first
+			if(myGui.getStatus() != TestSuiteGui.IDLE_STATE){
+				System.out.println("************ RELOAD KILL ****************");
+				addSubBehaviour(new Requester(myAgent, new Exit()){
+					public int onEnd() {
+						try {
+							Thread.sleep(1000);
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+						}
+						return 0;
+					}							
+				}); 	
+			}
+			
+			// 2td Step: Load a tester ti run
+			addSubBehaviour(new OneShotBehaviour(myAgent){
+				public void action(){
+					System.out.println("CARICATO TESTER: "+testerName);
+					currentTester = testerName;
+					loadTester(testerName);
+				}
+			});
+			
+			// 3td Step: Run the tester
+			addSubBehaviour(new Requester(myAgent, new Execute(false)));
+		}
+
+		public int onEnd() {
+			System.out.println("Test terminated");
+			lpToBeResumed.resume();
+			return 0;
 		}
 	}
 	
@@ -231,9 +343,23 @@ public class TestSuiteAgent extends GuiAgent {
 			return v;
 		}
 			
+		// Elisabetta: modified handleIngform to print report
 		protected void handleInform(ACLMessage inform) {
 			if (requestedAction instanceof Execute) {
-				// FIXME: parse the message and get passed, failed and skipped
+				try{
+					Result res = (Result) getContentManager().extractContent(inform);
+					ArrayList lRes = (ArrayList)res.getItems();
+					ExecResult exRes = (ExecResult) lRes.get(0);
+					
+					ArrayList ls = new ArrayList();
+					ls.add(new Integer(exRes.getPassed()));
+					ls.add(new Integer(exRes.getFailed()));
+					ls.add(new Integer(exRes.getSkipped()));
+					risultati.put(currentTester, ls);
+					
+				}catch(Exception e){
+					e.printStackTrace();
+				}
 			}	
 		}
 	
