@@ -382,6 +382,29 @@ public class PersistenceProxy extends Service.SliceProxy implements PersistenceS
 	}
     }
 
+    public void deleteContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException {
+        GenericCommand cmd = new GenericCommand(H_DELETECONTAINER, PersistenceSlice.NAME, null);
+        cmd.addParam(cid);
+        cmd.addParam(repository);
+
+        Node n = getNode();
+        Object result = n.accept(cmd);
+        if((result != null) && (result instanceof Throwable)) {
+            if(result instanceof ServiceException) {
+                throw (ServiceException)result;
+            }
+            else if(result instanceof IMTPException) {
+                throw (IMTPException)result;
+            }
+            else if(result instanceof NotFoundException) {
+                throw (NotFoundException)result;
+            }
+            else {
+                throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+            }
+        }
+    }
+
     public MTPDescriptor[] getInstalledMTPs(ContainerID cid) throws ServiceException, IMTPException, NotFoundException {
 	GenericCommand cmd = new GenericCommand(H_GETINSTALLEDMTPS, PersistenceSlice.NAME, null);
 	cmd.addParam(cid);
@@ -430,4 +453,96 @@ public class PersistenceProxy extends Service.SliceProxy implements PersistenceS
 	return (AID[])result;
     }
 
+    public String[] getRepositories() throws ServiceException, IMTPException {
+	GenericCommand cmd = new GenericCommand(H_GETREPOSITORIES, PersistenceSlice.NAME, null);
+
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
+	    }
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
+	}
+
+	return (String[])result;
+    }    
+
+    public String[] getSavedAgents(String repository) throws ServiceException, IMTPException, NotFoundException {
+	GenericCommand cmd = new GenericCommand(H_GETSAVEDAGENTS, PersistenceSlice.NAME, null);
+	cmd.addParam(repository);
+
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
+	    }
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		throw (NotFoundException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
+	}
+
+	return (String[])result;
+    }
+
+    public String[] getFrozenAgents(String repository) throws ServiceException, IMTPException, NotFoundException {
+	GenericCommand cmd = new GenericCommand(H_GETFROZENAGENTS, PersistenceSlice.NAME, null);
+	cmd.addParam(repository);
+
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
+	    }
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		throw (NotFoundException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
+	}
+
+	return (String[])result;
+    }    
+
+    public String[] getSavedContainers(String repository) throws ServiceException, IMTPException, NotFoundException {
+	GenericCommand cmd = new GenericCommand(H_GETSAVEDCONTAINERS, PersistenceSlice.NAME, null);
+	cmd.addParam(repository);
+
+	Node n = getNode();
+	Object result = n.accept(cmd);
+	if((result != null) && (result instanceof Throwable)) {
+	    if(result instanceof ServiceException) {
+		throw (ServiceException)result;
+	    }
+	    else if(result instanceof IMTPException) {
+		throw (IMTPException)result;
+	    }
+	    else if(result instanceof NotFoundException) {
+		throw (NotFoundException)result;
+	    }
+	    else {
+		throw new IMTPException("An undeclared exception was thrown", (Throwable)result);
+	    }
+	}
+
+	return (String[])result;
+    }
+    
 }
