@@ -130,6 +130,7 @@ class XMLDecoder {
 	protected void openTag(String qname, Attributes attr) throws OntologyException {
 		
 			ObjectSchema objectSchema = null;
+			ObjectSchema objectSchema1 = null;
 
 			// Initialize the decoder		
 			if (qname.equals("CONTENT_ELEMENT_LIST")) {
@@ -150,18 +151,20 @@ class XMLDecoder {
 			}
 			
 			// Manage the cast toward specific type. 
+			objectSchema1 = getRelatedSchema(qname);
+			
 			String schemaName = attr.getValue("type");
-			if (schemaName==null) {
-				schemaName = qname;					
+			if (schemaName == null) {
+				schemaName = qname;
 			}
 			
 			// Identify the schema of the current tag
-			objectSchema = getRelatedSchema(schemaName);	
+			objectSchema = getRelatedSchema(schemaName);
 				
 			// Manage the first occurence of an aggregate member
-			if (objectSchema instanceof AggregateSchema) {
-				addToStack(qname, attr, objectSchema);		
-			 	objectSchema = getRelatedSchema(qname);	
+			if (objectSchema1 instanceof AggregateSchema) {
+				addToStack(qname, attr, objectSchema1);		
+			 	objectSchema = getRelatedSchema(schemaName);	
 			}
 								
 			addToStack(qname, attr, objectSchema);		
@@ -231,7 +234,6 @@ class XMLDecoder {
 		
 	protected void addToStack(String qname, Attributes attr, ObjectSchema objectSchema) throws OntologyException {
 		//try {
-				
 			StackElement stackElement = new StackElement();
 			stackElement.tag = qname;
 			stackElement.term = (AbsObject)objectSchema.newInstance();
