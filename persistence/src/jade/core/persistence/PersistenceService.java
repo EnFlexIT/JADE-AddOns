@@ -585,7 +585,6 @@ public class PersistenceService extends BaseService {
 		ContainerID cid = impl.getContainerID(agentID);
 		PersistenceSlice targetSlice = (PersistenceSlice)getSlice(cid.getName());
 		try {
-			System.out.println("Freezing agent on repository "+repository+". Buffer = "+(bufferContainer == null ? "null" : bufferContainer.getName()));
 		    targetSlice.freezeAgent(agentID, repository, bufferContainer);
 		}
 		catch(IMTPException imtpe) {
