@@ -46,50 +46,36 @@ public class TestEnvelope extends Test {
 	private static final String KEY1 = "k1";
 	private static final String KEY2 = "k2";
 	
-	private JadeController jc;
-	
 	private AID resp = null;
-	private Logger l = Logger.getLogger();
 	
-  public Behaviour load(Agent a, DataStore ds, String resultKey) throws TestException { 
+  public Behaviour load(Agent a) throws TestException { 
   	try {
-  		final DataStore store = ds;
-  		final String key = resultKey;
-  		
-			jc = TestUtility.launchJadeInstance("Container-1", null, new String("-container -host "+TestUtility.getLocalHostName()+" -port "+String.valueOf(Test.DEFAULT_PORT)+" -mtp jade.mtp.iiop.MessageTransportProtocol"), null); 
-	  	
 			AID remoteAMS = (AID) getGroupArgument(InterPlatformCommunicationTesterAgent.REMOTE_AMS_KEY);
-			System.out.println("Starting responder");
 			resp = TestUtility.createAgent(a, RESPONDER_NAME, getClass().getName()+"$CheckEnvelopeAgent", null, remoteAMS, null);
-			System.out.println("Responder started");
+			log("Responder correctly started on remote platform");
 			
   		Behaviour b1 = new SimpleBehaviour() {
   			private boolean finished = false;
   			public void onStart() {
   				ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
   				msg.setConversationId(CONV_ID);
-  				//msg.addReceiver(resp);
   				msg.setDefaultEnvelope();
   				Envelope env = msg.getEnvelope();
   				env.addTo(resp);
   				env.addProperties(new Property(KEY1, TEST_SERIALIZABLE));
   				env.addProperties(new Property(KEY2, TEST_STRING));
-  				System.out.println("Sending test message");
   				myAgent.send(msg);
   			}
   			
   			public void action() {
   				ACLMessage msg = myAgent.receive(MessageTemplate.MatchConversationId(CONV_ID)); 
 					if (msg != null) { 
-						System.out.println("Reply received: "+msg);
 						AID sender = msg.getSender();
 						if (sender.equals(resp) && msg.getPerformative() == ACLMessage.INFORM) {
-							l.log("Message envelope OK");
-							store.put(key, new Integer(Test.TEST_PASSED));
+							passed("Message envelope OK");
 						}
 						else {
-							l.log("Wrong message envelope: "+msg.getContent());
-							store.put(key, new Integer(Test.TEST_FAILED));
+							failed("Wrong message envelope: "+msg.getContent());
 						}
 						finished = true;
   				}
@@ -106,8 +92,7 @@ public class TestEnvelope extends Test {
   		// If we don't receive any answer in 10 sec --> TEST_FAILED
   		Behaviour b2 = new WakerBehaviour(a, 10000) {
 				protected void handleElapsedTimeout() {
-					l.log("Timeout expired");
-					store.put(key, new Integer(Test.TEST_FAILED));
+					failed("Timeout expired");
 				}
   		};
   		
@@ -129,7 +114,6 @@ public class TestEnvelope extends Test {
   	try {
   		TestUtility.killAgent(a, resp);
   		Thread.sleep(1000);
-  		jc.kill();
   	}
   	catch (Exception e) {
   		e.printStackTrace();
@@ -154,8 +138,10 @@ public class TestEnvelope extends Test {
 	  		Iterator it = env.getAllProperties();
 	  		boolean serializableOK = false;
 	  		boolean stringOK = false;
+	  		int cnt = 0;
 	  		while (it.hasNext()) {
 	  			Property p = (Property) it.next();
+	  			cnt++;
 	  			String key = p.getName();
 	  			if (key.equals(KEY1)) {
 	  				if (p.getValue().equals(TEST_SERIALIZABLE)) {
@@ -180,12 +166,17 @@ public class TestEnvelope extends Test {
   					break;
   				}
 	  		}
-	  		if (serializableOK && stringOK) {
-	  			reply.setPerformative(ACLMessage.INFORM);
+	  		if (cnt == 2) {
+		  		if (serializableOK && stringOK) {
+		  			reply.setPerformative(ACLMessage.INFORM);
+		  		}
 	  		}
+	  		else {
+					reply.setContent(cnt+" properties found while 2 were expected");
+	  		}	
   		}
   		catch (Throwable t) {
-  			reply.setContent("Exception persing envelope properties "+t.toString());
+  			reply.setContent("Exception parsing envelope properties "+t.toString());
   			t.printStackTrace();
   		}
   		send(reply);

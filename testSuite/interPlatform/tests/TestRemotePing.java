@@ -26,6 +26,7 @@ package test.interPlatform.tests;
 import jade.core.*;
 import jade.core.behaviours.*;
 import jade.lang.acl.*;
+import jade.util.leap.Properties;
 import test.common.*;
 import test.interPlatform.InterPlatformCommunicationTesterAgent;
 
@@ -35,28 +36,21 @@ import test.interPlatform.InterPlatformCommunicationTesterAgent;
    @author Giovanni Caire - TILAB
  */
 public class TestRemotePing extends Test {
-	public  static final String TEST_NAME = "Remote Ping";
 	private static final String RESPONDER_NAME = "responder";
 	private final String CONV_ID = "conv_ID"+hashCode();
 	private final String CONTENT = "\"PING\"";
+	private final String USER_DEF_KEY = "U_KEY";
+	private final String USER_DEF_VALUE = "U_VALUE";
 	private JadeController jc;
 	
 	private AID resp = null;
 	
-  public String getName() {
-  	return TEST_NAME;
-  }
-  
-  public Behaviour load(Agent a, DataStore ds, String resultKey) throws TestException { 
+  public Behaviour load(Agent a) throws TestException { 
   	try {
-  		final DataStore store = ds;
-  		final String key = resultKey;
-  		
-			jc = TestUtility.launchJadeInstance("Container-1", null, new String("-container -host "+TestUtility.getLocalHostName()+" -port "+String.valueOf(Test.DEFAULT_PORT)+" -mtp jade.mtp.iiop.MessageTransportProtocol"), null); 
-	  	
 			AID remoteAMS = (AID) getGroupArgument(InterPlatformCommunicationTesterAgent.REMOTE_AMS_KEY);
 			resp = TestUtility.createAgent(a, RESPONDER_NAME, TestUtility.CONFIGURABLE_AGENT, null, remoteAMS, null);
   		TestUtility.addBehaviour(a, resp, "test.common.behaviours.NotUnderstoodResponder");
+			log("Responder correctly started on remote platform");
   		
   		Behaviour b1 = new SimpleBehaviour() {
   			private boolean finished = false;
@@ -65,6 +59,7 @@ public class TestRemotePing extends Test {
   				msg.addReceiver(resp);
   				msg.setConversationId(CONV_ID);
   				msg.setContent(CONTENT);
+  				msg.addUserDefinedParameter(USER_DEF_KEY, USER_DEF_VALUE);
   				myAgent.send(msg);
   			}
   			
@@ -72,11 +67,24 @@ public class TestRemotePing extends Test {
   				ACLMessage msg = myAgent.receive(MessageTemplate.MatchConversationId(CONV_ID)); 
 					if (msg != null) { 
 						AID sender = msg.getSender();
-						if (sender.equals(resp) && CONTENT.equals(msg.getContent())) {
-							store.put(key, new Integer(Test.TEST_PASSED));
+						Properties pp = msg.getAllUserDefinedParameters();
+						if (!sender.equals(resp)) {
+							failed("Unexpected reply sender "+sender.getName());
+						} 
+						else if (msg.getPerformative() != ACLMessage.NOT_UNDERSTOOD) {
+							failed("Unexpected reply performative "+msg.getPerformative());
+						}
+						else if (!CONTENT.equals(msg.getContent())) {
+							failed("Unexpected reply content "+msg.getContent());
+						}
+						else if (pp.size() != 1) {
+							failed(pp.size()+" user defined parameters found while 1 was expected");
+						}
+						else if (!USER_DEF_VALUE.equals(msg.getUserDefinedParameter(USER_DEF_KEY))) {
+							failed("Unexpected user defined parameter "+msg.getUserDefinedParameter(USER_DEF_KEY));
 						}
 						else {
-							store.put(key, new Integer(Test.TEST_FAILED));
+							passed("Reply message correctly received");
 						}
 						finished = true;
   				}
@@ -93,7 +101,7 @@ public class TestRemotePing extends Test {
   		// If we don't receive any answer in 10 sec --> TEST_FAILED
   		Behaviour b2 = new WakerBehaviour(a, 10000) {
 				protected void handleElapsedTimeout() {
-					store.put(key, new Integer(Test.TEST_FAILED));
+					failed("Timeout expired");
 				}
   		};
   		
@@ -115,7 +123,6 @@ public class TestRemotePing extends Test {
   	try {
   		TestUtility.killAgent(a, resp);
   		Thread.sleep(1000);
-  		jc.kill();
   	}
   	catch (Exception e) {
   		e.printStackTrace();

@@ -46,27 +46,41 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 	public static final String REMOTE_PLATFORM_NAME = "Remote-platform";
 	public static final String REMOTE_PLATFORM_PORT = "9003";
 	
+	public static final String MTP_KEY = "mtp";
+	public static final String MTP_DEFAULT = "jade.mtp.iiop.MessageTransportProtocol";
+	public static final String PROTO_KEY = "proto";
+	public static final String PROTO_DEFAULT = "IOR";
+	public static final String MTP_URL_KEY = "url";
+	public static final String MTP_URL_DEFAULT = "";
 	public static final String ADDITIONAL_CLASSPATH_KEY = "classpath";
 	public static final String ADDITIONAL_CLASSPATH_DEFAULT = "c:/jade/add-ons/http/classes";
 	
 	protected TestGroup getTestGroup() {
 		TestGroup tg = new TestGroup("test/interPlatform/interPlatformTestsList.xml"){		
 			
-			private JadeController jc;
+			private JadeController jc1, jc2;
 			
 			public void initialize(Agent a) throws TestException {
 				try {
-					// Start the remote platform with a SUNOrb-based IIOP MTP
-					jc = TestUtility.launchJadeInstance(REMOTE_PLATFORM_NAME, null, new String("-name "+REMOTE_PLATFORM_NAME+" -port "+REMOTE_PLATFORM_PORT), new String[]{"IOR"}); 
+					String mtp = (String) getArgument(MTP_KEY);
+					String proto = (String) getArgument(PROTO_KEY);
+					String addClasspath = "+"+((String) getArgument(ADDITIONAL_CLASSPATH_KEY));
+					
+					// Start the remote platform with the specified MTP
+					jc1 = TestUtility.launchJadeInstance(REMOTE_PLATFORM_NAME, addClasspath, new String("-name "+REMOTE_PLATFORM_NAME+" -port "+REMOTE_PLATFORM_PORT+" -mtp "+mtp), new String[]{proto}); 
 		
 					// Construct the AID of the AMS of the remote platform and make it
 					// accessible to the tests as a group argument
 					AID remoteAMS = new AID("ams@"+REMOTE_PLATFORM_NAME, AID.ISGUID);
-					Iterator it = jc.getAddresses().iterator();
+					Iterator it = jc1.getAddresses().iterator();
 					while (it.hasNext()) {
 						remoteAMS.addAddresses((String) it.next());
 					}
 					setArgument(REMOTE_AMS_KEY, remoteAMS);
+					
+					// Start a local container with the specified MTP
+					String url = (String) getArgument(MTP_URL_KEY);
+					jc2 = TestUtility.launchJadeInstance("Container-mtp", addClasspath, new String("-container -host "+TestUtility.getLocalHostName()+" -port "+String.valueOf(Test.DEFAULT_PORT)+" -mtp "+mtp+"("+url+")"), null);
 				}
 				catch (TestException te) {
 					throw te;
@@ -78,9 +92,10 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 			
 			public void shutdown(Agent a) {
   			try {
-  				// Kill the remote platform
+  				// Kill the remote platform and the mtp container
   				Thread.sleep(1000);
-  				jc.kill();
+  				jc1.kill();
+  				jc2.kill();
   			}
   			catch (Exception e) {
   				e.printStackTrace();
@@ -88,6 +103,9 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 			}
 		};
 		
+		tg.specifyArgument(MTP_KEY, "MTP", MTP_DEFAULT);
+		tg.specifyArgument(PROTO_KEY, "Protocol", PROTO_DEFAULT);
+		tg.specifyArgument(MTP_URL_KEY, "Local MTP URL", MTP_URL_DEFAULT);
 		tg.specifyArgument(ADDITIONAL_CLASSPATH_KEY, "Additional classpath", ADDITIONAL_CLASSPATH_DEFAULT);
 		return tg;
 	}
