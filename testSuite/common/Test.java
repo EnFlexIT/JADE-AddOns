@@ -26,6 +26,7 @@ package test.common;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.SerialBehaviour;
+import jade.lang.acl.MessageTemplate;
 import jade.util.leap.*;
 import jade.core.behaviours.DataStore;
 import test.common.xml.TestDescriptor;
@@ -53,6 +54,9 @@ public abstract class Test implements Serializable {
   private Wrapper myWrapper;
   private DataStore myStore;
   private String myKey;
+  
+  private boolean pauseEnabled = false;
+  private static MessageTemplate resumeTemplate = MessageTemplate.MatchContent("resume");
   
   /**
      Specific tests must re-define this method to perform test specific 
@@ -101,7 +105,7 @@ public abstract class Test implements Serializable {
      @param key The key identifying the group argument to be retrieved
      @return The value of the group argument identified by <code>key</code>
    */
-  protected Object getGroupArgument(String key) {
+  protected final Object getGroupArgument(String key) {
   	return myGroup.getArgument(key);
   }
 
@@ -114,24 +118,35 @@ public abstract class Test implements Serializable {
      @param key The key identifying the test argument to be retrieved
      @return The value of the test argument identified by <code>key</code>
    */
-  protected String getTestArgument(String key) {
+  protected final String getTestArgument(String key) {
   	return myDescriptor.getArg(key);
   }
   
-  protected void passed(String msg) {
+  protected final void passed(String msg) {
   	log(msg);
   	myStore.put(myKey, new Integer(TEST_PASSED));
   	myWrapper.stop();
   }
   
-  protected void failed(String reason) {
+  protected final void failed(String reason) {
   	log(reason);
   	myStore.put(myKey, new Integer(TEST_FAILED));
   	myWrapper.stop();
   }
   
-  protected void log(String s) {
+  protected final void log(String s) {
   	Logger.getLogger().log(s);
+  }
+  
+  protected final void pause(Agent a) {
+  	if (pauseEnabled) {
+  		log("Test paused. Send a REQUEST message with content \"resume\" to go on");
+  		a.blockingReceive(resumeTemplate);
+  	}
+  }
+  
+  protected final void enablePause(boolean b) {
+  	pauseEnabled = b;
   }
   
   //////////////////////////////////////
