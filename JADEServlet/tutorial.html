@@ -1,0 +1,649 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>JADE Servlet Tutorial</title>
+</head>
+<body style="color: rgb(0, 0, 0);" link="#0000ee" alink="#0000ee"
+ vlink="#551a8b">
+<h1
+ style="border: medium none ; padding: 0cm; background-color: rgb(153, 255, 153);">&nbsp;
+Linking a servlet to a JADE agent<br>
+</h1>
+<div style="background-color: rgb(255, 255, 153);"> <span
+ style="font-weight: bold;">Author:</span>&nbsp; Fabien Gandon (<a
+ href="mailto:Fabien.Gandon@cs.cmu.edu">Fabien.Gandon@cs.cmu.edu</a>) <span
+ style="font-weight: bold;">Date:</span> June, the 11th, 2003 <i><br>
+</i>
+<p
+ style="border: medium none ; padding: 0cm; margin-bottom: 0cm; background-color: rgb(255, 255, 153);"><span
+ style="font-weight: bold;">Configuration used:</span> <a
+ href="http://java.sun.com/j2se">Sun JDK 1.4</a> , <a
+ href="http://java.sun.com/webservices/webservicespack.html">Java Web
+Services Developer Pack 1.1</a>, <a href="http://jade.cselt.it/"> JADE
+3.0b1</a></p>
+</div>
+<br>
+&nbsp; <span lang="EN-US"><span style="font-weight: bold;">T</span>his
+tutorial gives an example of how one may link an agent and a servlet to
+allow Web Applications to be interfaced with a Multi-Agent System. The
+following code allows you to run a servlet in Tomcat that is interfaced
+with a proxy-agent in JADE in order to retrieve and display the list of
+the agents advertising a service with the Directory Facilitator (DF) as
+defined in FIPA.</span>&nbsp; <span lang="EN-US">This tutorial supposes
+that:</span> <br>
+<ul>
+  <li><span lang="EN-US">you are familiar with JAVA and you have JAVA
+1.4 correctly installed;</span> </li>
+  <li><span lang="EN-US">you are familiar with Servlets and you have
+JWSDP 1.1 correctly installed (other servlet containers may be used with
+adequate adaptations);</span> </li>
+  <li><span lang="EN-US">you are familiar with JADE and you have JADE
+1.4 correctly installed.</span></li>
+</ul>
+<p class="MsoNormal"><span lang="EN-US">Sources are in the &#8216;<a
+ href="sources/">sources</a>&#8217; directory; the <a href="doc/index.html">javadoc</a>
+is in the &#8216;<a href="doc/">doc</a>&#8217; directory; the web application files
+are in the &#8216;<a href="web/">web</a>&#8217; directory; the built application is
+in the &#8216;<a href="build/">build</a>&#8217; directory and the packages are in
+the &#8216;<a href="dist/">dist</a>&#8217; directory.</span></p>
+<h2 style="background-color: rgb(153, 255, 153);">&nbsp;Architecture of
+the example<br>
+</h2>
+<p class="MsoNormal"><span lang="EN-US"><span style="font-weight: bold;">&nbsp;T</span>he
+little example developed here relies on a Servlet called
+DirectoryServlet which answers any HTTP requests by providing the list
+of the agents advertising services with the DF of the local JADE
+platform. Therefore we suppose that before running the Tomcat server, a
+default JADE platform has been started on the same host, port 1099, with
+a main container. As shown in figure 1, each instance of the servlet
+respond to an HTTP Request and is linked to a behavior of the Proxy
+Agent in charge of handling the request ;<span style="">&nbsp; </span>each
+instance of the behavior connect to the DF, retrieves the list of
+advertised agents, and provide a Web page as a response. In this
+architecture the multithreaded Servlet Server is mirrored by a
+multi-behavior Proxy Agent, allowing the handling of multiple requests
+in parallel and further customization of the behaviors to handle
+different types of requests in different ways.<br>
+</span></p>
+<p class="MsoNormal" style="text-align: center;"><span lang="EN-US"><img
+ src="Architecture.gif"
+ title="Architecture of the Agent-Servlet coupling"
+ alt="Architecture of the Agent-Servlet coupling"
+ style="border: 0px solid ; width: 732px; height: 310px;" hspace="0"
+ vspace="0"></span></p>
+<p class="MsoNormal" style="text-align: center;"><span
+ style="font-weight: bold;">Figure 1.</span> Architecture</p>
+<h2 style="background-color: rgb(153, 255, 153);">&nbsp;Comments on the
+code<br>
+</h2>
+&nbsp; <span lang="EN-US"><span style="font-weight: bold;">L</span>et
+us now have a look at the code of the example. First, the <a
+ href="sources/DirectoryServlet.java">code of the servlet</a> is given
+in figure 2:</span> <br>
+<ul>
+  <li><span lang="EN-US">Section <span style="font-weight: bold;">(1)</span>:
+the servlet is an extension of an HttpServlet, with a unique static
+reference to the Proxy Agent.</span> </li>
+  <li><span lang="EN-US">Section <span style="font-weight: bold;">(2)</span>:
+the initialization method of the servlet calls a synchronized static
+method that ensures that the Proxy Agent was created with its container
+connected to the local JADE platform. If not the method creates a
+non-main container that joins the local instance of the JADE platform,
+creates an instance of the Proxy Agent and passes a Synchronizer object
+to it. The Synchronizer is used by the agent to notify the servlet that
+it started and is ready to handle requests.</span> </li>
+  <li><span lang="EN-US">Section <span style="font-weight: bold;">(3)</span>:
+the doGet(...) method is called when an HTTP request arrives. An
+Interaction object is used to wrap the request and the response objects
+and synchronize the servlet with the agent behavior ; the Interaction
+object is put in the object to agent queue of the Proxy Agent, and the
+servlet then waits for the agent to notify that the HTTP response was
+updated.</span><br>
+  </li>
+</ul>
+<span lang="EN-US"></span><br>
+<table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <td
+ style="background-color: rgb(153, 255, 153); width: 5%; text-align: center; vertical-align: middle; font-family: monospace; font-weight: bold;">(1)<br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153); font-family: monospace;"><span
+ style="font-weight: bold; color: rgb(0, 0, 0);">public class
+DirectoryServlet extends HttpServlet</span><br>
+{ <br>
+&nbsp; private static Agent theProxyAgent = null;<br>
+      </td>
+    </tr>
+    <tr>
+      <td
+ style="background-color: rgb(153, 255, 153); width: 5%; text-align: center; vertical-align: middle; font-family: monospace; font-weight: bold;">(2)<br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153); font-family: monospace;">&nbsp;<span
+ style="font-weight: bold; color: rgb(0, 0, 0);">synchronized private
+static void SyncInit()</span><br>
+&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; <span style="color: rgb(102, 102, 102);">// Have
+the proxy agent and its container already been initialized?</span><br>
+&nbsp;&nbsp;&nbsp; if (theProxyAgent==null)<br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color: rgb(102, 102, 102);">//
+Create a new non-main container</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Runtime l_JADERunTime =
+Runtime.instance();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Profile l_JADEProfile = new
+ProfileImpl();&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; AgentContainer l_NewContainer =
+l_JADERunTime.createAgentContainer(l_JADEProfile);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; try<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span
+ style="color: rgb(102, 102, 102);">// Create the object used to
+synchronize the starting of the Servlet and the Proxy agent</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Object l_Arg[] = new
+Object[1];<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Synchronizer l_Sync = new
+Synchronizer();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; l_Arg[0] = l_Sync;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span
+ style="color: rgb(102, 102, 102);">// Create the Proxy Agent and pass
+it the synchronizing object as argument</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; theProxyAgent =
+(Agent)l_NewContainer.createNewAgent("ProxyAgent",
+ProxyAgent.class.getName(),l_Arg);<br>
+      <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span
+ style="color: rgb(102, 102, 102);">// Start the Proxy Agent</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; theProxyAgent.start();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span
+ style="color: rgb(102, 102, 102);">// Wait for synchronization signal</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; l_Sync.waitOn();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; catch(Exception l_Exception) {
+l_Exception.printStackTrace(); }<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp; } <br>
+      <br>
+&nbsp; <span style="font-weight: bold; color: rgb(0, 0, 0);">public
+void init() throws ServletException</span> <br>
+&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; SyncInit();<br>
+&nbsp; }<br>
+      </td>
+    </tr>
+    <tr>
+      <td
+ style="background-color: rgb(153, 255, 153); text-align: center; vertical-align: middle; font-weight: bold;"><span
+ style="font-family: monospace;">(3)</span><br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153);"><span
+ style="font-family: monospace;">&nbsp; <span
+ style="font-weight: bold; color: rgb(0, 0, 0);">public void doGet
+(HttpServletRequest p_Request, HttpServletResponse p_Response)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp; throws ServletException, IOException</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp; {</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp; <span
+ style="color: rgb(102, 102, 102);">// Create an interaction object
+wrapping the HTTP request and response</span> </span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp; Interaction
+l_Interac = new Interaction(p_Request,p_Response);</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp; </span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp; <span
+ style="color: rgb(102, 102, 102);">// Pass the interaction to the
+Proxy Agent and wait for the signal that the interaction was updated</span></span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp; try</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp; {</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;
+theProxyAgent.putO2AObject(l_Interac, Agent.ASYNC);</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;
+l_Interac.waitChangedResponse();</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp; }</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp;&nbsp;
+catch(Exception l_Exception) { l_Exception.printStackTrace(); }</span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">&nbsp; }</span><span
+ style="font-family: monospace;"></span><br
+ style="font-family: monospace;">
+      <span style="font-family: monospace;">}</span></td>
+    </tr>
+    <tr align="center">
+      <td style="vertical-align: top;" rowspan="1" colspan="2"><span
+ style="font-weight: bold;">Figure 2.</span> Code of the servlet<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<p class="MsoNormal"><span lang="EN-US"><span style="font-weight: bold;">&nbsp;T</span>he<a
+ href="sources/Synchronizer.java">Synchronizer</a> in figure 3 is fairly
+simple: it stores the initialization state of the Proxy Agent in a
+boolean <span style="font-weight: bold;">(1)</span> provides a method to
+wait for the state to be &#8216;Started&#8217; <span style="font-weight: bold;">(2)</span>
+and a method to signal the agent started <span
+ style="font-weight: bold;">(3)</span>.</span></p>
+<br>
+<table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <td
+ style="width: 5%; text-align: center; vertical-align: middle; font-family: monospace; font-weight: bold; background-color: rgb(153, 255, 153);">(1)<br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153); font-family: monospace;"><span
+ style="font-weight: bold; color: rgb(0, 0, 0);"></span><span
+ style="font-weight: bold;">public class Synchronizer</span><br>
+{<br>
+&nbsp; private boolean Started = false;<br>
+      </td>
+    </tr>
+    <tr>
+      <td
+ style="width: 5%; text-align: center; vertical-align: middle; font-family: monospace; font-weight: bold; background-color: rgb(153, 255, 153);">(2)<br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153); font-family: monospace;">&nbsp;<span
+ style="font-weight: bold;">synchronized void waitOn()</span><br>
+&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; try { while(!Started) wait();}<br>
+&nbsp;&nbsp;&nbsp; catch (InterruptedException l_InterruptedException)
+{ l_InterruptedException.printStackTrace(); }<br>
+&nbsp; }<br>
+      </td>
+    </tr>
+    <tr>
+      <td
+ style="text-align: center; vertical-align: middle; font-weight: bold; background-color: rgb(153, 255, 153);"><span
+ style="font-family: monospace;">(3)</span><br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153); font-family: monospace;">&nbsp;<span
+ style="font-weight: bold;">synchronized void Started()</span><br>
+&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; Started = true;<br>
+&nbsp;&nbsp;&nbsp; notifyAll();<br>
+&nbsp; }<br>
+}</td>
+    </tr>
+    <tr align="center">
+      <td style="vertical-align: top;" rowspan="1" colspan="2"><span
+ style="font-weight: bold;">Figure 3.</span> Code of the Synchronizer</td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<p class="MsoNormal"><span lang="EN-US"><span style="font-weight: bold;">&nbsp;T</span>he<a
+ href="sources/Interaction.java"> Interaction</a> class in figure 4, is
+somehow similar to the Synchronizer: it stores an HTTP request and its
+response and a flag indicating any update in the response <span
+ style="font-weight: bold;">(1)</span>. It provides the corresponding
+constructor and accessors <span style="font-weight: bold;">(2)</span> as
+well as two methods <span style="font-weight: bold;">(3)</span> to
+respectively wait for any update in the response and signal the update
+of the response.</span><br>
+</p>
+<table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <td
+ style="width: 5%; text-align: center; vertical-align: middle; font-family: monospace; font-weight: bold; background-color: rgb(153, 255, 153);">(1)<br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153); font-family: monospace;"><span
+ style="font-weight: bold; color: rgb(0, 0, 0);"></span><span
+ style="font-weight: bold;">public class Interaction</span><br>
+{<br>
+&nbsp; private HttpServletRequest theRequest = null;<br>
+&nbsp; private HttpServletResponse theResponse = null;<br>
+&nbsp; private boolean theResponseChangeFlag = false;<br>
+      </td>
+    </tr>
+    <tr>
+      <td
+ style="width: 5%; text-align: center; vertical-align: middle; font-family: monospace; font-weight: bold; background-color: rgb(153, 255, 153);">(2)<br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153); font-family: monospace;">&nbsp;<span
+ style="font-weight: bold;"> public Interaction (HttpServletRequest
+p_Request, HttpServletResponse p_Response)</span><br>
+&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; theRequest = p_Request;<br>
+&nbsp;&nbsp;&nbsp; theResponse = p_Response;<br>
+&nbsp; }<br>
+      <br>
+&nbsp; <span style="font-weight: bold;">synchronized
+HttpServletResponse getResponse()</span><br>
+&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; return (theResponse);<br>
+&nbsp; }<br>
+      <br>
+&nbsp; <span style="font-weight: bold;">synchronized
+HttpServletRequest getRequest()</span><br>
+&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; return (theRequest);<br>
+&nbsp; }<br>
+      </td>
+    </tr>
+    <tr>
+      <td
+ style="text-align: center; vertical-align: middle; font-weight: bold; background-color: rgb(153, 255, 153);"><span
+ style="font-family: monospace;">(3)</span><br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153); font-family: monospace;">&nbsp;<span
+ style="font-weight: bold;">synchronized void waitChangedResponse()</span><br>
+&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; boolean l_Flag = theResponseChangeFlag;<br>
+&nbsp;&nbsp;&nbsp; try { while(l_Flag==theResponseChangeFlag) wait();}<br>
+&nbsp;&nbsp;&nbsp; catch (InterruptedException l_InterruptedException)
+{ l_InterruptedException.printStackTrace(); }<br>
+&nbsp; }<br>
+      <br>
+&nbsp; <span style="font-weight: bold;">synchronized void
+setResponseChanged()</span><br>
+&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; theResponseChangeFlag = !theResponseChangeFlag;<br>
+&nbsp;&nbsp;&nbsp; this.notifyAll();<br>
+&nbsp; }<br>
+}</td>
+    </tr>
+    <tr align="center">
+      <td style="vertical-align: top;" rowspan="1" colspan="2"><span
+ style="font-weight: bold;">Figure 4.</span> Code of the Interaction</td>
+    </tr>
+  </tbody>
+</table>
+<br>
+&nbsp; <span lang="EN-US"><span style="font-weight: bold;">F</span>inally,
+the <a href="sources/ProxyAgent.java">Proxy Agent</a> class is shown in
+figure 5:</span> <br>
+<ul>
+  <li><span lang="EN-US">section <span style="font-weight: bold;">(1)</span>
+-<span style="">&nbsp; </span>this agent extends the Agent class and
+declares it accepts messages through the object to agent communication
+channel.</span> </li>
+  <li><span lang="EN-US">section <span style="font-weight: bold;">(2)</span>
+- the main behavior is a cyclic behavior that reads the queue of objects
+and dynamically creates behaviors (GetDFList) to handle each request
+that is received. </span></li>
+  <li><span lang="EN-US">section <span style="font-weight: bold;">(3)</span>
+- the agent registers with the DF and finally uses the synchronizer to
+notify the servlet that it is ready to receive messages.</span> </li>
+  <li><span lang="EN-US">section <span style="font-weight: bold;">(4)</span>
+- this nested class is a one-shot behavior handling a request: the
+action method retrieves the list of the advertised agents from the DF
+and builds a Web page from it. Once it is done, the Interaction object
+is used to notify the servlet that the HTTP response has been updated
+and is ready to be sent.</span></li>
+</ul>
+<br>
+<table cellpadding="2" cellspacing="2" border="0"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <td
+ style="background-color: rgb(153, 255, 153); width: 5%; text-align: center; vertical-align: middle; font-family: monospace; font-weight: bold;">(1)<br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153); font-family: monospace;"><span
+ style="color: rgb(0, 0, 0);"><span style="font-weight: bold;">public
+class ProxyAgent extends Agent</span><br>
+{<br>
+&nbsp; <span style="font-weight: bold;">public void setup() </span><br>
+&nbsp; {<br>
+      <span style="color: rgb(102, 102, 102);"> &nbsp;&nbsp;&nbsp; //
+Accept objects through the object-to-agent communication channel, with a
+maximum size of 100 queued objects</span><br>
+&nbsp;&nbsp;&nbsp; this.setEnabledO2ACommunication(true, 100);<br>
+      </span></td>
+    </tr>
+    <tr>
+      <td
+ style="background-color: rgb(153, 255, 153); width: 5%; text-align: center; vertical-align: middle; font-family: monospace; font-weight: bold;">(2)<br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153); font-family: monospace;"><span
+ style="color: rgb(0, 0, 0);">&nbsp;&nbsp;&nbsp; // Add a cyclic
+behaviour checking the queue of objects<br>
+&nbsp;&nbsp;&nbsp; this.addBehaviour(new CyclicBehaviour() <br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public void action()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Object l_Obj =
+getO2AObject();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(l_Obj != null) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+      <span style="color: rgb(102, 102, 102);">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // We have an
+object and we know for sure it is an Interaction</span><br
+ style="color: rgb(102, 102, 102);">
+      <span style="color: rgb(102, 102, 102);">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // here the only
+interaction handle is the request for the directory</span><br
+ style="color: rgb(102, 102, 102);">
+      <span style="color: rgb(102, 102, 102);">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // thus one
+behavior is created to fulfil this request </span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+myAgent.addBehaviour(new GetDFList(myAgent,(Interaction)l_Obj));<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else block();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; });<br>
+      </span></td>
+    </tr>
+    <tr>
+      <td
+ style="background-color: rgb(153, 255, 153); text-align: center; vertical-align: middle; font-weight: bold;"><span
+ style="font-family: monospace;">(3)</span><br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153);"><span
+ style="font-family: monospace;"></span><span
+ style="color: rgb(0, 0, 0); font-family: monospace;">
+&nbsp;&nbsp;&nbsp; <span style="color: rgb(102, 102, 102);">// Register
+the Proxy Agent with the DF so that there is at least one registered
+agent</span><br>
+&nbsp;&nbsp;&nbsp; DFAgentDescription l_AgentDescription = new
+DFAgentDescription();<br>
+&nbsp;&nbsp;&nbsp; l_AgentDescription.setName(this.getAID());<br>
+&nbsp;&nbsp;&nbsp; ServiceDescription l_ServiceDescription = new
+ServiceDescription();<br>
+&nbsp;&nbsp;&nbsp; l_ServiceDescription.setName("HTTP-proxy-agent");<br>
+&nbsp;&nbsp;&nbsp; l_ServiceDescription.setType("proxy");<br>
+&nbsp;&nbsp;&nbsp;
+l_ServiceDescription.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST);<br>
+&nbsp;&nbsp;&nbsp; l_ServiceDescription.addOntologies("HTTP-ontology");<br>
+&nbsp;&nbsp;&nbsp; l_ServiceDescription.setOwnership("Carnegie Mellon
+University");<br>
+&nbsp;&nbsp;&nbsp; l_AgentDescription.addServices(l_ServiceDescription);<br>
+&nbsp;&nbsp;&nbsp; try { DFService.register(this,l_AgentDescription); }<br>
+&nbsp;&nbsp;&nbsp; catch(FIPAException l_ex) {l_ex.printStackTrace(); }<br>
+&nbsp;&nbsp;&nbsp; &nbsp;<br>
+&nbsp;&nbsp;&nbsp; <span style="color: rgb(102, 102, 102);">// Notify
+the Servlet that the Proxy Agent is ready</span><br>
+&nbsp;&nbsp;&nbsp; Object[] l_Args = getArguments();<br>
+&nbsp;&nbsp;&nbsp; Synchronizer l_Sync = (Synchronizer) (l_Args[0]);<br>
+&nbsp;&nbsp;&nbsp; l_Sync.Started();<br>
+&nbsp; }<br>
+      </span></td>
+    </tr>
+    <tr>
+      <td
+ style="background-color: rgb(153, 255, 153); font-weight: bold; font-family: monospace; text-align: center; vertical-align: middle;">(4)<br>
+      </td>
+      <td
+ style="vertical-align: top; background-color: rgb(255, 255, 153);"><span
+ style="color: rgb(0, 0, 0); font-family: monospace;">&nbsp; <span
+ style="font-weight: bold;">class GetDFList extends OneShotBehaviour</span><br>
+&nbsp; {<br>
+&nbsp;&nbsp;&nbsp; Interaction myInteraction = null;<br>
+      <br>
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">public
+GetDFList(Agent p_Agent, Interaction p_Interaction)</span><br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; super(p_Agent);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myInteraction = p_Interaction;<br>
+&nbsp;&nbsp;&nbsp; }<br>
+      </span><span style="color: rgb(0, 0, 0); font-family: monospace;">
+&nbsp;&nbsp;&nbsp; <span style="font-weight: bold;">public void action()</span><br>
+&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; try<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span
+ style="color: rgb(102, 102, 102);">//retrieve list of all registered
+agents</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; DFAgentDescription[]
+l_Result = DFService.search(myAgent, new DFAgentDescription());<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span
+ style="color: rgb(102, 102, 102);">// write the list of AID in the
+HTTP response</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PrintWriter l_Out =
+myInteraction.getResponse().getWriter();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+l_Out.println("&lt;HTML&gt;&lt;BODY&gt;");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (l_Result!=null
+&amp;&amp; l_Result.length&gt;0)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+l_Out.println("List of registered agents:&lt;BR /&gt;");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for(int
+l_count=0; l_count&lt; l_Result.length ; l_count++)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+l_Out.println("&lt;LI&gt;"+l_Result[l_count].getName().toString()+"&lt;/LI&gt;");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else l_Out.println("No agent
+found.");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+l_Out.println("&lt;/BODY&gt;&lt;/HTML&gt;");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; l_Out.close();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; catch(Exception l_ex)
+{l_ex.printStackTrace(); }<br>
+&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="color: rgb(102, 102, 102);">//
+Notify the Servlet that the response is ready</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; myInteraction.setResponseChanged();<br>
+&nbsp;&nbsp;&nbsp; } &nbsp;<br>
+&nbsp; }<br>
+}</span><br>
+      </td>
+    </tr>
+    <tr align="center">
+      <td style="vertical-align: top;" rowspan="1" colspan="2"><span
+ style="font-weight: bold;">Figure 5.</span> Code of the Interaction</td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<h2 style="background-color: rgb(153, 255, 153);">&nbsp;Running the
+example<br>
+</h2>
+&nbsp;<span lang="EN-US"><span style="font-weight: bold;">T</span>he
+example is provided with a <a href="build.xml">build.xml</a> file to be
+used with Ant; it was tested with the version of Ant provided in JWSDP.
+Before using this file, you should adjust the properties declared in its
+header to reflect the configuration of your system.</span> <span
+ lang="EN-US" style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">You
+should also place a copy of the libraries of JADE in the "shared/lib"
+of JWSDP; you cannot simply include them in the WAR file of the
+application because some classes won&#8217;t be found by the class loader.</span><small><span
+ lang="EN-US"> (*)</span></small><br>
+<span lang="EN-US">&nbsp;<span style="font-weight: bold;">T</span>hen
+you can run the example by following this script:</span> <br>
+<ol>
+  <li><span lang="EN-US"><span style=""></span>run &#8216;ant build&#8217;: to
+compile the classes of the project.</span> </li>
+  <li><span lang="EN-US">run &#8216;ant package&#8217;: to package the <a
+ href="web/WEB-INF/web.xml">web.xml</a> in a WAR file and the classes in
+a JAR file. Note that the classes are placed in the JAR file which is
+copied directly to the shared/lib directory so that the class loader of
+JADE will found them</span><span lang="EN-US"
+ style="font-size: 12pt; font-family: &quot;Times New Roman&quot;;">; usually
+they are archived within the WAR file used for deployment.</span><span
+ lang="EN-US"> </span><small><span lang="EN-US">(*)</span></small><span
+ lang="EN-US">&nbsp;</span> </li>
+  <li><span lang="EN-US">run &#8216;ant run-platform&#8217;: to start a local JADE
+platform with a GUI on the host you are running the demo.</span> </li>
+  <li><span lang="EN-US">use the standard script of JWSDP or to start
+tomcat on the host you are running the demo.</span> </li>
+  <li><span lang="EN-US">run &#8216;ant deploy&#8217;: to deploy you Web
+application.</span> </li>
+</ol>
+&nbsp;<small><span lang="EN-US">(*) There may be some clever way to
+improve the class loading problem, but I haven&#8217;t found it yet.</span></small><br>
+<br>
+&nbsp;<span lang="EN-US"><o:p></o:p></span><span lang="EN-US"><span
+ style="font-weight: bold;">T</span>o test, connect to your web server
+(e.g. <a href="http://localhost:8080/JADE/DirectoryServlet">http://localhost:8080/JADE/DirectoryServlet</a>
+) you should see something like this:</span> <br>
+<span lang="EN-US"><o:p>&nbsp;</o:p></span>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">List of registered agents:<br>
+      <li>( agent-identifier  :name ProxyAgent@tethys:1099/JADE
+:addresses (sequence
+IOR:000000000000001149444C3A464950412F4D54533A312E30000000000000000100000000000001B0000102000000000E3132382E322E3138302E323131000D3600000019AFABCB0000000002B92A03160000000800000000000000000A000000000000020000001900000143000000000000013B66696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F636C61737365732F2066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F4261736536342E6A61722066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F69696F702E6A61722066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F6A6164652E6A61722066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F6A616465736572766C65742E6A61722066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F6A616465546F6F6C732E6A61722066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F6D7963616D7075732E6A6172000000000001000000200000000000010001000000020501000100010020000101090000000100010100
+))</li>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<span lang="EN-US"><span style="font-weight: bold;">&nbsp;Y</span>ou
+can register additional (fake) agents using the interface of the DF and
+by refreshing the web page you should see them appear in the list, e.g. :<br>
+<br>
+</span><span lang="EN-US"><o:p></o:p></span>
+<table cellpadding="2" cellspacing="2" border="1"
+ style="text-align: left; width: 100%;">
+  <tbody>
+    <tr>
+      <td style="vertical-align: top;">List of registered agents:<br>
+      <li>( agent-identifier  :name Giovanni@tethys:1099/JADE)</li>
+      <li>( agent-identifier  :name Agostino@tethys:1099/JADE)</li>
+      <li>( agent-identifier  :name ProxyAgent@tethys:1099/JADE
+:addresses (sequence
+IOR:000000000000001149444C3A464950412F4D54533A312E30000000000000000100000000000001B0000102000000000E3132382E322E3138302E323131000D3600000019AFABCB0000000002B92A03160000000800000000000000000A000000000000020000001900000143000000000000013B66696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F636C61737365732F2066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F4261736536342E6A61722066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F69696F702E6A61722066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F6A6164652E6A61722066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F6A616465736572766C65742E6A61722066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F6A616465546F6F6C732E6A61722066696C653A433A2F6A6176615F6465762F6A777364702F7368617265642F6C69622F6D7963616D7075732E6A6172000000000001000000200000000000010001000000020501000100010020000101090000000100010100
+))</li>
+      <li>( agent-identifier  :name Fabio@tethys:1099/JADE)</li>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<span lang="EN-US"><o:p>&nbsp;</o:p></span> <br>
+<div style="text-align: right;"><span
+ style="font-style: italic; font-weight: bold;">That&#8217;s all folks&#8230;<o:p></o:p> </span><span
+ lang="EN-US"><span style="font-style: italic; font-weight: bold;">F@b.</span><o:p></o:p></span><br>
+</div>
+<br>
+<br>
+<br>
+<h1><font size="-1"><br>
+</font></h1>
+<font size="-1"><br>
+</font>
+</body>
+</html>

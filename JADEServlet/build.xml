@@ -1,0 +1,131 @@
+<!--
+         JADE Servler ant build file.
+         Fabien GANDON - Fabien.Gandon@cs.cmu.edu 
+         Carnegie Mellon University - m-Commerce Lab. - 11th June 2003
+                                                                          -->
+
+<project name="ewallet" default="build" basedir=".">
+
+  <!-- SET THE FOLLOWING PROPERTIES BEFORE USING ANT -->
+
+  <!-- Properties of this project -->
+  <property name="project-root"  value="." />
+  <property name="build-dir"     value="${project-root}/build" />
+  <property name="sources-dir"   value="${project-root}/sources" />
+  <property name="doc-dir"       value="${project-root}/doc" />
+  <property name="war-file"      value="jadeservlet.war" />
+  <property name="jar-file"      value="jadeservlet.jar" />
+  <property name="path"          value="/JADE" />
+
+  <!-- Class path -->
+  <path id="classpath">
+    <pathelement location="${build-dir}/WEB-INF/classes"/>
+    <fileset dir="C:/java_dev/JADE/jade/lib">
+      <include name="*.jar"/>
+    </fileset>
+    <fileset dir="${jwsdp.home}/common/lib">
+      <include name="*.jar"/>
+    </fileset> 
+  </path>
+
+  <!-- Configure properties to access the JWSDP manager -->
+  <property name="url"      value="http://localhost:8080/manager"/>
+  <property file="build.properties"/>
+  <property file="${user.home}/build.properties"/>
+
+
+  <!-- TASKS -->
+
+  <!-- Tasks of this project -->
+  <target name="init"
+      description="Prepares directories...">
+      <echo message="Preparing directories..."/>
+      <mkdir dir="${build-dir}" />
+      <mkdir dir="${build-dir}/META-INF" />
+      <mkdir dir="${build-dir}/WEB-INF" />
+      <mkdir dir="${build-dir}/WEB-INF/classes" />
+      <mkdir dir="${build-dir}/WEB-INF/lib" />
+      <mkdir dir="${project-root}/dist" />
+      <tstamp/>
+  </target>
+
+  <!-- Build all -->
+  <target name="build" depends="init"
+      description="Compiles the project">
+    <echo message="Compiling the project..."/>
+    <javac srcdir="${sources-dir}" destdir="${build-dir}/WEB-INF/classes">
+      <classpath refid="classpath" />
+    </javac>  
+    <copy todir="${build-dir}/WEB-INF">
+      <fileset dir="web/WEB-INF"    >
+        <include name="web.xml" />
+        <include name="*.tld" />
+      </fileset>
+    </copy>
+    <copy todir="${build-dir}">
+      <fileset dir="web">
+        <include name="*.html" />
+        <include name="*.gif" />
+        <include name="*.jsp" />
+      </fileset>
+    </copy>
+  </target>
+
+  <!-- Package the WAR with Web App. description and the JAR with the classes,
+       the JAR is then copied to the shared /lib of JWSDP -->
+  <target name="package" description="Packages the files">
+      <echo message="Packaging the files (WAR and JAR)..."/>
+      <delete file="${project-root}/dist/${war-file}" />
+      <jar jarfile="${project-root}/dist/${war-file}" >
+        <fileset dir="${build-dir}" >
+         <exclude name="**/*.class" />
+       </fileset>
+      </jar>
+      <delete file="${project-root}/dist/${jar-file}" />
+      <jar jarfile="${project-root}/dist/${jar-file}" >
+        <fileset dir="${build-dir}/WEB-INF/classes" />
+      </jar>
+      <copy todir="${jwsdp.home}/shared/lib" file="${project-root}/dist/${jar-file}" />
+  </target>
+
+  <!-- Deploy the WAR -->
+  <target name="deploy" description="Deploy a Web application">
+    <echo message="Deploying the Web application...."/>
+    <deploy url="${url}" username="${username}" password="${password}" 
+        path="${path}" war="file:${project-root}/dist/${war-file}" />
+  </target>
+
+  <!-- Undeploy the WAR -->
+  <target name="undeploy" description="Undeploy web application">
+    <echo message="Undeploying the Web application...."/>
+    <undeploy url="${url}" username="${username}" password="${password}" path="${path}"/>
+  </target>
+  
+  <!-- Run the platform -->
+  <target name="run-platform"
+    description="Runs the JADE platform with main container">
+    <echo message="Running the JADE platform with main container..."/>
+    <java classname="jade.Boot" fork="true">
+      <arg value="-nomtp"/>
+      <arg value="-gui"/>
+      <classpath refid="classpath" />
+    </java>  
+  </target>
+
+  <!-- Build doc -->
+  <target name="javadocs" >
+    <javadoc author="true" bottom="m-Commerce Lab. - Carnegie Mellon University" destdir="${doc-dir}"
+        doctitle="JADE Servlet tutorial" private="false" sourcepath="${sources-dir}/*.java"
+        use="true" version="true" windowtitle="JADE Servlet tutorial" classpath="${classpath}" />
+  </target>
+
+
+  <!-- Build doc -->
+  <target name="dist" >
+    <zip zipfile="${project-root}/../../JADEServlet.zip"
+         basedir="${project-root}/../../"  includes="**/JADEServlet/**" excludes="**/*.PRJ,**/*.doc"/>
+  </target>
+
+
+
+ </project>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app PUBLIC '-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN' 'http://java.sun.com/dtd/web-app_2_3.dtd'>
+<!-- Describe Web App. -->
+<web-app>
+  <display-name>JADEServlet</display-name>
+  <description>JADE tutorial for servlet integration</description>
+  <servlet>
+    <servlet-name>DirectoryServlet</servlet-name>
+    <display-name>DirectoryServlet</display-name>
+    <description>servlet front-end for listing services registered in the DF</description>
+    <servlet-class>DirectoryServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>DirectoryServlet</servlet-name>
+    <url-pattern>/DirectoryServlet</url-pattern>
+  </servlet-mapping>
+</web-app>
+
