@@ -79,6 +79,7 @@ public class TestSuiteAgent extends GuiAgent {
 			"test.content.SLOperatorsTesterAgent",
 			"test.interPlatform.InterPlatformCommunicationTesterAgent",
 			"test.behaviours.BlockTimeoutTesterAgent",
+			"test.domain.df.DFTesterAgent",
 			"test.domain.JADEManagementOntologyTesterAgent",
 			"test.proto.ContractNetTesterAgent",
 			"test.proto.AchieveRETesterAgent" } );

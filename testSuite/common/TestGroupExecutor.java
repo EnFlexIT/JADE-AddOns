@@ -64,9 +64,12 @@ public class TestGroupExecutor extends FSMBehaviour {
 
 	// Flag indicating whether the execution is currently paused
 	private boolean inPause = false;
+	
+	private Logger l;
 
 	public TestGroupExecutor(Agent a, TestGroup tg) {
 		super(a);
+		l = Logger.getLogger();
 		
 		if (tg == null) {
 			throw new IllegalArgumentException("Null test group");
@@ -90,7 +93,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 					tests.initialize(myAgent);
 				}
 				catch (TestException tie) {
-					System.out.println("Error in TestGroup initialization");
+					l.log("Error in TestGroup initialization");
 					tie.printStackTrace();
 					myAgent.doDelete();
 				}
@@ -107,9 +110,10 @@ public class TestGroupExecutor extends FSMBehaviour {
 					currentTest = tests.next();
 					if (currentTest != null) {
 						ret = EXECUTE;
-						System.out.println("\n--------------------------------------------");
-						System.out.println("Executing test: "+currentTest.getName());
-						System.out.println("Description: "+currentTest.getDescription());
+						StringBuffer sb = new StringBuffer("\n--------------------------------------------\n");
+						sb.append("Executing test: "+currentTest.getName()+"\n\n");
+						sb.append("Description:\n"+currentTest.getDescription()+"\n");
+						l.log(sb.toString());
 						Behaviour b2 = currentTest.load(myAgent, getDataStore(), TEST_RESULT_KEY);
 						registerState(b2, EXECUTE_TEST_STATE);
 						
@@ -125,8 +129,8 @@ public class TestGroupExecutor extends FSMBehaviour {
 				}
 				catch (TestException tie) {
 					// Some problems occured initializing this test. Skip it
-					System.out.println("Problems in test initialization ["+tie.getMessage()+"]");
-					System.out.println("Skip this test.");
+					l.log("Problems in test initialization ["+tie.getMessage()+"]");
+					l.log("Skip this test.");
 					skippedCnt++;
 					ret = SKIP;
 				}
@@ -142,15 +146,14 @@ public class TestGroupExecutor extends FSMBehaviour {
 		// HANDLE_RESULT_STATE
 		b = new OneShotBehaviour() {
 			public void action() {
-				
 				Integer i = (Integer) getDataStore().get(TEST_RESULT_KEY);
   			int result = i.intValue();
 				if (result == Test.TEST_PASSED) {
-  				System.out.println("Test PASSED");
+  				l.log("Test PASSED");
   				passedCnt++;
   			}
   			else {
-  				System.out.println("Test FAILED");
+  				l.log("Test FAILED");
   				failedCnt++;
   			}
   			
@@ -159,7 +162,7 @@ public class TestGroupExecutor extends FSMBehaviour {
   			}
   			catch (Exception e) {
   				// Just print a warning
-  				System.out.println("Warning: Exception in test cleaning ["+e.getMessage()+"]");
+  				l.log("Warning: Exception in test cleaning ["+e.getMessage()+"]");
   			}
 			}			
 		};
@@ -169,14 +172,15 @@ public class TestGroupExecutor extends FSMBehaviour {
 		// END_STATE
 		b = new OneShotBehaviour() {
 			public void action() {
-				System.out.println("\n--------------------------------------------");
-				System.out.println("--------------------------------------------");
-    		System.out.println("Test summary:");
-    		System.out.println(passedCnt+" tests PASSED");
-    		System.out.println(failedCnt+" tests FAILED");
+				StringBuffer sb = new StringBuffer("\n--------------------------------------------\n");
+				sb.append("--------------------------------------------\n");
+    		sb.append("Test summary:\n");
+    		sb.append(passedCnt+" tests PASSED\n");
+    		sb.append(failedCnt+" tests FAILED\n");
     		if (skippedCnt > 0) {
-    			System.out.println(skippedCnt+" tests SKIPPED due to initailization problems");
+    			sb.append(skippedCnt+" tests SKIPPED due to initailization problems\n");
     		}	
+    		l.log(sb.toString());
     		
 				tests.shutdown(myAgent);
 			}			
