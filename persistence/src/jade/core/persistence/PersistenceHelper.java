@@ -53,10 +53,46 @@ public interface PersistenceHelper extends ServiceHelper {
     public static final String LOAD_FROM = "load-from";
 
     /**
+       The name of a persistence-specific profile parameter, stating
+       the URL from where the properties for the JADE meta-database
+       can be retrieved.
+     */
+    public static final String META_DB = "meta-db";
+
+    /**
        The name of this service.
     */
     public static final String NAME = "jade.core.persistence.Persistence";
 
+
+    /**
+       This command name represents the <code>get-nodes</code> action.
+    */
+    static final String GET_NODES = "Get-Nodes";
+
+    /**
+       This command name represents the <code>get-repositories</code>
+       action.
+    */
+    static final String GET_REPOSITORIES = "Get-Repositories";
+
+    /**
+       This command name represents the <code>get-saved-agents</code>
+       action.
+    */
+    static final String GET_SAVED_AGENTS = "Get-Saved-Agents";
+
+    /**
+       This command name represents the <code>get-frozen-agents</code>
+       action.
+    */
+    static final String GET_FROZEN_AGENTS = "Get-Frozen-Agents";
+
+    /**
+       This command name represents the
+       <code>get-saved-containers</code> action.
+    */
+    static final String GET_SAVED_CONTAINERS = "Get-Saved-Containers";
 
     /**
        This command name represents the <code>save-agent</code>
@@ -143,20 +179,26 @@ public interface PersistenceHelper extends ServiceHelper {
        This command name represents the <code>save-container</code>
        action.
     */
-    static final String SAVE_CONTAINER = "save-container";
+    static final String SAVE_CONTAINER = "Save-Container";
 
     /**
        This command name represents the <code>load-container</code>
        action.
     */
-    static final String LOAD_CONTAINER = "load-container";
+    static final String LOAD_CONTAINER = "Load-Container";
 
     /**
        This command name represents the <code>delete-container</code>
        action.
     */
-    static final String DELETE_CONTAINER = "delete-container";
+    static final String DELETE_CONTAINER = "Delete-Container";
 
+
+    String[] getNodes() throws ServiceException, IMTPException;
+    String[] getRepositories(String nodeName) throws ServiceException, IMTPException, NotFoundException;
+    String[] getSavedAgents(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException;
+    String[] getFrozenAgents(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException;
+    String[] getSavedContainers(String nodeName, String repository) throws ServiceException, IMTPException, NotFoundException;
 
     void saveAgent(AID agentID, String repository) throws ServiceException, NotFoundException, IMTPException;
     void loadAgent(AID agentID, String repository, ContainerID where) throws ServiceException, IMTPException, NotFoundException, NameClashException;
@@ -171,19 +213,7 @@ public interface PersistenceHelper extends ServiceHelper {
 
     void saveContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException;
     void loadContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException, NameClashException;
-    void deleteContainer(ContainerID cid, String repository) throws ServiceException, IMTPException, NotFoundException;
-
-
-    /***
-	TO BE IMPLEMENTED
-
-    void saveAgentGroup(...) throws ServiceException, IMTPException...
-    void loadAgentGroup(...) throws ServiceException, IMTTPException...
-
-    Some more management methods...
-
-    ***/
-
+    void deleteContainer(ContainerID cid, ContainerID where, String repository) throws ServiceException, IMTPException, NotFoundException;
 
 
 }
