@@ -33,7 +33,7 @@ import test.interPlatform.InterPlatformCommunicationTesterAgent;
 
 /**
    Test the correct transfer of the Message Envelope in communication 
-   across different platforms using the standard IIOP MTP.
+   across different platforms.
    @author Giovanni Caire - TILAB
  */
 public class TestEnvelope extends Test {

@@ -31,23 +31,33 @@ import test.common.*;
 import test.interPlatform.InterPlatformCommunicationTesterAgent;
 
 /**
-   Test sending and receiving messages across different platforms.
+   Test the "incoming message routing" mechanism i.e. the case where
+   a message is delivered to an agent on a remote platform and living
+   on a container different from that where the MTP that receives the 
+   message is installed.
    @author Giovanni Caire - TILAB
  */
-public class TestRemotePing extends Test {
+public class TestIncomingMessageRouting extends Test {
 	private static final String RESPONDER_NAME = "responder";
 	private final String CONV_ID = "conv_ID"+hashCode();
 	private final String CONTENT = "\"PING\"";
-	private final String USER_DEF_KEY = "U_KEY";
-	private final String USER_DEF_VALUE = "U_VALUE";
+	private JadeController jc;
 	
 	private AID resp = null;
 	
   public Behaviour load(Agent a) throws TestException { 
   	try {
+  		// Get the remote AMS as group argument
 			AID remoteAMS = (AID) getGroupArgument(InterPlatformCommunicationTesterAgent.REMOTE_AMS_KEY);
-			resp = TestUtility.createAgent(a, RESPONDER_NAME, TestUtility.CONFIGURABLE_AGENT, null, remoteAMS, null);
-  		TestUtility.addBehaviour(a, resp, "test.common.behaviours.NotUnderstoodResponder");
+  		
+			// Start a peripheral container in the remote platform
+  		String host = TestUtility.getContainerHostName(a, remoteAMS, null);
+			String port = InterPlatformCommunicationTesterAgent.REMOTE_PLATFORM_PORT;
+  		jc = TestUtility.launchJadeInstance("Remote-Container", null, new String("-container -host "+host+" -port "+port), null);
+			log("Peripheral container correctly created on remote platform");
+
+  		// Create a responder agent on the remote container
+			resp = TestUtility.createAgent(a, RESPONDER_NAME, "test.interPlatform.tests.TestIncomingMessageRouting$PingAgent", null, remoteAMS, jc.getContainerName());
 			log("Responder correctly started on remote platform");
   		
   		Behaviour b1 = new SimpleBehaviour() {
@@ -57,7 +67,6 @@ public class TestRemotePing extends Test {
   				msg.addReceiver(resp);
   				msg.setConversationId(CONV_ID);
   				msg.setContent(CONTENT);
-  				msg.addUserDefinedParameter(USER_DEF_KEY, USER_DEF_VALUE);
   				myAgent.send(msg);
   			}
   			
@@ -65,7 +74,6 @@ public class TestRemotePing extends Test {
   				ACLMessage msg = myAgent.receive(MessageTemplate.MatchConversationId(CONV_ID)); 
 					if (msg != null) { 
 						AID sender = msg.getSender();
-						Properties pp = msg.getAllUserDefinedParameters();
 						if (!sender.equals(resp)) {
 							failed("Unexpected reply sender "+sender.getName());
 						} 
@@ -74,12 +82,6 @@ public class TestRemotePing extends Test {
 						}
 						else if (!CONTENT.equals(msg.getContent())) {
 							failed("Unexpected reply content "+msg.getContent());
-						}
-						else if (pp.size() != 1) {
-							failed(pp.size()+" user defined parameters found while 1 was expected");
-						}
-						else if (!USER_DEF_VALUE.equals(msg.getUserDefinedParameter(USER_DEF_KEY))) {
-							failed("Unexpected user defined parameter "+msg.getUserDefinedParameter(USER_DEF_KEY));
 						}
 						else {
 							passed("Reply message correctly received");
@@ -119,13 +121,33 @@ public class TestRemotePing extends Test {
 					
   public void clean(Agent a) {
   	try {
-  		TestUtility.killAgent(a, resp);
-  		Thread.sleep(1000);
+  		jc.kill();
   	}
   	catch (Exception e) {
   		e.printStackTrace();
   	}
   }
-  	
+
+  /**
+     Inner class PingAgent
+   */
+  public static class PingAgent extends Agent {
+  	protected void setup() {
+  		addBehaviour(new CyclicBehaviour(this) {
+  			public void action() {
+  				ACLMessage msg = myAgent.receive();
+  				if (msg != null) {
+  					ACLMessage reply = msg.createReply();
+  					reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+  					reply.setContent(msg.getContent());
+  					myAgent.send(reply);
+  				}
+  				else {
+  					block();
+  				}
+  			}
+  		} );
+  	}
+  }
 }
 
