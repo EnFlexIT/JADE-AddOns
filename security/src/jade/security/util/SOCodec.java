@@ -21,54 +21,28 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package jade.core.security.util;
-
-import jade.core.security.util.SOCodec;
-import jade.core.security.util.SecurityData;
-
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+package jade.security.util;
 
 /** 
- * Default implementation of the <code>SOCodec</code>.
- * Uses Java serialization to encode the information.
+ * Interface used for encoding / decoding security objects
  *
  * @see jade.domain.FIPAAgentManagement.SecurityObject
- * @see jade.core.security.util.SOCodec
- * @see jade.core.security.util.SecurityData
+ * @see jade.security.util.SecurityData
  *
  * @author Jerome Picault - Motorola
- * @author Nicolas Lhuillier - Motorola
  * @version  $Date$ $Revision$
  */
 
-public class BasicSOCodec implements SOCodec {
-  
-  public String getName() {
-    return "JADE";
-  }
-  
-
+public interface SOCodec {
+    
   /**
    * Encodes a <code>SecurityData</code> object into a byte sequence,
    * according to the specific object representation.
    * @param so The security object to encode.
    * @return a byte array, containing the encoded security object.
    */
-  public byte[] encode(SecurityData so) throws SOCodec.CodecException {
-    try { 
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      ObjectOutputStream oos = new ObjectOutputStream(baos); 
-      oos.writeObject(so);
-      return baos.toByteArray();
-    }
-    catch(Exception e) {
-      throw new SOCodec.CodecException(e.getMessage(),e);
-    }
-  }
-
+  byte[] encode(SecurityData so) throws CodecException;
+  
   /**
    * Recovers a <code>SecurityData</code> object back from raw data,
    * using the specific security object representation to interpret the byte
@@ -78,14 +52,52 @@ public class BasicSOCodec implements SOCodec {
    * data.
    * @exception CodecException If some kind of syntax error occurs.
    */
-  public SecurityData decode(byte[] data) throws SOCodec.CodecException {
-    try{
-      ByteArrayInputStream bais = new ByteArrayInputStream(data);
-      ObjectInputStream ois = new ObjectInputStream(bais); 
-      return (SecurityData)ois.readObject();
+  SecurityData decode(byte[] data) throws CodecException;
+  
+  /**
+   * Query the name of the security object representation handled by this
+   * <code>Codec</code> object. 
+   * @return The name of the handled security object representation.
+   */
+  String getName();
+
+  /**
+   * This exception is thrown when some problem occurs in the concrete parsing
+   * subsystem accessed through this interface. If an exception is thrown by the
+   * underlying parser, it is wrapped with a <code>Codec.CodecException</code>,
+   * which is then rethrown.
+   */
+  public static class CodecException extends Exception {
+    private Throwable nested;
+
+    /**
+     * Construct a new <code>CodecException</code>
+     * @param msg The message for this exception.
+     * @param t The exception wrapped by this object.
+     */
+    public CodecException(String msg, Throwable t) {
+      super(msg);
+      nested = t;
     }
-    catch(Exception e) {
-      throw new SOCodec.CodecException(e.getMessage(),e);
+
+    /**
+     * Reads the exception wrapped by this object.
+     * @return the <code>Throwable</code> object that is the exception thrown by
+     * the concrete parsing subsystem.
+     */
+    public Throwable getNested() {
+      return nested;
+    }
+   
+    /**
+     * Print the stack trace for this exception on the standard
+     * output stream.
+     */
+    public void printStackTrace() {
+      if (nested != null)
+        nested.printStackTrace();
+      super.printStackTrace();
     }
   }
+
 }

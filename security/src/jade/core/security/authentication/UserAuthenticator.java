@@ -32,7 +32,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import jade.security.JADEPrincipal;
 import jade.security.Credentials;
-import jade.core.security.util.SecurityStore;
+import jade.security.util.SecurityStore;
 import jade.core.security.authentication.RemoteUserAuthenticator;
 import jade.core.security.authentication.JadeTextCallbackHandler;
 import jade.core.security.authentication.JadeDialogCallbackHandler;

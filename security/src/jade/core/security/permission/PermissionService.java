@@ -52,7 +52,7 @@ import jade.security.JADEAuthority;
 import jade.core.Agent;
 import jade.core.security.SecurityHelper;
 import jade.core.security.SecurityService;
-import jade.core.security.util.SecurityData;
+import jade.security.util.SecurityData;
 import jade.util.Logger;
 import jade.core.security.authentication.OwnershipCertificate;
 import java.util.Enumeration;

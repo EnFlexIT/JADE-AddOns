@@ -26,8 +26,8 @@ package jade.security.impl;
 import jade.core.Agent;
 import jade.core.Profile;
 import jade.core.security.SecurityHelper;
-import jade.core.security.util.SecurityStore;
-import jade.core.security.util.SecurityData;
+import jade.security.util.SecurityStore;
+import jade.security.util.SecurityData;
 import jade.core.security.authentication.UserPassCredential;
 
 import jade.domain.FIPAAgentManagement.SecurityObject;

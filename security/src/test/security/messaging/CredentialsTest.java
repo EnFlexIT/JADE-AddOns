@@ -27,7 +27,7 @@ import jade.core.*;
 import jade.core.behaviours.*;
 import jade.lang.acl.ACLMessage;
 import jade.core.security.*;
-import jade.core.security.util.*;
+import jade.security.util.*;
 import jade.core.security.authentication.*;
 
 import jade.security.*;

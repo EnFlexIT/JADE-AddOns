@@ -23,7 +23,7 @@
  * **************************************************************
  */
 
-package jade.core.security.util;
+package jade.security.util;
 
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;

@@ -23,7 +23,7 @@ package jade.core.security;
 
 
 import jade.core.*;
-import jade.core.security.util.*;
+import jade.security.util.*;
 import jade.core.security.authentication.UserAuthenticator;
 import jade.core.security.authentication.UserPassCredential;
 import jade.core.messaging.GenericMessage;

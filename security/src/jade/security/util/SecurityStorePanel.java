@@ -23,7 +23,7 @@
  * **************************************************************
  */
 
-package jade.core.security.util;
+package jade.security.util;
 
 import javax.swing.JPanel;
 import javax.swing.JFrame;

@@ -26,7 +26,6 @@ package test.security.messaging;
 import jade.core.Agent;
 import jade.core.AID;
 import jade.core.security.SecurityHelper;
-//import jade.core.security.util.JADEKey;
 import jade.security.JADEPrincipal;
 import jade.security.impl.SDSINameImpl;
 import jade.security.impl.JADEPrincipalImpl;

@@ -25,8 +25,8 @@ package jade.security;
 
 import jade.core.Agent;
 import jade.core.Profile;
-import jade.core.security.util.SecurityData;
 import jade.domain.FIPAAgentManagement.SecurityObject;
+import jade.security.util.SecurityData;
 
 /**
  * The <code>Authority</code> interface represents an authority.

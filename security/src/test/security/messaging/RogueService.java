@@ -27,8 +27,7 @@ package test.security.messaging;
 
 import jade.core.*;
 import jade.core.security.*;
-import jade.core.security.util.*;
-import jade.core.security.basic.*;
+import jade.security.util.*;
 import jade.core.messaging.*;
 import jade.lang.acl.*;
 import jade.domain.FIPAAgentManagement.*;

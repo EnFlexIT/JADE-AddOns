@@ -34,7 +34,7 @@ import java.util.Vector;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import jade.util.Logger;
-import jade.core.security.util.Digest;
+import jade.security.util.Digest;
 import javax.security.auth.login.LoginException;
 
 

@@ -34,7 +34,7 @@ import jade.core.messaging.MessagingService;
 import jade.core.messaging.GenericMessage;
 
 import jade.core.security.*;
-import jade.core.security.util.*;
+import jade.security.util.*;
 
 import jade.domain.FIPAAgentManagement.Envelope;
 import jade.domain.FIPAAgentManagement.Property;

@@ -21,7 +21,7 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package jade.core.security.util;
+package jade.security.util;
 
 
 /**
@@ -50,19 +50,6 @@ public class LocalName implements java.security.Principal, jade.util.leap.Serial
     return str.toString();
   }
 
-  public boolean equals(Object o) {
-          return (o != null) && toString().equals(o.toString());
-  }
-
-  public boolean implies(LocalName p) {
-    if ( (getName().equals(p.getName())) ||
-        (getName().equals("")) ||
-        (getName().equals("*"))) {
-      return true;
-    } else {
-      return false;
-    }
-  } // end implies
 
   public static LocalName[] getLocalName(String[] locnames) {
     LocalName[] p=new LocalName[locnames.length];

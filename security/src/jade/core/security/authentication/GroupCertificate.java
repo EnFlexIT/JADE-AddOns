@@ -26,7 +26,7 @@ package jade.core.security.authentication;
 import jade.security.JADEPrincipal;
 import jade.security.Credentials;
 import jade.security.impl.BasicCertificateImpl;
-import jade.core.security.util.CredentialsEngine;
+import jade.security.util.CredentialsEngine;
 
 import java.io.*;
 

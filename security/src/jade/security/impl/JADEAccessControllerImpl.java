@@ -41,7 +41,7 @@ import java.security.PrivilegedActionException;
 import java.security.DomainCombiner;
 import jade.security.Credentials;
 import jade.security.JADESecurityException;
-import jade.core.security.util.SecurityStore;
+import jade.security.util.SecurityStore;
 import jade.core.security.authentication.NameCertificate;
 import jade.core.security.authentication.OwnershipCertificate;
 import java.util.Enumeration;

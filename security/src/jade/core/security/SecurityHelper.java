@@ -46,9 +46,7 @@ import jade.security.PrivilegedExceptionAction;
 import jade.security.CertificateException;
 import jade.security.DelegationCertificate;
 import jade.security.impl.*;
-
-import jade.core.security.basic.*;
-import jade.core.security.util.*;
+import jade.security.util.*;
 //import javax.security.auth.login.LoginContext;
 import jade.core.ServiceException;
 import jade.core.Profile;

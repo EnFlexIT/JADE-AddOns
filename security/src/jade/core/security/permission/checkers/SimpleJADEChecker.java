@@ -47,7 +47,7 @@ import jade.core.security.authentication.UserPassCredential;
 import javax.security.auth.login.*;
 import jade.security.impl.NameAuthority;
 import jade.util.Logger;
-import jade.core.security.util.SecurityData;
+import jade.security.util.SecurityData;
 import jade.security.CertificateEncodingException;
 import java.security.Permission;
 

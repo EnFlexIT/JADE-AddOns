@@ -25,8 +25,8 @@ Boston, MA  02111-1307, USA.
 package jade.security.impl;
 
 import jade.security.*;
-import jade.core.security.util.SecurityData;
-import jade.core.security.util.CredentialsEngine;
+import jade.security.util.SecurityData;
+import jade.security.util.CredentialsEngine;
 
 import jade.util.leap.ArrayList;
 import jade.util.leap.Iterator;

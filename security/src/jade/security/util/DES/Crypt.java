@@ -1,4 +1,4 @@
-package jade.core.security.util.DES;
+package jade.security.util.DES;
 /**
  * Crypt is the class, that implements UFC crypt (ultra fast crypt implementation )
  * 
