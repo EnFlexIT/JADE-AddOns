@@ -1,0 +1,16 @@
+[28-Mar-01] Version 0.1.2
+-- Added definitions of "Original Code" and "Initial Developer" to 
+   "Open Source Copyright Notice and License"
+-- Fixed bug with the value of "reply-by" when type designator is used.
+-- Directory structure changed slightly
+-- Added Makefile rules (dist, belib, etc.)
+-- Added short installation guide (doc/BEFipaMessage.doc) for Jade
+
+[13-Mar-01] Version 0.1.1
+-- Minor changes to FIPA-OS version
+-- Added some examples
+-- Improved documentation (but still much to do...)
+
+[28-Feb-01] Version 0.1
+-- First Release
+
