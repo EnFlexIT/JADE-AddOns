@@ -1,9 +1,13 @@
 package examples.jsp;
 
+import jade.core.AID;
+import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+
 import java.util.Vector;
-import jade.core.*;
-import jade.core.behaviours.*;
-import jade.lang.acl.*;
 
 /**
  * This agent manage all the messages received from the JSP page.

@@ -22,10 +22,8 @@ Boston, MA  02111-1307, USA.
 
 package jade.wrapper.taglib;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import jade.wrapper.*;
-import jade.core.*;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.BodyTagSupport;
 
 public class SendObjectTag extends BodyTagSupport {
 

@@ -22,19 +22,11 @@ Boston, MA  02111-1307, USA.
 
 package jade.wrapper.taglib;
 
-import java.lang.reflect.Method;
-import java.beans.*;
-import java.io.IOException;
-import java.util.Enumeration;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import jade.wrapper.*;
-import jade.core.*;
 import jade.util.Logger;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.BodyTagSupport;
 /***********************************************************************/
 
 /**

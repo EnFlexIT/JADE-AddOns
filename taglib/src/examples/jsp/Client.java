@@ -1,14 +1,17 @@
 package examples.jsp;
 
-import java.io.*;
-import java.awt.*;
-import javax.swing.*;
-import java.awt.event.*;
-
-import jade.core.*;
-import jade.core.behaviours.*;
+import jade.core.AID;
+import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 public class Client extends Agent {
     // Used to display the messages

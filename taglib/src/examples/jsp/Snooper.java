@@ -1,8 +1,8 @@
 package examples.jsp;
 
-import jade.core.*;
-import jade.core.behaviours.*;
-import jade.lang.acl.*;
+import jade.core.AID;
+import jade.core.Agent;
+import jade.lang.acl.ACLMessage;
 import jade.util.Logger;
 
 /**
