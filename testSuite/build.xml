@@ -8,19 +8,12 @@
 
   <property environment="env"/>
   <path id="project.class.path">
-    <!--pathelement path="${env.CLASSPATH}"/-->
-    <pathelement location="add-ons/leap/j2se/classes"/>
     <pathelement location="classes"/>
-    <pathelement location="add-ons/benchmark/classes"/>
     <fileset dir="lib">
         <include name="*.jar"/>
     </fileset>
   </path>
 
-
-  
-  
-  
 
   
   <!--   _______________________________________________
@@ -44,10 +37,6 @@
   	       optimize="on" 
   	       deprecation="off">
   	  <classpath refid="project.class.path"/>
-      <include name="test/**"/>
-  		<exclude name="test/TestAgent.java"/>
-  		<exclude name="test/mobility/separate/**"/>
-  		<exclude name="test/leap/midp/**"/>
   	</javac>
   				
   	<!-- RMIC the TSDaemon -->
@@ -60,7 +49,8 @@
     
     <!-- Copy xml configuration files -->
     <copy todir="classes/test" >
-     <fileset dir="add-ons/testSuite/" includes="testerList.xml"/>
+     <fileset dir="add-ons/testSuite/" includes="testerList.xml "/>
+     <fileset dir="add-ons/testSuite/src/test/" includes="interPlatform/*.xml"/>
     </copy>
   </target>
 
