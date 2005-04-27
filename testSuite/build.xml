@@ -56,6 +56,18 @@
 
 
   <!--  __________________________________________________
+                            jar
+        __________________________________________________ -->
+  <target name="jar" depends="compile" description="create the test suite jar file">
+    <mkdir dir="add-ons\testSuite\lib"/>
+		<delete file="add-ons\testSuite\lib\testSuite.jar" quiet="true"/>
+  	<jar jarfile="add-ons\testSuite\lib\testSuite.jar">
+      <fileset dir="classes" includes="test/**"/>
+   </jar>
+  </target>
+
+  
+  <!--  __________________________________________________
                             clean
         __________________________________________________ -->
   <target name="clean" description="clean up">
