@@ -143,6 +143,7 @@ public class TestSuiteAgent extends GuiAgent {
   	if (args != null && args.length > 0) {
   		xmlFileName = (String) args[0];
   	}
+  	System.out.println("Loading functionality list form file "+xmlFileName);
   	allFunc = XMLManager.getFunctionalities(xmlFileName);
   	
     // Register language and ontology used to control the

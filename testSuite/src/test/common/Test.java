@@ -164,6 +164,15 @@ public abstract class Test implements Serializable {
   }
   
   /**
+     @return true if this test has already been marked as failed by means of 
+     a call to the <code>failed()</code> method
+   */
+  protected final boolean isFailed() {
+  	Integer ii = (Integer) myStore.get(myKey);
+  	return (ii != null && ii.intValue() == TEST_FAILED);
+  }
+  
+  /**
      Log a given String
    */
   protected final void log(String s) {
