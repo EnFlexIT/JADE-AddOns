@@ -118,12 +118,8 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
                 formulaToAssert.clear();
 		        currentSRList.clear();
 		        newSRList.clear();
-//                System.out.println("On commence un nouvo tour avec : " );
-//                ((KbaseImpl_List)((SemanticAgent)myAgent).getMyKBase()).viewDataInBase();
-//                System.out.println("==========================");
 		        sr = (SemanticRepresentation)((SemanticAgent)myAgent).getEventList().remove(0);
 			    if (sr != null) {
-//                    System.out.println("++++ ON traite la SR : " + sr.getSLRepresentation());
 			        currentSRList.add(sr);
 			        int minIndex = getMin(currentSRList);
 			        while(minIndex < ((SemanticAgent)myAgent).getMySemanticInterpretationTable().getSemanticInterpretationPrincipleList().size() && minIndex >= 0) {
@@ -135,18 +131,15 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
 			            if (logger.isLoggable(Logger.FINE)) logger.log(Logger.FINE, "CURRENT DEDUCTIVE STEP : " + currentSemanticInterpretationPrinciple);
 			            while(!currentSRList.isEmpty()) {
 			                SemanticRepresentation currentSR = (SemanticRepresentation)currentSRList.remove(0);
-    //                        System.out.println("Current SR = " + currentSR);
 			                if (logger.isLoggable(Logger.FINE)) logger.log(Logger.FINE, "CURRENT SR : " + currentSR);
 			                if (currentSR.getSemanticInterpretationPrincipleIndex()-1 == minIndex) {
 		                        ArrayList srListResult = currentSemanticInterpretationPrinciple.apply(currentSR);
 		                        if (srListResult != null) {
-  //                                  System.out.println("APPLICABLE : " + currentSemanticInterpretationPrinciple);
 		                            if (logger.isLoggable(Logger.FINE)) logger.log(Logger.FINE, " STEP : " + currentSemanticInterpretationPrinciple + " succeeded !");
 		                            for (int j = 0; j < srListResult.size(); j++) {
 		                                ((SemanticRepresentation)srListResult.get(j)).setSLRepresentation(((SemanticRepresentation)srListResult.get(j)).getSLRepresentation().getSimplifiedFormula());
 		                                newSRList.add(srListResult.get(j));
 		                                if (logger.isLoggable(Logger.FINE)) logger.log(Logger.FINE, "NEW SR : " + j + " : " + srListResult.get(j));
-//                                        System.out.println("NEW SR : " + j + " : " + srListResult.get(j));
 		                            }
 		                            if (hasFalse(srListResult)) {
 		                                newSRList.clear();
@@ -160,13 +153,11 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
 		            			    	myAgent.send(reply);
 		                            }
 		                        } else {
-                                 //   System.out.println("NON applicable : " + currentSemanticInterpretationPrinciple);
 		                            if (logger.isLoggable(Logger.FINE)) logger.log(Logger.FINE, " STEP : " + currentSemanticInterpretationPrinciple + " not succeeded !");
 			                        currentSR.setSemanticInterpretationPrincipleIndex(currentSR.getSemanticInterpretationPrincipleIndex() + 1);
 			                        newSRList.add(currentSR);
 		                        }
 			                } else {
-//                                System.out.println("Indice SR superieur à celui du SIP");
 			                    newSRList.add(currentSR);
 			                }
 			            }

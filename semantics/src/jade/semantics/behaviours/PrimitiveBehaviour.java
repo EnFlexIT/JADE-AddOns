@@ -88,14 +88,10 @@ public class PrimitiveBehaviour extends SemanticBehaviour {
      * @see jade.core.behaviours.Behaviour#action()
      */
     public void action() {
-        //System.out.println("On lance le Primitive behaviour sur : " + action.getClass());
         if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Trying the behaviour of " + ACLMessage.getPerformative(action.getACLMessageCode()) + " ON " + action.getContent());
         if (((SemanticAgent)myAgent).getAgentName().equals(action.getSender())) {
-            //System.out.println("Sender ok");
             if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Cheking Feasibility Precondition: " + action.getFeasibilityPrecondition());
-            //System.out.println("Precondition teste : " + action.getFeasibilityPrecondition());
             if (((SemanticAgent)myAgent).getMyKBase().query(action.getFeasibilityPrecondition()) != null) {
-               // System.out.println("Precondition ok");
                 if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Feasibility Precondition is believed!");
                 try {
                     ACLMessage reply = new ACLMessage(action.getACLMessageCode());
