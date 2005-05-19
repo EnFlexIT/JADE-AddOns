@@ -112,7 +112,6 @@ public class Agree extends CommunicativeAction {
                             "??sender", matchResult.getTerm("??sender"),
                             "??receiverList", matchResult.getTerm("??receiver"),
                             "??content", new StringConstantNode(cont.toString()));
-             //           System.out.println("ON cree un agree avec : " + actionExpression);
                         return new Inform(table).newAction(actionExpr);
                     }
                 }
@@ -128,7 +127,6 @@ public class Agree extends CommunicativeAction {
      */
     public SemanticAction newAction(Formula rationalEffect, Term agentName) {
         try {
-            //System.out.println("On cree un AGree RE avec : " + rationalEffect);
             MatchResult matchResult = SLPatternManip.match(rationalEffectPattern, rationalEffect);
             if (matchResult != null) {
                 
