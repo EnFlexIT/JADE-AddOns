@@ -111,8 +111,6 @@ public class ActionFeatures extends SemanticInterpretationPrincipleImpl {
      * @see jade.semantics.interpreter.SemanticInterpretationPrincipleImpl#apply(jade.core.semantics.interpreter.SemanticRepresentation, jade.util.leap.ArrayList)
      */
     public ArrayList apply(SemanticRepresentation sr) throws SemanticInterpretationPrincipleException {
-//        Long debut = new Date().getTime();
-//        System.out.println("------- Debut Action features");
         try {
             MatchResult matchResult = SLPatternManip.match(pattern,sr.getSLRepresentation());
             if (matchResult != null) {
@@ -154,15 +152,7 @@ public class ActionFeatures extends SemanticInterpretationPrincipleImpl {
     	            listOfSR.add(persistentPreconditionSR);
     	            listOfSR.add(intentionaleEffectSR);
     	            listOfSR.add(postConditionsSR);
-//                    System.out.println("--------------------- ACTION FEATURES");
-//                    System.out.println("FP : " + feasibilityPreconditionSR);
-//                    System.out.println("PFP : " + persistentPreconditionSR);
-//                    System.out.println("ER : " + intentionaleEffectSR);
-//                    System.out.println("PC : " + postConditionsSR);
-//                    System.out.println("-------------------------------------");
     	            action = null;
-//                    Long end = new Date().getTime();
-//                    System.out.println("---- Fin Action Features ok : " + (debut - end));
     	            return listOfSR;
                 } 
             } 
@@ -170,8 +160,6 @@ public class ActionFeatures extends SemanticInterpretationPrincipleImpl {
             e.printStackTrace();
             throw new SemanticInterpretationPrincipleException();
         }
-//        Long end = new Date().getTime();
-//        System.out.println("---- Fin Action Features nok : " + (debut - end));
         return null;
     } // End of apply/1
     

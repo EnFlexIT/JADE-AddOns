@@ -84,8 +84,6 @@ public class ActionPerformance extends SemanticInterpretationPrincipleImpl {
                             new IntentionalBehaviour((SemanticBehaviour)act.getBehaviour(),
                                     sr.getSLRepresentation(),
                                     4));
-//                    System.out.println("**** Action performance ajoute une formule");
-//                    potentiallyAssertFormula(sr.getSLRepresentation());
 
     	            return new ArrayList();
     	        } 

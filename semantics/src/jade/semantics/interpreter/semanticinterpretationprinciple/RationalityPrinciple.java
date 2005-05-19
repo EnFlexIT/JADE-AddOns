@@ -78,8 +78,6 @@ public class RationalityPrinciple extends SemanticInterpretationPrincipleImpl {
      * @see jade.semantics.interpreter.SemanticInterpretationPrincipleImpl#apply(jade.core.semantics.interpreter.SemanticRepresentation, jade.util.leap.ArrayList)
      */
     public ArrayList apply(SemanticRepresentation sr) throws SemanticInterpretationPrincipleException {
-//        Long debut = new Date().getTime();
-//        System.out.println("------- Debut Rationality principle");
         try {
             MatchResult matchResult = SLPatternManip.match(rationalityPattern,sr.getSLRepresentation());
             if (matchResult != null) {
@@ -94,25 +92,15 @@ public class RationalityPrinciple extends SemanticInterpretationPrincipleImpl {
                                 (SemanticBehaviour)alternative.getBehaviour(),
                                 sr.getSLRepresentation(),
                                 5));
-//                        System.out.println("**** Rationality principle Applique sur :" + sr.getSLRepresentation());
-//                        System.out.println("On a la liste d'actions : " );
-//                        for (int h = 0; h < actionList.size(); h++) System.out.println(" " + actionList.get(h));
- //                       potentiallyAssertFormula(sr.getSLRepresentation());
-//                        Long end = new Date().getTime();
-//                        System.out.println("---- Fin Rationality principle ok : " + (debut - end));
                         return new ArrayList();
                     } 
                 }
-//                Long end = new Date().getTime();
-//                System.out.println("---- Fin Rationality principle nok : " + (debut - end));
                 return null;
             } 
         } catch (Exception e) {
             e.printStackTrace();
             throw new SemanticInterpretationPrincipleException();
         }
-//        Long end = new Date().getTime();
-//        System.out.println("---- Fin Rationality principle nok : " + (debut - end));
         return null;
     } // End of apply/1
 

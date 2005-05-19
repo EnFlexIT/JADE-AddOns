@@ -123,11 +123,6 @@ public class IntentionTransfer extends SemanticInterpretationPrincipleImpl {
                     listOfSR.add(newSecondSR);
     	            sender = null;
     	            phi = null;
-//                    System.out.println("+++++++++++ On applique le transfert d'intention avec : ");
-//                    System.out.println("* Entree : " + sr.getSLRepresentation());
-//                    System.out.println("* Sortie 1 : " + newFirstSR);
-//                    System.out.println("* Sortie 2 : " + newSecondSR);
-//                    System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     	            return listOfSR;
                 }
             } 

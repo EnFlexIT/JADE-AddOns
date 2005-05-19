@@ -78,8 +78,6 @@ public class BeliefTransfer extends SemanticInterpretationPrincipleImpl {
      * @see jade.semantics.interpreter.SemanticInterpretationPrincipleImpl#apply(jade.core.semantics.interpreter.SemanticRepresentation, jade.util.leap.ArrayList)
      */
     public ArrayList apply(SemanticRepresentation sr) throws SemanticInterpretationPrincipleException {
-//        Long debut = new Date().getTime();
-//        System.out.println("------- Debut Belief transfer");
         try {
             MatchResult matchResult = SLPatternManip.match(beliefPattern,sr.getSLRepresentation());
             if (matchResult != null) {
@@ -92,13 +90,6 @@ public class BeliefTransfer extends SemanticInterpretationPrincipleImpl {
                     ArrayList listOfSR = new ArrayList();
     	            listOfSR.add(newSR);
     	            phi = null;
-//                    System.out.println("+++++++++ transfert de croyance avec : ");
-//                    System.out.println("* Entree : " + sr.getSLRepresentation());
-//                    System.out.println("* Sortie 1 : " + newSR);
-//                    System.out.println("+++++++++++++++++++++++++++++++++++++++++");
-
-//                    Long end = new Date().getTime();
-//                    System.out.println("---- Fin Belief transfer ok : " + (debut - end));
     	            return listOfSR;
                 }
             } 
@@ -106,8 +97,6 @@ public class BeliefTransfer extends SemanticInterpretationPrincipleImpl {
             e.printStackTrace();
             throw new SemanticInterpretationPrincipleException();
         }
-//        Long end = new Date().getTime();
-//        System.out.println("---- Fin Belief transfer nok : " + (debut - end));
 
         return null;
     } // End of apply/1
