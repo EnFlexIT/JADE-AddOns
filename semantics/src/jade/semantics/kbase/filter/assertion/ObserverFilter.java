@@ -50,13 +50,9 @@ public class ObserverFilter extends KBAssertFilter {
     } // End of beforeAssert/1
     
     public void afterAssert(Formula formula) {
-//        System.out.println("++ on entre dans le Observer filter avec : " + formula);
         for(int i = 0; i < myKBase.getObservationTable().size(); i++) {
             KbaseImpl_List.Observation observation = ((KbaseImpl_List.Observation)myKBase.getObservationTable().get(i));
             Bindings newValue = myKBase.query(observation.getObserver().getObservedFormula());
-//            System.out.println("On est dans l'observer : " + observation.getObserver().getObservedFormula());
-//            System.out.println("OldValue = " + observation.getCurrentValue());
-//            System.out.println("NewValue = " + newValue);
             
             if (newValue == null) {
                 observation.setCurrentValue(null);
