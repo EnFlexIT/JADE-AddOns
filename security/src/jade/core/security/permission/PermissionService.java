@@ -677,9 +677,9 @@ private PermissionService service;
       // find the owner of 'owned'
       OwnershipCertificate ownCertificate=null;
       // get the copy of the cert from the local ownershipTable
-      Enumeration enum = ownershipTable.keys();
-      for (; enum.hasMoreElements();){
-        JADEPrincipal jp = (JADEPrincipal) enum.nextElement();
+      Enumeration enumK = ownershipTable.keys();
+      for (; enumK.hasMoreElements();){
+        JADEPrincipal jp = (JADEPrincipal) enumK.nextElement();
         if ( jp.getName().equals( owned ) ){
           ownCertificate = (OwnershipCertificate) ownershipTable.get( jp );
         }
