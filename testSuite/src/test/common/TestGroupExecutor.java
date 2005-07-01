@@ -43,6 +43,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 	// State names 
 	private static final String INIT_TEST_GROUP_STATE = "Init-test-group";
 	private static final String LOAD_TEST_STATE = "Load-test";
+	private static final String CLEAN_TEST_STATE = "Clean-test";
 	private static final String EXECUTE_TEST_STATE = "Execute-test";
 	private static final String HANDLE_RESULT_STATE = "Handle-result";
 	private static final String END_STATE = "End";
@@ -88,12 +89,13 @@ public class TestGroupExecutor extends FSMBehaviour {
 		registerDefaultTransition(INIT_TEST_GROUP_STATE, LOAD_TEST_STATE);
 		registerTransition(INIT_TEST_GROUP_STATE, END_STATE, ABORT);
 		registerTransition(LOAD_TEST_STATE, EXECUTE_TEST_STATE, EXECUTE);
-		registerTransition(LOAD_TEST_STATE, LOAD_TEST_STATE, SKIP);
+		registerTransition(LOAD_TEST_STATE, CLEAN_TEST_STATE, SKIP);
 		registerTransition(LOAD_TEST_STATE, END_STATE, EXIT);
 		registerTransition(LOAD_TEST_STATE, PAUSE_STATE, PAUSE);
 		registerDefaultTransition(PAUSE_STATE, EXECUTE_TEST_STATE);
 		registerDefaultTransition(EXECUTE_TEST_STATE, HANDLE_RESULT_STATE);
-		registerDefaultTransition(HANDLE_RESULT_STATE, LOAD_TEST_STATE);
+		registerDefaultTransition(HANDLE_RESULT_STATE, CLEAN_TEST_STATE);
+		registerDefaultTransition(CLEAN_TEST_STATE, LOAD_TEST_STATE);
 		
 		// INIT_TEST_GROUP_STATE
 		Behaviour b = new OneShotBehaviour() {
@@ -195,20 +197,6 @@ public class TestGroupExecutor extends FSMBehaviour {
 					e.printStackTrace();
 				}
   			
-  			try {
-		  		currentTest.clean(myAgent);
-  			}
-  			catch (Exception e) {
-  				// Just print a warning
-  				log("Warning: Exception in test cleaning ["+e.getMessage()+"]");
-  			}
-  			finally {
-  				try {
-  					Thread.sleep(1000);
-  				}
-  				catch (Exception e ) {}
-  			}
-  			
 				if (result == Test.TEST_PASSED) {
   				log("Test PASSED");
   				passedCnt++;
@@ -230,6 +218,29 @@ public class TestGroupExecutor extends FSMBehaviour {
 		b.setDataStore(getDataStore());
 		registerState(b, HANDLE_RESULT_STATE);
 
+		// CLEAN_TEST_STATE
+		b = new OneShotBehaviour() {
+			public void action() {
+				if (currentTest!= null) {
+	  			try {
+			  		currentTest.clean(myAgent);
+	  			}
+	  			catch (Exception e) {
+	  				// Just print a warning
+	  				log("Warning: Exception in test cleaning ["+e.getMessage()+"]");
+	  			}
+	  			finally {
+	  				try {
+	  					Thread.sleep(1000);
+	  				}
+	  				catch (Exception e ) {}
+	  			}
+				}
+			}
+		};
+		b.setDataStore(getDataStore());
+		registerState(b, CLEAN_TEST_STATE);
+  			
 		// END_STATE
 		b = new OneShotBehaviour() {
 			public void action() {
