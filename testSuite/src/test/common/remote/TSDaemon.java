@@ -107,10 +107,18 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager {
 	//////////////////////////////////////////
   // RemoteManager INTERFACE IMPLEMENTATION
   //////////////////////////////////////////
-  public int launchJadeInstance(String instanceName, String classpath, String jadeArgs, String[] protoNames) throws TestException, RemoteException {
+  public int launchJadeInstance(String instanceName, String classpath, String mainClass, String jadeArgs, String[] protoNames) throws TestException, RemoteException {
 		instanceCnt++;
 		jadeArgs = additionalArgs + jadeArgs;
-  	JadeController jc = TestUtility.launchJadeInstance(instanceName, classpath, jadeArgs, protoNames);
+		JadeController jc = null;
+		if (mainClass.equals("jade.Boot")) {
+			// Stand alone mode
+	  	jc = TestUtility.launchJadeInstance(instanceName, classpath, jadeArgs, protoNames);
+		}
+		else {
+			// Split mode
+	  	jc = TestUtility.launchSplitJadeInstance(instanceName, classpath, jadeArgs);
+		}
   	controllers.put(new Integer(instanceCnt), jc);
   	return instanceCnt;
 	}
