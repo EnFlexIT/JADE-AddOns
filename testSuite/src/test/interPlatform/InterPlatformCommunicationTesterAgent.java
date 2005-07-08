@@ -51,7 +51,7 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 	public static final String MTP_URL_KEY = "url";
 	public static final String MTP_URL_DEFAULT = "";
 	public static final String ADDITIONAL_CLASSPATH_KEY = "classpath";
-	public static final String ADDITIONAL_CLASSPATH_DEFAULT = "../../tools/xercesImpl.jar";
+	public static final String ADDITIONAL_CLASSPATH_DEFAULT = "";
 	
 	protected TestGroup getTestGroup() {
 		TestGroup tg = new TestGroup("test/interPlatform/interPlatformTestsList.xml"){		
@@ -62,9 +62,8 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 				try {
 					String mtp = (String) getArgument(MTP_CLASS_KEY);
 					String proto = (String) getArgument(PROTO_KEY);
-					//String additionalArguments = "";
-					String additionalArguments = ("http".equalsIgnoreCase(proto) ? "-jade_mtp_http_parser org.apache.xerces.parsers.SAXParser" : "");
-					String addClasspath = "+"+((String) getArgument(ADDITIONAL_CLASSPATH_KEY));
+					String additionalArguments = ("http".equalsIgnoreCase(proto) ? TestUtility.HTTP_MTP_ARG : "");
+					String addClasspath = "+"+TestUtility.HTTP_MTP_CLASSPATH+System.getProperty("path.separator")+((String) getArgument(ADDITIONAL_CLASSPATH_KEY));
 					
 					// Start the remote platform with the specified MTP
 					jc1 = TestUtility.launchJadeInstance(REMOTE_PLATFORM_NAME, addClasspath, new String("-name "+REMOTE_PLATFORM_NAME+" -port "+REMOTE_PLATFORM_PORT+" -mtp "+mtp+" "+additionalArguments), new String[]{proto}); 
@@ -80,7 +79,7 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 					
 					// Start a local container with the specified MTP
 					String url = (String) getArgument(MTP_URL_KEY);
-					jc2 = TestUtility.launchJadeInstance("Container-mtp", addClasspath, new String("-container -host "+TestUtility.getLocalHostName()+" -port "+String.valueOf(Test.DEFAULT_PORT)+" -mtp "+mtp+"("+url+") "+additionalArguments), null);
+					jc2 = TestUtility.launchJadeInstance("Container-mtp", addClasspath, new String("-container -host "+TestUtility.getContainerHostName(a, null)+" -port "+Test.DEFAULT_PORT+" -mtp "+mtp+"("+url+") "+additionalArguments), null);
 				}
 				catch (TestException te) {
 					throw te;

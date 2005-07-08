@@ -58,6 +58,9 @@ import java.net.InetAddress;
 public class TestUtility {
 	private static boolean verbose = true;
 	
+	public static String HTTP_MTP_CLASSPATH;
+	public static String HTTP_MTP_ARG;
+	
 	public static final String CONFIGURABLE_AGENT = "test.common.ConfigurableAgent";
 	
 	private static final String SPY_NOTIFICATION = "spy-notification";
@@ -70,6 +73,16 @@ public class TestUtility {
   private static test.common.remote.RemoteManager defaultRm = null;
   
   static {
+  	String version = System.getProperty("java.version");
+  	if (version.startsWith("1.4")) {
+  		HTTP_MTP_CLASSPATH = "";
+  		HTTP_MTP_ARG = "";
+  	}
+  	else {
+  		HTTP_MTP_CLASSPATH = "../../tools/xercesImpl.jar";
+  		HTTP_MTP_ARG = "-jade_mtp_http_parser org.apache.xerces.parsers.SAXParser";
+  	}
+  		
   	cm.registerLanguage(codec);
   	cm.registerOntology(onto);
   	cm.registerLanguage(new SLCodec(0), FIPANames.ContentLanguage.FIPA_SL0);
@@ -251,6 +264,28 @@ public class TestUtility {
      indicated RemoteManager
    */
   public static JadeController launchJadeInstance(RemoteManager rm, String instanceName, String classpath, String jadeArgs, String[] protoNames) throws TestException { 
+  	return launch(rm, instanceName, classpath, "jade.Boot", jadeArgs, protoNames);
+  }
+
+  /**
+     Launch a new instance of a JADE split container in a separate process 
+   */
+  public static JadeController launchSplitJadeInstance(String instanceName, String classpath, String jadeArgs) throws TestException {
+  	return launchSplitJadeInstance(null, instanceName, classpath, jadeArgs);
+  }
+  
+  /**
+     Launch a new instance of a JADE split container in a separate process 
+     using the indicated RemoteManager
+   */
+  public static JadeController launchSplitJadeInstance(RemoteManager rm, String instanceName, String classpath, String jadeArgs) throws TestException {
+  	return launch(rm, instanceName, classpath, "jade.MicroBoot", jadeArgs, null);
+  }
+  
+  /**
+     Launch a new instance of JADE in a separate process.
+   */
+  private static JadeController launch(RemoteManager rm, String instanceName, String classpath, String mainClass, String jadeArgs, String[] protoNames) throws TestException { 
 		JadeController jc = null;
 		if (rm == null) {
 			rm = defaultRm;
@@ -260,7 +295,7 @@ public class TestUtility {
 			// If a RemoteManager is set, use it and launch the JADE instance 
 			// remotely
 			try {
-				int id = rm.launchJadeInstance(instanceName, classpath, jadeArgs, protoNames);
+				int id = rm.launchJadeInstance(instanceName, classpath, mainClass, jadeArgs, protoNames);
 				jc = new RemoteJadeController(rm, id);
 			}
 			catch (RemoteException re) {
@@ -278,7 +313,7 @@ public class TestUtility {
   				classpath = classpath.substring(1)+System.getProperty("path.separator")+currentCp;
   			}
 			}
-			jc = new LocalJadeController(instanceName, new String("java -cp "+classpath+" jade.Boot "+jadeArgs), protoNames);
+			jc = new LocalJadeController(instanceName, new String("java -cp "+classpath+" "+mainClass+" "+jadeArgs), protoNames);
 		}
 		return jc;
   }
@@ -322,13 +357,17 @@ public class TestUtility {
    */
   public static String getContainerHostName(Agent a, AID ams, String containerName) throws TestException {
   	try {
+  		if (containerName == null) {
+  			containerName = AgentContainer.MAIN_CONTAINER_NAME;
+  		}
+  		
   		String[] args = null;
   		if (ams == null || a.getAMS().equals(ams)) {
   			// The container is in the local platform --> arg0 is the localName
   			args = new String[] {a.getLocalName()};
   		}
   		else {
-				// The container is in a remote platform --> arg0 is the GUID and arg1 following 
+				// The container is in a remote platform --> arg0 is the GUID and arg1 and following 
 				// args are the addresses
   			List l = new ArrayList();
   			l.add(a.getName());
@@ -341,6 +380,7 @@ public class TestUtility {
   				args[i] = (String) l.get(i);
   			}
   		}
+  		
   		spyCnt++;
   		AID spy = TestUtility.createAgent(a, "spy"+spyCnt, "test.common.TestUtility$HostSpyAgent", args, ams, containerName);
   		ACLMessage msg = a.blockingReceive(MessageTemplate.MatchConversationId(SPY_NOTIFICATION), 10000);

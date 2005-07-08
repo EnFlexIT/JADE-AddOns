@@ -50,7 +50,7 @@ public class TestReplyTo extends Test {
   	setTimeout(5000);
 
   	// Start a remote container
-		jc = TestUtility.launchJadeInstance("Container-1", null, new String("-container -host "+TestUtility.getLocalHostName()+" -port "+String.valueOf(Test.DEFAULT_PORT)), null);
+		jc = TestUtility.launchJadeInstance("Container-1", null, new String("-container -host "+TestUtility.getContainerHostName(a, null)+" -port "+Test.DEFAULT_PORT), null);
 		// Start Agent A on the remote container
   	agentA = TestUtility.createAgent(a, AGENT_A, getClass().getName()+"$ResponderAgent", null, a.getAMS(), jc.getContainerName());
   	// Start agent B on a remote platform
