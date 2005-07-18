@@ -165,6 +165,34 @@ public class TestUtility {
     	throw new TestException("Error killing TargetAgent "+agentAID.getName(), te.getNested());
     }
   }
+  /**
+   * Ask the AMS to kill a container.
+   * 
+   */
+  public static void killContainer(Agent a, AID amsAID, String containerName) throws TestException{
+  	if(amsAID == null){
+  		amsAID = createNewAID("ams", a.getAID());
+  	}
+  	
+  	KillContainer kc = new KillContainer();
+  	ContainerID cid = new ContainerID();
+  	cid.setName(containerName);
+  	kc.setContainer(cid);
+  	
+  	try{
+  		requestAMSAction(a, amsAID, kc);
+  	}
+  	catch(TestException te){
+  		throw new TestException("Error killing container " + containerName, te.getNested());
+  	}
+  }
+  
+  /**
+   * Ask the AMS to kill a container
+   */
+  public static void killContainer(Agent a, String containerName) throws TestException{
+  	killContainer(a, null, containerName);
+  }
   
   /**
      Request an AMS agent to perform a given action in the JADE
