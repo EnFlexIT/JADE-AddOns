@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<content>
-<expressions>
-<or>
-<meta_formula_reference MEANS="left_formula" name="??x"/>
-<meta_formula_reference MEANS="right_formula" name="??y"/>
-</or>
-</expressions>
-</content>
