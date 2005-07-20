@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+JSA ant build file
+
+It is created according a JADE's build.xml.
+-->
+
+<project name="Jade Semantic Agent" default="compile" basedir=".">
+	<description>JSA build file</description>
+	<property name="version" value="1.0"/>
+	<property name="build.compiler" value="modern"/>
+	<property name="javac.optimize" value="on"/>
+	<property name="javac.debug" value="on"/>
+	<property environment="env"/>
+	<!-- set global properties for this build -->
+	<property name="root" location="."/>
+	<property name="lib" location="lib"/>
+	<property name="src" location="src"/>
+	<property name="dist" location=".."/>
+	<property name="doc" location="doc"/>
+	<property name="build" location="classes"/>
+	<property name="demo" location="demo"/>
+    <property name="libJADEDir" value="../../lib"/>
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the directory structure -->
+		<mkdir dir="${doc}"/>
+		<mkdir dir="${lib}"/>
+		<mkdir dir="${build}"/>
+	</target>
+
+	<target name="compile" depends="init" description="compile the source">
+	    <javac srcdir="${src}" destdir="${build}" nowarn="off" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="on">
+	      <classpath>
+	        <fileset dir="${libJADEDir}" includes="*.jar"/>
+	        <fileset dir="${lib}" includes="**/*.jar"/> 
+	      </classpath>
+	    </javac>
+	</target>
+
+	<target name="lib" depends="init,compile" description="generate the jar file">
+		<!-- Create the jsa.jar file -->
+		<delete file="${lib}/jsa.jar" quiet="true"/> 
+		<jar jarfile="${lib}/jsa.jar">
+			<fileset dir="${build}" excludes="demo/**"/>
+		</jar>
+	</target>
+
+	<target name="demo" depends="init,compile,lib" description="generate the demo jar file">
+		<!-- Copy the gifs -->
+	    <copy todir="${build}/demo">
+			<fileset file="${demo}/*.gif"/>
+	    </copy>
+		<!-- Create the jsaDemo.jar file -->
+		<delete file="${demo}/jsaDemo.jar" quiet="true"/> 
+		<jar jarfile="${demo}/jsaDemo.jar">
+			<fileset dir="${build}" includes="demo/**"/>
+		</jar>
+	</target>
+
+	<target name="doc" depends="init" description="generate javadoc documentation">
+		<javadoc destdir="${doc}" author="true" version="true" windowtitle="Jade Semantic Agent ${version} API Reference" use="true">
+      <classpath>
+        <fileset dir="${libJADEDir}" includes="*.jar"/>
+        <fileset dir="${lib}" includes="**/*.jar"/>
+      </classpath>
+	  <packageset dir="src" defaultexcludes="yes">
+		<include name="jade/semantics/**"/>
+	  </packageset>
+    </javadoc>
+	</target>
+
+	<target name="dist" depends="init" description="generate the distribution">
+		<zip zipfile="../../../JSAAddOn.1.0.zip" basedir="../../.." includes="jade/add-ons/semantics/**" excludes="jade/add-ons/semantics/classes/**,jade/add-ons/semantics/demo/.xvpics/**,jade/add-ons/semantics/doc/**,jade/add-ons/semantics/lib/**"/>
+	</target>
+	
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build} directory tree -->
+		<delete includeEmptyDirs="true">
+			<fileset dir="${build}" excludes="**/*.mf"/>
+			<fileset dir="${doc}"/>
+			<fileset dir="${lib}" includes="*.jar"/>
+		</delete>
+	</target>
+
+</project> 
+
