@@ -198,17 +198,18 @@ public class FilterKBaseImpl implements FilterKBase, KBFilterManagment {
     /*********************************************************************/
     
     /**
-     * First tests the filters via the method <code>beforeAssert</code>, tries to assert the 
+     * First, tests the filters via the method <code>beforeAssert</code>, tries to assert the 
      * formula, and then, if needed, tests the filters via the method <code>afterAssert</code>
      * The assertion depends of the formula. If the formula match the pattern:
      * <ul>
-     * <li> "(I jsa ??phi)", the formula is asserted.
+     * <li> "(I agent ??phi)", the formula is asserted.
      * <li> "(not (I ??agt ??phi))", the formula "(I ??agt ??phi)" is removed if
      * it is in the base 
-     * <li> "(B jsa ??phi)", the formula phi is asserted if it is an 
+     * <li> "(B agent ??phi)", the formula phi is asserted if it is an 
      * <code>AtomicFormula</code>
-     * <li> "(B jsa (not ??phi)), if the formula phi is in the base, it is removed
+     * <li> "(B agent (not ??phi)), if the formula phi is in the base, it is removed
      * </ul>  
+     * <i>agent</i> represents the current semantic agent.<br> 
      * If the formula matches another pattern nothing is done.
      * @inheritDoc
      */

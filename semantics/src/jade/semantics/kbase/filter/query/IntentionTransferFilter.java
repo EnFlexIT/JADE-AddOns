@@ -37,9 +37,9 @@ import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 
 /**
- * Is the JSA cooperative towards an other agent <i>agent</i> regarding to a specific goal?
+ * Is the semantic agent cooperative towards an other agent <i>agent</i> regarding to a specific goal?
  * This question is asked whenever an agent <i>agent</i> expresses the intention 
- * of its own towards the JSA.
+ * of its own towards the semantic agent.
  * For example, this filter may be applied when the Jade agent receives a 
  * <code>Request</code>, a <code>Query-if</code>, <code>Query-ref</code>, a
  * <code>CallForProposal</code> message or a <code>Confirm</code>, <code>Disconfirm</code>,

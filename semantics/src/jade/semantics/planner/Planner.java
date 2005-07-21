@@ -39,7 +39,7 @@ import jade.semantics.lang.sl.grammar.Formula;
 public interface Planner {
     
     /**
-    * Returns a Behaviour if the planner find a plan to reach the input goal.
+    * Returns a Behaviour if the planner finds a plan to reach the input goal.
     * @param formula the goal to be reached
     * @return a behaviour
     **/

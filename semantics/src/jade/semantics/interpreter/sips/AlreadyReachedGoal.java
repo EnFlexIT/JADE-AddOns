@@ -37,7 +37,8 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
 
 /**
- * Traps the JSA intentions that the JSA already believes. 
+ * Traps the intentions of the semantic agent that the semantic agent already 
+ * believes. 
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/06/14 Revision: 1.0
  */

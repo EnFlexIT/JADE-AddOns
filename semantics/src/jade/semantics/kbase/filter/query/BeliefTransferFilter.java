@@ -37,9 +37,9 @@ import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 
 /**
- * Is the JSA cooperative towards the agent <i>agent</i> regarding a specific belief?
+ * Is the semantic agent cooperative towards the agent <i>agent</i> regarding a specific belief?
  * This question is asked whenever whenever an agent <i>agent</i> expresses a piece of 
- * information towards the JSA.
+ * information towards the semantic agent.
  * For example, this filter may be applied when the Jade agent receives a 
  * <code>RequestWhenever</code>, a <code>Refuse</code>, <code>Subscribe</code>, a
  * <code>Propose</code>, a <code>Confirm</code>, a <code>Failure</code>, 

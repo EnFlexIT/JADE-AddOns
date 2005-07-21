@@ -137,13 +137,13 @@ public class Tools {
     
     /**
      * Tests if the action expression given in parameter is a communicative 
-     * action from the JSA (me) to the specified receiver.
+     * action from the semantic agent (me) to the specified receiver.
      * @param actionExp an action expression
      * @param receiver the receiver
-     * @param me the current jsa agent 
+     * @param me the current semantic agent 
      * @return true if the the action expression given in parameter is a 
-     * communicative action from the JSA (me) to the specified receiver, false
-     * if not.
+     * communicative action from the semantic agent (me) to the specified 
+     * receiver, false if not.
      */
     public static boolean isCommunicativeActionFromMeToReceiver(ActionExpression actionExp, Term receiver, SemanticAgent me) {
         try {
