@@ -62,7 +62,7 @@ It is created according a JADE's build.xml.
 	</target>
 
 	<target name="doc" depends="init" description="generate javadoc documentation">
-		<javadoc destdir="${doc}" author="true" version="true" windowtitle="Jade Semantic Agent ${version} API Reference" use="true">
+		<javadoc destdir="${doc}" author="true" version="true" windowtitle="Jade Semantics Add-On ${version} API Reference" use="true">
       <classpath>
         <fileset dir="${libJADEDir}" includes="*.jar"/>
         <fileset dir="${lib}" includes="**/*.jar"/>
@@ -74,14 +74,15 @@ It is created according a JADE's build.xml.
 	</target>
 
 	<target name="dist" depends="init" description="generate the distribution">
-		<zip zipfile="../../../JSAAddOn.1.0.zip" basedir="../../.." includes="jade/add-ons/semantics/**" excludes="jade/add-ons/semantics/classes/**,jade/add-ons/semantics/demo/.xvpics/**,jade/add-ons/semantics/doc/**,jade/add-ons/semantics/lib/**"/>
+		<zip zipfile="../../../JSAAddOn.1.0.zip" basedir="../../.."
+			includes="jade/add-ons/semantics/*,jade/add-ons/semantics/doc/guides/*.pdf,jade/add-ons/semantics/src/**,jade/add-ons/semantics/demo/**" excludes="jade/add-ons/semantics/demo/.xvpics/**,jade/add-ons/semantics/demo/*.jar,jade/add-ons/semantics/demo/APDescription.txt"/>
 	</target>
 	
 	<target name="clean" description="clean up">
 		<!-- Delete the ${build} directory tree -->
 		<delete includeEmptyDirs="true">
 			<fileset dir="${build}" excludes="**/*.mf"/>
-			<fileset dir="${doc}"/>
+			<fileset dir="${doc}" excludes="guides/**"/>
 			<fileset dir="${lib}" includes="*.jar"/>
 		</delete>
 	</target>
