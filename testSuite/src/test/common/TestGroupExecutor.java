@@ -251,7 +251,7 @@ public class TestGroupExecutor extends FSMBehaviour {
     			sb.append(passedCnt+" tests PASSED\n");
     			sb.append(failedCnt+" tests FAILED\n");
 	    		if (skippedCnt > 0) {
-  	  			sb.append(skippedCnt+" tests SKIPPED due to initailization/termination problems\n");
+  	  			sb.append(skippedCnt+" tests SKIPPED due to initialization/termination problems\n");
     			}	
     			log(sb.toString());
     		
