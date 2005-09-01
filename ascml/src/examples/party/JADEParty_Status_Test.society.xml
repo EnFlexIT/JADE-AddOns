@@ -56,5 +56,6 @@
 			<agentinstances>
 				<agentinstance name="Guest" type="PartyGuest" quantity="10" namingscheme="%N"/>
 			</agentinstances>
+			</societyinstance>
 	</societyinstances>
 </society>

@@ -14,6 +14,7 @@
 	<property name="src.dir" value="src"/>
 	
 	<property name="dist.dir" value="lib"/>
+	<property name="dist" value="../.."/>
 	<property name="version" value="0.49d"/>
 	<property name="name" value="ASCML"/>
 	<property name="dist.jar.dir" value="${name}-${version}"/>
@@ -27,6 +28,8 @@
 	<path id="classpath">
 		<pathelement path="${classes.dir}"/>
 		<pathelement path="${classpath}"/>
+    <pathelement path="${JADE_PATH}"/>
+    <pathelement path="${JDSL_PATH}"/> 
 		<fileset dir=".">
 			<include name="lib/**/*.jar"/>
 		</fileset>
@@ -95,9 +98,9 @@
 		<jar destfile="${dist.dir}/ASCML-Applet.jar"  basedir="${classes.dir}"/>
 	</target>	
 
-	<target name="dist" depends="init,clean,compile,doc,dist-bin,dist-src"
+	<!-- target name="dist" depends="init,clean,compile,doc,dist-bin,dist-src"
 		description="Erstellt Jar Dateien fuer das Projekt">
-	</target>
+	</target -->
 
 	<target name="dist-bin" depends="init,compile">
 		<jar destfile="${dist.dir}/${jarfile.bin}" basedir="${classes.dir}"/>
@@ -116,11 +119,22 @@
 			<fileset dir="${jdoc.dir}" includes="**/*" excludes="**/CVS/*,**/CVS"/>
 		</copy>
 		<copy file="build.xml" todir="${dist.dir}/${dist.jar.dir}" />
-		<copy file=".project" todir="${dist.dir}/${dist.jar.dir}" />
-		<copy file=".classpath" todir="${dist.dir}/${dist.jar.dir}" />
+		<copy file=".project" todir="${dist.dir}/${dist.jar.dir}" failonerror ="false" />
+		<copy file=".classpath" todir="${dist.dir}/${dist.jar.dir}" failonerror ="false" />
 		<zip destfile="${dist.dir}/${zipfile.src}" basedir="${dist.dir}/${dist.jar.dir}"/>
 		<delete dir="${dist.dir}/${dist.jar.dir}"/>
 	</target>
+	
+	<!-- Make distribution zip file and put in ${dist} -->
+  <target name="dist" depends="init, cleanall, compile, doc, dist-bin">
+    <jar jarfile="${dist}/${zipfile.src}">
+      <fileset dir="${dist}" includes="add-ons/ascml/${src.dir}/**"/>
+      <fileset dir="${dist}" includes="add-ons/ascml/${doc.dir}/**"/>
+      <fileset dir="${dist}" includes="add-ons/ascml/*"/>
+      <fileset dir="${dist}" includes="add-ons/ascml/${dist.dir}/**"/>
+    </jar>
+  </target>
+  
 
 	<target name="doc" depends="init"
 		description="create the java documentation files">

@@ -39,13 +39,13 @@ public class ImageIconLoader
 	public static final String ASCML_LOGO					= "images/logo/logo.png";
 	public static final String ASCML_LOGO_VERSION			= "images/logo/version.png";
 
-	public static final String LIFECYCLE_CREATED			= "images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_NOT_RUNNING		= "images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_STARTING			= "images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_RUNNING			= "images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_PARTLY_RUNNING		= "images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_STOPPING			= "images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_ERROR				= "images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_CREATED			= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_NOT_RUNNING		= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_STARTING			= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_RUNNING			= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_PARTLY_RUNNING		= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_STOPPING			= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_ERROR				= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
 
 	public static final String STATUS_RUNNING 				= "images/status/running.gif";
 	public static final String STATUS_PARTLY_RUNNING 		= "images/status/partly_running.gif";
@@ -139,12 +139,15 @@ public class ImageIconLoader
 					try
 					{
 						// load via ClassLoader, path is interpreted relative to this class'-location
+						System.out.println("#################loading resouce new path: " + newPath);
 						URL imgURL = ImageIconLoader.class.getResource(newPath);
+						
 						if (imgURL == null)
 							imgURL = ImageIconLoader.class.getClassLoader().getResource(newPath);
 						if (imgURL == null)
 							imgURL = new URL(newPath);
-
+						System.out.println("imgURL: " + imgURL);
+						
 						returnIcon = new ImageIcon(imgURL);
 						imageCache.put(path, returnIcon);
 					}
@@ -166,6 +169,7 @@ public class ImageIconLoader
 
 	public static ImageIcon scaleImageIcon(ImageIcon imageIcon, int width, int height)
 	{
+		if( imageIcon != null){
 		String key = imageIcon.toString() + width + height;
 
 		if (scaledImageCache.containsKey(key))
@@ -178,6 +182,7 @@ public class ImageIconLoader
 			scaledImageCache.put(key, scaledIcon);
 			return scaledIcon;
 		}
+		}else return null;
 	}
 
 	public static ImageIcon createRunnableStatusIcon(Status status, int width, int height)
