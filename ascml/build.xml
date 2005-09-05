@@ -29,7 +29,6 @@
 		<pathelement path="${classes.dir}"/>
 		<pathelement path="${classpath}"/>
     <pathelement path="${JADE_PATH}"/>
-    <pathelement path="${JDSL_PATH}"/> 
 		<fileset dir=".">
 			<include name="lib/**/*.jar"/>
 		</fileset>
