@@ -191,8 +191,16 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEICON_FOLDER_AGENTTYPES, 14, 14));
 			else if (nodeString ==  RepositoryTree.SOCIETYTYPES_STRING)
 				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEICON_FOLDER_SOCIETYTYPES, 14, 14));
+			else if (nodeString ==  RepositoryTree.REFERENCE_DESCRIPTION_STRING)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.REFERENCE_DESCRIPTION, 14, 14));
+			else if (nodeString ==  RepositoryTree.AGENT_DESCRIPTION_STRING)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.AGENT_DESCRIPTION, 14, 14));
+			else if (nodeString ==  RepositoryTree.RUNNINGINSTANCES_STRING)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.RUNNING_INSTANCES, 14, 14));
 			else
 				setIcon(null);
+
+			setToolTipText(null);
 		}
 		return this;
 	}

@@ -85,9 +85,7 @@ public class SocietyInstanceNode extends DefaultMutableTreeNode implements IRepo
 			else // show both with details
 			{
                 // System.err.println("SocietyInstanceNode.init: create runnable & templates-node");
-				DefaultMutableTreeNode templatesNode = new DefaultMutableTreeNode(RepositoryTree.TEMPLATES_STRING);
-				createTemplateNodes(templatesNode, true);
-				treeModel.insertNodeInto(templatesNode, this, 0);
+				createTemplateNodes(this, true);
 
 				runnableRootNode = new DefaultMutableTreeNode(RepositoryTree.RUNNINGINSTANCES_STRING);
 
@@ -116,11 +114,11 @@ public class SocietyInstanceNode extends DefaultMutableTreeNode implements IRepo
 	{
 		if (splitAgentsAndReferences)
 		{
-			DefaultMutableTreeNode agentsNode = new DefaultMutableTreeNode(RepositoryTree.AGENTS_STRING);
+			DefaultMutableTreeNode agentsNode = new DefaultMutableTreeNode(RepositoryTree.AGENT_DESCRIPTION_STRING);
 			addAgentInstanceTemplateNodes(agentsNode);
             treeModel.insertNodeInto(agentsNode, rootNode, 0);
 
-			DefaultMutableTreeNode referencesNode = new DefaultMutableTreeNode(RepositoryTree.REFERENCES_STRING);
+			DefaultMutableTreeNode referencesNode = new DefaultMutableTreeNode(RepositoryTree.REFERENCE_DESCRIPTION_STRING);
 			addSocietyInstanceReferenceTemplateNodes(referencesNode);
             treeModel.insertNodeInto(referencesNode, rootNode, 1);
 		}

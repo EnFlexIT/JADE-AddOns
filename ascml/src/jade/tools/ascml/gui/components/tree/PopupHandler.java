@@ -326,7 +326,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 					mi.setActionCommand(CMD_AUTOSEARCH);
 					popup.add(mi);
 				}
-				else if (userObjString.equals(RepositoryTree.AGENTTYPES_STRING))
+				else if (userObjString.equals(RepositoryTree.AGENTTYPES_STRING) || (userObjString.equals(RepositoryTree.ADD_AGENTMODEL_STRING)))
 				{
 					popup.add(new JLabel("<html>&nbsp;&nbsp;&nbsp;<i>AgentType-Options</i></html>"));
 					popup.addSeparator();
@@ -335,13 +335,26 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 					mi.setActionCommand(CMD_ADD_AGENTTYPE_DIALOG);
 					popup.add(mi);
 				}
-				else if (userObjString.equals(RepositoryTree.SOCIETYTYPES_STRING))
+				else if (userObjString.equals(RepositoryTree.SOCIETYTYPES_STRING) || (userObjString.equals(RepositoryTree.ADD_SOCIETYMODEL_STRING)))
 				{
 					popup.add(new JLabel("<html>&nbsp;&nbsp;&nbsp;<i>SocietyType-Options</i></html>"));
 					popup.addSeparator();
 					JMenuItem mi = new JMenuItem("Load a Society");
 					mi.addActionListener(this);
 					mi.setActionCommand(CMD_ADD_SOCIETYTYPE_DIALOG);
+					popup.add(mi);
+				}
+				else if (userObjString.equals(RepositoryTree.ADD_A_MODEL_HEADER))
+				{
+					popup.add(new JLabel("<html>&nbsp;&nbsp;&nbsp;<i>Add a new Model ...</i></html>"));
+					popup.addSeparator();
+					JMenuItem mi = new JMenuItem("Load a Society");
+					mi.addActionListener(this);
+					mi.setActionCommand(CMD_ADD_SOCIETYTYPE_DIALOG);
+					popup.add(mi);
+					mi = new JMenuItem("Load an Agent");
+					mi.addActionListener(this);
+					mi.setActionCommand(CMD_ADD_AGENTTYPE_DIALOG);
 					popup.add(mi);
 				}
 				else if (userObjString.equals(RepositoryTree.REMOTEREPOSITORIES_STRING))

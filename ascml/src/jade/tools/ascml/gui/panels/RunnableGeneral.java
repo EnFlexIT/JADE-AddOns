@@ -123,7 +123,7 @@ public class RunnableGeneral extends AbstractPanel implements ActionListener, Mo
     {
         if (status instanceof Known)
         {
-            lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_CREATED);
+            lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_NOT_RUNNING);
         }
         else if (status instanceof Starting)
         {

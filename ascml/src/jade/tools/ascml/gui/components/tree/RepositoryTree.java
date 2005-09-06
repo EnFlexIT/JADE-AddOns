@@ -47,10 +47,9 @@ public class RepositoryTree extends JTree implements TreeSelectionListener, Proj
 	public final static String AGENTTYPES_STRING			= "<html><b>AgentTypes</b></html>";
 	public final static String SOCIETYTYPES_STRING			= "<html><b>SocietyTypes</b></html>";
 	public final static String REMOTEREPOSITORIES_STRING	= "<html><b>remote Repositories</b></html>";
-	public final static String TEMPLATES_STRING				= "<html><b>Templates</b></html>";
-	public final static String AGENTS_STRING				= "<html><b>Agents</b></html>";
-	public final static String REFERENCES_STRING			= "<html><b>References</b></html>";
-	public final static String RUNNINGINSTANCES_STRING		= "<html><b>running Instances</b></html>";
+	public final static String AGENT_DESCRIPTION_STRING		= "<html><b>Agents</b></html>";
+	public final static String REFERENCE_DESCRIPTION_STRING	= "<html><b>References</b></html>";
+	public final static String RUNNINGINSTANCES_STRING		= "<html><b>Running Instances</b></html>";
 
 	public static final String ADD_A_MODEL_HEADER			= "<html><b>Add a new Model ...</b></html>";
 	public static final String ADD_AGENTMODEL_STRING		= "... load an Agent";
@@ -258,11 +257,15 @@ public class RepositoryTree extends JTree implements TreeSelectionListener, Proj
 			setView(event.getProject().getView());
 			repaint();
 		}
-		else if (event.getEventCode().equals(ProjectChangedEvent.AGENTTYPE_REMOVED) ||
-				 event.getEventCode().equals(ProjectChangedEvent.SOCIETYTYPE_REMOVED))
+		else if (event.getEventCode().equals(ProjectChangedEvent.AGENTTYPE_REMOVED))
 		{
-			setSelectedNode(root);
-			repaint();
+			((DefaultTreeModel)getModel()).removeNodeFromParent((DefaultMutableTreeNode)searchModelInTree(root, event.getModel()));
+			setSelectedNode((DefaultMutableTreeNode)searchModelInTree(root, AGENTTYPES_STRING));
+		}
+		else if (event.getEventCode().equals(ProjectChangedEvent.SOCIETYTYPE_REMOVED))
+		{
+			// ((DefaultTreeModel)getModel()).removeNodeFromParent((DefaultMutableTreeNode)searchModelInTree(root, event.getModel()));
+			setSelectedNode((DefaultMutableTreeNode)searchModelInTree(root, SOCIETYTYPES_STRING));
 		}
 	}
 

@@ -66,7 +66,7 @@ public class RunnableSocietyInstanceNode extends DefaultMutableTreeNode implemen
 	
 	private DefaultMutableTreeNode createAgentsNodes()
 	{
-		DefaultMutableTreeNode agentsNode = new DefaultMutableTreeNode(RepositoryTree.AGENTS_STRING);
+		DefaultMutableTreeNode agentsNode = new DefaultMutableTreeNode(RepositoryTree.AGENT_DESCRIPTION_STRING);
 		
 		// add new children (running agentinstances) to the "Agents"-node of the running society-instance's root-node 
 		IRunnableAgentInstance[] runningAgentInstances = runnableModel.getRunnableAgentInstances();
@@ -81,7 +81,7 @@ public class RunnableSocietyInstanceNode extends DefaultMutableTreeNode implemen
 	
 	private DefaultMutableTreeNode createReferencesNodes()
 	{
-		DefaultMutableTreeNode referencesNode = new DefaultMutableTreeNode(RepositoryTree.REFERENCES_STRING);
+		DefaultMutableTreeNode referencesNode = new DefaultMutableTreeNode(RepositoryTree.REFERENCE_DESCRIPTION_STRING);
 		
 		// add local running SocietyInstance-references to "References"-node
 		IRunnableSocietyInstance[] runningSocInstRefs = runnableModel.getLocalRunnableSocietyInstanceReferences();

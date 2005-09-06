@@ -314,7 +314,7 @@ public class AutoSearch extends AbstractPanel
 				pleaseWaitFrame.getContentPane().add(new JLabel("<html><h2>Please Wait ...</h2>while the results are rendered.</html>)"));
 				pleaseWaitFrame.getContentPane().setBackground(Color.WHITE);
 				pleaseWaitFrame.setIconImage(ImageIconLoader.createImageIcon(ImageIconLoader.ASCML_LOGO).getImage());
-				pleaseWaitFrame.setSize(250, 70);
+				pleaseWaitFrame.setSize(300, 100);
 				pleaseWaitFrame.setLocation((int)(Toolkit.getDefaultToolkit().getScreenSize().getWidth()/2-pleaseWaitFrame.getWidth()/2),
 						(int)(Toolkit.getDefaultToolkit().getScreenSize().getHeight()/2-pleaseWaitFrame.getHeight()/2));
 

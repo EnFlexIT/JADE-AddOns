@@ -39,13 +39,13 @@ public class ImageIconLoader
 	public static final String ASCML_LOGO					= "images/logo/logo.png";
 	public static final String ASCML_LOGO_VERSION			= "images/logo/version.png";
 
-	public static final String LIFECYCLE_CREATED			= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_NOT_RUNNING		= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_STARTING			= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_RUNNING			= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_PARTLY_RUNNING		= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_STOPPING			= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
-	public static final String LIFECYCLE_ERROR				= "/jade/tools/ascml/repository/loader/images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_CREATED			= "images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_NOT_RUNNING		= "images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_STARTING			= "images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_RUNNING			= "images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_PARTLY_RUNNING		= "images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_STOPPING			= "images/lifecycle/life_cycle.gif";
+	public static final String LIFECYCLE_ERROR				= "images/lifecycle/life_cycle.gif";
 
 	public static final String STATUS_RUNNING 				= "images/status/running.gif";
 	public static final String STATUS_PARTLY_RUNNING 		= "images/status/partly_running.gif";
@@ -62,6 +62,9 @@ public class ImageIconLoader
 	public static final String AGENTINSTANCE				= "images/agent/agentinstance_50x50.gif";
 	public static final String SOCIETYTYPE 					= "images/society/societytype_50x50.gif";
 	public static final String SOCIETYINSTANCE				= "images/society/societyinstance_16x16.gif";
+	public static final String AGENT_DESCRIPTION			= "images/society/agent_desc_16x16.gif";
+	public static final String RUNNING_INSTANCES			= "images/society/running_instances_16x16.gif";
+	public static final String REFERENCE_DESCRIPTION		= "images/society/reference_desc_16x16.gif";
 	public static final String SOCIETYINSTANCE_REFERENCE_LOCAL	= "images/society/local_societyinstance_reference_16x16.gif";
 	public static final String SOCIETYINSTANCE_REFERENCE_REMOTE	= "images/society/remote_societyinstance_reference_16x16.gif";
 
@@ -139,15 +142,12 @@ public class ImageIconLoader
 					try
 					{
 						// load via ClassLoader, path is interpreted relative to this class'-location
-						System.out.println("#################loading resouce new path: " + newPath);
 						URL imgURL = ImageIconLoader.class.getResource(newPath);
-						
 						if (imgURL == null)
 							imgURL = ImageIconLoader.class.getClassLoader().getResource(newPath);
 						if (imgURL == null)
 							imgURL = new URL(newPath);
-						System.out.println("imgURL: " + imgURL);
-						
+
 						returnIcon = new ImageIcon(imgURL);
 						imageCache.put(path, returnIcon);
 					}
@@ -169,7 +169,6 @@ public class ImageIconLoader
 
 	public static ImageIcon scaleImageIcon(ImageIcon imageIcon, int width, int height)
 	{
-		if( imageIcon != null){
 		String key = imageIcon.toString() + width + height;
 
 		if (scaledImageCache.containsKey(key))
@@ -182,21 +181,18 @@ public class ImageIconLoader
 			scaledImageCache.put(key, scaledIcon);
 			return scaledIcon;
 		}
-		}else return null;
 	}
 
 	public static ImageIcon createRunnableStatusIcon(Status status, int width, int height)
 	{
 		if (status instanceof Known)
-			return createImageIcon(STATUS_CREATED, width, height);
+			return createImageIcon(STATUS_NOT_RUNNING, width, height);
 		else if (status instanceof Starting)
 			return createImageIcon(STATUS_STARTING, width, height);
 		else if (status instanceof Functional)
 			return createImageIcon(STATUS_RUNNING, width, height);
 		else if (status instanceof Stopping)
 			return createImageIcon(STATUS_STOPPING, width, height);
-		if (status instanceof Known)
-			return createImageIcon(STATUS_NOT_RUNNING, width, height);
 		else if (status instanceof jade.tools.ascml.onto.Error)
 			return createImageIcon(STATUS_ERROR, width, height);
         return null;
