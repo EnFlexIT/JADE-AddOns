@@ -92,14 +92,14 @@ public class TestUtility {
   /**
      Create a generic agent in the local container of the local platform
 	 */
-  public static AID createAgent(Agent a, String agentName, String agentClass, String[] agentArgs) throws TestException {
+  public static AID createAgent(Agent a, String agentName, String agentClass, Object[] agentArgs) throws TestException {
 		return createAgent(a, agentName, agentClass, agentArgs, null, null);
   }
 
   /**
      Create a generic agent in the platform administrated by the indicated AMS
 	 */
-  public static AID createAgent(Agent a, String agentName, String agentClass, String[] agentArgs, AID amsAID, String containerName) throws TestException {
+  public static AID createAgent(Agent a, String agentName, String agentClass, Object[] agentArgs, AID amsAID, String containerName) throws TestException {
 		if (amsAID == null) {
 			amsAID = a.getAMS();
 		}
