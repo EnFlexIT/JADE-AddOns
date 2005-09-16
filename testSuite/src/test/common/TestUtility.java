@@ -34,6 +34,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
 import jade.domain.JADEAgentManagement.*;
+import jade.domain.mobility.MobilityOntology;
 import jade.domain.FIPANames;
 import jade.content.AgentAction;
 import jade.content.ContentElement;
@@ -47,7 +48,6 @@ import test.common.remote.RemoteManager;
 
 import java.util.Date;
 import java.rmi.*;
-import java.net.InetAddress;
 
 /**
    Class including utility static methods for launching/killing
@@ -87,6 +87,7 @@ public class TestUtility {
   	cm.registerOntology(onto);
   	cm.registerLanguage(new SLCodec(0), FIPANames.ContentLanguage.FIPA_SL0);
   	cm.registerOntology(JADEManagementOntology.getInstance());
+  	cm.registerOntology(MobilityOntology.getInstance());
   }
   
   /**
@@ -199,7 +200,18 @@ public class TestUtility {
      management ontology.
    */
   public static Object requestAMSAction(Agent a, AID amsAID, AgentAction action) throws TestException {
+	return requestAMSAction(a, amsAID, action, JADEManagementVocabulary.NAME);
+  }
+  
+  /**
+     Request an AMS agent to perform a given action of a given ontology.
+   */
+  public static Object requestAMSAction(Agent a, AID amsAID, AgentAction action, String ontologyName) throws TestException {
     try {
+    	if (amsAID == null) {
+    		amsAID = a.getAMS();
+    	}
+    	
     	// Prepare the request
   		ACLMessage request = createRequestMessage(a, amsAID, FIPANames.ContentLanguage.FIPA_SL0, JADEManagementVocabulary.NAME);
 
@@ -208,11 +220,11 @@ public class TestUtility {
   		act.setAction(action);
   		
   		request.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
-  		request.setOntology(JADEManagementVocabulary.NAME);
+  		request.setOntology(ontologyName == null ? JADEManagementVocabulary.NAME : ontologyName);
   		cm.fillContent(request,act);
     	   	
     	// Send message and collect reply
-    	ACLMessage inform = FIPAService.doFipaRequestClient(a, request);
+    	ACLMessage inform = FIPAService.doFipaRequestClient(a, request, 10000);
     	
     	// Extract the result from the reply (if any)
     	ContentElement ce = cm.extractContent(inform);
