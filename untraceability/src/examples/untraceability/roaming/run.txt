@@ -1,0 +1,5 @@
+FILE QUARANTINED
+----------------
+
+Antigen for Exchange removed untraceability-0.1.gamma.zip->run.bat since it
+was found to match the FILE FILTER= *.bat file filter.

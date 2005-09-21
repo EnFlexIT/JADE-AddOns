@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+examples.untraceability.roaming ant build file
+It is created according a JADE's build.xml.
+-->
+
+<project name="untraceable_roaming-example" default="run" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="version" value="1.0.gamma"/>
+  <property name="build.compiler" value="modern"/>
+  <property name="javac.optimize" value="on"/>
+  <property name="javac.debug" value="on"/>
+  <property environment="env"/>
+
+  <property name="root" location="../../../../"/>
+
+  <property name="src" location="${root}/src"/>
+  <property name="build" location="${root}/classes"/>
+
+  <property name="jade-root" value="c:/Program Files/jade"/>
+  <property name="untraceability-root" value="${jade-root}/add-ons/untraceability"/>
+  <property name="classpath" value=
+    	"${env.CLASSPATH};${jade-root}/add-ons/untraceability/classes"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+      <!-- Create the directory structure -->
+        <mkdir dir="${untraceability-root}"/>
+        <mkdir dir="${untraceability-root}/classes/"/>
+        <mkdir dir="${untraceability-root}/classes/examples"/>
+    </target>
+
+  <target name="compile" depends="init" description="compile the source">
+    <javac srcdir="${src}" destdir="${build}" nowarn="off" target="1.4"
+      optimize="${javac.optimize}" debug="${javac.debug}"
+      deprecation="on">
+      <classpath>
+        <fileset dir="${jade-root}/lib" includes="*.jar"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="dist" depends="init,compile" description="generate the distribution">
+    <copy todir="${untraceability-root}/classes/">
+      <fileset dir="${build}" includes="examples/**"/>
+    </copy>
+  </target>
+
+  <target name="run" depends="" description="run the example" >
+    <java classname="examples.untraceability.roaming.UntraceableRoaming" fork="yes">
+      <classpath>
+        <pathelement path="${classpath}"/>
+      </classpath>
+    </java>
+  </target>
+
+</project>

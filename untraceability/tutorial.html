@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+           "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<meta name="GENERATOR" content="TtH 3.70">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+ <style type="text/css"> div.p { margin-top: 7pt;}</style>
+ <style type="text/css"><!--
+ td div.comp { margin-top: -0.6ex; margin-bottom: -1ex;}
+ td div.comb { margin-top: -0.6ex; margin-bottom: -.6ex;}
+ td div.hrcomp { line-height: 0.9; margin-top: -0.8ex; margin-bottom: -1ex;}
+ td div.norm {line-height:normal;}
+ span.roman {font-family: serif; font-style: normal; font-weight: normal;} 
+ span.overacc2 {position: relative;  left: .8em; top: -1.2ex;}
+ span.overacc1 {position: relative;  left: .6em; top: -1.2ex;} --></style>
+
+ 
+<title> Untraceability I Add-on for JADE</title>
+ 
+<h1 align="center">Untraceability I Add-on for JADE </h1>
+
+<h3 align="center">Author: Rafal  Leszczyna </h3>
+
+<div class="p"><!----></div>
+
+<div class="p"><!----></div>
+ 
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc1">
+1</a>&nbsp;&nbsp;Introduction</h2>
+This is the first public release of <em>Untraceability I Add-on for JADE</em> - a <em>JADE</em> add-on developed at <em>European Commission Joint Research Centre</em> as a part of the author's PhD Project.
+
+<div class="p"><!----></div>
+The add-on introduces a new service to the <em>JADE</em> environment, which aims at making migration of mobile agents untraceable.
+
+<div class="p"><!----></div>
+This is the first step towards underpinning privacy of <em>JADE</em> users.
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc2">
+2</a>&nbsp;&nbsp;Feedback</h2>
+We are looking forward to seeing any practical applications of the service, so if you have successfully applied the service into your project, please, send us an e-mail including a short description of the application, to <tt>Rafal.Leszczyna@jrc.it</tt>.
+
+<div class="p"><!----></div>
+If you have suggestions or if you encountered bugs in this software, please send an email to <tt>Rafal.Leszczyna@jrc.it</tt>.
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc3">
+3</a>&nbsp;&nbsp;Contact</h2>
+Rafal Leszczyna - European Commission Joint Research Centre
+
+<div class="p"><!----></div>
+e-mail: <tt>Rafal.Leszczyna@jrc.it</tt>
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc4">
+4</a>&nbsp;&nbsp;License</h2>
+This add-on is distributed by <em>European Commission Joint Research Centre</em> under the <em>LGPL</em> license. See the file <tt>COPYING</tt> for details.
+
+<div class="p"><!----></div>
+Although this is not an obligation, we would like to warmly encourage you to send us any information of successful applications of the service into your projects to <tt>Rafal.Leszczyna@jrc.it</tt>. This add-on was developed as a part of the author's PhD project and for the author, having such an information might positively influence quality of his PhD thesis, giving a description of case studies.
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc5">
+5</a>&nbsp;&nbsp;System requirements</h2>
+In order to use <em>Untraceability I Service</em> you need <em>JADE 3.2</em> or later and <em>Sun Java SDK 1.4</em> or later.
+The file <tt>untraceability.jar</tt>, which contains the service's distribution (the <em>JADE</em> add-on), needs to be in your <tt>CLASSPATH</tt> variable.
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc6">
+6</a>&nbsp;&nbsp;Description</h2>
+A typical scenario of employing a mobile agent is composed of the following steps:
+
+<ol type="1">
+<li> an agent's goal is described,
+<div class="p"><!----></div>
+</li>
+
+<li> the agent is dispatched from a container (called a base container/station or a source container/station) and it roams until the goal is achieved,
+<div class="p"><!----></div>
+</li>
+
+<li> the agent returns to the base station with results.
+<div class="p"><!----></div>
+</li>
+</ol>
+
+<div class="p"><!----></div>
+To allow such scenario, a mobile agent must store somewhere the address of its base container. Usually it saves it explicitly in its state.
+
+<div class="p"><!----></div>
+This makes the address available to all. Anyone interested may learn the agent's place of origin which gives a strong indication of the agent's owner.
+
+<div class="p"><!----></div>
+Such feature is undesirable in many agent applications where privacy of agents' owners should be respected [<a href="#leszczyna05solution" name="CITEleszczyna05solution">1</a>].
+
+<div class="p"><!----></div>
+<em>Untraceability I Service</em> allows an implementation of the above scenario while the address of the base station is kept secret.
+
+<div class="p"><!----></div>
+<em>Untraceable I Service</em> complies with the specification of <em>Untraceability Protocol I</em> presented in [<a href="#leszczyna05untraceability" name="CITEleszczyna05untraceability">2</a>,<a href="#leszczyna04untraceability" name="CITEleszczyna04untraceability">3</a>].
+
+<div class="p"><!----></div>
+The general idea of the protocol is the following: an agent, while migrating, encrypts the identifier of the last visited platform (using the public key of the present platform) and puts it to the LIFO queue stored in its state. After achieving the goal, when the agent wishes to come back to its base platform, it uses the queue to find its way back. Down the route back the identifiers are subsequently decrypted using each platform's private key.
+
+<div class="p"><!----></div>
+For further details, an interested reader may refer to [<a href="#leszczyna05untraceability" name="CITEleszczyna05untraceability">2</a>,<a href="#leszczyna04untraceability" name="CITEleszczyna04untraceability">3</a>,<a href="#leszczyna05solution" name="CITEleszczyna05solution">1</a>,<a href="#leszczyna05performance" name="CITEleszczyna05performance">4</a>]
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc7">
+7</a>&nbsp;&nbsp;Installation</h2>
+Unpack the file <tt>untraceability-X.X.XX.zip</tt> (where the ,,<tt>X.X.XX</tt>" part indicates the version of the release) into the location of your current <em>JADE</em> installation. All needed files will be created into the directory <tt>jade/add-ons/untraceability</tt>.
+In addition to all <em>JADE</em> jar files, you also need to add <tt>jade/add-ons/untraceability/lib/untraceability.jar</tt> to your Java <tt>CLASSPATH</tt>.
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc8">
+8</a>&nbsp;&nbsp;Using the service</h2>
+We made an attempt to make using of the service straightforward.
+
+<div class="p"><!----></div>
+The process of developing untraceable agents involves employing the <tt>UntraceableAgent</tt> class combined with the predetermined migration behaviours - the <tt>GoAheadBehaviour</tt> and <tt>ComeBackBehaviour</tt> - available in the <tt>behaviours</tt> subpackage).
+
+<div class="p"><!----></div>
+It is important to have the agent route stored in the <tt>myUnprotectedRoute</tt> field of the agent's class.
+
+<div class="p"><!----></div>
+To allow the Untraceability Service must be registered at each container participating in agent's untraceable migration. So if started from a command line, the alike string should be added: <tt>-services jade.core.security.UntraceabilityService;jade.core.mobility.AgentMobilityService;jade.core.event.NotificationService</tt>.
+
+<div class="p"><!----></div>
+For further details, follow the example in <tt>jade/add-ons/untraceability/src/examples/untraceability/</tt> (see the description in the next section).
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc9">
+9</a>&nbsp;&nbsp;Examples</h2>
+A working example is available in the directory: <tt>jade/add-ons/untraceability/src/examples/untraceability/</tt>.
+
+<div class="p"><!----></div>
+In the example an agent obtains a list of locations (containers) available in the agent platform, chooses one of the locations as a destination of its  migration and moves towards it passing intermediate locations. After reaching the destination it comes back to the source location.
+
+<div class="p"><!----></div>
+If you have <em>Apache Ant</em> installed in your system, you can take advantage of the Ant's <tt>build.xml</tt> file (available in the already mentioned <tt>jade/add-ons/untraceability/src/examples/untraceability/</tt> directory). First, run <tt>ant</tt> with '<tt>dist</tt>' parameter to compile the example's classes and to put them into a proper location. After this is once done, you can anytime start the example by simply typing '<tt>ant</tt>'.
+
+<div class="p"><!----></div>
+Additionally, <em>Windows</em> users can also use the <tt>run.bat</tt> file present in the <tt>jade/add-ons/untraceability/src/examples/untraceability/</tt> directory.
+
+<div class="p"><!----></div>
+
+<h2>References</h2>
+
+<dl compact="compact">
+ <dt><a href="#CITEleszczyna05solution" name="leszczyna05solution">[1]</a></dt><dd>
+Rafal Leszczyna.
+ The solution for anonymous access of it services and its application
+  to e-health counselling.
+ <em>Proceedings of the 1st 2005 IEEE International Conference on
+  Technologies for Homeland Security and Safety (TEHOSS '05)</em>, May 2005.
+ Accepted for the 1st 2005 IEEE International Conference on
+  Technologies for Homeland Security and Safety, Gdansk, Poland. September
+  28-30, 2005.
+
+<div class="p"><!----></div>
+</dd>
+ <dt><a href="#CITEleszczyna05untraceability" name="leszczyna05untraceability">[2]</a></dt><dd>
+Rafal Leszczyna and Janusz G&#243;rski.
+ Untraceability of mobile agents.
+ <em>Proceedings of the 4th International Joint Conference on
+  Autonomous Agents and Multiagent Systems (AAMAS '05)</em>, 3:1233-1234, July
+  2005.
+
+<div class="p"><!----></div>
+</dd>
+ <dt><a href="#CITEleszczyna04untraceability" name="leszczyna04untraceability">[3]</a></dt><dd>
+Rafal Leszczyna and Janusz G&#243;rski.
+ Untraceability of mobile agents.
+ Technical report, European Commission, Joint Research Centre,
+  Institute for the Protection and security of the Citizen, December 2004.
+
+<div class="p"><!----></div>
+</dd>
+ <dt><a href="#CITEleszczyna05performance" name="leszczyna05performance">[4]</a></dt><dd>
+Rafal Leszczyna and Janusz G&#243;rski.
+ Performance analysis of untraceability protocols for mobile agents.
+ Technical report, European Commission, Joint Research Centre,
+  Institute for the Protection and security of the Citizen, March 2005.</dd>
+</dl>
+
+
+
+<br /><br /><hr /><small>File translated from
+T<sub><font size="-1">E</font></sub>X
+by <a href="http://hutchinson.belmont.ma.us/tth/">
+T<sub><font size="-1">T</font></sub>H</a>,
+version 3.70.<br />On 09 Sep 2005, 11:11.</small>
+</html>

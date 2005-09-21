@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+Untraceability Service ant build file
+It is created according a JADE's build.xml.
+-->
+
+<project name="Untraceability Service" default="compile" basedir=".">
+  <description></description>
+  <property name="version" value="1.0.gamma"/>
+  <property name="build.compiler" value="modern"/>
+  <property name="javac.optimize" value="on"/>
+  <property name="javac.debug" value="on"/>
+  <property environment="env"/>
+  <!-- set global properties for this build -->
+  <property name="root" value="."/>
+  <property name="jade-root" value="../.."/>
+  <property name="lib" location="lib"/>
+  <property name="src" location="src"/>
+  <property name="dist" location=".."/>
+  <property name="doc" location="doc"/>
+  <property name="build" location="classes"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+      <!-- Create the directory structure -->
+        <mkdir dir="${doc}"/>
+        <mkdir dir="${lib}"/>
+	<mkdir dir="${build}"/>
+    </target>
+
+  <target name="compile" depends="init" description="compile the source">
+    <javac srcdir="${src}" destdir="${build}" nowarn="off" target="1.4" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="on" excludes="examples/**">
+      <classpath>
+        <fileset dir="${jade-root}/lib" includes="*.jar"/>
+        <fileset dir="${lib}" includes="**/*.jar"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="lib" depends="compile" description="generate the jar file">
+  <!-- Create the untraceability.jar file -->
+    <delete file="${lib}/untraceability.jar" quiet="true"/>
+    <jar jarfile="${lib}/untraceability.jar">
+      <fileset dir="${build}"/>
+    </jar>
+  </target>
+
+  <target name="doc" depends="init" description="generate javadoc documentation">
+    <javadoc destdir="${doc}/api" author="true" windowtitle="Untraceability Service ${version} API Reference"
+    sourcepath="${src}" use="true"
+    packagenames="jade.core.security.*, examples.*">
+    <classpath>
+      <fileset dir="${jade-root}/lib" includes="*.jar"/>
+        <fileset dir="${lib}" includes="**/*.jar"/>
+      </classpath>
+    </javadoc>
+  </target>
+
+  <target name="dist" depends="init,compile,doc,lib" description="generate the distribution">
+    <mkdir dir="${root}/temp/jade"/>
+    <mkdir dir="${root}/temp/jade"/>
+    <mkdir dir="${root}/temp/jade/add-ons"/>
+    <mkdir dir="${root}/temp/jade/add-ons/untraceability"/>
+    <copy todir="${root}/temp/jade/add-ons/untraceability">
+      <fileset dir="${root}" includes="src/**"/>
+      <fileset dir="${root}" includes="doc/**"/>
+      <fileset dir="${root}" includes="classes/**"/>
+      <fileset dir="${root}" includes="lib/**"/>
+      <fileset dir="${root}" includes="build.xml"/>
+      <fileset dir="${root}" includes="COPYING"/>
+      <fileset dir="${root}" includes="License"/>
+      <fileset dir="${root}" includes="tutorial.html"/>
+      <fileset dir="${root}" includes="*.pdf"/>
+    </copy>
+    <delete file="${dist}/untraceability-0.1.gamma.zip" quiet="true"/>
+    <zip zipfile="${dist}/untraceability-0.1.gamma.zip" basedir="${root}/temp"/>
+    <delete dir="${root}/temp" includeEmptyDirs="true" />
+  </target>
+
+  <target name="clean" description="clean up">
+  <!-- Delete the ${build} directory tree -->
+    <delete includeEmptyDirs="true">
+      <fileset dir="${build}" excludes="**/*.mf"/>
+      <fileset dir="${doc}"/>
+      <fileset dir="${lib}" includes="*.jar"/>
+    </delete>
+  </target>
+
+</project>
+
