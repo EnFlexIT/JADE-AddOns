@@ -34,9 +34,9 @@ public class ByteConstantNode extends StringConstant
     public final int getNodeID(){
         return 37;
     }
-    java.lang.Byte[] _lx_value;
+    byte[] _lx_value;
 
-    public ByteConstantNode(java.lang.Byte[] lx_value)  {
+    public ByteConstantNode(byte[] lx_value)  {
         super(0);
         lx_value(lx_value);
     }
@@ -61,6 +61,6 @@ public class ByteConstantNode extends StringConstant
         }
         initNode();
     }
-    public java.lang.Byte[] lx_value() {return _lx_value;}
-    public void lx_value(java.lang.Byte[] o) {_lx_value = o;}
+    public byte[] lx_value() {return _lx_value;}
+    public void lx_value(byte[] o) {_lx_value = o;}
 }

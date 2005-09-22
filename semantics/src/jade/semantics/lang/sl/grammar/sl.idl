@@ -40,6 +40,8 @@ CONTENT ::= content
     void addContentElement(Node element);
     void setContentElements(int number);
     int contentElementNumber();
+    jade.semantics.lang.sl.tools.MatchResult match(Node expression);
+    Node instantiate(String varname, Node expression);
 };
 
 content =>;
@@ -90,6 +92,8 @@ FORMULA ::= ATOMIC_FORMULA
     FORMULA getVariablesSubstitutionAsIn(FORMULA formula);
     FORMULA getVariablesSubstitution(VARIABLE x, VARIABLE y);
     FORMULA isBeliefFrom(TERM agent);
+    jade.semantics.lang.sl.tools.MatchResult match(Node expression);
+    Node instantiate(String varname, Node expression);
 };
 
 meta_formula_reference => lx_name : (java.lang.String),
@@ -191,8 +195,10 @@ TERM ::= VARIABLE
        | meta_term_reference
        => sm_simplified_term : TERM
 {
-     TERM getSimplifiedTerm();
-     void simplify();
+    TERM getSimplifiedTerm();
+    void simplify();
+    jade.semantics.lang.sl.tools.MatchResult match(Node expression);
+    Node instantiate(String varname, Node expression);
 };
 
 meta_term_reference => lx_name : (java.lang.String),
@@ -245,7 +251,7 @@ integer_constant => lx_value : (java.lang.Long);
 real_constant => lx_value : (java.lang.Double);
 string_constant => lx_value : (java.lang.String);
 word_constant => lx_value : (java.lang.String);
-byte_constant => lx_value : (java.lang.Byte[]);
+byte_constant => lx_value : (byte[]);
 date_time_constant => lx_value : (java.util.Date);
 
 ----------------------------------------------------

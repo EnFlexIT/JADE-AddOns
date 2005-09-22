@@ -47,7 +47,7 @@ import jade.semantics.lang.sl.grammar.Term;
  *  the performance of the action. 
  * <li>Rational effect (an SL formula): represents a state intented by the agent
  *  performing the action.
- * <li>Poscondition (an SL formula): represents the effect that the performing 
+ * <li>Postcondition (an SL formula): represents the effect that the performing 
  * agent considers to be true just after the performance of the action.
  * <li>A behaviour implementing the performance of this action by the agent.
  * </ul>
@@ -62,7 +62,7 @@ public interface SemanticAction {
     
     /**
      * Returns a Term that represents the author of the action.
-     * @return a Term that represents the author of the action, or null if not applicable
+     * @return a Term that represents the author of the action (could be null)
      */
     public Term getAuthor();
     
@@ -102,20 +102,28 @@ public interface SemanticAction {
     /********************************************************************/
     
     /**
-     * Creates a new instancied instance of the action based on the specified 
-     * action expression.
-     * @param actionExpression an action expresison
-     * @return an instancied semantic action
+     * Creates a new instance of this prototype of semantic action from
+     * the specified action expression.
+     * @param actionExpression
+     *          an expression of action that specifies the instance to create
+     * @return a new instance of the semantic action, the action expression of
+     * which is specified, or null if no instance of the semantic action with
+     * the specified action expression can be created
      * @throws SemanticInterpretationException if any exception occurs
      */
     public SemanticAction newAction(ActionExpression actionExpression) throws SemanticInterpretationException;
     
     /**
-     * Creates a new instancied instance of the action based on the specified 
-     * rational effect.
-     * @param rationalEffect a formula that specified the rational effet
-     * @param inReplyTo
-     * @return an instancied semantic actio
+     * Creates a new instance of this prototype of semantic action from
+     * the specified rational effect.
+     * Should be overridden when using the rational effect of the action
+     * (returns null by default).
+     * @param rationalEffect a formula that specifies the rational effet of the 
+     * instance to create
+     * @param inReplyTo an ACL message the message to answer
+     * @return a new instance of the semantic action, the rational effect of
+     * which is specified, or null if no instance of the semantic action with
+     * the specified rational effect can be created
      */
     public SemanticAction newAction(Formula rationalEffect, ACLMessage inReplyTo);
     

@@ -43,7 +43,7 @@ import jade.util.leap.ArrayList;
 /**
  * This semantic interpretation principle expresses a necessary cooperation principle of the Jade
  * agent (receiving the ACL message) towards the intentions that the sender 
- * intends to communicate. Thi step is typically used to interpret incoming 
+ * intends to communicate. This step is typically used to interpret incoming 
  * <code>Request</code> or <code>Inform</code> messages, the content of which 
  * being an intention of the sender. 
  * @author Vincent Pautret - France Telecom

@@ -1,12 +1,6 @@
 package jade.semantics.lang.sl.grammar.operations;
 
-import jade.semantics.lang.sl.grammar.ActionExpression;
-import jade.semantics.lang.sl.grammar.ActionExpressionNode;
 import jade.semantics.lang.sl.grammar.AlternativeActionExpressionNode;
-import jade.semantics.lang.sl.grammar.AndNode;
-import jade.semantics.lang.sl.grammar.Formula;
-import jade.semantics.lang.sl.grammar.ListOfTerm;
-import jade.semantics.lang.sl.grammar.SequenceActionExpressionNode;
 import jade.semantics.lang.sl.grammar.Term;
 
  

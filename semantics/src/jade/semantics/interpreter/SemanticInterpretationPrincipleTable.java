@@ -54,8 +54,8 @@ public interface SemanticInterpretationPrincipleTable {
     /**
      * Removes all the semantic interpretation principles that correspond to the
      * finder.
-     * @param finder the finder that permits the recognition of a semantic 
-     * interpretation principle
+     * @param finder the finder that permits the recognition of semantic 
+     * interpretation principles
      */
     public void removeSemanticInterpretationPrinciple(Finder finder);
     

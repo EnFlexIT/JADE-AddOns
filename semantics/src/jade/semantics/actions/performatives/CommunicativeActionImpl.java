@@ -21,7 +21,7 @@
  Boston, MA  02111-1307, USA.
  *****************************************************************/
 /*
- * CommunicativeAction.java
+ * CommunicativeActionImpl.java
  * Created on 9 dec. 2004
  * Author : Vincent Louis
  */
@@ -62,10 +62,9 @@ import jade.util.leap.Iterator;
 import java.util.Date;
 
 /**
- * This class is an implementation of the <code>SemanticAction</code>
+ * This class is an implementation of the <code>CommunicativeAction</code>
  * interface specific to the use of FIPA performatives. It is the super class of
  * the semantic implementation of all FIPA performatives.
- * 
  * @author Vincent LOUIS - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0
  */
@@ -255,16 +254,25 @@ public abstract class CommunicativeActionImpl extends SemanticActionImpl  implem
 	} // End of CommunicativeActionImpl/9
     
     /**
-     * Creates a new instance of communicative action
+     * Creates a new instance of communicative action. This abstract class 
+     * should be implemented by each subclass.
      * @return a new instance of communicative action
      */
-    public abstract CommunicativeActionImpl createInstance();
+    public abstract CommunicativeActionProto createInstance();
 
 	/***************************************************************************
 	 * PUBLIC METHODS /
 	 **************************************************************************/
     /**
-     * @inheritDoc
+     * Creates a new instance of this prototype of semantic action from
+     * the specified action expression.
+     * 
+     * @param actionExpression
+     *          an expression of action that specifies the instance to create
+     * @return a new instance of the semantic action, the action expression of
+     * which is specified, or null if no instance of the semantic action with
+     * the specified action expression can be created
+     * @throws SemanticInterpretationException if any exception occurs
      */
     public SemanticAction newAction(ActionExpression actionExpression) throws SemanticInterpretationException {
         return newAction(actionExpression, this);
@@ -571,6 +579,7 @@ public abstract class CommunicativeActionImpl extends SemanticActionImpl  implem
      ***********************************************************************/
     
     /**
+     * Returns a <code>PrimitiveBehaviour</code>.
      * @return a primitive behaviour 
      */
     public Behaviour computeBehaviour() {
@@ -774,7 +783,8 @@ public abstract class CommunicativeActionImpl extends SemanticActionImpl  implem
     }
 
     /**
-     * @return Returns the surfacePerformative.
+     * Returns the surface Performative.
+     * @return Returns the surface Performative.
      */
     public int getSurfacePerformative() {
         return surfacePerformative;

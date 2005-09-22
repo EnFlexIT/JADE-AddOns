@@ -54,12 +54,12 @@ import jade.util.leap.ArrayList;
 public class Alternative extends SemanticActionImpl {
     
     /**
-     * Left action of the alternative
+     * Left action of the alternative (could be an alternative or a sequence)
      */
     private SemanticAction leftAction;
     
     /**
-     * Right action of the alternative
+     * Right action of the alternative (could be an alternative or a sequence)
      */
     private SemanticAction rightAction;
     
@@ -90,8 +90,15 @@ public class Alternative extends SemanticActionImpl {
     /*********************************************************************/
     
     /**
-     * @inheritDoc
-     * 
+     * Creates a new instance of this prototype of semantic action from
+     * the specified action expression. The action expression must match the
+     * pattern (| ??leftPart ??rightPart). It returns an instance of alternative
+     * with the left and the right action correctly set.
+     * @param actionExpression
+     *          an expression of action that specifies the instance to create
+     * @return a new instance of alternative, or null if no instance of the 
+     * semantic action with the specified action expression can be created
+     * @throws SemanticInterpretationException if any exception occurs
      */
     public SemanticAction newAction(ActionExpression actionExpression) throws SemanticInterpretationException {
         MatchResult matchResult = SLPatternManip.match(alternativePattern, actionExpression);
@@ -124,8 +131,8 @@ public class Alternative extends SemanticActionImpl {
     } // End of newAction/1
     
     /**
-     * Returns an <code>Alternative</code> that is an alternative of all the 
-     * actions which are in the list.
+     * Returns an <code>Alternative</code> instance that is an alternative of 
+     * all the actions which are in the list.
      * @param list a list of actions
      * @return an <code>Alternative</code> if the size of the list is more than 
      * 1, a <code>SemanticAction</code> if the size equals 1, null if the list 
@@ -148,7 +155,14 @@ public class Alternative extends SemanticActionImpl {
     } // End of newAction/1
     
     /**
-     * @inheritDoc
+     * Creates a new instance of this prototype of semantic action from
+     * the specified rational effect. The rational effect must match the pattern
+     * (or ??left ??right).
+     * @param rationalEffect a formula that specifies the rational effet of the
+     *  instance to create
+     * @param inReplyTo an ACL message the message to answer
+     * @return a new instance of alternative, or null if no instance can be 
+     * created
      */
     public SemanticAction newAction(Formula rationalEffect, ACLMessage inReplyTo) {
         try {

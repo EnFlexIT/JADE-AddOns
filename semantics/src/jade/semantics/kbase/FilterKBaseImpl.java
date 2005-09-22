@@ -53,6 +53,7 @@ import jade.semantics.lang.sl.grammar.ListOfTerm;
 import jade.semantics.lang.sl.grammar.MetaTermReferenceNode;
 import jade.semantics.lang.sl.grammar.Node;
 import jade.semantics.lang.sl.grammar.NotNode;
+import jade.semantics.lang.sl.grammar.TermSequenceNode;
 import jade.semantics.lang.sl.grammar.TrueNode;
 import jade.semantics.lang.sl.grammar.Variable;
 import jade.semantics.lang.sl.tools.MatchResult;
@@ -67,7 +68,7 @@ import jade.util.leap.ArrayList;
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0
  */
-public class FilterKBaseImpl implements FilterKBase, KBFilterManagment {
+public class FilterKBaseImpl implements FilterKBase {
     
     /**
      * The maximum size of the event memory list
@@ -225,7 +226,7 @@ public class FilterKBaseImpl implements FilterKBase, KBFilterManagment {
             if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Raw asserting : " + formulaToAssert);
             MatchResult matchResult = SLPatternManip.match(bPattern,formulaToAssert);
             if (matchResult != null) {
-                Formula phi = matchResult.getFormula("??phi");
+                Formula phi = matchResult.getFormula("phi");
                 if ( ((phi instanceof AtomicFormula) && !(phi instanceof TrueNode)) ||
                         ((phi instanceof NotNode) && (((NotNode)phi).as_formula() instanceof AtomicFormula))) {
                     if (!dataStorage.contains(phi)) {
@@ -286,6 +287,25 @@ public class FilterKBaseImpl implements FilterKBase, KBFilterManagment {
                     return listOfResult;
                 }
             } 
+            // !!!! Code added by TM, 15/09/2005 !!!!
+            // May be the two algorithm could be unified (to be checked)
+            else if (expression.as_term() instanceof TermSequenceNode ) {
+                TermSequenceNode sequence = (TermSequenceNode)expression.as_term();
+                Formula pattern = expression.as_formula();
+                for (int i=0; i<sequence.as_terms().size(); i++) {
+                    if ( sequence.as_terms().element(i) instanceof Variable ) {
+                        Variable var = (Variable)sequence.as_terms().element(i);
+                        pattern = (Formula)SLPatternManip.toPattern(pattern, var, var.lx_name());
+                    }
+                }
+                ListOfTerm listOfResult = getAllMatchingSequences(pattern, sequence);
+                if ((expression instanceof AnyNode && listOfResult.size() >= 1) ||
+                        (expression instanceof AllNode) ||
+                        (expression instanceof IotaNode && listOfResult.size() == 1)) {
+                    return listOfResult;
+                }
+            }
+            // !!!! End of added code !!!!
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -311,6 +331,35 @@ public class FilterKBaseImpl implements FilterKBase, KBFilterManagment {
         return result;
     } // End of getSolutions/1
     
+    //!!!!!!!!!!!!!!!!!! Added by TM, 15/09/2005, may be unified with the non sequence case !!!!!!!!!!!!!!!!!!!!!! 
+    /**
+     * Returns the list of all sequences that match the pattern 
+     * @param pattern a pattern
+     * @return list of solutions (list of sequences)
+     */
+    private ListOfTerm getAllMatchingSequences(Formula pattern, TermSequenceNode initial_sequence) {
+        ListOfTerm result = new ListOfTerm();
+        for (int j = 0; j < dataStorage.size(); j++) {
+            MatchResult matchResult = SLPatternManip.match(pattern, (Node)dataStorage.get(j));
+            if (matchResult != null) {
+                try {
+                    TermSequenceNode seq = new TermSequenceNode(new ListOfTerm());
+                    result.append(seq);
+                    for (int i=0; i<initial_sequence.as_terms().size(); i++) {
+                        if ( initial_sequence.as_terms().element(i) instanceof Variable ) {
+                            seq.as_terms().append(matchResult.getTerm(((Variable)initial_sequence.as_terms().element(i)).lx_name()));
+                        }
+                        else {
+                            seq.as_terms().append(initial_sequence.as_terms().element(i));
+                        }
+                    }
+                }
+                catch(Exception e) {e.printStackTrace();}
+            }
+        }
+        return result;
+    } // End of getAllMatchingSequences/1
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! End of the added code !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
     /**
      * Tries to match the formula on each data stored in the base. In case of
      * success, a new Bind is created with the name of the <code>MetaTermReferenceNode</code>
@@ -437,7 +486,7 @@ public class FilterKBaseImpl implements FilterKBase, KBFilterManagment {
      */
     public void addFiltersDefinition(FiltersDefinition filtersDefinition) {
         for (int i=0 ; i < filtersDefinition.size() ; i++) {
-            addKBFilter(filtersDefinition.get(i).getFilter(), filtersDefinition.get(i).getIndex());
+            addKBFilter(filtersDefinition.getFilterDefinition(i).getFilter(), filtersDefinition.getFilterDefinition(i).getIndex());
         }
     } // End of addFiltersDefinition/1
     
@@ -545,7 +594,7 @@ public class FilterKBaseImpl implements FilterKBase, KBFilterManagment {
     
     /**
      * For debugging purpose only
-     * @return an array that conatains a string representation of each data in 
+     * @return an array that contains a string representation of each data in 
      * the base
      */
     public String[] viewDataInBase() {

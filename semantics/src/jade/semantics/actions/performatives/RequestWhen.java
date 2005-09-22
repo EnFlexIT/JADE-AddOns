@@ -83,7 +83,7 @@ public class RequestWhen extends ActConditionInform {
      * Returns an instance of <code>RequestWhen</code>
      * @return an instance of <code>RequestWhen</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new RequestWhen(table);
     }
     

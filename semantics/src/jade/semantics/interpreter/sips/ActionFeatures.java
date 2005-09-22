@@ -42,16 +42,16 @@ import jade.util.leap.ArrayList;
 
 /**
  * Class that represents the Action Features Semantic Interpretation Principle.
- * This principle is intented to be applied to the initial formula representing the
+ * This principle is intended to be applied to the initial formula representing the
  * fact that the Jade agent has perceived an incoming ACL message.  
  * It produces four Semantic Representations :
  * <ul>
  * <li> one for checking the consistency.
  * <li> one stating that the Jade agent believes the persistent feasibility 
  * precondition of the received message is satisfied.
- * <li> one stating the the Jade agent believes the intentional effect of the 
+ * <li> one stating the Jade agent believes the intentional effect of the 
  * received message.
- * <li> the last is the poscondition of an action, the performance of which has just 
+ * <li> the last is the postcondition of an action, the performance of which has just 
  * been observed by the Jade agent.
  * </ul>
  * @author Vincent Pautret - France Telecom

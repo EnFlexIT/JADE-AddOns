@@ -1,13 +1,8 @@
 package jade.semantics.lang.sl.grammar.operations;
 
 import jade.semantics.lang.sl.grammar.FunctionalTermNode;
-import jade.semantics.lang.sl.grammar.ListOfParameter;
 import jade.semantics.lang.sl.grammar.ListOfTerm;
-import jade.semantics.lang.sl.grammar.Parameter;
-import jade.semantics.lang.sl.grammar.ParameterNode;
 import jade.semantics.lang.sl.grammar.Term;
-
-import java.util.Comparator;
 
 public class FunctionalTermNodeOperations 
 	extends TermNodeOperations {

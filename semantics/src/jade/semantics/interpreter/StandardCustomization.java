@@ -36,8 +36,8 @@ import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.grammar.Variable;
 
 /**
- * Provides methods to customise the semantic interpretation principles. These
- * methods offers to the developer to trigger some specific code.
+ * Provides methods to customize the semantic interpretation principles. These
+ * methods offer to the developer to trigger some specific code.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/03/16 Revision: 1.0 
  */
@@ -62,42 +62,42 @@ public interface StandardCustomization {
     /**
      * Returns a list of element that corresponds to the answer to the query. One and only one
      * solution is awaited.
-     * @param variable the variable that represents the variable in the formula
-     * @param formula the incoming formula
-     * @param action the action expression 
-     * @param agent the agent 
-     * @return the list of elements that respond to the query
+     * @param variable the variable used within the formula
+     * @param formula the condition of the CFP
+     * @param action the requested action to be performed 
+     * @param agent the agent who will perform the action if accepted
+     * @return the list of elements that contains the values to make the proposal
      */
     public ListOfTerm handleCFPIota(Variable variable, Formula formula, ActionExpression action, Term agent);
     
     /**
      * Returns a list of element that corresponds to the answer to the query. One 
      * solution is awaited.
-     * @param variable the variable that represents the variable in the formula
-     * @param formula the incoming formula
-     * @param action the action expression 
-     * @param agent the agent 
-     * @return the list of elements that respond to the query
+     * @param variable the variable used within the formula
+     * @param formula the condition of the CFP
+     * @param action the requested action to be performed 
+     * @param agent the agent who will perform the action if accepted
+     * @return the list of elements that contains the values to make the proposal
      */
     public ListOfTerm handleCFPAny(Variable variable, Formula formula, ActionExpression action, Term agent);
     
     /**
      * Returns a list of element that corresponds to the answer to the query. All the
      * solutions are awaited.
-     * @param variable the variable that represents the variable in the formula
-     * @param formula the incoming formula
-     * @param action the action expression 
-     * @param agent the agent 
-     * @return the list of elements that respond to the query
+     * @param variable the variable used within the formula
+     * @param formula the condition of the CFP
+     * @param action the requested action to be performed 
+     * @param agent the agent who will perform the action if accepted
+     * @return the list of elements that contains the values to make the proposal
      */
     public ListOfTerm handleCFPAll(Variable variable, Formula formula, ActionExpression action, Term agent);
     
     /**
-     * Returns true if this method trap the specified formula when an agent <i>agent</i> 
+     * Returns true if this method traps the specified formula when an agent <i>agent</i> 
      * is no longer committed to do an action <i>action</i> under the condition <i>formula</i>. 
      * @param agent a semantic agent
      * @param action the action
-     * @param formula the incoming formula
+     * @param formula the condition
      * @return true if the formula is trapped, false if not.
      */
     public boolean handleRefuse(Term agent, ActionExpression action, Formula formula);
@@ -108,17 +108,17 @@ public interface StandardCustomization {
      * <i>formula</i>.
      * @param agentI a semantic agent
      * @param action the action
-     * @param formula the incoming formula
+     * @param formula the condition
      * @return true if the formula is trapped, false if not.
      */
     public boolean handleRejectProposal(Term agentI, ActionExpression action, Formula formula);
     
     /**
      * Returns true if the specified formula is trapped when an agent <i>agent</i> 
-     * is commited to do an action <i>action</i> under the condition <i>formula</i>.
+     * is committed to do an action <i>action</i> under the condition <i>formula</i>.
      * @param agent a semantic agent
      * @param action the action
-     * @param formula the incoming formula
+     * @param formula the condition
      * @return true if the formula is trapped, false if not.
      */
     public boolean handleAgree(Term agent, ActionExpression action, Formula formula);
@@ -129,14 +129,15 @@ public interface StandardCustomization {
      * condition <i>formula</i>) towards the Jade agent.
      * @param agentI a semantic agent
      * @param action the action
-     * @param formula the incoming formula
+     * @param formula the condition
      * @return true if the formula is trapped, false if not.
      */
     public boolean handleProposal(Term agentI, ActionExpression action, Formula formula);
     
     /**
-     * Notifies the agent that it has just receive a subscribe from the subscriber
-     * on the formula "observed" with the goal "goal".
+     * Notifies the agent that it has just receive a subscribe, requestWhen or
+     * requestwhenever act from the subscriber on the formula "observed" 
+     * with the goal "goal".
      * @param subscriber a term representing an agent
      * @param obsverved the observed formula
      * @param goal the goal 

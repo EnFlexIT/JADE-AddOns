@@ -102,7 +102,7 @@ public class Confirm extends Assertive {
      * Returns a new <code>Confirm</code> instance
      * @return a new <code>Confirm</code> instance
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new Confirm(table);
     }
 } // End of class Confirm

@@ -39,6 +39,8 @@ public abstract class Content extends Node
             public void addContentElement(Content node, Node element);
             public void setContentElements(Content node, int number);
             public int contentElementNumber(Content node);
+            public jade.semantics.lang.sl.tools.MatchResult match(Content node, Node expression);
+            public Node instantiate(Content node, String varname, Node expression);
         }
         public String toSLString()
         {
@@ -87,6 +89,22 @@ public abstract class Content extends Node
                 _thisoperations = getOperations();
             }
             return((Content.Operations)_thisoperations).contentElementNumber(this );
+        }
+        public jade.semantics.lang.sl.tools.MatchResult match(Node expression)
+        {
+            
+            if ( _thisoperations == null ) {
+                _thisoperations = getOperations();
+            }
+            return((Content.Operations)_thisoperations).match(this , expression);
+        }
+        public Node instantiate(String varname, Node expression)
+        {
+            
+            if ( _thisoperations == null ) {
+                _thisoperations = getOperations();
+            }
+            return((Content.Operations)_thisoperations).instantiate(this , varname, expression);
         }
     static int _as_expressions = 0;
 

@@ -39,7 +39,7 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
 
 /**
- * This principle is intented to be applied when an agent receives a Propose 
+ * This principle is intended to be applied when an agent receives a Propose 
  * message.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/03/11 Revision: 1.0
@@ -64,7 +64,7 @@ public class Propose extends SemanticInterpretationPrinciple {
     public Propose(SemanticCapabilities capabilities) {
         super(capabilities);
         pattern = SLPatternManip.fromFormula("(B " + myCapabilities.getAgentName() + "(or (not (I " + myCapabilities.getAgentName() + " (done ??act ??condition))) (I ??agent (done ??act ??condition))))");
-    } // End of ProposeFilter/1
+    } // End of Propose/1
     
     /*********************************************************************/
     /**                         METHODS                                 **/
@@ -84,10 +84,10 @@ public class Propose extends SemanticInterpretationPrinciple {
                 ActionExpression act = (ActionExpression)applyResult.getTerm("act");
                 if ( act instanceof ActionExpressionNode
                         && ((ActionExpressionNode)act).as_agent().equals(applyResult.getTerm("agent"))
-                        && !myCapabilities.getAgentName().equals(applyResult.getTerm("??agent")) 
-                        && myCapabilities.getMyStandardCustomization().handleProposal(applyResult.getTerm("??agent"), 
+                        && !myCapabilities.getAgentName().equals(applyResult.getTerm("agent")) 
+                        && myCapabilities.getMyStandardCustomization().handleProposal(applyResult.getTerm("agent"), 
                                 act, 
-                                applyResult.getFormula("??condition"))) 
+                                applyResult.getFormula("condition"))) 
                 {
                     
                     return new ArrayList();
@@ -101,4 +101,4 @@ public class Propose extends SemanticInterpretationPrinciple {
         return null;
     } // End of apply/1
     
-} // End of class ProposeFilter
+} // End of class Propose

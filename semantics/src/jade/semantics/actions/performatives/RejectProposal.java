@@ -88,7 +88,7 @@ public class RejectProposal extends NonPrimitiveInform {
      * Returns an instance of <code>RejectProposal</code>
      * @return an instance of <code>RejectProposal</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new RejectProposal(table);
     }
     

@@ -74,7 +74,7 @@ public class AcceptProposal extends ActConditionInform {
      * Returns an instance of AcceptProposal
      * @return an instance of AcceptProposal
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new AcceptProposal(table);
     } // End of createInstance/0
 } // End of class AcceptProposal

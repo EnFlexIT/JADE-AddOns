@@ -92,7 +92,13 @@ public class SLUnparser extends VisitorBase
 		_nextChar = WHITE_CHAR;
     }
 	
+	// -----------------------------------------------
 	void _outputMetaReference(Node value, String name)
+	// This method outputs a meta reference in respect
+	// to the output mode (i.e., _trueSL or not).
+	// If _trueSL then it outputs the value or set _invalidSLExpr if no value is assigned to the meta reference.
+	// If !_trueSL then is outputs the value or the name of the meta reference if no value is assigned to.
+	// -----------------------------------------------
 	{
 		try {
 			if ( value != null ) {
@@ -248,8 +254,9 @@ public class SLUnparser extends VisitorBase
     public void visitByteConstantNode(ByteConstantNode node) {
 		int n = node.lx_value().length;
 		String bytesAsAString = "#"+Integer.toString(n)+"\"";
-		for (int i=0; i<n;i++) {bytesAsAString += (char)node.lx_value()[i].byteValue();}
-		_outputLiteralExp(bytesAsAString);
+		char[] bytesAsChar = new char[n];
+		for (int i=0; i<n;i++) {bytesAsChar[i] = (char)node.lx_value()[i];}
+		_outputLiteralExp(bytesAsAString+new String(bytesAsChar));
     }
 
     public void visitStringConstantNode(StringConstantNode node) {
@@ -290,7 +297,7 @@ public class SLUnparser extends VisitorBase
 			 SLPatternManip.getMetaReferenceValue(node.as_value()) == null ) {
 			// Meta variable which is not instantiated.
 			if ( _trueSL ) {
-				if ( node.lx_optional() ) {
+				if ( node.lx_optional().booleanValue() ) {
 					// Ntohing to print.
 				}
 				else {
@@ -298,14 +305,14 @@ public class SLUnparser extends VisitorBase
 				}
 			}
 			else {
-				if ( node.lx_optional() ) {
+				if ( node.lx_optional().booleanValue() ) {
 					_out.print(_nextChar);
 					_out.print("(::?");
 					_nextChar = WHITE_CHAR;
 				}
 				_outputLiteralExp(":"+node.lx_name());
 				node.childrenAccept(this);
-				if ( node.lx_optional() ) {
+				if ( node.lx_optional().booleanValue() ) {
 					_out.print(")");
 					_nextChar = WHITE_CHAR;
 				}

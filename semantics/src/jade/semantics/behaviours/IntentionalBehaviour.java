@@ -42,11 +42,10 @@ import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 
 /**
- * Behaviour that encapsulates an other behaviour. At first step, an intention 
- * is stored in the knowledge base. Then the encapsulated behaviour is executed. 
- * If the result of this behaviour is FEASIBILITY_FAILURE, a internal event is 
- * generated with the stored formula. Finally, the formula is deleted from the 
- * knowledge base. 
+ * This behaviour his mainly used by the ActionPerformance, the 
+ * RationalityPrinciple, and the Planning SIP to handle correctly the intentions
+ * of the agent. This behaviour extends jade.core.behaviours.SequentialBehaviour,
+ *  and encapsulates only one sub-behaviour.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/05/12 Revision: 1.0
  */
@@ -54,7 +53,7 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
     
     
     /**
-     * The formula to add in the knowledge base
+     * The intention to add in the knowledge base
      */
     private Formula intention;
     
@@ -100,7 +99,7 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
     /**
      * Creates an IntentionalBehaviour on the given behaviour.
      * @param behaviour the encapsulated behaviour
-     * @param intention the intention to be added in the knowledge base
+     * @param intention the intention to add in the knowledge base
      * @param index index of the semantic interpretation principle that 
      * generates this behaviour
      * @param data data to feed back
@@ -125,10 +124,10 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
     /**
      * If the internal behaviour finish with <code>SUCCESS</code>: <br>
      * interprets the feedback if needed, and sets the state of this behaviour to 
-     * <code>SUCCESS</code>. Reinjects the same intention to be intrepeted by an 
-     * other semantic interpretation principle, if the behaviour finish with 
+     * <code>SUCCESS</code>. Reinserts  the same intention to be interpreted  by 
+     * another semantic interpretation principle, if the behaviour finish with 
      * <code>FEASIBILITY_FAILURE</code>.In this case, the state of the behaviour
-     *  is set to <code>FEASIBILITY_FAILURE</code>. Finaly, if the internal 
+     *  is set to <code>FEASIBILITY_FAILURE</code>. Finally, if the internal 
      *  behaviour finish with <code>EXECUTION_FAILURE</code>, the state is set
      *  to <code>EXECUTION_FAILURE</code>. 
      * @return 0
@@ -183,6 +182,7 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
     } // End of onEnd/0
     
     /**
+     * Checks the termination of the behaviour
      * @return true if the state of the behaviour is <code>SUCCESS</code>, 
      * <code>FEASIBILITY_FAILURE</code>, or <code>EXECUTION_FAILURE</code>.
      * @see jade.core.behaviours.CompositeBehaviour#checkTermination(boolean, int)

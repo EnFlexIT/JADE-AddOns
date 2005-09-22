@@ -244,17 +244,17 @@ public class ManAgent extends SemanticAgentBase {
             Content content = (Content)SLParser.getParser().parseContent("("+formula+")");
             if (subscribe) {
                 msg.setContent(SLPatternManip.instantiate(REQUEST_WHENEVER_SUBSCRIBE_PATTERN, 
-                        "??me", getSemanticCapabilities().getAgentName(),
-                        "??thermometer", receiver,
-                        "??content", new StringConstantNode(content.toString()),
-                        "??phi", formula).toString());
+                        "me", getSemanticCapabilities().getAgentName(),
+                        "thermometer", receiver,
+                        "content", new StringConstantNode(content.toString()),
+                        "phi", formula).toString());
             } else {
                 Content result = (Content)INFORM_UNSUBSCRIBE_PATTERN.getClone();
-                SLPatternManip.set(result, "??e", new VariableNode("e"));
-                SLPatternManip.set(result, "??me", getSemanticCapabilities().getAgentName());
-                SLPatternManip.set(result, "??thermometer", receiver);
-                SLPatternManip.set(result, "??content", new StringConstantNode(content.toString()));
-                SLPatternManip.set(result, "??phi", formula);
+                SLPatternManip.set(result, "e", new VariableNode("e"));
+                SLPatternManip.set(result, "me", getSemanticCapabilities().getAgentName());
+                SLPatternManip.set(result, "thermometer", receiver);
+                SLPatternManip.set(result, "content", new StringConstantNode(content.toString()));
+                SLPatternManip.set(result, "phi", formula);
                 SLPatternManip.substituteMetaReferences(result);
                 msg.setContent(result.toString());
             }

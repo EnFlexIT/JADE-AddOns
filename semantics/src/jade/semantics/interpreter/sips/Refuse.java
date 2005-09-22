@@ -38,7 +38,7 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
 
 /**
- * This principle is intented to be applied if an agent is no longer commited to 
+ * This principle is intended to be applied if an agent is no longer committed to 
  * do an action under a condition. This principle may be apply when the Jade
  * agent receives a <code>Cancel</code> or a <code>Refuse</code> message.  
  * @author Vincent Pautret - France Telecom
@@ -63,7 +63,7 @@ public class Refuse extends SemanticInterpretationPrinciple {
     public Refuse(SemanticCapabilities capabilities) {
         super(capabilities);
         pattern = SLPatternManip.fromFormula("(not (I ??agent (done (action ??agent ??act) ??condition)))");
-    } // End of CancelActionFilter/1
+    } // End of Refuse/1
     
     /*********************************************************************/
     /**                         METHODS                                 **/

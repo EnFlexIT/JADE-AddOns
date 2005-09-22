@@ -110,7 +110,7 @@ public class InformRef extends CommunicativeActionImpl {
      * Returns an instance of <code>InformRef</code>
      * @return an instance of <code>InformRef</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new InformRef(table);
     }
     

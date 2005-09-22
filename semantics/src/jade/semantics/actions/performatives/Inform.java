@@ -99,7 +99,7 @@ public class Inform extends Assertive {
      * Returns an instance of <code>Inform</code>
      * @return an instance of <code>Inform</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new Inform(table);
     }
 } 

@@ -94,7 +94,7 @@ public class Subscribe extends RequestWhenever {
      * Returns an instance of <code>Subscribe</code>
      * @return an instance of <code>Subscribe</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new Subscribe(table);
     }
     

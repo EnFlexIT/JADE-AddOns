@@ -71,6 +71,7 @@ public class AlternativeBehaviour extends SequentialBehaviour implements Semanti
     
     
     /**
+     * Checks if the behaviour is finished.
      * @return if the behaviour is done, returns true with internal state set at <code>SUCCESS</code> if one 
      * behaviour of the sequence returns <code>SUCCESS</code>, or returns true with
      * internal state set at <code>EXECUTION_FAILURE</code> if one behaviour 

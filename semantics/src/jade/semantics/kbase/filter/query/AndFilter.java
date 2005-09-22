@@ -63,7 +63,7 @@ public class AndFilter extends KBQueryFilter {
     /*********************************************************************/
     
     /**
-     * Creates a new Filter
+     * Creates a new Filter on the pattern (and ??phi ??psi)
      */
     public AndFilter() {
         pattern = SLPatternManip.fromFormula("(and ??phi ??psi)");
@@ -74,14 +74,15 @@ public class AndFilter extends KBQueryFilter {
     /*********************************************************************/
     
     /** 
+     * Returns true if the formula matches the pattern (and ??phi ??psi).
      * @inheritDoc
      */
     public boolean isApplicable(Formula formula, Term agent) {
         try {
             applyResult = SLPatternManip.match(pattern,formula);
             if (applyResult != null) {
-                phi = applyResult.getFormula("??phi");
-                psi = applyResult.getFormula("??psi");
+                phi = applyResult.getFormula("phi");
+                psi = applyResult.getFormula("psi");
                 return true;
             }
         } catch (Exception e) {
@@ -91,7 +92,6 @@ public class AndFilter extends KBQueryFilter {
     } // End of isApplicable/2
     
     /**
-     * 
      * Returns true if the two parts of the formula are in the base, false if 
      * not.
      * @inheritDoc

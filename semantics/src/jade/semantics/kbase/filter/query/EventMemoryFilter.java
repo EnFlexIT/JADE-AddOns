@@ -55,7 +55,7 @@ public class EventMemoryFilter extends KBQueryFilter {
     private Formula donePattern;
     
     /**
-     * Creates a new filter
+     * Creates a new filter. Instantiates the patterns.
      */
     public EventMemoryFilter() {
         existPattern = SLPatternManip.fromFormula("(B ??agent (exists ??e (done ??act)))");
@@ -63,8 +63,11 @@ public class EventMemoryFilter extends KBQueryFilter {
     }
     
     /**
-     * Returns true, if <code>existPattern</code> or <code>donePattern</code> 
-     * matches.
+     * Returns true, if one of these patterns match:
+     * <ul>
+     * <li>(B ??agent (exists ??e (done ??act)))
+     * <li>(B ??agent (done ??act true))
+     * <ul>
      * @inheritDoc
      */
     public boolean isApplicable(Formula formula, Term agent) {
@@ -83,7 +86,7 @@ public class EventMemoryFilter extends KBQueryFilter {
     } // End of isApplicable/2
     
     /**
-     * Returns a new list (i.e. true) if the action recovered in the match result is a
+     * Returns a new Bindings (i.e. true) if the action recovered in the match result is a
      * sequence of action already done by the agent, <code>null</code> if not.
      * @inheritDoc
      */
@@ -106,7 +109,7 @@ public class EventMemoryFilter extends KBQueryFilter {
      * @param action the action expression to test
      * @param index current index
      * @param goOn true if a VariableNode is met
-     * @return true if the action expression is in the memory, false if not.
+     * @return true if the action expression is in memory, false if not.
      */
     private boolean analyzeActionExpression(Term action, int index, boolean goOn) {
         if (index == myKBase.getEventMemory().size() && !(action instanceof VariableNode)) {

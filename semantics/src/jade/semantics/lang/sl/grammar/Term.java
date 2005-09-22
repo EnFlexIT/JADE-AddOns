@@ -35,6 +35,8 @@ public abstract class Term extends Node
         {
             public Term getSimplifiedTerm(Term node);
             public void simplify(Term node);
+            public jade.semantics.lang.sl.tools.MatchResult match(Term node, Node expression);
+            public Node instantiate(Term node, String varname, Node expression);
         }
         public Term getSimplifiedTerm()
         {
@@ -51,6 +53,22 @@ public abstract class Term extends Node
                 _thisoperations = getOperations();
             }
             ((Term.Operations)_thisoperations).simplify(this );
+        }
+        public jade.semantics.lang.sl.tools.MatchResult match(Node expression)
+        {
+            
+            if ( _thisoperations == null ) {
+                _thisoperations = getOperations();
+            }
+            return((Term.Operations)_thisoperations).match(this , expression);
+        }
+        public Node instantiate(String varname, Node expression)
+        {
+            
+            if ( _thisoperations == null ) {
+                _thisoperations = getOperations();
+            }
+            return((Term.Operations)_thisoperations).instantiate(this , varname, expression);
         }
     Term _sm_simplified_term;
 

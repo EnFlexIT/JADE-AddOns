@@ -40,7 +40,7 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
 
 /**
- * This principle is intented to be applied when an agent receives a UnSubscribe 
+ * This principle is intended to be applied when an agent receives a UnSubscribe 
  * message.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/03/14 Revision: 1.0
@@ -121,7 +121,7 @@ public class Unsubscribe extends SemanticInterpretationPrinciple {
      */
     public Unsubscribe(SemanticCapabilities capabilities) {
         this(capabilities, null, null);
-    } // End of Unsubscribe
+    } // End of Unsubscribe/1
     
     /*********************************************************************/
     /**                         METHODS                                 **/
@@ -175,7 +175,7 @@ public class Unsubscribe extends SemanticInterpretationPrinciple {
                         }
                     }
                 });
-                myCapabilities.getMyStandardCustomization().notifyUnsubscribe(subscriber, observedPattern, applyResult.getFormula("??goal"));
+                myCapabilities.getMyStandardCustomization().notifyUnsubscribe(subscriber, observedPattern, applyResult.getFormula("goal"));
                 return new ArrayList();
             }
         }  catch (Exception  e) {

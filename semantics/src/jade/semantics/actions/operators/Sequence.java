@@ -51,12 +51,12 @@ import jade.util.leap.ArrayList;
  */
 public class Sequence extends SemanticActionImpl {
     /**
-     * Left action of the sequence
+     * Left action of the sequence (could be sequence or an alternative)
      */
     private SemanticAction leftAction;
     
     /**
-     * Right action of the sequence
+     * Right action of the sequence (could be sequence or an alternative)
      */
     private SemanticAction rightAction;
     
@@ -89,7 +89,15 @@ public class Sequence extends SemanticActionImpl {
     /*********************************************************************/
     
     /**
-     * @inheritDoc
+     * Creates a new instance of this prototype of semantic action from
+     * the specified action expression. The action expression must match the
+     * pattern (; ??leftPart ??rightPart). It returns an instance of sequence
+     * with the left and the right action correctly set.
+     * @param actionExpression
+     *          an expression of action that specifies the instance to create
+     * @return a new instance of sequence, or null if no instance of the 
+     * semantic action with the specified action expression can be created
+     * @throws SemanticInterpretationException if any exception occurs
      */
     public SemanticAction newAction(ActionExpression actionExpression) throws SemanticInterpretationException {
         Sequence result = new Sequence(table);
@@ -113,7 +121,7 @@ public class Sequence extends SemanticActionImpl {
     
     
     /**
-     * Returns a <code>Sequence</code> that is an alternative of all the 
+     * Returns a <code>Sequence</code> that is a sequence of all the 
      * actions which are in the list.
      * @param list a list of actions
      * @return a <code>Sequence</code> if the size of the list is more than 
@@ -137,7 +145,14 @@ public class Sequence extends SemanticActionImpl {
     } // End of newAction/1
     
     /**
-     * @inheritDoc
+     * Creates a new instance of this prototype of semantic action from
+     * the specified rational effect. The rational effect must match the pattern
+     * (and ??left ??right).
+     * @param rationalEffect a formula that specifies the rational effet of the
+     *  instance to create
+     * @param inReplyTo an ACL message the message to answer
+     * @return a new instance of sequence, or null if no instance can be 
+     * created
      */
     public SemanticAction newAction(Formula rationalEffect, ACLMessage inReplyTo) {
         Formula leftRationalEffect = null;
@@ -145,8 +160,8 @@ public class Sequence extends SemanticActionImpl {
         try {
             MatchResult matchResult = SLPatternManip.match(andPattern, rationalEffect);
             if (matchResult != null) {
-                leftRationalEffect = matchResult.getFormula("??left");
-                rightRationalEffect = matchResult.getFormula("??right");
+                leftRationalEffect = matchResult.getFormula("left");
+                rightRationalEffect = matchResult.getFormula("right");
                 ArrayList actionList = new ArrayList(); 
                 table.getSemanticActionInstance(actionList, leftRationalEffect, inReplyTo);
                 table.getSemanticActionInstance(actionList, rightRationalEffect, inReplyTo);
@@ -192,7 +207,9 @@ public class Sequence extends SemanticActionImpl {
     
     /**
      * @inheritDoc
-     * @return a <code>TrueNode</code>.
+     * @return the feasibility precondition can not be defined in a simple way.
+     * So, the feasibility precondition will be determined at runtime. Then the
+     * method returns a <code>TrueNode</code>.
      */
     public Formula computeFeasibilityPrecondition() throws WrongTypeException {
         return new TrueNode();
@@ -200,7 +217,9 @@ public class Sequence extends SemanticActionImpl {
     
     /**
      * @inheritDoc
-     * @return a <code>TrueNode</code>.
+     * @return a the persistent feasibility precondition can not be defined in a
+     * simple way. So, the persistent feasibility precondition will be 
+     * determined at runtime. Then the method returns a <code>TrueNode</code>.
      */
     public Formula computePersistentFeasibilityPreconditon() throws WrongTypeException {
         return new TrueNode();
@@ -208,7 +227,9 @@ public class Sequence extends SemanticActionImpl {
     
     /**
      * @inheritDoc
-     * @return a <code>TrueNode</code>.
+     * @return the rational effect can not be defined in a simple way.
+     * So, the rational effect will be determined at runtime. Then the
+     * method returns a <code>TrueNode</code>.
      */
     public Formula computeRationalEffect() throws WrongTypeException {
         return new TrueNode();
@@ -216,7 +237,9 @@ public class Sequence extends SemanticActionImpl {
     
     /**
      * @inheritDoc
-     * @return a <code>TrueNode</code>.
+     * @return the postcondition can not be defined in a simple way.
+     * So, the postcondition will be determined at runtime. Then the
+     * method returns a <code>TrueNode</code>.
      */
     public Formula computePostCondition() throws WrongTypeException {
         return new TrueNode();

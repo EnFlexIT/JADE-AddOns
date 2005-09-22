@@ -1,6 +1,5 @@
 package jade.semantics.lang.sl.tools;
 
-import jade.semantics.lang.sl.grammar.ActionExpression;
 import jade.semantics.lang.sl.grammar.ContentExpression;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.ListOfNodes;
@@ -49,6 +48,25 @@ public class MatchResult extends ListOfNodes {
 	}
 
 	/**
+	 * Return the formula assigned to the named meta variable
+	 * 
+	 * @param name
+	 *            the name of the meta variable to get its value
+	 * @return the formula which is the value of the meta variable named
+	 *         with the given <b><code>name</code></b>, or <b><code>null</code></b>
+	 *         if no formula is assigned to this meta variable, meaning the
+	 *         last matching operation has failed, or no matching operation
+	 *         has been performed on this pattern.
+	 */
+	public Formula formula(String name) {
+		try {
+			return getFormula(name);
+		}
+		catch(WrongTypeException wte) {wte.printStackTrace();}
+		return null;
+	}
+	
+	/**
 	 * Return the term assigned to the named meta variable.
 	 * 
 	 * @param name
@@ -75,6 +93,25 @@ public class MatchResult extends ListOfNodes {
 	}
 
 	/**
+	 * Return the term assigned to the named meta variable.
+	 * 
+	 * @param name
+	 *            the name of the meta variable to get its value
+	 * @return the term which is the value of the meta variable named with
+	 *         the given <b><code>name</code></b>, or <b><code>null</code></b>
+	 *         if no term is assigned to this meta variable, meaning the
+	 *         last matching operation has failed, or no matching operation
+	 *         has been performed on this pattern.
+	 */
+	public Term term(String name) {
+		try {
+			return getTerm(name);
+		}
+		catch(WrongTypeException wte) {wte.printStackTrace();}
+		return null;
+	}
+	
+	/**
 	 * Return the variable assigned to the named meta variable.
 	 * 
 	 * @param name
@@ -98,6 +135,25 @@ public class MatchResult extends ListOfNodes {
 	}
 
 	/**
+	 * Return the variable assigned to the named meta variable.
+	 * 
+	 * @param name
+	 *            the name of the meta variable to get its value
+	 * @return the variable which is the value of the meta variable named
+	 *         with the given <b><code>name</code></b>, or <b><code>null</code></b>
+	 *         if no variable is assigned to this meta variable, meaning the
+	 *         last matching operation has failed, or no matching operation
+	 *         has been performed on this pattern.
+	 */
+	public Variable variable(String name) {
+		try {
+			return getVariable(name);
+		}
+		catch(WrongTypeException wte) {wte.printStackTrace();}
+		return null;
+	}
+	
+	/**
 	 * Return the symbol assigned to the named meta variable.
 	 * 
 	 * @param name
@@ -120,6 +176,25 @@ public class MatchResult extends ListOfNodes {
 		return result;
 	}
 
+	/**
+	 * Return the symbol assigned to the named meta variable.
+	 * 
+	 * @param name
+	 *            the name of the meta variable to get its value
+	 * @return the symbol which is the value of the meta variable named with
+	 *         the given <b><code>name</code></b>, or <b><code>null</code></b>
+	 *         if no symbol is assigned to this meta variable, meaning the
+	 *         last matching operation has failed, or no matching operation
+	 *         has been performed on this pattern.
+	 */
+	public Symbol symbol(String name) {
+		try {
+			return getSymbol(name);
+		}
+		catch(WrongTypeException wte) {wte.printStackTrace();}
+		return null;
+	}
+	
 	/**
 	 * Return the content expression assigned to the named meta variable.
 	 * 
@@ -146,6 +221,26 @@ public class MatchResult extends ListOfNodes {
 		return result;
 	}
 
+	/**
+	 * Return the content expression assigned to the named meta variable.
+	 * 
+	 * @param name
+	 *            the name of the meta variable to get its value
+	 * @return the content expression which is the value of the meta
+	 *         variable named with the given <b><code>name</code></b>,
+	 *         or <b><code>null</code></b> if no content expression is
+	 *         assigned to this meta variable, meaning the last matching
+	 *         operation has failed, or no matching operation has been
+	 *         performed on this pattern.
+	 */
+	public ContentExpression contentExpression(String name) {
+		try {
+			return getContentExpression(name);
+		}
+		catch(WrongTypeException wte) {wte.printStackTrace();}
+		return null;
+	}
+	
 	/**
 	 * This method return a display of the matching result.
 	 */

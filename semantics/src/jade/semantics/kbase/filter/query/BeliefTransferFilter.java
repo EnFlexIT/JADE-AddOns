@@ -38,7 +38,7 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 
 /**
  * Is the semantic agent cooperative towards the agent <i>agent</i> regarding a specific belief?
- * This question is asked whenever whenever an agent <i>agent</i> expresses a piece of 
+ * This question is asked whenever an agent <i>agent</i> expresses a piece of 
  * information towards the semantic agent.
  * For example, this filter may be applied when the Jade agent receives a 
  * <code>RequestWhenever</code>, a <code>Refuse</code>, <code>Subscribe</code>, a
@@ -51,26 +51,26 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 public class BeliefTransferFilter extends KBQueryFilter {
     
     /**
-     * The filter manager
+     * The customization object of the agent which owns this filter
      */
     private StandardCustomization standardCustomization;
     
     /**
      * Pattern that must match to apply the filter
      */
-    private Formula pattern = 
-        SLPatternManip.fromFormula("(or (not (I ??agent1 (B ??agent2 ??belief))) (B ??agent2 ??belief))");   
+    private Formula pattern;    
     
     /*********************************************************************/
     /**				 			CONSTRUCTOR								**/
     /*********************************************************************/
     
     /**
-     * Creates a new filter
-     * @param standardCustomization the customization object of the agent that 
+     * Creates a new filter. Instantiate the pattern.
+     * @param standardCustomization the customization object of the agent which 
      * owns this filter
      */
     public BeliefTransferFilter(StandardCustomization standardCustomization) {
+        pattern = SLPatternManip.fromFormula("(or (not (I ??agent1 (B ??agent2 ??belief))) (B ??agent2 ??belief))");
         this.standardCustomization = standardCustomization;
     } // End of BeliefTransferFilter/1
     
@@ -79,6 +79,9 @@ public class BeliefTransferFilter extends KBQueryFilter {
     /*********************************************************************/
     
     /**
+     * Returns true if the formula matches the pattern
+     * (or (not (I ??agent1 (B ??agent2 ??belief))) (B ??agent2 ??belief)) and if 
+     * the current agent is agent2 but not agent1. 
      * @inheritDoc
      */
     public boolean isApplicable(Formula formula, Term agent) {
@@ -96,7 +99,8 @@ public class BeliefTransferFilter extends KBQueryFilter {
     } // End of isApplicable/2
     
     /**
-     * Returns true if the method {@link StandardCustomization#acceptBeliefTransfer(Formula, Term)} returns true,
+     * Returns an empty Bindings (meaning true),
+     * if the method {@link StandardCustomization#acceptBeliefTransfer(Formula, Term)} returns true,
      * false if not.
      * @inheritDoc
      */

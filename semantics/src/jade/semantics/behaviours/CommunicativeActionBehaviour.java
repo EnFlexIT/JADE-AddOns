@@ -54,7 +54,7 @@ public abstract class CommunicativeActionBehaviour extends SemanticBehaviourBase
     
     /**
      * Sends an ACL message if the feasibility precondition of the action is 
-     * satisfied. Stores in the knowledge base, the post condition of the action
+     * satisfied. Stores in the knowledge base, the postcondition of the action
      * and the fact that the agent has done the action.
      * @see jade.core.behaviours.Behaviour#action()
      */

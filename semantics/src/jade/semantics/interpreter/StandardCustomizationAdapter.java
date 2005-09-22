@@ -99,7 +99,7 @@ public class StandardCustomizationAdapter implements StandardCustomization {
     } // End of trapProposal/3
 	
 	/**
-     * By default does nothing
+     * By default, does nothing
      * @inheritDoc 
 	 * 
 	 */
@@ -108,7 +108,7 @@ public class StandardCustomizationAdapter implements StandardCustomization {
 	}
 	
 	/**
-     * By default does nothing
+     * By default, does nothing
      * @inheritDoc 
 	 * 
 	 */

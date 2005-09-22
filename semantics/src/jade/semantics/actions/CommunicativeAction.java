@@ -77,19 +77,27 @@ public interface CommunicativeAction extends SemanticAction {
      **************************************************************************/
     
     /**
-     * Creates an instance of Semantic Action from an action expression.
-     * @param actionExpression an action expression
+     * Creates a new instance of this prototype of semantic action from
+     * the specified action expression.
+     * 
+     * @param actionExpression
+     *          an expression of action that specifies the instance to create
+     * @return a new instance of the semantic action, the action expression of
+     * which is specified, or null if no instance of the semantic action with
+     * the specified action expression can be created
      * @throws SemanticInterpretationException if any exception occurs
-     * @return a semantic action
      */
     public SemanticAction newAction(ActionExpression actionExpression) throws SemanticInterpretationException;
     
     
     /**
-     * Creates an instance of Semantic Action from an ACLMessage.
+     * Creates a new instance of this prototype of semantic action from an 
+     * ACLMessage.
      * @param aclMessage an ACL Message
      * @throws SemanticInterpretationException if any exception occurs
-     * @return a semantic action
+     * @return a new instance of the semantic action, the ACL message of
+     * which is specified, or null if no instance of the semantic action with
+     * the specified ACL message can be created
      */
     public SemanticAction newAction(ACLMessage aclMessage) throws SemanticInterpretationException;
     
@@ -101,7 +109,9 @@ public interface CommunicativeAction extends SemanticAction {
      * @param content content of the action
      * @param inReplyTo communicative action to reply to 
      * @throws SemanticInterpretationException if any exception occurs
-     * @return a semantic action
+     * @return a new instance of the semantic action, the parameters of
+     * which are specified, or null if no instance of the semantic action with
+     * the specified parameters can be created
      */
     public SemanticAction newAction(Term author, ListOfTerm receivers, Content content, CommunicativeAction inReplyTo) throws SemanticInterpretationException;
     
@@ -109,17 +119,26 @@ public interface CommunicativeAction extends SemanticAction {
      * Creates an instance of the Semantic Action from a communicative action and a specific content
      * @param content content of the action
      * @param body communicative action, model to build the new action 
-     * @return a semantic action
+     * @return a new instance of the semantic action, the parameters of
+     * which are specified, or null if no instance of the semantic action with
+     * the specified parameters can be created
      * @throws SemanticInterpretationException if any exception occurs
      */
     public SemanticAction newAction(Content content, CommunicativeAction body) throws SemanticInterpretationException;
     
     
     /**
-     * Creates an instance of Semantic Action from an instantiation of its Rational Effect
-     * @param rationalEffect rational effect of the action
-     * @param inReplyTo ACL Message to reply to (could be <code>null</code>)
-     * @return a semantic action
+     * Creates a new instance of this prototype of semantic action from
+     * the specified rational effect.
+     * Should be overridden when using the rational effect of the action
+     * (returns null by default).
+     * 
+     * @param rationalEffect
+     *              a formula that specifies the rational effet of the instance to create
+     * @param inReplyTo an ACL message the message to answer
+     * @return a new instance of the semantic action, the rational effect of
+     * which is specified, or null if no instance of the semantic action with
+     * the specified rational effect can be created
      */
     public SemanticAction newAction(Formula rationalEffect, ACLMessage inReplyTo);
     
@@ -171,8 +190,8 @@ public interface CommunicativeAction extends SemanticAction {
     
     
     /**
-     * Returns the fisrt receiver of the receiver list.
-     * @return the fisrt receiver of the receiver list.
+     * Returns the first receiver of the receiver list.
+     * @return the first receiver of the receiver list.
      */
     public Term getReceiver();
     
@@ -413,7 +432,7 @@ public interface CommunicativeAction extends SemanticAction {
     public ListOfTerm getReplyToList();
     
     /**
-     * Sets reply-to parmeter.
+     * Sets reply-to parameter.
      * @param replyToList The replyToList to set.
      */
     public void setReplyToList(ListOfTerm replyToList);

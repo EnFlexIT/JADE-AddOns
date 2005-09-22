@@ -93,12 +93,12 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
     private Logger logger;
     
     /**
-     * List of behaviours to be added at the agent 
+     * List of behaviours to be added to the agent 
      */
     private ArrayList behaviourToAdd;
     
     /**
-     * List of behaviours to be removed at the agent
+     * List of behaviours to be removed from the agent
      */
     private ArrayList behaviourToRemove;
     
@@ -122,7 +122,7 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
     /*********************************************************************/
     
     /**
-     * Creates a new semantic behaviour.
+     * Creates a new semantic interpretation behaviour.
      * @param msgTemplate a pattern for matching incoming ACL messages
      */
     public SemanticInterpreterBehaviour(MessageTemplate msgTemplate) {
@@ -289,7 +289,7 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
                         }
                     }
                 }
-            } 
+            }
             if (msg == null) block();
         } catch (Exception e) {
             e.printStackTrace();
@@ -298,8 +298,8 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
     
     /**
      * Returns the minimum index of a semantic interpretation principle
-     *  in the list of semantic representation. Returns -1 if the list is 
-     *  <code>null</code>.
+     * in the list of semantic representation. Returns -1 if the list is 
+     * <code>null</code>.
      * @param srList a list (ArrayList) of SemanticRepresentation objects.
      * @return the minimum index
      */
@@ -319,7 +319,7 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
     
     /**
      * Returns true if one of the Semantic Representation contained in the list 
-     * is false.
+     * is false. Sends a Not Understood message in this case.
      * @param list a list of Semantic Representation
      * @return true if one of the Semantic Representation contained in the list 
      * is false, false if not.
@@ -419,7 +419,7 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
     }
     
     /**
-     * Interpret a SemanticRepresentation, i.e. adds this SR in the internal 
+     * Interprets a SemanticRepresentation, i.e. adds this SR in the internal 
      * event list.
      * @param sr a SemanticRepresentation that represents the event
      */
@@ -429,7 +429,7 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
     } // End of interpret/1
     
     /**
-     * Interpret a formula, i.e. creates an event (a SemanticRepresentation) 
+     * Interprets a formula, i.e. creates an event (a SemanticRepresentation) 
      * in the internal event list from the given formula.
      * @param formula a formula to be interpreted
      */

@@ -48,7 +48,7 @@ import jade.semantics.interpreter.sips.Unsubscribe;
 import jade.util.leap.ArrayList;
 
 /**
- * Class that represents a table wihch contains all the semantic interpretation 
+ * Class that represents a table which contains all the semantic interpretation 
  * principles known by the agent.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/02 Revision: 1.0 
@@ -72,8 +72,8 @@ public class SemanticInterpretationPrincipleTableImpl extends ArrayList implemen
     /**************************************************************************/
     
     /**
-     * Adds a semantic interpretation principle in the table and update the 
-     * semantic interpretation principle index.
+     * Adds a semantic interpretation principle in the table and updates the 
+     * semantic interpretation principle index of the added sip.
      * @param sip the semantic interpretation principle
      */
     public void addSemanticInterpretationPrinciple(SemanticInterpretationPrinciple sip) {
@@ -92,7 +92,8 @@ public class SemanticInterpretationPrincipleTableImpl extends ArrayList implemen
     } // End of getSemanticInterpretationPrinciple/1
     
     /**
-     * Removes the semantic interpretation principle corresponding to a given specification
+     * Removes the semantic interpretation principle corresponding to a given 
+     * specification
      * @param sipFinder specifies the semantic interpretation principle to remove
      */
     public void removeSemanticInterpretationPrinciple(Finder sipFinder) {

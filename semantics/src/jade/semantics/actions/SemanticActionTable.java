@@ -36,7 +36,8 @@ import jade.semantics.lang.sl.grammar.Formula;
 import jade.util.leap.ArrayList;
 
 /**
- * Interface of the Semantic Action Table. 
+ * Interface of the Semantic Action Table. A semantic action table gathers all 
+ * the action known by a semantic agent.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/03/18 Revision: 1.0
  */
@@ -61,16 +62,16 @@ public interface SemanticActionTable {
     public void removeSemanticAction(Finder finder);
     
     /**
-     * Creates an instanciated <code>SemanticAction</code> from the <code>SemanticAction</code> prototype
+     * Creates an instantiated <code>SemanticAction</code> from the <code>SemanticAction</code> prototype
      * within the table corresponding to an <code>ActionExpression</code>
      * @param actionExpression the <code>ActionExpression</code> representing the <code>SemanticAction</code> to create
      * @throws SemanticInterpretationException if any exception occurs
-     * @return an instanciated <code>SemanticAction</code> that implements action
+     * @return an instantiated <code>SemanticAction</code> that implements action
      */
     public SemanticAction getSemanticActionInstance(ActionExpression actionExpression) throws SemanticInterpretationException;
     
     /**
-     * Creates an instanciated <code>SemanticAction</code> from the <code>SemanticAction</code> prototype
+     * Creates an instantiated <code>SemanticAction</code> from the <code>SemanticAction</code> prototype
      * within the table corresponding to an ACL Message
      * @param aclMessage an ACL Message
      * @return an instance of semantic action
@@ -79,7 +80,7 @@ public interface SemanticActionTable {
     public SemanticAction getSemanticActionInstance(ACLMessage aclMessage) throws SemanticInterpretationException;
     
     /**
-     * Creates a list of instanciated semantic actions from the <code>SemanticAction</code> prototypes
+     * Creates a list of instantiated semantic actions from the <code>SemanticAction</code> prototypes
      * within the table, such that each <code>SemanticAction</code> has a specified rational effect
      * @param actionList the list of actions to complete with the created semanticActions
      * @param rationalEffect the rational effect of the semanticActions to create

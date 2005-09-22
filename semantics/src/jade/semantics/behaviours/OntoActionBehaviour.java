@@ -35,7 +35,7 @@ import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 
 /**
- * Class that represents a behaviour for an ontologic action.
+ * Class that represents a behaviour for an ontological action.
  * @author Vincent Louis - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
  */
@@ -77,7 +77,7 @@ public class OntoActionBehaviour extends SemanticBehaviourBase {
     /**
      * If the action is feasible; the action is performed and the belief of 
      * feasibility precondition and belief of postcondition are considered as
-     * internal events.
+     * internal events (and so are interpreted by the agent).
      * @see jade.core.behaviours.Behaviour#action()
      */
     public void action() {

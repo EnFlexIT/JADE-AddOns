@@ -80,7 +80,7 @@ public class Agree extends ActConditionInform {
      * Returns an instance of <code>Agree</code>
      * @return an instance of <code>Agree</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new Agree(table);
     } // End of createInstance/0
 } // End of class Agree

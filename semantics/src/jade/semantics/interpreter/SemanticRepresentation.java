@@ -158,7 +158,7 @@ public class SemanticRepresentation {
 	} // End of getSLRepresentation/0
 
 	/**
-	 * Sets teh SL representation
+	 * Sets the SL representation
 	 * @param formula the formula to set
 	 */
 	public void setSLRepresentation(Formula formula) {
@@ -205,7 +205,7 @@ public class SemanticRepresentation {
 	} // End of ToString/0
     
     /**
-     * Two SR are equals if theire SL representations are equals.
+     * Two SR are equals if their SL representations are equal.
      * @see Object#equals(java.lang.Object) 
      */
     public boolean equals(Object o) {

@@ -34,7 +34,7 @@ import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
 
 /**
- * This principle is intented to be applied when an agent receives a RequestWhenever 
+ * This principle is intended to be applied when an agent receives a RequestWhenever 
  * message.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/03/14 Revision: 1.0

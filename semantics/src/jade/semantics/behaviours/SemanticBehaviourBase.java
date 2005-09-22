@@ -22,7 +22,7 @@
  *****************************************************************/
 
 /*
- * SemanticBehaviour.java
+ * SemanticBehaviourBase.java
  * Created on 16 nov. 2004
  * Author : Vincent Pautret
  */
@@ -34,7 +34,8 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.Logger;
 
 /**
- * Class that represents a semanticBehaviour. This class extends Behaviour and 
+ * Abstract class that represents a basic SemanticBehaviour. This class extends 
+ * jade.core.behaviours.Behaviour and 
  * add a state to the behaviour, which indicates the final execution state 
  * (SUCCESS, FEASIBILITY_FAILURE, or EXECUTION_FAILURE) of it.  
  * @author Vincent Pautret - France Telecom
@@ -83,12 +84,11 @@ public abstract class SemanticBehaviourBase extends Behaviour implements Semanti
      * Runs the behaviour. This abstract method must be implemented by
      * <code>SemanticBehaviour</code> subclasses to perform ordinary behaviour
      * duty.
-     * 
      */
     public abstract void action();
     
     /**
-     * Check if this behaviour is done.
+     * Checks if this behaviour is done.
      * 
      */
     public boolean done() {

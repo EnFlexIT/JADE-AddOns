@@ -49,7 +49,8 @@ public class EventMemoryFilter extends KBAssertFilter {
     private Formula pattern;
     
     /**
-     * Creates a new EventMemoryFilter
+     * Creates a new EventMemoryFilter. Instantiates the pattern to test the
+     * applicability.
      */
     public EventMemoryFilter() {
         pattern = SLPatternManip.fromFormula("(B ??agent (done ??action ??phi))");
@@ -58,7 +59,8 @@ public class EventMemoryFilter extends KBAssertFilter {
     /**
      * Asserts a formula.
      * If the formula given in parameter is a 
-     * SequenceActionExpressionNode, this method asserts all the elements of 
+     * <code>SequenceActionExpressionNode</code>,
+     * this method asserts all the elements of 
      * the sequence in the event list of the knowledge base. 
      * If the action expression given in parameter is an ActionExpressionNode,
      * the method asserts the action expression.
@@ -66,7 +68,7 @@ public class EventMemoryFilter extends KBAssertFilter {
      * and returns the formula given in parameter.
      * @param formula a formula to assert
      * @return <code>TrueNode</code> if the filter is applicable, the given formula in the 
-     * other case.
+     * other cases.
      */
     public Formula beforeAssert(Formula formula) {
         mustApplyAfter = false;

@@ -50,7 +50,7 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 public class IntentionTransferFilter extends KBQueryFilter {
     
     /**
-     * The filter manager
+     * The customization object of the agent which owns this filter
      */
     private StandardCustomization standardCustomization;
     
@@ -65,7 +65,7 @@ public class IntentionTransferFilter extends KBQueryFilter {
     
     /**
      * Creates a new filter
-     * @param standardCustomization the customization object of the agent that 
+     * @param standardCustomization the customization object of the agent which 
      * owns this filter
      */
     public IntentionTransferFilter(StandardCustomization standardCustomization) {
@@ -78,6 +78,9 @@ public class IntentionTransferFilter extends KBQueryFilter {
     /*********************************************************************/
     
     /**
+     * Returns true if the formula matches the pattern
+     * (or (not (I ??agent1 ??goal)) (I ??agent2 ??goal)) and if 
+     * the current agent is agent2 but not agent1. 
      * @inheritDoc
      */
     public boolean isApplicable(Formula formula, Term agent) {
@@ -94,7 +97,8 @@ public class IntentionTransferFilter extends KBQueryFilter {
     } // End of isApplicable/2
     
     /**
-     * Returns true if the method {@link StandardCustomization#acceptIntentionTransfer(Formula, Term)}
+     * Returns an empty Bindings (meaning true)
+     * if the method {@link StandardCustomization#acceptIntentionTransfer(Formula, Term)}
      * returns true, false if not.
      * @inheritDoc
      */

@@ -1,7 +1,6 @@
 package jade.semantics.lang.sl.grammar.operations;
 
 import jade.semantics.lang.sl.grammar.Constant;
-import jade.semantics.lang.sl.grammar.IntegerConstantNode;
 import jade.semantics.lang.sl.grammar.Node;
 import jade.semantics.lang.sl.grammar.RealConstantNode;
 
@@ -11,7 +10,7 @@ public class RealConstantNodeOperations
 {
     public Long intValue(Constant node)
 	{
-		return ((RealConstantNode)node).lx_value().longValue();
+		return new Long (((RealConstantNode)node).lx_value().longValue());
 	}
 	
     public Double realValue(Constant node)

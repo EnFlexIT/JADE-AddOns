@@ -85,7 +85,7 @@ public abstract class SemanticActionImpl implements SemanticAction {
     /********************************************************************/
     
     /**
-     * Constructor
+     * Constructor for a semantic action prototype
      * @param table the semantic action table that contains this semantic action
      */
     public SemanticActionImpl(SemanticActionTable table) {
@@ -103,6 +103,7 @@ public abstract class SemanticActionImpl implements SemanticAction {
     /********************************************************************/
     
     /**
+     * Returns the author of this action
      * @return Returns the author of this action
      */
     public Term getAuthor() {
@@ -118,6 +119,7 @@ public abstract class SemanticActionImpl implements SemanticAction {
     } // End of setAuthor/1
     
     /**
+     * Returns the feasibility precondition. 
      * @return Returns the feasibility precondition.
      **/
     public Formula getFeasibilityPrecondition() {
@@ -140,6 +142,7 @@ public abstract class SemanticActionImpl implements SemanticAction {
     } // End of setFeasibilityPrecondition/1
     
     /**
+     * Returns the persistentFeasibilityPrecondition.
      * @return Returns the persistentFeasibilityPrecondition.
      */
     public Formula getPersistentFeasibilityPrecondition() {
@@ -210,8 +213,8 @@ public abstract class SemanticActionImpl implements SemanticAction {
     } // End of setPostCondition/1
     
     /**
-     * Returns the body of the action.
-     * @return the body of the action
+     * Returns the behaviour of the action.
+     * @return the behaviour of the action
      **/
     public Behaviour getBehaviour() {
         if (behaviour == null) {
@@ -248,7 +251,7 @@ public abstract class SemanticActionImpl implements SemanticAction {
     /**
      * Creates a new instance of this prototype of semantic action from
      * the specified rational effect.
-     * Should be overriden when using the rational effect of the action
+     * Should be overridden when using the rational effect of the action
      * (returns null by default).
      * 
      * @param rationalEffect

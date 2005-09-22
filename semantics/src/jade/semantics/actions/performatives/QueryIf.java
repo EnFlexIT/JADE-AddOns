@@ -102,7 +102,7 @@ public class QueryIf extends Request {
      * Returns an instance of <code>QueryIf</code>
      * @return an instance of <code>QueryIf</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new QueryIf(table);
     }
 

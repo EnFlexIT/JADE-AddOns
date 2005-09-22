@@ -77,7 +77,7 @@ public class NotUnderstood extends ActionReasonInform {
      * Returns an instance of <code>NotUnderstood</code>.
      * @return an instance of <code>NotUnderstood</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new NotUnderstood(table);
     }
 }

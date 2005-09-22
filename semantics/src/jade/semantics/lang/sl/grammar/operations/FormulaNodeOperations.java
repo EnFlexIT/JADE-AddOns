@@ -14,6 +14,8 @@ import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.grammar.TrueNode;
 import jade.semantics.lang.sl.grammar.Variable;
 import jade.semantics.lang.sl.grammar.VariableNode;
+import jade.semantics.lang.sl.tools.SLPatternManip;
+import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
 
 public class FormulaNodeOperations extends DefaultNodeOperations implements Formula.Operations {
 	
@@ -117,4 +119,20 @@ public class FormulaNodeOperations extends DefaultNodeOperations implements Form
         formula.childrenOfKind(Variable.class, vars);
         return node.getVariablesSubstitution(vars);
     }
+	
+	public jade.semantics.lang.sl.tools.MatchResult match(Formula node, Node expression)
+	{
+		return SLPatternManip.match(node, expression);
+	}
+	
+	public Node instantiate(Formula node, String varname, Node expression)
+	{
+		try {
+			return SLPatternManip.instantiate(node, varname, expression);
+		} catch (WrongTypeException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }

@@ -111,7 +111,7 @@ public class Request extends CommunicativeActionImpl {
      * Returns an instance of <code>Request</code>
      * @return an instance of <code>Request</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new Request(table);
     }
     

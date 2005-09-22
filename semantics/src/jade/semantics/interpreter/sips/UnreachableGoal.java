@@ -37,7 +37,7 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
 
 /**
- * This principle is intented to be applied to all intentions that have not be 
+ * This principle is intended to be applied to all intentions that have not be 
  * realised. These intentions are considered as not feasible.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/06/20 Revision: 1.0

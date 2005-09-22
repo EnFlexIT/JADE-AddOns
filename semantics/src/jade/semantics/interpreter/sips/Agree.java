@@ -38,7 +38,7 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
 
 /**
- * This principle is intented to be applied if an agent is commited to do an 
+ * This principle is intended to be applied if an agent is committed to do an 
  * action under a condition. This principle may be applied when the Jade agent
  * receives an <code>Agree</code> message.
  * @author Vincent Pautret - France Telecom
@@ -63,7 +63,7 @@ public class Agree extends SemanticInterpretationPrinciple {
     public Agree(SemanticCapabilities capabilities) {
         super(capabilities);
         pattern = SLPatternManip.fromFormula("(I ??agent (done (action ??agent ??act) ??condition))");
-    } // End of DoActionFilter/1
+    } // End of Agree/1
     
     /*********************************************************************/
     /**                         METHODS                                 **/

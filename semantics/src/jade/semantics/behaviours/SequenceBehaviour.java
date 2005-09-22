@@ -71,7 +71,7 @@ public class SequenceBehaviour extends  SequentialBehaviour implements SemanticB
     /*********************************************************************/
     
     /**
-     * Check if this behaviour is done.
+     * Checks if this behaviour is done.
      * First starts the behaviour for the the left part of the sequence.
      * If the behaviour ends up with execution failure, or feasibility failure,
      * the final result is respectively execution failure or feasibility failure. 

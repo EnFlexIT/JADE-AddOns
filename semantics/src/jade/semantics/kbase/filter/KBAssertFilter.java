@@ -48,7 +48,7 @@ public class KBAssertFilter extends KBFilter {
      * This method may modify the formula to assert by returning another formula.
      * By default, it returns the same formula. The boolean <code>mustApplyAfter</code>
      * is set to true.<br> 
-     * Should be overriden.
+     * Should be overridden.
      * @param formula the formula to assert
      * @return the formula to assert into the KBase
      */

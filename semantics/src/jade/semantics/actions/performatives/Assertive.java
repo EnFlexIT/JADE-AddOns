@@ -97,8 +97,12 @@ public abstract class Assertive extends CommunicativeActionImpl {
     /**				 			METHODS									**/
     /*********************************************************************/
 
-     /**
-     * @inheritDoc
+    /**
+     * Creates a new Assertive using the given surface content. The content of 
+     * the action is the given content.
+     * @param surfaceContent a content
+     * @return a semantic action
+     * @throws SemanticInterpretationException if any exception occurs
      */
     public SemanticAction doNewAction(Content surfaceContent) throws SemanticInterpretationException {
         setContent(surfaceContent);

@@ -54,7 +54,7 @@ public class ObserverAdapter implements Observer {
     }
     
     /**
-     * Should be overriden
+     * Should be overridden
      * @see Observer#notify(Bindings)
      * @inheritDoc
      */

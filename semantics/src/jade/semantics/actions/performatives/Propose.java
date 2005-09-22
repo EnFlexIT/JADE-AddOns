@@ -83,7 +83,7 @@ public class Propose extends ActConditionInform {
      * Returns an instance of <code>Propose</code>
      * @return an instance of <code>Propose</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new Propose(table);
     }
     

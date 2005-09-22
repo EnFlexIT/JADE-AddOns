@@ -81,7 +81,7 @@ public class RequestWhenever extends ActConditionInform {
      * Returns an instance of <code>RequestWhenever</code>
      * @return an instance of <code>RequestWhenever</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new RequestWhenever(table);
     }
     

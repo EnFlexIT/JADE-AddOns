@@ -35,6 +35,7 @@ import jade.semantics.lang.sl.grammar.Formula;
 
 /**
  * Filter used to observe value of formula in the knowledge base. 
+ * Notifies the observers whose observed formula becomes true.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/04/07 Revision 1.0
  */
@@ -52,7 +53,7 @@ public class ObserverFilter extends KBAssertFilter {
     
     /**
      * For each <code>Observation</code>, notifies the associated observer if
-     * the value of the observation has changed. Do nothing, in the other case. 
+     * the value of the observation becomes true. Do nothing, in the other case. 
      * @inheritDoc
      */
     public void afterAssert(Formula formula) {

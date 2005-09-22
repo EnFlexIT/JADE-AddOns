@@ -258,9 +258,9 @@ public abstract class Node {
         for (int i=0; i<nodeClasses.length; i++) {
             try {
                 if ( nodeClasses[i].isInstance(this) ) {
-                    Method getAttributMethod = getClass().getMethod(attribut);
+                    Method getAttributMethod = getClass().getMethod(attribut, new Class[0]);
                     if ( getAttributMethod != null ) {
-                        Object attributValue = getAttributMethod.invoke(this);
+                        Object attributValue = getAttributMethod.invoke(this, new Object[0]);
                         if ( attributValue == value || attributValue != null &&  attributValue.equals(value) ) {
                             result.add(this);
                         }

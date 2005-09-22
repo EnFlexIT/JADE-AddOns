@@ -100,7 +100,7 @@ public class QueryRef extends Request {
      * Returns an instance of <code>QueryRef</code>
      * @return an instance of <code>QueryRef</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new QueryRef(table);
     }
     

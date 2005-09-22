@@ -61,8 +61,8 @@ import jade.util.leap.Iterator;
 
 
 /**
- * Class that implements the interface <code>SemanticActionTable</code>. It 
- * represents all the actions knowed by the agent.
+ * Class that implements the interface <code>SemanticActionTable</code>. This 
+ * implementation extends <code>jade.leap.ArrayList</code>.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
  */
@@ -146,12 +146,12 @@ public class SemanticActionTableImpl extends ArrayList implements SemanticAction
     
     
     /**
-     * Creates an instanciated <code>SemanticAction</code> from the 
+     * Creates an instantiated <code>SemanticAction</code> from the 
      * <code>SemanticAction</code> prototype
      * within the table corresponding to an <code>ActionExpression</code>
      * @param action the actionExpression representing the semanticAction to create
      * @throws SemanticInterpretationException
-     * @return an instanciated semanticAction that implements action
+     * @return an instantiated semanticAction that implements action
      */
     public SemanticAction getSemanticActionInstance(ActionExpression action) throws SemanticInterpretationException {
         SemanticAction result = null;
@@ -166,11 +166,11 @@ public class SemanticActionTableImpl extends ArrayList implements SemanticAction
     } // End of newAction/1
     
     /**
-     * Creates an instanciated <code>SemanticAction</code> from the <code>SemanticAction</code> prototype
+     * Creates an instantiated <code>SemanticAction</code> from the <code>SemanticAction</code> prototype
      * within the table corresponding to an ACL Message
      * @param aclMessage an ACL message
      * @throws SemanticInterpretationException
-     * @return an instanciated semanticAction that implements action
+     * @return an instantiated semanticAction that implements action
      */
     public SemanticAction getSemanticActionInstance(ACLMessage aclMessage) throws SemanticInterpretationException {
         SemanticAction result = null;
@@ -188,7 +188,7 @@ public class SemanticActionTableImpl extends ArrayList implements SemanticAction
     } // End of newAction/1
     
     /**
-     * Creates a list of instanciated semantic actions from the <code>SemanticAction</code> prototypes
+     * Creates a list of instantiated semantic actions from the <code>SemanticAction</code> prototypes
      * within the table, such that each <code>SemanticAction</code> has a specified rational effect
      * @param actionList the list of actions to complete with the created semanticActions
      * @param rationalEffect the rational effect of the semantic actions to create

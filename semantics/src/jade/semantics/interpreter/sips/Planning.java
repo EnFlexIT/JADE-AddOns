@@ -41,7 +41,7 @@ import jade.util.leap.ArrayList;
 /**
  * This semantic interpretation principle provides the Jade agent with a general 
  * mean of planning.
- * It calls an external component that returns a Jade Bhaviour that implements 
+ * It calls an external component that returns a Jade Behaviour that implements 
  * a way to reach an input goal <i>phi</i>, and adds this Behaviour to the 
  * agent.
  * @author Vincent Pautret - France Telecom

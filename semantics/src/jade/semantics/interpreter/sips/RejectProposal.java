@@ -38,9 +38,9 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
 
 /**
- * This principle is intented to be applied if an agent is no longer interested
+ * This principle is intended to be applied if an agent is no longer interested
  * in the Jade agent doing an action under a condition. The Jade agent may then
- * drop his behaviour that currently seeks peforming this action. This principle
+ * drop his behaviour that currently seeks performing this action. This principle
  *  may be apply when the Jade agent receives a <code>Cancel</code> or a 
  *  <code>RejectProposal</code> message.
  * @author Vincent Pautret - France Telecom

@@ -80,4 +80,10 @@ public interface FilterKBase extends KBase {
      */
     public void removeKBQueryRefFilter(Finder finder);
     
+    /**
+     * Adds a list of filters to the KBase (useful for defining specific predicate management)
+     * @param filtersDefinition the list of filters
+     */
+    public void addFiltersDefinition(FiltersDefinition filtersDefinition);
+
 } // End of interface FilterKBase

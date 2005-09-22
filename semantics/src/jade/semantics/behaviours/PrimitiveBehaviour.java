@@ -35,7 +35,7 @@ import jade.util.Logger;
 
 /**
  * Class that represents the behaviour associated with a primitive semantic
- * action.
+ * action (Inform, Confirm, Disconfirm, or Request).
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
  */

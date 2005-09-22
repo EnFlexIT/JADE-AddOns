@@ -36,7 +36,7 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
 
 /**
- * This principle is intented to be applied when an agent receives a Subscribe 
+ * This principle is intended to be applied when an agent receives a Subscribe 
  * message.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/03/14 Revision: 1.0

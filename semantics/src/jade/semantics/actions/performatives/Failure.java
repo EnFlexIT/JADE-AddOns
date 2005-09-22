@@ -78,7 +78,7 @@ public class Failure extends ActionReasonInform {
      * Returns an instance of <code>Failure</code>
      * @return an instance of <code>Failure</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new Failure(table);
     }
     

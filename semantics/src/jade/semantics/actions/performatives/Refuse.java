@@ -133,7 +133,7 @@ public class Refuse extends CommunicativeActionImpl {
      * Returns an instance of <code>Refuse</code>
      * @return an instance of <code>Refuse</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new Refuse(table);
     }
     

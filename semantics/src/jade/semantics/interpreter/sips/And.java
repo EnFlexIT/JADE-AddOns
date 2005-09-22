@@ -37,7 +37,7 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
 
 /**
- * This principle is intented to be applied to an AND formula.  
+ * This principle is intended to be applied to an AND formula.  
  * It produces two Semantic Representations:
  * <ul>
  * <li> the left part of the conjonction;
@@ -73,8 +73,8 @@ public class And extends SemanticInterpretationPrinciple {
     
     /**
      * Splits the SR into two SR if the SL representation of the SR is an AND formula.
-     * The first new SR is the left part of the conjonction, and the second one 
-     * the right part of the conjonction.
+     * The first new SR is the left part of the conjunction, and the second one 
+     * the right part of the conjunction.
      * @inheritDoc
      */
     public ArrayList apply(SemanticRepresentation sr)
@@ -82,8 +82,8 @@ public class And extends SemanticInterpretationPrinciple {
         try {
             MatchResult applyResult = SLPatternManip.match(pattern, sr.getSLRepresentation());
             if (applyResult != null) {
-                Formula phi = applyResult.getFormula("??phi");
-                Formula psi = applyResult.getFormula("??psi");
+                Formula phi = applyResult.getFormula("phi");
+                Formula psi = applyResult.getFormula("psi");
                 ArrayList listOfSR = new ArrayList();
                 SemanticRepresentation phiSR = new SemanticRepresentation();
                 phiSR.setSLRepresentation(phi);

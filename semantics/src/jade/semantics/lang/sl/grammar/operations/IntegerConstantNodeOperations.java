@@ -15,7 +15,7 @@ public class IntegerConstantNodeOperations
 	
     public Double realValue(Constant node)
 	{
-		return ((IntegerConstantNode)node).lx_value().doubleValue();
+		return new Double(((IntegerConstantNode)node).lx_value().doubleValue());
 	}
 	
     public String stringValue(Constant node)

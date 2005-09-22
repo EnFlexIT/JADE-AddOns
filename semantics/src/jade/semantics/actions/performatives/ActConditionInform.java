@@ -41,8 +41,9 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
 
 /**
- * This class specifies an action <code>Inform</code>. The content of this kind 
- * of action contains two elements. The first one relate to an action and the 
+ * This abstract class specifies an action <code>Inform</code>. 
+ * The content of this kind of action contains two elements. 
+ * The first one relate to an action and the
  * second one relate to a condition to do this action.
  * @author Vincent Louis - France Telecom
  * @version Date: 2005/05/30 Revision 1.0

@@ -75,7 +75,7 @@ public class FiltersDefinition extends ArrayList {
      * @return the <code>FilterDefinition</code> at the specified index
      * @param i index if the <code>FilterDefinition</code> 
      */
-    public FilterDefinition get(int i) {
+    public FilterDefinition getFilterDefinition(int i) {
         return (FilterDefinition)super.get(i);
     } // End of get/1
     

@@ -30,7 +30,7 @@ package demo;
 
 import jade.semantics.interpreter.SemanticCapabilities;
 import jade.semantics.interpreter.StandardCustomizationAdapter;
-import jade.semantics.kbase.KBFilterManagment;
+import jade.semantics.kbase.FilterKBase;
 import jade.semantics.lang.sl.grammar.ActionExpression;
 import jade.semantics.lang.sl.grammar.AnyNode;
 import jade.semantics.lang.sl.grammar.Formula;
@@ -106,7 +106,7 @@ public class SensorCapabilities extends SemanticCapabilities {
      */
     public void setupKbase() {
         super.setupKbase();
-        ((KBFilterManagment) myKBase).addFiltersDefinition(temperatureDefinition);
+        ((FilterKBase) myKBase).addFiltersDefinition(temperatureDefinition);
     } // End of setupKbase
 	
 } // End of class SensorCapabilities/0

@@ -101,7 +101,7 @@ public class CallForProposal extends QueryRef {
      * Returns an instance of <code>CallForProposal</code>
      * @return an instance of <code>CallForProposal</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new CallForProposal(table);
     }
 

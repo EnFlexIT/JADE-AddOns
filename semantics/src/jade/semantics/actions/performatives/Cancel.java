@@ -99,7 +99,7 @@ public class Cancel extends Disconfirm {
      * Returns an instance of <code>Cancel</code>
      * @return an instance of <code>Cancel</code>
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new Cancel(table);
     } // End of createInstance/0
 

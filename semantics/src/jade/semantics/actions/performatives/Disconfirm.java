@@ -110,7 +110,7 @@ public class Disconfirm extends Assertive {
      * Returns a new <code>DisConfirm</code> instance
      * @return a new <code>DisConfirm</code> instance
      */
-    public CommunicativeActionImpl createInstance() {
+    public CommunicativeActionProto createInstance() {
         return new Disconfirm(table);
     }
 

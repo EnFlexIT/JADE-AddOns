@@ -75,7 +75,7 @@ public abstract class NonPrimitiveInform extends Inform {
      * Returns an instance of <code>CommunicativeActionImpl</code>.
      * @return an instance of <code>CommunicativeActionImpl</code>.
      */
-    abstract public CommunicativeActionImpl createInstance();
+    abstract public CommunicativeActionProto createInstance();
     
     /**
      * Returns the rational effect recognition pattern fro
@@ -93,7 +93,11 @@ public abstract class NonPrimitiveInform extends Inform {
     }
     
     /**
-     * @inheritDoc
+     * Creates a NonPrimitiveInform action using the given surface content. 
+     * The content contains a list of contents. 
+     * @param surfaceContent a content
+     * @return a semantic action
+     * @throws SemanticInterpretationException if any exception occurs
      */
     public SemanticAction doNewAction(Content surfaceContent) throws SemanticInterpretationException {
         Content informContent = new ContentNode(new ListOfContentExpression());

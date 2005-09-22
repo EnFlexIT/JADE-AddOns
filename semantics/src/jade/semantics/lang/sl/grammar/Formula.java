@@ -44,6 +44,8 @@ public abstract class Formula extends Node
             public Formula getVariablesSubstitutionAsIn(Formula node, Formula formula);
             public Formula getVariablesSubstitution(Formula node, Variable x, Variable y);
             public Formula isBeliefFrom(Formula node, Term agent);
+            public jade.semantics.lang.sl.tools.MatchResult match(Formula node, Node expression);
+            public Node instantiate(Formula node, String varname, Node expression);
         }
         public Formula getSimplifiedFormula()
         {
@@ -68,14 +70,6 @@ public abstract class Formula extends Node
                 _thisoperations = getOperations();
             }
             return((Formula.Operations)_thisoperations).isMentalAttitude(this , term);
-        }
-        public Formula isBeliefFrom(Term agent)
-        {
-            
-            if ( _thisoperations == null ) {
-                _thisoperations = getOperations();
-            }
-            return((Formula.Operations)_thisoperations).isBeliefFrom(this , agent);
         }
         public boolean isSubsumedBy(Formula formula)
         {
@@ -132,6 +126,30 @@ public abstract class Formula extends Node
                 _thisoperations = getOperations();
             }
             return((Formula.Operations)_thisoperations).getVariablesSubstitution(this , x, y);
+        }
+        public Formula isBeliefFrom(Term agent)
+        {
+            
+            if ( _thisoperations == null ) {
+                _thisoperations = getOperations();
+            }
+            return((Formula.Operations)_thisoperations).isBeliefFrom(this , agent);
+        }
+        public jade.semantics.lang.sl.tools.MatchResult match(Node expression)
+        {
+            
+            if ( _thisoperations == null ) {
+                _thisoperations = getOperations();
+            }
+            return((Formula.Operations)_thisoperations).match(this , expression);
+        }
+        public Node instantiate(String varname, Node expression)
+        {
+            
+            if ( _thisoperations == null ) {
+                _thisoperations = getOperations();
+            }
+            return((Formula.Operations)_thisoperations).instantiate(this , varname, expression);
         }
     Formula _sm_simplified_formula;
 

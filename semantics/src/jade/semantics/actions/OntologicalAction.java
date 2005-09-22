@@ -54,42 +54,42 @@ import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
 public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 
 	/**
-	 * Pattern to recognize an action expression corresponding to this ontologic
-	 * action
+	 * Pattern to recognize an action expression corresponding to this 
+     * ontological action
 	 */
     private ActionExpression actionPattern;
 
 	/**
 	 * Pattern to recognize and build the rational effect and the postcondition
-     * of this ontologic action
+     * of this ontological action
 	 */
     private Formula postconditionPattern;
 
 	/**
-	 * Pattern to build the feasibility precondition of this ontologic action
+	 * Pattern to build the feasibility precondition of this ontological action
 	 */
     private Formula preconditionPattern;
 
 	/**
 	 * Table that stores the values of the parameters of an instance of this
-	 * ontologic action
+	 * ontological action
 	 */
     private MatchResult actionParameters;
 
 	/**
-	 * Standard name for metaVariables refering to the agent of the ontologic
+	 * Standard name for metaVariables refering to the agent of the ontological
 	 * action
 	 */
 	private static final String SENDER_REFERENCE = "sender";
 
 	/**
-	 * Creates a new Ontologic Action prototype defined by an action pattern, a
+	 * Creates a new Ontological Action prototype defined by an action pattern, a
 	 * postcondition pattern and a precondition pattern. All the metaVariables
 	 * of these patterns must refere to SL terms representing one of the
 	 * arguments of the action and must use the same names for these
 	 * metaVariables. These patterns may refere to the reserved metaReference "<code>??sender</code>",
 	 * which denotes the agent of the action. A call to one of the
-	 * <code>newAction</code> methods creates instances of this Ontologic
+	 * <code>newAction</code> methods creates instances of this Ontological
 	 * Action prototype such that :
 	 * <ul>
 	 * <li> the <code>getFeasibilityPrecondition</code> and
@@ -102,7 +102,7 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 	 * returns the true formula,</li>
 	 * <li> the <code>computeBehaviour</code> method returns a
 	 * <code>OntoActionBehaviour</code> that automatically manages the
-	 * specified preconditions and postconditions for this OntologicAction.</li>
+	 * specified preconditions and postconditions for this OntologicalAction.</li>
 	 * </ul>
 	 * 
 	 * @param table
@@ -129,16 +129,35 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 		this.preconditionPattern = preconditionPattern;
 	} // End of OntologicalAction/4
 
-	/**
-	 * @inheritDoc
-	 */
+    /**
+     * Creates a new instance of this prototype of semantic action from
+     * the specified action expression. The action expression mus match the
+     * pattern (action ??sender " + actionPattern + ") where actionPattern is
+     * given in the constructor (second parameter). 
+     * 
+     * @param actionExpression
+     *          an expression of action that specifies the instance to create
+     * @return a new instance of the semantic action, the action expression of
+     * which is specified, or null if no instance of the semantic action with
+     * the specified action expression can be created.
+     * @throws SemanticInterpretationException if any exception occurs
+     */
 	public SemanticAction newAction(ActionExpression actionExpression) throws SemanticInterpretationException {
 		return newAction(actionPattern, actionExpression, false);
 	} // End of newAction/1
 
-	/**
-	 * @inheritDoc
-	 */
+    /**
+     * Creates a new instance of this prototype of semantic action from
+     * the specified rational effect. The rational effect must match the 
+     * postcondition pattern given in the constructor (third parameter).
+     * @param rationalEffect
+     *              a formula that specifies the rational effet of the instance 
+     *              to create
+     * @param inReplyTo an ACL message the message to answer
+     * @return a new instance of the semantic action, the rational effect of
+     * which is specified, or null if no instance of the semantic action with
+     * the specified rational effect can be created
+     */
 	public SemanticAction newAction(Formula rationalEffect, ACLMessage inReplyTo) {
 		try {
             return newAction(postconditionPattern, rationalEffect, true);
@@ -149,7 +168,7 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 	} // End of newAction/2
 
 	/**
-	 * Internal implementation for building a new instance of this Ontologic
+	 * Internal implementation for building a new instance of this Ontological
 	 * Action prototype
 	 * 
 	 * @param pattern
@@ -157,7 +176,9 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 	 * @param node
 	 *            instantiated formula or term that identifies the parameters of
 	 *            the instance of action to create (when matching the pattern)
-     * @param isAuthorToBeSet
+     * @param isAuthorToBeSet if true the author of the action is the one which 
+     * appears in the sender_reference metavariable, and if false the author is 
+     * the current agent.
 	 * @return the new instance of the action prototype that has been created
      * @throws SemanticInterpretationException if any exception occurs
 	 */
@@ -199,6 +220,7 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
     
     /**
      * @inheritDoc
+     * @return a <code>OntoActionBehaviour</code>.
      */
     public Behaviour computeBehaviour() {
         return new OntoActionBehaviour(this);
@@ -212,6 +234,7 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
     
     /**
      * @inheritDoc
+     * @return returns a <code>TrueNode</code>
      */
     public Formula computePersistentFeasibilityPreconditon() throws WrongTypeException {
         return new TrueNode();
@@ -257,9 +280,9 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 	} // End of instantiateFeatures/1
 
 	/**
-	 * Implementation of the behaviour of the ontologic action. This method must
+	 * Implementation of the behaviour of the ontological action. This method must
 	 * be developped along the same way as the <code>action</code> method of
-	 * the <code>Behaviour</code>. This method must be overriden in all the
+	 * the <code>Behaviour</code>. This method must be overridden in all the
 	 * subclasses (by default, does nothing but setting the internal state to
 	 * the <code>SUCCESS</code> constant).
 	 * 
@@ -275,7 +298,7 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 	} // End of perform/1
 
 	/**
-	 * This method is called just before running the behaviour of the ontologic
+	 * This method is called just before running the behaviour of the ontological
 	 * action. Does nothing by default. May be usefull to override it when
 	 * programming a GUI for example.
 	 * 
@@ -287,7 +310,7 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 	} // End of beforePerform/1
 
 	/**
-	 * This method is called just after running the behaviour of the ontologic
+	 * This method is called just after running the behaviour of the ontological
 	 * action if it has succeeded. Does nothing by default. May be usefull to
 	 * override it when programming a GUI for example.
 	 * 

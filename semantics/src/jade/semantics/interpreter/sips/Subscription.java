@@ -131,7 +131,7 @@ public abstract class Subscription extends SemanticInterpretationPrinciple {
      * Builds the observed property with the elements of the matching result.
      * @param applyResult matching result 
      * @return a formula representing the property to observe
-     * @throws WrongTypeException
+     * @throws WrongTypeException if it raised during the SL formulae analyzis
      */
     abstract protected Formula computePropertyToObserve(MatchResult applyResult) throws WrongTypeException;
     
@@ -139,7 +139,7 @@ public abstract class Subscription extends SemanticInterpretationPrinciple {
      * Builds the event to execute with the elements of the matching result.
      * @param applyResult matching result
      * @return a formula representing the event to execute
-     * @throws WrongTypeException
+     * @throws WrongTypeException if it raised during the SL formulae analyzis
      */
     abstract protected Formula computeEventToExecute(MatchResult applyResult)throws WrongTypeException;
     

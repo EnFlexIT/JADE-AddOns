@@ -135,7 +135,26 @@ public class SLPatternManip {
 	 */
 	public static Node toPattern(Node expression, Variable x) {
 		Node result = expression.getClone();
-		variable2MetaVariable(result, x);
+		variable2MetaVariable(result, x, "X");
+		return result;
+	}
+
+	/**
+	 * This method return a new expression corresponding to the given one in
+	 * which all variables equals to <b><code>x</code></b> are replaced by a
+	 * meta variable named <b><code>??\<metaname\></code></b>.
+	 * 
+	 * @param expression
+	 *            the expression to transform as a pattern.
+	 * @param x
+	 *            the variable to be replaced by a meta variable.
+	 * @param metaname
+	 *            the name of the introduced meta variable.
+	 * @return the pattern node.
+	 */
+	public static Node toPattern(Node expression, Variable x, String metaname) {
+		Node result = expression.getClone();
+		variable2MetaVariable(result, x, metaname);
 		return result;
 	}
 
@@ -363,10 +382,9 @@ public class SLPatternManip {
 	{
 		String result = null;
 		try {
-			Method smValueMethod = metaReference.getClass().getMethod(
-					"lx_name");
+			Method smValueMethod = metaReference.getClass().getMethod("lx_name", new Class[0]);
 			if (smValueMethod != null) {
-				result = (String) smValueMethod.invoke(metaReference);
+				result = (String) smValueMethod.invoke(metaReference, new Object[0]);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -382,10 +400,9 @@ public class SLPatternManip {
 	{
 		Node result = null;
 		try {
-			Method smValueMethod = metaReference.getClass().getMethod(
-					"sm_value");
+			Method smValueMethod = metaReference.getClass().getMethod("sm_value", new Class[0]);
 			if (smValueMethod != null) {
-				result = (Node) smValueMethod.invoke(metaReference);
+				result = (Node) smValueMethod.invoke(metaReference, new Object[0]);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -501,7 +518,7 @@ public class SLPatternManip {
 				FunctionalTermParamNode term = (FunctionalTermParamNode)terms.get(i);
 				for (int j=term.as_parameters().size()-1; j>=0; j--) {
 					Parameter p = term.as_parameters().element(j);
-					if ( p.lx_optional() &&
+					if ( p.lx_optional().booleanValue() &&
 						((p.as_value() instanceof MetaTermReferenceNode && ((MetaTermReferenceNode)p.as_value()).sm_value() == null)
 					  || (p.as_value() instanceof MetaVariableReferenceNode && ((MetaTermReferenceNode)p.as_value()).sm_value() == null)) ) {
 						term.as_parameters().remove(p);
@@ -595,11 +612,15 @@ public class SLPatternManip {
 
 		// -----------------------------------------------
 		private Node getMetaReference(Node metaReference)
+		// Returns a meta reference with the class and the same name from the previously 
+		// stored meta references (_metaReferences), or null if no such 
+		// meta reference exists.
 		// -----------------------------------------------
 		{
 			ListOfNodes foundRef = new ListOfNodes();
-			if (_metaReferences.find(metaReference.getClass(), "lx_name", metaReference
-					.toString(), foundRef, false)) {
+//			if (_metaReferences.find(metaReference.getClass(), "lx_name", metaReference
+//					.toString(), foundRef, false)) {
+			if (_metaReferences.find(metaReference.getClass(), "lx_name", getMetaReferenceName(metaReference), foundRef, false)) {
 				return foundRef.get(0);
 			} else {
 				return null;
@@ -649,6 +670,12 @@ public class SLPatternManip {
 
 		// -----------------------------------------------
 		private void doPatternMatchingOnMetaReference(Node metaRef, Node exp)
+		// Try to find another reference with the same type and the same name.
+		// If found then 
+		// 	  If the two meta references match then assign the new one with the value of the other one.
+		//    Else _match is set to false.
+		// Else
+		//    _match is set to true, the new meta reference value is exp, and the new meta reference is stored.
 		// -----------------------------------------------
 		{
 			Node otherRef = getMetaReference(metaRef);
@@ -793,17 +820,17 @@ public class SLPatternManip {
 				while (i < node.size() && j < node2.size()) {
 					_match = matchExpressions(node.element(i), node2.element(j));
 					if ( _match ) {i++; j++;}
-					else if (((ParameterNode)node.element(i)).lx_optional()) {i++;}
-					else if (((ParameterNode)node2.element(j)).lx_optional()) {j++;}
+					else if (((ParameterNode)node.element(i)).lx_optional().booleanValue()) {i++;}
+					else if (((ParameterNode)node2.element(j)).lx_optional().booleanValue()) {j++;}
 					else {_match = false; break;}
 				}
 				// i == node.size() || j == node2.size()
 				
 				while ( _match && i < node.size() ) {
-					_match = _match && ((ParameterNode)node.element(i++)).lx_optional();
+					_match = _match && ((ParameterNode)node.element(i++)).lx_optional().booleanValue();
 				}
 				while ( _match && j < node2.size() ) {
-					_match = _match && ((ParameterNode)node2.element(j++)).lx_optional();
+					_match = _match && ((ParameterNode)node2.element(j++)).lx_optional().booleanValue();
 				}
 			}
 		}
@@ -951,7 +978,7 @@ public class SLPatternManip {
 	}
 	
 	// -----------------------------------------------
-	private static void variable2MetaVariable(Node node, Variable x)
+	private static void variable2MetaVariable(Node node, Variable x, String metavarname)
 	// -----------------------------------------------
 	{
 		Node[] children = node.children();
@@ -959,9 +986,9 @@ public class SLPatternManip {
 			if (children[i] instanceof VariableNode
 					&& ((VariableNode) children[i]).lx_name().equals(
 							x.lx_name())) {
-				node.replace(i, new MetaTermReferenceNode("X"));
+				node.replace(i, new MetaTermReferenceNode(metavarname));
 			} else {
-				variable2MetaVariable(children[i], x);
+				variable2MetaVariable(children[i], x, metavarname);
 			}
 		}
 	}

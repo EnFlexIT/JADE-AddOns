@@ -11,6 +11,8 @@ import jade.semantics.lang.sl.grammar.ListOfContentExpression;
 import jade.semantics.lang.sl.grammar.Node;
 import jade.semantics.lang.sl.grammar.Content.Operations;
 import jade.semantics.lang.sl.parser.SLUnparser;
+import jade.semantics.lang.sl.tools.SLPatternManip;
+import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
 
 public class ContentNodeOperations 
 	extends DefaultNodeOperations
@@ -73,4 +75,20 @@ public class ContentNodeOperations
 	public int contentElementNumber(Content node) {
 		return node.as_expressions().size();
 	}
+	
+	public jade.semantics.lang.sl.tools.MatchResult match(Content node, Node expression)
+	{
+		return SLPatternManip.match(node, expression);
+	}
+	
+	public Node instantiate(Content node, String varname, Node expression)
+	{
+		try {
+			return SLPatternManip.instantiate(node, varname, expression);
+		} catch (WrongTypeException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 }

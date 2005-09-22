@@ -72,7 +72,7 @@ public abstract class KBQueryFilterAdapter extends KBQueryFilter {
      */
     public boolean isApplicable(Formula formula, Term agent) {
         try {
-             SLPatternManip.set(pattern, "??agent", agent);
+             SLPatternManip.set(pattern, "agent", agent);
             applyResult = SLPatternManip.match(pattern, formula);
             return (applyResult != null);
         } catch (Exception e) {

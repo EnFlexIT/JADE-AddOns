@@ -33,7 +33,7 @@ import jade.semantics.lang.sl.grammar.Formula;
 import jade.util.leap.ArrayList;
 
 /**
- * Class that represents a semantic interpretation principle.
+ * Abstract class that represents a semantic interpretation principle.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
  */

@@ -73,14 +73,15 @@ public class OrFilter extends KBQueryFilter {
     /*********************************************************************/
     
     /**
+     * Returns true if the formula matches the pattern (or ??phi ??psi)
      * @inheritDoc
      */
     public boolean isApplicable(Formula formula, Term agent) {
         try {
             applyResult = SLPatternManip.match(pattern,formula);
             if (applyResult != null) {
-                phi = applyResult.getFormula("??phi");
-                psi = applyResult.getFormula("??psi");
+                phi = applyResult.getFormula("phi");
+                psi = applyResult.getFormula("psi");
                 return true;
             }
         } catch (Exception e) {

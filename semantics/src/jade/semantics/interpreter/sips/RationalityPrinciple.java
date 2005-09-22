@@ -43,7 +43,7 @@ import jade.util.leap.ArrayList;
 /**
  * This semantic interpretation principle enables the Jade agent to compute some trivial planning 
  * according to the rationality principle. It looks for all the semantic actions
- * available to the Jade agent, the rationnal effect of which matches the 
+ * available to the Jade agent, the rational effect of which matches the 
  * intention <i>phi</i> of the Jade agent. Then it builds (and adds to the agent)
  * a Jade Behaviour implementing one of these actions (which is represented by
  * an alternative action expression).
@@ -83,7 +83,7 @@ public class RationalityPrinciple extends SemanticInterpretationPrinciple {
         try {
             MatchResult matchResult = SLPatternManip.match(rationalityPattern,sr.getSLRepresentation());
             if (matchResult != null) {
-                Formula phi = matchResult.getFormula("??phi");
+                Formula phi = matchResult.getFormula("phi");
                 ArrayList actionList = new ArrayList();
                 myCapabilities.getMySemanticActionTable().getSemanticActionInstance(actionList, phi, sr.getMessage());
                 if (actionList.size() > 0) {

@@ -38,8 +38,10 @@ import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 
 /**
- * Filter for the identifying expression of the form <i>(= (all ??X ??formula) ??set)</i>.
- * Asserts in the knowledge base each element which appears in the set.
+ * Filter for the identifying expression of the form <i>(= (all ??X ??formula) ??set)</i>
+ * or <i>(= (iota ??X ??formula) ??set)</i>.
+ * Asserts in the knowledge base each element which appears in the set for the 
+ * first pattern and the single value for the second pattern.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/07/01 Revision: 1.0
  */
@@ -48,32 +50,38 @@ public class AllIREFilter extends KBAssertFilter {
     /**
      * Pattern that must match to apply the filter adapter
      */
-    protected Formula pattern;
-    
+    protected Formula allPattern;
+
+    /**
+     * Pattern that must match to apply the filter adapter
+     */
+    protected Formula iotaPattern;
+
     /**
      * Pattern used to assert formula in the knowledge base
      */
     private Formula bPattern;
     
     /**
-     * Constructor
+     * Constructor of the filter. Instantiates the patterns.
      */
     public AllIREFilter() {
-        pattern = SLPatternManip.fromFormula("(B ??agent (= (all ??X ??formula) ??set))");
+        allPattern = SLPatternManip.fromFormula("(B ??agent (= (all ??X ??formula) ??set))");
+        iotaPattern = SLPatternManip.fromFormula("(B ??agent (= (iota ??X ??formula) ??phi))");
         bPattern = SLPatternManip.fromFormula("(B ??agent ??formula)" ); 
     } // End of AllIREFilter/0
     
     /**
      * If the filter is applicable, asserts in the knowledge base each element 
-     * which appears in the set, and returns a TrueNode.
+     * which appears in the set, and returns a <code>TrueNode</code>.
      * @param formula a formula to assert
      * @return TrueNode if the filter is applicable, the given formula in the 
-     * other case.
+     * other cases.
      */
     public final Formula beforeAssert(Formula formula) {
         mustApplyAfter = false;
         try {
-            MatchResult applyResult = SLPatternManip.match(pattern, formula);
+            MatchResult applyResult = SLPatternManip.match(allPattern, formula);
             if (applyResult != null && 
                     applyResult.getTerm("set") instanceof TermSetNode && 
                     applyResult.getTerm("X") instanceof VariableNode) {
@@ -89,6 +97,14 @@ public class AllIREFilter extends KBAssertFilter {
                             "formula", toBelieve));
                 }
                 return new TrueNode();
+            } else {
+                applyResult = SLPatternManip.match(iotaPattern, formula);
+                if (applyResult != null) {
+                    myKBase.assertFormula((Formula)SLPatternManip.instantiate(bPattern,
+                            "agent", applyResult.getTerm("agent"),
+                            "formula", applyResult.getFormula("phi")));
+                    return new TrueNode();
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -53,7 +53,7 @@ class Digit {
     private Color darkColor;  
     
     /**
-     * The tab of all knowed digits
+     * The tab of all known digits
      */
     private static int digitMap[][] = {
         {1,1,1,1,1,1,0,0},  //0

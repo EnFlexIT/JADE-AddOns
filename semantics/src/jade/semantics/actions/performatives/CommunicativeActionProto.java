@@ -52,7 +52,7 @@ interface CommunicativeActionProto extends CommunicativeAction {
      abstract CommunicativeActionProto createInstance();
     
     /**
-     * Checks the validity of the builded action and sets the content of it.
+     * Checks the validity of the built action and sets the content of it.
      * @return a semantic action
      * @throws SemanticInterpretationException if any exception occurs 
      */

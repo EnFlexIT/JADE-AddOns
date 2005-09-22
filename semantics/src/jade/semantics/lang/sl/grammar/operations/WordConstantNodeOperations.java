@@ -2,7 +2,6 @@ package jade.semantics.lang.sl.grammar.operations;
 
 import jade.semantics.lang.sl.grammar.Constant;
 import jade.semantics.lang.sl.grammar.Node;
-import jade.semantics.lang.sl.grammar.StringConstantNode;
 import jade.semantics.lang.sl.grammar.WordConstantNode;
 
 public class WordConstantNodeOperations 
@@ -11,12 +10,12 @@ public class WordConstantNodeOperations
 {
     public Long intValue(Constant node)
 	{
-		return Long.parseLong(((WordConstantNode)node).lx_value());
+		return new Long(((WordConstantNode)node).lx_value());
 	}
 	
     public Double realValue(Constant node)
 	{
-		return Double.parseDouble(((WordConstantNode)node).lx_value());
+		return new Double(((WordConstantNode)node).lx_value());
 	}
 	
     public String stringValue(Constant node)

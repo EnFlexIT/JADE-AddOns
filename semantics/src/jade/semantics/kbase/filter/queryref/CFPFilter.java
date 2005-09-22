@@ -66,7 +66,7 @@ public class CFPFilter extends KBQueryRefFilter {
     /*********************************************************************/
     
     /**
-     * Creates a new Filter.
+     * Creates a new Filter. Instantiates the pattern.
      * @param standardCustomization the customization object of the agent that 
      * owns this filter
      */
@@ -80,6 +80,11 @@ public class CFPFilter extends KBQueryRefFilter {
     /*********************************************************************/
     
     /**
+     * Returns true if the formula part of the given identifying expression
+     * matches the pattern 
+     * <i>(or (not (I ??agent1 (done ??act ??proposition))) (I ??agent2 (done ??act ??proposition)))</i>,
+     *  if the current agent is the agent of the action expression <i>act</i>, if the 
+     *  current agent is <i>agent2</i>, and if the current agent is not <i>agent1</i>.
      * @inheritDoc
      */
     public boolean isApplicable(IdentifyingExpression ide, Term agent) {
@@ -89,8 +94,8 @@ public class CFPFilter extends KBQueryRefFilter {
                 ActionExpression act = (ActionExpression)applyResult.getTerm("act");
                 return act instanceof ActionExpressionNode 
                 && agent.equals(((ActionExpressionNode)act).as_agent())
-                && agent.equals(applyResult.getTerm("??agent2")) 
-                && !agent.equals(applyResult.getTerm("??agent1"));
+                && agent.equals(applyResult.getTerm("agent2")) 
+                && !agent.equals(applyResult.getTerm("agent1"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,11 +114,11 @@ public class CFPFilter extends KBQueryRefFilter {
     public ListOfTerm apply(IdentifyingExpression ide) {
         try {
             if (ide instanceof IotaNode) {
-                return standardCustomization.handleCFPIota((Variable)ide.as_term(), applyResult.getFormula("??proposition"), (ActionExpression)applyResult.getTerm("??act"),  applyResult.getTerm("??agent1"));
+                return standardCustomization.handleCFPIota((Variable)ide.as_term(), applyResult.getFormula("proposition"), (ActionExpression)applyResult.getTerm("act"),  applyResult.getTerm("agent1"));
             } else if (ide instanceof AnyNode) {
-                return standardCustomization.handleCFPAny((Variable)ide.as_term(), applyResult.getFormula("??proposition"), (ActionExpression)applyResult.getTerm("??act"),  applyResult.getTerm("??agent1"));
+                return standardCustomization.handleCFPAny((Variable)ide.as_term(), applyResult.getFormula("proposition"), (ActionExpression)applyResult.getTerm("act"),  applyResult.getTerm("agent1"));
             } else {
-                return standardCustomization.handleCFPAll((Variable)ide.as_term(), applyResult.getFormula("??proposition"), (ActionExpression)applyResult.getTerm("??act"),  applyResult.getTerm("??agent1"));
+                return standardCustomization.handleCFPAll((Variable)ide.as_term(), applyResult.getFormula("proposition"), (ActionExpression)applyResult.getTerm("act"),  applyResult.getTerm("agent1"));
             }
         } catch (Exception e) {
             e.printStackTrace();
