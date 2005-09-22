@@ -28,7 +28,7 @@ public class FunctionalTermParamNodeOperations
 			result.element(0).as_value(term);
 		}
 		else {
-			node.as_parameters().add(new ParameterNode(term, name, false));
+			node.as_parameters().add(new ParameterNode(term, name, new Boolean(false)));
 		}
 	}
 	

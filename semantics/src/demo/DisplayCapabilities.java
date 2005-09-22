@@ -68,8 +68,8 @@ public class DisplayCapabilities extends SemanticCapabilities {
                // the agent agrees to believe of information one the temperature only
                // if the agent which sends it is has sensor.
                 return 
-               (((DisplayAgent)myAgent).selectedAgent != null 
-                       && agent.equals(((DisplayAgent)myAgent).selectedAgent)) 
+               (((DisplayAgent)getAgent()).selectedAgent != null 
+                       && agent.equals(((DisplayAgent)getAgent()).selectedAgent)) 
                        || !((SLPatternManip.match(temperatureDefinition.VALUE_X_PATTERN, formula) != null)
                                || (SLPatternManip.match(temperatureDefinition.NOT_VALUE_X_PATTERN, formula) != null)
                                || (SLPatternManip.match(temperatureDefinition.VALUE_GT_X_PATTERN, formula) != null)
@@ -84,7 +84,7 @@ public class DisplayCapabilities extends SemanticCapabilities {
                    matchResult = SLPatternManip.match(DisplayAgent.CFP_CONDITION, formula);
                    if ( matchResult != null ) {
                        try {
-                           ((DisplayAgent)myAgent).handleProposal((IntegerConstantNode)matchResult.getTerm("X"), 
+                           ((DisplayAgent)getAgent()).handleProposal((IntegerConstantNode)matchResult.getTerm("X"), 
                                    agentI, action, formula);
                        }
                        catch(Exception e) {
@@ -110,12 +110,12 @@ public class DisplayCapabilities extends SemanticCapabilities {
                    // Sets the temperature to display with the suitable characteristics of display
                    public void afterAssert(Formula formula) {
                        try {
-                           ((DisplayAgent)myAgent).display.setTemperature(((RealConstantNode)applyResult.getTerm("X")).lx_value());
+                           ((DisplayAgent)getAgent()).display.setTemperature(((RealConstantNode)applyResult.getTerm("X")).lx_value());
                        } 
                         catch (ClassCastException cce) 
                         {
                            try {
-                            ((DisplayAgent)myAgent).display.setTemperature(new Double(((IntegerConstantNode)applyResult.getTerm("X")).lx_value().doubleValue()));             
+                            ((DisplayAgent)getAgent()).display.setTemperature(new Double(((IntegerConstantNode)applyResult.getTerm("X")).lx_value().doubleValue()));             
                            } catch (Exception e) {
                                e.printStackTrace();
                            }

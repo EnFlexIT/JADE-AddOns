@@ -25,7 +25,7 @@ public class DateTimeConstantNodeOperations
 	
 	public int compare(Node node1, Node node2)
 	{
-//      #DOTNET_EXCLUDE_BEGIN
+	//#DOTNET_EXCLUDE_BEGIN
         return ((DateTimeConstantNode)node1).lx_value().compareTo(((DateTimeConstantNode)node2).lx_value());
         //#DOTNET_EXCLUDE_END
         /*#DOTNET_INCLUDE_BEGIN

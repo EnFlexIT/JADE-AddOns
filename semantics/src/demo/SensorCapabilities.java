@@ -92,11 +92,11 @@ public class SensorCapabilities extends SemanticCapabilities {
 			}
 			// Sets the color to yellow when it receives a subscribe
 			public void notifySubscribe(Term subscriber, Formula obsverved, Formula goal) {
-				((SensorAgent)myAgent).setSubscribed(true);
+				((SensorAgent)getAgent()).setSubscribed(true);
 			}
             //Sets the color to gray when it receives an unsubscribe
 			public void notifyUnsubscribe(Term subscriber, Formula obsverved, Formula goal) {
-				((SensorAgent)myAgent).setSubscribed(false);
+				((SensorAgent)getAgent()).setSubscribed(false);
 			}
 		});
     } // End of setupStandardCustomization/0
