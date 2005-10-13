@@ -205,8 +205,15 @@ public class TestUtility {
   
   /**
      Request an AMS agent to perform a given action of a given ontology.
-   */
+  */
   public static Object requestAMSAction(Agent a, AID amsAID, AgentAction action, String ontologyName) throws TestException {
+	  return requestAMSAction(a, amsAID, action, ontologyName, 10000);
+  }
+  
+  /**
+     Request an AMS agent to perform a given action of a given ontology specifying a given timeout.
+   */
+  public static Object requestAMSAction(Agent a, AID amsAID, AgentAction action, String ontologyName, long timeout) throws TestException {
     try {
     	if (amsAID == null) {
     		amsAID = a.getAMS();
@@ -224,19 +231,24 @@ public class TestUtility {
   		cm.fillContent(request,act);
     	   	
     	// Send message and collect reply
-    	ACLMessage inform = FIPAService.doFipaRequestClient(a, request, 10000);
+    	ACLMessage inform = FIPAService.doFipaRequestClient(a, request, timeout);
     	
-    	// Extract the result from the reply (if any)
-    	ContentElement ce = cm.extractContent(inform);
-    	if (ce instanceof Done) {
-    		// No result to return
-    		return null;
-    	}
-    	else if (ce instanceof Result) {
-    		return ((Result) ce).getValue();
+    	if (inform != null) {
+	    	// Extract the result from the reply (if any)
+	    	ContentElement ce = cm.extractContent(inform);
+	    	if (ce instanceof Done) {
+	    		// No result to return
+	    		return null;
+	    	}
+	    	else if (ce instanceof Result) {
+	    		return ((Result) ce).getValue();
+	    	}
+	    	else {
+	    		throw new TestException("Unknown notification received from "+amsAID);
+	    	}
     	}
     	else {
-    		throw new TestException("Unknown notification received from "+amsAID);
+    		throw new TestException("Timeout expired");
     	}
     }
     catch (Exception e) {
