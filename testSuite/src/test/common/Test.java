@@ -233,7 +233,7 @@ public abstract class Test implements Serializable {
   	private boolean stopped = false;
   	private Behaviour wrapped;
   	private Behaviour paused;
-  	private List children = new ArrayList();
+  	private List children = new ArrayList(1);
   	
   	private Wrapper(Agent a, Behaviour b) {
   		super(a);
@@ -246,6 +246,10 @@ public abstract class Test implements Serializable {
 	  }
 	  
 	  protected void scheduleNext(boolean currentDone, int currentResult) {
+		  if (stopped) {
+			  // If the Wrapper was stopped from the outside, at next round we must not execute the wrapped behaviour anymore
+			  wrapped = null;
+		  }
 	  }
 	  
 	  protected boolean checkTermination(boolean currentDone, int currentResult) {
@@ -282,9 +286,9 @@ public abstract class Test implements Serializable {
   	public void reset() {
   		stopped = false;
   		super.reset();
-  	}
-  	
+  	}  	
   } // END of inner class Wrapper
+  
   
   /**
      Inner class WatchDog.
