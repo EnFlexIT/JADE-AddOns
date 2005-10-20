@@ -1,0 +1,48 @@
+<VisualStudioProject>
+    <VISUALJSHARP LastOpenVersion = "7.10.3077" >
+        <Build>
+            <Settings ReferencePath = "D:\JADE 5756\trunk\leap\dotnet\lib\" >
+                <Config
+                    Name = "Debug"
+                    EnableASPDebugging = "false"
+                    EnableASPXDebugging = "false"
+                    EnableUnmanagedDebugging = "false"
+                    EnableSQLServerDebugging = "false"
+                    RemoteDebugEnabled = "false"
+                    RemoteDebugMachine = ""
+                    StartAction = "Program"
+                    StartArguments = "-name test -agents DFAgent:demo.DFAgent;sensor:demo.SensorAgent(0,DFAgent@test);bettersensor:demo.SensorAgent(1,DFAgent@test);bestsensor:demo.SensorAgent(2,DFAgent@test);display:demo.DisplayAgent(DFAgent@test);son:demo.ManAgent(son.txt,display@test,mother@test,showkb);mother:demo.DemoAgent(mother.txt);daughter:demo.DemoAgent(daughter.txt)"
+                    StartPage = ""
+                    StartProgram = "C:\Documents and Settings\FPieri\Documenti\Visual Studio Projects\TestJadeSemantics\bin\Debug\TestJadeSemantics.exe"
+                    StartURL = ""
+                    StartWorkingDirectory = ""
+                    StartWithIE = "false"
+                />
+                <Config
+                    Name = "Release"
+                    EnableASPDebugging = "false"
+                    EnableASPXDebugging = "false"
+                    EnableUnmanagedDebugging = "false"
+                    EnableSQLServerDebugging = "false"
+                    RemoteDebugEnabled = "false"
+                    RemoteDebugMachine = ""
+                    StartAction = "Project"
+                    StartArguments = ""
+                    StartPage = ""
+                    StartProgram = ""
+                    StartURL = ""
+                    StartWorkingDirectory = ""
+                    StartWithIE = "false"
+                />
+            </Settings>
+        </Build>
+        <OtherProjectSettings
+            CopyProjectDestinationFolder = ""
+            CopyProjectUncPath = ""
+            CopyProjectOption = "0"
+            ProjectView = "ProjectFiles"
+            ProjectTrust = "0"
+        />
+    </VISUALJSHARP>
+</VisualStudioProject>
+

@@ -70,11 +70,14 @@ It can be downloaded from the JADE web site
 First, uncompress the archive file in the parent directory of the JADE root
 directory.
 Then, go to the 'jade/add-ons/semantics' subdirectory.
-Execute the 'ant lib' command.
+Execute the 'ant <env> lib' command, where <env> is replaced with either
+'java' (for compiling in a standard Java environment), 'dotnet' (for compiling
+in a .Net environment), or 'all' (for compiling both in a Java and .Net
+environment).
 The source file will be compiled, and a jsa.jar file will be generated
 in the 'lib' subdirectory.
 In order to additionally generate the javadoc in the 'doc' subdirectory,
-simply execute the 'ant doc' command.
+simply execute the 'ant <env> doc' command.
 
 4 Testing the JADE Semantics Add-On
 ===================================
@@ -98,14 +101,15 @@ new set of values for the predicate 'foo'. Enjoy!
 A complete demonstration of the JADE Semantics Add-On is also provided within
 the distribution file.
 In order to build it, first go to the 'jade/add-ons/semantics' directory and
-execute the 'ant demo' command.
+execute the 'ant <env> demo' command.
 Then, launch the 'runDemo.bat' (Windows systems) or the 'runDemo.sh' (Unix
 systems) in the 'demo' subdirectory.
 You may need to edit these files to adapt them to your operating system
 settings (for example if the Java Runtime is not available from the 'PATH'
 environment variable).
-A short tutorial for this demo is available (as a PDF file) in the 'doc'
-subdirectory.
+A short tutorial for this demo is available (as a PDF file) in the 'doc/guides'
+subdirectory. Some more theoretical papers about this Jade Semantics Add-on
+can also be found in the 'doc/papers' subdirectory.
 
 
 LIMITATIONS
