@@ -1,0 +1,69 @@
+README file for XMPP MTP for JADE, Version $Name: JADE-3_3 $
+
+INTRODUCTION
+============
+
+This file contains a XMPP MTP for JADE.
+Available at http://........
+
+
+LICENSE
+=======
+See file COPYING
+
+
+SYSTEM REQUIREMENTS
+===================
+
+This MTP requires JADE, smack and crimson libraries.
+
+SAMCK Homepage: http://www.jivesoftware.org/smack/
+CRIMSON Homepage: http://xml.apache.org/crimson/
+
+INSTALLATION
+============
+
+This MTP is contained into a separate JAR file, named xmpp.jar; in
+order to be used, the xmpp.jar file must be added to the CLASSPATH
+environment variable.
+
+
+USING THE NEW MTP
+=================
+
+Installing from the binary distribution of JADE
+-----------------------------------------------
+
+In the binary distribution, JADE is contained into three JAR files:
+
+  - jade.jar (Basic JADE runtime system)
+  - jadeTools.jar (JADE graphical tools)
+  - iiop.jar (Basic IIOP MTP)
+  - http.jar (Basic HTTP MTP)
+
+If you want to use the XMPP MTP, you have to include in your
+CLASSPATH the following files:
+
+  - jade.jar (Basic JADE runtime system)
+  - xmpp.jar (XMPP MTP)
+  - crimson.jar (XML Parser)
+
+
+Run the MTPs from the command line
+--------------------------------------
+
+In this case the following parameter must be specified on the command line.
+  -mtp jade.mtp.xmpp.MessageTransportProtocol
+  -jade_mtp_xmpp_server <jabber server>
+  -jade_mtp_xmpp_username <username>
+  -jade_mtp_xmpp_password <password>
+
+As an Example:
+
+java jade.Boot -mtp jade.mtp.xmpp.MessageTransportProtocol -jade_mtp_xmpp_server  jabber.org -jade_mtp_xmpp_username jade -jade_mtp_xmpp_password secret
+
+Supported MTP address kinds
+---------------------------
+
+The XMPP MTP supports 'xmpp://' addresses.
+

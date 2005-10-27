@@ -1,0 +1,48 @@
+<project name="xmpp" default="compile" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="src" value="src"/>
+  <property name="build" value="classes"/>
+  <property name="lib" value="lib"/>
+  <property name="dist" value="../.."/>
+  <property name="libDir" value="../../../jade/lib"/>
+  <property name="classpath" value="${libDir}/jade.jar;${libDir}/Base64.jar;${libDir}/smack.jar;${libDir}/smackx.jar;"/>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the directories structure used to store files -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <!-- Compile the java code from ${src} into ${build} -->
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on" />
+  </target>
+
+  <!-- Make jars file and put in ${lib} -->
+  <target name="lib" depends="init, compile">
+    <jar jarfile="${lib}/xmpp.jar">
+      <fileset dir="${build}" includes="**/jade/mtp/xmpp/*"/>
+    </jar>
+  </target>
+
+  <!-- Make distribution zip file and put in ${dist} -->
+  <target name="dist" depends="init, compile, lib">
+    <jar jarfile="${dist}/xmpp.zip">
+      <fileset dir="${dist}" includes="add-ons/xmpp/${src}/**"/>
+      <fileset dir="${dist}" includes="add-ons/xmpp/*"/>
+      <fileset dir="${dist}" includes="add-ons/xmpp/${lib}/**"/>
+    </jar>
+  </target>
+
+  <target name="all" depends="init, compile, lib, dist"/>
+
+  <!-- delete ${build} and ${lib} directories -->
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} directory tree -->
+    <delete includeEmptyDirs="true" file="${lib}/rdf.jar">
+      <fileset dir="${build}"/>
+    </delete>
+  </target>
+
+</project>
