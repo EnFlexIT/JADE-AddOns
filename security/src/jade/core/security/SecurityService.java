@@ -399,7 +399,12 @@ SecurityFactory.getSecurityFactory(myProfile);
               (java.security.Provider)
               Class.forName( provClass ).newInstance() );
         } catch (Throwable t) {
+          //#PJAVA_EXCLUDE_BEGIN
           myLogger.log(Logger.FINE, t.getMessage(), t);
+          //#PJAVA_EXCLUDE_END
+          /*#PJAVA_INCLUDE_BEGIN
+          myLogger.log(Logger.FINE, t.getMessage());
+          #PJAVA_INCLUDE_END*/          
           myLogger.log( noExplicitProv ?  Logger.CONFIG : Logger.WARNING, 
                         "Could not load JCE provider: '"+ provClass+"'");
         }
@@ -408,7 +413,12 @@ SecurityFactory.getSecurityFactory(myProfile);
     } // end for
   }// end setJCEProviders
 
+  //#PJAVA_EXCLUDE_BEGIN
   static java.util.logging.Level LEV = Logger.FINE;
+  //#PJAVA_EXCLUDE_END
+  /*#PJAVA_INCLUDE_BEGIN
+  static int LEV = Logger.FINE;
+  #PJAVA_INCLUDE_END*/ 
   public static void showProviders() {	
     if (!myLogger.isLoggable(LEV)) return;
     StringBuffer sb = new StringBuffer();

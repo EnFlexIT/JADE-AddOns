@@ -421,7 +421,7 @@ public class PermissionService
         }
 
         // instantiate one only Access Controller associated to the service for both filters
-        myJADEAccessController = SecurityFactory.getSecurityFactory().newJADEAccessController(
+        myJADEAccessController = ((jade.security.impl.JADESecurityFactory) SecurityFactory.getSecurityFactory()).newJADEAccessController(
           "ac-jade", 
           null, 
           policyFileName

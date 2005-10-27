@@ -98,7 +98,7 @@ public class SimpleJADEChecker extends BaseJADEChecker {
     	// Main container: NEW_NODE UP command issued by the underlying PlatformManagerImpl.
       // The requester principal and credentials 
     	// are held by the NodeDescriptor and not by the command.
-    	PermissionFilter.log( direction, cmd );
+    	jade.core.security.permission.PermissionFilter.log( direction, cmd );
       
       NodeDescriptor nd = (NodeDescriptor) params[0];
       String container_name = nd.getName();

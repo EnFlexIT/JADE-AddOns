@@ -32,9 +32,7 @@ package jade.security;
 	@version $Date$ $Revision$
 */
 public interface PrivilegedExceptionAction
-//#J2ME_EXCLUDE_BEGIN
 		extends java.security.PrivilegedExceptionAction
-//#J2ME_EXCLUDE_END
 {
 
 	/**

@@ -194,7 +194,12 @@ public class JADEAuthorityImpl implements jade.security.JADEAuthority {
     }
 
     // load the key pair (if exists, otherwise create a new one into the store)
+    //#PJAVA_EXCLUDE_BEGIN
     java.util.logging.Level LEV1 = java.util.logging.Level.CONFIG;
+    //#PJAVA_EXCLUDE_END
+    /*#PJAVA_INCLUDE_BEGIN
+    int LEV1 = jade.util.Logger.CONFIG;
+    #PJAVA_INCLUDE_END*/        
     if (securityStore.hasMyKeyPair()) {
       myLogger.log(LEV1,"Principal "+name+" already had a key pair, loading it.");
       keyPair = securityStore.getMyKeyPair();

@@ -91,8 +91,15 @@ public class PermissionFilter extends Filter {
           myLogger.log( Logger.FINE, "CheckerTable filled by:"+fillerClass );
         }
         catch (Exception ex) {
+          //#PJAVA_EXCLUDE_BEGIN
           myLogger.log( Logger.SEVERE, "Could not load custom CheckerTableFiller: '"+ fillerClass +
                         "'. Please check config param: "+CHECKERTABLE_FILLER_CLASS_KEY+"", ex);
+          //#PJAVA_EXCLUDE_END
+          /*#PJAVA_INCLUDE_BEGIN
+          myLogger.log( Logger.SEVERE, "Could not load custom CheckerTableFiller: '"+ fillerClass +
+                        "'. Please check config param: "+CHECKERTABLE_FILLER_CLASS_KEY+"");
+          #PJAVA_INCLUDE_END*/ 
+
         }
       } else {
         // Load rows into the checkerTable by using the default code-wired.
@@ -256,7 +263,12 @@ public class PermissionFilter extends Filter {
 
       } catch (Throwable e) {
         if (myLogger.isLoggable(Logger.SEVERE))
-        myLogger.log(Logger.SEVERE, "[PermissionFilter] ", e); 
+          //#PJAVA_EXCLUDE_BEGIN
+          myLogger.log(Logger.SEVERE, "[PermissionFilter] ", e); 
+          //#PJAVA_EXCLUDE_END
+          /*#PJAVA_INCLUDE_BEGIN
+          myLogger.log(Logger.SEVERE, "[PermissionFilter] "); 
+          #PJAVA_INCLUDE_END*/ 
       }
 
       // No JADESecurityException was thrown, so it is passed.
@@ -265,7 +277,12 @@ public class PermissionFilter extends Filter {
     } // end accept mehotd
 
 
+//#PJAVA_EXCLUDE_BEGIN
 static java.util.logging.Level LEV = Logger.FINE;
+//#PJAVA_EXCLUDE_END
+/*#PJAVA_INCLUDE_BEGIN
+static int LEV = Logger.FINE;
+#PJAVA_INCLUDE_END*/ 
 public static synchronized void log(boolean direction, jade.core.Command cmd) {
       if (!myLogger.isLoggable(LEV)) return;
       Object[] params = null;
