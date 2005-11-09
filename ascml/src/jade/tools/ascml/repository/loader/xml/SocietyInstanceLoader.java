@@ -44,7 +44,9 @@ public class SocietyInstanceLoader
 	public final static String TAG_LAUNCHER				= "launcher";
 	public final static String TAG_DEPENDENCY			= "dependency";
 	public final static String TAG_ADDRESS				= "address";
-	
+	public final static String TAG_FUNCTIONAL			= "functional";
+	public final static String TAG_INVARIANT			= "invariant";
+
 	public final static String ATTRIBUTE_NAME				= "name";
 	public final static String ATTRIBUTE_DESCRIPTION		= "description";
 	public final static String ATTRIBUTE_QUANTITY			= "quantity";
@@ -124,6 +126,28 @@ public class SocietyInstanceLoader
 			{
 				SocietyInstanceReferenceModel oneReference = initSocietyInstanceReference(oneNode, rootException);
 				model.addSocietyInstanceReference(oneReference);
+			}
+			else if(nodeName.equals(TAG_FUNCTIONAL))
+			{
+				IFunctional functionalModel = new FunctionalModel();
+
+				NodeList subNodes = oneNode.getChildNodes();
+				for(int j = 0; j < subNodes.getLength(); j++)
+				{
+					Node oneSubNode = subNodes.item(j);
+					String subNodeName = oneSubNode.getNodeName().toLowerCase();
+					if (subNodeName.equals(TAG_DEPENDENCY))
+					{
+						IDependency dependencyModel = DependencyTypeLoader.getModel((Element)oneSubNode, model.getName(), rootException);
+						functionalModel.addDependency(dependencyModel);
+					}
+					else if (subNodeName.equals(TAG_INVARIANT))
+					{
+						String invariant = oneSubNode.getTextContent().trim();
+						functionalModel.addInvariant(invariant);
+					}
+				}
+				model.setFunctionalModel(functionalModel);
 			}
 		}
 
