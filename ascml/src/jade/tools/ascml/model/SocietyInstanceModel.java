@@ -54,6 +54,7 @@ public class SocietyInstanceModel implements ISocietyInstance
 	private ISocietyType parentSociety;
 	private long quantity;
 	private String namingScheme;
+	private IFunctional functionalModel;
 
 	/**
 	 *  Instantiate a new model and initialize some variables 
@@ -188,6 +189,24 @@ public class SocietyInstanceModel implements ISocietyInstance
 	public String getStatus()
 	{
 		return this.status;
+	}
+
+	/**
+	 * Set the model on which the functional-status relies.
+	 * @param functionalModel  The model-object containing the funtional-dependencies and invariants.
+	 */
+	public void setFunctionalModel(IFunctional functionalModel)
+	{
+		this.functionalModel = functionalModel;
+	}
+
+	/**
+	 * Get the model on which the functional-status relies.
+	 * @return  The model-object containing the funtional-dependencies and invariants.
+	 */
+	public IFunctional getFunctionalModel()
+	{
+		return this.functionalModel;
 	}
 
 	/**
