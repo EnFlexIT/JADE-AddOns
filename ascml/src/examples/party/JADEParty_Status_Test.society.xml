@@ -21,36 +21,19 @@
 				</agentinstance>
 			</agentinstances>
 			<societyinstanceref name="ref. Male Guestpool" societytype="PartySociety Reloaded" societyinstance="Male Guestpool"/>
+
 			<functional>
 				<dependency>
 					<agentinstance name="examples.party.PartySociety.Ally McBeal-Party.Ally McBeal"/>
+				</dependency>
+				<dependency>
 					<agenttype name="PartyGuest" quantity="10"/>
 				</dependency>
+				<invariant>
+					Test-Variant
+				</invariant>
 			</functional>
-<!--			<statustransitions>
-				<statustransition precondition="STARTING" postcondition="FUNCTIONAL">
-					<dependency>
-						<agentinstance name="examples.party.PartySociety.Ally McBeal-Party.Ally McBeal"/>
-						<agenttype name="PartyGuest" quantity="10"/>
-					</dependency>
-				</statustransition>
-				<statustransition precondition="FUNCTIONAL" postcondition="NONFUNCTIONAL">
-					<dependency>
-						<agenttype name="PartyHost" quantity="1" statuscondition="STOPPING"/>
-					</dependency>
-				</statustransition>
-				<statustransition precondition="FUNCTIONAL" postcondition="NONFUNCTIONAL">
-					<dependency>
-						<agenttype name="PartyGuest" quantity="10" statuscondition="!STARTED"/>
-					</dependency>
-				</statustransition>
-				<statustransition precondition="ANY" postcondition="ERROR">
-					<dependency>
-						<agenttype name="PartyHost" quantity="1" statuscondition="ERROR"/>
-					</dependency>
-				</statustransition>
-			</statustransitions>
--->		</societyinstance>
+		</societyinstance>
 
 		<societyinstance name="Male Guestpool" description="This pool consists of male-agent-guests">
 			<agentinstances>
