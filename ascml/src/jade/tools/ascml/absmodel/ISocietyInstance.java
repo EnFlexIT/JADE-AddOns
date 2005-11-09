@@ -92,6 +92,18 @@ public interface ISocietyInstance
 	public String getStatus();
 
 	/**
+	 * Set the model on which the functional-status relies.
+	 * @param functionalModel  The model-object containing the funtional-dependencies and invariants.
+	 */
+	public void setFunctionalModel(IFunctional functionalModel);
+
+	/**
+	 * Get the model on which the functional-status relies.
+	 * @return  The model-object containing the funtional-dependencies and invariants.
+	 */
+	public IFunctional getFunctionalModel();
+
+	/**
 	 * Get the status-exception, which describe errors or warnings in detail.
 	 * @return  A ModelException containing detailed status-messages as Strings.
 	 */
