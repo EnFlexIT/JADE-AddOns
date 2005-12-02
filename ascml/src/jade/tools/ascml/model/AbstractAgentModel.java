@@ -44,7 +44,7 @@ public abstract class AbstractAgentModel
 
 	/**
 	 * The status indicates if this model has successfully been loaded.
-	 * Possible stati are STATUS_OK, STATUS_ERROR, STATUS_WARNING.
+	 * Possible stati are STATUS_OK, STATUS_ERROR, STATUS_REFERENCE_ERROR.
 	 */
 	protected String status;
 
@@ -146,7 +146,7 @@ public abstract class AbstractAgentModel
 
 	/**
 	 * Get the status of this model. The status indicates, whether loading was successful or not.
-	 * @return The status of this model, possible values are STATUS_OK, STATUS_ERROR, STATUS_WARNING.
+	 * @return The status of this model, possible values are STATUS_OK, STATUS_ERROR, STATUS_REFERENCE_ERROR.
 	 */
 	public String getStatus()
 	{
