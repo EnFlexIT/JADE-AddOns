@@ -143,7 +143,7 @@ public class SocietyInstanceLoader
 					}
 					else if (subNodeName.equals(TAG_INVARIANT))
 					{
-						String invariant = oneSubNode.getTextContent().trim();
+						String invariant = oneSubNode.getFirstChild().getNodeValue().trim();
 						functionalModel.addInvariant(invariant);
 					}
 				}
