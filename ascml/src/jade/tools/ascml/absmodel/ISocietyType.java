@@ -52,12 +52,6 @@ public interface ISocietyType
 	public final static String STATUS_REFERENCE_ERROR	= "erroneous reference";
 
 	/**
-	 * This constant is used to indicate, that at least one warning occurred while loading the model,
-	 * but the model has nevertheless been loaded.
-	 */
-	public final static String STATUS_WARNING			= "loading warning";
-
-	/**
 	 * This constant is used when no name has been given to this societytype.
 	 * Since the name is mandatory, it is set to NAME_UNKNOWN.
 	 */

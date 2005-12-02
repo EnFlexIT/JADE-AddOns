@@ -54,12 +54,6 @@ public interface IAbstractAgent
 	public final static String STATUS_ERROR		= "loading error";
 
 	/**
-	 * This constant is used to indicate, that at least one warning occurred while loading the model,
-	 * but the model has nevertheless been loaded.
-	 */
-	public final static String STATUS_WARNING	= "loading warning";
-
-	/**
 	 * This constant is used to indicate, that at least one referenced agenttype
 	 * has NOT been loaded successfully
 	 */
