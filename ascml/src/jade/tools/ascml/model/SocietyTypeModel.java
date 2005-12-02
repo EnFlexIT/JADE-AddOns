@@ -41,7 +41,7 @@ public class SocietyTypeModel implements ISocietyType
 {
 	/**
 	 * The status indicates if this model has successfully been loaded.
-	 * Possible stati are STATUS_OK, STATUS_ERROR, STATUS_WARNING, STATUS_REFERENCE_ERROR.
+	 * Possible stati are STATUS_OK, STATUS_ERROR, STATUS_REFERENCE_ERROR.
 	 */
 	private String status;
 
@@ -163,8 +163,7 @@ public class SocietyTypeModel implements ISocietyType
 
 	/**
 	 * Get the status of this model. The status indicates, whether loading was successful or not.
-	 * @return The status of this model, possible values are STATUS_OK, STATUS_ERROR, STATUS_WARNING
-	 * STATUS_REFERENCE_ERROR.
+	 * @return The status of this model, possible values are STATUS_OK, STATUS_ERROR, STATUS_REFERENCE_ERROR.
 	 */
 	public String getStatus()
 	{
