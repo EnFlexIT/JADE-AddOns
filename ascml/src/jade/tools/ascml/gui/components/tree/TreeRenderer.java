@@ -52,10 +52,57 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 	{
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
         String view = repository.getProject().getView();
-		
+
 		Object nodeContent = ((DefaultMutableTreeNode)value).getUserObject();
-		
-		if (nodeContent instanceof ISocietyType)
+
+		if ((nodeContent instanceof ISocietyType) || (nodeContent instanceof ISocietyInstance) || (nodeContent instanceof ISocietyInstanceReference) ||
+				(nodeContent instanceof IAgentType) || (nodeContent instanceof IAgentInstance))
+		{
+			processStaticModel(nodeContent);
+		}
+        else if ((nodeContent instanceof IRunnableSocietyInstance) || (nodeContent instanceof IRunnableRemoteSocietyInstanceReference) ||
+				(nodeContent instanceof IRunnableAgentInstance))
+		{
+			processRunnableModel(nodeContent);
+		}
+		else if (nodeContent instanceof ModelException)
+		{
+			setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.EXCEPTION_MAIN, 14, 14));
+		}
+		else if (nodeContent instanceof String)
+		{
+			String nodeString = (String)nodeContent;
+            if (nodeString.startsWith(RepositoryTree.REPOSITORY_STRING) && (view == Project.BASIC_VIEW))
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEVIEW_BASIC, 14, 14));
+			else if (nodeString.startsWith(RepositoryTree.REPOSITORY_STRING) && (view == Project.EXPERT_VIEW))
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEVIEW_EXPERT, 14, 14));
+			else if (nodeString == RepositoryTree.ADD_A_MODEL_HEADER)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEICON_BASIC_ADD, 14, 14));
+			else if (nodeString == RepositoryTree.ADD_AGENTMODEL_STRING)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.AGENTTYPE, 14, 14));
+			else if (nodeString == RepositoryTree.ADD_SOCIETYMODEL_STRING)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYTYPE, 14, 14));
+			else if (nodeString == RepositoryTree.AGENTTYPES_STRING)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEICON_FOLDER_AGENTTYPES, 14, 14));
+			else if (nodeString ==  RepositoryTree.SOCIETYTYPES_STRING)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEICON_FOLDER_SOCIETYTYPES, 14, 14));
+			else if (nodeString ==  RepositoryTree.REFERENCE_DESCRIPTION_STRING)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.REFERENCE_DESCRIPTION, 14, 14));
+			else if (nodeString ==  RepositoryTree.AGENT_DESCRIPTION_STRING)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.AGENT_DESCRIPTION, 14, 14));
+			else if (nodeString ==  RepositoryTree.RUNNINGINSTANCES_STRING)
+				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.RUNNING_INSTANCES, 14, 14));
+			else
+				setIcon(null);
+
+			setToolTipText(null);
+		}
+		return this;
+	}
+
+	private void processStaticModel(Object nodeContent)
+	{
+        if (nodeContent instanceof ISocietyType)
 		{
 			ISocietyType societyType = (ISocietyType)nodeContent;
 			ImageIcon typeIcon = societyType.getIcon();
@@ -83,14 +130,6 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 			setIcon(ImageIconLoader.scaleImageIcon(icon, 14, 14));
 			setToolTipText("SocietyInstance: "+((ISocietyInstance)nodeContent).getName());
 		}
-		else if (nodeContent instanceof IRunnableSocietyInstance)
-		{
-			IRunnableSocietyInstance runnableInstance = (IRunnableSocietyInstance)nodeContent;
-			Status status = runnableInstance.getStatus();
-			
-			setIcon(ImageIconLoader.createRunnableStatusIcon(status, 16, 16));
-			setToolTipText("Runnable SocietyInstance: "+runnableInstance.getName()+ " Status:" + status);
-		}
 		else if (nodeContent instanceof ISocietyInstanceReference)
 		{
 			ISocietyInstanceReference referenceModel = (ISocietyInstanceReference)nodeContent;
@@ -114,15 +153,6 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 
 			setIcon(ImageIconLoader.scaleImageIcon(icon, 14, 14));
 		}
-		else if (nodeContent instanceof IRunnableRemoteSocietyInstanceReference)
-		{
-			IRunnableRemoteSocietyInstanceReference instanceReference = (IRunnableRemoteSocietyInstanceReference)nodeContent;
-			Status status = instanceReference.getStatus();
-
-			setIcon(ImageIconLoader.createRunnableStatusIcon(status, 16, 16));
-
-			setToolTipText("remote SocietyInstance: " + instanceReference.getName() + " (" + status + ")");
-		}
 		else if (nodeContent instanceof IAgentInstance)
 		{
 			IAgentInstance agentInstance = (IAgentInstance)nodeContent;
@@ -138,7 +168,7 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 
 			setIcon(ImageIconLoader.scaleImageIcon(icon, 14, 14));
 			setToolTipText("Agent-Instance: " + agentInstance.getName());
-		}		
+		}
 		else if (nodeContent instanceof IAgentType)
 		{
 			IAgentType agentType = (IAgentType)nodeContent;
@@ -152,6 +182,28 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 
 			setIcon(ImageIconLoader.scaleImageIcon(icon, 14, 14));
 			setToolTipText("AgentType: " + agentType.getDocument().getSource());
+		}
+
+	}
+
+	private void processRunnableModel(Object nodeContent)
+	{
+		if (nodeContent instanceof IRunnableSocietyInstance)
+		{
+			IRunnableSocietyInstance runnableInstance = (IRunnableSocietyInstance)nodeContent;
+			Status status = runnableInstance.getStatus();
+
+			setIcon(ImageIconLoader.createRunnableStatusIcon(status, 16, 16));
+			setToolTipText("Runnable SocietyInstance: "+runnableInstance.getName()+ " Status:" + status);
+		}
+		else if (nodeContent instanceof IRunnableRemoteSocietyInstanceReference)
+		{
+			IRunnableRemoteSocietyInstanceReference instanceReference = (IRunnableRemoteSocietyInstanceReference)nodeContent;
+			Status status = instanceReference.getStatus();
+
+			setIcon(ImageIconLoader.createRunnableStatusIcon(status, 16, 16));
+
+			setToolTipText("remote SocietyInstance: " + instanceReference.getName() + " (" + status + ")");
 		}
 		else if (nodeContent instanceof IRunnableAgentInstance)
 		{
@@ -167,42 +219,6 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 
 			setIcon(ImageIconLoader.createRunnableStatusIcon(status, 16, 16));
 		}
-		else if (nodeContent instanceof ModelException)
-		{
-			setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.EXCEPTION_MAIN, 14, 14));
-		}
-		else if (nodeContent instanceof String)
-		{
-			String nodeString = (String)nodeContent;
-            if (nodeString.startsWith(RepositoryTree.REPOSITORY_STRING))
-			{
-				if (view == Project.BASIC_VIEW)
-					setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEVIEW_BASIC, 14, 14));
-				else if (view == Project.EXPERT_VIEW)
-					setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEVIEW_EXPERT, 14, 14));
-			}
-			else if (nodeString == RepositoryTree.ADD_A_MODEL_HEADER)
-				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEICON_BASIC_ADD, 14, 14));
-			else if (nodeString == RepositoryTree.ADD_AGENTMODEL_STRING)
-				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.AGENTTYPE, 14, 14));
-			else if (nodeString == RepositoryTree.ADD_SOCIETYMODEL_STRING)
-				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYTYPE, 14, 14));
-			else if (nodeString == RepositoryTree.AGENTTYPES_STRING)
-				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEICON_FOLDER_AGENTTYPES, 14, 14));
-			else if (nodeString ==  RepositoryTree.SOCIETYTYPES_STRING)
-				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.TREEICON_FOLDER_SOCIETYTYPES, 14, 14));
-			else if (nodeString ==  RepositoryTree.REFERENCE_DESCRIPTION_STRING)
-				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.REFERENCE_DESCRIPTION, 14, 14));
-			else if (nodeString ==  RepositoryTree.AGENT_DESCRIPTION_STRING)
-				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.AGENT_DESCRIPTION, 14, 14));
-			else if (nodeString ==  RepositoryTree.RUNNINGINSTANCES_STRING)
-				setIcon(ImageIconLoader.createImageIcon(ImageIconLoader.RUNNING_INSTANCES, 14, 14));
-			else
-				setIcon(null);
-
-			setToolTipText(null);
-		}
-		return this;
 	}
 
 	public void exit()
