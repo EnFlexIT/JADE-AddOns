@@ -61,7 +61,7 @@ Get the ASCML sources as mentioned above.
 Use 'ant lib' to generate the ASCML jar.
 It will be called ASCML-bin-<version>.jar in the lib subdirectory
 
-e.g. ASCML-bin-0.49.jar.
+e.g. ASCML-bin-0.1.jar.
 
 other build targets are
 
@@ -76,7 +76,7 @@ other build targets are
 3 Launching and using the ASCML
 ===============================
 The most simple way to start an ASCML agent:
-     java -cp lib/jade/jade.jar;lib/jade/jadeTools.jar;ASCML-0.49.jar
+     java -cp lib/jade/jade.jar;lib/jade/jadeTools.jar;ASCML-bin-0.1.jar
           jade.Boot -nomtp -gui -name test
           ascml:jade.tools.ascml.launcher.AgentLauncher
 
