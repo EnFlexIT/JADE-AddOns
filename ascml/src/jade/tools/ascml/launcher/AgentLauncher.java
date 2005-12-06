@@ -98,7 +98,7 @@ public class AgentLauncher extends ToolAgent {
     private ListenerManagerInterface lmi;
 
 	private StatusSubscriptionManager subscriptionManager = new StatusSubscriptionManager(this);
-
+	private DependencyManager myDependencyManager;
 
     /**
      * Listens to platform evens like DEADAGENT,BORNAGENT,...
@@ -403,6 +403,7 @@ public class AgentLauncher extends ToolAgent {
         else
 			System.err.println(repository.getModelIndex());
 		
+		myDependencyManager = new DependencyManager(this);
 		/*try
 		{
 			int randomNumber = (int)(Math.random()*1000) % 1000;
@@ -629,4 +630,7 @@ public class AgentLauncher extends ToolAgent {
 		return null;
 	}
 
+	public DependencyManager getDependencyManager() {
+		return myDependencyManager;
+	}
 }
