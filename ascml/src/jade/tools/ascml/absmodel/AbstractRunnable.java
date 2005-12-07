@@ -29,6 +29,7 @@ import java.util.*;
 import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.events.ModelChangedEvent;
 import jade.tools.ascml.onto.*;
+import jade.tools.ascml.launcher.DependencyManager.DependencyManager;
 
 /**
  *  Model-object containing all required information about a running SocietyInstance. 
@@ -41,6 +42,7 @@ public class AbstractRunnable implements IAbstractRunnable
 	protected Object parentModel;
 	protected IAbstractRunnable parentRunnable;
 	protected IDependency[] dependencies;
+	protected DependencyManager dependencyManager;
 
 	protected Vector modelChangedListener;
 
@@ -60,10 +62,6 @@ public class AbstractRunnable implements IAbstractRunnable
 			this.dependencies = new IDependency[0];
 
 		this.modelChangedListener = modelChangedListener;
-
-		this.detailedStatus = "Runnable model has been created";
-
-		setStatus(new Starting());
 	}
 	
 	/**
@@ -72,11 +70,14 @@ public class AbstractRunnable implements IAbstractRunnable
 	 */
 	public void setName(String name)
 	{
-		if(name == null) {
+		if(name == null)
+		{
 			name = "";
-                } else {
-                    this.name = name;
-                }
+		}
+		else
+		{
+			this.name = name;
+		}
 	}
 	
 	/**
@@ -212,12 +213,7 @@ public class AbstractRunnable implements IAbstractRunnable
 	{
 		return this.status;
 	}
-	
-	/**
-	 *  Get a ModelStatus Ontology Object which represents the status of this instance.
-	 *  @return  instance's status.
-	 */	
-	
+
 	/**
 	 *  Get the detailed information about the status of this instance.
 	 *  @return  instance's status in detail.

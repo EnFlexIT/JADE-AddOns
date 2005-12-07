@@ -53,12 +53,6 @@ public interface ISocietyInstanceReference
 	public final static String STATUS_REFERENCE_ERROR	= "erroneous reference";
 
 	/**
-	 * This constant is used to indicate, that the status of a reference is unknown, this constant
-	 * is usually used for remote references
-	 */
-	public final static String STATUS_REFERENCE_UNKNOWN	= "unknown reference status";
-
-	/**
 	 * This constant is used when no name has been given to this societyinstance-reference.
 	 * Since the name is mandatory, it is set to NAME_UNKNOWN.
 	 */
@@ -166,8 +160,7 @@ public interface ISocietyInstanceReference
 
 	/**
 	 * Get the status of this model. The status indicates, whether loading was successful or not.
-	 * @return The status of this model, possible values are STATUS_OK, STATUS_ERROR, STATUS_WARNING
-	 * STATUS_REFERENCE_ERROR, STATUS_REFERENCE_UNKNOWN.
+	 * @return The status of this model, possible values are STATUS_OK, STATUS_ERROR, STATUS_REFERENCE_ERROR
 	 */
 	public String getStatus();
 

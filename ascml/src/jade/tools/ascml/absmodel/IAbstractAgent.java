@@ -91,7 +91,7 @@ public interface IAbstractAgent
 
 	/**
 	 * Get the status of this model. The status indicates, whether loading was successful or not.
-	 * @return The status of this model, possible values are STATUS_OK, STATUS_ERROR, STATUS_WARNING.
+	 * @return The status of this model, possible values are STATUS_OK, STATUS_ERROR, STATUS_REFERENCE_ERROR.
 	 */
 	public String getStatus();
 	

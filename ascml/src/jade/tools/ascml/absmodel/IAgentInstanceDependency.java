@@ -35,14 +35,6 @@ public interface IAgentInstanceDependency extends IDependency
 	 * Since the name is a mandatory attribute, it is nevertheless set.
 	 */
 	public String NAME_UNKNOWN = "Unknown";
-	
-	public String STATUS_CREATED			= IAbstractRunnable.STATUS_CREATED;
-	public String STATUS_STARTING			= IAbstractRunnable.STATUS_STARTING;
-	public String STATUS_RUNNING			= IAbstractRunnable.STATUS_RUNNING;
-	public String STATUS_PARTLY_RUNNING		= IAbstractRunnable.STATUS_PARTLY_RUNNING;
-	public String STATUS_STOPPING			= IAbstractRunnable.STATUS_STOPPING;
-	public String STATUS_NOT_RUNNING		= IAbstractRunnable.STATUS_NOT_RUNNING;
-	public String STATUS_ERROR				= IAbstractRunnable.STATUS_ERROR;
 
 	public String getName();
 

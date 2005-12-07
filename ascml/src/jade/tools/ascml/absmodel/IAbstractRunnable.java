@@ -32,15 +32,6 @@ import jade.tools.ascml.onto.Status;
  */
 public interface IAbstractRunnable
 {
-	public static final String STATUS_NOT_CREATED	= "not_created";
-	public static final String STATUS_CREATED		= "created";
-	public static final String STATUS_STARTING		= "starting";
-	public static final String STATUS_RUNNING		= "running";
-	public static final String STATUS_PARTLY_RUNNING = "partly_running";
-	public static final String STATUS_STOPPING		= "stopping";
-	public static final String STATUS_NOT_RUNNING	= "not_running";
-	public static final String STATUS_ERROR			= "error";
-
 	public void setName(String name);
 
 	public String getName();
