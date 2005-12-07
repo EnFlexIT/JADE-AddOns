@@ -73,6 +73,8 @@ public class ModelActionRequestListener extends SimpleAchieveREResponder
 	{
 		//Default Antwort erstellen. Die wird abgeschickt, wenn
 		// eine Exception ausgelöst wird
+		System.out.println("ModelActionRequestListener: received:");
+		System.out.println(request.toString());		
 		ACLMessage response = request.createReply();
 		response.setPerformative(ACLMessage.NOT_UNDERSTOOD);
 		try

@@ -60,11 +60,11 @@ import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.repository.Repository;
 
 import jade.tools.ascml.onto.*;
-import jade.tools.ascml.launcher.DependencyManager.DependencyManager;
 import jade.tools.ascml.launcher.Subscriptions.*;
 import jade.tools.ascml.launcher.abstracts.*;
 import jade.tools.ascml.launcher.behaviours.*;
 import jade.tools.ascml.model.AgentTypeModel;
+import jade.tools.ascml.dependencymanager.DependencyManager;
 import jade.tools.ascml.events.*;
 import jade.tools.ascml.gui.GUI;
 import jade.tools.sl.SLFormatter;

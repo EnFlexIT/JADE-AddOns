@@ -22,28 +22,17 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package jade.tools.ascml.launcher.DependencyManager;
+package jade.tools.ascml.dependencymanager;
 
 import jade.tools.ascml.absmodel.IDependency;
+import jade.tools.ascml.launcher.AgentLauncher;
 
-public class DependencyManagerThread implements Runnable{
+public class DependencyManager {
 	
-	private IDependency[] dependencyArray;
-	private Thread t;
-	
-	public DependencyManagerThread(IDependency[] deps) {
-		dependencyArray=deps;
-		t=new Thread(this);
-		t.start();
-	}
+	private AgentLauncher myAgentLauncher;
 
-	public void run() {
-		//TODO: deps abarbeiten
-	}
-	
-	public boolean join() throws InterruptedException {
-		t.join();
-		return true;
-	}
+	public DependencyManager(AgentLauncher launcher) {
+		myAgentLauncher=launcher;
+	}	
 
 }

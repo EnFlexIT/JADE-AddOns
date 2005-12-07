@@ -57,6 +57,8 @@ public class GetStatusRequestListener extends SimpleAchieveREResponder {
 	protected ACLMessage prepareResponse(ACLMessage request)
 	throws NotUnderstoodException, RefuseException {
 		fqn = "";
+		System.out.println("GetStatusRequestListener: received:");
+		System.out.println(request.toString());
 		ACLMessage response = request.createReply();
 		response.setPerformative(ACLMessage.NOT_UNDERSTOOD);
 		absIota = null;
