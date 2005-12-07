@@ -32,18 +32,11 @@ import java.awt.event.*;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.events.ModelChangedEvent;
-import jade.tools.ascml.events.ModelActionEvent;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
-import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.onto.*;
 
 public class RunnableGeneral extends AbstractPanel implements ActionListener, ModelChangedListener
 {
-	private final static String RESTART	= "restart";
-	private final static String START	= "start";
-	private final static String STOP	= "stop";
-
-	private JButton button;
     private ImageIcon lifeCycleIcon;
     private JLabel statusIconLabel;
 	private IAbstractRunnable model;
@@ -74,11 +67,8 @@ public class RunnableGeneral extends AbstractPanel implements ActionListener, Mo
 
 	private JPanel createAttributePanel()
 	{
-		button = new JButton();
-		button.addActionListener(this);
-        Status status = model.getStatus();
+		Status status = model.getStatus();
 
-        initButton(status);
 		// prepare instance name
 		textName = new JTextField(model.getName(), 20);
 		textName.setEditable(false);
@@ -112,20 +102,14 @@ public class RunnableGeneral extends AbstractPanel implements ActionListener, Mo
 		mainPanel.add(textParentName, new GridBagConstraints(1, 2, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 		mainPanel.add(new JLabel("Status-Details:"), new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 		mainPanel.add(textDetailedStatus, new GridBagConstraints(1, 3, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-		mainPanel.add(button, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-        mainPanel.add(new JLabel(lifeCycleIcon), new GridBagConstraints(1, 4, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		mainPanel.add(new JLabel(lifeCycleIcon), new GridBagConstraints(1, 4, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
 
 		return mainPanel;
 	}
 
     private void initLifeCycleIcon(Status status)
-    // These are String comparisons XXX FIXME
     {
-        if (status instanceof Known)
-        {
-            lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_NOT_RUNNING);
-        }
-        else if (status instanceof Starting)
+        if (status instanceof Starting)
         {
             lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_STARTING);
         }
@@ -133,10 +117,10 @@ public class RunnableGeneral extends AbstractPanel implements ActionListener, Mo
         {
             lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_RUNNING);
         }
-        /*else if (status.equals(IAbstractRunnable.STATUS_PARTLY_RUNNING))
+        else if (status instanceof NonFunctional)
         {
-            lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_PARTLY_RUNNING);
-        }*/
+            lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_NOT_RUNNING);
+        }
         else if (status instanceof Stopping)
         {
             lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_STOPPING);
@@ -145,38 +129,9 @@ public class RunnableGeneral extends AbstractPanel implements ActionListener, Mo
         {
             lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_ERROR);
         }
-        /*else if (status.equals(IAbstractRunnable.STATUS_NOT_RUNNING))
-        {
-            lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_NOT_RUNNING);
-        }*/
 
         ImageIconLoader.scaleImageIcon(lifeCycleIcon, 300, 138);
     }
-
-	private void initButton(Status status)
-	{
-		if (status instanceof Functional)
-		{
-			button.setText("Stop");
-			button.setActionCommand(STOP);
-		}
-		/*else if (status == IAbstractRunnable.STATUS_NOT_RUNNING)
-		{
-			button.setText("Restart");
-			button.setActionCommand(RESTART);
-		}*/
-		else if (status instanceof Known)
-		{
-			button.setText("Start");
-			button.setActionCommand(START);
-		}
-		else if (status instanceof jade.tools.ascml.onto.Error)
-		{
-			button.setText("Try Restart");
-			button.setActionCommand(RESTART);
-		}
-
-	}
 
     public void updateAllComponents(Status status)
     {
@@ -186,8 +141,7 @@ public class RunnableGeneral extends AbstractPanel implements ActionListener, Mo
             textName.setText(model.getName());
             textParentName.setText(model.getParentModel().toString());
             textDetailedStatus.setText(model.getDetailedStatus());
-            initButton(status);
-	    initLifeCycleIcon(status);
+            initLifeCycleIcon(status);
             statusIconLabel.setIcon(ImageIconLoader.createRunnableStatusIcon(status, 50, 50));
 
             this.repaint();
@@ -196,83 +150,7 @@ public class RunnableGeneral extends AbstractPanel implements ActionListener, Mo
 
 	public void actionPerformed(ActionEvent evt)
 	{
-		if (evt.getSource() == button)
-		{
-			String cmd = evt.getActionCommand();
-			if (cmd.equals(RESTART))
-			{
-				try
-				{
-					getRepository().getRunnableManager().addRunnable(model);
-					model.setStatus(new Starting());
-					model.setDetailedStatus("Restarting instance");
-				}
-				catch(ModelException me)
-				{
-					System.err.println("RunnableGeneral.actionPerformed: Warning, readded runnable failed.");
-				}
 
-				if (model instanceof IRunnableAgentInstance)
-				{
-					ModelActionEvent event = new ModelActionEvent(ModelActionEvent.CMD_START_AGENTINSTANCE, model);
-					throwModelActionEvent(event);
-				}
-				else if (model instanceof IRunnableSocietyInstance)
-				{
-					ModelActionEvent event = new ModelActionEvent(ModelActionEvent.CMD_START_SOCIETYINSTANCE, model);
-					throwModelActionEvent(event);
-				}
-				else
-					System.err.println("RunnableGeneral.actionPerformed: try to restart " + model + " not supported");
-
-				/*Object parentModel = model.getParentModel();
-				if (parentModel instanceof ISocietyInstance)
-				{
-					mainPanel.showDialog(new StartSocietyInstanceDialog(mainPanel, (ISocietyInstance)parentModel));
-				}
-				else if (parentModel instanceof IAgentInstance)
-				{
-					model.setStatus(IAbstractRunnable.STATUS_CREATED);
-					model.setDetailedStatus("Model is going to restart");
-
-					mainPanel.selectModel(model);
-
-					// create an ModelActionEvent to inform the ModelActionHandler that a new agent has to be started
-					ModelActionEvent event = new ModelActionEvent(ModelActionEvent.CMD_START_AGENTINSTANCE, model);
-					throwModelActionEvent(event);
-				}
-				else
-				{
-					System.err.println("RunnableGeneral: actionPerformed RESTART of "+parentModel+", implement me !!!");
-				}*/
-				/*model.getType().createRunnableInstance(model.getName(), model.getModelListener());
-				ModelActionEvent event = new ModelActionEvent(ModelActionEvent.CMD_START_AGENTINSTANCE, model);
-				throwModelActionEvent(event);
-				parentPanel.selectModel(model);
-				*/
-			}
-			else if (cmd.equals(START))
-			{
-				System.err.println("RunnableGeneral: actionPerformed START, implement me !!!");
-				/*
-				ModelActionEvent event = new ModelActionEvent(ModelActionEvent.CMD_START_AGENTINSTANCE, model);
-				throwModelActionEvent(event);
-				parentPanel.selectModel(model);
-				*/
-			}
-			else if (cmd.equals(STOP))
-			{
-                ModelActionEvent actionEvent = null;
-
-                if (model instanceof IRunnableAgentInstance)
-                    actionEvent = new ModelActionEvent(ModelActionEvent.CMD_STOP_AGENTINSTANCE, model);
-                else if (model instanceof IRunnableSocietyInstance)
-                    actionEvent = new ModelActionEvent(ModelActionEvent.CMD_STOP_SOCIETYINSTANCE, model);
-
-				mainPanel.throwModelActionEvent(actionEvent);
-			}
-
-		}
 	}
 
 	public void modelChanged(ModelChangedEvent event)
