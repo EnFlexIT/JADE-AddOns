@@ -61,7 +61,7 @@ public class StartAgentInstanceDialog extends AbstractDialog
 			String instanceName = ((String)result).trim();
 			try
 			{
-				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])super.repository.getRunnableManager().createRunnable(instanceName, agentTypeModel);
+				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])super.repository.createRunnableAgentInstance(agentTypeModel.getFullyQualifiedName() + "." + instanceName);
 
 				// and select the newly created instance
 				mainPanel.selectModel(runnableModels[0]);
