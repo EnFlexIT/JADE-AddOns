@@ -30,7 +30,7 @@ DO NOT EDIT, UNLESS YOU ARE REALLY REALLY SURE WHAT YOU ARE DOING! */
 
 /** file: SlotHolder
  * @author ontology bean generator (Acklin BV) 
- * @version 2005/06/29, 16:24:48
+ * @version 2005/12/7, 10:14:11
  */
 
 public class SlotHolder {

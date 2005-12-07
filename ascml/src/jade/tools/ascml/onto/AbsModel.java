@@ -33,7 +33,7 @@ import jade.core.*;
 /**
    * Protege name: AbsModel
 * @author ontology bean generator
-* @version 2005/06/29, 16:24:48
+* @version 2005/12/7, 10:14:11
 */
 public class AbsModel implements Concept {
 
@@ -70,14 +70,14 @@ public class AbsModel implements Concept {
 
    /**
    * The full quallified Name
-   * Protege name: Name
+   * Protege name: FullQuallifiedName
    */
-   private String name;
-   public void setName(String value) { 
-    this.name=value;
+   private String fullQuallifiedName;
+   public void setFullQuallifiedName(String value) { 
+    this.fullQuallifiedName=value;
    }
-   public String getName() {
-     return this.name;
+   public String getFullQuallifiedName() {
+     return this.fullQuallifiedName;
    }
 
    /**

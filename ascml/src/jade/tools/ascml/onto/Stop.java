@@ -34,7 +34,7 @@ import jade.core.*;
    * Stop a model at an ascml
    * Protege name: Stop
 * @author ontology bean generator
-* @version 2005/06/29, 16:24:48
+* @version 2005/12/7, 10:14:11
 */
 public class Stop extends jade.content.onto.basic.Action implements AgentAction {
 

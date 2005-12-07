@@ -30,11 +30,21 @@ import jade.util.leap.*;
 import jade.core.*;
 
 /**
-   * Defining an SocietyInstance by its full quallified name
-   * Protege name: SocietyInstance
+   * Protege name: AgentStatus
 * @author ontology bean generator
 * @version 2005/12/7, 10:14:11
 */
-public class SocietyInstance extends AbsModel{ 
+public class AgentStatus extends Status{ 
+
+   /**
+   * Protege name: DetailedStatus
+   */
+   private String detailedStatus;
+   public void setDetailedStatus(String value) { 
+    this.detailedStatus=value;
+   }
+   public String getDetailedStatus() {
+     return this.detailedStatus;
+   }
 
 }

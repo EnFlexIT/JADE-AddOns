@@ -32,9 +32,9 @@ import jade.core.*;
 /**
    * Protege name: Starting
 * @author ontology bean generator
-* @version 2005/06/29, 16:24:48
+* @version 2005/12/7, 10:14:11
 */
-public class Starting extends Status{ 
+public class Starting extends SocietyStatus{ 
 
 //////////////////////////// User code
 @Override

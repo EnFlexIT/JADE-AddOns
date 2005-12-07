@@ -34,7 +34,7 @@ import jade.core.CaseInsensitiveString;
 
 /** file: ASCMLOntology.java
  * @author ontology bean generator
- * @version 2005/06/29, 16:24:48
+ * @version 2005/12/7, 10:14:11
  */
 public class ASCMLOntology extends jade.content.onto.Ontology implements ProtegeTools.ProtegeOntology {
    /**
@@ -69,31 +69,37 @@ public class ASCMLOntology extends jade.content.onto.Ontology implements Protege
     public static final String STOP="Stop";
     public static final String START_MODELS="Models";
     public static final String START="Start";
-    public static final String DEBUG="Debug";
-    public static final String STARTING="Starting";
-    public static final String ABSMODEL_CONFIG="Config";
-    public static final String ABSMODEL_NAME="Name";
-    public static final String ABSMODEL_TOOLOPTIONS="ToolOptions";
-    public static final String ABSMODEL_MODELSTATUS="ModelStatus";
-    public static final String ABSMODEL="AbsModel";
-    public static final String UNKNOWN="Unknown";
-    public static final String NONFUNCTIONAL="NonFunctional";
+    public static final String AGENTTYPE="AgentType";
+    public static final String INTROSPECT="Introspect";
+    public static final String SNIFF="Sniff";
+    public static final String AGENTSTATUS_DETAILEDSTATUS="DetailedStatus";
+    public static final String AGENTSTATUS="AgentStatus";
+    public static final String DEAD="Dead";
+    public static final String ERROR="Error";
+    public static final String SOCIETYTYPE="SocietyType";
+    public static final String BENCHMARK="Benchmark";
+    public static final String SOCIETYSTATUS="SocietyStatus";
     public static final String SOCIETYINSTANCE="SocietyInstance";
     public static final String AGENTINSTANCE="AgentInstance";
+    public static final String DEBUG="Debug";
+    public static final String UNKNOWN="Unknown";
+    public static final String STARTING="Starting";
     public static final String STOPPING="Stopping";
-    public static final String INTROSPECT="Introspect";
-    public static final String ERROR="Error";
     public static final String TOOLOPTION_OPTIONS="Options";
     public static final String TOOLOPTION="ToolOption";
-    public static final String LOG="Log";
-    public static final String AGENTTYPE="AgentType";
-    public static final String BENCHMARK="Benchmark";
+    public static final String NONFUNCTIONAL="NonFunctional";
+    public static final String BORN="Born";
+    public static final String KNOWN="Known";
+    public static final String ABSMODEL_CONFIG="Config";
+    public static final String ABSMODEL_FULLQUALLIFIEDNAME="FullQuallifiedName";
+    public static final String ABSMODEL_MODELSTATUS="ModelStatus";
+    public static final String ABSMODEL_TOOLOPTIONS="ToolOptions";
+    public static final String ABSMODEL="AbsModel";
+    public static final String FUNCTIONAL="Functional";
     public static final String STATUS_DETAILEDSTATUS="DetailedStatus";
     public static final String STATUS="Status";
-    public static final String SOCIETYTYPE="SocietyType";
-    public static final String KNOWN="Known";
-    public static final String FUNCTIONAL="Functional";
-    public static final String SNIFF="Sniff";
+    public static final String RUNNING="Running";
+    public static final String LOG="Log";
 
   /**
    * Constructor
@@ -105,44 +111,54 @@ public class ASCMLOntology extends jade.content.onto.Ontology implements Protege
     try { 
 
     // adding Concept(s)
-    ConceptSchema sniffSchema = new ConceptSchema(SNIFF);
-    add(sniffSchema, jade.tools.ascml.onto.Sniff.class);
-    ConceptSchema functionalSchema = new ConceptSchema(FUNCTIONAL);
-    add(functionalSchema, jade.tools.ascml.onto.Functional.class);
-    ConceptSchema knownSchema = new ConceptSchema(KNOWN);
-    add(knownSchema, jade.tools.ascml.onto.Known.class);
-    ConceptSchema societyTypeSchema = new ConceptSchema(SOCIETYTYPE);
-    add(societyTypeSchema, jade.tools.ascml.onto.SocietyType.class);
-    ConceptSchema statusSchema = new ConceptSchema(STATUS);
-    add(statusSchema, jade.tools.ascml.onto.Status.class);
-    ConceptSchema benchmarkSchema = new ConceptSchema(BENCHMARK);
-    add(benchmarkSchema, jade.tools.ascml.onto.Benchmark.class);
-    ConceptSchema agentTypeSchema = new ConceptSchema(AGENTTYPE);
-    add(agentTypeSchema, jade.tools.ascml.onto.AgentType.class);
     ConceptSchema logSchema = new ConceptSchema(LOG);
     add(logSchema, jade.tools.ascml.onto.Log.class);
+    ConceptSchema runningSchema = new ConceptSchema(RUNNING);
+    add(runningSchema, jade.tools.ascml.onto.Running.class);
+    ConceptSchema statusSchema = new ConceptSchema(STATUS);
+    add(statusSchema, jade.tools.ascml.onto.Status.class);
+    ConceptSchema functionalSchema = new ConceptSchema(FUNCTIONAL);
+    add(functionalSchema, jade.tools.ascml.onto.Functional.class);
+    ConceptSchema absModelSchema = new ConceptSchema(ABSMODEL);
+    add(absModelSchema, jade.tools.ascml.onto.AbsModel.class);
+    ConceptSchema knownSchema = new ConceptSchema(KNOWN);
+    add(knownSchema, jade.tools.ascml.onto.Known.class);
+    ConceptSchema bornSchema = new ConceptSchema(BORN);
+    add(bornSchema, jade.tools.ascml.onto.Born.class);
+    ConceptSchema nonFunctionalSchema = new ConceptSchema(NONFUNCTIONAL);
+    add(nonFunctionalSchema, jade.tools.ascml.onto.NonFunctional.class);
     ConceptSchema toolOptionSchema = new ConceptSchema(TOOLOPTION);
     add(toolOptionSchema, jade.tools.ascml.onto.ToolOption.class);
-    ConceptSchema errorSchema = new ConceptSchema(ERROR);
-    add(errorSchema, jade.tools.ascml.onto.Error.class);
-    ConceptSchema introspectSchema = new ConceptSchema(INTROSPECT);
-    add(introspectSchema, jade.tools.ascml.onto.Introspect.class);
     ConceptSchema stoppingSchema = new ConceptSchema(STOPPING);
     add(stoppingSchema, jade.tools.ascml.onto.Stopping.class);
+    ConceptSchema startingSchema = new ConceptSchema(STARTING);
+    add(startingSchema, jade.tools.ascml.onto.Starting.class);
+    ConceptSchema unknownSchema = new ConceptSchema(UNKNOWN);
+    add(unknownSchema, jade.tools.ascml.onto.Unknown.class);
+    ConceptSchema debugSchema = new ConceptSchema(DEBUG);
+    add(debugSchema, jade.tools.ascml.onto.Debug.class);
     ConceptSchema agentInstanceSchema = new ConceptSchema(AGENTINSTANCE);
     add(agentInstanceSchema, jade.tools.ascml.onto.AgentInstance.class);
     ConceptSchema societyInstanceSchema = new ConceptSchema(SOCIETYINSTANCE);
     add(societyInstanceSchema, jade.tools.ascml.onto.SocietyInstance.class);
-    ConceptSchema nonFunctionalSchema = new ConceptSchema(NONFUNCTIONAL);
-    add(nonFunctionalSchema, jade.tools.ascml.onto.NonFunctional.class);
-    ConceptSchema unknownSchema = new ConceptSchema(UNKNOWN);
-    add(unknownSchema, jade.tools.ascml.onto.Unknown.class);
-    ConceptSchema absModelSchema = new ConceptSchema(ABSMODEL);
-    add(absModelSchema, jade.tools.ascml.onto.AbsModel.class);
-    ConceptSchema startingSchema = new ConceptSchema(STARTING);
-    add(startingSchema, jade.tools.ascml.onto.Starting.class);
-    ConceptSchema debugSchema = new ConceptSchema(DEBUG);
-    add(debugSchema, jade.tools.ascml.onto.Debug.class);
+    ConceptSchema societyStatusSchema = new ConceptSchema(SOCIETYSTATUS);
+    add(societyStatusSchema, jade.tools.ascml.onto.SocietyStatus.class);
+    ConceptSchema benchmarkSchema = new ConceptSchema(BENCHMARK);
+    add(benchmarkSchema, jade.tools.ascml.onto.Benchmark.class);
+    ConceptSchema societyTypeSchema = new ConceptSchema(SOCIETYTYPE);
+    add(societyTypeSchema, jade.tools.ascml.onto.SocietyType.class);
+    ConceptSchema errorSchema = new ConceptSchema(ERROR);
+    add(errorSchema, jade.tools.ascml.onto.Error.class);
+    ConceptSchema deadSchema = new ConceptSchema(DEAD);
+    add(deadSchema, jade.tools.ascml.onto.Dead.class);
+    ConceptSchema agentStatusSchema = new ConceptSchema(AGENTSTATUS);
+    add(agentStatusSchema, jade.tools.ascml.onto.AgentStatus.class);
+    ConceptSchema sniffSchema = new ConceptSchema(SNIFF);
+    add(sniffSchema, jade.tools.ascml.onto.Sniff.class);
+    ConceptSchema introspectSchema = new ConceptSchema(INTROSPECT);
+    add(introspectSchema, jade.tools.ascml.onto.Introspect.class);
+    ConceptSchema agentTypeSchema = new ConceptSchema(AGENTTYPE);
+    add(agentTypeSchema, jade.tools.ascml.onto.AgentType.class);
 
     // adding AgentAction(s)
     AgentActionSchema startSchema = new AgentActionSchema(START);
@@ -157,41 +173,44 @@ public class ASCMLOntology extends jade.content.onto.Ontology implements Protege
 
     // adding fields
     statusSchema.add(STATUS_DETAILEDSTATUS, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    toolOptionSchema.add(TOOLOPTION_OPTIONS, (TermSchema)getSchema(BasicOntology.STRING), 0, ObjectSchema.UNLIMITED);
-    absModelSchema.add(ABSMODEL_MODELSTATUS, statusSchema, ObjectSchema.OPTIONAL);
-    absModelSchema.add(ABSMODEL_TOOLOPTIONS, toolOptionSchema, 0, ObjectSchema.UNLIMITED);
-    absModelSchema.add(ABSMODEL_NAME, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
+    absModelSchema.add(ABSMODEL_FULLQUALLIFIEDNAME, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
     absModelSchema.add(ABSMODEL_CONFIG, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
-    startSchema.add(START_MODELS, absModelSchema, 1, ObjectSchema.UNLIMITED);
-    stopSchema.add(STOP_MODELS, absModelSchema, 1, ObjectSchema.UNLIMITED);
+    toolOptionSchema.add(TOOLOPTION_OPTIONS, (TermSchema)getSchema(BasicOntology.STRING), 0, ObjectSchema.UNLIMITED);
+    agentStatusSchema.add(AGENTSTATUS_DETAILEDSTATUS, (TermSchema)getSchema(BasicOntology.STRING), ObjectSchema.OPTIONAL);
 
     // adding name mappings
     storeSlotName("DetailedStatus", "jade.tools.ascml.onto.Status", "DetailedStatus");  
-    storeSlotName("Options", "jade.tools.ascml.onto.ToolOption", "Options");  
-    storeSlotName("ModelStatus", "jade.tools.ascml.onto.AbsModel", "ModelStatus");  
     storeSlotName("ToolOptions", "jade.tools.ascml.onto.AbsModel", "ToolOptions");  
-    storeSlotName("Name", "jade.tools.ascml.onto.AbsModel", "Name");  
+    storeSlotName("ModelStatus", "jade.tools.ascml.onto.AbsModel", "ModelStatus");  
+    storeSlotName("FullQuallifiedName", "jade.tools.ascml.onto.AbsModel", "FullQuallifiedName");  
     storeSlotName("Config", "jade.tools.ascml.onto.AbsModel", "Config");  
+    storeSlotName("Options", "jade.tools.ascml.onto.ToolOption", "Options");  
+    storeSlotName("DetailedStatus", "jade.tools.ascml.onto.AgentStatus", "DetailedStatus");  
     storeSlotName("Models", "jade.tools.ascml.onto.Start", "Models");  
     storeSlotName("Models", "jade.tools.ascml.onto.Stop", "Models");  
 
     // adding inheritance
-    sniffSchema.addSuperSchema(toolOptionSchema);
-    functionalSchema.addSuperSchema(statusSchema);
-    knownSchema.addSuperSchema(statusSchema);
-    societyTypeSchema.addSuperSchema(absModelSchema);
-    benchmarkSchema.addSuperSchema(toolOptionSchema);
-    agentTypeSchema.addSuperSchema(absModelSchema);
     logSchema.addSuperSchema(toolOptionSchema);
-    errorSchema.addSuperSchema(statusSchema);
-    introspectSchema.addSuperSchema(toolOptionSchema);
-    stoppingSchema.addSuperSchema(statusSchema);
+    runningSchema.addSuperSchema(agentStatusSchema);
+    functionalSchema.addSuperSchema(societyStatusSchema);
+    knownSchema.addSuperSchema(societyStatusSchema);
+    bornSchema.addSuperSchema(agentStatusSchema);
+    nonFunctionalSchema.addSuperSchema(societyStatusSchema);
+    stoppingSchema.addSuperSchema(societyStatusSchema);
+    startingSchema.addSuperSchema(societyStatusSchema);
+    unknownSchema.addSuperSchema(societyStatusSchema);
+    debugSchema.addSuperSchema(toolOptionSchema);
     agentInstanceSchema.addSuperSchema(absModelSchema);
     societyInstanceSchema.addSuperSchema(absModelSchema);
-    nonFunctionalSchema.addSuperSchema(statusSchema);
-    unknownSchema.addSuperSchema(statusSchema);
-    startingSchema.addSuperSchema(statusSchema);
-    debugSchema.addSuperSchema(toolOptionSchema);
+    societyStatusSchema.addSuperSchema(statusSchema);
+    benchmarkSchema.addSuperSchema(toolOptionSchema);
+    societyTypeSchema.addSuperSchema(absModelSchema);
+    errorSchema.addSuperSchema(statusSchema);
+    deadSchema.addSuperSchema(agentStatusSchema);
+    agentStatusSchema.addSuperSchema(statusSchema);
+    sniffSchema.addSuperSchema(toolOptionSchema);
+    introspectSchema.addSuperSchema(toolOptionSchema);
+    agentTypeSchema.addSuperSchema(absModelSchema);
 
    }catch (java.lang.Exception e) {e.printStackTrace();}
   }
