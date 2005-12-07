@@ -249,7 +249,7 @@ public class DispatcherThread  extends AbstractMARWaitThread{
 		
 		// set up us the message		
 		SocietyInstance newsoc = new SocietyInstance();
-		newsoc.setName(fqn);
+		newsoc.setFullQuallifiedName(fqn);
 		Status srbResult = new Error();
 		try {
 			ACLMessage  getStatusMsg = al.createSubscription(receiver,newsoc);

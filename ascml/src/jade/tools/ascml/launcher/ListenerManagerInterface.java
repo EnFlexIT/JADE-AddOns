@@ -154,7 +154,7 @@ public class ListenerManagerInterface implements ToolTakeDownListener, Exception
 		    // I will tweak this to compile, I've not touched this code before, it might be wrong
                     Status ms;
                     SocietyInstance socI = new SocietyInstance();
-                    socI.setName(absRunnable.getFullyQualifiedName());
+                    socI.setFullQuallifiedName(absRunnable.getFullyQualifiedName());
                     if (absRunnable.getStatus() instanceof Known) 
                         //ms = new STATUS_CREATED();
 			ms = new Known();

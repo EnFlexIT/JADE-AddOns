@@ -65,7 +65,7 @@ public class RemoteStopperThread extends AbstractMARWaitThread {
 			
 			// System.out.println("DispatcherThread is sending MSG to : " + receiver + " to start:");
 			// System.out.print("     ");
-			newsoc.setName(remoteRef.getFullyQualifiedName());
+			newsoc.setFullQuallifiedName(remoteRef.getFullyQualifiedName());
 			
 			action.addModels(newsoc);
 			

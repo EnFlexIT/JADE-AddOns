@@ -59,7 +59,7 @@ public class MARResolverThread extends AbstractMARThread {
 			if (toResolve == RESOLVE_SOCIETY) {
 				while (it.hasNext()) {
                     SocietyInstance sc = (SocietyInstance) it.next();
-					String societyName = sc.getName();
+					String societyName = sc.getFullQuallifiedName();
 					System.out.println("MARResolver: Received MSG to start: " + societyName);
 					IRunnableSocietyInstance rsoc = null;
 					try {
@@ -90,7 +90,7 @@ public class MARResolverThread extends AbstractMARThread {
 			} else if (toResolve == RESOLVE_AGENTINSTANCE) {
 				while (it.hasNext()) {					
 					AgentInstance ai = (AgentInstance) it.next();
-					String instanceName = ai.getName();
+					String instanceName = ai.getFullQuallifiedName();
 					IRunnableAgentInstance rai = al.getRepository().createRunnableAgentInstance(instanceName);
 					if (!al.isAgentStarted(rai.getName())) {
 						AgentLauncherThread alt = new AgentLauncherThread(rai,al,null);
@@ -109,7 +109,7 @@ public class MARResolverThread extends AbstractMARThread {
 			} else if (toResolve == RESOLVE_AGENTTYPE) {			
 				while (it.hasNext()) {
 					AgentType at = (AgentType) it.next();
-					String typeName = at.getName();
+					String typeName = at.getFullQuallifiedName();
 
 					/* changed by Dirk, 14.2.05
 					   ge�ndert wurde: Runnables werden nun nicht mehr direkt aus den Models gelesen, sondern

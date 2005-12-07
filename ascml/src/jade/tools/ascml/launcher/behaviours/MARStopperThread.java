@@ -52,7 +52,7 @@ public class MARStopperThread  extends AbstractMARThread {
 		if (toResolve == RESOLVE_SOCIETY) {
 			while (it.hasNext()) {
                 SocietyInstance sc = (SocietyInstance) it.next();
-				String societyName = sc.getName();
+				String societyName = sc.getFullQuallifiedName();
 
 				IRunnableSocietyInstance instance = (IRunnableSocietyInstance) al.getRepository().getRunnableManager().getRunnable(societyName);
 				try
@@ -69,7 +69,7 @@ public class MARStopperThread  extends AbstractMARThread {
 			Vector<AgentKillThread> aktVector = new Vector<AgentKillThread>();
 			while (it.hasNext()) {					
 				AgentInstance ai = (AgentInstance) it.next();
-				String instanceName = ai.getName();
+				String instanceName = ai.getFullQuallifiedName();
 				IRunnableAgentInstance rai = (IRunnableAgentInstance) al.getRepository().getRunnableManager().getRunnable(instanceName);
 				if (!al.isAgentStarted(rai.getName())) {
 					AgentKillThread akt = new AgentKillThread(rai,al);

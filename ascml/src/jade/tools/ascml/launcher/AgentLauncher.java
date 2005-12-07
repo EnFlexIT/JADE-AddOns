@@ -60,6 +60,7 @@ import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.repository.Repository;
 
 import jade.tools.ascml.onto.*;
+import jade.tools.ascml.launcher.DependencyManager.DependencyManager;
 import jade.tools.ascml.launcher.Subscriptions.*;
 import jade.tools.ascml.launcher.abstracts.*;
 import jade.tools.ascml.launcher.behaviours.*;
@@ -71,7 +72,7 @@ import jade.tools.sl.SLFormatter;
 import java.util.*;
 
 /**
- * @author sven
+ * @author Sven Lilienthal
  *
  */
 public class AgentLauncher extends ToolAgent {
@@ -586,7 +587,7 @@ public class AgentLauncher extends ToolAgent {
 		AbsIRE absIota = new AbsIRE(SL2Vocabulary.IOTA);
 		absIota.setVariable(new AbsVariable("x",ASCMLOntology.STATUS));
 		AbsConcept absModel = (AbsConcept) ASCMLOntology.getInstance().fromObject(model);
-		absModel.set("Name",model.getName());
+		absModel.set("Name",model.getFullQuallifiedName());
 		absModel.set("ModelStatus",new AbsVariable("x",ASCMLOntology.STATUS));			
 		AbsPredicate abseq = new AbsPredicate(SL2Vocabulary.EQUALS);
 		abseq.set("left",absModel);
