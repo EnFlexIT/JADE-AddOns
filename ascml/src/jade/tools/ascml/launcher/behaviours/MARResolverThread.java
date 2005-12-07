@@ -91,22 +91,31 @@ public class MARResolverThread extends AbstractMARThread {
 				while (it.hasNext()) {					
 					AgentInstance ai = (AgentInstance) it.next();
 					String instanceName = ai.getFullQuallifiedName();
-					IRunnableAgentInstance rai = al.getRepository().createRunnableAgentInstance(instanceName);
-					if (!al.isAgentStarted(rai.getName())) {
-						AgentLauncherThread alt = new AgentLauncherThread(rai,al,null);
-						altVector.add(alt);
+
+					/* changed by Dirk, 7.12.05
+					   createRunnableAgentInstance now returns an array. It is possible
+					   that an agentinstance defines - using the quantity attribute of the xml-file -
+					   a collection of agentinstances. And this collection
+					   (consisting of 1 or more agentinstances) is returned by the create...-method. */
+
+					IRunnableAgentInstance[] rai = al.getRepository().createRunnableAgentInstance(instanceName);
+					for (int i=0; i < rai.length; i++)
+					{
+						if (!al.isAgentStarted(rai[i].getName())) {
+							AgentLauncherThread alt = new AgentLauncherThread(rai[i],al,null);
+							altVector.add(alt);
+						}
 					}
-                    
                     Iterator recIt = message.getAllIntendedReceiver();
                     while (recIt.hasNext()) {
                         AID oneAID = (AID)recIt.next();
-                    }                    
+                    }
 				}
 				for (int i=0;i<altVector.size();i++) {
 					AgentLauncherThread alt = altVector.get(i);
 					alt.getResult();
 				}
-			} else if (toResolve == RESOLVE_AGENTTYPE) {			
+			} else if (toResolve == RESOLVE_AGENTTYPE) {
 				while (it.hasNext()) {
 					AgentType at = (AgentType) it.next();
 					String typeName = at.getFullQuallifiedName();
