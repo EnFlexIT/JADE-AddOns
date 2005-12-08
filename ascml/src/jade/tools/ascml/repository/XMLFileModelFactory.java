@@ -29,14 +29,19 @@ import javax.xml.parsers.*;
 import java.io.*;
 import java.util.zip.*;
 import java.util.jar.*;
-import java.util.Vector;
 
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.repository.loader.xml.*;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.exceptions.ResourceNotFoundException;
+import jade.tools.ascml.model.jibx.AgentType;
+import jade.tools.ascml.model.DocumentModel;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
+import org.jibx.runtime.BindingDirectory;
+import org.jibx.runtime.IBindingFactory;
+import org.jibx.runtime.JiBXException;
+import org.jibx.runtime.IUnmarshallingContext;
 
 /**
  *  The default model loader creates the default model elements.
@@ -85,6 +90,8 @@ public class XMLFileModelFactory implements IModelFactory
 			modelInputStream = getModelInputStream(xmlFile);
 		}
 
+		System.out.println("Warning, using Jibx-ModelFactory for parsing " + xmlFile);
+
 		Document doc = readDocument(modelInputStream);
 		Element root = doc.getDocumentElement();
 
@@ -96,6 +103,26 @@ public class XMLFileModelFactory implements IModelFactory
 		}
 		else if(xmlFile.endsWith(".agent.xml"))
 		{
+			try
+			{
+				IBindingFactory bfact = BindingDirectory.getFactory(AgentType.class);
+				IUnmarshallingContext uctx = bfact.createUnmarshallingContext();
+
+				AgentType model = (AgentType)uctx.unmarshalDocument(new FileInputStream(xmlFile), null);
+				model.setDocument(new DocumentModel(xmlFile));
+				model.setModelChangedListener(repository.getListenerManager().getModelChangedListener());
+				model.setStatus(AgentType.STATUS_OK);
+
+			}
+			catch (JiBXException e)
+			{
+				throw new ModelException("Failed to load agenttype-model from '"+xmlFile+"'", e);
+			}
+			catch (FileNotFoundException e)
+			{
+				throw new ResourceNotFoundException("Failed to load agenttype-model from '"+xmlFile+"', file not found !", e);
+			}
+
 			IAgentType model = AgentTypeLoader.getModel(root, xmlFile, repository.getListenerManager().getModelChangedListener());
 			return model;
 		}
