@@ -28,6 +28,7 @@ package jade.tools.ascml.model;
 import java.util.*;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.onto.Status;
+import jade.tools.ascml.onto.Starting;
 
 /**
  *  This class describes the properties of a runnable societyInstance-reference.
@@ -63,6 +64,9 @@ public class RunnableRemoteSocietyInstanceReferenceModel extends AbstractRunnabl
 		this.instanceName = instanceName;
 		this.launcherName = launcherName;
 		this.launcherAddresses = launcherAddresses;
+
+		this.status = new Starting();
+		this.detailedStatus = "Runnable remote societyinstance-reference has been created";
 	}
 
 	//-------- methods --------
@@ -119,20 +123,6 @@ public class RunnableRemoteSocietyInstanceReferenceModel extends AbstractRunnabl
 		if (launcherName == null)
 			return "";
 		return launcherName;
-	}
-
-	public void setStatus(Status newStatus)
-	{
-		Status oldStatus = getStatus();
-		/* String comparison again, this will break FIXME XXX 
-		 * for now we just set the new status, even if it's the same, 
-		 * it schouldn't break anything. Maybe EventListeners might get
-		 * superfluous Events with same Status changes
-		 *
-		/*if (oldStatus != newStatus)
-		{*/
-			super.setStatus(newStatus);
-		/*}*/
 	}
 
 	/**

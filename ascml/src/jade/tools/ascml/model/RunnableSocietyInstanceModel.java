@@ -37,15 +37,6 @@ public class RunnableSocietyInstanceModel extends AbstractRunnable implements IR
 	private Vector localRunnableSocietyInstanceRefs	= new Vector();
 	private Vector remoteSocietyInstanceRefs		= new Vector();
 	
-	private int childrenAvailable		= 0;
-//	private int childrenCreated			= 0;
-	private int childrenNotRunning		= 0;
-	private int childrenStarting		= 0;
-	private int childrenRunning			= 0;
-	private int childrenPartlyRunning		= 0;
-	private int childrenStopping		= 0;
-	private int childrenError			= 0;
-	
 	private HashMap<String, Vector> debugStatusMap = new HashMap();
 	private boolean debug = true;
 	
@@ -56,39 +47,9 @@ public class RunnableSocietyInstanceModel extends AbstractRunnable implements IR
 	public RunnableSocietyInstanceModel(String name, ISocietyInstance parentModel, IAbstractRunnable parentRunnable)
 	{
 		super(name, parentModel, null, parentModel.getParentSocietyType().getModelChangedListener(), parentRunnable); // SocietyInstances themselves have no dependencies, therefore 'null'
-	}
-	
-	public void setStatus(Status newStatus)
-	{
-		/* toDO: HACK !!!, Agenten sollten nicht zwangsläufig den
-		 * gleichen Status erhalten wie die Society, sondern jeweils ihren eigenen
-		 */
-		/*try
-		 {
-		 throw new Exception(getName());
-		 }
-		 catch(Exception e)
-		 {
-		 e.printStackTrace();
-		 }*/
-		Status oldStatus = getStatus();
-		
-		/*IRunnableAgentInstance[] agentInstances = getRunnableAgentInstances();
-		 for (int i=0; i < agentInstances.length; i++)
-		 {
-		 if (agentInstances[i].getStatus() != newStatus)
-		 agentInstances[i].setStatus(newStatus);
-		 }
-		 
-		 IRunnableSocietyInstance[] societyInstances = getLocalRunnableSocietyInstanceReferences();
-		 for (int i=0; i < societyInstances.length; i++)
-		 {
-		 if (societyInstances[i].getStatus() != newStatus)
-		 societyInstances[i].setStatus(newStatus);
-		 }*/
-		
-		if ((oldStatus==null) || (!oldStatus.equals(newStatus)))
-			super.setStatus(newStatus);
+
+		this.status = new Starting();
+		this.detailedStatus = "Runnable societyinstance has been created";
 	}
 	
 	/**
@@ -100,57 +61,26 @@ public class RunnableSocietyInstanceModel extends AbstractRunnable implements IR
 	 */
 	public synchronized void informStatus(String runnableName, Status childNewStatus, Status childOldStatus)
 	{
+		// not needed anymore since the status is now set by the DependencyManager
+		
 		// System.err.println("RunnableSocietyInstanceModel.informStatus: oldStatus=" + childOldStatus + " newStatus=" + childNewStatus);
-		if (childNewStatus==null) 
+		/*if (childNewStatus==null)
 			System.err.println("RunnableSocietyInstanceModel.informStatus("+this.getFullyQualifiedName() +"): oldStatus=" + childOldStatus + " newStatus=" + childNewStatus);
 		if ((childNewStatus==null) || (childNewStatus.equals(childOldStatus)))
 			return;
-		
-		if (childNewStatus instanceof Functional)
-			childrenRunning++;
-		else if (childNewStatus instanceof Known)
-			childrenAvailable++;
-		else if (childNewStatus instanceof Starting)
-			childrenStarting++;
-		else if (childNewStatus instanceof Stopping)
-			childrenStopping++;
-		else if (childNewStatus instanceof jade.tools.ascml.onto.Error)
-			childrenError++;
-		
-		if (childOldStatus instanceof Functional)
-			childrenRunning--;
-		else if (childOldStatus instanceof Known)
-			childrenAvailable++;
-		else if (childOldStatus instanceof Starting)
-			childrenStarting--;
-		else if (childOldStatus instanceof Stopping)
-			childrenStopping--;
-		else if (childOldStatus instanceof jade.tools.ascml.onto.Error)
-			childrenError--;
-		
+
 		// now check, if the status has changed and if so, update the status
 		// and throw the appropiate event.
 		Status oldStatus = getStatus();
 
+
 		Status newSocStatus = null;
-		if (childrenError > 0) {
-			newSocStatus = new jade.tools.ascml.onto.Error();
-		} else if (childrenStarting > 0) {
-			newSocStatus = new Starting();	
-		} else if (childrenStopping > 0) {
-			newSocStatus = new Stopping();
-		} else if ((childrenRunning > 0) && ((new Starting()).equals(oldStatus))) {
-			newSocStatus = new Functional();	
-		} else if ((childrenAvailable > 0) && (childrenRunning==0)) {
-			newSocStatus = new Known();
-		} else if (oldStatus==null) {
-			newSocStatus = new Known();
-		} else if ((childrenRunning > 0) && (childrenAvailable > 0)) {
-			newSocStatus = new Stopping();
-		}
+		newSocStatus =
+
+
 		if (newSocStatus==null)
 			newSocStatus=oldStatus;
-			
+
 		if (debug)
 		{
 			if (debugStatusMap.containsKey(childNewStatus.toString()))
@@ -169,24 +99,19 @@ public class RunnableSocietyInstanceModel extends AbstractRunnable implements IR
 				Vector modelStatusVector = debugStatusMap.get(childOldStatus.toString());
 				modelStatusVector.remove(runnableName);
 			}
-			// STATUS FIXME: This looks strange due to the Status model change. I don't know how to properly do this.
-			System.err.println(getName() + " informStatus: childrenAvailable       = " + childrenAvailable + " " + debugStatusMap.get((new Known()).toString()));
-			System.err.println(getName() + " informStatus: childrenStarting      = " + childrenStarting + " " + debugStatusMap.get((new Starting()).toString()));
-			System.err.println(getName() + " informStatus: childrenStarted       = " + childrenRunning + " " + debugStatusMap.get((new Functional()).toString()));
-			System.err.println(getName() + " informStatus: childrenStopping      = " + childrenStopping + " " + debugStatusMap.get((new Stopping()).toString()));
-			System.err.println(getName() + " informStatus: childrenError         = " + childrenError + " " + debugStatusMap.get((new jade.tools.ascml.onto.Error()).toString()));
-			
+
 			if ((oldStatus==null) || (!oldStatus.equals(newSocStatus)))
 				System.err.println(getName() + " informStatus: inform lead to new status: " + newSocStatus);
 			else
 				System.err.println(getName() + " informStatus: despite inform old status: " + newSocStatus);
-			
+
 		}
-		
+
 		if ((oldStatus==null) || (!oldStatus.equals(newSocStatus)))
 			super.setStatus(newSocStatus);
+		*/
 	}
-	
+
 	/**
 	 * Get the status of this RunnableSocietyInstance.
 	 * The status results of the status of all contained RunnableAgentInstances
@@ -196,129 +121,6 @@ public class RunnableSocietyInstanceModel extends AbstractRunnable implements IR
 	public Status getStatus()
 	{
 		return super.getStatus();
-		
-		
-		/*// System.err.println("RunnableSocietyInstanceModel.getStatus: thisStatus = " + thisStatus);
-		 boolean atLeastOneSubSocietyCreated         = false;
-		 boolean atLeastOneSubSocietyNotRunning      = false;
-		 boolean atLeastOneSubSocietyStarting        = false;
-		 boolean atLeastOneSubSocietyRunning         = false;
-		 boolean atLeastOneSubSocietyPartlyRunning   = false;
-		 boolean atLeastOneSubSocietyStopping        = false;
-		 boolean atLeastOneSubSocietyException       = false;
-		 
-		 IRunnableSocietyInstance[] societyReferences = getLocalRunnableSocietyInstanceReferences();
-		 for (int i=0; i < societyReferences.length; i++)
-		 {
-		 String status = societyReferences[i].getStatus();
-		 // System.err.println("RunnableSocietyInstanceModel.getStatus: subsociety=" + societyReferences[i] + " status"+status);
-		  if (status == IAbstractRunnable.STATUS_RUNNING)
-		  atLeastOneSubSocietyRunning = true;
-		  else if (status == IAbstractRunnable.STATUS_NOT_RUNNING)
-		  atLeastOneSubSocietyNotRunning = true;
-		  else if (status == IAbstractRunnable.STATUS_CREATED)
-		  atLeastOneSubSocietyCreated = true;
-		  else if (status == IAbstractRunnable.STATUS_PARTLY_RUNNING)
-		  atLeastOneSubSocietyPartlyRunning = true;
-		  else if (status == IAbstractRunnable.STATUS_STARTING)
-		  atLeastOneSubSocietyStarting = true;
-		  else if (status == IAbstractRunnable.STATUS_STOPPING)
-		  atLeastOneSubSocietyStopping = true;
-		  else if (status == IAbstractRunnable.STATUS_ERROR)
-		  atLeastOneSubSocietyException = true;
-		  }
-		  
-		  IRunnableRemoteSocietyInstanceReference[] remoteSocietyReferences = getRemoteRunnableSocietyInstanceReferences();
-		  for (int i=0; i < remoteSocietyReferences.length; i++)
-		  {
-		  String status = remoteSocietyReferences[i].getStatus();
-		  // System.err.println("RunnableSocietyInstanceModel.getStatus: subsociety=" + societyReferences[i] + " status"+status);
-		   if (status == IAbstractRunnable.STATUS_RUNNING)
-		   atLeastOneSubSocietyRunning = true;
-		   else if (status == IAbstractRunnable.STATUS_NOT_RUNNING)
-		   atLeastOneSubSocietyNotRunning = true;
-		   else if (status == IAbstractRunnable.STATUS_CREATED)
-		   atLeastOneSubSocietyCreated = true;
-		   else if (status == IAbstractRunnable.STATUS_PARTLY_RUNNING)
-		   atLeastOneSubSocietyPartlyRunning = true;
-		   else if (status == IAbstractRunnable.STATUS_STARTING)
-		   atLeastOneSubSocietyStarting = true;
-		   else if (status == IAbstractRunnable.STATUS_STOPPING)
-		   atLeastOneSubSocietyStopping = true;
-		   else if (status == IAbstractRunnable.STATUS_ERROR)
-		   atLeastOneSubSocietyException = true;
-		   }
-		   
-		   String subsocietyStatus = null;
-		   
-		   if (atLeastOneSubSocietyCreated)
-		   subsocietyStatus = IAbstractRunnable.STATUS_CREATED;
-		   
-		   if (atLeastOneSubSocietyCreated && atLeastOneSubSocietyStarting)
-		   subsocietyStatus = IAbstractRunnable.STATUS_STARTING;
-		   
-		   // test if all elements are running, and none is starting, stopping, partly_running, etc.
-		    if (!atLeastOneSubSocietyCreated && !atLeastOneSubSocietyStarting &&
-		    atLeastOneSubSocietyRunning && !atLeastOneSubSocietyPartlyRunning &&
-		    !atLeastOneSubSocietyStopping && !atLeastOneSubSocietyException)
-		    subsocietyStatus = IAbstractRunnable.STATUS_RUNNING;
-		    
-		    if (atLeastOneSubSocietyRunning &&
-		    (atLeastOneSubSocietyCreated || atLeastOneSubSocietyStarting ||
-		    atLeastOneSubSocietyPartlyRunning || atLeastOneSubSocietyStopping ||
-		    atLeastOneSubSocietyNotRunning))
-		    subsocietyStatus = IAbstractRunnable.STATUS_PARTLY_RUNNING;
-		    
-		    if (atLeastOneSubSocietyNotRunning &&
-		    (!atLeastOneSubSocietyCreated || !atLeastOneSubSocietyStarting ||
-		    !atLeastOneSubSocietyPartlyRunning || !atLeastOneSubSocietyStopping ||
-		    !atLeastOneSubSocietyRunning))
-		    subsocietyStatus = IAbstractRunnable.STATUS_NOT_RUNNING;
-		    
-		    if (atLeastOneSubSocietyException)
-		    subsocietyStatus = IAbstractRunnable.STATUS_ERROR;
-		    
-		    // starting & stopping -status changes are omitted.
-		     
-		     System.err.println("RunnableSocietyInstanceModel.getStatus: thisStatus=" + thisStatus + " subsocietyStatus = " + subsocietyStatus);
-		     if ((subsocietyStatus != null) && (subsocietyStatus != thisStatus))
-		     {
-		     if (thisStatus == IAbstractRunnable.STATUS_CREATED)
-		     {
-		     if (subsocietyStatus != STATUS_CREATED)
-		     super.setStatus(subsocietyStatus);
-		     }
-		     else if (thisStatus == IAbstractRunnable.STATUS_STARTING)
-		     {
-		     if ((subsocietyStatus != STATUS_CREATED) && (subsocietyStatus != STATUS_STARTING))
-		     super.setStatus(subsocietyStatus);
-		     }
-		     else if (thisStatus == IAbstractRunnable.STATUS_PARTLY_RUNNING)
-		     {
-		     if (subsocietyStatus == IAbstractRunnable.STATUS_ERROR)
-		     super.setStatus(IAbstractRunnable.STATUS_ERROR);
-		     else
-		     super.setStatus(IAbstractRunnable.STATUS_PARTLY_RUNNING);
-		     }
-		     else if (thisStatus == IAbstractRunnable.STATUS_RUNNING)
-		     {
-		     if (subsocietyStatus == IAbstractRunnable.STATUS_ERROR)
-		     super.setStatus(IAbstractRunnable.STATUS_ERROR);
-		     else
-		     super.setStatus(IAbstractRunnable.STATUS_PARTLY_RUNNING);
-		     }
-		     else // if (thisStatus == IAbstractRunnable.STATUS_PARTLY_RUNNING)
-		     {
-		     if (subsocietyStatus == IAbstractRunnable.STATUS_ERROR)
-		     {
-		     detailedStatus = "At least one referenced society-instance is errorneous. Please have a look at the status-details of contained references.";
-		     super.setStatus(subsocietyStatus);
-		     }
-		     }
-		     }
-		     // System.err.println("RunnableSocietyInstanceModel.getStatus: model=" + this + " status=" + super.getStatus());
-		      return super.getStatus();
-		      */
 	}
 	
 	/**

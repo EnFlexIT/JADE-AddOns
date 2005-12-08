@@ -28,6 +28,7 @@ package jade.tools.ascml.model;
 import java.util.*;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.onto.Status;
+import jade.tools.ascml.onto.Born;
 
 /**
  *  Model-object containing all required information about a running SocietyInstance. 
@@ -61,6 +62,9 @@ public class RunnableAgentInstanceModel extends AbstractRunnable implements IRun
 			this.toolOptions = toolOptions;
 		else
 			this.toolOptions = new HashMap<String, HashMap<String, Vector<String>>>();
+
+		this.status = new Born();
+		this.detailedStatus = "Runnable agentinstance has been created";
 	}
 
 	public String getClassName()
@@ -180,7 +184,7 @@ public class RunnableAgentInstanceModel extends AbstractRunnable implements IRun
 	 */
 	public IAgentParameterSet getParameterSet(String name)
 	{
-		System.err.println("RunnableAgentInstanceModel: Implement parameterValues !!!");
+		System.err.println("RunnableAgentInstanceModel.getParameterSet: Implement parameterValues !!!");
 		for (int i=0; i < parameterSets.length; i++)
 		{
 			if (name.equals(parameterSets[i].getName()))
