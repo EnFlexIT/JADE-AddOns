@@ -235,7 +235,7 @@ public class Repository
 	 *                           no runnable agentInstance could be created
 	 *                           or the name is not fully qualified.
 	 */
-	public IRunnableAgentInstance createRunnableAgentInstance(String fullyQualifiedInstanceName) throws ModelException
+	public IRunnableAgentInstance[] createRunnableAgentInstance(String fullyQualifiedInstanceName) throws ModelException
 	{
 		// System.err.println("Repository.createRunnableAgentInstance: WARNING, maybe > 1 runnableModel has been created, but only 1st is returned.");
 		String agentTypeName = fullyQualifiedInstanceName.substring(0, fullyQualifiedInstanceName.lastIndexOf('.'));
@@ -243,7 +243,7 @@ public class Repository
 
 		IAgentType agentType = getAgentType(agentTypeName, true);
 		IRunnableAgentInstance[] runnableInstance = (IRunnableAgentInstance[])getRunnableManager().createRunnable(runnableAgentInstanceName, agentType);
-		return runnableInstance[0];
+		return runnableInstance;
 	}
 
 	public Status getRunnableStatus(String fullyQualifiedName)
