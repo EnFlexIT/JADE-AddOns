@@ -25,15 +25,21 @@
 
 package jade.tools.ascml.model.dependency;
 
-import jade.tools.ascml.absmodel.IAbstractRunnable;
-import jade.tools.ascml.absmodel.IProvider;
-import jade.tools.ascml.absmodel.IAgentInstanceDependency;
+import jade.tools.ascml.absmodel.*;
 
 /**
  * 
  */
 public class AgentInstanceDependencyModel extends AbstractDependencyModel implements IAgentInstanceDependency
 {
+    /**
+     * These constants are used to check whether the status, that is set in the setStatus-method
+     * is a valid status.
+     */
+	private static String STATUS_BORN       = "born";
+	private static String STATUS_RUNNING    = "running";
+	private static String STATUS_ERROR      = "error";
+	private static String STATUS_DEAD       = "dead";
 
 	private String name;
 	private String status;
@@ -68,22 +74,19 @@ public class AgentInstanceDependencyModel extends AbstractDependencyModel implem
 			this.status = STATUS_RUNNING;
 		else
 		{
-			status = status.trim();
-
-			if (status.equalsIgnoreCase(STATUS_CREATED))
-				this.status = STATUS_CREATED;
-			else if (status.equalsIgnoreCase(STATUS_STARTING))
-				this.status = STATUS_STARTING;
+			if (status.equalsIgnoreCase(STATUS_BORN))
+				this.status = STATUS_BORN;
 			else if (status.equalsIgnoreCase(STATUS_RUNNING))
 				this.status = STATUS_RUNNING;
-			else if (status.equalsIgnoreCase(STATUS_PARTLY_RUNNING))
-				this.status = STATUS_PARTLY_RUNNING;
-			else if (status.equalsIgnoreCase(STATUS_STOPPING))
-				this.status = STATUS_STOPPING;
-			else if (status.equalsIgnoreCase(STATUS_NOT_RUNNING))
-				this.status = STATUS_NOT_RUNNING;
 			else if (status.equalsIgnoreCase(STATUS_ERROR))
 				this.status = STATUS_ERROR;
+			else if (status.equalsIgnoreCase(STATUS_DEAD))
+				this.status = STATUS_DEAD;
+			else
+			{
+				System.err.println("AgentInstanceDependencyModel.setStatus: Unknown status ("+status+")");
+				this.status = STATUS_RUNNING;
+			}
 		}
 	}
 
