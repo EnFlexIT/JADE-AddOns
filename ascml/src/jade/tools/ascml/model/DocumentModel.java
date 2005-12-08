@@ -56,6 +56,16 @@ public class DocumentModel implements IDocument
 		this.imports = new ArrayList();
 	}
 
+	/**
+	 *  Create a new document.
+	 *  @param src  The source-path of this document
+	 */
+	public DocumentModel(String src)
+	{
+		this();
+		this.source = src;
+	}
+
 	//-------- methods --------
 
 	/**
