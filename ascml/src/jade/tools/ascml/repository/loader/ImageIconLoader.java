@@ -185,16 +185,22 @@ public class ImageIconLoader
 
 	public static ImageIcon createRunnableStatusIcon(Status status, int width, int height)
 	{
-		if (status instanceof Known)
-			return createImageIcon(STATUS_NOT_RUNNING, width, height);
-		else if (status instanceof Starting)
+		if (status instanceof Starting)
 			return createImageIcon(STATUS_STARTING, width, height);
 		else if (status instanceof Functional)
 			return createImageIcon(STATUS_RUNNING, width, height);
+		if (status instanceof NonFunctional)
+			return createImageIcon(STATUS_NOT_RUNNING, width, height);
 		else if (status instanceof Stopping)
 			return createImageIcon(STATUS_STOPPING, width, height);
 		else if (status instanceof jade.tools.ascml.onto.Error)
 			return createImageIcon(STATUS_ERROR, width, height);
+		else if (status instanceof Born)
+			return createImageIcon(STATUS_CREATED, width, height);
+		else if (status instanceof Running)
+			return createImageIcon(STATUS_RUNNING, width, height);
+		else if (status instanceof Dead)
+			return createImageIcon(STATUS_NOT_RUNNING, width, height);
         return null;
 	}	
 }
