@@ -356,16 +356,22 @@ public class TestUtility {
 		}
 		else {
 			// Otherwise launch the JADE instance locally
-  		if (classpath == null || classpath.startsWith("+")) {
-  			String currentCp = System.getProperty("java.class.path");
-  			if (classpath == null) {
-  				classpath = currentCp;
-  			}
-  			else {
-  				classpath = classpath.substring(1)+System.getProperty("path.separator")+currentCp;
-  			}
+			if (classpath == null || classpath.startsWith("+")) {
+				String currentCp = System.getProperty("java.class.path");
+				if (classpath == null) {
+					classpath = currentCp;
+				}
+				else {
+					classpath = classpath.substring(1)+System.getProperty("path.separator")+currentCp;
+				}
 			}
-			jc = new LocalJadeController(instanceName, new String("java -cp "+classpath+" "+mainClass+" "+jadeArgs), protoNames);
+			if ("true".equalsIgnoreCase(System.getProperty("DEBUG"))) {
+				System.out.println("Manual launch!!!!!!!!!!!!!!");
+				jc = new ManualJadeController(instanceName, new String("java -cp "+classpath+" "+mainClass+" "+jadeArgs), protoNames);
+			}
+			else {
+				jc = new LocalJadeController(instanceName, new String("java -cp "+classpath+" "+mainClass+" "+jadeArgs), protoNames);
+			}
 		}
 		return jc;
   }
