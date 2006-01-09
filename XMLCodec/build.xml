@@ -6,7 +6,7 @@
   <property name="lib" value="lib"/>
   <property name="dist" value="../.."/>
   <property name="libJADEDir" value="../../lib"/>
-  <property name="classpath" value="../..;${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar"/>
+  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/commons-codec/commons-codec-1.3.jar"/>
 
   <target name="init">
     <!-- Create the time stamp -->

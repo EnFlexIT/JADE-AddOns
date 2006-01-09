@@ -22,8 +22,7 @@
  * Boston, MA  02111-1307, USA.
  * **************************************************************
  */
- 
- 
+
 package jade.content.lang.xml;
 
 import jade.content.lang.StringCodec;
@@ -39,195 +38,106 @@ import javax.xml.parsers.*;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
-/**
- * @author Filippo Quarta - TELECOM ITALIA LAB
- */
-
-class XMLErrorHandler implements ErrorHandler {
-		
-	public void error(SAXParseException exception) {
-		exception.printStackTrace();
-	}
-		
-	public void fatalError(SAXParseException exception) {
-		exception.printStackTrace();
-	}
-		
-	public void warning(SAXParseException exception) {
-		exception.printStackTrace();
-	}
-}
-
-class XMLContentHandler extends DefaultHandler {
-	
-	XMLDecoder decoder;
-	String lastValue;
-	
-	protected void setXMLDecoder(XMLDecoder d) {
-		decoder = d;
-	}	
-	
-	public void startElement(String namespaceURI,
-							 String localName,
-							 String qname,
-							 Attributes attr) throws SAXException {
-		
-		try {
-			lastValue = new String();
-			decoder.openTag(qname, attr);		
-		} catch (OntologyException e) {
-			e.printStackTrace();
-			throw new SAXException(e.getMessage());
-		}
-	}
-		
-	public void endElement(String namespaceURI,
-						   String localName,
-						   String qname) throws SAXException {
-		try {
-   			decoder.closeTag(qname, lastValue);
-   		} catch (OntologyException e) {
-   			throw new SAXException(e.getMessage());
-   		}
-	}
-		
-	public void characters(char[] ch, 
-						   int start,
-						   int length) throws SAXException {
-
-		String temp = new String(ch, start, length);
-		temp.trim();
-		if ((temp.charAt(0)=='\t') && (temp.charAt(temp.length()-1)=='\t'))
-			temp = "";
-		lastValue = lastValue + temp;
-		// Remove unexpected text data like sequence of tabs
-		
-	}					   	
-   		
-}
 
 public class XMLCodec extends StringCodec {
+	public static final String NAME = "XML";
 	
-	static final String JAXP_SCHEMA_LANGUAGE =
-	    "http://java.sun.com/xml/jaxp/properties/schemaLanguage";
-
-	static final String W3C_XML_SCHEMA =
-	    "http://www.w3.org/2001/XMLSchema";
-	    
-	static final String JAXP_SCHEMA_SOURCE = 
-		"http://java.sun.com/xml/jaxp/properties/schemaSource";
-		
-	public static final String NAME = "XMLCodec";
+	public static final String PRIMITIVE_TAG = "primitive";
+	public static final String VALUE_ATTR = "value";
+	public static final String AGGREGATE_ATTR = "aggregate";
+	public static final String BINARY_STARTER = "#";
 	
-	boolean XMLValidation;
-	XMLContentHandler handler;
-	SAXParser parser;
-	XMLDecoder decoder;
-	XMLCoder coder;
-	
-	public XMLCodec() {
-		super(NAME);
-		initComponents(false);
+    public XMLCodec() {
+    	super(NAME);
+    }
+    
+	/**
+	 * Encodes a content into a string.
+	 * @param content the content as an abstract descriptor.
+	 * @return the content as a string.
+	 * @throws CodecException
+	 */
+	public String encode(AbsContentElement content) throws CodecException {
+		throw new CodecException("Not supported");
 	}
 	
-	protected void initComponents(boolean pXMLValidation) {
-	
-		XMLValidation = pXMLValidation;
-		decoder = new XMLDecoder();
-		coder = new XMLCoder();
-		handler = new XMLContentHandler();
-		handler.setXMLDecoder(decoder);
-		
+	/**
+	 * Encodes a content into a string using a given ontology.
+	 * @param ontology the ontology 
+	 * @param content the content as an abstract descriptor.
+	 * @return the content as a string.
+	 * @throws CodecException
+	 */
+	public String encode(Ontology ontology, AbsContentElement content) throws CodecException {
 		try {
-			SAXParserFactory factory = SAXParserFactory.newInstance();
-			factory.setValidating(XMLValidation);
-			factory.setNamespaceAware(XMLValidation);
-			parser = factory.newSAXParser();
-			if (XMLValidation) {
-				parser.getXMLReader().setErrorHandler(new XMLErrorHandler());	
-				parser.setProperty(JAXP_SCHEMA_LANGUAGE, W3C_XML_SCHEMA);
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
+			return encodeAbsObject(ontology, content, false);
 		}
-	}	
-	
-	public XMLCodec(boolean pXMLValidation) {
-		super(NAME);
-		initComponents(pXMLValidation);	
-	}	
-
-	 /**
-     * Encodes a content into a string.
-     * @param content the content as an abstract descriptor.
-     * @return the content as a string.
-     * @throws CodecException
-     */
-    public String encode(AbsContentElement content) 
-            throws CodecException {
-    	StringBuffer sb = new StringBuffer();
-        coder.encodeAsTag((AbsObject)content, null, null, null, sb);
-    	return sb.toString();
-  	}
-
-    /**
-     * Encodes a content into a string using a given ontology.
-     * @param ontology the ontology 
-     * @param content the content as an abstract descriptor.
-     * @return the content as a string.
-     * @throws CodecException
-     */
-    public String encode(Ontology ontology, AbsContentElement content) 
-            throws CodecException {
-        coder.setOntology(ontology);
-        return encode(content);
-	}
-         
-
-    /**
-     * Decodes the content to an abstract description.
-     * @param content the content as a string.
-     * @return the content as an abstract description.
-     * @throws CodecException
-     */
-    public AbsContentElement decode(String content) 
-            throws CodecException {
-
-		try {
-			parser.parse(new InputSource(new StringReader(content)), handler);
- 		} catch (Exception e) {
- 			e.printStackTrace();
- 			throw new CodecException(e.getMessage());
- 		}
-
-		return decoder.getDecodedContent();
-	}
-
-    /**.
-     * Decodes the content to an abstract description using a 
-     * given ontology.
-     * @param ontology the ontology.
-     * @param content the content as a string.
-     * @return the content as an abstract description.
-     * @throws CodecException
-     */
-    public AbsContentElement decode(Ontology o, String content) 
-            throws CodecException {
-
-		try {
-			decoder.setOntology(o);
-			if (XMLValidation) {
-				System.out.println(o.getName().concat(".xsd"));			
-				parser.setProperty(JAXP_SCHEMA_SOURCE, o.getName().concat(".xsd"));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new CodecException(e.getMessage());
+		catch (OntologyException oe) {
+			throw new CodecException("Ontology error", oe);
 		}
-		
-		return decode(content);
 	}
 	
+	public String encodeAbsObject(Ontology ontology, AbsObject abs, boolean indent) throws CodecException, OntologyException {
+		XMLEncoder encoder = new XMLEncoder();
+		StringBuffer sb = new StringBuffer();
+		encoder.init(ontology, sb);
+		encoder.setIndentEnabled(indent);
+		encoder.encode(abs);
+		return sb.toString();
+	}
+	
+	/**
+	 * Encode a generic ontological entity in XML form
+	 */
+	public String encodeObject(Ontology ontology, Object obj, boolean indent) throws CodecException, OntologyException {
+		AbsObject abs = ontology.fromObject(obj);
+		return encodeAbsObject(ontology, abs, indent);
+	}
+	
+	/**
+	 * Decodes the content to an abstract description.
+	 * @param content the content as a string.
+	 * @return the content as an abstract description.
+	 * @throws CodecException
+	 */
+	public AbsContentElement decode(String content) throws CodecException {
+		throw new CodecException("Not supported");
+	}
+	
+	/**.
+	 * Decodes the content to an abstract description using a 
+	 * given ontology.
+	 * @param ontology the ontology.
+	 * @param content the content as a string.
+	 * @return the content as an abstract description.
+	 * @throws CodecException
+	 */
+	public AbsContentElement decode(Ontology ontology, String content) throws CodecException {
+		try {
+			AbsObject abs = decodeAbsObject(ontology, content);
+			if (abs instanceof AbsContentElement) {
+				return (AbsContentElement) abs;
+			}
+			else {
+				throw new CodecException(abs.getTypeName()+" is not a content element");
+			}
+		}
+		catch (OntologyException oe) {
+			throw new CodecException("Ontology error", oe);
+		}
+	}
+	
+	public AbsObject decodeAbsObject(Ontology ontology, String xml) throws CodecException, OntologyException {
+		XMLDecoder decoder = new XMLDecoder();
+		decoder.init(ontology);
+		return decoder.decode(xml);
+	}
+	
+	/**
+	 * Decode a generic ontological entity from an XML form
+	 */
+	public Object decodeObject(Ontology ontology, String xml) throws CodecException, OntologyException {
+		AbsObject abs = decodeAbsObject(ontology, xml);
+		return ontology.toObject(abs);
+	}
 }
