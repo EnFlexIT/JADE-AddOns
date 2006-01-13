@@ -1,16 +1,21 @@
 <!-- ANT BUILD FILE FOR THE JADE TEST SUITE -->
 
 <!-- set properties for this project -->
-<project name="testsuite" default="run" basedir="../..">
+<project name="testsuite" default="run" basedir=".">
   <description>Test Suite build file</description>
   
-  <property name="version" value="3.3"/>
-
   <property environment="env"/>
-  <path id="project.class.path">
-    <pathelement location="classes"/>
-    <fileset dir="lib">
-        <include name="*.jar"/>
+  <property name="version" value="3.3"/>
+  <property name="src" value="src"/>
+  <property name="classes" value="classes"/>
+  <property name="lib" value="lib"/>
+  <property name="jade-lib-dir" value="../../lib"/>
+  <property name="jade-doc-dir" value="../../doc"/>
+
+
+  <path id="jade-classes">
+    <fileset dir="${jade-lib-dir}">
+      <include name="*.jar"/>
     </fileset>
   </path>
 
@@ -22,7 +27,8 @@
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
-    <mkdir dir="classes"/>
+    <mkdir dir="${classes}"/>
+    <mkdir dir="${lib}"/>
   </target>
 
 
@@ -31,39 +37,41 @@
          _______________________________________________ -->
   <target name="compile" depends="init" description="compile the tests">
   	
-  	<!-- Compile the java code source files -->
-  	<javac srcdir="add-ons\testSuite\src" 
-  	       destdir="classes" 
-  	       optimize="on" 
-  	       deprecation="off">
-  	  <classpath refid="project.class.path"/>
-  	</javac>
+    <!-- Compile the java code source files -->
+    <javac srcdir="${src}" destdir="${classes}" optimize="on" deprecation="off">
+      <classpath refid="jade-classes"/>
+    </javac>
   				
-  	<!-- RMIC the TSDaemon -->
-    <rmic classname="test.common.remote.TSDaemon" base="classes"/>
+    <!-- RMIC the TSDaemon -->
+    <rmic classname="test.common.remote.TSDaemon" base="${classes}">
+      <classpath>
+        <pathelement location="{classes}"/>
+        <path refid="jade-classes"/>
+      </classpath>
+    </rmic>
+
     
-    <!-- Copy images -->
-    <copy todir="classes/test/common/testSuite/gui/images">
-      <fileset dir="add-ons/testSuite/src/test/common/testSuite/gui/images"/>
-    </copy> 
-    
-    <!-- Copy xml configuration files -->
-    <copy todir="classes/test" >
-     <fileset dir="add-ons/testSuite/" includes="testerList.xml "/>
-     <fileset dir="add-ons/testSuite/src/test/" includes="interPlatform/*.xml"/>
+    <!-- Copy images, xml and properties configuration files -->
+    <copy todir="${classes}">
+      <fileset dir="${src}">
+        <include name="**/*.xml"/>
+        <include name="**/*.properties"/>
+        <include name="**/*.gif"/>
+        <include name="**/*.jpg"/>
+        <include name="**/*.png"/>
+      </fileset>
     </copy>
   </target>
 
 
   <!--  __________________________________________________
-                            jar
+                            lib
         __________________________________________________ -->
-  <target name="jar" depends="compile" description="create the test suite jar file">
-    <mkdir dir="add-ons\testSuite\lib"/>
-		<delete file="add-ons\testSuite\lib\testSuite.jar" quiet="true"/>
-  	<jar jarfile="add-ons\testSuite\lib\testSuite.jar">
-      <fileset dir="classes" includes="test/**"/>
-   </jar>
+  <target name="lib" depends="compile" description="create the test suite jar file">
+    <delete file="${lib}/testSuite.jar" quiet="true"/>
+    <jar jarfile="${lib}/testSuite.jar">
+      <fileset dir="${classes}"/>
+    </jar>
   </target>
 
   
@@ -71,9 +79,9 @@
                             clean
         __________________________________________________ -->
   <target name="clean" description="clean up">
-    <!-- Delete the classes/test directory tree -->
+    <!-- Delete the classes directory tree -->
     <delete includeEmptyDirs="true">
-      <fileset dir="classes/test"/>
+      <fileset dir="${classes}"/>
     </delete>
   </target>
 
@@ -82,11 +90,15 @@
   <!--  __________________________________________________
                             run
         __________________________________________________ -->
-  <target name="run" description="run the test suite" depends="compile">
-   <java classname="test.common.testSuite.TestSuiteAgent" fork="true">
-  	  <classpath refid="project.class.path"/>
-      <!-- arg value="testerList.xml"/-->
-   </java>
+  <target name="run" description="run the test suite" depends="lib">
+    <java classname="jade.Boot" fork="true">
+      <classpath>
+        <pathelement path="${lib}/testSuite.jar"/>
+        <path refid="jade-classes"/>
+        <path location="."/>
+      </classpath>
+      <arg line="-gui testSuite:test.common.testSuite.TestSuiteAgent(testerList.xml)"/>
+    </java>
   </target>
 
 
@@ -94,19 +106,19 @@
                             dist
         __________________________________________________ -->
   <target name="dist" description="create the distribution file">
-   <echo message="REMIND TO PUT IN THIS DIRECTORY THE PDF FILE JADE_TestSuite.pdf"/>
-   <mkdir dir="doc"/>
-   <mkdir dir="doc/tutorials"/>
-   <copy file="add-ons/testSuite/JADE_TestSuite.pdf" todir="doc/tutorials"/>
-   <jar jarfile="../JADE-testSuite-${version}.zip">
-      <fileset dir=".." includes="jade/add-ons/testSuite/COPYING"/>
-      <fileset dir=".." includes="jade/add-ons/testSuite/ChangeLog"/>
-      <fileset dir=".." includes="jade/add-ons/testSuite/License"/>
-      <fileset dir=".." includes="jade/add-ons/testSuite/build.xml"/>
-      <fileset dir=".." includes="jade/add-ons/testSuite/testerList.xml"/>
-      <fileset dir=".." includes="jade/doc/tutorials/JADE_TestSuite.pdf"/>
-      <fileset dir=".." includes="jade/add-ons/testSuite/src/test/common/**"/>
-      <fileset dir=".." includes="jade/add-ons/testSuite/src/test/interPlatform/**"/>
+   <echo message="GENERATE THE PDF FORM OF THE JADE_TestSuite TUTORIAL, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/testSuite) AND THEN PRESS ENTER -->"/>
+   <input/>
+   <mkdir dir="${jade-doc-dir}"/>
+   <mkdir dir="${jade-doc-dir}/tutorials"/>
+   <copy file="JADE_TestSuite.pdf" todir="${jade-doc-dir}/tutorials"/>
+   <jar destfile="../JADE-testSuite-${version}.zip" basedir="../..">
+     <include name="add-ons/testSuite/COPYING"/>
+     <include name="add-ons/testSuite/ChangeLog"/>
+     <include name="add-ons/testSuite/License"/>
+     <include name="add-ons/testSuite/build.xml"/>
+     <include name="add-ons/testSuite/testerList.xml"/>
+     <include name="add-ons/testSuite/src/**"/>
+     <include name="doc/tutorials/JADE_TestSuite.pdf"/>
    </jar>
   </target>
 
