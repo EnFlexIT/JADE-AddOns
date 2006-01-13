@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Relative reference to the DTD file does not work when the test suite is in a jar file
+<!DOCTYPE TestsList SYSTEM "../common/xml/listTests.dtd" [
+	<!ENTITY % inline "#PCDATA|em|br|UL|LI|b">
+	]>
+-->
+	<TestsList> 
+		<Test name="Inter platform migration between 2 Main-Containers" skip="false">
+			<TestClassName>test.migration.tests.TestMain2Main</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+		<Test name="Migration from Container to MainContainer" skip="false">
+			<TestClassName>test.migration.tests.TestContainer2Main</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+		<Test name="Migration from Container to MainContainer and to Remote Platform" skip="false">
+			<TestClassName>test.migration.tests.TestContainer2Main2RPMain</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+		<Test name="Migration from Main to Container and to remote platform" skip="false">
+			<TestClassName>test.migration.tests.TestMain2Cont2RP</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+		<Test name="Migration between platforms and moving to a container" skip="false">
+                        <TestClassName>test.migration.tests.TestMain2Container</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+		<Test name="Migration through 3 different platforms" skip="false">
+                        <TestClassName>test.migration.tests.Test3Platforms</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+		<Test name="Migration from Main to Container to Main and to Main Container Remote Platform" skip="false">
+			<TestClassName>test.migration.tests.TestMain2Cont2Main2RMain</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>		
+		<Test name="Inter platform migration between 2 Main-Containers Go and go back" skip="false">
+			<TestClassName>test.migration.tests.TestMain2MainIV</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+		<Test name="Migration error because agent cannot be deserialitzed at destination" skip="false">
+			<TestClassName>test.migration.tests.TestErrorMain2Main</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+		<Test name="Migration error because destination agent platform doesn't exist" skip="false">
+			<TestClassName>test.migration.tests.TestErrorAddrNotExistMain2Main</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+		<Test name="Migration error because destination agent management platform doesn't exist" skip="false">
+			<TestClassName>test.migration.tests.TestErrorAMSNotExistMain2Main</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+		<Test name="Migration to remote platform and creation of a clone to another container" skip="false">
+			<TestClassName>test.migration.tests.TestMain2MainAndClone</TestClassName>
+			<WhatTest>.</WhatTest>
+			<HowWorkTest>.</HowWorkTest>
+			<WhenTestPass> .</WhenTestPass>
+		</Test>
+	</TestsList>

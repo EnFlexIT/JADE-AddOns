@@ -1,0 +1,89 @@
+<!-- ANT BUILD FILE FOR THE MIGRATION SERVICE TEST SUITE -->
+
+<project name="testsuite" default="run" basedir=".">
+  <description>Migration service Test Suite build file</description>
+  
+  <!-- set properties for this project -->
+  <property environment="env"/>
+  <property name="home" value="../.."/>
+  <property name="src" value="${home}/src"/>
+  <property name="classes" value="${home}/classes"/>
+  <property name="lib" value="${home}/lib"/>
+  <property name="jade-lib-dir" value="${home}/../../lib"/>
+  <property name="jade-testsuite-jar" value="${home}/../testSuite/lib/testSuite.jar"/>
+  
+  <path id="jade-classes">
+    <fileset dir="${jade-lib-dir}">
+      <include name="*.jar"/>
+      <include name="commons-codec/commons-codec-1.3.jar"/>
+    </fileset>
+  </path>
+
+  
+  <!--   _______________________________________________
+                               init
+         _______________________________________________ -->
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <mkdir dir="${classes}"/>
+    <mkdir dir="${lib}"/>
+  </target>
+
+
+  <!--   _______________________________________________
+                               compile
+         _______________________________________________ -->
+  <target name="compile" depends="init">
+  	
+    <!-- Compile the java source files of the Migration service test suite -->
+    <javac srcdir="${src}" destdir="${classes}" optimize="on" deprecation="off">
+      <classpath>
+        <path refid="jade-classes"/>
+        <pathelement path="${jade-testsuite-jar}"/>
+      </classpath>
+      <include name="test/**"/>
+    </javac>
+
+    <!-- Copy xml and properties configuration files -->
+    <copy todir="${classes}">
+      <fileset dir="${src}">
+        <include name="**/*.xml"/>
+        <include name="**/*.properties"/>
+      </fileset>
+    </copy>
+  </target>
+
+
+  <!--  __________________________________________________
+                            lib
+        __________________________________________________ -->
+  <target name="lib" depends="compile"> 
+    <delete file="${lib}/migrationTestSuite.jar" quiet="true"/>
+    <jar jarfile="${lib}/migrationTestSuite.jar">
+      <fileset dir="${classes}">
+        <include name="**/test/**"/>
+      </fileset>
+    </jar>
+  </target>
+
+	
+	
+
+  <!--  __________________________________________________
+                            run
+        __________________________________________________ -->
+  <target name="run" description="Run the Migration service test suite" depends="lib">
+    <java classname="jade.Boot" fork="true">
+      <classpath>
+        <path refid="jade-classes"/>
+        <pathelement path="${jade-testsuite-jar}"/>
+        <pathelement path="${lib}/migration.jar"/>
+        <pathelement path="${lib}/migrationTestSuite.jar"/>
+        <pathelement path="${home}/../../tools/xercesImpl.jar"/>
+      </classpath>
+      <arg line="-gui -services jade.core.event.NotificationService;jade.core.mobility.AgentMobilityService;jade.core.migration.InterPlatformMobilityService testSuite:test.common.testSuite.TestSuiteAgent()"/>
+    </java>
+  </target>
+
+</project>
