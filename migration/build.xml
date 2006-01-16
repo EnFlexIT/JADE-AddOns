@@ -1,5 +1,8 @@
 <project name="Inter-Platform Mobility" default="compile" basedir=".">
   <!-- set global properties for this build -->
+  <property environment="env"/>
+  <property name="version" value="3.4"/>
+
   <property name="src" value="src"/>
   <property name="build" value="classes"/>
   <property name="doc" value="doc"/>
@@ -7,7 +10,6 @@
   <property name="lib" value="lib"/>
   <property name="packageDir" value="benchmark/roundTripTime"/>
   <property name="libJADEDir" value="../../lib"/>
-  <property name="release" value="1.0"/>
   
   <!-- classpaths and filesets -->
   <patternset id="src.non.test" >
@@ -48,17 +50,18 @@
   </target>
 
   <!-- Make distribution zip file and put in ${dist} -->
-  <target name="dist" depends="init, clean">
-    <jar jarfile="${dist}/migrationAdd-on-${release}.zip">
-      <fileset dir="${dist}" includes="add-ons/migration/${src}/**"/>
-      <fileset dir="${dist}" includes="add-ons/migration/*"/>
+  <target name="dist" depends="lib">
+    <jar jarfile="../migration-${version}.zip" basedir="../..">
+      <include name="add-ons/migration/*"/>
+      <include name="add-ons/migration/src/**"/>
+      <include name="add-ons/migration/lib/**"/>
     </jar>
   </target>
 
   <!-- delete ${build} and ${lib} directories -->
   <target name="clean" description="clean up">
     <!-- Delete the ${build} directory tree -->
-    <delete includeEmptyDirs="true">
+    <delete includeEmptyDirs="true" quiet="true">
       <fileset dir="${build}"/>
     </delete>
   </target>

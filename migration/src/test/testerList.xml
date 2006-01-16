@@ -11,7 +11,7 @@
 		<!ELEMENT TestsListRif (#PCDATA)>
 	]>
 	<TesterList> 
-		<Tester name="Jar Agent Mobility" skip="false">
+		<Tester name="Inter platform migration" skip="false">
                         <ClassName>test.migration.MigrationTesterAgent</ClassName>
 			<Description> This item includes tests related to agent migration  across different platforms. </Description>
 			<TestsListRif>test/migration/migrationTestsList.xml</TestsListRif>

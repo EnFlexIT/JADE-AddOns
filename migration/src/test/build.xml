@@ -80,9 +80,8 @@
         <pathelement path="${jade-testsuite-jar}"/>
         <pathelement path="${lib}/migration.jar"/>
         <pathelement path="${lib}/migrationTestSuite.jar"/>
-        <pathelement path="${home}/../../tools/xercesImpl.jar"/>
       </classpath>
-      <arg line="-gui -services jade.core.event.NotificationService;jade.core.mobility.AgentMobilityService;jade.core.migration.InterPlatformMobilityService testSuite:test.common.testSuite.TestSuiteAgent()"/>
+      <arg line="-gui -nomtp -services jade.core.event.NotificationService;jade.core.mobility.AgentMobilityService;jade.core.migration.InterPlatformMobilityService testSuite:test.common.testSuite.TestSuiteAgent()"/>
     </java>
   </target>
 

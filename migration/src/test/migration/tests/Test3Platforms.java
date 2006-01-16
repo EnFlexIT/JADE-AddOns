@@ -33,6 +33,7 @@ import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import test.common.Test;
 import test.common.TestException;
+import test.common.TestUtility;
 import jade.core.AID;
 import test.common.*;
 import test.migration.MigrationTesterAgent;
@@ -48,8 +49,7 @@ import jade.lang.acl.MessageTemplate;
  */
 public class Test3Platforms extends Test {
   
-  public static final String AGENTS_PATH = MigrationTesterAgent.CURRENT_DIR + File.separator + "src" + File.separator + 
-  "test" + File.separator + "migration" + File.separator + "path4";
+  public static final String AGENTS_PATH = "migration" + File.separator + "path4";
 
   public Behaviour load(Agent a) throws TestException {
     AID remoteAMS = (AID) getGroupArgument(MigrationTesterAgent.REMOTE_AMS_KEY);
@@ -68,6 +68,8 @@ public class Test3Platforms extends Test {
                                     null,
                                    "-name Remote-Platform-3 "
                                    + "-port 6666 "
+                                   + "-gui "
+                                   + " "+TestUtility.HTTP_MTP_ARG+" "
                                    + "-mtp "
                                    + "jade.mtp.http.MessageTransportProtocol(http://"+hostname+":9999/acc) " 
                                    + MigrationTesterAgent.AGENTS_PATH_KEY + " "

@@ -45,9 +45,7 @@ import jade.lang.acl.MessageTemplate;
  */
 public class TestMain2MainAndClone extends Test {
   
-  public static final String AGENTS_PATH = MigrationTesterAgent.CURRENT_DIR + 
-  File.separator + "src" + File.separator + 
-  "test" + File.separator + "migration" + File.separator + "path3";
+  public static final String AGENTS_PATH = "migration" + File.separator + "path3";
 
   public Behaviour load(Agent a) throws TestException {
     AID remoteAMS = (AID) getGroupArgument(MigrationTesterAgent.REMOTE_AMS_KEY);

@@ -6,6 +6,7 @@
   
   <property environment="env"/>
   <property name="version" value="3.3"/>
+
   <property name="src" value="src"/>
   <property name="classes" value="classes"/>
   <property name="lib" value="lib"/>
@@ -106,20 +107,20 @@
                             dist
         __________________________________________________ -->
   <target name="dist" description="create the distribution file">
-   <echo message="GENERATE THE PDF FORM OF THE JADE_TestSuite TUTORIAL, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/testSuite) AND THEN PRESS ENTER -->"/>
-   <input/>
-   <mkdir dir="${jade-doc-dir}"/>
-   <mkdir dir="${jade-doc-dir}/tutorials"/>
-   <copy file="JADE_TestSuite.pdf" todir="${jade-doc-dir}/tutorials"/>
-   <jar destfile="../JADE-testSuite-${version}.zip" basedir="../..">
-     <include name="add-ons/testSuite/COPYING"/>
-     <include name="add-ons/testSuite/ChangeLog"/>
-     <include name="add-ons/testSuite/License"/>
-     <include name="add-ons/testSuite/build.xml"/>
-     <include name="add-ons/testSuite/testerList.xml"/>
-     <include name="add-ons/testSuite/src/**"/>
-     <include name="doc/tutorials/JADE_TestSuite.pdf"/>
-   </jar>
+    <echo message="GENERATE THE PDF FORM OF THE JADE_TestSuite TUTORIAL, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/testSuite) AND THEN PRESS ENTER -->"/>
+    <input/>
+    <mkdir dir="${jade-doc-dir}"/>
+    <mkdir dir="${jade-doc-dir}/tutorials"/>
+    <copy file="JADE_TestSuite.pdf" todir="${jade-doc-dir}/tutorials"/>
+    <jar destfile="../testSuite-${version}.zip" basedir="../..">
+      <include name="add-ons/testSuite/COPYING"/>
+      <include name="add-ons/testSuite/ChangeLog"/>
+      <include name="add-ons/testSuite/License"/>
+      <include name="add-ons/testSuite/build.xml"/>
+      <include name="add-ons/testSuite/testerList.xml"/>
+      <include name="add-ons/testSuite/src/**"/>
+      <include name="doc/tutorials/JADE_TestSuite.pdf"/>
+    </jar>
   </target>
 
 </project>
