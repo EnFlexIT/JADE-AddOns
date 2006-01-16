@@ -1,4 +1,4 @@
-<project name="Inter-Platform Mobility" default="compile" basedir=".">
+<project name="Inter-Platform Mobility" default="lib" basedir=".">
   <!-- set global properties for this build -->
   <property environment="env"/>
   <property name="version" value="3.4"/>
@@ -8,20 +8,22 @@
   <property name="doc" value="doc"/>
   <property name="dist" value="../.."/>
   <property name="lib" value="lib"/>
-  <property name="packageDir" value="benchmark/roundTripTime"/>
-  <property name="libJADEDir" value="../../lib"/>
+  <property name="jade-lib-dir" value="../../lib"/>
+
+  <path id="jade-classes">
+    <fileset dir="${jade-lib-dir}">
+      <include name="commons-codec/commons-codec-1.3.jar"/>
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+
   
   <!-- classpaths and filesets -->
   <patternset id="src.non.test" >
     <include name="jade/**/*.java"/>
-    <include name="edu/**/*.java"/>
+    <include name="samples/**/*.java"/>
     <exclude name="test/**/*.java"/>
-  </patternset>
-	
-  <patternset id="src.all" >
-    <include name="jade/**/*.java"/>
-    <include name="edu/**/*.java"/>
-    <include name="test/**/*.java"/>
   </patternset>
 	
   <!-- targets -->
@@ -34,11 +36,10 @@
   </target>
 
   <target name="compile" depends="init">
-    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on">
+    <javac srcdir="${src}" destdir="${build}" nowarn="off" optimize="on" deprecation="on">
       <patternset refid="src.non.test"/>
       <classpath>
-        <pathelement path="${libJADEDir}/jade.jar"/>
-        <pathelement path="${libJADEDir}/commons-codec/commons-codec-1.3.jar"/>
+        <path refid="jade-classes"/>
       </classpath>
     </javac>
   </target>
@@ -54,7 +55,8 @@
     <jar jarfile="../migration-${version}.zip" basedir="../..">
       <include name="add-ons/migration/*"/>
       <include name="add-ons/migration/src/**"/>
-      <include name="add-ons/migration/lib/**"/>
+      <exclude name="add-ons/migration/src/test/**"/>
+      <include name="add-ons/migration/lib/migration.jar"/>
     </jar>
   </target>
 
