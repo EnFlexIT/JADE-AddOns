@@ -55,7 +55,7 @@ import jade.domain.FIPANames;
 import jade.lang.acl.ACLCodec.CodecException;
 import jade.core.CaseInsensitiveString;
 
-import starlight.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 import jade.lang.acl.ISO8601;
 
@@ -403,7 +403,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 	    sb.append("\t<"+BASE64ENCODING_KEY+">"+BASE64ENCODING_VALUE+"</"+BASE64ENCODING_KEY+">\n");
 
 	    try {
-		String b64 = new String(Base64.encode(msg.getByteSequenceContent()));
+		String b64 = new String(Base64.encodeBase64(msg.getByteSequenceContent()));
 		sb.append("\t<");
 		sb.append(CONTENT_TAG);
 		sb.append(">");
@@ -588,9 +588,7 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 	    try { // decode Base64
 		String content = msg.getContent();
 		if ((content != null) && (content.length() > 0)) {
-		    char[] cc = new char[content.length()];
-		    content.getChars(0,content.length(),cc,0);
-		    msg.setByteSequenceContent(Base64.decode(cc));
+		    msg.setByteSequenceContent(Base64.decodeBase64(content.getBytes("US-ASCII")));
 		    msg.removeUserDefinedParameter(BASE64ENCODING_KEY); // reset the slot value for encoding
 		}
 	    } catch(java.lang.StringIndexOutOfBoundsException e){
@@ -606,6 +604,8 @@ public class XMLACLCodec extends DefaultHandler implements ACLCodec {
 		    Thread.currentThread().sleep(3000);
 		}catch(InterruptedException ie) {
 		}
+	    }catch(java.io.UnsupportedEncodingException e3){
+	    	e3.printStackTrace();
 	    }
 	} //end of if CaseInsensitiveString
     }
