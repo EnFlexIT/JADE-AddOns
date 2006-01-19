@@ -5,7 +5,7 @@
   <property name="lib" value="lib"/>
   <property name="dist" value="../.."/>
   <property name="libJADEDir" value="../../lib"/>
-  <property name="classpath" value="${libJADEDir}/jade.jar;${lib}/sax2/sax2.jar;${libJADEDir}/rdf-api-2001-01-19.jar;"/>
+  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/rdf-api-2001-01-19.jar;"/>
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -32,13 +32,13 @@
   </target>
 
   <!-- Make distribution zip file and put in ${dist} -->
-  <target name="dist" depends="init, compile, lib">
-    <jar jarfile="${dist}/RDFCodecAddOn.zip">
-      <fileset dir="${dist}" includes="add-ons/RDFCodec/${src}/**"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec/examples/**"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec/*"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec/${lib}/**"/>
-    </jar>
+  <target name="dist" depends="clean, lib">
+    <zip zipfile="../RDFCodecAddOn.zip" basedir="../..">
+      <include name="add-ons/RDFCodec/*"/>
+      <include name="add-ons/RDFCodec/src/**"/>
+      <include name="add-ons/RDFCodec/examples/**"/>
+      <include name="add-ons/RDFCodec/lib/**"/>
+    </zip>
   </target>
 
   <target name="all" depends="init, compile, examples, lib, dist"/>

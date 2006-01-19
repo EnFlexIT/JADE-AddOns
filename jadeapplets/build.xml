@@ -1,16 +1,18 @@
 <project name="jadeapplet" default="compile" basedir=".">
 
     <!-- set global properties for this build -->
+    <property name="jade-home" value="../.."/>
+    <property name="version" value="3.4"/>
+
     <property name="src" value="src"/>
     <property name="build" value="classes"/>
     <property name="lib"  value="lib"/>
     <property name="doc"  value="doc"/>
-    <property name="dist" value="../.."/>
 
     <!-- Copy the necessary JADE files from JADE distribution   -->
     <target name="copy-jade-lib">
         <copy todir="${lib}">
-            <fileset dir="${dist}/lib">
+            <fileset dir="${jade-home}/lib">
                 <include name="**/*.jar"/>
             </fileset>
         </copy>
@@ -21,7 +23,7 @@
         <javac srcdir="${src}" destdir="${build}">
             <classpath>
                 <pathelement path="${lib}/jade.jar"/>
-                <pathelement path="${lib}/Base64.jar"/>
+                <pathelement path="${lib}/commons-codec/commoms-codec-1.3.jar"/>
                 <pathelement path="${lib}/jadeTools.jar"/>
                 <pathelement path="${lib}/iiop.jar"/>
                 <pathelement path="${lib}/http.jar"/>
@@ -50,7 +52,7 @@
     <!--  Sign the necessary JADE jar files  -->
     <target name="jade-lib-sign">
         <signjar jar="${lib}/jade.jar" alias="rsatest" storepass="applet" keystore="test_store"/>
-        <signjar jar="${lib}/base64.jar" alias="rsatest" storepass="applet" keystore="test_store"/>
+        <signjar jar="${lib}/commons-codec/commons-codec-1.3.jar" alias="rsatest" storepass="applet" keystore="test_store"/>
         <signjar jar="${lib}/iiop.jar" alias="rsatest" storepass="applet" keystore="test_store"/>
         <signjar jar="${lib}/jadeTools.jar" alias="rsatest" storepass="applet" keystore="test_store"/>
         <signjar jar="${lib}/http.jar" alias="rsatest" storepass="applet" keystore="test_store"/>
@@ -59,7 +61,7 @@
 
     <!-- Delete the ${build} directory tree and ${lib}/clientapplet.jar -->
     <target name="clean">
-        <delete includeEmptyDirs="true">
+        <delete includeEmptyDirs="true" quiet="true">
             <fileset dir="${build}" includes="**/*"/>
             <fileset dir="${lib}" includes="clientapplet.jar"/>
         </delete>
@@ -67,7 +69,7 @@
 
     <!-- Delete the ${build} and ${lib} directory tree -->
     <target name="clean-all">
-        <delete includeEmptyDirs="true">
+        <delete includeEmptyDirs="true" quiet="true">
             <fileset dir="${build}" includes="**/*"/>
             <fileset dir="${lib}" includes="**/*"/>
         </delete>
@@ -91,7 +93,7 @@
       <javadoc destdir="${doc}/api" author="true" windowtitle="JADE Applets API" sourcepath="${src}" packagenames="client.*, mobileagent.*, server.*">
           <classpath>
               <pathelement path="${lib}/jade.jar"/>
-              <pathelement path="${lib}/Base64.jar"/>
+              <pathelement path="${lib}/commons-codec/commons-codec-1.3.jar"/>
               <pathelement path="${lib}/jadeTools.jar"/>
               <pathelement path="${lib}/iiop.jar"/>
               <pathelement path="${lib}/http.jar"/>
@@ -102,11 +104,11 @@
 
     <!-- Make distribution zip file and put in ${dist} -->
     <target name="dist" depends="init, clean-all, copy-jade-lib, compile, clean-lib, applet-jar-sign">
-        <jar jarfile="${dist}/JADEAppletsAddOn.zip">
-            <fileset dir="${dist}" includes="add-ons/jadeapplets/${src}/**"/>
-            <fileset dir="${dist}" includes="add-ons/jadeapplets/*"/>
-            <fileset dir="${dist}" includes="add-ons/jadeapplets/${doc}/**"/>
-        </jar>
+        <zip zipfile="../JADEAppletsAddOn.zip" basedir="../..">
+            <include name="add-ons/jadeapplets/*"/>
+            <include name="add-ons/jadeapplets/src/**"/>
+            <include name="add-ons/jadeapplets/doc/**"/>
+        </zip>
     </target>
 
 </project>

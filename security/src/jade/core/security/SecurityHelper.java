@@ -44,7 +44,7 @@ import jade.util.leap.Iterator;
 import java.io.IOException;
 import java.util.Hashtable;
 
-import starlight.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 /* 
 *  Note: this class shall not make any reference (e.g. import) to any 
@@ -587,8 +587,8 @@ public class SecurityHelper
       String txt;
       // Decodes the "Credentials" slot
       if ((txt = msg.getUserDefinedParameter(CREDENTIALS)) != null) {
-        byte[] tmp = Base64.decode(txt.toCharArray());
-        // Decodes the Credentials
+    	  byte[] tmp = Base64.decodeBase64(txt.getBytes("US-ASCII"));
+      	// Decodes the Credentials
         return CredentialsEngine.decodeCredentials(tmp);
       }
       return null;
@@ -608,8 +608,8 @@ public class SecurityHelper
   public void addCredentials(ACLMessage msg, Credentials cred) throws JADESecurityException {
     try {
       // TOFIX: This uses a user-defined slot, to be fixed once FIPA has standardized
-      char[] tmp = Base64.encode(CredentialsEngine.encodeCredentials(cred));
-      msg.addUserDefinedParameter(CREDENTIALS, new String(tmp));
+    	String tmp = new String(Base64.encodeBase64(CredentialsEngine.encodeCredentials(cred)), "US-ASCII");
+      msg.addUserDefinedParameter(CREDENTIALS, tmp);
     }
     catch(IOException ioe) {
       myLogger.log(Logger.SEVERE,ioe.toString());

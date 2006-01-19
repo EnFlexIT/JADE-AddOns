@@ -9,16 +9,31 @@
 
 <project name="exit-example" default="run" basedir=".">
   <!-- set global properties for this build -->
-  <property name="libJADEDir" value="../../../../lib" />
-  <property name="lib" value="../../lib" />
-  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/jadeTools.jar;${bc.jar};${lib}/jadeSecurity.jar;${lib}/examples.jar;"/> 
+  <property name="jade-home" value="../../../.."/>
+  <property name="jade-lib-dir" value="${jade-home}/lib" />
+  <property name="lib" value="${jade-home}/add-ons/security/lib" />
 
-  <target name="run" depends="" description="Starts the exit-agent example." >
+  <path id="jade-classes">
+    <fileset dir="${jade-lib-dir}">
+      <include name="commons-codec/commons-codec-1.3.jar"/>
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="jade-S-classes">
+    <fileset dir="${lib}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+
+  <target name="run" depends="" description="Starts the messaging example." >
 
        <java classname="jade.Boot" fork="yes">
          <arg line="-conf main.conf" />
          <classpath>
-           <pathelement path="${classpath}"/>
+           <path refid="jade-classes"/>
+           <path refid="jade-S-classes"/>
          </classpath>
        </java>
   </target>

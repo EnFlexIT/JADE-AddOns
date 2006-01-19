@@ -1,3 +1,3 @@
-java -cp ..\..\jadelib\jade.jar;..\..\..\..\lib\jade.jar;..\..\classes jade.Boot -conf .\100receivers.conf
+java -cp ..\..\..\..\lib\jade.jar;..\..\lib\benchmark.jar jade.Boot -conf .\100receivers.conf
 
 pause

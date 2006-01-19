@@ -69,14 +69,32 @@ public class SignatureFilter {
     this.myContainer = myContainer;
     in = new In();
     out = new Out();
-    try {
-      ss = (SecurityService)myContainer.getServiceFinder().findService(SecuritySlice.NAME);
-      ms = (MessagingService)myContainer.getServiceFinder().findService(MessagingSlice.NAME);
-    }
-    catch(Exception e) {
-      myLogger.log(Logger.SEVERE,"Unable to find Security or Messaging services");
-      //e.printStackTrace();
-    }
+  }
+  
+  // Method for lazy retrieval of the SecurityService
+  private SecurityService getSecurityService() {
+	  if (ss == null) {
+		try {
+	      ss = (SecurityService) myContainer.getServiceFinder().findService(SecuritySlice.NAME);
+	    }
+	    catch(Exception e) {
+	      myLogger.log(Logger.SEVERE, "Unable to find Security services.", e);
+	    }
+	  }
+	  return ss;
+  }
+  
+  // Method for lazy retrieval of the MessagingService
+  private MessagingService getMessagingService() {
+	  if (ms == null) {
+		try {
+		   ms = (MessagingService)myContainer.getServiceFinder().findService(MessagingSlice.NAME);
+	    }
+	    catch(Exception e) {
+	      myLogger.log(Logger.SEVERE, "Unable to find Messaging services.", e);
+	    }
+	  }
+	  return ms;
   }
   
   /**
@@ -118,7 +136,7 @@ public class SignatureFilter {
             so.setEncoded(sd);
             ACLMessage acl = msg.getACLMessage();
             if (acl!=null) so.setConversationId(acl.getConversationId());
-            ss.encode(so);   
+            getSecurityService().encode(so);   
             myLogger.log(Logger.FINEST,"ACLMessage has been signed");
             }
           }
@@ -139,11 +157,11 @@ public class SignatureFilter {
         catch(Exception e) {
           // This can be a ClassCastException, IndexOutOfBounds, SecurityException, NullPointer, etc.
           myLogger.log(Logger.WARNING,e.toString());
-          //e.printStackTrace();
+          e.printStackTrace();
           try {
             // Reports the exception to the sender
-            ss.reconstructACLMessage(msg);
-            ms.notifyFailureToSender(msg, sender, new InternalError(e.getMessage()));
+            getSecurityService().reconstructACLMessage(msg);
+            getMessagingService().notifyFailureToSender(msg, sender, new InternalError(e.getMessage()));
           }
           catch(Exception ne) {
             cmd.setReturnValue(ne);
@@ -154,7 +172,7 @@ public class SignatureFilter {
       return true;
     }
     
-  } // End of SignatureFilter.In class
+  } // End of SignatureFilter.Out class
 
 
   /**
@@ -189,7 +207,7 @@ public class SignatureFilter {
           Envelope env = msg.getEnvelope();
           if ((env != null)&&((so=SecurityService.getSecurityObject(env,SecurityObject.SIGN)) != null)) {
             AID receiver = (AID)params[2];
-            ss.decode(so);
+            getSecurityService().decode(so);
             SecurityData sd = (SecurityData)so.getEncoded();
             Agent agt = myContainer.acquireLocalAgent(receiver);
             SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
@@ -206,8 +224,8 @@ public class SignatureFilter {
           myLogger.log(Logger.WARNING,e.toString());
           try {
             // Reports the exception to the sender
-            ss.reconstructACLMessage(msg);
-            ms.notifyFailureToSender(msg, (AID)params[0], new InternalError(e.getMessage()));
+        	getSecurityService().reconstructACLMessage(msg);
+            getMessagingService().notifyFailureToSender(msg, (AID)params[0], new InternalError(e.getMessage()));
           }
           catch(Exception ne) {
             cmd.setReturnValue(ne);

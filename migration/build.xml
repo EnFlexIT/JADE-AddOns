@@ -1,14 +1,14 @@
 <project name="Inter-Platform Mobility" default="lib" basedir=".">
   <!-- set global properties for this build -->
   <property environment="env"/>
+  <property name="jade-home" value="../.."/>
   <property name="version" value="3.4"/>
 
   <property name="src" value="src"/>
   <property name="build" value="classes"/>
   <property name="doc" value="doc"/>
-  <property name="dist" value="../.."/>
   <property name="lib" value="lib"/>
-  <property name="jade-lib-dir" value="../../lib"/>
+  <property name="jade-lib-dir" value="${jade-home}/lib"/>
 
   <path id="jade-classes">
     <fileset dir="${jade-lib-dir}">
@@ -51,13 +51,13 @@
   </target>
 
   <!-- Make distribution zip file and put in ${dist} -->
-  <target name="dist" depends="lib">
-    <jar jarfile="../migration-${version}.zip" basedir="../..">
+  <target name="dist" depends="clean, lib">
+    <zip zipfile="../migrationAddOn.zip" basedir="../..">
       <include name="add-ons/migration/*"/>
       <include name="add-ons/migration/src/**"/>
       <exclude name="add-ons/migration/src/test/**"/>
       <include name="add-ons/migration/lib/migration.jar"/>
-    </jar>
+    </zip>
   </target>
 
   <!-- delete ${build} and ${lib} directories -->

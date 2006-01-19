@@ -23,8 +23,7 @@ Boston, MA  02111-1307, USA.
 
 package jade.security.impl;
 
-//import java.security.PublicKey;
-import starlight.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * The <code>SDSINameImpl</code> represents
@@ -100,7 +99,14 @@ public class SDSINameImpl implements jade.security.SDSIName, jade.util.leap.Seri
     while ((++i) < name.length) {
       allNames += SEPARATOR + name[i];
     }
-    return new String( Base64.encode(getEncoded()) ) + allNames;
+    try {
+	    return new String(Base64.encodeBase64(getEncoded()), "US-ASCII") + allNames;
+    }
+    catch (Exception e) {
+    	// Should never happen
+    	e.printStackTrace();
+    	return null;
+    }
   }
 
 

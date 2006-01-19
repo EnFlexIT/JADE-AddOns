@@ -9,10 +9,23 @@
 
 <project name="SingleUser-example" default="remote-cont" basedir=".">
   <!-- set global properties for this build -->
-  <property name="jaderoot" value="../../../../../"/>
-  <property name="libJADEDir" value="${jaderoot}/lib"/>
+  <property name="jade-home" value="../../../../.."/>
+  <property name="jade-lib-dir" value="${jade-home}/lib" />
+  <property name="lib" value="${jade-home}/add-ons/security/lib" />
 
-  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar;${libJADEDir}/iiop.jar;${libJADEDir}/jadeTools.jar;${jaderoot}/add-ons/security/lib/jadeSecurity.jar;" /> 
+  <path id="jade-classes">
+    <fileset dir="${jade-lib-dir}">
+      <include name="commons-codec/commons-codec-1.3.jar"/>
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <path id="jade-S-classes">
+    <fileset dir="${lib}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
 
 
 
@@ -20,10 +33,11 @@
 
        <java classname="jade.Boot" fork="yes">
 
-         <arg line="-conf cont-1.conf -container -host 127.0.0.1" />
+         <arg line="-conf cont-1.conf -container" />
 
          <classpath>
-           <pathelement path="${classpath}"/>
+           <path refid="jade-classes"/>
+           <path refid="jade-S-classes"/>
          </classpath>
        </java>
   </target>

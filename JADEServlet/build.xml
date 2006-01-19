@@ -121,9 +121,12 @@
 
 
   <!-- Build doc -->
-  <target name="dist" >
-    <zip zipfile="${project-root}/../../JADEServlet.zip"
-         basedir="${project-root}/../../"  includes="**/JADEServlet/**" excludes="**/*.PRJ,**/*.doc"/>
+  <target name="dist">
+    <zip zipfile="../JADEServletAddOn.zip" basedir="../..">
+      <include name="add-ons/JADEServlet/**"/>
+      <exclude name="add-ons/JADEServlet/**/*.PRJ"/>
+      <exclude name="add-ons/JADEServlet/**/*.doc"/>
+    </zip>
   </target>
 
 

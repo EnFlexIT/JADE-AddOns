@@ -1,7 +1,7 @@
 <project name="JADE Persistence" default="compile" basedir=".">
 
   <!-- Adapt these to your Hibernate installation -->
-  <property name="hibernate-home" value="E:/Libs/hibernate-2.0.3"/>
+  <property name="hibernate-home" value="c:\tools\hibernate-2.1"/>
 
 
   <!-- set global properties for this build -->
@@ -52,12 +52,12 @@
   </target>
 
   <!-- Make distribution zip file and put in ${dist} -->
-  <target name="dist" depends="init, lib">
-    <jar jarfile="${dist}/${libName}AddOn.zip">
-      <fileset dir="${dist}" includes="add-ons/persistence/${src}/**"/>
-      <fileset dir="${dist}" includes="add-ons/persistence/*"/>
-      <fileset dir="${dist}" includes="add-ons/persistence/${lib}/*"/>
-    </jar>
+  <target name="dist" depends="clean, lib">
+    <zip zipfile="../persistenceAddOn.zip" basedir="..\..">
+      <include name="add-ons/persistence/*"/>
+      <include name="add-ons/persistence/src/**"/>
+      <include name="add-ons/persistence/lib/**"/>
+    </zip>
   </target>
 
   <target name="all" depends="compile, lib, dist"/>
