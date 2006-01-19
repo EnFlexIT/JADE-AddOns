@@ -61,7 +61,7 @@ import jade.domain.FIPAAgentManagement.Property;
 import jade.core.AID;
 import jade.util.Logger;
 
-import starlight.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 public class XMLCodec extends DefaultHandler {
     
@@ -175,7 +175,7 @@ public class XMLCodec extends DefaultHandler {
     }
     else if (o instanceof byte[]) {
       type = PROP_BYTE_TYPE;
-      v = new String(Base64.encode((byte[])o));
+      v = new String(Base64.encodeBase64((byte[])o));
     }
     else if (o instanceof Serializable) {
       type = PROP_SER_TYPE;
@@ -186,7 +186,7 @@ public class XMLCodec extends DefaultHandler {
 	  oos.close();
 	  byte[] bytes = bos.toByteArray();
 	  if(bytes != null)
-	      v = new String(Base64.encode(bytes));
+	      v = new String(Base64.encodeBase64(bytes));
       }catch(IOException ioe){
 	  return;
       }
@@ -205,16 +205,18 @@ public class XMLCodec extends DefaultHandler {
   private void decodeProp(StringBuffer acc, Property p) {
     if(propType.equals(PROP_SER_TYPE)){
       try{
-        char[] serdata = acc.toString().toCharArray();
-        ObjectInputStream ois = new ObjectInputStream( 
-          new ByteArrayInputStream(Base64.decode(serdata)));
+        ObjectInputStream ois = new ObjectInputStream(
+          new ByteArrayInputStream(Base64.decodeBase64(acc.toString().getBytes("US-ASCII"))));
         p.setValue((Serializable)ois.readObject());
       }catch(Exception e){
 	  // nothing, we leave value of this property as null;
       }
     }else if(propType.equals(PROP_BYTE_TYPE)){
-      char[] bytes = acc.toString().toCharArray();
-      p.setValue(Base64.decode(bytes));
+    	try{
+    		p.setValue(Base64.decodeBase64(acc.toString().getBytes("US-ASCII")));
+      }catch(Exception e){
+      	e.printStackTrace();
+      }
     }else{
       p.setValue(acc.toString());
     }
