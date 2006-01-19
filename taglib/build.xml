@@ -1,13 +1,27 @@
 <project name="taglib" default="compile" basedir=".">
   <!-- set global properties for this build -->
+  <property name="jade-home" value="../.."/>
   <property name="src" value="src"/>
   <property name="build" value="classes"/>
   <property name="web" value="web"/>
   <property name="lib" value="lib"/>
   <property name="dist" value="../.."/>
-  <property name="libJADEDir" value="../../lib"/>
-  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/servlet.jar;"/>
-
+  <property name="jade-lib-dir" value="${jade-home}/lib"/>
+  <property name="servlet-lib-dir" value="${jade-lib-dir}"/>
+ 
+  <path id="jade-classes">
+	 	<fileset dir="${jade-lib-dir}">
+	 		<include name="commons-codec/commons-codec-1.3.jar"/>
+	 		<include name="*.jar"/>
+	 	</fileset>
+  </path>
+  <path id="web-classes">
+  	<fileset dir="${servlet-lib-dir}">
+  		<include name="servlet-api.jar"/>
+  		<include name="jsp-api.jar"/>
+  	</fileset>
+  </path>
+	
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
@@ -17,12 +31,22 @@
 
   <!-- Compile the java code from ${src} into ${build} -->
   <target name="compile" depends="init">
-    <javac srcdir="${src}/jade" destdir="${web}/WEB-INF/${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on"/>
+    <javac srcdir="${src}/jade" destdir="${web}/WEB-INF/${build}"  nowarn="off" optimize="on" deprecation="on">
+    	<classpath>
+    		<path refid="jade-classes"/>
+    		<path refid="web-classes"/>
+    	</classpath>
+    </javac>
   </target>
 
   <!-- Compile the examples code from ${src}/examples into ${web}/WEB-INF/${build} -->
   <target name="examples" depends="init">
-    <javac srcdir="${src}/examples" destdir="${web}/WEB-INF/${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on"/>
+    <javac srcdir="${src}/examples" destdir="${web}/WEB-INF/${build}" nowarn="off" optimize="on" deprecation="on">
+    	<classpath>
+    		<path refid="jade-classes"/>
+    		<path refid="web-classes"/>
+    	</classpath>
+    </javac>
     <jar jarfile="${web}/WEB-INF/lib/jspagents.jar">
       <fileset dir="${web}/WEB-INF/${build}" includes="examples/**"/>
     </jar>
@@ -36,22 +60,25 @@
   </target>
   
   <!-- Make distribution zip file and put in ${dist} -->
-  <target name="dist" depends="init, compile, lib, examples">
-    <jar jarfile="${dist}/taglibAddOn.zip">
-      <fileset dir="${dist}" includes="add-ons/taglib/${src}/**"/>
-      <fileset dir="${dist}" includes="add-ons/taglib/*"/>
-      <fileset dir="${dist}" includes="add-ons/taglib/${web}/*"/>
-      <fileset dir="${dist}" includes="add-ons/taglib/${web}/WEB-INF/*"/>
-      <fileset dir="${dist}" includes="add-ons/taglib/${web}/WEB-INF/lib/*"/>
-    </jar>
+  <target name="dist" depends="clean, lib, examples">
+    <zip zipfile="../taglibAddOn.zip" basedir="../..">
+      <include name="add-ons/taglib/${src}/**"/>
+      <include name="add-ons/taglib/*"/>
+      <include name="add-ons/taglib/${web}/*"/>
+      <include name="add-ons/taglib/${web}/WEB-INF/*"/>
+      <include name="add-ons/taglib/${web}/WEB-INF/lib/*"/>
+    </zip>
   </target>
   
   <target name="all" depends="init, compile, examples, lib, dist"/>
   <!-- delete ${build} and ${lib} directories -->
   <target name="clean" description="clean up">
     <!-- Delete the ${build} directory tree -->
-    <delete includeEmptyDirs="true" file="${web}/WEB-INF/lib/jadetaglib.jar">
-      <fileset dir="${web}/WEB-INF/${build}/jade"/>
+    <delete quiet="true"  includeEmptyDirs="true">
+      <fileset dir="${web}/WEB-INF/${build}"/>
+      <fileset dir="${web}/WEB-INF/lib/">
+      	<filename name="*.jar"/> 
+      </fileset>
     </delete>
   </target>
 </project>
