@@ -38,8 +38,9 @@ import jade.content.schema.ObjectSchema;
 import jade.content.schema.Facet;
 import jade.content.schema.facets.TypedAggregateFacet;
 import jade.lang.acl.ISO8601;
-import starlight.util.Base64;
 import java.util.Date;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * @author Rosalba Bochicchio - TELECOM ITALIA LAB
@@ -183,7 +184,7 @@ class RDFCoder {
 						 typeName.equals(BasicOntology.INTEGER))
 		  			temp = v.toString();
 		  		else if (typeName.equals(BasicOntology.BYTE_SEQUENCE))
-		  			temp = String.copyValueOf(Base64.encode((byte [])v));
+					temp = new String(Base64.encodeBase64((byte [])v), "US-ASCII");
 		  		else temp = normalizeString(((AbsObject)absPrimitive).toString());
 				sb.append(temp);
     			if (ontologyName!=null)

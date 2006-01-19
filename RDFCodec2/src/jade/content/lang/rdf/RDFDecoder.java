@@ -34,8 +34,9 @@ import jade.content.lang.StringCodec;
 import org.xml.sax.Attributes;
 import jade.util.leap.ArrayList;
 import jade.lang.acl.ISO8601;
-import starlight.util.Base64;
 import java.util.*;
+
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * @author Rosalba Bochicchio - TELECOM ITALIA LAB
@@ -351,7 +352,7 @@ class RDFDecoder {
        	 	} 
        	 	
        	 	if (type.equals(BasicOntology.BYTE_SEQUENCE)) {
-            	abs = AbsPrimitive.wrap(Base64.decode(content.toCharArray()));
+            	abs = AbsPrimitive.wrap(Base64.decodeBase64(content.getBytes("US-ASCII")));
        	 	} 
        	 	
        	 	element.term = abs;

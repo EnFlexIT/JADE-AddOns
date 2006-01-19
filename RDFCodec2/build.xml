@@ -1,17 +1,25 @@
 <project name="RDFCodec" default="compile" basedir=".">
   <!-- set global properties for this build -->
+  <property name="jade-home" value="../.."/>
+
   <property name="src" value="src"/>
   <property name="classes" value="classes"/>
   <property name="lib" value="lib"/>
-  <property name="dist" value="../.."/>
-  <property name="libJADEDir" value="../../lib"/>
-  
+  <property name="jade-lib-dir" value="${jade-home}/lib"/>
+
   <!-- ===============================================
   	CLASSPATH: 
   	If you are using a JDK earlier than JDK1.4, add the SAX API and 
-  	a SAX Parser to the classpath below
+  	a SAX Parser to the jade/lib directory
   ================================================ -->
-  <property name="classpath" value="${libJADEDir}/jade.jar;${libJADEDir}/Base64.jar"/>
+
+  <path id="jade-classes">
+    <fileset dir="${jade-lib-dir}">
+      <include name="commons-codec/commons-codec-1.3.jar"/>
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+  
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -23,12 +31,21 @@
 
   <!-- Compile the java code from ${src} into ${classes} -->
   <target name="compile" depends="init">
-    <javac srcdir="${src}" destdir="${classes}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on" />
+    <javac srcdir="${src}" destdir="${classes}" nowarn="off" optimize="on" deprecation="on">
+      <classpath>
+        <path refid="jade-classes"/>
+      </classpath>
+    </javac>
   </target>
 
   <!-- Compile the examples code from ${src} into ${classes} -->
-  <target name="examples" depends="init">
-    <javac srcdir="examples" destdir="${classes}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on"/>
+  <target name="examples" depends="compile">
+    <javac srcdir="examples" destdir="${classes}" nowarn="off" optimize="on" deprecation="on">
+      <classpath>
+        <pathelement location="{classes}"/>
+        <path refid="jade-classes"/>
+      </classpath>
+    </javac>
   </target>
 
   <!-- Create the jar file ${lib} -->
@@ -50,17 +67,17 @@
 
   <!-- Make distribution zip file and put in ${dist} -->
   <target name="dist" depends="all">
-    <jar jarfile="${dist}/RDFCodecAddOn.zip">
-      <fileset dir="${dist}" includes="add-ons/RDFCodec2/${src}/**"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec2/examples/**"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec2/${lib}/**"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec2/LICENSE"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec2/COPYING"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec2/README"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec2/build.xml"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec2/RDFCodec.html"/>
-      <fileset dir="${dist}" includes="add-ons/RDFCodec2/runExamples.bat"/>
-    </jar>
+    <zip zipfile="../RDFCodec2AddOn.zip" basedir="../..">
+      <include name="add-ons/RDFCodec2/LICENSE"/>
+      <include name="add-ons/RDFCodec2/COPYING"/>
+      <include name="add-ons/RDFCodec2/README"/>
+      <include name="add-ons/RDFCodec2/build.xml"/>
+      <include name="add-ons/RDFCodec2/RDFCodec.html"/>
+      <include name="add-ons/RDFCodec2/runExamples.bat"/>
+      <include name="add-ons/RDFCodec2/src/**"/>
+      <include name="add-ons/RDFCodec2/examples/**"/>
+      <include name="add-ons/RDFCodec2/lib/**"/>
+    </zip>
   </target>
 
 </project>
