@@ -1,12 +1,21 @@
 <project name="Miscellaneous" default="compile" basedir=".">
   <!-- set global properties for this build -->
+  <property name="jade-home" value="../.."/>
+  <property name="version" value="3.4"/>
+
   <property name="src" value="src"/>
   <property name="build" value="classes"/>
   <property name="doc" value="doc"/>
-  <property name="dist" value="../.."/>
-  <property name="lib" location="lib"/>
-  <property name="libJADEDir" value="../../lib"/>
-  <property name="classpath" value="../..;${libJADEDir}/jade.jar;${libJADEDir}/jadeTools.jar;${libJADEDir}/iiop.jar;classes;"/>
+  <property name="lib" value="lib"/>
+  <property name="jade-lib-dir" value="${jade-home}/lib"/>
+
+  <path id="jade-classes">
+    <fileset dir="${jade-lib-dir}">
+      <include name="commons-codec/commons-codec-1.3.jar"/>
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -14,12 +23,26 @@
     <!-- Create the directories structure used to store files -->
     <mkdir dir="${build}"/>
     <mkdir dir="${lib}"/>
+    <mkdir dir="${doc}/api"/>
   </target>
 
   <!-- Compile the javadoc code from ${src} into ${doc} -->
   <target name="doc" depends="init">
     <mkdir dir="${doc}/api"/>
-    <javadoc sourcepath="${src}" packagenames="jade.misc, examples.misc.FSMMessageExchange" destdir="${doc}/api" author="true" windowtitle="JADE Miscellaneous classes"/>
+    <javadoc sourcepath="${src}" packagenames="jade.misc, examples.misc.FSMMessageExchange" destdir="${doc}/api" author="true" windowtitle="JADE Miscellaneous classes">
+      <classpath>
+        <pathelement location="{build}"/>
+        <path refid="jade-classes"/>
+      </classpath>
+    </javadoc>
+  </target>
+
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on">
+      <classpath>
+        <path refid="jade-classes"/>
+      </classpath>
+    </javac>
   </target>
 
   <target name="lib" depends="compile" description="generate jar archive">
@@ -28,23 +51,20 @@
     </jar>
   </target>
 
-  <target name="compile" depends="init">
-    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on"/>
-  </target>
-
   <!-- Make distribution zip file and put in ${dist} -->
-  <target name="dist" depends="init, clean">
-    <jar jarfile="${dist}/miscAddon.zip">
-      <fileset dir="${dist}" includes="add-ons/misc/${src}/**"/>
-      <fileset dir="${dist}" includes="add-ons/misc/*"/>
-      <fileset dir="${dist}" includes="add-ons/misc/resources/**"/>
-    </jar>
+  <target name="dist" depends="clean, doc, lib">
+    <zip zipfile="../miscAddOn.zip" basedir="../..">
+      <include name="add-ons/misc/*"/>
+      <include name="add-ons/misc/src/**"/>
+      <include name="add-ons/misc/doc/**"/>
+      <include name="add-ons/misc/lib/**"/>
+      <include name="add-ons/misc/resources/**"/>
+    </zip>
   </target>
 
-  <!-- delete ${build} and ${lib} directories -->
   <target name="clean" description="clean up">
     <!-- Delete the ${build} directory tree -->
-    <delete includeEmptyDirs="true">
+    <delete includeEmptyDirs="true" quiet="true">
       <fileset dir="${build}"/>
       <fileset dir="${lib}"/>
       <fileset dir=".">

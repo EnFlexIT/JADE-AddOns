@@ -42,9 +42,9 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * This agent uses a property file to request a subDF to federate with a rootDF. <br>
- * The first argument passed to this agent on the command line is the name
- * of a file with a list of properties in the form <br>
+ * This agent provides a simple graphical interface to federate DF agents.
+ * Moreover it uses a property file to create some federations between DF agents at startup.
+ * This file is passed to the DFFederatorAgent as command line argument and has the form <br>
  * <code>
  SubDF1 = df@jade.cselt.it:1099/JADE , IOR:00002233 <br>
  RootDF = df@teschet.it:1099/JADE, http://teschet.it:8088/acc <br>
@@ -60,7 +60,7 @@ import java.util.Vector;
  * an example of a property file for this agent. <br>
  * A suggested command line to better understand this agent is the following:
  * <br><code>
-   java jade.Boot -gui subDF:jade.domain.df r:examples.DFFederator.DFFederatorAgent(resouces\DFFederatorAgent.properties) </code>
+   java -cp <jade classes + misc add-on classes> jade.Boot -gui subDF:jade.domain.df federator:jade.misc.DFFederatorAgent(resources\DFFederatorAgent.properties) </code>
  * 
  * @author Fabio Bellifemine - TILAB
  * @version $Date$ $Revision$

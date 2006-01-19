@@ -222,7 +222,7 @@ class DFFederatorAgentGUI extends JFrame {
 		int centerX = (int)screenSize.getWidth() / 2;
 		int centerY = (int)screenSize.getHeight() / 2;
 		setLocation(centerX - getWidth() / 2, centerY - getHeight() / 2);
-		show();
+		setVisible(true);
 	}
 	
 }
