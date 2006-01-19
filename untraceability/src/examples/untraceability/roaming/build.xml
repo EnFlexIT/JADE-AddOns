@@ -11,25 +11,30 @@ It is created according a JADE's build.xml.
   <property name="build.compiler" value="modern"/>
   <property name="javac.optimize" value="on"/>
   <property name="javac.debug" value="on"/>
-  <property environment="env"/>
+  <property name="jade-home" value="../../../../../.."/>
+  <property name="example-root" value="../../../.."/>	
+  <property name="src" location="${example-root}/src"/>
+  <property name="build" location="${example-root}/classes"/>
+  <property name="jade-lib-dir" value="${jade-home}/lib"/>
 
-  <property name="root" location="../../../../"/>
-
-  <property name="src" location="${root}/src"/>
-  <property name="build" location="${root}/classes"/>
-
-  <property name="jade-root" value="c:/Program Files/jade"/>
-  <property name="untraceability-root" value="${jade-root}/add-ons/untraceability"/>
-  <property name="classpath" value=
-    	"${env.CLASSPATH};${jade-root}/add-ons/untraceability/classes"/>
-
+  <path id="jade-classes">
+	  	<fileset dir="${jade-lib-dir}">
+	  		<include name="commons-codec/commons-codec-1.3.jar"/>
+	  		<include name="*.jar"/>
+	  	</fileset>
+  </path>
+	
+  <path id="untraceability-classes">
+	<fileset dir="${example-root}/lib">
+		<include name="*.jar"/>
+	</fileset>
+  </path>
+	
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
       <!-- Create the directory structure -->
-        <mkdir dir="${untraceability-root}"/>
-        <mkdir dir="${untraceability-root}/classes/"/>
-        <mkdir dir="${untraceability-root}/classes/examples"/>
+        <mkdir dir="${example-root}/classes/"/>
     </target>
 
   <target name="compile" depends="init" description="compile the source">
@@ -37,21 +42,18 @@ It is created according a JADE's build.xml.
       optimize="${javac.optimize}" debug="${javac.debug}"
       deprecation="on">
       <classpath>
-        <fileset dir="${jade-root}/lib" includes="*.jar"/>
+        <path refid="jade-classes"/>
+      	<path refid="untraceability-classes"/>
       </classpath>
     </javac>
   </target>
 
-  <target name="dist" depends="init,compile" description="generate the distribution">
-    <copy todir="${untraceability-root}/classes/">
-      <fileset dir="${build}" includes="examples/**"/>
-    </copy>
-  </target>
-
-  <target name="run" depends="" description="run the example" >
+  <target name="run" depends="compile" description="run the example" >
     <java classname="examples.untraceability.roaming.UntraceableRoaming" fork="yes">
       <classpath>
-        <pathelement path="${classpath}"/>
+      	<path refid="jade-classes"/>
+      	<path refid="untraceability-classes"/>
+      	<pathelement path="${build}"/>
       </classpath>
     </java>
   </target>
