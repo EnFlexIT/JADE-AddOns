@@ -22,8 +22,17 @@ It is created according a JADE's build.xml.
 	<property name="build" location="classes"/>
 	<property name="demo" location="demo"/>
 	<property name="misc" location="misc"/>
-  <property name="libJADEDir" value="../../lib"/>
+ 	
+	<property name="jade-home" value="../.."/>
+	<property name="jade-lib-dir" value="${jade-home}/lib"/>
 
+	  <path id="jade-classes">
+	    <fileset dir="${jade-lib-dir}">
+	      <include name="commons-codec/commons-codec-1.3.jar"/>
+	      <include name="*.jar"/>
+	    </fileset>
+	  </path>
+	
 	<target name="init">
 		<!-- Create the time stamp -->
 		<tstamp/>
@@ -36,7 +45,7 @@ It is created according a JADE's build.xml.
 	<target name="compile" depends="init" description="compile the source">
 	    <javac srcdir="${src}" destdir="${build}" nowarn="off" target="1.4" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="on" excludes="demo/**,examples/**,test/**">
 	      <classpath>
-	        <fileset dir="${libJADEDir}" includes="*.jar"/>
+	      	<path refid="jade-classes"/>
 	        <fileset dir="${lib}" includes="**/*.jar"/>
 	      </classpath>
 	    </javac>
@@ -56,21 +65,21 @@ It is created according a JADE's build.xml.
 	<target name="doc" depends="init" description="generate javadoc documentation">
 		<javadoc destdir="${doc}/api" author="true" windowtitle="WSIG ${version} API Reference" sourcepath="${src}" use="true" packagenames="com.whitestein.wsig">
       <classpath>
-        <fileset dir="${libJADEDir}" includes="*.jar"/>
+      	<path refid="jade-classes"/>
         <fileset dir="${lib}" includes="**/*.jar"/>
       </classpath>
     </javadoc>
 	</target>
 
-	<target name="dist" depends="init,compile,lib,doc" description="generate the distribution">
-		<zip zipfile="../../../WSIGAddOn-beta.0.4.zip" basedir="../../.." includes="jade/add-ons/wsig/**" excludes="jade/add-ons/wsig/classes/**"/>
+	<target name="dist" depends="lib,doc" description="generate the distribution">
+		<zip zipfile="../WSIGAddOn-beta.0.4.zip" basedir="../../.." includes="jade/add-ons/wsig/**" excludes="jade/add-ons/wsig/classes/**"/>
 	</target>
 	
 	<target name="clean" description="clean up">
 		<!-- Delete the ${build} directory tree -->
 		<delete includeEmptyDirs="true">
 			<fileset dir="${build}" excludes="**/*.mf"/>
-			<fileset dir="${doc}"/>
+			<fileset dir="${doc}/api"/>
 			<fileset dir="${lib}" includes="*.jar"/>
 		</delete>
 </target>
