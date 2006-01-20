@@ -1,5 +1,8 @@
 <project name="XMLCodec" default="compile" basedir=".">
   <!-- set global properties for this build -->
+  <property environment="env"/>
+  <property name="version" value="3.4"/>
+
   <property name="src" value="src"/>
   <property name="build" value="classes"/>
   <property name="doc" value="doc"/>
@@ -36,11 +39,10 @@
 
   <!-- Make distribution zip file and put in ${dist} -->
   <target name="dist" depends="lib">
-    <jar jarfile="${dist}/XMLCodec.zip">
-      <fileset dir="${dist}" includes="add-ons/XMLCodec/${src}/**"/>
-      <fileset dir="${dist}" includes="add-ons/XMLCodec/examples/**"/>
-      <fileset dir="${dist}" includes="add-ons/XMLCodec/*"/>
-      <fileset dir="${dist}" includes="add-ons/XMLCodec/lib/**"/>
+    <jar jarfile="../XMLCodec-${version}.zip" basedir="../..">
+      <include name="add-ons/XMLCodec/*"/>
+      <include name="add-ons/XMLCodec/src/**"/>
+      <include name="add-ons/XMLCodec/lib/**"/>
     </jar>
   </target>
  

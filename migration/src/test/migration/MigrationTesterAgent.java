@@ -64,7 +64,7 @@ public class MigrationTesterAgent extends TesterAgent {
 	public static final String MOBILITY_SERVICE = "jade.core.mobility.AgentMobilityService";
 	public static final String MIGRATION_SERVICE = "jade.core.migration.InterPlatformMobilityService";
 	public static final String CURRENT_DIR = System.getProperty("user.dir");
-	public static final String AGENTS_PATH_KEY = "-jade_AgentManagement_agentspath";
+	public static final String AGENTS_PATH_KEY = "-jade_core_management_AgentManagementService_agentspath";
 	public static final String AGENTS_PATH = "migration" + File.separator + "path1";
 	//public static final String AGENTS_PATH = CURRENT_DIR + File.separator + "src" + File.separator + "test" + File.separator + "migration" + File.separator + "path1";
 	// "migration" + java.io.File.separator + "path1";
