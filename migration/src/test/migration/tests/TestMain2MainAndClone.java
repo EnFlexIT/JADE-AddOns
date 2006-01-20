@@ -53,12 +53,12 @@ public class TestMain2MainAndClone extends Test {
     String[] args = new String[3];
     args[0] = a.getName() + "#" + a.getAID().getAddressesArray()[0];
     args[1] = remoteAMS2.getName() + "#" + remoteAMS2.getAddressesArray()[0];
-    args[2] = "Container-1";
+    args[2] = "DestinationContainer4";
     
     int port = Integer.parseInt((String)getGroupArgument(MigrationTesterAgent.REMOTE_PLATFORM_PORT_KEY_2));
-    container = TestUtility.launchJadeInstance("Remote-Container-1", 
+    container = TestUtility.launchJadeInstance("DestinationContainer4", 
                                     null, 
-                                   "-container -host localhost -port "
+                                   "-container -container-name DestinationContainer4 -host localhost -port "
                                    + port + " " 
                                    + MigrationTesterAgent.AGENTS_PATH_KEY + " "
                                    + AGENTS_PATH + " -services "

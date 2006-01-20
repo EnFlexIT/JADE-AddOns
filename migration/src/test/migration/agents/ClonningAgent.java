@@ -41,7 +41,7 @@ import jade.lang.acl.ACLMessage;
 public class ClonningAgent extends Agent {
 
 public void setup(){
-    Object[] args = getArguments();
+    final Object[] args = getArguments();
     
     if(args != null){
       _testerAID = new AID(
@@ -82,7 +82,7 @@ public void setup(){
             case 2:
               try{
                 if(myAgent.getAID().getLocalName().equals("myClone") && 
-                    myAgent.getContainerController().getContainerName().equals("Container-1")){
+                    myAgent.getContainerController().getContainerName().equals(args[2])){
                   System.out.println("Sending inform message to my Tester");
                   myAgent.send(_inform);
                 }

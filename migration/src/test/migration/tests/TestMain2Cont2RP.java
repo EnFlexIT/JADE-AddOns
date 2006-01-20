@@ -53,14 +53,14 @@ public class TestMain2Cont2RP extends Test {
     AID remoteAMS2 = (AID) getGroupArgument(MigrationTesterAgent.REMOTE_AMS_KEY_2);
     String[] args = new String[3];
     args[0] = a.getName() + "#" + a.getAID().getAddressesArray()[0];
-    args[1] =  "Container-1";
+    args[1] =  "DestinationContainer2";
     args[2] = remoteAMS2.getName() + "#" + remoteAMS2.getAddressesArray()[0];
     
     
     int port = Integer.parseInt((String)getGroupArgument(MigrationTesterAgent.REMOTE_PLATFORM_PORT_KEY));
-    container = TestUtility.launchJadeInstance("Remote-Container-1", 
+    container = TestUtility.launchJadeInstance("DestinationContainer2", 
                                     null, 
-                                   "-container -host localhost -port "
+                                   "-container -container-name DestinationContainer2 -host localhost -port "
                                    + port + " "
                                    + "-jade_core_migration_InterPlatformMigrationService_verbosity 100 "
                                    + MigrationTesterAgent.AGENTS_PATH_KEY + " "

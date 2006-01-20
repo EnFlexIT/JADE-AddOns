@@ -68,7 +68,7 @@ public class Test3Platforms extends Test {
                                     null,
                                    "-name Remote-Platform-3 "
                                    + "-port 6666 "
-                                   + "-gui "
+                                   + " "
                                    + " "+TestUtility.HTTP_MTP_ARG+" "
                                    + "-mtp "
                                    + "jade.mtp.http.MessageTransportProtocol(http://"+hostname+":9999/acc) " 

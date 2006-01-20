@@ -61,9 +61,9 @@ public class TestContainer2Main2RPMain extends Test {
 	    
 	    
 	    int port = Integer.parseInt((String)getGroupArgument(MigrationTesterAgent.REMOTE_PLATFORM_PORT_KEY));
-	    container = TestUtility.launchJadeInstance("Remote-Container-1", 
+	    container = TestUtility.launchJadeInstance("SourceContainer2", 
 	                                    null, 
-	                                   "-container -host localhost -port "
+	                                   "-container -container-name SourceContainer2 -host localhost -port "
 	                                   + port + " " 
 	                                   + MigrationTesterAgent.AGENTS_PATH_KEY + " "
 	                                   + AGENTS_PATH + " -services "
@@ -71,7 +71,7 @@ public class TestContainer2Main2RPMain extends Test {
 	                                   + MigrationTesterAgent.MOBILITY_SERVICE,null);
 	    
 	    
-	    AID resp = TestUtility.createAgent(a, "pep", "test.migration.agents.GenericMovingAgent",args, remoteAMS, "Container-1");
+	    AID resp = TestUtility.createAgent(a, "pep", "test.migration.agents.GenericMovingAgent",args, remoteAMS, "SourceContainer2");
 	    return new ResponderBehaviour(a, resp);
 	  }
 	  

@@ -33,7 +33,7 @@ import test.common.*;
 
 import java.io.File;
 import java.net.InetAddress;
-import java.util.Iterator;
+import jade.util.leap.Iterator;
 /**
  * Description here
  * 
@@ -94,7 +94,7 @@ public class MigrationTesterAgent extends TesterAgent {
 							new String(
 									"-name "
 									+ REMOTE_PLATFORM_NAME
-									+ " -gui "
+                  + " "
 									+ additionalArguments
 									+ " -port "
 									+ REMOTE_PLATFORM_PORT
@@ -118,7 +118,7 @@ public class MigrationTesterAgent extends TesterAgent {
 							new String(
 									"-name " 
 									+ REMOTE_PLATFORM_NAME_2
-									+ " -gui "
+									+ " "
 									+ additionalArguments
 									+ " -port "
 									+ REMOTE_PLATFORM_PORT_2
