@@ -1,13 +1,17 @@
 <%@ page import="jade.core.*" %>
+<%@ page import="jade.wrapper.*" %>
 <jsp:useBean id="oldsnooper" class="examples.jsp.Snooper" scope="application">
 <% try {
-    // Does not work for the moment
-    // JADE 1.4 String [] args = {"-platform", "buffer:examples.jsp.Buffer"};
-    String [] args = {"-container"};
-    jade.Boot.main(args);
+    // Get a hold on JADE runtime
+    jade.core.Runtime rt = jade.core.Runtime.instance();
+    Profile p = new ProfileImpl(false);
+    p.setParameter("port", "2099");
+   
+    System.out.println("Launching the agent container ..."+p);
+	  jade.wrapper.AgentContainer ac = rt.createAgentContainer(p);
     System.out.println("Jade Inited()");
     System.out.println("Start");
-    oldsnooper.doStart("oldsnooper");
+    ac.acceptNewAgent("oldsnooper", oldsnooper);
    } catch (Exception ex) {
        out.println(ex);
    }
