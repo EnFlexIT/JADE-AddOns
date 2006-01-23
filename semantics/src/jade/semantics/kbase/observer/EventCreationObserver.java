@@ -30,8 +30,10 @@ package jade.semantics.kbase.observer;
 import jade.semantics.interpreter.Finder;
 import jade.semantics.interpreter.SemanticAgent;
 import jade.semantics.interpreter.SemanticRepresentation;
-import jade.semantics.kbase.Bindings;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.MetaTermReferenceNode;
+import jade.semantics.lang.sl.tools.ListOfMatchResults;
+import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 
 /**
@@ -47,7 +49,7 @@ public class EventCreationObserver extends ObserverAdapter {
     private Formula subscribedEvent;
     
     /**
-     * The agent that has this observer on its knowledge base
+     * The agent that has this observer on its belief base
      */
     private SemanticAgent myAgent;
     
@@ -60,7 +62,7 @@ public class EventCreationObserver extends ObserverAdapter {
     /*********************************************************************/
     /**
      * Creates a new Observer
-     * @param agent The agent that has this observer on its knowledge base 
+     * @param agent The agent that has this observer on its belief base 
      * @param observedFormula the formula to observe
      * @param subscribedEvent the event to trigger
      * @param isOneShot should the observer be done only one time or not
@@ -74,7 +76,7 @@ public class EventCreationObserver extends ObserverAdapter {
     
     /**
      * Creates a new Observer
-     * @param agent The agent that has this observer on its knowledge base 
+     * @param agent The agent that has this observer on its belief base 
      * @param observedFormula the formula to observe
      * @param subscribedEvent the event to trigger
      */
@@ -100,24 +102,30 @@ public class EventCreationObserver extends ObserverAdapter {
     
     
     /**
-     * @inheritDoc
-     * Interpret the subcribe event and removes the suitable observer if the 
-     * observer should be done only one time 
+     * Interprets the subcribe event and removes the suitable observer if the 
+     * observer should be done only one time.
+     * @param list list of MatchResults which made possible the notification
      */
-    public void notify(Bindings bindings) {
+    public void notify(ListOfMatchResults list) {
         try {
-            for (int i =0; i < bindings.size(); i++) {
-                SLPatternManip.instantiate(subscribedEvent,
-                        bindings.getBind(i).getVarName(), bindings.getBind(i).getVarValue());
+            if (list != null) {
+                if (list.size() >= 1) {
+                    for (int i =0; i < ((MatchResult)list.get(0)).size(); i++) {
+                        SLPatternManip.instantiate(subscribedEvent,
+                                ((MetaTermReferenceNode)((MatchResult)list.get(0)).get(i)).lx_name(),
+                                ((MetaTermReferenceNode)((MatchResult)list.get(0)).get(i)).sm_value());
+                    }
+                } 
+                myAgent.getSemanticCapabilities().getSemanticInterpreterBehaviour().interpret(new SemanticRepresentation(subscribedEvent));
+                if (isOneShot) myAgent.getSemanticCapabilities().getMyKBase().removeObserver(new Finder() {
+                    public boolean identify(Object object) {
+                        return EventCreationObserver.this == object;
+                    }
+                });
             }
-            myAgent.getSemanticCapabilities().getSemanticInterpreterBehaviour().interpret(new SemanticRepresentation(subscribedEvent));
-            if (isOneShot) myAgent.getSemanticCapabilities().getMyKBase().removeObserver(new Finder() {
-                public boolean identify(Object object) {
-                    return EventCreationObserver.this == object;
-                }
-            });
         } catch (Exception e) {
             e.printStackTrace();
         }
     } // End of notify/1
+
 } // End of class EventCreationObserver

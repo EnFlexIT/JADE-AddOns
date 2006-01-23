@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class IntegerConstantNode extends Constant
 {
-    public final int getNodeID(){
-        return 32;
-    }
+    public static Integer ID = new Integer(33);
+    public final int getClassID() {return ID.intValue();}
     java.lang.Long _lx_value;
 
     public IntegerConstantNode(java.lang.Long lx_value)  {
@@ -48,11 +47,13 @@ public class IntegerConstantNode extends Constant
     }
 
     public void accept(Visitor visitor) {visitor.visitIntegerConstantNode(this);}
+
     public Node getClone() {
         Node clone = new IntegerConstantNode();
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof IntegerConstantNode) {
             super.copyValueOf(n);
@@ -61,6 +62,28 @@ public class IntegerConstantNode extends Constant
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public java.lang.Long lx_value() {return _lx_value;}
     public void lx_value(java.lang.Long o) {_lx_value = o;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("lx_value") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("lx_value") ) return lx_value();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("lx_value") ) {lx_value((java.lang.Long)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

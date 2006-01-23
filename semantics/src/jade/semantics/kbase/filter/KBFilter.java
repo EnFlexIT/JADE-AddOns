@@ -31,19 +31,19 @@ import jade.semantics.kbase.KBase;
 import jade.semantics.kbase.FilterKBaseImpl;
 
 /**
- * General object that represents a knowledge base filter.
+ * General object that represents a belief base filter.
  * @author Vincent Louis - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0
  */
 public class KBFilter {
     
     /**
-     * Knowledge base onto apply this filter
+     * Belief base onto apply this filter
      */
     protected FilterKBaseImpl myKBase;
     
     /**
-     * Returns the knowledge base
+     * Returns the belief base
      * @return Returns the myKBase.
      */
     public KBase getMyKBase() {
@@ -51,7 +51,7 @@ public class KBFilter {
     } // End of getMyKBase/0
     
     /**
-     * Sets the knowledge base
+     * Sets the belief base
      * @param myKBase The myKBase to set.
      */
     public void setMyKBase(FilterKBaseImpl myKBase) {

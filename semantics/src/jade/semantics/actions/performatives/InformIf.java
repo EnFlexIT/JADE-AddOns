@@ -259,7 +259,7 @@ public class InformIf extends Alternative implements CommunicativeActionProto {
      */
     public SemanticAction doNewAction(Content surfaceContent) throws SemanticInterpretationException {
         Content informNotContent = new ContentNode(new ListOfContentExpression());
-        informNotContent.addContentElement(new NotNode((Formula)surfaceContent.getContentElement(0)));
+        informNotContent.addContentElement(new NotNode((Formula)surfaceContent.getContentElement(0)).getSimplifiedFormula());
         setLeftAction(new Inform(table).newAction(surfaceContent, this));
         setRightAction(new Inform(table).newAction(informNotContent, this));
         setContent(surfaceContent);

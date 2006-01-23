@@ -70,6 +70,7 @@ public interface Visitor {
     public abstract void visitAnyNode(AnyNode node);
     public abstract void visitIotaNode(IotaNode node);
     public abstract void visitAllNode(AllNode node);
+    public abstract void visitSomeNode(SomeNode node);
     public abstract void visitVariableNode(VariableNode node);
     public abstract void visitMetaVariableReferenceNode(MetaVariableReferenceNode node);
     public abstract void visitIntegerConstantNode(IntegerConstantNode node);

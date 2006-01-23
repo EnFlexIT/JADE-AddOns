@@ -23,39 +23,40 @@ public interface SLParserConstants {
   int ALLKW = 22;
   int ANYKW = 23;
   int IOTAKW = 24;
-  int DONEKW = 25;
-  int TRUEKW = 26;
-  int EQUIVKW = 27;
-  int FALSEKW = 28;
-  int ACTIONKW = 29;
-  int RESULTKW = 30;
-  int EXISTSKW = 31;
-  int FORALLKW = 32;
-  int IMPLIESKW = 33;
-  int FEASIBLEKW = 34;
-  int SEQUENCEKW = 35;
-  int PARAMETER_NAME = 36;
-  int VARIABLE = 37;
-  int META_VARIABLE = 38;
-  int INTEGER = 39;
-  int SIGN = 40;
-  int HEX_LITERAL = 41;
-  int FLOAT = 42;
-  int MANTISSA = 43;
-  int EXPONENT = 44;
-  int DATE_TIME = 45;
-  int YEAR = 46;
-  int MONTH = 47;
-  int DAY = 48;
-  int HOUR = 49;
-  int MINUTE = 50;
-  int SECOND = 51;
-  int MILLISECOND = 52;
-  int TYPE_DESIGNATOR = 53;
-  int STRING_LITERAL = 54;
-  int WORD = 55;
-  int BYTES = 56;
-  int DEC_LITERAL = 57;
+  int SOMEKW = 25;
+  int DONEKW = 26;
+  int TRUEKW = 27;
+  int EQUIVKW = 28;
+  int FALSEKW = 29;
+  int ACTIONKW = 30;
+  int RESULTKW = 31;
+  int EXISTSKW = 32;
+  int FORALLKW = 33;
+  int IMPLIESKW = 34;
+  int FEASIBLEKW = 35;
+  int SEQUENCEKW = 36;
+  int PARAMETER_NAME = 37;
+  int VARIABLE = 38;
+  int META_VARIABLE = 39;
+  int INTEGER = 40;
+  int SIGN = 41;
+  int HEX_LITERAL = 42;
+  int FLOAT = 43;
+  int MANTISSA = 44;
+  int EXPONENT = 45;
+  int DATE_TIME = 46;
+  int YEAR = 47;
+  int MONTH = 48;
+  int DAY = 49;
+  int HOUR = 50;
+  int MINUTE = 51;
+  int SECOND = 52;
+  int MILLISECOND = 53;
+  int TYPE_DESIGNATOR = 54;
+  int STRING_LITERAL = 55;
+  int WORD = 56;
+  int BYTES = 57;
+  int DEC_LITERAL = 58;
 
   int DEFAULT = 0;
 
@@ -85,6 +86,7 @@ public interface SLParserConstants {
     "<ALLKW>",
     "<ANYKW>",
     "<IOTAKW>",
+    "<SOMEKW>",
     "<DONEKW>",
     "\"true\"",
     "<EQUIVKW>",

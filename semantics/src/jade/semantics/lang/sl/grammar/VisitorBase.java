@@ -79,6 +79,7 @@ public class VisitorBase implements Visitor {
     public void visitAnyNode(AnyNode node) {}
     public void visitIotaNode(IotaNode node) {}
     public void visitAllNode(AllNode node) {}
+    public void visitSomeNode(SomeNode node) {}
     public void visitVariableNode(VariableNode node) {}
     public void visitMetaVariableReferenceNode(MetaVariableReferenceNode node) {}
     public void visitIntegerConstantNode(IntegerConstantNode node) {}

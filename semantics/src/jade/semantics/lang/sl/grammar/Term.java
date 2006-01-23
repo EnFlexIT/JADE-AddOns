@@ -70,6 +70,8 @@ public abstract class Term extends Node
             }
             return((Term.Operations)_thisoperations).instantiate(this , varname, expression);
         }
+    public static Integer ID = new Integer(10013);
+    public int getClassID() {return ID.intValue();}
     Term _sm_simplified_term;
 
     public Term(int capacity)  {
@@ -83,6 +85,27 @@ public abstract class Term extends Node
             _sm_simplified_term= tn._sm_simplified_term;
         }
     }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Term sm_simplified_term() {return _sm_simplified_term;}
     public void sm_simplified_term(Term o) {_sm_simplified_term = o;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("sm_simplified_term") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("sm_simplified_term") ) return sm_simplified_term();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("sm_simplified_term") ) {sm_simplified_term((Term)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

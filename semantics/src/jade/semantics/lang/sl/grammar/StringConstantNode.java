@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class StringConstantNode extends StringConstant
 {
-    public final int getNodeID(){
-        return 35;
-    }
+    public static Integer ID = new Integer(36);
+    public final int getClassID() {return ID.intValue();}
     java.lang.String _lx_value;
 
     public StringConstantNode(java.lang.String lx_value)  {
@@ -48,11 +47,13 @@ public class StringConstantNode extends StringConstant
     }
 
     public void accept(Visitor visitor) {visitor.visitStringConstantNode(this);}
+
     public Node getClone() {
         Node clone = new StringConstantNode();
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof StringConstantNode) {
             super.copyValueOf(n);
@@ -61,6 +62,28 @@ public class StringConstantNode extends StringConstant
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public java.lang.String lx_value() {return _lx_value;}
     public void lx_value(java.lang.String o) {_lx_value = o;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("lx_value") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("lx_value") ) return lx_value();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("lx_value") ) {lx_value((java.lang.String)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

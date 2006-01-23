@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public abstract class Symbol extends Node
 {
+    public static Integer ID = new Integer(10025);
+    public int getClassID() {return ID.intValue();}
 
     public Symbol(int capacity)  {
       super (capacity);
@@ -41,5 +43,11 @@ public abstract class Symbol extends Node
             super.copyValueOf(n);
             Symbol tn = (Symbol)n;
         }
+    }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class PredicateNode extends AtomicFormula
 {
-    public final int getNodeID(){
-        return 10;
-    }
+    public static Integer ID = new Integer(10);
+    public final int getClassID() {return ID.intValue();}
     static int _as_symbol = 0;
     static int _as_terms = 1;
 
@@ -52,11 +51,13 @@ public class PredicateNode extends AtomicFormula
     }
 
     public void accept(Visitor visitor) {visitor.visitPredicateNode(this);}
+
     public Node getClone() {
         Node clone = new PredicateNode(null, null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof PredicateNode) {
             super.copyValueOf(n);
@@ -64,8 +65,33 @@ public class PredicateNode extends AtomicFormula
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Symbol as_symbol() {return (Symbol)_nodes[_as_symbol];}
     public void as_symbol(Symbol s) {_nodes[_as_symbol] = s;}
     public ListOfTerm as_terms() {return (ListOfTerm)_nodes[_as_terms];}
     public void as_terms(ListOfTerm s) {_nodes[_as_terms] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_symbol") ) return true;
+        if ( attrname.equals("as_terms") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_symbol") ) return as_symbol();
+        if ( attrname.equals("as_terms") ) return as_terms();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_symbol") ) {as_symbol((Symbol)attrvalue);return;}
+        if ( attrname.equals("as_terms") ) {as_terms((ListOfTerm)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

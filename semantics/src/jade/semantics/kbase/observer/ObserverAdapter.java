@@ -29,8 +29,8 @@ package jade.semantics.kbase.observer;
 
 
 
-import jade.semantics.kbase.Bindings;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.tools.ListOfMatchResults;
 
 
 /**
@@ -55,10 +55,10 @@ public class ObserverAdapter implements Observer {
     
     /**
      * Should be overridden
-     * @see Observer#notify(Bindings)
+     * @see Observer#notify(ListOfMatchResults)
      * @inheritDoc
      */
-    public void notify(Bindings bindings) {
+    public void notify(ListOfMatchResults listOfMatchResults) {
         System.out.println("OBSERVER ADAPTER NOTIFY !!! : " + this.getObservedFormula());
     }
     

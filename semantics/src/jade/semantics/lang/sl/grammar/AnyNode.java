@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class AnyNode extends IdentifyingExpression
 {
-    public final int getNodeID(){
-        return 27;
-    }
+    public static Integer ID = new Integer(27);
+    public final int getClassID() {return ID.intValue();}
 
     public AnyNode(Term as_term, Formula as_formula)  {
         super(2, as_term, as_formula);
@@ -46,16 +45,25 @@ public class AnyNode extends IdentifyingExpression
     }
 
     public void accept(Visitor visitor) {visitor.visitAnyNode(this);}
+
     public Node getClone() {
         Node clone = new AnyNode(null, null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof AnyNode) {
             super.copyValueOf(n);
             AnyNode tn = (AnyNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

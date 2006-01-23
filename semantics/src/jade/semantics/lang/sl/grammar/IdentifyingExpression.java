@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public abstract class IdentifyingExpression extends Term
 {
+    public static Integer ID = new Integer(10020);
+    public int getClassID() {return ID.intValue();}
     static int _as_term = 0;
     static int _as_formula = 1;
 
@@ -46,8 +48,32 @@ public abstract class IdentifyingExpression extends Term
             IdentifyingExpression tn = (IdentifyingExpression)n;
         }
     }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Term as_term() {return (Term)_nodes[_as_term];}
     public void as_term(Term s) {_nodes[_as_term] = s;}
     public Formula as_formula() {return (Formula)_nodes[_as_formula];}
     public void as_formula(Formula s) {_nodes[_as_formula] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_term") ) return true;
+        if ( attrname.equals("as_formula") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_term") ) return as_term();
+        if ( attrname.equals("as_formula") ) return as_formula();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_term") ) {as_term((Term)attrvalue);return;}
+        if ( attrname.equals("as_formula") ) {as_formula((Formula)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

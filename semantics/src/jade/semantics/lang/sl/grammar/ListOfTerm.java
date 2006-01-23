@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class ListOfTerm extends ListOfNodes
 {
+    public static Integer ID = new Integer(10012);
+    public int getClassID() {return ID.intValue();}
     public ListOfTerm(Term[] nodes) {
         super(nodes);
     }
@@ -49,5 +51,11 @@ public class ListOfTerm extends ListOfNodes
         Node clone = new ListOfTerm();
         clone.copyValueOf(this);
         return clone;
+    }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

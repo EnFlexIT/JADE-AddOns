@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class ParameterNode extends Parameter
 {
-    public final int getNodeID(){
-        return 45;
-    }
+    public static Integer ID = new Integer(46);
+    public final int getClassID() {return ID.intValue();}
 
     public ParameterNode(Term as_value, java.lang.String lx_name, java.lang.Boolean lx_optional)  {
         super(1, as_value, lx_name, lx_optional);
@@ -50,16 +49,25 @@ public class ParameterNode extends Parameter
     }
 
     public void accept(Visitor visitor) {visitor.visitParameterNode(this);}
+
     public Node getClone() {
         Node clone = new ParameterNode(null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof ParameterNode) {
             super.copyValueOf(n);
             ParameterNode tn = (ParameterNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

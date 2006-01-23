@@ -32,6 +32,8 @@ import jade.semantics.actions.SemanticActionTable;
 import jade.semantics.interpreter.SemanticInterpretationException;
 import jade.semantics.lang.sl.grammar.Content;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.MetaFormulaReferenceNode;
+import jade.semantics.lang.sl.grammar.MetaTermReferenceNode;
 import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
@@ -88,7 +90,7 @@ public abstract class Assertive extends CommunicativeActionImpl {
         super(table, surfacePerformative,
                 (surfaceContentFormat == null ? new Class[] {Formula.class} : surfaceContentFormat),
                 (surfaceContentFormatMessage == null ? "a formula" : surfaceContentFormatMessage),
-                rationalEffectRecognition,
+                (rationalEffectRecognition == null ? new MetaFormulaReferenceNode("phi") : rationalEffectRecognition),
                 SLPatternManip.fromFormula("(B ??receiver ??formula)"), feasibilityPrecondition, persistentFeasibilityPrecondition, postCondition);
         this.contentSize = 1;
     }
@@ -114,9 +116,15 @@ public abstract class Assertive extends CommunicativeActionImpl {
      * @inheritDoc     
      */
     public boolean setFeaturesFromRationalEffect(MatchResult rationalEffectMatching) throws Exception {
-        setReceiver(rationalEffectMatching.getTerm("receiver"));
-        setSurfaceContentElement(0, rationalEffectMatching.getFormula("formula"));
-        return true;
+        Formula rationalEffect = rationalEffectMatching.getFormula("phi");
+        MetaTermReferenceNode receiver = new MetaTermReferenceNode("receiver");
+        Formula content = rationalEffect.isBeliefFrom(receiver);
+        if (content != null) {
+            setReceiver(receiver.sm_value());
+            setSurfaceContentElement(0, content);
+            return true;
+        }
+        return false;
     } // End of newAction/2
     
     /**

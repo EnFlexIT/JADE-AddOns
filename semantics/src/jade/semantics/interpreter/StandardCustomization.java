@@ -47,7 +47,7 @@ public interface StandardCustomization {
      * Returns true if the agent accepts the belief transfer, false if not.
      * @param formula the fact to believe
      * @param agent the agent that intends the Jade agent to adopt this belief
-     * @return true if the fact to believe can be asserted in the knowledge base. 
+     * @return true if the fact to believe can be asserted in the belief base. 
      */
     public boolean acceptBeliefTransfer(Formula formula, Term agent);
     
@@ -55,7 +55,7 @@ public interface StandardCustomization {
      * Returns true if the agent accepts the intention transfer, false if not.
      * @param formula the fact to intend
      * @param agent the agent that intends the Jade agent to adopt this intention.
-     * @return true if the fact can be asserted in the knowledge base. 
+     * @return true if the fact can be asserted in the belief base. 
      */
     public boolean acceptIntentionTransfer(Formula formula, Term agent);
     
@@ -91,6 +91,17 @@ public interface StandardCustomization {
      * @return the list of elements that contains the values to make the proposal
      */
     public ListOfTerm handleCFPAll(Variable variable, Formula formula, ActionExpression action, Term agent);
+    
+    /**
+     * Returns a list of element that corresponds to the answer to the query. Some 
+     * solutions are awaited, i.e. all the solutions the agent believes
+     * @param variable the variable used within the formula
+     * @param formula the condition of the CFP
+     * @param action the requested action to be performed 
+     * @param agent the agent who will perform the action if accepted
+     * @return the list of elements that contains the values to make the proposal
+     */
+    public ListOfTerm handleCFPSome(Variable variable, Formula formula, ActionExpression action, Term agent);
     
     /**
      * Returns true if this method traps the specified formula when an agent <i>agent</i> 

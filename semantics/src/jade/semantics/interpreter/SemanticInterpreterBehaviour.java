@@ -28,6 +28,7 @@
  */
 package jade.semantics.interpreter;
 
+import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
@@ -49,6 +50,8 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
 import jade.util.Logger;
 import jade.util.leap.ArrayList;
+import jade.util.leap.Iterator;
+
 
 /**
  * Class that represents the main behaviour of a semantic agent.
@@ -103,7 +106,7 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
     private ArrayList behaviourToRemove;
     
     /**
-     * List of formulae to be asserted in the knowledge base 
+     * List of formulae to be asserted in the belief base 
      */
     private ArrayList formulaToAssert;
     
@@ -149,7 +152,7 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
      * @see jade.core.Agent#receive(jade.lang.acl.MessageTemplate)
      * @see jade.core.Agent#receive()
      */
-    ACLMessage receiveNextMessage()
+    public ACLMessage receiveNextMessage()
     {
         ACLMessage msg = null;
         if (messageTemplate != null) {
@@ -176,6 +179,20 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
                 sr.setSLRepresentation(new TrueNode());
             }
             else {
+                // WARNING: PROVISORY CODE
+                // used to simplify the semantical processing of communicative actions with multiple receivers
+                msg.removeReceiver(myAgent.getAID());
+                Iterator iter = msg.getAllReceiver();
+                ArrayList list = new ArrayList();
+                for(;iter.hasNext();) {
+                    list.add(iter.next());
+                }
+                msg.clearAllReceiver();
+                msg.addReceiver(myAgent.getAID());
+                for (int i =0; i < list.size(); i++) {
+                    msg.addReceiver((AID)list.get(i));
+                }
+                //END OF PROVISORY CODE
                 Formula formulaPattern = SLPatternManip.fromFormula("(B ??agent (done ??act))");
                 Formula formula = (Formula)SLPatternManip.instantiate(formulaPattern,
                         "agent", ((SemanticAgent)myAgent).getSemanticCapabilities().getAgentName(),
@@ -245,7 +262,6 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
                                             logger.log(Logger.FINE, " SIP: " + currentSemanticInterpretationPrinciple + " succeeded !");
                                             logger.log(Logger.FINE, " applies on: " + currentSR.getSLRepresentation());
                                         }
-                                        
                                         for (int j = 0; j < srListResult.size(); j++) {
                                             ((SemanticRepresentation)srListResult.get(j)).setSLRepresentation(((SemanticRepresentation)srListResult.get(j)).getSLRepresentation().getSimplifiedFormula());
                                             if (!newSRList.contains(srListResult.get(j)) &&
@@ -284,7 +300,7 @@ public class SemanticInterpreterBehaviour extends CyclicBehaviour {
                         for (int i = 0; i < behaviourToRemove.size(); i++) {                       
                             myAgent.removeBehaviour((Behaviour)behaviourToRemove.get(i));
                         }
-                        for (int i = 0; i < formulaToAssert.size(); i++) { 
+                        for (int i = 0; i < formulaToAssert.size(); i++) {
                             ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().assertFormula((Formula)formulaToAssert.get(i));
                         }
                     }

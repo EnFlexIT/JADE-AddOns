@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class ActionContentExpressionNode extends ContentExpression
 {
-    public final int getNodeID(){
-        return 2;
-    }
+    public static Integer ID = new Integer(2);
+    public final int getClassID() {return ID.intValue();}
     static int _as_action_expression = 0;
 
     public ActionContentExpressionNode(ActionExpression as_action_expression)  {
@@ -49,11 +48,13 @@ public class ActionContentExpressionNode extends ContentExpression
     }
 
     public void accept(Visitor visitor) {visitor.visitActionContentExpressionNode(this);}
+
     public Node getClone() {
         Node clone = new ActionContentExpressionNode(null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof ActionContentExpressionNode) {
             super.copyValueOf(n);
@@ -61,6 +62,28 @@ public class ActionContentExpressionNode extends ContentExpression
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public ActionExpression as_action_expression() {return (ActionExpression)_nodes[_as_action_expression];}
     public void as_action_expression(ActionExpression s) {_nodes[_as_action_expression] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_action_expression") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_action_expression") ) return as_action_expression();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_action_expression") ) {as_action_expression((ActionExpression)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

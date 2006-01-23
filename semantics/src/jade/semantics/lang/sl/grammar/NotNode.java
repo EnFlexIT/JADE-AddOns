@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class NotNode extends UnaryLogicalFormula
 {
-    public final int getNodeID(){
-        return 7;
-    }
+    public static Integer ID = new Integer(7);
+    public final int getClassID() {return ID.intValue();}
 
     public NotNode(Formula as_formula)  {
         super(1, as_formula);
@@ -46,16 +45,25 @@ public class NotNode extends UnaryLogicalFormula
     }
 
     public void accept(Visitor visitor) {visitor.visitNotNode(this);}
+
     public Node getClone() {
         Node clone = new NotNode(null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof NotNode) {
             super.copyValueOf(n);
             NotNode tn = (NotNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

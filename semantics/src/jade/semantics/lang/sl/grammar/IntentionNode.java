@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class IntentionNode extends ModalLogicFormula
 {
-    public final int getNodeID(){
-        return 16;
-    }
+    public static Integer ID = new Integer(16);
+    public final int getClassID() {return ID.intValue();}
 
     public IntentionNode(Term as_agent, Formula as_formula)  {
         super(2, as_agent, as_formula);
@@ -46,16 +45,25 @@ public class IntentionNode extends ModalLogicFormula
     }
 
     public void accept(Visitor visitor) {visitor.visitIntentionNode(this);}
+
     public Node getClone() {
         Node clone = new IntentionNode(null, null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof IntentionNode) {
             super.copyValueOf(n);
             IntentionNode tn = (IntentionNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

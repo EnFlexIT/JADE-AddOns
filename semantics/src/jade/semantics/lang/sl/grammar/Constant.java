@@ -61,6 +61,8 @@ public abstract class Constant extends Term
             }
             return((Constant.Operations)_thisoperations).stringValue(this );
         }
+    public static Integer ID = new Integer(10015);
+    public int getClassID() {return ID.intValue();}
 
     public Constant(int capacity)  {
       super (capacity);
@@ -71,5 +73,11 @@ public abstract class Constant extends Term
             super.copyValueOf(n);
             Constant tn = (Constant)n;
         }
+    }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

@@ -28,17 +28,18 @@
  */
 package jade.semantics.kbase.filter.query;
 
-import jade.semantics.kbase.Bindings;
-import jade.semantics.kbase.BindingsImpl;
 import jade.semantics.kbase.filter.KBQueryFilter;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.SequenceActionExpressionNode;
 import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.grammar.VariableNode;
+import jade.semantics.lang.sl.tools.ListOfMatchResults;
+import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
+import jade.util.leap.Set;
 
 /**
- * Manages the event memory of the knowledge base. 
+ * Manages the event memory of the belief base. 
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/06/17 Revision: 1.0
  */
@@ -63,38 +64,55 @@ public class EventMemoryFilter extends KBQueryFilter {
     }
     
     /**
-     * Returns true, if one of these patterns match:
+     * Returns true as first element, if one of these patterns match:
      * <ul>
      * <li>(B ??agent (exists ??e (done ??act)))
      * <li>(B ??agent (done ??act true))
      * <ul>
-     * @inheritDoc
+     * and if the current agent is the "agent" of the pattern. In this case, the
+     * second element is an empty ListOfMatchResults if the action 
+     * recovered in the match result is a sequence of action already done by the 
+     * agent, null in the others cases.
+     * If the filter returns false as first element, the second element is null.
+     * @param formula a formula on which the filter is tested
+     * @param agent a term that represents the agent is trying to apply the filter
+     * @return an array with a Boolean meaning the applicability of the filter,
+     * and a ListOfMatchResults that is the result of performing the filter.
      */
-    public boolean isApplicable(Formula formula, Term agent) {
+    public QueryResult apply(Formula formula, Term agent) {
+        QueryResult queryResult = new QueryResult();
         try {
-            applyResult = SLPatternManip.match(existPattern,formula);
+            MatchResult applyResult = SLPatternManip.match(existPattern,formula);
             if (applyResult != null && agent.equals(applyResult.getTerm("agent"))) { 
-                return true;
+                queryResult.setResult(apply(applyResult));
+                queryResult.setFilterApplied(true);
+                return queryResult;
             } else {
                 applyResult = SLPatternManip.match(donePattern,formula);
-                return (applyResult != null && agent.equals(applyResult.getTerm("agent")));
+                if (applyResult != null && agent.equals(applyResult.getTerm("agent"))) {
+                    queryResult.setResult(apply(applyResult));
+                    queryResult.setFilterApplied(true);
+                    return queryResult;
+                }
             }
         } catch (SLPatternManip.WrongTypeException wte) {
             wte.printStackTrace();
         }
-        return false;
+        return queryResult;
     } // End of isApplicable/2
     
     /**
-     * Returns a new Bindings (i.e. true) if the action recovered in the match result is a
+     * Returns a new ListOFMatchResults if the action recovered in the match result is a
      * sequence of action already done by the agent, <code>null</code> if not.
-     * @inheritDoc
+     * @param applyResult the MatchResult corresponding to the match between
+     * the incoming formula and the pattern of the filter.
+     * @return an empty ListOfMatchResults or null.
      */
-    public Bindings apply(Formula formula) {
+    private ListOfMatchResults apply(MatchResult applyResult) {
         try {
-            if (analyzeActionExpression(applyResult.getTerm("act"), 0, false)) {
-                return new BindingsImpl();
-            }
+            if (analyzeActionExpression(applyResult, applyResult.getTerm("act"), 0, false)) {
+                return new ListOfMatchResults();
+            } 
         } catch (SLPatternManip.WrongTypeException wte) {
             wte.printStackTrace();
         }
@@ -105,13 +123,15 @@ public class EventMemoryFilter extends KBQueryFilter {
      * Tests if a sequence of actions (can be reduced to only one) is in the
      * event memory or not. If VariableNode appears that means the actions could
      * appears between them. For example, a1;a2;e;a3 , means that a2 must follow
-     * a1 in the memory whereas there can be several actions between a1 and a2.     
+     * a1 in the memory whereas there can be several actions between a1 and a2.
+     * @param applyResult the MatchResult corresponding to the match between
+     * the incoming formula and the pattern of the filter.
      * @param action the action expression to test
      * @param index current index
      * @param goOn true if a VariableNode is met
      * @return true if the action expression is in memory, false if not.
      */
-    private boolean analyzeActionExpression(Term action, int index, boolean goOn) {
+    private boolean analyzeActionExpression(MatchResult applyResult, Term action, int index, boolean goOn) {
         if (index == myKBase.getEventMemory().size() && !(action instanceof VariableNode)) {
             return false;
         }
@@ -119,12 +139,12 @@ public class EventMemoryFilter extends KBQueryFilter {
             try {
                 if (((SequenceActionExpressionNode)action).as_right_action() instanceof VariableNode 
                         && ((SequenceActionExpressionNode)action).as_right_action().equals(applyResult.getTerm("e"))) {
-                    return analyzeActionExpression(((SequenceActionExpressionNode)action).as_left_action(), index, true);    
+                    return analyzeActionExpression(applyResult, ((SequenceActionExpressionNode)action).as_left_action(), index, true);    
                 } else if (((SequenceActionExpressionNode)action).as_right_action().equals(myKBase.getEventMemory().get(index))) {
-                    return analyzeActionExpression(((SequenceActionExpressionNode)action).as_left_action(), index + 1, true);
+                    return analyzeActionExpression(applyResult, ((SequenceActionExpressionNode)action).as_left_action(), index + 1, true);
                 } else {
                     if (goOn) {
-                        return analyzeActionExpression(action, index + 1, true);
+                        return analyzeActionExpression(applyResult, action, index + 1, true);
                     } else {
                         return false;
                     }
@@ -143,11 +163,21 @@ public class EventMemoryFilter extends KBQueryFilter {
             if (myKBase.getEventMemory().get(index).equals(action)) {
                 return true;
             } else if (goOn) {
-                return analyzeActionExpression(action, index + 1, goOn);
+                return analyzeActionExpression(applyResult, action, index + 1, goOn);
             } else {
                 return false;
             }
         }
     } // End of analyzeActionExpression/3
     
+    /**
+     * By default, this method does nothing. 
+     * @param formula an observed formula
+     * @param set set of patterns. Each pattern corresponds to a kind a formula
+     * which, if it is asserted in the base, triggers the observer that
+     * observes the formula given in parameter.
+     */
+    public void getObserverTriggerPatterns(Formula formula, Set set) {
+    }
+
 } // End of class EventMemoryFilter

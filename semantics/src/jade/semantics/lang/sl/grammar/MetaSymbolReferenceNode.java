@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class MetaSymbolReferenceNode extends Symbol
 {
-    public final int getNodeID(){
-        return 47;
-    }
+    public static Integer ID = new Integer(48);
+    public final int getClassID() {return ID.intValue();}
     java.lang.String _lx_name;
     Symbol _sm_value;
 
@@ -49,11 +48,13 @@ public class MetaSymbolReferenceNode extends Symbol
     }
 
     public void accept(Visitor visitor) {visitor.visitMetaSymbolReferenceNode(this);}
+
     public Node getClone() {
         Node clone = new MetaSymbolReferenceNode();
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof MetaSymbolReferenceNode) {
             super.copyValueOf(n);
@@ -63,8 +64,33 @@ public class MetaSymbolReferenceNode extends Symbol
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public java.lang.String lx_name() {return _lx_name;}
     public void lx_name(java.lang.String o) {_lx_name = o;}
     public Symbol sm_value() {return _sm_value;}
     public void sm_value(Symbol o) {_sm_value = o;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("lx_name") ) return true;
+        if ( attrname.equals("sm_value") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("lx_name") ) return lx_name();
+        if ( attrname.equals("sm_value") ) return sm_value();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("lx_name") ) {lx_name((java.lang.String)attrvalue);return;}
+        if ( attrname.equals("sm_value") ) {sm_value((Symbol)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

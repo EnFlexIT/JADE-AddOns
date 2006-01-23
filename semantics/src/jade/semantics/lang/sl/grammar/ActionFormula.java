@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public abstract class ActionFormula extends Formula
 {
+    public static Integer ID = new Integer(10009);
+    public int getClassID() {return ID.intValue();}
     static int _as_action = 0;
     static int _as_formula = 1;
 
@@ -46,8 +48,32 @@ public abstract class ActionFormula extends Formula
             ActionFormula tn = (ActionFormula)n;
         }
     }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Term as_action() {return (Term)_nodes[_as_action];}
     public void as_action(Term s) {_nodes[_as_action] = s;}
     public Formula as_formula() {return (Formula)_nodes[_as_formula];}
     public void as_formula(Formula s) {_nodes[_as_formula] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_action") ) return true;
+        if ( attrname.equals("as_formula") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_action") ) return as_action();
+        if ( attrname.equals("as_formula") ) return as_formula();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_action") ) {as_action((Term)attrvalue);return;}
+        if ( attrname.equals("as_formula") ) {as_formula((Formula)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

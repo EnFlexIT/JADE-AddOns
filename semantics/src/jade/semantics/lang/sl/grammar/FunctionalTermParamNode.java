@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class FunctionalTermParamNode extends FunctionalTerm
 {
-    public final int getNodeID(){
-        return 44;
-    }
+    public static Integer ID = new Integer(45);
+    public final int getClassID() {return ID.intValue();}
         public interface Operations extends Term.Operations
         {
             public Term getParameter(FunctionalTermParamNode node, String name);
@@ -70,11 +69,13 @@ public class FunctionalTermParamNode extends FunctionalTerm
     }
 
     public void accept(Visitor visitor) {visitor.visitFunctionalTermParamNode(this);}
+
     public Node getClone() {
         Node clone = new FunctionalTermParamNode(null, null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof FunctionalTermParamNode) {
             super.copyValueOf(n);
@@ -82,6 +83,28 @@ public class FunctionalTermParamNode extends FunctionalTerm
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public ListOfParameter as_parameters() {return (ListOfParameter)_nodes[_as_parameters];}
     public void as_parameters(ListOfParameter s) {_nodes[_as_parameters] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_parameters") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_parameters") ) return as_parameters();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_parameters") ) {as_parameters((ListOfParameter)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

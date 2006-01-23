@@ -151,6 +151,8 @@ public abstract class Formula extends Node
             }
             return((Formula.Operations)_thisoperations).instantiate(this , varname, expression);
         }
+    public static Integer ID = new Integer(10005);
+    public int getClassID() {return ID.intValue();}
     Formula _sm_simplified_formula;
 
     public Formula(int capacity)  {
@@ -164,6 +166,27 @@ public abstract class Formula extends Node
             _sm_simplified_formula= tn._sm_simplified_formula;
         }
     }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Formula sm_simplified_formula() {return _sm_simplified_formula;}
     public void sm_simplified_formula(Formula o) {_sm_simplified_formula = o;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("sm_simplified_formula") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("sm_simplified_formula") ) return sm_simplified_formula();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("sm_simplified_formula") ) {sm_simplified_formula((Formula)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

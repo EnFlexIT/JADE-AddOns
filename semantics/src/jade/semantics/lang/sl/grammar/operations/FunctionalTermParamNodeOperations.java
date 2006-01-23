@@ -7,6 +7,10 @@ import jade.semantics.lang.sl.grammar.ParameterNode;
 import jade.semantics.lang.sl.grammar.Term;
 
 import java.util.Comparator;
+//#PJAVA_EXCLUDE_END
+/*#PJAVA_INCLUDE_BEGIN
+import jade.util.leap.Comparator;
+#PJAVA_INCLUDE_END*/
 
 public class FunctionalTermParamNodeOperations 
 	extends TermNodeOperations 

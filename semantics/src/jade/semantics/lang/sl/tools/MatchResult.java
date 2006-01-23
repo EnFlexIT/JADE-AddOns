@@ -254,6 +254,99 @@ public class MatchResult extends ListOfNodes {
 		}
 		return result;
 	}
+	
+	/**
+	 * 
+	 * @param object The match result object to compare with
+	 * @return true is this match result object equals the one given as an argument. "Equal" means that
+	 * the 2 objects holds the same meta variables (name and value) regardless their rank in the list.  
+	 */
+	public boolean equals(Object object)
+	{
+		boolean isEqual = object instanceof MatchResult && ((MatchResult)object).size() == size();
+		if ( isEqual && size() != 0 ) {
+			ListOfNodes l1 = new ListOfNodes(children());
+			ListOfNodes l2 = new ListOfNodes(((MatchResult)object).children());
+			do {
+				Node n1 = l1.getFirst();
+				ListOfNodes lo = new ListOfNodes();
+				isEqual = l2.find(n1.getClass(), "lx_name", SLPatternManip.getMetaReferenceName(n1), lo, true);
+				if ( isEqual ){
+					Node n2 = lo.getFirst();
+					isEqual = SLPatternManip.getMetaReferenceValue(n1).equals(SLPatternManip.getMetaReferenceValue(n2));
+					l1.remove(n1);
+					l2.remove(n2);
+				}
+			} while (isEqual && l1.size() > 0);
+		}
+		return isEqual;
+	}
+	
+	/**
+	 * 
+	 * @param other the other match result to compute the intersection between
+	 * @return the intersection between this match result and the one given as an argument or null if
+	 *         the 2 match results are incompatible, i.e., they hold the same variable with different 
+	 *         values.
+	 */
+	public MatchResult intersect(MatchResult other)
+	{
+		MatchResult result = new MatchResult();
+		for (int i = 0; i < size(); i++) {
+			Node m = get(i);
+			ListOfNodes lo = new ListOfNodes();
+			if ( other.find(m.getClass(), "lx_name", SLPatternManip.getMetaReferenceName(m), lo, true) ) {
+				if ( SLPatternManip.getMetaReferenceValue(m).equals(SLPatternManip.getMetaReferenceValue(lo.getFirst())) ) {
+					result.add(m.getClone());
+				}
+				else {
+					// the 2 match results are incompatible
+					return null;
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * 
+	 * @param other the other match result to join with
+	 * @return the union between this match result and the one given as an argument or null if
+	 *         the 2 match results are incompatible, i.e., they hold the same variable with different 
+	 *         values.
+	 */
+	public MatchResult join(MatchResult other)
+	{
+		MatchResult result = intersect(other);
+		if ( result != null ) {
+			for (int i = 0; i < size(); i++) {
+				Node m = get(i);
+				ListOfNodes lo = new ListOfNodes();
+				if ( !result.find(m.getClass(), "lx_name", SLPatternManip.getMetaReferenceName(m), lo, true) ) {
+					result.add(m.getClone());
+				}
+			}
+			for (int i = 0; i < other.size(); i++) {
+				Node m = other.get(i);
+				ListOfNodes lo = new ListOfNodes();
+				if ( !result.find(m.getClass(), "lx_name", SLPatternManip.getMetaReferenceName(m), lo, true) ) {
+					result.add(m.getClone());
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+    * This method return a clone of the list.
+    * @return a new recreated graph.
+    */
+    public Node getClone()
+    {
+        Node clone = new MatchResult();
+        clone.copyValueOf(this);
+        return clone;
+    }	
 
 	// ===============================================
 	// Package private implementation

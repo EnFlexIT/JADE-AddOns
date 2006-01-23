@@ -37,7 +37,7 @@ import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 
 /**
- * Filter used to store in knowledge base the actions done by the agent. 
+ * Filter used to store in belief base the actions done by the agent. 
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/06/17 Revision 1.0 
  */
@@ -61,7 +61,7 @@ public class EventMemoryFilter extends KBAssertFilter {
      * If the formula given in parameter is a 
      * <code>SequenceActionExpressionNode</code>,
      * this method asserts all the elements of 
-     * the sequence in the event list of the knowledge base. 
+     * the sequence in the event list of the belief base. 
      * If the action expression given in parameter is an ActionExpressionNode,
      * the method asserts the action expression.
      * In these two cases, returns a <code>TrueNode</code>. Otherwise, does nothing,
@@ -86,7 +86,7 @@ public class EventMemoryFilter extends KBAssertFilter {
     /**
      * If the action expression given in parameter is a 
      * SequenceActionExpressionNode, this method asserts all the elements of 
-     * the sequence in the event list of the knowledge base. 
+     * the sequence in the event list of the belief base. 
      * If the action expression given in parameter is an ActionExpressionNode,
      * the method asserts the action expression.
      * @param action an action expression

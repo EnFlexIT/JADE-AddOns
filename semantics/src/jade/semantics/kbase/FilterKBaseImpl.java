@@ -33,36 +33,50 @@ import jade.semantics.interpreter.SemanticAgent;
 import jade.semantics.kbase.filter.KBAssertFilter;
 import jade.semantics.kbase.filter.KBFilter;
 import jade.semantics.kbase.filter.KBQueryFilter;
-import jade.semantics.kbase.filter.KBQueryRefFilter;
 import jade.semantics.kbase.filter.assertion.AllIREFilter;
+import jade.semantics.kbase.filter.assertion.AndFilter;
 import jade.semantics.kbase.filter.assertion.EventMemoryFilter;
 import jade.semantics.kbase.filter.assertion.ObserverFilter;
 import jade.semantics.kbase.filter.query.BeliefTransferFilter;
+import jade.semantics.kbase.filter.query.CFPFilter;
+import jade.semantics.kbase.filter.query.ExistsFilter;
+import jade.semantics.kbase.filter.query.ForallFilter;
+import jade.semantics.kbase.filter.query.IREFilter;
 import jade.semantics.kbase.filter.query.IntentionTransferFilter;
 import jade.semantics.kbase.filter.query.OrFilter;
-import jade.semantics.kbase.filter.queryref.CFPFilter;
+import jade.semantics.kbase.filter.query.QueryResult;
 import jade.semantics.kbase.observer.Observer;
 import jade.semantics.lang.sl.grammar.ActionExpression;
-import jade.semantics.lang.sl.grammar.AllNode;
-import jade.semantics.lang.sl.grammar.AnyNode;
+import jade.semantics.lang.sl.grammar.AndNode;
 import jade.semantics.lang.sl.grammar.AtomicFormula;
+import jade.semantics.lang.sl.grammar.BelieveNode;
+import jade.semantics.lang.sl.grammar.ExistsNode;
+import jade.semantics.lang.sl.grammar.ForallNode;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.IdentifyingExpression;
-import jade.semantics.lang.sl.grammar.IotaNode;
+import jade.semantics.lang.sl.grammar.IntentionNode;
 import jade.semantics.lang.sl.grammar.ListOfTerm;
-import jade.semantics.lang.sl.grammar.MetaTermReferenceNode;
 import jade.semantics.lang.sl.grammar.Node;
 import jade.semantics.lang.sl.grammar.NotNode;
-import jade.semantics.lang.sl.grammar.TermSequenceNode;
+import jade.semantics.lang.sl.grammar.OrNode;
+import jade.semantics.lang.sl.grammar.Term;
+import jade.semantics.lang.sl.grammar.TermSetNode;
 import jade.semantics.lang.sl.grammar.TrueNode;
-import jade.semantics.lang.sl.grammar.Variable;
+import jade.semantics.lang.sl.grammar.UncertaintyNode;
+import jade.semantics.lang.sl.tools.ListOfMatchResults;
 import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
+import jade.semantics.lang.sl.tools.SLPatternManip.LoopingInstantiationException;
 import jade.util.Logger;
 import jade.util.leap.ArrayList;
+import jade.util.leap.Iterator;
+import jade.util.leap.Set;
+import jade.util.leap.SortedSetImpl;
+
+import java.util.HashSet;
 
 /**
- * Class that implements the knowledge base api. The data are stored in an 
+ * Class that implements the belief base api. The data are stored in an 
  * <code>ArrayList</code>. The filters and the observers of the base are also 
  * stored in <code>ArrayList</code>s. 
  * @author Vincent Pautret - France Telecom
@@ -76,12 +90,12 @@ public class FilterKBaseImpl implements FilterKBase {
     private int event_memory_size = 10;
     
     /**
-     * The agent that owns this knowledge base
+     * The agent that owns this belief base
      */
     private SemanticAgent agent;
     
     /**
-     * Storgae of knowledge 
+     * Storgae of belief
      */
     private ArrayList dataStorage;
     
@@ -101,6 +115,11 @@ public class FilterKBaseImpl implements FilterKBase {
     private ArrayList queryRefFilterList;
     
     /**
+     * List of patterns which are closed 
+     */
+    private ArrayList closedPredicateList;
+    
+    /**
      * List of events already done
      */
     private ArrayList eventMemory;
@@ -108,7 +127,7 @@ public class FilterKBaseImpl implements FilterKBase {
     /**
      * List of observations on the table
      */
-    private ArrayList observationTable;
+    private HashMapForCollections observationTable;
 
     /**
      * Patterns for assertion and query methods
@@ -121,77 +140,82 @@ public class FilterKBaseImpl implements FilterKBase {
         SLPatternManip.fromFormula("(I ??agt ??phi)");
     private final Formula notIPattern = 
         SLPatternManip.fromFormula("(not (I ??agt ??phi))");
-//  private final Formula bNotPattern = 
-//  SLPatternManip.fromFormula("(B ??agt (not ??phi))");
     private final Formula bPattern = 
         SLPatternManip.fromFormula("(B ??agt ??phi)");
     private final Formula notBPattern = 
         SLPatternManip.fromFormula("(not(B ??agt ??phi))");
-    private final Formula notBRefPattern = 
-        SLPatternManip.fromFormula("(forall ??var (not (B ??agt ??phi)))");
     private final Formula notURefPattern = 
         SLPatternManip.fromFormula("(forall ??var (not (U ??agt ??phi)))");
-    private final Formula BRefPattern = 
-        SLPatternManip.fromFormula("(exists ??var (B ??agt ??phi))");
     private final Formula URefPattern = 
         SLPatternManip.fromFormula("(exists ??var (U ??agt ??phi))");
-    private final IdentifyingExpression anyIREPattern = 
-        (IdentifyingExpression)SLPatternManip.fromTerm("(any ??var ??phi)");
-//  private final Formula donePattern = 
-//  SLPatternManip.fromFormula("(done ??act ??phi)");
-    
+    private final Formula ireFormula = 
+        SLPatternManip.fromFormula("(B ??agent (= ??ire ??Result))");
     /**
      * Logger
      */
     private Logger logger;
     
-    
+    /**
+     * HashSet of Observations which contains the observers to trigger when a
+     * formula is asserted
+     */
+    HashSet observersToApplied;
     
     /*********************************************************************/
     /**                         CONSTRUCTOR                             **/
     /*********************************************************************/
     
     /**
-     * Creates a new knowledge base. Adds the five query filters:
+     * Creates a new belief base. Adds the eight query filters:
      * <ul>
+     * <li>IREFIlter
      * <li>BeliefTransferFilter
      * <li>IntentionTransferFilter
      * <li>AndFilter
      * <li>OrFilter
      * <li>EventMemoryFilter
+     * <li>ExistsFilter
+     * <li>ForallFilter
      * </ul>
      * Adds the queryRef filter: CFPFilter.<br>
      * Adds three assert filters:
      * <ul>
+     * <li>AllIREFilter
      * <li>ObserverFilter
      * <li>EventMemoryFilter
-     * <li>AllIREFilter
      * </ul>
      * @param agent the owner of the base
      */
     public FilterKBaseImpl(SemanticAgent agent) {
         this.agent = agent;
         
-        assertFilterList = new ArrayList();
-        queryFilterList = new ArrayList();
-        queryRefFilterList = new ArrayList();
-        dataStorage = new ArrayList();
-        eventMemory = new ArrayList();
-        logger = Logger.getMyLogger("jade.core.semantics.kbase.KbaseImpl_List");
+        this.assertFilterList = new ArrayList();
+        this.queryFilterList = new ArrayList();
+        this.queryRefFilterList = new ArrayList();
+        this.dataStorage = new ArrayList();
+        this.eventMemory = new ArrayList();
+        this.closedPredicateList = new ArrayList();
+        this.observationTable = new HashMapForCollections();
         
+        this.logger = Logger.getMyLogger("jade.core.semantics.kbase.KbaseImpl_List");
+
+        addKBQueryFilter(new CFPFilter(agent.getSemanticCapabilities().getMyStandardCustomization()));
+        addKBQueryFilter(new IREFilter());
         addKBQueryFilter(new BeliefTransferFilter(agent.getSemanticCapabilities().getMyStandardCustomization()));
         addKBQueryFilter(new IntentionTransferFilter(agent.getSemanticCapabilities().getMyStandardCustomization()));
         addKBQueryFilter(new jade.semantics.kbase.filter.query.AndFilter());
         addKBQueryFilter(new OrFilter());
         addKBQueryFilter(new jade.semantics.kbase.filter.query.EventMemoryFilter());
+        addKBQueryFilter(new ExistsFilter());
+        addKBQueryFilter(new ForallFilter());
         
-        addKBQueryRefFilter(new CFPFilter(agent.getSemanticCapabilities().getMyStandardCustomization()));
+     //   addKBQueryRefFilter(new jade.semantics.kbase.filter.queryref.CFPFilter(agent.getSemanticCapabilities().getMyStandardCustomization()));
         
-        observationTable = new ArrayList();
-        
-        addKBAssertFilter(new ObserverFilter());
-        addKBAssertFilter(new EventMemoryFilter());
         addKBAssertFilter(new AllIREFilter());
+        addKBAssertFilter(new AndFilter());
+        addKBAssertFilter(new jade.semantics.kbase.filter.assertion.ForallFilter());
+        addKBAssertFilter(new EventMemoryFilter());
+        addKBAssertFilter(new ObserverFilter());
     } // End of KbaseImpl_List/2
     
     /*********************************************************************/
@@ -212,10 +236,13 @@ public class FilterKBaseImpl implements FilterKBase {
      * </ul>  
      * <i>agent</i> represents the current semantic agent.<br> 
      * If the formula matches another pattern nothing is done.
-     * @inheritDoc
+     * At the end of the assert, each boolean that corresponds to the
+     * applicability of the observers is set to false.   
+     * @param formula the formula to assert in the belief base
      */
     public void assertFormula(Formula formula) {
         if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "AssertFormula into the KBase : " + formula);
+        formula = new BelieveNode(agent.getSemanticCapabilities().getAgentName(), formula).getSimplifiedFormula();
         try {
             Formula formulaToAssert = formula;
             for (int i =0; i < assertFilterList.size(); i++) {
@@ -232,20 +259,27 @@ public class FilterKBaseImpl implements FilterKBase {
                     if (!dataStorage.contains(phi)) {
                         removeFormula(new NotNode(phi).getSimplifiedFormula());
                         dataStorage.add(phi);
+                        setObserversToBeapplied(phi);
                     }
                 }
             }
             else if ((matchResult = SLPatternManip.match(iPattern,formulaToAssert)) != null) {
                 dataStorage.add(formulaToAssert);
+                setObserversToBeapplied(formulaToAssert);
             }
             else if ((matchResult = SLPatternManip.match(notIPattern,formulaToAssert)) != null) {
                 dataStorage.remove(((NotNode)formulaToAssert).as_formula());
+                setObserversToBeapplied(formulaToAssert);
             }
             else if (((matchResult = SLPatternManip.match(uPattern,formulaToAssert)) != null) || 
                     ((matchResult = SLPatternManip.match(notUPattern, formulaToAssert)) != null) ) {
             }
             else if ((matchResult = SLPatternManip.match(notBPattern, formulaToAssert)) != null) {
-                throw new Exception();
+                Formula phi = matchResult.getFormula("phi");
+                if ( ((phi instanceof AtomicFormula) && !(phi instanceof TrueNode)) ||
+                        ((phi instanceof NotNode) && (((NotNode)phi).as_formula() instanceof AtomicFormula))) {
+                    removeAllFormulae(matchResult.getFormula("phi"));
+                }
             }
             
             for (int i =0; i < assertFilterList.size(); i++) {
@@ -255,57 +289,66 @@ public class FilterKBaseImpl implements FilterKBase {
                     ((KBAssertFilter)assertFilterList.get(i)).afterAssert(formula);
                 }
             }
+            
         } catch (Exception e) {
             e.printStackTrace();   
         }
     } // End of assertFormula/1
-    
+
+    /**
+     * Sets the observers which must be tested according to the formula which 
+     * has been just asserted.
+     * @param formulaToAssert the formula which has been just asserted
+     */
+    private void setObserversToBeapplied(Formula formulaToAssert) {
+        observersToApplied = new HashSet();
+        for (Iterator iter = observationTable.keySet().iterator(); iter.hasNext();) {
+            Formula pattern = (Formula)iter.next();
+            if (SLPatternManip.match(pattern,formulaToAssert) != null || 
+                    (!formulaToAssert.isMentalAttitude(agent.getSemanticCapabilities().getAgentName()) && SLPatternManip.match(pattern,new NotNode(formulaToAssert).getSimplifiedFormula()) != null)) {
+                observersToApplied.addAll((HashSet)observationTable.get(pattern));
+            }
+        }
+    }
     
     /**
-     * Tests the queryRef filters. If no filter applies, 
-     * queries directly the base and returns the found solutions identified by
-     * the given expression.
-     * @inheritDoc
+     * Tests the queryRef filters. If no filter applies, queries the belief 
+     * base on the formula (B ??agent (= ??ire ??Result)), where 
+     * ??ire is instantiated with the identifying expression given in parameter.
+     * The ListOfTerm corresponding to the solutions is the value of the meta
+     * variable ??Result, which could be null. 
+     * @param expression the identifying expression on which the query relates.
+     * @return a list of terms that corresponds to the question or null (meaning
+     * the answer : "I do not know")
      */   
     public ListOfTerm queryRef(IdentifyingExpression expression) {
         if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Querying-ref from the KBase : " + expression);
         try {
-            for (int i =0; i < queryRefFilterList.size(); i++) {
-                if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Testing query-ref filter (" + i + "): " + queryRefFilterList.get(i));
-                if (((KBQueryRefFilter)queryRefFilterList.get(i)).isApplicable(expression, agent.getSemanticCapabilities().getAgentName())) {
-                    if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "query-ref Filter (" + i + ") applied");
-                    return ((KBQueryRefFilter)queryRefFilterList.get(i)).apply(expression);
-                }
-            }
             if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Raw querying-ref : " + expression);
-            if (expression.as_term() instanceof Variable) {
-                Formula pattern = (Formula)SLPatternManip.toPattern(expression.as_formula(), (Variable)expression.as_term());
-                ListOfTerm listOfResult = getSolutions(pattern);
-                if ((expression instanceof AnyNode && listOfResult.size() >= 1) ||
-                        (expression instanceof AllNode) ||
-                        (expression instanceof IotaNode && listOfResult.size() == 1)) {
-                    return listOfResult;
+            Formula form = (Formula)SLPatternManip.instantiate(ireFormula, 
+                    "agent", agent.getSemanticCapabilities().getAgentName(),
+                    "ire", expression);
+            
+            ListOfMatchResults solutions = query(form);
+            if (solutions != null && solutions.size() > 0) {
+                Term term;
+                if (((MatchResult)solutions.get(0)).getTerm("Result") instanceof IdentifyingExpression) {
+                    term = ((MatchResult)solutions.get(0)).getTerm("ire");
+                } else {
+                    term = ((MatchResult)solutions.get(0)).getTerm("Result");    
                 }
-            } 
-            // !!!! Code added by TM, 15/09/2005 !!!!
-            // May be the two algorithm could be unified (to be checked)
-            else if (expression.as_term() instanceof TermSequenceNode ) {
-                TermSequenceNode sequence = (TermSequenceNode)expression.as_term();
-                Formula pattern = expression.as_formula();
-                for (int i=0; i<sequence.as_terms().size(); i++) {
-                    if ( sequence.as_terms().element(i) instanceof Variable ) {
-                        Variable var = (Variable)sequence.as_terms().element(i);
-                        pattern = (Formula)SLPatternManip.toPattern(pattern, var, var.lx_name());
+                ListOfTerm result = new ListOfTerm();
+                if (term instanceof TermSetNode) {
+                    for (int j = 0; j < ((TermSetNode)term).as_terms().size(); j++) {
+                        result.add( ((TermSetNode)term).as_terms().get(j));
                     }
+                } else {
+                    result.add(term);
                 }
-                ListOfTerm listOfResult = getAllMatchingSequences(pattern, sequence);
-                if ((expression instanceof AnyNode && listOfResult.size() >= 1) ||
-                        (expression instanceof AllNode) ||
-                        (expression instanceof IotaNode && listOfResult.size() == 1)) {
-                    return listOfResult;
-                }
+                return result;
+            } else if (solutions != null && solutions.size() == 0) {
+                return new ListOfTerm();
             }
-            // !!!! End of added code !!!!
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -313,133 +356,97 @@ public class FilterKBaseImpl implements FilterKBase {
     } // End of queryRef/1
     
     /**
-     * Returns the terms of the database that match the pattern. 
-     * @param pattern a pattern
-     * @return list of solutions
-     */
-    private ListOfTerm getSolutions(Formula pattern) {
-        ListOfTerm result = new ListOfTerm();
-        for (int j = 0; j < dataStorage.size(); j++) {
-            MatchResult matchResult = SLPatternManip.match(pattern, (Node)dataStorage.get(j));
-            if (matchResult != null) {
-                try {
-                    result.add(matchResult.getTerm("X"));
-                }
-                catch(Exception e) {e.printStackTrace();}
-            }
-        }
-        return result;
-    } // End of getSolutions/1
-    
-    //!!!!!!!!!!!!!!!!!! Added by TM, 15/09/2005, may be unified with the non sequence case !!!!!!!!!!!!!!!!!!!!!! 
-    /**
-     * Returns the list of all sequences that match the pattern 
-     * @param pattern a pattern
-     * @return list of solutions (list of sequences)
-     */
-    private ListOfTerm getAllMatchingSequences(Formula pattern, TermSequenceNode initial_sequence) {
-        ListOfTerm result = new ListOfTerm();
-        for (int j = 0; j < dataStorage.size(); j++) {
-            MatchResult matchResult = SLPatternManip.match(pattern, (Node)dataStorage.get(j));
-            if (matchResult != null) {
-                try {
-                    TermSequenceNode seq = new TermSequenceNode(new ListOfTerm());
-                    result.append(seq);
-                    for (int i=0; i<initial_sequence.as_terms().size(); i++) {
-                        if ( initial_sequence.as_terms().element(i) instanceof Variable ) {
-                            seq.as_terms().append(matchResult.getTerm(((Variable)initial_sequence.as_terms().element(i)).lx_name()));
-                        }
-                        else {
-                            seq.as_terms().append(initial_sequence.as_terms().element(i));
-                        }
-                    }
-                }
-                catch(Exception e) {e.printStackTrace();}
-            }
-        }
-        return result;
-    } // End of getAllMatchingSequences/1
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! End of the added code !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-    /**
      * Tries to match the formula on each data stored in the base. In case of
-     * success, a new Bind is created with the name of the <code>MetaTermReferenceNode</code>
-     * name and <code>MetaTermReferenceNode</code> value.
-     * @param pattern a pattern 
-     * @return a list of solutions
+     * success, a new ListOfMatchResults is created and contains all 
+     * the corresponding MatchResults.
+     * @param pattern a pattern to test on each data of the base
+     * @return a list of MatchResults, which match the given pattern, and null if
+     * the pattern does not match with any data stored in the base.  
      */
-    private Bindings getBindings(Formula pattern) {
-        Bindings bindings = null;
+    private ListOfMatchResults getMatchResults(Formula pattern) {
+        ListOfMatchResults solutions = null;
         for (int j = 0; j < dataStorage.size(); j++) {
             MatchResult matchResult = SLPatternManip.match(pattern, (Node)dataStorage.get(j));
             if (matchResult != null) {
-                bindings = new BindingsImpl();
-                for (int i = 0; i < matchResult.size(); i++) {
-                    Node node = matchResult.get(i);
-                    if (node instanceof MetaTermReferenceNode) {
-                        bindings.addBind(((MetaTermReferenceNode)node).lx_name(), ((MetaTermReferenceNode)node).sm_value());
-                    } else {
-                        return null;
-                    }
-                }
-                break;
+                if (solutions == null) solutions = new ListOfMatchResults();
+                if (matchResult.size() != 0) solutions.add(matchResult);
             }
         }
-        return bindings;
-    } // End of getBindings/1
+        return solutions;
+    } // End of getMatchResults/1
     
     /**
      * First tests if a query filter is applicable. In this case, returns the result
-     * of the filter. If no filter applies, queries directly the knowledge base.  
-     * @inheritDoc
+     * of the filter. If no filter applies, queries directly the belief base.  
+     * @return a list of solutions to the query
+     * @param formula a formula 
      */
-    public Bindings query(Formula formula) {
-        Bindings result = new BindingsImpl();
+    public ListOfMatchResults query(Formula formula) {
+        ListOfMatchResults result = new ListOfMatchResults();
+        formula = new BelieveNode(agent.getSemanticCapabilities().getAgentName(), formula).getSimplifiedFormula();
         if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Querying from the KBase : " + formula);
         try {
             for (int i =0; i < queryFilterList.size(); i++) {
                 if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Testing query filter (" + i + "): " + queryFilterList.get(i));
-                if (((KBQueryFilter)queryFilterList.get(i)).isApplicable(formula, agent.getSemanticCapabilities().getAgentName())) {
-                    if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "query Filter (" + i + ") applied");
-                    return (((KBQueryFilter)queryFilterList.get(i)).apply(formula));
+                QueryResult queryResult = ((KBQueryFilter)queryFilterList.get(i)).apply(formula, agent.getSemanticCapabilities().getAgentName());
+                if (queryResult.isFilterApplied()) {
+                    return queryResult.getResult();
                 }
             }
-            
             if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Raw querying : " + formula);
             MatchResult matchResult = SLPatternManip.match(bPattern,formula);
-            if (matchResult != null) {
-                return getBindings(matchResult.getFormula("phi"));
-            }           
-            if ((matchResult = SLPatternManip.match(notBPattern,formula)) != null) {
-                if (getBindings(matchResult.getFormula("phi")) == null) return result;
-                else return null;
-            }
-            if (((matchResult = SLPatternManip.match(notBRefPattern,formula))!=null) && 
-                    matchResult.getTerm("agt").equals(agent.getSemanticCapabilities().getAgentName())) {
-                IdentifyingExpression ide = (IdentifyingExpression)SLPatternManip.instantiate(anyIREPattern,
-                        "var", matchResult.getVariable("var"),
-                        "phi", matchResult.getFormula("phi"));
-                if (ide.as_term() instanceof Variable) {
-                    Formula pattern = (Formula)SLPatternManip.toPattern(ide.as_formula(), (Variable)ide.as_term());
-                    if (getBindings(pattern) == null) return result;
-                    else return null;
+            if (matchResult != null && 
+                  matchResult.getTerm("agt").equals(agent.getSemanticCapabilities().getAgentName())) {
+                if (matchResult.getFormula("phi") instanceof NotNode) {
+                    result = getMatchResults(matchResult.getFormula("phi"));
+                    if (result == null) {
+                        if (!isClosed(((NotNode)matchResult.getFormula("phi")).as_formula(), result)) {
+                            return null;
+                        } else {
+                            ListOfMatchResults result2 = query(((NotNode)matchResult.getFormula("phi")).as_formula());
+                            if (result2 != null) {
+                                return null;
+                            } else {
+                                return new ListOfMatchResults();
+                            }
+                        }
+                    } else {
+                        return result;
+                    }
+                } else {
+                    result = getMatchResults(matchResult.getFormula("phi"));
+                    if (result == null) {
+                        NotNode notNode = new NotNode(matchResult.getFormula("phi"));
+                        if (!isClosed(notNode, result)) {
+                            return null;
+                        } else {
+                            ListOfMatchResults result2 = query(notNode);
+                            if (result2 != null) {
+                                return null;
+                            } else {
+                                return new ListOfMatchResults();
+                            }
+                        }
+                    } else {
+                        return result;
+                    }
                 }
-            }
-            if (((matchResult = SLPatternManip.match(BRefPattern, formula)) != null) && 
-                    matchResult.getTerm("agt").equals(agent.getSemanticCapabilities().getAgentName())) {
-                IdentifyingExpression ide = (IdentifyingExpression)SLPatternManip.instantiate(anyIREPattern,
-                        "var", matchResult.getVariable("var"),
-                        "phi", matchResult.getFormula("phi"));
-                if (ide.as_term() instanceof Variable) {
-                    Formula pattern = (Formula)SLPatternManip.toPattern(ide.as_formula(), (Variable)ide.as_term());
-                    return getBindings(pattern).removeBind(matchResult.getVariable("var").lx_name());
+            }                   
+            if ((matchResult = SLPatternManip.match(notBPattern,formula)) != null && 
+                  matchResult.getTerm("agt").equals(agent.getSemanticCapabilities().getAgentName())) {
+                if (getMatchResults(matchResult.getFormula("phi")) == null){
+                    return result;
                 }
+                return null;
             }
             if ((matchResult = SLPatternManip.match(iPattern, formula)) != null) {
-                return getBindings(formula);
+                return getMatchResults(formula);
             }
             if ((matchResult = SLPatternManip.match(notIPattern, formula)) != null) {
-                if (getBindings(((NotNode)formula).as_formula()) == null) return result;
-                else return null;
+                if (getMatchResults(((NotNode)formula).as_formula()) == null) {
+                    return result;
+                }
+                return null;
             }    
             if (formula.equals(new TrueNode())) {
                 return result;
@@ -451,7 +458,7 @@ public class FilterKBaseImpl implements FilterKBase {
             if (((matchResult = SLPatternManip.match(notURefPattern,formula)) != null) || 
                     ((matchResult = SLPatternManip.match(notUPattern, formula)) != null)) {
                 return result;
-            }           
+            } 
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -481,6 +488,17 @@ public class FilterKBaseImpl implements FilterKBase {
     public void removeFormula(Finder finder) {
         finder.removeFromList(dataStorage);
     }
+    
+    /**
+     * It retracts the formula given in parameter from the belief base by 
+     * asserting (not (B agent formula)). The formula to retract may include 
+     * metavariables.
+     * @param formula the formula to retract from the belief base
+     */
+    public void retractFormula(Formula formula) {
+        assertFormula(new NotNode(new BelieveNode(agent.getSemanticCapabilities().getAgentName(), formula)).getSimplifiedFormula());
+    }
+    
     /**
      * @inheritDoc
      */
@@ -498,13 +516,18 @@ public class FilterKBaseImpl implements FilterKBase {
     private void addKBFilter(KBFilter filter, int index) {
         filter.setMyKBase(this);
         if (filter instanceof KBAssertFilter) {
-            assertFilterList.add((index<0 ? assertFilterList.size() : index), (KBAssertFilter)filter);
+            if (index == FilterKBase.END) {
+                assertFilterList.add(filter);
+            } else {
+                assertFilterList.add((index<0 ? assertFilterList.size() : index), filter);
+            }
         }
         else if (filter instanceof KBQueryFilter) {
-            queryFilterList.add((index<0 ? queryFilterList.size() : index), filter);
-        } 
-        else if (filter instanceof KBQueryRefFilter) {
-            queryRefFilterList.add((index<0 ? queryRefFilterList.size() : index), filter);
+            if (index == FilterKBase.END) {
+                queryFilterList.add(filter);
+            } else {
+                queryFilterList.add((index<0 ? queryFilterList.size() : index), filter);
+            }
         } 
     } // End of addKBFilter/
     
@@ -536,19 +559,6 @@ public class FilterKBaseImpl implements FilterKBase {
         addKBFilter(filter, index);
     } // End of addKBQueryFilter/2
     
-    /**
-     * @inheritDoc
-     */
-    public void addKBQueryRefFilter(KBQueryRefFilter filter) {
-        addKBFilter(filter, -1);
-    } // End of addKBQueryRefFilter/1    
-    
-    /**
-     * @inheritDoc
-     */
-    public void addKBQueryRefFilter(KBQueryRefFilter filter, int index) {
-        addKBFilter(filter, index);
-    } // End of addKBQueryRefFilter/2    
     
     /**
      * @inheritDoc
@@ -563,13 +573,6 @@ public class FilterKBaseImpl implements FilterKBase {
     public void removeKBQueryFilter(Finder filterIdentifier) {
         filterIdentifier.removeFromList(queryFilterList);
     } // End of removeKBQueryFilter/1
-    
-    /**
-     * @inheritDoc
-     */
-    public void removeKBQueryRefFilter(Finder filterIdentifier) {
-        filterIdentifier.removeFromList(queryRefFilterList);
-    } // End of removeKBQueryRefFilter/1
     
     /**
      * Returns the dataStorage.
@@ -625,10 +628,23 @@ public class FilterKBaseImpl implements FilterKBase {
     } // End of setAgent/1
     
     /**
+     * Gets the SemanticAgent that owns the base
+     * @return the SemanticAgent that owns the base
+     */
+    public SemanticAgent getAgent() {
+        return this.agent;
+    } // End of getAgent/1
+    /**
      * Adds a new event in the event memory
      * @param action an action expression of an done event 
      */
     public void addEventInMemory(ActionExpression action) {
+        try {
+            SLPatternManip.substituteMetaReferences(action);
+            SLPatternManip.removeOptionalParameter(action);
+        } catch (LoopingInstantiationException e) {
+            e.printStackTrace();
+        }
         eventMemory.add(0, action);
         if (eventMemory.size() == event_memory_size + 1) eventMemory.remove(event_memory_size);
     }
@@ -663,7 +679,10 @@ public class FilterKBaseImpl implements FilterKBase {
     public void addObserver(final Observer o) {
         Observation observation = new Observation(o);
         observation.setCurrentValue(query(o.getObservedFormula()));
-        observationTable.add(observation);
+        observation.setTriggerPatterns(getObserverTriggerPatterns(o.getObservedFormula()));
+        for (Iterator iter = observation.getTriggerPatterns().iterator(); iter.hasNext();) {
+            observationTable.put(iter.next(), observation);
+        }
     } // End of addObserver/1
     
     /**
@@ -671,18 +690,47 @@ public class FilterKBaseImpl implements FilterKBase {
      * @param finder the finder
      */
     public void removeObserver(Finder finder) {
-        for (int i= observationTable.size() -1; i >=0; i--) {
-            if (finder.identify(((Observation)observationTable.get(i)).getObserver())) {
-                observationTable.remove(i);
+        ArrayList toSupress = new ArrayList();
+        for (Iterator iter = observationTable.values().iterator(); iter.hasNext();) {
+            HashSet elem = (HashSet)iter.next();
+            for (java.util.Iterator iter2 = elem.iterator(); iter2.hasNext();) {
+                Observation elem2 = (Observation)iter2.next();
+                if (finder.identify(elem2.getObserver())) {
+                  toSupress.add(elem2);
+              } 
+            }
+            for (int i = 0; i < toSupress.size(); i++) {
+                elem.remove(toSupress.get(i));    
             }
         }
+        observationTable.removeUselessKeys();
     } // End of removeObserver/1
     
+    /**
+     * Removes the given observer
+     * @param obs the observer to be removed
+     */
+    public void removeObserver(Observer obs) {
+        ArrayList toSupress = new ArrayList();
+        for (Iterator iter = observationTable.values().iterator(); iter.hasNext();) {
+            HashSet elem = (HashSet)iter.next();
+            for (java.util.Iterator iter2 = elem.iterator(); iter2.hasNext();) {
+                Observation elem2 = (Observation)iter2.next();
+                if (obs.equals(elem2.getObserver())) {
+                  toSupress.add(elem2);
+              } 
+            }
+            for (int i = 0; i < toSupress.size(); i++) {
+                elem.remove(toSupress.get(i));    
+            }
+        }
+        observationTable.removeUselessKeys();
+    }
     /**
      * Returns the observationTable.
      * @return the observationTable.
      */
-    public ArrayList getObservationTable() {
+    public HashMapForCollections getObservationTable() {
         return observationTable;
     } // End of getObservationTable/0
     
@@ -690,7 +738,7 @@ public class FilterKBaseImpl implements FilterKBase {
      * Sets the observation table.
      * @param observationTable The observationTable to set.
      */
-    public void setObservationTable(ArrayList observationTable) {
+    public void setObservationTable(HashMapForCollections observationTable) {
         this.observationTable = observationTable;
     } // End of setObservationTable/1
     
@@ -702,11 +750,111 @@ public class FilterKBaseImpl implements FilterKBase {
         event_memory_size = size;
     }
     
+    /**
+     * Adds a closed predicate if it is not already in the list.
+     * @param pattern a new closed predicate
+     */
+    public void addClosedPredicate(Formula pattern) {
+        if (!(pattern instanceof BelieveNode) && !(pattern instanceof IntentionNode) &&
+                !(pattern instanceof UncertaintyNode) && !(pattern instanceof OrNode) &&
+                !(pattern instanceof ExistsNode)) {
+            if ((pattern instanceof NotNode)) {
+                if (
+                    !(((NotNode)pattern).as_formula() instanceof BelieveNode) &&
+                    !(((NotNode)pattern).as_formula() instanceof IntentionNode) &&
+                    !(((NotNode)pattern).as_formula() instanceof UncertaintyNode) &&
+                    !isClosed(pattern, null)) {
+                closedPredicateList.add(pattern);
+                }
+            } else if (pattern instanceof AndNode) {
+                addClosedPredicate(((AndNode)pattern).as_left_formula());
+                addClosedPredicate(((AndNode)pattern).as_right_formula());
+            } else if (pattern instanceof ForallNode) {
+                addClosedPredicate(new NotNode(pattern));
+            } else if (!isClosed(pattern, null)) {
+                 closedPredicateList.add(pattern);    
+            }
+        }        
+    }
     
     /**
-     * Defines an observation on the knowledge base.
-     * @author Vincent Pautret
-     * @version Date: 2005/06/10 Revision: 1.0
+     * Removes the closed predicate identifying by the given finder.
+     * @param finder a finder
+     */
+    public void removeClosedPredicate(Finder finder) {
+        finder.removeFromList(closedPredicateList);
+    }
+    
+    /**
+     * Returns the list of closed predicates
+     * @return the list of closed predicates
+     */
+    public ArrayList getCLosedPredicatList() {
+        return closedPredicateList;
+    }
+    
+    /**
+     * Returns true if the formula given in parameter is closed on the domain of 
+     * values defined by the list of MatchResult given in parameter. 
+     * In details, it returns true if:
+     * <ul>
+     * <li>the formula is a mental attitude of the current agent;
+     * <li>if the formula is an And Formula, the left part or the right part of
+     * the formula should be closed;
+     * <li>if the formula is an Or Formula, the left part and the right part of
+     * the formula should be closed;
+     * <li>in the other cases, the formula should be match one of the patterns
+     * stored in the closed patterns list. In this case, the solutions on the 
+     * query on the formula should be the same as the domain of values.
+     * </ul>  
+     * Otherwise, returns false.
+     * @param pattern the pattern to be tested
+     * @param b the domain of values
+     * @return true if the pattern is closed on the given domain, false if not.
+     */
+    public boolean isClosed(Formula pattern, ListOfMatchResults b) {
+        if (pattern.isMentalAttitude(agent.getSemanticCapabilities().getAgentName())) {
+            return true;
+        } else if (pattern instanceof AndNode) {
+            return (isClosed(((AndNode)pattern).as_left_formula(), b) || isClosed(((AndNode)pattern).as_right_formula(), b));
+        } else if (pattern instanceof OrNode) {
+            return (isClosed(((OrNode)pattern).as_left_formula(), b) && isClosed(((OrNode)pattern).as_right_formula(), b));
+        } else if (pattern instanceof ExistsNode) {
+            return (isClosed(((ExistsNode)pattern).as_formula(),b));
+        } else if (pattern instanceof ForallNode) {
+            return (isClosed(((ForallNode)pattern).as_formula(),b));
+        }         
+        else {
+            try {
+                for (int i = 0; i < closedPredicateList.size(); i++) {
+                    if ((SLPatternManip.match((Node)closedPredicateList.get(i),pattern) != null)) {
+                        ListOfMatchResults values = query(pattern);
+                        if (b != null) {
+                            return (b.equals(values));
+                        }
+                        return true;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+    }
+    
+    /**
+     * Inner class which is a Data structure that gathers :
+     * <ul>
+     * <li> a boolean. If it is true, it means that the inner observer is applicable
+     * and not if the boolean is false;
+     * <li> an observer. 
+     * <li> a set of patterns. If one of this patterns match an asserted formula
+     * the value of the boolean is set to true (the observer becomes applicable).
+     * <li> a list of match results corresponding to the current value of the
+     * observed formula.  
+     * </ul>
+     * @author Vincent Pautret - France Telecom
+     * @version Date:  Revision: 1.0
      */
     public class Observation {
         
@@ -716,16 +864,23 @@ public class FilterKBaseImpl implements FilterKBase {
         Observer observer;
         
         /**
-         * The current observed value
+         * Set of patterns which make it possible to trigger the observer
          */
-        Bindings currentValue;
+        Set triggerPatterns;
         
         /**
-         * Constructor
+         * The current observed value
+         */
+        ListOfMatchResults currentValue;
+        
+        /**
+         * Constructor. 
+         * The boolean that tests the applicability is set to false, 
          * @param observer the observer that makes observation
          */
         public Observation(Observer observer) {
             this.observer = observer;
+            triggerPatterns = new SortedSetImpl();
         } // End of Observation/1
         
         /**
@@ -738,20 +893,90 @@ public class FilterKBaseImpl implements FilterKBase {
         /**
          * @return the currentValue.
          */
-        public Bindings getCurrentValue() {
+        public ListOfMatchResults getCurrentValue() {
             return currentValue;
         } // End of getCurrentValue/0
         
         /**
          * @param currentValue The currentValue to set.
          */
-        public void setCurrentValue(Bindings currentValue) {
+        public void setCurrentValue(ListOfMatchResults currentValue) {
             this.currentValue = currentValue;
         } // End of setCurrentValue/1
         
+        
+        /**
+         * Returns the set of pattern which make it possible to trigger the
+         * observer.
+         * @return the set of pattern which make it possible to trigger the
+         * observer.
+         */
+        public Set getTriggerPatterns() {
+            return triggerPatterns;
+        }
+        
+        /**
+         * Sets the set of patterns which makes possible to trigger the 
+         * observer. 
+         * @param set set of patterns
+         */
+        public void setTriggerPatterns(Set set) {
+            triggerPatterns = set;
+        }
+        
+        /**
+         * The String representation is the observed formula
+         * @return the String representation of an observation.
+         */
+        public String toString() {
+            return "Observation on : " + getObserver().getObservedFormula() +" \n";
+            
+        }
     } // End of class Observation
     
+    /**
+     * Calls the getObserverTriggerPatterns method of each query filters. 
+     * At least, the pattern corresponding to the observed formula 
+     * is returned.  
+     * @param formula an observed formula
+     * @return set of patterns. Each pattern corresponds to a kind a formula
+     * which, if it is asserted in the base, triggers the observer that
+     * observes the formula given in parameter. 
+     */
+    public Set getObserverTriggerPatterns(Formula formula) {
+        Set result = new SortedSetImpl();
+        for (int i =0; i < queryFilterList.size(); i++) {
+            ((KBQueryFilter)queryFilterList.get(i)).getObserverTriggerPatterns(formula, result);
+        }
+        try {
+            MatchResult matchResult = SLPatternManip.match(bPattern,formula);
+            if (matchResult != null && 
+                  matchResult.getTerm("agt").equals(agent.getSemanticCapabilities().getAgentName())) {
+          //      if (matchResult.getFormula("phi") instanceof AtomicFormula && !(matchResult.getFormula("phi") instanceof TrueNode)) {
+                    result.add(matchResult.getFormula("phi"));
+           //     }
+            } else {
+                result.add(formula);
+            }
+        } catch (SLPatternManip.WrongTypeException wte) {
+            wte.printStackTrace();
+        }
+        return result;
+    }
+    
+    /**
+     * Gets the HashSet of observers to applied
+     * @return the HashSet of observers to applied
+     */
+    public HashSet getObserversToApplied() {
+        return observersToApplied;
+    }
+    
+    /**
+     * Sets the HashSet of observers to applied
+     * @param set the HashSet of observers to applied
+     */
+    public void setObserversToBeApplied(HashSet set) {
+        observersToApplied = set;
+    }
 } // End of class FilterKbaseImpl
-
-
-

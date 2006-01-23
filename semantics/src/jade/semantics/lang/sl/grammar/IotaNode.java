@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class IotaNode extends IdentifyingExpression
 {
-    public final int getNodeID(){
-        return 28;
-    }
+    public static Integer ID = new Integer(28);
+    public final int getClassID() {return ID.intValue();}
 
     public IotaNode(Term as_term, Formula as_formula)  {
         super(2, as_term, as_formula);
@@ -46,16 +45,25 @@ public class IotaNode extends IdentifyingExpression
     }
 
     public void accept(Visitor visitor) {visitor.visitIotaNode(this);}
+
     public Node getClone() {
         Node clone = new IotaNode(null, null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof IotaNode) {
             super.copyValueOf(n);
             IotaNode tn = (IotaNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

@@ -51,10 +51,6 @@ public class BeliefTransfer extends SemanticInterpretationPrinciple {
      */
     private Formula beliefPattern; 
     
-    /**
-     * Pattern used to create the new <code>SemanticRepresentation</code>
-     */
-    private Formula applyPattern;
     
     /*********************************************************************/
     /**				 			CONSTRUCTOR								**/
@@ -68,7 +64,6 @@ public class BeliefTransfer extends SemanticInterpretationPrinciple {
     public BeliefTransfer(SemanticCapabilities capabilities) {
         super(capabilities);
         beliefPattern = SLPatternManip.fromFormula("(B " + myCapabilities.getAgentName() + " (I ??sender ??phi))");
-        applyPattern = SLPatternManip.fromFormula("(B " + myCapabilities.getAgentName() + " ??phi)");
     } // End of BeliefTransfer/1
     /*********************************************************************/
     /**				 			METHODS									**/

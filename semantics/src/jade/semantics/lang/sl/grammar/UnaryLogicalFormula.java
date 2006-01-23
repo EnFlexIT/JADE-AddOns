@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public abstract class UnaryLogicalFormula extends Formula
 {
+    public static Integer ID = new Integer(10007);
+    public int getClassID() {return ID.intValue();}
     static int _as_formula = 0;
 
     public UnaryLogicalFormula(int capacity, Formula as_formula)  {
@@ -44,6 +46,27 @@ public abstract class UnaryLogicalFormula extends Formula
             UnaryLogicalFormula tn = (UnaryLogicalFormula)n;
         }
     }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Formula as_formula() {return (Formula)_nodes[_as_formula];}
     public void as_formula(Formula s) {_nodes[_as_formula] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_formula") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_formula") ) return as_formula();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_formula") ) {as_formula((Formula)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

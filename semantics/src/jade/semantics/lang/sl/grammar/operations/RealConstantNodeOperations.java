@@ -25,6 +25,20 @@ public class RealConstantNodeOperations
 	
 	public int compare(Node node1, Node node2)
 	{
+	    //#PJAVA_EXCLUDE_BEGIN
 		return ((RealConstantNode)node1).lx_value().compareTo(((RealConstantNode)node2).lx_value());
+        //#PJAVA_EXCLUDE_END
+        /*#PJAVA_INCLUDE_BEGIN
+               if ( ((RealConstantNode)node1).lx_value().longValue() < ((RealConstantNode)node2).lx_value().longValue() ) {
+                   return -1;
+               }
+               else if ( ((RealConstantNode)node1).lx_value().longValue() == ((RealConstantNode)node2).lx_value().longValue() ) {
+                   return 0;
+               }
+               else {
+                   return 1;
+               }
+        #PJAVA_INCLUDE_END*/
+         
 	}
 }

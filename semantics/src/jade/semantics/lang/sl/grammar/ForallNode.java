@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class ForallNode extends QuantifiedFormula
 {
-    public final int getNodeID(){
-        return 21;
-    }
+    public static Integer ID = new Integer(21);
+    public final int getClassID() {return ID.intValue();}
 
     public ForallNode(Variable as_variable, Formula as_formula)  {
         super(2, as_variable, as_formula);
@@ -46,16 +45,25 @@ public class ForallNode extends QuantifiedFormula
     }
 
     public void accept(Visitor visitor) {visitor.visitForallNode(this);}
+
     public Node getClone() {
         Node clone = new ForallNode(null, null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof ForallNode) {
             super.copyValueOf(n);
             ForallNode tn = (ForallNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

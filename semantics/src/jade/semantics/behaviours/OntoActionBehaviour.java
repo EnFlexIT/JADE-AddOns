@@ -68,6 +68,7 @@ public class OntoActionBehaviour extends SemanticBehaviourBase {
         super();
         state = BEFORE_START;
         myAction = action;
+        setBehaviourName(action.getClass().toString());
     } // End of OntoActionBehaviour/1
     
     /*********************************************************************/
@@ -82,7 +83,7 @@ public class OntoActionBehaviour extends SemanticBehaviourBase {
      */
     public void action() {
         if (state == BEFORE_START) {
-            myAction.beforePerform(this);
+            //myAction.beforePerform(this);
             B_PATTERN = SLPatternManip.fromFormula("(B " + ((SemanticAgent)myAgent).getSemanticCapabilities().getAgentName() + " ??phi)");
             try {
                 if (((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().query(((Formula)SLPatternManip.
@@ -96,18 +97,24 @@ public class OntoActionBehaviour extends SemanticBehaviourBase {
             }
             state = START;
         }
-        myAction.perform(this);
+        try {
+            myAction.perform(this);
+        } catch (Exception e) {
+            state = EXECUTION_FAILURE;
+            return;
+        }
         if (state == SUCCESS) {
             try {
                 ((SemanticAgent)myAgent).getSemanticCapabilities().getSemanticInterpreterBehaviour().interpret(new SemanticRepresentation(((Formula)SLPatternManip.instantiate(B_PATTERN, "phi", myAction.getPersistentFeasibilityPrecondition())).getSimplifiedFormula()));
                 ((SemanticAgent)myAgent).getSemanticCapabilities().getSemanticInterpreterBehaviour().interpret(new SemanticRepresentation(((Formula)SLPatternManip.instantiate(B_PATTERN, "phi", myAction.getPostCondition())).getSimplifiedFormula()));
                 ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().assertFormula(
-                        ((Formula)SLPatternManip.instantiate(PrimitiveBehaviour.believeDonePattern,
+                        ((Formula)SLPatternManip.instantiate(CommunicativeActionBehaviour.believeDonePattern,
                                 "agent", ((SemanticAgent)myAgent).getSemanticCapabilities().getAgentName(),
                                 "act", myAction.toActionExpression())).getSimplifiedFormula());
             }
-            catch (Exception e) {e.printStackTrace();}
-            myAction.afterPerform(this);
+            catch (Exception e) {
+                e.printStackTrace();}
+            //myAction.afterPerform(this);
         }
     } // End of action/0
     

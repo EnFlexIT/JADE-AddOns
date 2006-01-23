@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class MetaVariableReferenceNode extends Variable
 {
-    public final int getNodeID(){
-        return 31;
-    }
+    public static Integer ID = new Integer(32);
+    public final int getClassID() {return ID.intValue();}
     Variable _sm_value;
 
     public MetaVariableReferenceNode(java.lang.String lx_name)  {
@@ -46,11 +45,13 @@ public class MetaVariableReferenceNode extends Variable
     }
 
     public void accept(Visitor visitor) {visitor.visitMetaVariableReferenceNode(this);}
+
     public Node getClone() {
         Node clone = new MetaVariableReferenceNode();
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof MetaVariableReferenceNode) {
             super.copyValueOf(n);
@@ -59,6 +60,28 @@ public class MetaVariableReferenceNode extends Variable
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Variable sm_value() {return _sm_value;}
     public void sm_value(Variable o) {_sm_value = o;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("sm_value") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("sm_value") ) return sm_value();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("sm_value") ) {sm_value((Variable)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

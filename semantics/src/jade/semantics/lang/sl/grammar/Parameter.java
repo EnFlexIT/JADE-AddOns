@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public abstract class Parameter extends Node
 {
+    public static Integer ID = new Integer(10024);
+    public int getClassID() {return ID.intValue();}
     java.lang.String _lx_name;
     java.lang.Boolean _lx_optional;
     static int _as_value = 0;
@@ -50,10 +52,37 @@ public abstract class Parameter extends Node
             _lx_optional= tn._lx_optional;
         }
     }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public java.lang.String lx_name() {return _lx_name;}
     public void lx_name(java.lang.String o) {_lx_name = o;}
     public java.lang.Boolean lx_optional() {return _lx_optional;}
     public void lx_optional(java.lang.Boolean o) {_lx_optional = o;}
     public Term as_value() {return (Term)_nodes[_as_value];}
     public void as_value(Term s) {_nodes[_as_value] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("lx_name") ) return true;
+        if ( attrname.equals("lx_optional") ) return true;
+        if ( attrname.equals("as_value") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("lx_name") ) return lx_name();
+        if ( attrname.equals("lx_optional") ) return lx_optional();
+        if ( attrname.equals("as_value") ) return as_value();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("lx_name") ) {lx_name((java.lang.String)attrvalue);return;}
+        if ( attrname.equals("lx_optional") ) {lx_optional((java.lang.Boolean)attrvalue);return;}
+        if ( attrname.equals("as_value") ) {as_value((Term)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

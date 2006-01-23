@@ -75,9 +75,14 @@ public class RationalityPrinciple extends SemanticInterpretationPrinciple {
     /*********************************************************************/
     
     /**
-     * Adds a new intentional behaviour ({@link IntentionalBehaviour}) if it is applicable.
-     * @inheritDoc
-     * 
+     * Adds a new intentional behaviour ({@link IntentionalBehaviour}) which encapsulates
+     * an alternative behaviour of all actions found from the formula ??phi.
+     * @param sr a semantic representation
+     * @return if the pattern (I ??agent ??phi)
+     * matches with the incoming SR and the agent find 
+     * at least one action ??act from ??phi, this method returns an ArrayList with the same SR which
+     * SIP index is increased by one. Returns null in other cases. 
+     * @throws SemanticInterpretationPrincipleException if any exception occurs
      */
     public ArrayList apply(SemanticRepresentation sr) throws SemanticInterpretationPrincipleException {
         try {

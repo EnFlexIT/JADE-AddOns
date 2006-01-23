@@ -37,6 +37,16 @@ package jade.semantics.interpreter;
 public interface SemanticInterpretationPrincipleTable {
     
     /**
+     * Index of the frist SIP in the table. 
+     */
+    public final static int FRONT = 0;
+
+    /**
+     * Index of the last SIP in the table.
+     */
+    public final static int END = Integer.MAX_VALUE;
+
+    /**
      * Adds a new semantic interpretation principle at the end of the table
      * @param semanticInterpretationPrinciple the semantic interpretation 
      * principle to add 

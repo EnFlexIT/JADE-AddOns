@@ -31,6 +31,7 @@ import jade.semantics.lang.sl.grammar.MetaFormulaReferenceNode;
 import jade.semantics.lang.sl.grammar.MetaSymbolReferenceNode;
 import jade.semantics.lang.sl.grammar.MetaTermReferenceNode;
 import jade.semantics.lang.sl.grammar.Node;
+import jade.semantics.lang.sl.grammar.ParameterNode;
 import jade.semantics.lang.sl.grammar.RealConstantNode;
 import jade.semantics.lang.sl.grammar.StringConstantNode;
 import jade.semantics.lang.sl.grammar.SymbolNode;
@@ -103,6 +104,12 @@ import jade.util.leap.HashMap;
 						equal = ((DateTimeConstantNode)expression1).lx_value()
 						.equals(((DateTimeConstantNode)expression2).lx_value());
 					}
+                    else if ( expression1 instanceof ParameterNode ) {
+                        equal = ((ParameterNode)expression1).lx_name()
+                        .equals(((ParameterNode)expression2).lx_name()) &&
+                        ((ParameterNode)expression1).as_value()
+                        .equals(((ParameterNode)expression2).as_value());
+                    }
 					else if ( expression1 instanceof SymbolNode ) {
 						equal = ((SymbolNode)expression1).lx_value()
 						.equals(((SymbolNode)expression2).lx_value());

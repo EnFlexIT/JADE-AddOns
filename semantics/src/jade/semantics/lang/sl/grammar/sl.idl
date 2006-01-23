@@ -210,12 +210,14 @@ meta_term_reference => lx_name : (java.lang.String),
 IDENTIFYING_EXPRESSION ::= any
 	                 | iota
                          | all
+			 | some
 		        => as_term : TERM,
                            as_formula : FORMULA;
 
 any => ;
 all => ;
 iota => ;
+some => ;
 
 ----------------------------------------------------
 --                   VARIABLE

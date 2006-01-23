@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public abstract class BinaryLogicalFormula extends Formula
 {
+    public static Integer ID = new Integer(10011);
+    public int getClassID() {return ID.intValue();}
     static int _as_left_formula = 0;
     static int _as_right_formula = 1;
 
@@ -46,8 +48,32 @@ public abstract class BinaryLogicalFormula extends Formula
             BinaryLogicalFormula tn = (BinaryLogicalFormula)n;
         }
     }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Formula as_left_formula() {return (Formula)_nodes[_as_left_formula];}
     public void as_left_formula(Formula s) {_nodes[_as_left_formula] = s;}
     public Formula as_right_formula() {return (Formula)_nodes[_as_right_formula];}
     public void as_right_formula(Formula s) {_nodes[_as_right_formula] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_left_formula") ) return true;
+        if ( attrname.equals("as_right_formula") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_left_formula") ) return as_left_formula();
+        if ( attrname.equals("as_right_formula") ) return as_right_formula();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_left_formula") ) {as_left_formula((Formula)attrvalue);return;}
+        if ( attrname.equals("as_right_formula") ) {as_right_formula((Formula)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

@@ -31,10 +31,9 @@ package jade.semantics.kbase;
 import jade.semantics.interpreter.Finder;
 import jade.semantics.kbase.filter.KBAssertFilter;
 import jade.semantics.kbase.filter.KBQueryFilter;
-import jade.semantics.kbase.filter.KBQueryRefFilter;
 
 /**
- * Interface that defines a knowledge base based upon filters. These filters are
+ * Interface that defines a belief base based upon filters. These filters are
  * used to access the base.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/03/21 Revision: 1.0
@@ -42,10 +41,29 @@ import jade.semantics.kbase.filter.KBQueryRefFilter;
 public interface FilterKBase extends KBase {
     
     /**
-     * Adds an assert filter to the knowledge base
+     * Value to add a filter at the beginning of the list of filters
+     */
+    public int FRONT = 0;
+    
+    /**
+     * Value to add a filter at the end of the list of filters
+     */
+    public int END = Integer.MAX_VALUE; 
+    
+    /**
+     * Adds an assert filter to the belief base
      * @param assertFilter an assert filter
      */
     public void addKBAssertFilter(KBAssertFilter assertFilter);
+
+    /**
+     * Adds an assert filter to the belief base at the specified index. It is 
+     * possible the <code>FRONT</code> or <code>END</code> constants to put
+     * the filter at the beginning of the lits or at the end of the list. 
+     * @param assertFilter an assert filter
+     * @param index the index in the list of filters to add a new filter 
+     */
+    public void addKBAssertFilter(KBAssertFilter assertFilter, int index);
     
     /**
      * Removes the assert filters that are identified by 
@@ -55,30 +73,26 @@ public interface FilterKBase extends KBase {
     public void removeKBAssertFilter(Finder finder);
     
     /**
-     * Adds a query filter to the knowledge base
+     * Adds a query filter to the belief base
      * @param queryFilter a queryFilter
      */
     public void addKBQueryFilter(KBQueryFilter queryFilter);
     
+    /**
+     * Adds a query filter to the belief base at the specified index. It is 
+     * possible the <code>FRONT</code> or <code>END</code> constants to put
+     * the filter at the beginning of the lits or at the end of the list.
+     * @param queryFilter a queryFilter
+     * @param index the index in the list of filters to add a new filter
+     */
+    public void addKBQueryFilter(KBQueryFilter queryFilter, int index);
+
     /**
      * Removes the query filters that are identified by 
      * the specified finder. 
      * @param finder a finder
      */
     public void removeKBQueryFilter(Finder finder);
-    
-    /**
-     * Adds a queryRef filter to the knowledge base
-     * @param queryRefFilter a queryRefFilter
-     */
-    public void addKBQueryRefFilter(KBQueryRefFilter queryRefFilter);
-    
-    /**
-     * Removes the queryref filters that are identified by 
-     * the specified finder. 
-     * @param finder a finder
-     */
-    public void removeKBQueryRefFilter(Finder finder);
     
     /**
      * Adds a list of filters to the KBase (useful for defining specific predicate management)

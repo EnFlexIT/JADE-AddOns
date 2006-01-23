@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class ResultNode extends AtomicFormula
 {
-    public final int getNodeID(){
-        return 9;
-    }
+    public static Integer ID = new Integer(9);
+    public final int getClassID() {return ID.intValue();}
     static int _as_term1 = 0;
     static int _as_term2 = 1;
 
@@ -52,11 +51,13 @@ public class ResultNode extends AtomicFormula
     }
 
     public void accept(Visitor visitor) {visitor.visitResultNode(this);}
+
     public Node getClone() {
         Node clone = new ResultNode(null, null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof ResultNode) {
             super.copyValueOf(n);
@@ -64,8 +65,33 @@ public class ResultNode extends AtomicFormula
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Term as_term1() {return (Term)_nodes[_as_term1];}
     public void as_term1(Term s) {_nodes[_as_term1] = s;}
     public Term as_term2() {return (Term)_nodes[_as_term2];}
     public void as_term2(Term s) {_nodes[_as_term2] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_term1") ) return true;
+        if ( attrname.equals("as_term2") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_term1") ) return as_term1();
+        if ( attrname.equals("as_term2") ) return as_term2();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_term1") ) {as_term1((Term)attrvalue);return;}
+        if ( attrname.equals("as_term2") ) {as_term2((Term)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

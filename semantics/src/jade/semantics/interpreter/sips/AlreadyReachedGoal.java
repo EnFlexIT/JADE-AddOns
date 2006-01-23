@@ -79,9 +79,7 @@ public class AlreadyReachedGoal extends SemanticInterpretationPrinciple {
         try {
             MatchResult matchResult = SLPatternManip.match(pattern,sr.getSLRepresentation());
             if (matchResult != null) {
-                Formula goal = matchResult.getFormula("phi");
-                
-                if ((myCapabilities.getMyKBase().query((Formula)SLPatternManip.instantiate(bPattern, "phi", matchResult.getFormula("phi"))) != null)) {
+                if ((myCapabilities.getMyKBase().query((Formula)SLPatternManip.instantiate(bPattern, "phi", matchResult.getFormula("phi")))) != null) {
                     return new ArrayList();
                 }
             }

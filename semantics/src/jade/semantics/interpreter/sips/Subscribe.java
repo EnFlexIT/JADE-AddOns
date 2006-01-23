@@ -56,6 +56,10 @@ public class Subscribe extends Subscription {
      */
     private Formula allPattern = SLPatternManip.fromFormula("(= (all ??x ??property) ??y))");
     
+    /**
+     * Pattern used to test the applicability of the principle
+     */
+    private Formula somePattern = SLPatternManip.fromFormula("(= (some ??x ??property) ??y))");
     
     /*********************************************************************/
     /**                         CONSTRUCTOR                             **/
@@ -88,6 +92,8 @@ public class Subscribe extends Subscription {
         if ((matchResult = SLPatternManip.match(iotaPattern, property)) != null) {
             observedFormula = (Formula)SLPatternManip.toPattern(matchResult.getFormula("property"), (Variable)matchResult.getTerm("x"));
         } else if ((matchResult = SLPatternManip.match(allPattern, property)) != null) {
+            observedFormula = (Formula)SLPatternManip.toPattern(matchResult.getFormula("property"), (Variable)matchResult.getTerm("x"));
+        } else if ((matchResult = SLPatternManip.match(somePattern, property)) != null) {
             observedFormula = (Formula)SLPatternManip.toPattern(matchResult.getFormula("property"), (Variable)matchResult.getTerm("x"));
         } else {
             observedFormula = (Formula)SLPatternManip.toPattern(property, (Variable)applyResult.getTerm("y"));

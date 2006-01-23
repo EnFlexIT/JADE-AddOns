@@ -29,6 +29,9 @@
 package jade.semantics.behaviours;
 
 
+import java.util.HashSet;
+import java.util.Iterator;
+
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.semantics.interpreter.Finder;
@@ -36,8 +39,13 @@ import jade.semantics.interpreter.SemanticAgent;
 import jade.semantics.interpreter.SemanticRepresentation;
 import jade.semantics.interpreter.Tools;
 import jade.semantics.interpreter.SemanticRepresentation.FeedBackData;
+import jade.semantics.kbase.FilterKBaseImpl;
+import jade.semantics.kbase.observer.Observer;
+import jade.semantics.kbase.observer.ObserverAdapter;
 import jade.semantics.lang.sl.grammar.ActionExpression;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.NotNode;
+import jade.semantics.lang.sl.tools.ListOfMatchResults;
 import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 
@@ -53,7 +61,7 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
     
     
     /**
-     * The intention to add in the knowledge base
+     * The intention to add in the belief base
      */
     private Formula intention;
     
@@ -92,6 +100,8 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
      * Pattern to apply the behaviour
      */
     private Formula existPattern;
+    
+    private Formula observedIntention;
     /*********************************************************************/
     /**                         CONSTRUCTOR                             **/
     /*********************************************************************/
@@ -99,7 +109,7 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
     /**
      * Creates an IntentionalBehaviour on the given behaviour.
      * @param behaviour the encapsulated behaviour
-     * @param intention the intention to add in the knowledge base
+     * @param intention the intention to add in the belief base
      * @param index index of the semantic interpretation principle that 
      * generates this behaviour
      * @param data data to feed back
@@ -109,17 +119,37 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
         this.behaviour = behaviour;
         this.intention = intention;
         addSubBehaviour((Behaviour)behaviour);
+        setBehaviourName("Intention for: " +intention);
         sipIndex = index;
         state = START;
         dataToFeedBack = data;
         donePattern = SLPatternManip.fromFormula("(done ??action ??phi)");
         dataPattern = SLPatternManip.fromFormula("(I ??agent (B ??sender ??phi))");
         existPattern = SLPatternManip.fromFormula("(I ??agent (B ??sender (exists ?e (done (; ??act ?e)))))");
+        observedIntention = new NotNode(intention);
     } // End of IntentionalBehaviour/2
     
     /*********************************************************************/
     /**                         PUBLIC METHODS                          **/
     /*********************************************************************/
+    
+    public void onStart() {
+        ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().addObserver(new ObserverAdapter(observedIntention) {
+            public void notify(ListOfMatchResults listOfMatchResults) {
+                ((SemanticAgent)IntentionalBehaviour.this.myAgent).getSemanticCapabilities().getMyKBase().removeObserver(
+                        new Finder() {
+                            public boolean identify(Object object) {
+                                if (object instanceof Observer) {
+                                    return ((Observer)object).getObservedFormula().equals(observedIntention);
+                                }
+                                return false;
+                            }
+                        });
+                IntentionalBehaviour.this.myAgent.removeBehaviour(IntentionalBehaviour.this);
+            }
+        });
+    }
+    
     
     /**
      * If the internal behaviour finish with <code>SUCCESS</code>: <br>
@@ -146,7 +176,7 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
                                             "sender", dataToFeedBack.getReceiver(),
                                             "act", matchDoneResult.getTerm("action"))).getSimplifiedFormula()));
                         }
-                    } else if (!dataToFeedBack.getGoal().isMentalAttitude(dataToFeedBack.getReceiver())) {                            
+                    } else if (!dataToFeedBack.getGoal().isMentalAttitude(dataToFeedBack.getReceiver())) {  
                         ((SemanticAgent)myAgent).getSemanticCapabilities().getSemanticInterpreterBehaviour().interpret(
                                 new SemanticRepresentation(((Formula)SLPatternManip.instantiate(dataPattern,
                                         "agent", ((SemanticAgent)myAgent).getSemanticCapabilities().getAgentName(),
@@ -170,14 +200,16 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
             state = EXECUTION_FAILURE;
             // TODO Generate a Failure message if needed
         }
-        ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().removeFormula(new Finder() {
-            public boolean identify(Object object) {
-                if (object instanceof Formula) {
-                    return intention.equals(object);
-                }
-                return false;
-            }
-        });
+        ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().removeObserver(
+                new Finder() {
+                    public boolean identify(Object object) {
+                        if (object instanceof Observer) {
+                            return ((Observer)object).getObservedFormula().equals(observedIntention);
+                        }
+                        return false;
+                    }
+                });
+        ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().retractFormula(intention);
         return 0;
     } // End of onEnd/0
     

@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class IdentifyingContentExpressionNode extends ContentExpression
 {
-    public final int getNodeID(){
-        return 3;
-    }
+    public static Integer ID = new Integer(3);
+    public final int getClassID() {return ID.intValue();}
     static int _as_identifying_expression = 0;
 
     public IdentifyingContentExpressionNode(IdentifyingExpression as_identifying_expression)  {
@@ -49,11 +48,13 @@ public class IdentifyingContentExpressionNode extends ContentExpression
     }
 
     public void accept(Visitor visitor) {visitor.visitIdentifyingContentExpressionNode(this);}
+
     public Node getClone() {
         Node clone = new IdentifyingContentExpressionNode(null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof IdentifyingContentExpressionNode) {
             super.copyValueOf(n);
@@ -61,6 +62,28 @@ public class IdentifyingContentExpressionNode extends ContentExpression
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public IdentifyingExpression as_identifying_expression() {return (IdentifyingExpression)_nodes[_as_identifying_expression];}
     public void as_identifying_expression(IdentifyingExpression s) {_nodes[_as_identifying_expression] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_identifying_expression") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_identifying_expression") ) return as_identifying_expression();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_identifying_expression") ) {as_identifying_expression((IdentifyingExpression)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

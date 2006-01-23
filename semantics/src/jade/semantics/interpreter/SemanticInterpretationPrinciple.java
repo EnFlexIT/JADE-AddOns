@@ -79,7 +79,7 @@ public abstract class SemanticInterpretationPrinciple {
      * It returns <code>null</code> if the principle is not applicable.
      * @param sr a semantic representation
      * @return a list of SR produced by the semantic interpretation principle
-     * @throws SemanticInterpretationPrincipleException if an exception occurs
+     * @throws SemanticInterpretationPrincipleException if any exception occurs
      **/
     public abstract ArrayList apply(SemanticRepresentation sr) throws SemanticInterpretationPrincipleException;
     
@@ -120,7 +120,7 @@ public abstract class SemanticInterpretationPrinciple {
     } // End of removeProvisoryBehaviour/1
     
     /**
-     * Asserts a formula in the knowledge base
+     * Asserts a formula in the belief base
      * @param formula the formula to be added
      */
     public void potentiallyAssertFormula(Formula formula) {

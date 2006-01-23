@@ -28,7 +28,8 @@ Boston, MA  02111-1307, USA.
  */
 package jade.semantics.planner;
 
-import jade.core.behaviours.Behaviour;
+import jade.semantics.behaviours.SemanticBehaviour;
+import jade.semantics.interpreter.SemanticRepresentation;
 import jade.semantics.lang.sl.grammar.Formula;
 
 /**
@@ -41,8 +42,9 @@ public interface Planner {
     /**
     * Returns a Behaviour if the planner finds a plan to reach the input goal.
     * @param formula the goal to be reached
+    * @param sr the incoming SemanticRepresentation
     * @return a behaviour
     **/
-    public Behaviour findPlan(Formula formula);
+    public SemanticBehaviour findPlan(Formula formula, SemanticRepresentation sr);
 
 } // End of class Planner

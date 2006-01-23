@@ -30,14 +30,14 @@ Boston, MA  02111-1307, USA.
 package jade.semantics.lang.sl.grammar;
 
 
-import java.util.*;
-import java.lang.reflect.*;
+import java.util.HashMap;
+import java.util.Vector;
 /**
 This abstract class is the base class of all nodes belonging to a directed graph
  representing a particular abstract syntax tree. It provides all basic mechanisms
 needed to manipulate a node.
 */
-public abstract class Node {
+public abstract class Node implements Comparable {
     /**
     This interface defines node operations that can be redefined
      using the <b><code>addOperations</code></b> method.
@@ -50,44 +50,43 @@ public abstract class Node {
         public String toString(Node node);
         public void initNode(Node node);
     }
-    static java.util.HashMap _operations = new java.util.HashMap();
+    static HashMap _operations = new HashMap();
     Node.Operations _thisoperations = null;
     /**
-    This method return the numerical id of the node. It is the same
+    This field represent the static ID of the class Node.
+    */
+    public static Integer ID = new Integer(0);
+    /**
+    This method return the dynamic class ID of the node. It is the same
     for all nodes of the same type. This method which is automatically redefined 
     according the declaration rank of the corresponding operator in the grammar.
     */
-    public int getNodeID(){
-        return 0;
+    public int getClassID(){
+        return ID.intValue();
     }
     /**
     This method allows to redefine some operations for a particular class of nodes.
-    @param nodeClass the class the operations of which we want to redefine.
+    @param classID the id of the class the operations of which we want to redefine.
     @param operations the new operations definition.
     */
-    public static void addOperations(Class nodeClass, Node.Operations operations){
-        _operations.put(nodeClass, operations);
+    public static void addOperations(Integer classID, Node.Operations operations){
+        _operations.put(classID, operations);
     }
     /**
     This method returns the object implementing the operations associated to this node.
     @return the object implementing the operations of this node.
     */
     public Node.Operations getOperations(){
-        Class nodeClass = getClass();
-        Node.Operations result = (Node.Operations)_operations.get(nodeClass);
-        while (result == null && (nodeClass = nodeClass.getSuperclass()) != null ) {;
-            result = (Node.Operations)_operations.get(nodeClass);
-        }
-        return result;
+            return (Node.Operations)_operations.get(ID);
     }
     /**
     This method allows to redefine operations on several node classes.
-    @param class_operations_array an array containing alternatively a node class
+    @param class_operations_array an array containing alternatively a node class ID
      and a Node.Operations class.
-    @see Node#addOperations(Class, Node.Operations)
+    @see Node#addOperations(Integer, Node.Operations)
     */
     public static void installOperations(Object[] class_operations_array){
-        // class_operations_array is an array alterning Class anf Node.Operations objects.
+        // class_operations_array is an array alterning Integer and Node.Operations objects.
         _operations.clear();
         for (int i=0; i<class_operations_array.length; i++) {
             _operations.put(class_operations_array[i++], class_operations_array[i]);
@@ -177,6 +176,24 @@ public abstract class Node {
         }
     }
     /**
+    This method returns true is the node holds the attribute the name of which is given as parameter. 
+    @param attrname the name of the attribute we are looking for.
+    @return true if the node holds this attribute.
+    */
+    public boolean hasAttribute(String attrname) {return false;}
+    /**
+    This method returns an object representing the value of the attribute if exists. 
+    @param attrname the name of the attribute we are looking for.
+    @return the object representing the value of the attribute, or null if the attribute doesn't exist.
+    */
+    public Object getAttribute(String attrname) {return null;}
+    /**
+    This method set the value of the attribute if exists. 
+    @param attrname the name of the attribute we are looking for.
+    @param attrvalue the new value of this attribute.
+    */
+    public void setAttribute(String attrname, Object attrvalue) {}
+    /**
     This method is part of the implementation of the visitor design pattern. 
     @param visitor the visitor to apply on this node.
     */
@@ -256,21 +273,15 @@ public abstract class Node {
     }
     protected void dofind(Class[] nodeClasses, String attribut, Object value, ListOfNodes result, boolean all) {
         for (int i=0; i<nodeClasses.length; i++) {
-            try {
-                if ( nodeClasses[i].isInstance(this) ) {
-                    Method getAttributMethod = getClass().getMethod(attribut, new Class[0]);
-                    if ( getAttributMethod != null ) {
-                        Object attributValue = getAttributMethod.invoke(this, new Object[0]);
-                        if ( attributValue == value || attributValue != null &&  attributValue.equals(value) ) {
-                            result.add(this);
-                        }
+            if ( nodeClasses[i].isInstance(this) ) {
+                if ( hasAttribute(attribut) ) {
+                    Object attributValue = getAttribute(attribut);
+                    if ( attributValue == value || (attributValue != null &&  attributValue.equals(value)) ) {
+                        result.add(this);
                     }
-                break;
                 }
+                break;
             }
-        catch (NoSuchMethodException nse) {}
-        catch (IllegalAccessException iae) {}
-        catch (InvocationTargetException ite) {}
         }
         for (int i=0; i<_nodes.length && (all || result.size()==0); i++) {
             if (_nodes[i] != null ) _nodes[i].dofind(nodeClasses, attribut, value, result, all);
@@ -293,6 +304,19 @@ public abstract class Node {
         }
     }
     /**
+    This method return if the node equals another node.  
+    @param object the node to compare with.
+    @return true if the 2 nodes are equal.
+    */
+    public int compareTo(Object object) {
+        if ( object instanceof Node ) {
+            return compare((Node)object);
+        }
+        else {
+        throw new ClassCastException();
+        }
+    }
+    /**
     This method compares the node with the one given as an argument.  
     @param other the other node to compare the node with.
     @return -1 if the node is less than the other node, 
@@ -300,9 +324,9 @@ public abstract class Node {
     */
     public int compare(Node other) {
         int result = 0;
-        if ( getNodeID() < other.getNodeID() ) {
+        if ( getClassID() < other.getClassID() ) {
             result = -1;
-        } else if (getNodeID() > other.getNodeID() ) {
+        } else if (getClassID() > other.getClassID() ) {
             result = 1;
         } else { // Same classes
             if ( _thisoperations == null ) {

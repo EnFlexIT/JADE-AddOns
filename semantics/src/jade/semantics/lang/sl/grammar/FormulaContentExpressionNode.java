@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class FormulaContentExpressionNode extends ContentExpression
 {
-    public final int getNodeID(){
-        return 4;
-    }
+    public static Integer ID = new Integer(4);
+    public final int getClassID() {return ID.intValue();}
     static int _as_formula = 0;
 
     public FormulaContentExpressionNode(Formula as_formula)  {
@@ -49,11 +48,13 @@ public class FormulaContentExpressionNode extends ContentExpression
     }
 
     public void accept(Visitor visitor) {visitor.visitFormulaContentExpressionNode(this);}
+
     public Node getClone() {
         Node clone = new FormulaContentExpressionNode(null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof FormulaContentExpressionNode) {
             super.copyValueOf(n);
@@ -61,6 +62,28 @@ public class FormulaContentExpressionNode extends ContentExpression
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Formula as_formula() {return (Formula)_nodes[_as_formula];}
     public void as_formula(Formula s) {_nodes[_as_formula] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_formula") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_formula") ) return as_formula();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_formula") ) {as_formula((Formula)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

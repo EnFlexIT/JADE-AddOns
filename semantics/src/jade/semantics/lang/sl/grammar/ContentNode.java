@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class ContentNode extends Content
 {
-    public final int getNodeID(){
-        return 1;
-    }
+    public static Integer ID = new Integer(1);
+    public final int getClassID() {return ID.intValue();}
 
     public ContentNode(ListOfContentExpression as_expressions)  {
         super(1, as_expressions);
@@ -46,16 +45,25 @@ public class ContentNode extends Content
     }
 
     public void accept(Visitor visitor) {visitor.visitContentNode(this);}
+
     public Node getClone() {
         Node clone = new ContentNode(null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof ContentNode) {
             super.copyValueOf(n);
             ContentNode tn = (ContentNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

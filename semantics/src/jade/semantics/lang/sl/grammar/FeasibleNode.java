@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class FeasibleNode extends ActionFormula
 {
-    public final int getNodeID(){
-        return 19;
-    }
+    public static Integer ID = new Integer(19);
+    public final int getClassID() {return ID.intValue();}
 
     public FeasibleNode(Term as_action, Formula as_formula)  {
         super(2, as_action, as_formula);
@@ -46,16 +45,25 @@ public class FeasibleNode extends ActionFormula
     }
 
     public void accept(Visitor visitor) {visitor.visitFeasibleNode(this);}
+
     public Node getClone() {
         Node clone = new FeasibleNode(null, null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof FeasibleNode) {
             super.copyValueOf(n);
             FeasibleNode tn = (FeasibleNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

@@ -31,6 +31,7 @@ package jade.semantics.actions.performatives;
 import jade.lang.acl.ACLMessage;
 import jade.semantics.actions.SemanticActionTable;
 import jade.semantics.lang.sl.grammar.Content;
+import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.Node;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;

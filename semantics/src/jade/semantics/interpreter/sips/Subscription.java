@@ -115,7 +115,7 @@ public abstract class Subscription extends SemanticInterpretationPrinciple {
                 Formula subscribedEvent = (Formula)SLPatternManip
                 .instantiate(eventPattern,
                         "subscriber", subscriber,
-                        "goal", computeEventToExecute(applyResult));
+                        "goal", computeEventToExecute(applyResult));                
                 myCapabilities.getMyKBase().addObserver(new EventCreationObserver(myCapabilities.getAgent(), observedFormula, subscribedEvent, isOneShot));
                 myCapabilities.getMyStandardCustomization().notifySubscribe(subscriber, observedFormula, applyResult.getFormula("goal"));
                 return new ArrayList();

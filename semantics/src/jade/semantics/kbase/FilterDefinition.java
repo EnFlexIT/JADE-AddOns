@@ -42,7 +42,7 @@ public class FilterDefinition {
     private int index;
     
     /**
-     * A knowledge base filter
+     * A belief base filter
      */
     private KBFilter filter;
     
@@ -63,7 +63,7 @@ public class FilterDefinition {
      * @return the filter.
      */
     public KBFilter getFilter() {
-        return filter;
+        return this.filter;
     } // End of getFilter/0
 
     /**
@@ -71,7 +71,7 @@ public class FilterDefinition {
      * @return the index.
      */
     public int getIndex() {
-        return index;
+        return this.index;
     } // End of getIndex/0
 
 } // End of FilterDefinition

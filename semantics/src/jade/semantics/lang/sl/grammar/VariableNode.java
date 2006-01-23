@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class VariableNode extends Variable
 {
-    public final int getNodeID(){
-        return 30;
-    }
+    public static Integer ID = new Integer(31);
+    public final int getClassID() {return ID.intValue();}
 
     public VariableNode(java.lang.String lx_name)  {
         super(0, lx_name);
@@ -45,16 +44,25 @@ public class VariableNode extends Variable
     }
 
     public void accept(Visitor visitor) {visitor.visitVariableNode(this);}
+
     public Node getClone() {
         Node clone = new VariableNode();
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof VariableNode) {
             super.copyValueOf(n);
             VariableNode tn = (VariableNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

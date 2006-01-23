@@ -43,6 +43,8 @@ public abstract class ActionExpression extends Term
             }
             return((ActionExpression.Operations)_thisoperations).getAgents(this );
         }
+    public static Integer ID = new Integer(10019);
+    public int getClassID() {return ID.intValue();}
     jade.semantics.actions.SemanticAction _sm_action;
 
     public ActionExpression(int capacity)  {
@@ -56,6 +58,27 @@ public abstract class ActionExpression extends Term
             _sm_action= tn._sm_action;
         }
     }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public jade.semantics.actions.SemanticAction sm_action() {return _sm_action;}
     public void sm_action(jade.semantics.actions.SemanticAction o) {_sm_action = o;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("sm_action") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("sm_action") ) return sm_action();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("sm_action") ) {sm_action((jade.semantics.actions.SemanticAction)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

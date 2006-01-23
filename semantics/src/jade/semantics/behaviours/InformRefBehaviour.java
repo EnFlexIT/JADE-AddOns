@@ -36,6 +36,7 @@ import jade.semantics.lang.sl.grammar.EqualsNode;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.IdentifyingExpression;
 import jade.semantics.lang.sl.grammar.ListOfTerm;
+import jade.semantics.lang.sl.grammar.SomeNode;
 import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.grammar.TermSetNode;
 import jade.semantics.lang.sl.tools.MatchResult;
@@ -78,7 +79,8 @@ public class InformRefBehaviour extends CommunicativeActionBehaviour {
         if (listOfResult != null) {
             EqualsNode equalsNode = new EqualsNode();
             equalsNode.as_left_term((Term)action.getContentElement(0));
-            if (action.getContentElement(0) instanceof AllNode) {
+            if (action.getContentElement(0) instanceof AllNode ||
+                    action.getContentElement(0) instanceof SomeNode) {
                 equalsNode.as_right_term(new TermSetNode(listOfResult));    
             } else {
                 equalsNode.as_right_term((Term)listOfResult.get(0));

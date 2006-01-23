@@ -52,6 +52,7 @@ public class PrimitiveBehaviour extends CommunicativeActionBehaviour {
     public PrimitiveBehaviour(CommunicativeAction action) {
         super();
         this.action = action;
+        setBehaviourName(action.getClass().toString());
     } // End of PrimitiveBehaviour/1
     
     /*********************************************************************/

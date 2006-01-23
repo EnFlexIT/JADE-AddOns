@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public abstract class Variable extends Term
 {
+    public static Integer ID = new Integer(10014);
+    public int getClassID() {return ID.intValue();}
     java.lang.String _lx_name;
 
     public Variable(int capacity, java.lang.String lx_name)  {
@@ -45,6 +47,27 @@ public abstract class Variable extends Term
             _lx_name= tn._lx_name;
         }
     }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public java.lang.String lx_name() {return _lx_name;}
     public void lx_name(java.lang.String o) {_lx_name = o;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("lx_name") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("lx_name") ) return lx_name();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("lx_name") ) {lx_name((java.lang.String)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

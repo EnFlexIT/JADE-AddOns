@@ -30,7 +30,12 @@ Boston, MA  02111-1307, USA.
 package jade.semantics.lang.sl.grammar;
 
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 /**
 This abstract class is the base class of all list of nodes.
  It provides all basic mechanisms needed to manipulate a list of nodes.
@@ -47,6 +52,18 @@ public class ListOfNodes extends Node {
     */
     public ListOfNodes(Node[] nodes) {super(0); addAll(nodes);}
     /**
+    This field represent the static ID of the class Node.
+    */
+    public static Integer ID = new Integer(10000);
+    /**
+    This method return the dynamic class ID of the node. It is the same
+    for all nodes of the same type. This method which is automatically redefined 
+    according the declaration rank of the corresponding operator in the grammar.
+    */
+    public int getClassID(){
+        return ID.intValue();
+    }
+    /**
     This method add a node within the list. 
     @param node node to be added.
     */
@@ -60,7 +77,7 @@ public class ListOfNodes extends Node {
     This method add several nodes within the list. 
     @param nodes list of nodes to be added.
     */
-    public void addAll(ListOfNodes nodes) {_nodesList.addAll(nodes.asACollection());}
+    public void addAll(ListOfNodes nodes) {for (int i=0; i<nodes.size(); i++) {_nodesList.add(nodes.get(i));}}
     /**
     This method add a node within the list at a particular position. 
     @param index position where tu add the node.
@@ -81,7 +98,7 @@ public class ListOfNodes extends Node {
     @param index the index of the node to replace.
     @param node the new node.
     */
-    public void replace(int index, Node node) {_nodesList.set(index, node);}
+    public void replace(int index, Node node) {_nodesList.remove(index); _nodesList.add(index, node);}
     /**
     This method replace all the nodes contained by the list by new nodes. 
     @param nodes an array containing the new nodes to be added.
@@ -108,12 +125,12 @@ public class ListOfNodes extends Node {
     This method returns the last node of the list. 
     @return the last node of the list, or null if empty.
     */
-    public Node getLast() {return (Node) _nodesList.getLast();}
+    public Node getLast() {return (Node) _nodesList.get(_nodesList.size()-1);}
     /**
     This method returns the first node of the list. 
     @return the first node of the list, or null if empty.
     */
-    public Node getFirst() {return (Node) _nodesList.getFirst();}
+    public Node getFirst() {return (Node) _nodesList.get(0);}
     /**
     This method returns the size of the list. 
     @return the size of the list.

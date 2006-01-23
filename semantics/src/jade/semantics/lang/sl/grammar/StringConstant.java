@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public abstract class StringConstant extends Constant
 {
+    public static Integer ID = new Integer(10022);
+    public int getClassID() {return ID.intValue();}
 
     public StringConstant(int capacity)  {
       super (capacity);
@@ -41,5 +43,11 @@ public abstract class StringConstant extends Constant
             super.copyValueOf(n);
             StringConstant tn = (StringConstant)n;
         }
+    }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

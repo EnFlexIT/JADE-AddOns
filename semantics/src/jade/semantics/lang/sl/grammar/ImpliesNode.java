@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class ImpliesNode extends BinaryLogicalFormula
 {
-    public final int getNodeID(){
-        return 22;
-    }
+    public static Integer ID = new Integer(22);
+    public final int getClassID() {return ID.intValue();}
 
     public ImpliesNode(Formula as_left_formula, Formula as_right_formula)  {
         super(2, as_left_formula, as_right_formula);
@@ -46,16 +45,25 @@ public class ImpliesNode extends BinaryLogicalFormula
     }
 
     public void accept(Visitor visitor) {visitor.visitImpliesNode(this);}
+
     public Node getClone() {
         Node clone = new ImpliesNode(null, null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof ImpliesNode) {
             super.copyValueOf(n);
             ImpliesNode tn = (ImpliesNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

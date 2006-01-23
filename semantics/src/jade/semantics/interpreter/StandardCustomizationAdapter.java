@@ -42,7 +42,7 @@ public class StandardCustomizationAdapter implements StandardCustomization {
     public ListOfTerm handleCFPIota(Variable variable, Formula formula,
             ActionExpression action, Term agent) {
         return null;
-    } // End of 
+    } // End of handleCFPIota/4
 
     /**
      * @inheritDoc
@@ -51,7 +51,7 @@ public class StandardCustomizationAdapter implements StandardCustomization {
     public ListOfTerm handleCFPAny(Variable variable, Formula formula,
             ActionExpression action, Term agent) {
         return null;
-    } // End of callForProposalAny/4
+    } // End of handleCFPAny/4
 
     /**
      * @inheritDoc
@@ -60,8 +60,16 @@ public class StandardCustomizationAdapter implements StandardCustomization {
     public ListOfTerm handleCFPAll(Variable variable, Formula formula,
             ActionExpression action, Term agent) {
         return null;
-    } // End of callForProposalAll/4
+    } // End of handleCFPAll/4
 
+    /**
+     * @inheritDoc
+     * @return By default, returns null.
+     */
+    public ListOfTerm handleCFPSome(Variable variable, Formula formula,
+            ActionExpression action, Term agent) {
+        return null;
+    } // End of handleCFPSome/4
     /**
      * @inheritDoc
      * @return By default, returns true.

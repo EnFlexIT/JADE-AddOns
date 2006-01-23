@@ -30,6 +30,7 @@ package jade.semantics.actions;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import jade.semantics.behaviours.OntoActionBehaviour;
+import jade.semantics.behaviours.SemanticBehaviour;
 import jade.semantics.behaviours.SemanticBehaviourBase;
 import jade.semantics.interpreter.SemanticInterpretationException;
 import jade.semantics.lang.sl.grammar.ActionExpression;
@@ -74,7 +75,7 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 	 * Table that stores the values of the parameters of an instance of this
 	 * ontological action
 	 */
-    private MatchResult actionParameters;
+    protected MatchResult actionParameters;
 
 	/**
 	 * Standard name for metaVariables refering to the agent of the ontological
@@ -294,32 +295,32 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 	 * @see SemanticBehaviourBase#action()
 	 */
 	public void perform(OntoActionBehaviour behaviour) {
-		behaviour.setState(SemanticBehaviourBase.SUCCESS);
+		behaviour.setState(SemanticBehaviour.SUCCESS);
 	} // End of perform/1
 
-	/**
-	 * This method is called just before running the behaviour of the ontological
-	 * action. Does nothing by default. May be usefull to override it when
-	 * programming a GUI for example.
-	 * 
-	 * @param behaviour
-	 *            Nesting SemanticBehaviour.
-	 * @see jade.semantics.behaviours.OntoActionBehaviour#action()
-	 */
-	public void beforePerform(OntoActionBehaviour behaviour) {
-	} // End of beforePerform/1
+//	/**
+//	 * This method is called just before running the behaviour of the ontological
+//	 * action. Does nothing by default. May be usefull to override it when
+//	 * programming a GUI for example.
+//	 * 
+//	 * @param behaviour
+//	 *            Nesting SemanticBehaviour.
+//	 * @see jade.semantics.behaviours.OntoActionBehaviour#action()
+//	 */
+//	public void beforePerform(OntoActionBehaviour behaviour) {
+//	} // End of beforePerform/1
 
-	/**
-	 * This method is called just after running the behaviour of the ontological
-	 * action if it has succeeded. Does nothing by default. May be usefull to
-	 * override it when programming a GUI for example.
-	 * 
-	 * @param behaviour
-	 *            Nesting SemanticBehaviour.
-	 * @see jade.semantics.behaviours.OntoActionBehaviour#action()
-	 */
-	public void afterPerform(OntoActionBehaviour behaviour) {
-	} // End of afterPerform/1
+//	/**
+//	 * This method is called just after running the behaviour of the ontological
+//	 * action if it has succeeded. Does nothing by default. May be usefull to
+//	 * override it when programming a GUI for example.
+//	 * 
+//	 * @param behaviour
+//	 *            Nesting SemanticBehaviour.
+//	 * @see jade.semantics.behaviours.OntoActionBehaviour#action()
+//	 */
+//	public void afterPerform(OntoActionBehaviour behaviour) {
+//	} // End of afterPerform/1
 
 
 	/**
@@ -335,4 +336,5 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
             return null;
         }
 	} // End of getActionParameter/1
+    
 } // End of OntologicalAction

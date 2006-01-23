@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public abstract class TermSet extends Term
 {
+    public static Integer ID = new Integer(10016);
+    public int getClassID() {return ID.intValue();}
 
     public TermSet(int capacity)  {
       super (capacity);
@@ -41,5 +43,11 @@ public abstract class TermSet extends Term
             super.copyValueOf(n);
             TermSet tn = (TermSet)n;
         }
+    }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

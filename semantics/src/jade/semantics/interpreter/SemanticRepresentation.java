@@ -211,7 +211,8 @@ public class SemanticRepresentation {
     public boolean equals(Object o) {
         if (o instanceof SemanticRepresentation) {
             return ((SemanticRepresentation)o).getSLRepresentation().equals(slFormula);
-        } else return false;
+        } 
+        return false;
     } // End of equals/1
     
     

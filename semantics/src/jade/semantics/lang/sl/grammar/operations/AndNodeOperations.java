@@ -3,6 +3,7 @@ package jade.semantics.lang.sl.grammar.operations;
 import jade.semantics.lang.sl.grammar.AndNode;
 import jade.semantics.lang.sl.grammar.FalseNode;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.MetaTermReferenceNode;
 import jade.semantics.lang.sl.grammar.NotNode;
 import jade.semantics.lang.sl.grammar.Term;
 
@@ -68,7 +69,13 @@ public class AndNodeOperations extends FormulaNodeOperations {
     public Formula isBeliefFrom(Formula node, Term agent) {
         Formula leftBelief = ((AndNode) node).as_left_formula().isBeliefFrom(agent);
         if (leftBelief != null) {
-            Formula rightBelief = ((AndNode) node).as_right_formula().isBeliefFrom(agent);
+            Term instantiatedAgent;
+            if (agent instanceof MetaTermReferenceNode) {
+                instantiatedAgent = ((MetaTermReferenceNode)agent).sm_value();
+            } else {
+                instantiatedAgent = agent;
+            }
+            Formula rightBelief = ((AndNode) node).as_right_formula().isBeliefFrom(instantiatedAgent);
             if (rightBelief != null) {
                 return new AndNode(leftBelief, rightBelief);
             }

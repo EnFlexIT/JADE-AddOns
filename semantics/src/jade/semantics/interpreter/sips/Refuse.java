@@ -33,6 +33,7 @@ import jade.semantics.interpreter.SemanticInterpretationPrinciple;
 import jade.semantics.interpreter.SemanticRepresentation;
 import jade.semantics.lang.sl.grammar.ActionExpression;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
@@ -72,7 +73,13 @@ public class Refuse extends SemanticInterpretationPrinciple {
     /**
      * Calls {@link jade.semantics.interpreter.StandardCustomization#handleRefuse(Term, ActionExpression, Formula)}</code> method of the 
      * <code>StandardCustomization</code> class.
-     * @inheritDoc
+     * @param sr a semantic representation
+     * @return if the pattern (not (I ??agent (done (action ??agent ??act) ??condition)))
+     * matches with the incoming SR, and the term ??agent is different of the current agent  
+     * and the handleRefuse
+     * method returns true, this method returns an empty ArrayList. Returns null
+     * in the other cases. 
+     * @throws SemanticInterpretationPrincipleException if any exception occurs
      */
     public ArrayList apply(SemanticRepresentation sr)
     throws SemanticInterpretationPrincipleException {

@@ -5,6 +5,7 @@ import jade.semantics.lang.sl.grammar.BelieveNode;
 import jade.semantics.lang.sl.grammar.ExistsNode;
 import jade.semantics.lang.sl.grammar.FalseNode;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.MetaTermReferenceNode;
 import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.grammar.TrueNode;
 
@@ -22,6 +23,11 @@ public class BelieveNodeOperations extends FormulaNodeOperations {
 			node.sm_simplified_formula((new AndNode(new BelieveNode(agent, formulaLeft), new BelieveNode(agent,
                     formulaRight))).getSimplifiedFormula());
         }
+//        else if (formula instanceof ForallNode) {
+//        	Variable var = ((ForallNode)formula).as_variable();
+//        	Formula quantifiedFormula = ((ForallNode)formula).as_formula();
+//        	node.sm_simplified_formula((new ForallNode(var, new BelieveNode(agent, quantifiedFormula))).getSimplifiedFormula());
+//        }
         else if (formula.isMentalAttitude(agent)) {
 			node.sm_simplified_formula(formula);
         }
@@ -37,7 +43,10 @@ public class BelieveNodeOperations extends FormulaNodeOperations {
     }
 
     public Formula isBeliefFrom(Formula node, Term agent) {
-        if (((BelieveNode) node).as_agent().equals(agent)) {
+        if (agent instanceof MetaTermReferenceNode) {
+            ((MetaTermReferenceNode)agent).sm_value(((BelieveNode) node).as_agent());
+            return ((BelieveNode) node).as_formula();
+        } else if (((BelieveNode) node).as_agent().equals(agent)) {
             return ((BelieveNode) node).as_formula();
         }
         return null;

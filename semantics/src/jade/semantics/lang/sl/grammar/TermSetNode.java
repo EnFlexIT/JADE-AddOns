@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class TermSetNode extends TermSet
 {
-    public final int getNodeID(){
-        return 38;
-    }
+    public static Integer ID = new Integer(39);
+    public final int getClassID() {return ID.intValue();}
     static int _as_terms = 0;
 
     public TermSetNode(ListOfTerm as_terms)  {
@@ -49,11 +48,13 @@ public class TermSetNode extends TermSet
     }
 
     public void accept(Visitor visitor) {visitor.visitTermSetNode(this);}
+
     public Node getClone() {
         Node clone = new TermSetNode(null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof TermSetNode) {
             super.copyValueOf(n);
@@ -61,6 +62,28 @@ public class TermSetNode extends TermSet
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public ListOfTerm as_terms() {return (ListOfTerm)_nodes[_as_terms];}
     public void as_terms(ListOfTerm s) {_nodes[_as_terms] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_terms") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_terms") ) return as_terms();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_terms") ) {as_terms((ListOfTerm)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

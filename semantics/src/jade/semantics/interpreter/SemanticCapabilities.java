@@ -70,7 +70,7 @@ import jade.util.leap.HashMap;
 
 /**
 * Capabilities of a Semantic Agent. This class provides methods to access all the
-* components of a Semantic Agent: knowledge base, semantic interpretation table,
+* components of a Semantic Agent: belief base, semantic interpretation table,
 * semantic action table, planner, user customisation(StandardCustomisation), and
 * the semantic interpreter behaviour.<br>
 * A user can also create an application-specific SemanticCapabilities by 
@@ -87,7 +87,7 @@ public class SemanticCapabilities {
     protected SemanticAgent myAgent;
    
    /**
-    * Knowledge base for this agent
+    * Belief base for this agent
     */
    protected KBase myKBase;
    
@@ -201,7 +201,7 @@ public class SemanticCapabilities {
    } // End of setupSemanticInterpretationPrinciples/0
    
    /**
-    * Setup of the knowledge base. By default, a <code>KBaseFilterImpl</code>.
+    * Setup of the belief base. By default, a <code>KBaseFilterImpl</code>.
     */
    protected void setupKbase() {
        myKBase = new FilterKBaseImpl(myAgent);
@@ -255,8 +255,8 @@ public class SemanticCapabilities {
    } // End of getAgentName/0
    
    /**
-    * Returns the knowledge base of this agent.
-    * @return the knowledge base.
+    * Returns the belief base of this agent.
+    * @return the belief base.
     */
    public KBase getMyKBase() {
        return myKBase;
@@ -338,8 +338,8 @@ public class SemanticCapabilities {
    } // End of setMyStandardCustomization/1
    
    /**
-    * Sets the knowledge base.
-    * @param myKBase The Knowledge base to set.
+    * Sets the belief base.
+    * @param myKBase The belief base to set.
     */
    public void setMyKBase(KBase myKBase) {
        this.myKBase = myKBase;

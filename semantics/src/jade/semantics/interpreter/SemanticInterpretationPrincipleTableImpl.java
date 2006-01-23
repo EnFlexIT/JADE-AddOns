@@ -28,6 +28,7 @@
  */
 package jade.semantics.interpreter;
 
+import jade.semantics.interpreter.sips.EqualsIRE;
 import jade.semantics.interpreter.sips.RequestWhen;
 import jade.semantics.interpreter.sips.RequestWhenever;
 import jade.semantics.interpreter.sips.UnreachableGoal;
@@ -72,13 +73,13 @@ public class SemanticInterpretationPrincipleTableImpl extends ArrayList implemen
     /**************************************************************************/
     
     /**
-     * Adds a semantic interpretation principle in the table and updates the 
-     * semantic interpretation principle index of the added sip.
-     * @param sip the semantic interpretation principle
+     * Adds a semantic interpretation principle at the beginning of the the 
+     * table and updates the semantic interpretation principle index of the 
+     * added sip.  
+     * @param sip the semantic interpretation principle to be added
      */
     public void addSemanticInterpretationPrinciple(SemanticInterpretationPrinciple sip) {
-        this.add(sip);
-        sip.setOrderIndex(this.size()-1);
+        this.addSemanticInterpretationPrinciple(sip, SemanticInterpretationPrincipleTable.FRONT);
     } // End of addSemanticInterpretationPrinciple/1
     
     
@@ -109,23 +110,24 @@ public class SemanticInterpretationPrincipleTableImpl extends ArrayList implemen
      * @param capabilities the semantic capabilities of the agent
      */
     public  void loadTable(SemanticCapabilities capabilities) {
-        this.addSemanticInterpretationPrinciple(new ActionFeatures(capabilities));
-        this.addSemanticInterpretationPrinciple(new AlreadyReachedGoal(capabilities));
-        this.addSemanticInterpretationPrinciple(new BeliefTransfer(capabilities));
-        this.addSemanticInterpretationPrinciple(new RequestWhen(capabilities));
-        this.addSemanticInterpretationPrinciple(new IntentionTransfer(capabilities));
-        this.addSemanticInterpretationPrinciple(new ActionPerformance(capabilities));
-        this.addSemanticInterpretationPrinciple(new RationalityPrinciple(capabilities));
-        this.addSemanticInterpretationPrinciple(new Planning(capabilities));
-        this.addSemanticInterpretationPrinciple(new Refuse(capabilities));
-        this.addSemanticInterpretationPrinciple(new RejectProposal(capabilities));
-        this.addSemanticInterpretationPrinciple(new Agree(capabilities));
-        this.addSemanticInterpretationPrinciple(new Propose(capabilities));
-        this.addSemanticInterpretationPrinciple(new RequestWhenever(capabilities)); 
-        this.addSemanticInterpretationPrinciple(new Subscribe(capabilities));
-        this.addSemanticInterpretationPrinciple(new Unsubscribe(capabilities));
-        this.addSemanticInterpretationPrinciple(new And(capabilities));
-        this.addSemanticInterpretationPrinciple(new UnreachableGoal(capabilities));        
+        this.addSemanticInterpretationPrinciple(new And(capabilities),0);
+        this.addSemanticInterpretationPrinciple(new EqualsIRE(capabilities),1);
+        this.addSemanticInterpretationPrinciple(new ActionFeatures(capabilities),2);
+        this.addSemanticInterpretationPrinciple(new AlreadyReachedGoal(capabilities),3);
+        this.addSemanticInterpretationPrinciple(new BeliefTransfer(capabilities),4);
+        this.addSemanticInterpretationPrinciple(new RequestWhen(capabilities),5);
+        this.addSemanticInterpretationPrinciple(new IntentionTransfer(capabilities),6);
+        this.addSemanticInterpretationPrinciple(new Planning(capabilities),7);
+        this.addSemanticInterpretationPrinciple(new ActionPerformance(capabilities),8);
+        this.addSemanticInterpretationPrinciple(new RationalityPrinciple(capabilities),9);
+        this.addSemanticInterpretationPrinciple(new Refuse(capabilities),10);
+        this.addSemanticInterpretationPrinciple(new RejectProposal(capabilities),11);
+        this.addSemanticInterpretationPrinciple(new Agree(capabilities),12);
+        this.addSemanticInterpretationPrinciple(new Propose(capabilities),13);
+        this.addSemanticInterpretationPrinciple(new RequestWhenever(capabilities),14); 
+        this.addSemanticInterpretationPrinciple(new Subscribe(capabilities),15);
+        this.addSemanticInterpretationPrinciple(new Unsubscribe(capabilities),16);
+        this.addSemanticInterpretationPrinciple(new UnreachableGoal(capabilities),17);
     } // End of loadTable/0
     
     /**
@@ -135,10 +137,16 @@ public class SemanticInterpretationPrincipleTableImpl extends ArrayList implemen
      * @param index the index in the table
      */
     public void addSemanticInterpretationPrinciple(SemanticInterpretationPrinciple sip, int index) {
-        this.add(index, sip);
-        sip.setOrderIndex(index);
-        for (int i = index + 1; i < this.size(); i++) {
-            ((SemanticInterpretationPrinciple)this.get(i)).setOrderIndex(i);
+        if (index >= size()) {
+            add(sip);
+            sip.setOrderIndex(size()-1);
+        } else  {
+            if (index < 0) {index = 0;}
+            this.add(index, sip);
+            sip.setOrderIndex(index);
+            for (int i = index + 1; i < this.size(); i++) {
+                ((SemanticInterpretationPrinciple)this.get(i)).setOrderIndex(i);
+            }
         }
     } // End of addSemanticInterpretationPrinciple/2
     

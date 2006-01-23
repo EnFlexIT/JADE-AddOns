@@ -50,12 +50,12 @@ public class Unsubscribe extends SemanticInterpretationPrinciple {
     /**
      * A subscribed internal event that identifies the subscription to drop
      */
-    private Formula subscribedEvent;
+    protected Formula subscribedEvent;
     
     /**
      * A pattern describing the formula to monitor, that identifies the subscription to drop 
      */
-    private Formula observedPattern;
+    protected Formula observedPattern;
     
     /**
      * Pattern used to build the observed pattern (observedPattern)
@@ -129,7 +129,7 @@ public class Unsubscribe extends SemanticInterpretationPrinciple {
     
     
     /**
-     * Removes observers from the knowledge base if the principle is applicable.
+     * Removes observers from the belief base if the principle is applicable.
      * @inheritDoc
      */
     public ArrayList apply(SemanticRepresentation sr)
@@ -151,9 +151,9 @@ public class Unsubscribe extends SemanticInterpretationPrinciple {
                         if (object instanceof EventCreationObserver) {
                             return (SLPatternManip.match(observedPattern, ((EventCreationObserver)object).getObservedFormula()) != null
                                     && SLPatternManip.match(subscribedEvent, ((EventCreationObserver)object).getSubscribedEvent()) != null);
-                        } else {
-                            return false;
                         }
+                        return false;
+                        
                     }
                 });
                 myCapabilities.getMyStandardCustomization().notifyUnsubscribe(subscriber, observedPattern, applyResult.getFormula("??goal"));
@@ -170,9 +170,9 @@ public class Unsubscribe extends SemanticInterpretationPrinciple {
                         if (object instanceof EventCreationObserver) {
                             return (SLPatternManip.match(observedPattern, ((EventCreationObserver)object).getObservedFormula()) != null
                                     && SLPatternManip.match(subscribedEvent, ((EventCreationObserver)object).getSubscribedEvent()) != null);
-                        } else {
-                            return false;
-                        }
+                        } 
+                        return false;
+                        
                     }
                 });
                 myCapabilities.getMyStandardCustomization().notifyUnsubscribe(subscriber, observedPattern, applyResult.getFormula("goal"));

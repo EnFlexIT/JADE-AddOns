@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class TrueNode extends AtomicFormula
 {
-    public final int getNodeID(){
-        return 11;
-    }
+    public static Integer ID = new Integer(11);
+    public final int getClassID() {return ID.intValue();}
 
     public TrueNode() {
         super(0);
@@ -41,16 +40,25 @@ public class TrueNode extends AtomicFormula
     }
 
     public void accept(Visitor visitor) {visitor.visitTrueNode(this);}
+
     public Node getClone() {
         Node clone = new TrueNode();
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof TrueNode) {
             super.copyValueOf(n);
             TrueNode tn = (TrueNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

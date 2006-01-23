@@ -89,7 +89,8 @@ public abstract class SemanticBehaviourBase extends Behaviour implements Semanti
     
     /**
      * Checks if this behaviour is done.
-     * 
+     * @return true if the internal state equals<code>SUCCESS</code>, <code>FEASIBILITY_FAILURE</code>, 
+     * or <code>EXECUTION_FAILURE</code>
      */
     public boolean done() {
         return (state == SUCCESS || state == EXECUTION_FAILURE || state == FEASIBILITY_FAILURE);

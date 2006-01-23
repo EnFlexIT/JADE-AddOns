@@ -29,12 +29,13 @@
 package jade.semantics.kbase.filter.query;
 
 import jade.semantics.interpreter.StandardCustomization;
-import jade.semantics.kbase.Bindings;
-import jade.semantics.kbase.BindingsImpl;
 import jade.semantics.kbase.filter.KBQueryFilter;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.Term;
+import jade.semantics.lang.sl.tools.ListOfMatchResults;
+import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
+import jade.util.leap.Set;
 
 /**
  * Is the semantic agent cooperative towards the agent <i>agent</i> regarding a specific belief?
@@ -79,39 +80,47 @@ public class BeliefTransferFilter extends KBQueryFilter {
     /*********************************************************************/
     
     /**
-     * Returns true if the formula matches the pattern
-     * (or (not (I ??agent1 (B ??agent2 ??belief))) (B ??agent2 ??belief)) and if 
-     * the current agent is agent2 but not agent1. 
-     * @inheritDoc
+     * Returns true as first element if the formula matches the pattern
+     * (or (not (I ??agent1 (B ??agent2 ??belief))) (B ??agent2 ??belief)), if 
+     * the current agent is agent2 but not agent1, false if not. In this case, 
+     * returns an empty ListOfMatchResults as second element and if if the method 
+     * {@link StandardCustomization#acceptBeliefTransfer(Formula, Term)} returns true,
+     * null in the others cases.
+     * If the filter returns false as first element, the second element is null.
+     * @param formula a formula on which the filter is tested
+     * @param agent a term that represents the agent is trying to apply the filter
+     * @return an array with a Boolean meaning the applicability of the filter,
+     * and a ListOfMatchResults that is the result of performing the filter. 
      */
-    public boolean isApplicable(Formula formula, Term agent) {
+    public QueryResult apply(Formula formula, Term agent) {
+        QueryResult queryResult = new QueryResult();
         try {
-            applyResult = SLPatternManip.match(pattern,formula);
+            MatchResult applyResult = SLPatternManip.match(pattern,formula);
             if (applyResult != null 
                     && agent.equals(applyResult.getTerm("agent2")) 
-                    && !agent.equals(applyResult.getTerm("agent1")))
-                return true;
+                    && !agent.equals(applyResult.getTerm("agent1"))) {
+                if (standardCustomization.acceptBeliefTransfer(applyResult.getFormula("belief"), applyResult.getTerm("agent1"))) {
+                    queryResult.setResult(new ListOfMatchResults());    
+                } else {
+                    queryResult.setResult(null);
+                }
+                queryResult.setFilterApplied(true);
+                return queryResult;
+            }
             
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return queryResult;
     } // End of isApplicable/2
     
     /**
-     * Returns an empty Bindings (meaning true),
-     * if the method {@link StandardCustomization#acceptBeliefTransfer(Formula, Term)} returns true,
-     * false if not.
-     * @inheritDoc
+     * By default, this method does nothing. 
+     * @param formula an observed formula
+     * @param set set of patterns. Each pattern corresponds to a kind a formula
+     * which, if it is asserted in the base, triggers the observer that
+     * observes the formula given in parameter.
      */
-    public Bindings apply(Formula formula) {
-        try {
-            if (standardCustomization.acceptBeliefTransfer(applyResult.getFormula("belief"), applyResult.getTerm("agent1")))
-                return new BindingsImpl();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    } // End of apply/1
-    
+    public void getObserverTriggerPatterns(Formula formula, Set set) {
+    }
 } // End of class BeliefTransferFilter

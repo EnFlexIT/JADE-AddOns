@@ -78,7 +78,12 @@ public class ActionPerformance extends SemanticInterpretationPrinciple {
     
     /**
      * Adds a new intentional behaviour {@link IntentionalBehaviour}if it is applicable.
-     * @inheritDoc
+     * @param sr a semantic representation
+     * @return if the pattern (I ??agent (done ??act ??phi))
+     * matches with the incoming SR, and the current agent believes ??phi and the agent find 
+     * an action ??act, this method returns an ArrayLIst with the same SR which
+     * SIP index is increased by one. Returns null in other cases. 
+     * @throws SemanticInterpretationPrincipleException if any exception occurs
      */
     public ArrayList apply(SemanticRepresentation sr) throws SemanticInterpretationPrincipleException {
         try {
@@ -86,10 +91,9 @@ public class ActionPerformance extends SemanticInterpretationPrinciple {
             if (matchResult != null) {
                 if (myCapabilities.getMyKBase().query(((Formula)SLPatternManip.instantiate(bPattern, "phi", matchResult.getFormula("phi"))).getSimplifiedFormula()) != null) {
                     SemanticAction act = myCapabilities.getMySemanticActionTable().getSemanticActionInstance((ActionExpression)matchResult.getTerm("act"));
-                    
                     if (act != null) {
                         // 	            act.getBehaviour().setAgent(getAgent());
-                        potentiallyAddBehaviour(
+                          potentiallyAddBehaviour(
                                 new IntentionalBehaviour((SemanticBehaviour)act.getBehaviour(),
                                         sr.getSLRepresentation(),
                                         getOrderIndex(),

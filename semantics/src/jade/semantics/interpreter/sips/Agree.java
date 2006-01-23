@@ -33,6 +33,7 @@ import jade.semantics.interpreter.SemanticInterpretationPrinciple;
 import jade.semantics.interpreter.SemanticRepresentation;
 import jade.semantics.lang.sl.grammar.ActionExpression;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
@@ -72,7 +73,12 @@ public class Agree extends SemanticInterpretationPrinciple {
     /**
      * Calls {@link jade.semantics.interpreter.StandardCustomization#handleAgree(Term, ActionExpression, Formula)} method of the 
      * <code>StandardCustomization</code> class.
-     * @inheritDoc
+     * @param sr a semantic representation
+     * @return if the pattern (I ??agent (done (action ??agent ??act) ??condition))
+     * matches with the incoming SR, and the term ??agent is the current agent and the handleAgree
+     * method returns true, this method returns an empty ArrayList. Returns null
+     * in the other cases. 
+     * @throws SemanticInterpretationPrincipleException if any exception occurs
      */
     public ArrayList apply(SemanticRepresentation sr)
     throws SemanticInterpretationPrincipleException {

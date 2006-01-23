@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class PropositionSymbolNode extends AtomicFormula
 {
-    public final int getNodeID(){
-        return 8;
-    }
+    public static Integer ID = new Integer(8);
+    public final int getClassID() {return ID.intValue();}
     static int _as_symbol = 0;
 
     public PropositionSymbolNode(Symbol as_symbol)  {
@@ -49,11 +48,13 @@ public class PropositionSymbolNode extends AtomicFormula
     }
 
     public void accept(Visitor visitor) {visitor.visitPropositionSymbolNode(this);}
+
     public Node getClone() {
         Node clone = new PropositionSymbolNode(null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof PropositionSymbolNode) {
             super.copyValueOf(n);
@@ -61,6 +62,28 @@ public class PropositionSymbolNode extends AtomicFormula
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public Symbol as_symbol() {return (Symbol)_nodes[_as_symbol];}
     public void as_symbol(Symbol s) {_nodes[_as_symbol] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_symbol") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_symbol") ) return as_symbol();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_symbol") ) {as_symbol((Symbol)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

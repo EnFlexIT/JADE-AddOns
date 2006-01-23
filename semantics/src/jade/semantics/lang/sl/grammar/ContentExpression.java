@@ -43,6 +43,8 @@ public abstract class ContentExpression extends Node
             }
             return((ContentExpression.Operations)_thisoperations).getElement(this );
         }
+    public static Integer ID = new Integer(10003);
+    public int getClassID() {return ID.intValue();}
 
     public ContentExpression(int capacity)  {
       super (capacity);
@@ -53,5 +55,11 @@ public abstract class ContentExpression extends Node
             super.copyValueOf(n);
             ContentExpression tn = (ContentExpression)n;
         }
+    }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

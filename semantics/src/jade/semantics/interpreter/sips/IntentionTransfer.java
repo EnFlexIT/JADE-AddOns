@@ -122,7 +122,6 @@ public class IntentionTransfer extends SemanticInterpretationPrinciple {
         try {
             MatchResult matchResult = SLPatternManip.match(intentionTransferPattern,sr.getSLRepresentation());
             if (matchResult != null) {
-                
                 Term sender = matchResult.getTerm("sender");
                 Formula phi = matchResult.getFormula("phi");
                 MatchResult matchDoneResult = SLPatternManip.match(phi, donePattern);
@@ -130,31 +129,33 @@ public class IntentionTransfer extends SemanticInterpretationPrinciple {
                         !((ActionExpression)matchDoneResult.getTerm("action")).getAgents().contains(sender)) {
                     ArrayList listOfSR = new ArrayList();
                     if (myCapabilities.getMyKBase().query(
-                            (Formula)SLPatternManip.instantiate(bPattern, "phi", phi)) == null) {
-                        if (myCapabilities.getMyStandardCustomization().acceptIntentionTransfer(phi, sender)) {
-                            if (matchDoneResult==null || !Tools.isCommunicativeActionFromMeToReceiver(
-                                    (ActionExpression)matchDoneResult.getTerm("action"), sender, myCapabilities.getAgent())) {
+                            ((Formula)SLPatternManip.instantiate(bPattern, "phi", phi)).getSimplifiedFormula()) == null) {
+                        if (myCapabilities.getMyKBase().query(((Formula)SLPatternManip.instantiate(intentionPattern, "phi", phi)).getSimplifiedFormula()) == null) {
+                            if (myCapabilities.getMyStandardCustomization().acceptIntentionTransfer(phi, sender)) {
+                                if (matchDoneResult==null || !Tools.isCommunicativeActionFromMeToReceiver(
+                                        (ActionExpression)matchDoneResult.getTerm("action"), sender, myCapabilities.getAgent())) {
+                                    listOfSR.add(new SemanticRepresentation(
+                                            sr.getMessage(),
+                                            ((Formula)SLPatternManip.instantiate(intentionPattern2,
+                                                    "sender", sender,
+                                                    "phi", phi)).getSimplifiedFormula(),
+                                                    0, null));
+                                }
                                 listOfSR.add(new SemanticRepresentation(
                                         sr.getMessage(),
-                                        ((Formula)SLPatternManip.instantiate(intentionPattern2,
-                                                "sender", sender,
-                                                "phi", phi)).getSimplifiedFormula(),
-                                                0, null));
+                                        ((Formula)SLPatternManip.instantiate(intentionPattern, "phi", phi)).getSimplifiedFormula(),
+                                        0, new FeedBackData(sender,phi)));
+                            } else {
+                                listOfSR.add(new SemanticRepresentation(
+                                        sr.getMessage(),
+                                        ((Formula)SLPatternManip.instantiate(notIntentionPattern2, "phi", phi)).getSimplifiedFormula(),
+                                        0, new FeedBackData(sender, phi)));
+                                listOfSR.add(new SemanticRepresentation(
+                                        sr.getMessage(),
+                                        ((Formula)SLPatternManip.instantiate(notIntentionPattern, "sender", sender, "phi", phi)).getSimplifiedFormula(),
+                                        0,
+                                        null));
                             }
-                            listOfSR.add(new SemanticRepresentation(
-                                    sr.getMessage(),
-                                    ((Formula)SLPatternManip.instantiate(intentionPattern, "phi", phi)).getSimplifiedFormula(),
-                                    0, new FeedBackData(sender,phi)));
-                        } else {
-                            listOfSR.add(new SemanticRepresentation(
-                                    sr.getMessage(),
-                                    ((Formula)SLPatternManip.instantiate(notIntentionPattern2, "phi", phi)).getSimplifiedFormula(),
-                                    0, new FeedBackData(sender, phi)));
-                            listOfSR.add(new SemanticRepresentation(
-                                    sr.getMessage(),
-                                    ((Formula)SLPatternManip.instantiate(notIntentionPattern, "sender", sender, "phi", phi)).getSimplifiedFormula(),
-                                    0,
-                                    null));
                         }
                     }
                     else {

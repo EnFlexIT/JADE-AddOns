@@ -106,6 +106,8 @@ public abstract class Content extends Node
             }
             return((Content.Operations)_thisoperations).instantiate(this , varname, expression);
         }
+    public static Integer ID = new Integer(10001);
+    public int getClassID() {return ID.intValue();}
     static int _as_expressions = 0;
 
     public Content(int capacity, ListOfContentExpression as_expressions)  {
@@ -119,6 +121,27 @@ public abstract class Content extends Node
             Content tn = (Content)n;
         }
     }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public ListOfContentExpression as_expressions() {return (ListOfContentExpression)_nodes[_as_expressions];}
     public void as_expressions(ListOfContentExpression s) {_nodes[_as_expressions] = s;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("as_expressions") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("as_expressions") ) return as_expressions();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("as_expressions") ) {as_expressions((ListOfContentExpression)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

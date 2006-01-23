@@ -28,9 +28,16 @@
  */
 package jade.semantics.kbase.filter.assertion;
 
+import jade.semantics.interpreter.Finder;
 import jade.semantics.kbase.filter.KBAssertFilter;
+import jade.semantics.lang.sl.grammar.AllNode;
+import jade.semantics.lang.sl.grammar.BelieveNode;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.IdentifyingExpression;
+import jade.semantics.lang.sl.grammar.IotaNode;
+import jade.semantics.lang.sl.grammar.ListOfNodes;
 import jade.semantics.lang.sl.grammar.ListOfTerm;
+import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.grammar.TermSetNode;
 import jade.semantics.lang.sl.grammar.TrueNode;
 import jade.semantics.lang.sl.grammar.VariableNode;
@@ -40,7 +47,7 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 /**
  * Filter for the identifying expression of the form <i>(= (all ??X ??formula) ??set)</i>
  * or <i>(= (iota ??X ??formula) ??set)</i>.
- * Asserts in the knowledge base each element which appears in the set for the 
+ * Asserts in the belief base each element which appears in the set for the 
  * first pattern and the single value for the second pattern.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/07/01 Revision: 1.0
@@ -48,31 +55,44 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
 public class AllIREFilter extends KBAssertFilter {
     
     /**
-     * Pattern that must match to apply the filter adapter
+     * Pattern used to assert formula in the belief base
      */
-    protected Formula allPattern;
-
+   // private Formula bPattern;
     /**
-     * Pattern that must match to apply the filter adapter
+     * Pattern that must match to apply the filter
      */
-    protected Formula iotaPattern;
-
-    /**
-     * Pattern used to assert formula in the knowledge base
-     */
-    private Formula bPattern;
+    protected Formula generalPattern;
     
+    protected Formula generalNotPattern;
+    
+    protected Formula formulaPattern;
+    
+    protected Formula closedPattern;
+    
+    protected Term termPattern;
+    
+    private ListOfNodes listOfNodes;
+    
+    private Finder finder;
     /**
      * Constructor of the filter. Instantiates the patterns.
      */
     public AllIREFilter() {
-        allPattern = SLPatternManip.fromFormula("(B ??agent (= (all ??X ??formula) ??set))");
-        iotaPattern = SLPatternManip.fromFormula("(B ??agent (= (iota ??X ??formula) ??phi))");
-        bPattern = SLPatternManip.fromFormula("(B ??agent ??formula)" ); 
+        generalPattern = SLPatternManip.fromFormula("(B ??agent (= ??ide ??phi))");
+        generalNotPattern = SLPatternManip.fromFormula("(B ??agent (not (= ??ide ??phi)))");
+     //   bPattern = SLPatternManip.fromFormula("(B ??agent ??formula)" ); 
+        finder = new Finder() {
+            public boolean identify(Object object) {
+                 if (object instanceof Formula) {
+                     return SLPatternManip.match(formulaPattern, (Formula)object) != null;
+                 }
+                 return false;
+            }
+        };
     } // End of AllIREFilter/0
     
     /**
-     * If the filter is applicable, asserts in the knowledge base each element 
+     * If the filter is applicable, asserts in the belief base each element 
      * which appears in the set, and returns a <code>TrueNode</code>.
      * @param formula a formula to assert
      * @return TrueNode if the filter is applicable, the given formula in the 
@@ -81,29 +101,19 @@ public class AllIREFilter extends KBAssertFilter {
     public final Formula beforeAssert(Formula formula) {
         mustApplyAfter = false;
         try {
-            MatchResult applyResult = SLPatternManip.match(allPattern, formula);
-            if (applyResult != null && 
-                    applyResult.getTerm("set") instanceof TermSetNode && 
-                    applyResult.getTerm("X") instanceof VariableNode) {
-                
-                Formula formulaPattern = (Formula)SLPatternManip.toPattern(applyResult.getFormula("formula"), (VariableNode)applyResult.getTerm("X"));
-                myKBase.removeAllFormulae(formulaPattern);
-                ListOfTerm list = ((TermSetNode)applyResult.getTerm("set")).as_terms();
-                for(int i = 0; i < list.size(); i++) {
-                    Formula toBelieve = (Formula)SLPatternManip.instantiate(formulaPattern, 
-                            "X", list.get(i));
-                    myKBase.assertFormula((Formula)SLPatternManip.instantiate(bPattern,
-                            "agent", applyResult.getTerm("agent"),
-                            "formula", toBelieve));
-                }
-                return new TrueNode();
-            } else {
-                applyResult = SLPatternManip.match(iotaPattern, formula);
-                if (applyResult != null) {
-                    myKBase.assertFormula((Formula)SLPatternManip.instantiate(bPattern,
-                            "agent", applyResult.getTerm("agent"),
-                            "formula", applyResult.getFormula("phi")));
-                    return new TrueNode();
+            MatchResult applyResult = SLPatternManip.match(generalPattern, formula);
+            if (applyResult != null && applyResult.getTerm("ide") instanceof IdentifyingExpression && 
+                    ((IdentifyingExpression)applyResult.getTerm("ide") instanceof AllNode ||
+                     (IdentifyingExpression)applyResult.getTerm("ide") instanceof IotaNode)) {
+                getPatterns(applyResult);
+                return generalPatternProcess(formula, applyResult);
+            } else {            
+                applyResult = SLPatternManip.match(generalNotPattern, formula);
+                if (applyResult != null && applyResult.getTerm("ide") instanceof IdentifyingExpression &&
+                        ((IdentifyingExpression)applyResult.getTerm("ide") instanceof AllNode ||
+                         (IdentifyingExpression)applyResult.getTerm("ide") instanceof IotaNode)) {
+                    getPatterns(applyResult);
+                    return generalNotPatternProcess(formula, applyResult);
                 }
             }
         } catch (Exception e) {
@@ -112,4 +122,79 @@ public class AllIREFilter extends KBAssertFilter {
         return formula;
     } // End of beforeAssert/1
     
+    
+    private Formula generalPatternProcess(Formula formula, MatchResult applyResult) {
+        try {
+            myKBase.retractFormula(formulaPattern);
+            myKBase.addClosedPredicate(closedPattern);
+            if (((IdentifyingExpression)applyResult.getTerm("ide")) instanceof AllNode &&
+                    applyResult.getTerm("phi") instanceof TermSetNode) {
+                ListOfTerm list = ((TermSetNode)applyResult.getTerm("phi")).as_terms();
+                for(int i = 0; i < list.size(); i++) {
+                    Formula toBelieve = formulaPattern;
+                    MatchResult termMatchResult = SLPatternManip.match(termPattern, list.get(i));
+                    for (int j = 0; j < listOfNodes.size(); j++) {
+                        toBelieve = (Formula)SLPatternManip.instantiate(toBelieve, 
+                                ((VariableNode)listOfNodes.get(j)).lx_name(), termMatchResult.getTerm(((VariableNode)listOfNodes.get(j)).lx_name()));
+                    }
+                    myKBase.assertFormula(new BelieveNode(applyResult.getTerm("agent"), toBelieve));
+                    //return new BelieveNode(applyResult.getTerm("agent"), toBelieve);
+                }
+                return new TrueNode();
+            } else {
+                Formula toBelieve = formulaPattern;
+                MatchResult termMatchResult = SLPatternManip.match(termPattern, applyResult.getTerm("phi"));
+                for (int j = 0; j < listOfNodes.size(); j++) {
+                    toBelieve = (Formula)SLPatternManip.instantiate(toBelieve, 
+                            ((VariableNode)listOfNodes.get(j)).lx_name(), termMatchResult.getTerm(((VariableNode)listOfNodes.get(j)).lx_name()));
+                }
+                myKBase.assertFormula(new BelieveNode(applyResult.getTerm("agent"), toBelieve));
+                //return new BelieveNode(applyResult.getTerm("agent"), toBelieve);
+                
+                return new TrueNode();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new TrueNode();
+        }
+        
+    }
+    
+    private Formula generalNotPatternProcess(Formula formula, MatchResult applyResult) {
+        try {
+            ListOfTerm solutionsInKB = myKBase.queryRef((IdentifyingExpression)applyResult.getTerm("ide"));
+            if (solutionsInKB != null) {
+                if ((IdentifyingExpression)applyResult.getTerm("ide") instanceof IotaNode) {
+                    if (solutionsInKB.get(0).equals(applyResult.getTerm("phi"))) {
+                        myKBase.removeClosedPredicate(finder);
+                    }
+                } else if (applyResult.getTerm("phi") instanceof TermSetNode && ((TermSetNode)applyResult.getTerm("phi")).as_terms().size() == solutionsInKB.size()) {
+                    ListOfTerm list = ((TermSetNode)applyResult.getTerm("phi")).as_terms();
+                    for(int i = 0; i < list.size(); i++) {
+                        if (!solutionsInKB.contains(list.get(i))) {
+                            return formula;
+                        }
+                    }
+                    myKBase.removeClosedPredicate(finder);
+                }
+                return new TrueNode();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return formula;
+    }
+    
+    private void getPatterns(MatchResult applyResult) {
+        try {
+            listOfNodes = new ListOfNodes();
+            if (((IdentifyingExpression)applyResult.getTerm("ide")).as_term().childrenOfKind(VariableNode.class, listOfNodes)) {
+                formulaPattern = (Formula)SLPatternManip.toPattern(((IdentifyingExpression)applyResult.getTerm("ide")).as_formula(), listOfNodes, null);
+                closedPattern = (Formula)SLPatternManip.toPattern(((IdentifyingExpression)applyResult.getTerm("ide")).as_formula(), listOfNodes, "_");
+                termPattern = (Term)SLPatternManip.toPattern(((IdentifyingExpression)applyResult.getTerm("ide")).as_term(), listOfNodes, null);
+            }             
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 } // End of class AllIREFilter

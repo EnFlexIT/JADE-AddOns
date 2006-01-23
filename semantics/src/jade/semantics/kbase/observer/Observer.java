@@ -28,14 +28,14 @@
 package jade.semantics.kbase.observer;
 
 
-import jade.semantics.kbase.Bindings;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.tools.ListOfMatchResults;
 
 
 
 /**
  * Defines an observer. It is used to observe a particular formula in the 
- * knowledge base.
+ * belief base.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/03/11 Revision: 1.0 
  */
@@ -43,9 +43,9 @@ public interface Observer {
     
     /**
      * Notifies the observer that the value has changed. 
-     * @param bindings the new value
+     * @param listOfMatchResults the new value
      */
-    public void notify(Bindings bindings);
+    public void notify(ListOfMatchResults listOfMatchResults);
     
     /**
      * Returns the observed formula

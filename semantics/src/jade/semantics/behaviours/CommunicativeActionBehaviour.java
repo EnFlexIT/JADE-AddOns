@@ -54,7 +54,7 @@ public abstract class CommunicativeActionBehaviour extends SemanticBehaviourBase
     
     /**
      * Sends an ACL message if the feasibility precondition of the action is 
-     * satisfied. Stores in the knowledge base, the postcondition of the action
+     * satisfied. Stores in the belief base, the postcondition of the action
      * and the fact that the agent has done the action.
      * @see jade.core.behaviours.Behaviour#action()
      */
@@ -64,10 +64,8 @@ public abstract class CommunicativeActionBehaviour extends SemanticBehaviourBase
             try {          
                 if (compute()) {
                     if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Feasibility Precondition is believed!");
-                    
                     myAgent.send(action.toAclMessage());
-                    if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "ACL Message has been sent!");
-                    
+                    if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "ACL Message has been sent!");                 
                     ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().assertFormula(action.getPostCondition());
                     try {
                         ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().assertFormula(

@@ -1,9 +1,12 @@
 package jade.semantics.lang.sl.grammar.operations;
 
+import jade.semantics.lang.sl.grammar.BelieveNode;
 import jade.semantics.lang.sl.grammar.DoneNode;
 import jade.semantics.lang.sl.grammar.ExistsNode;
 import jade.semantics.lang.sl.grammar.FeasibleNode;
+import jade.semantics.lang.sl.grammar.ForallNode;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.NotNode;
 import jade.semantics.lang.sl.grammar.OrNode;
 import jade.semantics.lang.sl.grammar.QuantifiedFormula;
 import jade.semantics.lang.sl.grammar.Term;
@@ -22,6 +25,13 @@ public class ExistsNodeOperations extends FormulaNodeOperations {
         }
         else if (!formula.isAFreeVariable(x)) {
 			node.sm_simplified_formula(formula);
+        }
+        else if (formula instanceof NotNode && ((NotNode)formula).as_formula() instanceof BelieveNode) {
+        	Formula beliefFormula = ((BelieveNode)((NotNode)formula).as_formula()).as_formula();
+        	Term beliefAgent = ((BelieveNode)((NotNode)formula).as_formula()).as_agent();
+        	node.sm_simplified_formula((new NotNode(new BelieveNode(beliefAgent,
+        															new ForallNode(x,
+        																		   beliefFormula)))).getSimplifiedFormula());
         }
         else if (formula instanceof DoneNode && ((DoneNode)formula).as_formula().isAFreeVariable(x)) {
 			node.sm_simplified_formula((new DoneNode(((DoneNode) formula).as_action(), 

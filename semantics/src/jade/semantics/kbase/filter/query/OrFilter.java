@@ -28,12 +28,13 @@
  */
 package jade.semantics.kbase.filter.query;
 
-import jade.semantics.kbase.Bindings;
-import jade.semantics.kbase.BindingsImpl;
 import jade.semantics.kbase.filter.KBQueryFilter;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.Term;
+import jade.semantics.lang.sl.tools.ListOfMatchResults;
+import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
+import jade.util.leap.Set;
 
 /**
  * This filter applies when an "or formula" is asserted in the KBase.
@@ -41,16 +42,6 @@ import jade.semantics.lang.sl.tools.SLPatternManip;
  * @version Date: 2004/11/30 Revision: 1.0 
  */
 public class OrFilter extends KBQueryFilter {
-    
-    /**
-     * First part of the formula
-     */
-    private Formula phi ;
-    
-    /**
-     * Second part of the formula
-     */
-    private Formula psi;
     
     /**
      * Pattern that must match to apply the filter
@@ -62,43 +53,68 @@ public class OrFilter extends KBQueryFilter {
     /*********************************************************************/
     
     /**
-     * Creates a new Filter
+     * Creates a new Filter on the pattern (B ??agent (or ??phi ??psi))
      */
     public OrFilter() {
-        pattern = SLPatternManip.fromFormula("(or ??phi ??psi)");
-    } // End of X_OrFilter/1
+        pattern = SLPatternManip.fromFormula("(B ??agent (or ??phi ??psi))");
+    } // End of OrFilter/1
     
     /*********************************************************************/
     /**				 			METHODS									**/
     /*********************************************************************/
     
     /**
-     * Returns true if the formula matches the pattern (or ??phi ??psi)
-     * @inheritDoc
+     * Returns true as first element if the formula matches the pattern 
+     * (B ??agent (or ??phi ??psi)), false if not. If true, the ListOfMatchResults
+     * contains the union of the whole of solutions of the first part of the formula and 
+     * the whole of solutions of the second part of the formula.
+     * If the filter returns false as first element, the second element is null.
+     * @param formula a formula on which the filter is tested
+     * @param agent a term that represents the agent is trying to apply the filter
+     * @return an array with a Boolean meaning the applicability of the filter,
+     * and a ListOfMatchResults that is the result of performing the filter. 
      */
-    public boolean isApplicable(Formula formula, Term agent) {
+    public QueryResult apply(Formula formula, Term agent) {
+        QueryResult queryResult = new QueryResult();
         try {
-            applyResult = SLPatternManip.match(pattern,formula);
-            if (applyResult != null) {
-                phi = applyResult.getFormula("phi");
-                psi = applyResult.getFormula("psi");
-                return true;
+            MatchResult applyResult = SLPatternManip.match(pattern,formula);
+            if (applyResult != null && applyResult.getTerm("agent").equals(agent)) {
+                ListOfMatchResults phiList = myKBase.query(applyResult.getFormula("phi"));
+                ListOfMatchResults psiList = myKBase.query(applyResult.getFormula("psi"));
+                if (phiList == null) {
+                    queryResult.setResult(psiList);
+                } else if (psiList == null) {
+                    queryResult.setResult(phiList);
+                } else {
+                    queryResult.setResult(phiList.union(psiList));    
+                }
+                queryResult.setFilterApplied(true);
+                return queryResult;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
-    } // End of isApplicable/2
-    
+        return queryResult;
+    } // End of apply/2
+
     /**
-     * Returns true if the left part or the right part (or the both part) of the
-     * formula is in the knowledge base.
-     * @inheritDoc
+     * Adds in the set, the patterns for the formula phi and for the formula
+     * psi.
+     * @param formula an observed formula
+     * @param set set of patterns. Each pattern corresponds to a kind a formula
+     * which, if it is asserted in the base, triggers the observer that
+     * observes the formula given in parameter.
      */
-    public Bindings apply(Formula formula) {
-        if ((myKBase.query(phi) != null) || (myKBase.query(psi) != null)) 
-            return new BindingsImpl();
-        return null;
-    } // End of apply/1
-    
+    public void getObserverTriggerPatterns(Formula formula, Set set) {
+        MatchResult applyResult = SLPatternManip.match(pattern,formula);
+        if (applyResult != null) {
+            try {
+                getObserverTriggerPatterns(applyResult.getFormula("phi"), set);
+                getObserverTriggerPatterns(applyResult.getFormula("psi"), set);
+            } catch (SLPatternManip.WrongTypeException wte) {
+                wte.printStackTrace();
+            }
+        }
+        
+    }
 } // End of class OrFilter

@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class MetaContentExpressionReferenceNode extends ContentExpression
 {
-    public final int getNodeID(){
-        return 5;
-    }
+    public static Integer ID = new Integer(5);
+    public final int getClassID() {return ID.intValue();}
     java.lang.String _lx_name;
     ContentExpression _sm_value;
 
@@ -49,11 +48,13 @@ public class MetaContentExpressionReferenceNode extends ContentExpression
     }
 
     public void accept(Visitor visitor) {visitor.visitMetaContentExpressionReferenceNode(this);}
+
     public Node getClone() {
         Node clone = new MetaContentExpressionReferenceNode();
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof MetaContentExpressionReferenceNode) {
             super.copyValueOf(n);
@@ -63,8 +64,33 @@ public class MetaContentExpressionReferenceNode extends ContentExpression
         }
         initNode();
     }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
+    }
     public java.lang.String lx_name() {return _lx_name;}
     public void lx_name(java.lang.String o) {_lx_name = o;}
     public ContentExpression sm_value() {return _sm_value;}
     public void sm_value(ContentExpression o) {_sm_value = o;}
+
+    public boolean hasAttribute(String attrname) {
+        if ( attrname.equals("lx_name") ) return true;
+        if ( attrname.equals("sm_value") ) return true;
+        return super.hasAttribute(attrname);
+    }
+
+    public Object getAttribute(String attrname) {
+        if ( attrname.equals("lx_name") ) return lx_name();
+        if ( attrname.equals("sm_value") ) return sm_value();
+        return super.getAttribute(attrname);
+    }
+
+    public void setAttribute(String attrname, Object attrvalue) {
+        if ( attrname.equals("lx_name") ) {lx_name((java.lang.String)attrvalue);return;}
+        if ( attrname.equals("sm_value") ) {sm_value((ContentExpression)attrvalue);return;}
+        super.setAttribute(attrname, attrvalue);
+    }
 }

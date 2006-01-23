@@ -32,7 +32,7 @@ import jade.semantics.lang.sl.grammar.Formula;
 
 /**
  * This class provides methods the developer has to subclass to create
- * a new filter for asserting knowledge into the knowledge base 
+ * a new filter for asserting belief into the belief base 
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
  */

@@ -34,6 +34,7 @@ import jade.semantics.interpreter.SemanticRepresentation;
 import jade.semantics.lang.sl.grammar.ActionExpression;
 import jade.semantics.lang.sl.grammar.ActionExpressionNode;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.ArrayList;
@@ -73,7 +74,13 @@ public class Propose extends SemanticInterpretationPrinciple {
     /**
      * Calls {@link jade.semantics.interpreter.StandardCustomization#handleProposal(Term, ActionExpression, Formula)}
      * </code> method of the <code>StandardCustomization</code> class.
-     * @inheritDoc
+     * @param sr a semantic representation
+     * @return if the pattern (B ??agent1 (or (not (I ??agent1 (done ??act ??condition))) (I ??agent2 (done ??act ??condition))))
+     * matches with the incoming SR, and the term ??agent1 is the current agent and different of ??agent2
+     * and the handleProposal
+     * method returns true, this method returns an empty ArrayList. Returns null
+     * in the other cases. 
+     * @throws SemanticInterpretationPrincipleException if any exception occurs
      */
     public ArrayList apply(SemanticRepresentation sr)
     throws SemanticInterpretationPrincipleException {

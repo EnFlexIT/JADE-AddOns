@@ -31,9 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public class DoneNode extends ActionFormula
 {
-    public final int getNodeID(){
-        return 18;
-    }
+    public static Integer ID = new Integer(18);
+    public final int getClassID() {return ID.intValue();}
 
     public DoneNode(Term as_action, Formula as_formula)  {
         super(2, as_action, as_formula);
@@ -46,16 +45,25 @@ public class DoneNode extends ActionFormula
     }
 
     public void accept(Visitor visitor) {visitor.visitDoneNode(this);}
+
     public Node getClone() {
         Node clone = new DoneNode(null, null);
         clone.copyValueOf(this);
         return clone;
     }
+
     public void copyValueOf(Node n) {
         if (n instanceof DoneNode) {
             super.copyValueOf(n);
             DoneNode tn = (DoneNode)n;
         }
         initNode();
+    }
+
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

@@ -40,6 +40,7 @@ import jade.semantics.lang.sl.grammar.PropositionSymbolNode;
 import jade.semantics.lang.sl.grammar.RealConstantNode;
 import jade.semantics.lang.sl.grammar.ResultNode;
 import jade.semantics.lang.sl.grammar.SequenceActionExpressionNode;
+import jade.semantics.lang.sl.grammar.SomeNode;
 import jade.semantics.lang.sl.grammar.StringConstantNode;
 import jade.semantics.lang.sl.grammar.SymbolNode;
 import jade.semantics.lang.sl.grammar.TermSequenceNode;
@@ -252,11 +253,8 @@ public class SLUnparser extends VisitorBase
     }
 
     public void visitByteConstantNode(ByteConstantNode node) {
-		int n = node.lx_value().length;
-		String bytesAsAString = "#"+Integer.toString(n)+"\"";
-		char[] bytesAsChar = new char[n];
-		for (int i=0; i<n;i++) {bytesAsChar[i] = (char)node.lx_value()[i];}
-		_outputLiteralExp(bytesAsAString+new String(bytesAsChar));
+		char[] chars = Base64.encode(node.lx_value());
+		_outputLiteralExp("#"+chars.length+"\""+new String(chars));
     }
 
     public void visitStringConstantNode(StringConstantNode node) {
@@ -298,7 +296,7 @@ public class SLUnparser extends VisitorBase
 			// Meta variable which is not instantiated.
 			if ( _trueSL ) {
 				if ( node.lx_optional().booleanValue() ) {
-					// Ntohing to print.
+					// Nothing to print.
 				}
 				else {
 					_invalidSLExpr = true;
@@ -320,8 +318,17 @@ public class SLUnparser extends VisitorBase
 		}
 		else {
 			// No meta variable or an instantiated meta variable .
+			if ( node.lx_optional().booleanValue() && !_trueSL) {
+				_out.print(_nextChar);
+				_out.print("(::?");
+				_nextChar = WHITE_CHAR;
+			}
 			_outputLiteralExp(":"+node.lx_name());
-			node.childrenAccept(this);					
+			node.childrenAccept(this);				
+			if ( node.lx_optional().booleanValue() && !_trueSL) {
+				_out.print(")");
+				_nextChar = WHITE_CHAR;
+			}		
 		}
 	}
 
@@ -373,7 +380,12 @@ public class SLUnparser extends VisitorBase
 	_outputTaggedExp(node, "all");
     }
 
-    public void visitEqualsNode(EqualsNode node) 
+    public void visitSomeNode(SomeNode node) 
+    {
+	_outputTaggedExp(node, "some");
+    }
+
+   public void visitEqualsNode(EqualsNode node) 
     {
 	_outputTaggedExp(node, "=");
     }

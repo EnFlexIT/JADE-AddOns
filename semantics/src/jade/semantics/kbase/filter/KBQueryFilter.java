@@ -28,37 +28,40 @@
  */
 package jade.semantics.kbase.filter;
 
-import jade.semantics.kbase.Bindings;
+import jade.semantics.kbase.filter.query.QueryResult;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.Term;
-import jade.semantics.lang.sl.tools.MatchResult;
+import jade.util.leap.Set;
 
 /**
  * This abstact class provides methods the developer has to override to create
- * a new filter for querying the knowledge base about a formula.
+ * a new filter for querying the belief base about a formula.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
  */
 public abstract class KBQueryFilter extends KBFilter {
     
     /**
-     * Matching result between the pattern of the filter and the formula to query
-     */
-    protected MatchResult applyResult = null;
-    
-    /**
-     * Returns true if the filter is applicable to the formula, false if not.
-     * @param formula a formula
+     * Returns an array of size 2, with a Boolean at the first index and a 
+     * ListOfMatchResults at the last index. The value of the Boolean is true
+     * if the filter is applicable to the formula, false if not. 
+     * The ListOfMatchResults is the result of performing the filter on the 
+     * specified formula (could be null).   
+     * @param formula a formula on which the filter is tested
      * @param agent a term that represents the agent is trying to apply the filter
-     * @return true if the filter is applicable, false if not.
+     * @return an array with a Boolean meaning the applicability of the filter,
+     * and a ListOfMatchResults that is the result of performing the filter. 
      */
-    public abstract boolean isApplicable(Formula formula, Term agent);
+    public abstract QueryResult apply(Formula formula, Term agent);
     
     /**
-     * Peforms the filter on the specified formula.
-     * @param formula a formula
-     * @return a list of Bind if the filter is applicable and succed, 
-     * <code>null</code> if not.
+     * Fills the set given in parameter with the patterns manipulated by this 
+     * filter and likely to trigger the observers which observe the formula given
+     * in parameter.
+     * @param formula an observed formula
+     * @param set set of patterns. Each pattern corresponds to a kind a formula
+     * which, if it is asserted in the base, triggers the observer that
+     * observes the formula given in parameter.
      */
-    public abstract Bindings apply(Formula formula);
+    public abstract void getObserverTriggerPatterns(Formula formula, Set set);
 } // End of class KBQueryFilter

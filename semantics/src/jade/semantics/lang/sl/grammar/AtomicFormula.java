@@ -31,6 +31,8 @@ package jade.semantics.lang.sl.grammar;
 
 public abstract class AtomicFormula extends Formula
 {
+    public static Integer ID = new Integer(10006);
+    public int getClassID() {return ID.intValue();}
 
     public AtomicFormula(int capacity)  {
       super (capacity);
@@ -41,5 +43,11 @@ public abstract class AtomicFormula extends Formula
             super.copyValueOf(n);
             AtomicFormula tn = (AtomicFormula)n;
         }
+    }
+
+    public Node.Operations getOperations() {
+        Node.Operations result = (Node.Operations)_operations.get(ID);
+        if ( result == null ) {result = super.getOperations();}
+        return result;
     }
 }

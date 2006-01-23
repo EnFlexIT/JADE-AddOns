@@ -28,13 +28,15 @@
  */
 package jade.semantics.kbase.filter.assertion;
 
-import jade.semantics.kbase.Bindings;
+import java.util.Iterator;
+
 import jade.semantics.kbase.FilterKBaseImpl;
 import jade.semantics.kbase.filter.KBAssertFilter;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.tools.ListOfMatchResults;
 
 /**
- * Filter used to observe value of formula in the knowledge base. 
+ * Filter used to observe value of formula in the belief base. 
  * Notifies the observers whose observed formula becomes true.
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/04/07 Revision 1.0
@@ -57,15 +59,18 @@ public class ObserverFilter extends KBAssertFilter {
      * @inheritDoc
      */
     public void afterAssert(Formula formula) {
-        for(int i = 0; i < myKBase.getObservationTable().size(); i++) {
-            FilterKBaseImpl.Observation observation = ((FilterKBaseImpl.Observation)myKBase.getObservationTable().get(i));
-            Bindings newValue = myKBase.query(observation.getObserver().getObservedFormula());
-            if (newValue == null) {
-                observation.setCurrentValue(null);
-            } else if (!newValue.equals(observation.getCurrentValue())) {
-                observation.setCurrentValue(newValue);
-                observation.getObserver().notify(newValue); 
+        if (myKBase.getObserversToApplied() != null) {
+            for (java.util.Iterator iter = myKBase.getObserversToApplied().iterator(); iter.hasNext();) {
+                FilterKBaseImpl.Observation observation = (FilterKBaseImpl.Observation)iter.next();
+                ListOfMatchResults newValue = myKBase.query(observation.getObserver().getObservedFormula());
+                if (newValue == null) {
+                    observation.setCurrentValue(null);
+                } else if (!newValue.equals(observation.getCurrentValue())) {
+                    observation.setCurrentValue(newValue);
+                    observation.getObserver().notify(newValue); 
+                }
             }
+            myKBase.setObserversToBeApplied(null);
         }
-    } // End of AfterAssert/1
+    } // End of afterAssert/1
 } // End of class ObserverFilter

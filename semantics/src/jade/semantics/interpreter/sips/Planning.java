@@ -72,16 +72,23 @@ public class Planning extends SemanticInterpretationPrinciple {
     /*********************************************************************/
     
     /**
-     * Adds a new intentional behaviour ({@link IntentionalBehaviour}) if it is applicable.
-     * @inheritDoc
+     * Adds a new intentional behaviour ({@link IntentionalBehaviour}) on the behaviour
+     * found by the method <code>finPlan</code> of the <code>Planner</code> interface.
+     * @param sr a semantic representation
+     * @return if the pattern "(I ??agent ??phi)"
+     * matches, and the current agent believes ??phi and the agent find 
+     * an action ??act, this method returns an ArrayLIst with the same SR which
+     * SIP index is increased by one. Returns null in other cases. 
+     * @throws SemanticInterpretationPrincipleException if any exception occurs
      */
     public ArrayList apply(final SemanticRepresentation sr) throws SemanticInterpretationPrincipleException {
         try {
             MatchResult matchResult = SLPatternManip.match(pattern,sr.getSLRepresentation());
             if (matchResult != null) {
-                if (myCapabilities.getMyPlanner() != null) {
+                SemanticBehaviour b;
+                if (myCapabilities.getMyPlanner() != null && (b = myCapabilities.getMyPlanner().findPlan(matchResult.getFormula("phi"), sr)) != null) {
                     potentiallyAddBehaviour(new IntentionalBehaviour(
-                            (SemanticBehaviour)myCapabilities.getMyPlanner().findPlan(sr.getSLRepresentation()),
+                            b,
                             sr.getSLRepresentation(),
                             getOrderIndex(),
                             sr.getDataToFeedback()));

@@ -3,6 +3,9 @@ package jade.semantics.lang.sl.content;
 import jade.semantics.lang.sl.grammar.Content;
 import jade.semantics.lang.sl.parser.ParseException;
 import jade.semantics.lang.sl.parser.SLParser;
+import jade.semantics.lang.sl.parser.SLUnparser;
+
+import java.io.StringWriter;
 
 public class DefaultContentParser implements ContentParser {
 
@@ -32,7 +35,16 @@ public class DefaultContentParser implements ContentParser {
 	 */
 	public String unparseContent(Content content)
 		throws UnparseContentException {
-		return content.toString();
+//		return content.toString();
+		try {
+			StringWriter writer = new StringWriter();
+			new SLUnparser(writer).unparseTrueSL(content);
+			return writer.toString();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 }
