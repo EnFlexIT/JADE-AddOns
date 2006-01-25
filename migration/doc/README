@@ -284,7 +284,7 @@ org_example_MyAgent.jar.
 agents. You can specify it with the following parameter when launching 
 JADE from the command line:
 
-java jade.Boot -jade_AgentManagement_agentspath=folder
+java jade.Boot -jade_core_management_AgentManagementService_agentspath=folder
 
    Of course, a config file can be used for specifying this parameter
 instead of using the command line. If we ommit this step, the present
