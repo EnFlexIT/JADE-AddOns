@@ -25,14 +25,14 @@ which is not available with the JADE built-in Agent Mobility Service.
 
 This service has been built to be as transparent as possible to the
 agent programmer, in the sense that, programming agents that will move
-across different platforms will be as easy as moving agents between JADE
-containers.
+across different platforms will be as easy as moving agents between
+JADE containers.
 
 This first version of the service doesn't provide a fully featured,
 optimal, secure and fault-tolerant migration system. The migration
 system provided, althought simple, tries to be the basis to create a
-more sophisticated service in the future. It has been built taking 
-into account the requirements that will surely arise from its first 
+more sophisticated service in the future. It has been built taking
+into account the requirements that will surely arise from its first
 usage by the community.
 
 In this README file we will try to describe the design philosophy and
@@ -232,10 +232,26 @@ ContainerID, but referencing destination platforms instead of
 destination containers.
 
 If we look at the PlatformID constructor it can be seen that the
-argument needed to build such an object its an AID instance.
-This must be the AID of the remote platform's AMS agent
-where we want to move our agent. This AID must contains the transport
-address of the remote platform.
+argument needed to build such an object its an AID instance.  This
+must be the AID of the remote platform's AMS agent where we want to
+move our agent. This AID must contains the transport address of the
+remote platform. Below, we can see sample code invocating migration to
+a remote platform.
+
+Sample code:
+
+// We build the AID corresponding to remote platform's AID 
+// Specified MTP is HTTP in this case, but does not matter which is used
+
+AID remoteAMS = new AID("ams@remotePlatform:1099/JADE", AID.ISGUID);
+remoteAMS.addAddresses("http://remotePlatformaddr:7778/acc");
+
+PlatformID destination = new PlatformID(remoteAMS); 
+
+// We are supposing that we exectue this code from a behaviour
+
+myAgent.doMove(destination);
+
 
 4.3 Class Analysis and JAR Agents
 ----------------------------------
