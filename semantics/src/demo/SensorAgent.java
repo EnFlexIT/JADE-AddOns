@@ -173,7 +173,7 @@ public class SensorAgent extends SemanticAgentBase {
        slider.setPaintTicks(true);
        slider.addChangeListener(new ChangeListener() {
            public void stateChanged(ChangeEvent evt) {
-               getSemanticCapabilities().getSemanticInterpreterBehaviour().interpret("(B ??agent (temperature " + (double)slider.getValue()/tenPowerPrecision + "))");
+               getSemanticCapabilities().getSemanticInterpreterBehaviour().interpret("(B ??agent (= (iota ?x (temperature ?x)) " + (double)slider.getValue()/tenPowerPrecision + ")) ");
            }
        });
        slider.setValue(21*tenPowerPrecision);

@@ -70,7 +70,7 @@ public class EventMemoryFilter extends KBAssertFilter {
      * @return <code>TrueNode</code> if the filter is applicable, the given formula in the 
      * other cases.
      */
-    public Formula beforeAssert(Formula formula) {
+    public Formula apply(Formula formula) {
         mustApplyAfter = false;
         MatchResult matchResult = SLPatternManip.match(pattern, formula);
         if (matchResult != null) {

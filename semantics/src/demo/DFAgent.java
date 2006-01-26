@@ -30,4 +30,8 @@ import jade.semantics.interpreter.SemanticAgentBase;
  * @version Date: 2005/07/04 Revision: 1.0
  */
 public class DFAgent extends SemanticAgentBase {
+    
+    public DFAgent() {
+        super(new DFCapabilities());
+    }
 }

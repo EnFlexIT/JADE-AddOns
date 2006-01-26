@@ -98,7 +98,7 @@ public class AllIREFilter extends KBAssertFilter {
      * @return TrueNode if the filter is applicable, the given formula in the 
      * other cases.
      */
-    public final Formula beforeAssert(Formula formula) {
+    public final Formula apply(Formula formula) {
         mustApplyAfter = false;
         try {
             MatchResult applyResult = SLPatternManip.match(generalPattern, formula);

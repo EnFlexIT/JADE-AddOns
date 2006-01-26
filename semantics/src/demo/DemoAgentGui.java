@@ -37,6 +37,7 @@ import jade.semantics.kbase.FilterKBaseImpl;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.parser.ParseException;
 import jade.semantics.lang.sl.parser.SLParser;
+import jade.semantics.lang.sl.tools.SLPatternManip;
 import jade.util.leap.HashMap;
 
 import java.awt.BorderLayout;
@@ -62,6 +63,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -281,6 +283,22 @@ public class DemoAgentGui extends JFrame {
            secondPanel.add(kbaseScroll);
            secondPanel.add(BorderLayout.SOUTH, p = new JPanel());
             //#DOTNET_EXCLUDE_BEGIN
+           final JTextField text = new JTextField(20);
+           p.add(text);
+           p.add(new JButton(new AbstractAction("Assert") {
+               public void actionPerformed(ActionEvent evt) {
+                   Formula result;
+                   if (text.getText() != null && !text.getText().trim().equals("")) {
+                       result = SLPatternManip.fromFormula(text.getText());
+                   } else {
+                       result = null;
+                   }
+                   if (result != null) {
+                          ((FilterKBaseImpl)((SemanticAgent)agent).getSemanticCapabilities().getMyKBase()).assertFormula(result);
+                          kbaseList.setListData(((FilterKBaseImpl)((SemanticAgent)agent).getSemanticCapabilities().getMyKBase()).viewDataInBase());
+                   }
+                   
+                   }}));
            p.add(new JButton(new AbstractAction("Remove") {
                public void actionPerformed(ActionEvent evt) {
                    if ( kbaseList.getSelectedIndex() != -1 ) {
@@ -397,7 +415,7 @@ public class DemoAgentGui extends JFrame {
         *
         */
        public void action() {
-           ACLMessage msg = agent.receive();
+           ACLMessage msg = agent.receive();           
            if ( msg != null ) {
                String text = receivedMsgTextArea.getText();
                receivedMsgTextArea.append(msg.toString()+"\n");

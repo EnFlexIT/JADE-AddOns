@@ -76,15 +76,15 @@ public abstract class KBAssertFilterAdapter extends KBAssertFilter {
      * @param formula a formula
      * @return true if the pattern of the adapter matches the formula,
      * false if not. 
-     * @see KBAssertFilter#beforeAssert(Formula)
+     * @see KBAssertFilter#apply(Formula)
      */
-    public final Formula beforeAssert(Formula formula) {
+    public final Formula apply(Formula formula) {
         mustApplyAfter = false;
         try {
             applyResult = SLPatternManip.match(pattern, formula);
             if (applyResult != null) {
                 mustApplyAfter = true;
-                return applyBefore(formula);  
+                return doApply(formula);  
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,7 +105,7 @@ public abstract class KBAssertFilterAdapter extends KBAssertFilter {
      * @param formula the incoming formula
      * @return a formula after the application of the method 
      */
-    public Formula applyBefore(Formula formula) {
+    public Formula doApply(Formula formula) {
         return formula;
     }
 } // End of KBAssertFilterAdapter

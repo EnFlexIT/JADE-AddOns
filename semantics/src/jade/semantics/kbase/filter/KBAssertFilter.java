@@ -52,17 +52,18 @@ public class KBAssertFilter extends KBFilter {
      * @param formula the formula to assert
      * @return the formula to assert into the KBase
      */
-    public Formula beforeAssert(Formula formula) {
+    public Formula apply(Formula formula) {
         mustApplyAfter = true;
         return formula;
-    } // End of beforeAssert/1
+    } // End of apply/1
     
     /**
      * Applies the filter after the given formula has been asserted into the KBase.
      * By default, does nothing.
      * @param formula the formula that has been asserted into the KBase.
+     * @deprecated 
      */
     public void afterAssert(Formula formula) {
-    } // End of AfterAssert/1
+    } // End of afterAssert/1
     
 } // End of class KBAssertFilter

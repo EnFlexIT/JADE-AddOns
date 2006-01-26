@@ -30,14 +30,28 @@ Boston, MA  02111-1307, USA.
 package jade.semantics.lang.sl.grammar;
 
 
+//#PJAVA_EXCLUDE_BEGIN
 import java.util.HashMap;
 import java.util.Vector;
+//#PJAVA_EXCLUDE_END
+/*#PJAVA_INCLUDE_BEGIN
+import jade.util.leap.Comparable;
+import jade.util.leap.HashMap;
+
+import java.util.Vector;
+#PJAVA_INCLUDE_END*/
 /**
 This abstract class is the base class of all nodes belonging to a directed graph
  representing a particular abstract syntax tree. It provides all basic mechanisms
 needed to manipulate a node.
 */
+//#PJAVA_EXCLUDE_BEGIN
+public abstract class Node {
+//#PJAVA_EXCLUDE_END
+/*#PJAVA_INCLUDE_BEGIN
 public abstract class Node implements Comparable {
+#PJAVA_INCLUDE_END*/
+
     /**
     This interface defines node operations that can be redefined
      using the <b><code>addOperations</code></b> method.

@@ -33,7 +33,6 @@ import jade.core.AID;
 import jade.core.behaviours.WakerBehaviour;
 import jade.semantics.interpreter.SemanticAgentBase;
 import jade.semantics.interpreter.Tools;
-import jade.semantics.kbase.FilterKBaseImpl;
 import jade.semantics.lang.sl.grammar.ActionExpression;
 import jade.semantics.lang.sl.grammar.ActionExpressionNode;
 import jade.semantics.lang.sl.grammar.Constant;
@@ -103,7 +102,7 @@ public class DisplayAgent extends SemanticAgentBase {
    static final Formula CFP_CONDITION 
    = SLPatternManip.fromFormula("(precision ??X)");
    static final IdentifyingExpression SUBSCRIBE_IRE 
-   = (IdentifyingExpression)SLPatternManip.fromTerm("(any ?x (temperature ?x))");
+   = (IdentifyingExpression)SLPatternManip.fromTerm("(iota ?x (temperature ?x))");
    static final IdentifyingExpression SUBSCRIBE_DF_IRE 
    = (IdentifyingExpression)SLPatternManip.fromTerm("(all ?x (sensor ?x))");
    
@@ -115,6 +114,7 @@ public class DisplayAgent extends SemanticAgentBase {
     */
    public DisplayAgent() {
        super(new DisplayCapabilities());
+       
    }
    
    /*********************************************************************/
@@ -182,17 +182,18 @@ public class DisplayAgent extends SemanticAgentBase {
             {                   
                protected void handleElapsedTimeout() {
                    ListOfTerm sensors = getSemanticCapabilities().getMyKBase().queryRef(SUBSCRIBE_DF_IRE);
-                   ((FilterKBaseImpl)getSemanticCapabilities().getMyKBase()).viewDataInBase();
-                   for(int i=0; i< sensors.size(); i++) {
-                       try {
-                           getSemanticCapabilities().sendCommunicativeAction(getSemanticCapabilities().createCFP((ActionExpression)SLPatternManip
-                                   .instantiate(CFP_ACTION, 
-                                           "agent", getSemanticCapabilities().getAgentName(),
-                                           "receiver", sensors.element(i)),
-                                           CFP_IRE,
-                                           sensors.element(i)));
+                   if (sensors != null) {
+                       for(int i=0; i< sensors.size(); i++) {
+                           try {
+                               getSemanticCapabilities().sendCommunicativeAction(getSemanticCapabilities().createCFP((ActionExpression)SLPatternManip
+                                       .instantiate(CFP_ACTION, 
+                                               "agent", getSemanticCapabilities().getAgentName(),
+                                               "receiver", sensors.element(i)),
+                                               CFP_IRE,
+                                               sensors.element(i)));
+                           }
+                           catch (Exception e) {e.printStackTrace();}
                        }
-                       catch (Exception e) {e.printStackTrace();}                           
                    }
                }});
            

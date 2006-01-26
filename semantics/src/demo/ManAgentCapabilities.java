@@ -39,6 +39,7 @@ import jade.semantics.behaviours.SemanticBehaviour;
 import jade.semantics.interpreter.SemanticCapabilities;
 import jade.semantics.interpreter.StandardCustomizationAdapter;
 import jade.semantics.kbase.FilterKBase;
+import jade.semantics.kbase.FilterKBaseImpl;
 import jade.semantics.kbase.observer.EventCreationObserver;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.Term;
@@ -90,8 +91,8 @@ public class ManAgentCapabilities extends SemanticCapabilities {
    /*********************************************************************/
    
    /**
-    * Knowledge base setup.
-    * Adds Observer on differents levels of temperature and initial knowledge
+    * Belief base setup.
+    * Adds Observer on differents levels of temperature and initial belief
     * of the son agent.
     */
    public void setupKbase() {
@@ -158,8 +159,9 @@ public class ManAgentCapabilities extends SemanticCapabilities {
                            "(I "+getAgentName()+" (wearing "+getAgentName()+" trousers)))))"
                    )));
            
-           // Initial Knowledge setup 
+           // Initial belief setup 
            // -----------------------
+           ((FilterKBaseImpl)getMyKBase()).addClosedPredicate(SLPatternManip.fromFormula("(wearing "+getAgentName()+" ??c)"));
            Formula initialKPattern = 
                SLPatternManip.fromFormula("(B "+ getAgentName() +" (not (wearing "+getAgentName()+" ??clothing)))");
            // In the initial state, the son does not wear clothing
@@ -246,12 +248,48 @@ public class ManAgentCapabilities extends SemanticCapabilities {
                "(WAIT :time ??time)",
                SLPatternManip.fromFormula("true"),
                SLPatternManip.fromFormula("true")){
+           private long wakeupTime = -1, blockTime;
+
            public void perform(OntoActionBehaviour behaviour) {
-               if (behaviour.getState() == SemanticBehaviour.START) {
-                   behaviour.block( Long.parseLong((getActionParameter("time").toString())) );
-                   behaviour.setState(1000);
+//               if (behaviour.getState() == SemanticBehaviour.START) {
+//                   behaviour.block( Long.parseLong((getActionParameter("time").toString())) );
+//                   behaviour.setState(1000);
+//               }
+//               else behaviour.setState(SemanticBehaviour.SUCCESS);
+               
+               switch (behaviour.getState()) {
+               case SemanticBehaviour.START: {
+                // Adjust wakeupTime in case the user set a relative time
+                    if (wakeupTime == -1) {
+                        wakeupTime = System.currentTimeMillis()+Long.parseLong((getActionParameter("time").toString()));
+                    }
+                 // in this state the behaviour blocks itself
+                 blockTime = wakeupTime - System.currentTimeMillis();
+                 if (blockTime > 0) // MINIMUM_TIMEOUT)
+                   //blockTime = MINIMUM_TIMEOUT;
+                   behaviour.block(blockTime);
+                 behaviour.setState(1000);
+                 break;
                }
-               else behaviour.setState(SemanticBehaviour.SUCCESS);
+               case 1000: {
+                 // in this state the behaviour can be restarted for two reasons
+                 // 1. the timeout is elapsed (then the handler method is called 
+                 //                            and the behaviour is definitively finished) 
+                 // 2. a message has arrived for this agent (then it blocks again and
+                 //                            the FSM remains in this state)
+                 blockTime = wakeupTime - System.currentTimeMillis();
+                 if (blockTime <= 0) {
+                   // timeout is expired
+                   behaviour.setState(SemanticBehaviour.SUCCESS);
+                 } else 
+                   behaviour.block(blockTime);
+                 break;
+               }
+               default : {
+                 behaviour.setState(SemanticBehaviour.EXECUTION_FAILURE);
+                 break;
+               }
+               } // end of switch
            }
        });
         //#DOTNET_EXCLUDE_END

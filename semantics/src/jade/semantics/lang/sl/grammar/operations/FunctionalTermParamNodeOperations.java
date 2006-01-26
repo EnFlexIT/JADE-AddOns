@@ -6,6 +6,7 @@ import jade.semantics.lang.sl.grammar.Parameter;
 import jade.semantics.lang.sl.grammar.ParameterNode;
 import jade.semantics.lang.sl.grammar.Term;
 
+//#PJAVA_EXCLUDE_BEGIN
 import java.util.Comparator;
 //#PJAVA_EXCLUDE_END
 /*#PJAVA_INCLUDE_BEGIN

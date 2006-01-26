@@ -74,11 +74,11 @@ public class HashMapForCollections extends HashMap {
 /******************************************************************************/
 	
 	/**
-     * This method overrides the one defined in {@link HashMap HashMap}.<br>
+     * This method overrides the one defined in HashMap.<br>
      * If the key does not already exist, it adds it while putting the <code>value</code>
-     * object in a {@link HashSet HashSet} which is created at the same time.<br> 
+     * object in a HashSet which is created at the same time.<br> 
      * If the key already exists, the <code>value</code> Object is added in a 
-     * {@link HashSet HashSet} corresponding to the key.
+     * HashSet corresponding to the key.
 	 * @param key key of the HashMap
 	 * @param value value to add
 	 * @return the added HashSet object if the key already existed, <code>null</code>

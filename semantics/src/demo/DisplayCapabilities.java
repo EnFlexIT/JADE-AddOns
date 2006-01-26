@@ -34,6 +34,7 @@ import jade.semantics.kbase.FilterKBase;
 import jade.semantics.kbase.filter.KBAssertFilterAdapter;
 import jade.semantics.lang.sl.grammar.ActionExpression;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.grammar.IdentifyingExpression;
 import jade.semantics.lang.sl.grammar.IntegerConstantNode;
 import jade.semantics.lang.sl.grammar.RealConstantNode;
 import jade.semantics.lang.sl.grammar.Term;
@@ -67,13 +68,22 @@ public class DisplayCapabilities extends SemanticCapabilities {
            public boolean acceptBeliefTransfer(Formula formula, Term agent) {
                // the agent agrees to believe of information one the temperature only
                // if the agent which sends it is has sensor.
+               Formula toBeTested = formula;
+               MatchResult match = SLPatternManip.match(SLPatternManip.fromFormula("(= ??ire ??value)"), formula);
+               if (match != null) {
+                   try {
+                       toBeTested = ((IdentifyingExpression)match.getTerm("ire")).as_formula();
+                   } catch (SLPatternManip.WrongTypeException wte) {
+                       wte.printStackTrace();
+                   }
+               }
                 return 
                (((DisplayAgent)getAgent()).selectedAgent != null 
                        && agent.equals(((DisplayAgent)getAgent()).selectedAgent)) 
-                       || !((SLPatternManip.match(temperatureDefinition.VALUE_X_PATTERN, formula) != null)
-                               || (SLPatternManip.match(temperatureDefinition.NOT_VALUE_X_PATTERN, formula) != null)
-                               || (SLPatternManip.match(temperatureDefinition.VALUE_GT_X_PATTERN, formula) != null)
-                               || (SLPatternManip.match(temperatureDefinition.NOT_VALUE_GT_X_PATTERN, formula) != null));
+                       || !((SLPatternManip.match(temperatureDefinition.VALUE_X_PATTERN, toBeTested) != null)
+                               || (SLPatternManip.match(temperatureDefinition.NOT_VALUE_X_PATTERN, toBeTested) != null)
+                               || (SLPatternManip.match(temperatureDefinition.VALUE_GT_X_PATTERN, toBeTested) != null)
+                               || (SLPatternManip.match(temperatureDefinition.NOT_VALUE_GT_X_PATTERN, toBeTested) != null));
            }
             
            public boolean handleProposal(Term agentI, ActionExpression action, Formula formula) {

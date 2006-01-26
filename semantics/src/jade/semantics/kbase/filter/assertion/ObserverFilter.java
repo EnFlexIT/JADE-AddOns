@@ -48,7 +48,7 @@ public class ObserverFilter extends KBAssertFilter {
      * @param formula a formula to assert
      * @return the given formula  
      */
-    public Formula beforeAssert(Formula formula) {
+    public Formula apply(Formula formula) {
         mustApplyAfter = true;
         return formula;
     } // End of beforeAssert/1

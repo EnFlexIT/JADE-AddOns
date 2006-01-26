@@ -157,7 +157,7 @@ public class SemanticCapabilities {
     * Calls all the setupXXX methods to initialise the capabilities.
     * @param agent the owner of this capabilities 
     */
-   public void install(SemanticAgent agent) {
+   protected void install(SemanticAgent agent) {
        //
        // Set the agent on which to install these capabilities
        myAgent = agent;

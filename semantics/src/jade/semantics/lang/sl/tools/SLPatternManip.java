@@ -1125,7 +1125,6 @@ public class SLPatternManip {
                 } else {
                     boolean find = false;
                     for (int j = 0; j < other.size(); j++) {
-                      //  System.out.println("On y passe avec " + other);
                         if (newMatcher().match(ref.get(i), other.get(j),_metaReferences, new ListOfNodes(), new ListOfNodes(), new ListOfNodes(), new ListOfNodes()) 
                                 || 
                                 newMatcher().match(other.get(j),ref.get(i), _metaReferences, new ListOfNodes(), new ListOfNodes(), new ListOfNodes(),  new ListOfNodes())) {

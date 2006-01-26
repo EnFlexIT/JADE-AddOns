@@ -178,8 +178,6 @@ public class ManAgent extends SemanticAgentBase {
         gui = new DemoAgentGui(getName(), args[0].toString(), this, true,  args.length >= 4 && args[3].equals("showkb"));
         
         try {
-            final IdentifyingExpression allClothingsIE = (IdentifyingExpression)SLPatternManip.instantiate(ALL_CLOTHING_PATTERN, "??agent", getSemanticCapabilities().getAgentName());
-            
             manPanel = (new JPanel() {
                 public void paintComponent(Graphics g) {
                     super.paintComponent(g);
@@ -239,9 +237,9 @@ public class ManAgent extends SemanticAgentBase {
             ACLMessage msg = new ACLMessage(subscribe ? ACLMessage.REQUEST_WHENEVER : ACLMessage.INFORM);
             msg.setSender(getAID());
             msg.addReceiver(displayAID);
-            Term receiver = (Term)SLParser.getParser().parseTerm(displayAID.toString());
-            Formula formula = (Formula)SLParser.getParser().parseFormula(formulaStr);
-            Content content = (Content)SLParser.getParser().parseContent("("+formula+")");
+            Term receiver = SLParser.getParser().parseTerm(displayAID.toString());
+            Formula formula = SLParser.getParser().parseFormula(formulaStr);
+            Content content = SLParser.getParser().parseContent("("+formula+")");
             if (subscribe) {
                 msg.setContent(SLPatternManip.instantiate(REQUEST_WHENEVER_SUBSCRIBE_PATTERN, 
                         "me", getSemanticCapabilities().getAgentName(),

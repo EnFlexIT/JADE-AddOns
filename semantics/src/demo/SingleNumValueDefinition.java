@@ -27,18 +27,21 @@ Boston, MA  02111-1307, USA.
 */
 package demo;
 
-import jade.semantics.kbase.Bindings;
-import jade.semantics.kbase.BindingsImpl;
+import jade.semantics.kbase.FilterKBase;
 import jade.semantics.kbase.FiltersDefinition;
-import jade.semantics.kbase.FilterKBaseImpl;
 import jade.semantics.kbase.filter.KBAssertFilterAdapter;
 import jade.semantics.kbase.filter.KBQueryFilterAdapter;
+import jade.semantics.kbase.filter.query.QueryResult;
 import jade.semantics.lang.sl.grammar.Constant;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.IdentifyingExpression;
 import jade.semantics.lang.sl.grammar.ListOfTerm;
+import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.grammar.TrueNode;
+import jade.semantics.lang.sl.tools.ListOfMatchResults;
+import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
+import jade.util.leap.Set;
 
 /**
 * General class that defines single value predicat. 
@@ -59,15 +62,14 @@ public class SingleNumValueDefinition extends FiltersDefinition {
    IdentifyingExpression ALL_VALUES_NOT_GT;
    
    /**
-    * Removes from the base all the knowledge about this kind of predicat
+    * Removes from the base all the belief about this kind of predicat
     * @param kbase the base to clean
     */
-   protected void cleanKBase(FilterKBaseImpl kbase) 
-   {
-       kbase.removeAllFormulae(NOT_VALUE_X_PATTERN);
-       kbase.removeAllFormulae(VALUE_X_PATTERN);
-       kbase.removeAllFormulae(VALUE_GT_X_PATTERN);
-       kbase.removeAllFormulae(NOT_VALUE_GT_X_PATTERN);
+   protected void cleanKBase(FilterKBase kbase) {
+       kbase.retractFormula(NOT_VALUE_X_PATTERN);
+       kbase.retractFormula(VALUE_X_PATTERN);
+       kbase.retractFormula(VALUE_GT_X_PATTERN);
+       kbase.retractFormula(NOT_VALUE_GT_X_PATTERN);
    } // End of cleanKBase/1
    
    /**
@@ -83,12 +85,12 @@ public class SingleNumValueDefinition extends FiltersDefinition {
        VALUE_GT_X_PATTERN = SLPatternManip.fromFormula("("+name+"_gt ??X)");
        
        NOT_VALUE_GT_X_PATTERN = SLPatternManip.fromFormula("(not ("+name+"_gt ??X))");
+
+       ALL_VALUES = (IdentifyingExpression)SLPatternManip.fromTerm("(all ?y (B ??agent ("+name+" ?y)))");
        
-       ALL_VALUES = (IdentifyingExpression)SLPatternManip.fromTerm("(all ?y ("+name+" ?y))");
+       ALL_VALUES_GT = (IdentifyingExpression)SLPatternManip.fromTerm("(all ?y (B ??agent ("+name+"_gt ?y)))");
        
-       ALL_VALUES_GT = (IdentifyingExpression)SLPatternManip.fromTerm("(all ?y ("+name+"_gt ?y))");
-       
-       ALL_VALUES_NOT_GT = (IdentifyingExpression)SLPatternManip.fromTerm("(all ?y (not ("+name+"_gt ?y)))");
+       ALL_VALUES_NOT_GT = (IdentifyingExpression)SLPatternManip.fromTerm("(all ?y (B ??agent (not ("+name+"_gt ?y))))");
        
        // ASSERT FILTERS
        // --------------
@@ -96,46 +98,37 @@ public class SingleNumValueDefinition extends FiltersDefinition {
        //predicat in the base.
        defineFilter(new KBAssertFilterAdapter("(B ??agent " + VALUE_X_PATTERN + ")") {
            //If the predicat is already in the base, does nothing, otherwise
-           //cleans the base of all knowledge related to this predicat
-           public Formula applyBefore(Formula formula) {
-               mustApplyAfter = false;
+           //cleans the base of all knowledge related to this predicate
+           public Formula doApply(Formula formula) {
                if ((myKBase.query(formula) != null)) {
                    return new TrueNode();
                }
-               else {
-                   cleanKBase((FilterKBaseImpl) myKBase);
-                   return formula;
-               }
+               cleanKBase(myKBase);
+               return formula;
            }
        });
        
        defineFilter(new KBAssertFilterAdapter("(B ??agent " + VALUE_GT_X_PATTERN + ")") {
-           public Formula applyBefore(Formula formula) {
+           public Formula doApply(Formula formula) {
                //If the predicat is already in the base, does nothing, otherwise
-               //cleans the base of all knowledge related to this predicat
-               mustApplyAfter = false;
+               //cleans the base of all knowledge related to this predicate
                if ((myKBase.query(formula) != null)) {
                    return new TrueNode();
                }
-               else {
-                   cleanKBase((FilterKBaseImpl) myKBase);
-                   return formula;
-               }
+               cleanKBase(myKBase);
+               return formula;
            }
        });
        
        defineFilter(new KBAssertFilterAdapter("(B ??agent " + NOT_VALUE_GT_X_PATTERN + ")") {
-           public Formula applyBefore(Formula formula) {
+           public Formula doApply(Formula formula) {
                //If the predicat is already in the base, does nothing, otherwise
-               //cleans the base of all knowledge related to this predicat
-               mustApplyAfter = false;
+               //cleans the base of all knowledge related to this predicate
                if ((myKBase.query(formula) != null)) {
                    return new TrueNode();
                }
-               else {
-                   cleanKBase((FilterKBaseImpl) myKBase);
-                   return formula;
-               }
+               cleanKBase(myKBase);
+               return formula;
            }
        });
        
@@ -144,54 +137,99 @@ public class SingleNumValueDefinition extends FiltersDefinition {
        
        defineFilter(new KBQueryFilterAdapter("(B ??agent " + VALUE_GT_X_PATTERN + ")") {
            // Compare the sought value with that known to give the answer. 
-           public Bindings apply(Formula formula) {
-               Bindings result = null;
+           public QueryResult apply(Formula formula, Term agent) {
+               QueryResult queryResult = new QueryResult();
                try {
-                   Long queriedValue = ((Constant)applyResult.getTerm("X")).intValue();
-                   ListOfTerm queryResult = myKBase.queryRef(ALL_VALUES);
-                   if ( queryResult.size() != 0 ) {
-                       if ( ((Constant)queryResult.get(0)).intValue().longValue() > queriedValue.longValue() ) {
-                           result = new BindingsImpl();
-                       }
+                  SLPatternManip.set(pattern, "agent", agent);
+                  MatchResult applyResult = SLPatternManip.match(pattern, formula);
+                  if (applyResult != null && applyResult.getTerm("X") instanceof Constant) {
+                      queryResult.setResult(null);
+                      Long queriedValue = ((Constant)applyResult.getTerm("X")).intValue();
+                      ListOfTerm queryRefResult = myKBase.queryRef((IdentifyingExpression)
+                       SLPatternManip.instantiate(ALL_VALUES, "agent", applyResult.getTerm("agent")));
+                      if (queryRefResult != null && queryRefResult.size() != 0 ) {
+                          if ( ((Constant)queryRefResult.get(0)).intValue().longValue() > queriedValue.longValue() ) {
+                              queryResult.setResult(new ListOfMatchResults());
+                          }
+                      }
+                      else {
+                          queryRefResult = myKBase.queryRef((IdentifyingExpression)
+                                  SLPatternManip.instantiate(ALL_VALUES_GT, "agent", applyResult.getTerm("agent")));
+                          if (queryRefResult != null && queryRefResult.size() != 0 ) {
+                              if (((Constant)queryRefResult.get(0)).intValue().longValue() >= queriedValue.longValue() ) {
+                                  queryResult.setResult(new ListOfMatchResults());
+                              }
+                          }
+                      }
+                      queryResult.setFilterApplied(true);
+                      return queryResult;
+                  }
+              } catch (Exception e) {
+                  e.printStackTrace();
+              }
+              return queryResult;
+           }
+           
+           public void getObserverTriggerPatterns(Formula formula, Set set) {
+               try {
+                   MatchResult applyResult = SLPatternManip.match(pattern, formula);
+                   if (applyResult != null && applyResult.getTerm("X") instanceof Constant) {
+                       set.add(VALUE_X_PATTERN);
+                       set.add(VALUE_GT_X_PATTERN);
+                       set.add(NOT_VALUE_GT_X_PATTERN);
                    }
-                   else {
-                       queryResult = myKBase.queryRef(ALL_VALUES_GT);
-                       if ( queryResult.size() != 0 ) {
-                           if (((Constant)queryResult.get(0)).intValue().longValue() >= queriedValue.longValue() ) {
-                               result = new BindingsImpl();
-                           }
-                       }
-                   }                   
+               }catch (SLPatternManip.WrongTypeException wte) {
+                   wte.printStackTrace();
                }
-               catch(Exception e) {e.printStackTrace();}
-               return result;
            }
        });
        
        defineFilter(new KBQueryFilterAdapter("(B ??agent " + NOT_VALUE_GT_X_PATTERN + ")") {
            // Compare the sought value with that known to give the answer. 
-           public Bindings apply(Formula formula) {
-               Bindings result = null;
+           public QueryResult apply(Formula formula, Term agent) {
+               QueryResult queryResult = new QueryResult();
                try {
-                   Long queriedValue = ((Constant)applyResult.getTerm("X")).intValue();
-                   ListOfTerm queryResult = myKBase.queryRef(ALL_VALUES);
-                   if ( queryResult.size() != 0 ) {
-                       if ( ((Constant)queryResult.get(0)).intValue().longValue() < queriedValue.longValue() ) {
-                           result = new BindingsImpl();
-                       }
-                   }
-                   else {
-                       queryResult = myKBase.queryRef(ALL_VALUES_NOT_GT);
-                       if ( queryResult.size() != 0 ) {
-                           if (((Constant)queryResult.get(0)).intValue().longValue() <= queriedValue.longValue() ) {
-                               result = new BindingsImpl();
+                   SLPatternManip.set(pattern, "agent", agent);
+                   MatchResult applyResult = SLPatternManip.match(pattern, formula);
+                   if (applyResult != null && applyResult.getTerm("X") instanceof Constant) {
+                       queryResult.setResult(null);
+                       Long queriedValue = ((Constant)applyResult.getTerm("X")).intValue();
+                       ListOfTerm queryRefResult = myKBase.queryRef((IdentifyingExpression)
+                                   SLPatternManip.instantiate(ALL_VALUES, "agent", applyResult.getTerm("agent")));
+                       if (queryRefResult != null && queryRefResult.size() != 0 ) {
+                           if ( ((Constant)queryRefResult.get(0)).intValue().longValue() < queriedValue.longValue() ) {
+                               queryResult.setResult(new ListOfMatchResults());
                            }
                        }
-                   }                   
-               }
-               catch(Exception e) {e.printStackTrace();}
-               return result;
+                       else {
+                           queryRefResult = myKBase.queryRef((IdentifyingExpression)
+                                   SLPatternManip.instantiate(ALL_VALUES_NOT_GT, "agent", applyResult.getTerm("agent")));
+                           if (queryRefResult != null && queryRefResult.size() != 0 ) {
+                               if (((Constant)queryRefResult.get(0)).intValue().longValue() <= queriedValue.longValue() ) {
+                                   queryResult.setResult(new ListOfMatchResults());
+                               }
+                           }
+                       }
+                       queryResult.setFilterApplied(true);
+                       return queryResult;
+                   }
+               } catch(Exception e) {e.printStackTrace();}
+               return queryResult;
            }
+           public void getObserverTriggerPatterns(Formula formula, Set set) {
+               try {
+               MatchResult applyResult = SLPatternManip.match(pattern, formula);
+               if (applyResult != null && applyResult.getTerm("X") instanceof Constant) {
+                   set.add(NOT_VALUE_GT_X_PATTERN);
+                   set.add(VALUE_X_PATTERN);
+                   set.add(VALUE_GT_X_PATTERN);
+               }
+               }catch (SLPatternManip.WrongTypeException wte) {
+                   wte.printStackTrace();
+               }
+               
+           }
+
        });
        
    } // End of SingleNumValueDefinition

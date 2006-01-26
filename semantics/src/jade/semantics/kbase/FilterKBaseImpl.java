@@ -247,7 +247,7 @@ public class FilterKBaseImpl implements FilterKBase {
             Formula formulaToAssert = formula;
             for (int i =0; i < assertFilterList.size(); i++) {
                 if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Applying assert filter BEFORE (" + i + "): " + assertFilterList.get(i));
-                formulaToAssert = ((KBAssertFilter)assertFilterList.get(i)).beforeAssert(formulaToAssert);
+                formulaToAssert = ((KBAssertFilter)assertFilterList.get(i)).apply(formulaToAssert);
                 if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "beforeAssert Filter (" + i + ") resulted in : " + formulaToAssert);
             }
             if (logger.isLoggable(Logger.FINEST)) logger.log(Logger.FINEST, "Raw asserting : " + formulaToAssert);
@@ -586,7 +586,7 @@ public class FilterKBaseImpl implements FilterKBase {
      * Removes all the formulae that match the specified pattern.
      * @param pattern an SL pattern
      */
-    public void removeAllFormulae(Formula pattern) {
+    private void removeAllFormulae(Formula pattern) {
         for (int i = dataStorage.size()-1; i >= 0 ; i--) {
             MatchResult matchResult = SLPatternManip.match(pattern, (Node)dataStorage.get(i));
             if (matchResult != null) {

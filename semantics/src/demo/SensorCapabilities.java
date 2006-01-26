@@ -86,9 +86,8 @@ public class SensorCapabilities extends SemanticCapabilities {
 				if ( SLPatternManip.match(SLPatternManip.fromFormula("(precision ??X)"), formula) != null ) {
 					return myKBase.queryRef(new AnyNode(variable, formula));
 				}
-				else {
-					return null;
-				}
+				return null;
+				
 			}
 			// Sets the color to yellow when it receives a subscribe
 			public void notifySubscribe(Term subscriber, Formula obsverved, Formula goal) {

@@ -29,13 +29,23 @@ Boston, MA  02111-1307, USA.
 
 package jade.semantics.lang.sl.grammar;
 
-
+//#PJAVA_EXCLUDE_BEGIN
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+//#PJAVA_EXCLUDE_END
+/*#PJAVA_INCLUDE_BEGIN
+import jade.util.leap.Collection;
+import jade.util.leap.Comparator;
+import jade.util.leap.LinkedList;
+import jade.util.leap.List;
+import jade.util.leap.SortedSet;
+import jade.util.leap.SortedSetImpl;
+#PJAVA_INCLUDE_END*/
 import java.util.Vector;
+
 /**
 This abstract class is the base class of all list of nodes.
  It provides all basic mechanisms needed to manipulate a list of nodes.
@@ -148,6 +158,7 @@ public class ListOfNodes extends Node {
     @param comparator the comparator to use to sort the list.
     */
     public void sort(Comparator comparator) {
+        //#PJAVA_EXCLUDE_BEGIN
         if ( comparator == null ) {
             Collections.sort(_nodesList, new Comparator() {
                 public int compare(Object o1, Object o2) {return (o1.toString().compareTo(o2.toString()));}});
@@ -155,6 +166,14 @@ public class ListOfNodes extends Node {
         else {
             Collections.sort(_nodesList, comparator);
         }
+        //#PJAVA_EXCLUDE_END
+        /*#PJAVA_INCLUDE_BEGIN
+        SortedSet sorted = new SortedSetImpl();
+        for (int i = 0; i<_nodesList.size(); i++) {sorted.add(_nodesList.get(i));}
+        Object[] sortedObjects = sorted.toArray();
+        removeAll();
+        for (int i = 0; i<sortedObjects.length; i++) {add((Node)sortedObjects[i]);}
+        #PJAVA_INCLUDE_END*/  
     }
     /**
     This method returns the list as a collection. 
