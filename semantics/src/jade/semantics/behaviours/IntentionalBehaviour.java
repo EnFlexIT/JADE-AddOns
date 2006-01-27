@@ -29,17 +29,12 @@
 package jade.semantics.behaviours;
 
 
-import java.util.HashSet;
-import java.util.Iterator;
-
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.SequentialBehaviour;
-import jade.semantics.interpreter.Finder;
 import jade.semantics.interpreter.SemanticAgent;
 import jade.semantics.interpreter.SemanticRepresentation;
 import jade.semantics.interpreter.Tools;
 import jade.semantics.interpreter.SemanticRepresentation.FeedBackData;
-import jade.semantics.kbase.FilterKBaseImpl;
 import jade.semantics.kbase.observer.Observer;
 import jade.semantics.kbase.observer.ObserverAdapter;
 import jade.semantics.lang.sl.grammar.ActionExpression;
@@ -101,7 +96,12 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
      */
     private Formula existPattern;
     
-    private Formula observedIntention;
+    /**
+     * Observer to monitor the dropout of the intention attached to this 
+     * behaviour 
+     */
+    private Observer notIntentionObserver;
+    
     /*********************************************************************/
     /**                         CONSTRUCTOR                             **/
     /*********************************************************************/
@@ -126,7 +126,12 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
         donePattern = SLPatternManip.fromFormula("(done ??action ??phi)");
         dataPattern = SLPatternManip.fromFormula("(I ??agent (B ??sender ??phi))");
         existPattern = SLPatternManip.fromFormula("(I ??agent (B ??sender (exists ?e (done (; ??act ?e)))))");
-        observedIntention = new NotNode(intention);
+        notIntentionObserver = new ObserverAdapter(new NotNode(intention)) {
+            public void notify(ListOfMatchResults listOfMatchResults) {
+                ((SemanticAgent)IntentionalBehaviour.this.myAgent).getSemanticCapabilities().getMyKBase().removeObserver(notIntentionObserver);
+                IntentionalBehaviour.this.myAgent.removeBehaviour(IntentionalBehaviour.this);
+            }
+        };
     } // End of IntentionalBehaviour/2
     
     /*********************************************************************/
@@ -134,20 +139,7 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
     /*********************************************************************/
     
     public void onStart() {
-        ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().addObserver(new ObserverAdapter(observedIntention) {
-            public void notify(ListOfMatchResults listOfMatchResults) {
-                ((SemanticAgent)IntentionalBehaviour.this.myAgent).getSemanticCapabilities().getMyKBase().removeObserver(
-                        new Finder() {
-                            public boolean identify(Object object) {
-                                if (object instanceof Observer) {
-                                    return ((Observer)object).getObservedFormula().equals(observedIntention);
-                                }
-                                return false;
-                            }
-                        });
-                IntentionalBehaviour.this.myAgent.removeBehaviour(IntentionalBehaviour.this);
-            }
-        });
+        ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().addObserver(notIntentionObserver);
     }
     
     
@@ -200,16 +192,9 @@ public class IntentionalBehaviour extends SequentialBehaviour implements Semanti
             state = EXECUTION_FAILURE;
             // TODO Generate a Failure message if needed
         }
-        ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().removeObserver(
-                new Finder() {
-                    public boolean identify(Object object) {
-                        if (object instanceof Observer) {
-                            return ((Observer)object).getObservedFormula().equals(observedIntention);
-                        }
-                        return false;
-                    }
-                });
-        ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().retractFormula(intention);
+        ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().removeObserver(notIntentionObserver);
+//        ((SemanticAgent)myAgent).getSemanticCapabilities().getMyKBase().retractFormula(intention);
+        ((SemanticAgent)myAgent).getSemanticCapabilities().getSemanticInterpreterBehaviour().interpret(new NotNode(intention));
         return 0;
     } // End of onEnd/0
     
