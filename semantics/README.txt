@@ -10,7 +10,7 @@ LICENSE
 see file License.
 
 FEEDBACK
-=======
+========
 As you know already, this is still an on-going project. 
 We are still working on the framework and new versions will be distributed 
 as soon as available.
@@ -109,6 +109,16 @@ settings (for example if the Java Runtime is not available from the 'PATH'
 environment variable).
 A short tutorial for this demo is available (as a PDF file) in the 'doc'
 subdirectory.
+
+
+DOCUMENTATION
+=============
+You will find some useful documentation in the 'doc' subdirectory. A complete
+tutorial for programming JSA-based agents is in preparation and will be posted
+on the subversion server when ready.
+(see https://avalon.cselt.it/svn/jade_add-ons/trunk/semantics)
+In the meanwhile, the programmer's guide included in this distribution should
+already contain a lot of valuable material.
 
 
 LIMITATIONS

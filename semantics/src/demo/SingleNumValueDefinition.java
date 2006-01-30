@@ -57,9 +57,9 @@ public class SingleNumValueDefinition extends FiltersDefinition {
    Formula NOT_VALUE_X_PATTERN;
    Formula VALUE_GT_X_PATTERN;
    Formula NOT_VALUE_GT_X_PATTERN;
-   IdentifyingExpression ALL_VALUES;
-   IdentifyingExpression ALL_VALUES_GT;
-   IdentifyingExpression ALL_VALUES_NOT_GT;
+   IdentifyingExpression IOTA_VALUE;
+   IdentifyingExpression IOTA_VALUE_GT;
+   IdentifyingExpression IOTA_VALUE_NOT_GT;
    
    /**
     * Removes from the base all the belief about this kind of predicat
@@ -86,11 +86,11 @@ public class SingleNumValueDefinition extends FiltersDefinition {
        
        NOT_VALUE_GT_X_PATTERN = SLPatternManip.fromFormula("(not ("+name+"_gt ??X))");
 
-       ALL_VALUES = (IdentifyingExpression)SLPatternManip.fromTerm("(all ?y (B ??agent ("+name+" ?y)))");
+       IOTA_VALUE = (IdentifyingExpression)SLPatternManip.fromTerm("(iota ?y (B ??agent ("+name+" ?y)))");
        
-       ALL_VALUES_GT = (IdentifyingExpression)SLPatternManip.fromTerm("(all ?y (B ??agent ("+name+"_gt ?y)))");
+       IOTA_VALUE_GT = (IdentifyingExpression)SLPatternManip.fromTerm("(iota ?y (B ??agent ("+name+"_gt ?y)))");
        
-       ALL_VALUES_NOT_GT = (IdentifyingExpression)SLPatternManip.fromTerm("(all ?y (B ??agent (not ("+name+"_gt ?y))))");
+       IOTA_VALUE_NOT_GT = (IdentifyingExpression)SLPatternManip.fromTerm("(iota ?y (B ??agent (not ("+name+"_gt ?y))))");
        
        // ASSERT FILTERS
        // --------------
@@ -143,10 +143,9 @@ public class SingleNumValueDefinition extends FiltersDefinition {
                   SLPatternManip.set(pattern, "agent", agent);
                   MatchResult applyResult = SLPatternManip.match(pattern, formula);
                   if (applyResult != null && applyResult.getTerm("X") instanceof Constant) {
-                      queryResult.setResult(null);
                       Long queriedValue = ((Constant)applyResult.getTerm("X")).intValue();
                       ListOfTerm queryRefResult = myKBase.queryRef((IdentifyingExpression)
-                       SLPatternManip.instantiate(ALL_VALUES, "agent", applyResult.getTerm("agent")));
+                       SLPatternManip.instantiate(IOTA_VALUE, "agent", applyResult.getTerm("agent")));
                       if (queryRefResult != null && queryRefResult.size() != 0 ) {
                           if ( ((Constant)queryRefResult.get(0)).intValue().longValue() > queriedValue.longValue() ) {
                               queryResult.setResult(new ListOfMatchResults());
@@ -154,7 +153,7 @@ public class SingleNumValueDefinition extends FiltersDefinition {
                       }
                       else {
                           queryRefResult = myKBase.queryRef((IdentifyingExpression)
-                                  SLPatternManip.instantiate(ALL_VALUES_GT, "agent", applyResult.getTerm("agent")));
+                                  SLPatternManip.instantiate(IOTA_VALUE_GT, "agent", applyResult.getTerm("agent")));
                           if (queryRefResult != null && queryRefResult.size() != 0 ) {
                               if (((Constant)queryRefResult.get(0)).intValue().longValue() >= queriedValue.longValue() ) {
                                   queryResult.setResult(new ListOfMatchResults());
@@ -162,7 +161,6 @@ public class SingleNumValueDefinition extends FiltersDefinition {
                           }
                       }
                       queryResult.setFilterApplied(true);
-                      return queryResult;
                   }
               } catch (Exception e) {
                   e.printStackTrace();
@@ -192,10 +190,9 @@ public class SingleNumValueDefinition extends FiltersDefinition {
                    SLPatternManip.set(pattern, "agent", agent);
                    MatchResult applyResult = SLPatternManip.match(pattern, formula);
                    if (applyResult != null && applyResult.getTerm("X") instanceof Constant) {
-                       queryResult.setResult(null);
                        Long queriedValue = ((Constant)applyResult.getTerm("X")).intValue();
                        ListOfTerm queryRefResult = myKBase.queryRef((IdentifyingExpression)
-                                   SLPatternManip.instantiate(ALL_VALUES, "agent", applyResult.getTerm("agent")));
+                                   SLPatternManip.instantiate(IOTA_VALUE, "agent", applyResult.getTerm("agent")));
                        if (queryRefResult != null && queryRefResult.size() != 0 ) {
                            if ( ((Constant)queryRefResult.get(0)).intValue().longValue() < queriedValue.longValue() ) {
                                queryResult.setResult(new ListOfMatchResults());
@@ -203,7 +200,7 @@ public class SingleNumValueDefinition extends FiltersDefinition {
                        }
                        else {
                            queryRefResult = myKBase.queryRef((IdentifyingExpression)
-                                   SLPatternManip.instantiate(ALL_VALUES_NOT_GT, "agent", applyResult.getTerm("agent")));
+                                   SLPatternManip.instantiate(IOTA_VALUE_NOT_GT, "agent", applyResult.getTerm("agent")));
                            if (queryRefResult != null && queryRefResult.size() != 0 ) {
                                if (((Constant)queryRefResult.get(0)).intValue().longValue() <= queriedValue.longValue() ) {
                                    queryResult.setResult(new ListOfMatchResults());
@@ -211,7 +208,6 @@ public class SingleNumValueDefinition extends FiltersDefinition {
                            }
                        }
                        queryResult.setFilterApplied(true);
-                       return queryResult;
                    }
                } catch(Exception e) {e.printStackTrace();}
                return queryResult;
@@ -227,9 +223,7 @@ public class SingleNumValueDefinition extends FiltersDefinition {
                }catch (SLPatternManip.WrongTypeException wte) {
                    wte.printStackTrace();
                }
-               
            }
-
        });
        
    } // End of SingleNumValueDefinition

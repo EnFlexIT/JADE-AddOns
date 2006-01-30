@@ -81,7 +81,7 @@ public class Planning extends SemanticInterpretationPrinciple {
      * SIP index is increased by one. Returns null in other cases. 
      * @throws SemanticInterpretationPrincipleException if any exception occurs
      */
-    public ArrayList apply(final SemanticRepresentation sr) throws SemanticInterpretationPrincipleException {
+    public ArrayList apply(SemanticRepresentation sr) throws SemanticInterpretationPrincipleException {
         try {
             MatchResult matchResult = SLPatternManip.match(pattern,sr.getSLRepresentation());
             if (matchResult != null) {

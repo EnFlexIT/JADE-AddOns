@@ -92,6 +92,16 @@ public class Util {
         return solution;
     }
  
+    /**
+     * This method returns true if a MetaVariable has the given varName in the 
+     * given MatchResult and if it succeeds in giving it the given value.  
+     * @param match a MatchResult 
+     * @param varName the name of a metavaraible
+     * @param value the value of the metavariable
+     * @return true if a MetaVariable has the given varName in the 
+     * given MatchResult and if it succeeds in giving it the given value, false
+     * if not.
+     */
     public static boolean instantiateInMatchResult(MatchResult match, String varName, Node value) {
         try {
             for (int i = 0; i < match.size(); i++) {

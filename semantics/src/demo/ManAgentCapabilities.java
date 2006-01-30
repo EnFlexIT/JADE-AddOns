@@ -251,22 +251,14 @@ public class ManAgentCapabilities extends SemanticCapabilities {
            private long wakeupTime = -1, blockTime;
 
            public void perform(OntoActionBehaviour behaviour) {
-//               if (behaviour.getState() == SemanticBehaviour.START) {
-//                   behaviour.block( Long.parseLong((getActionParameter("time").toString())) );
-//                   behaviour.setState(1000);
-//               }
-//               else behaviour.setState(SemanticBehaviour.SUCCESS);
-               
                switch (behaviour.getState()) {
                case SemanticBehaviour.START: {
-                // Adjust wakeupTime in case the user set a relative time
                     if (wakeupTime == -1) {
                         wakeupTime = System.currentTimeMillis()+Long.parseLong((getActionParameter("time").toString()));
                     }
                  // in this state the behaviour blocks itself
                  blockTime = wakeupTime - System.currentTimeMillis();
-                 if (blockTime > 0) // MINIMUM_TIMEOUT)
-                   //blockTime = MINIMUM_TIMEOUT;
+                 if (blockTime > 0) 
                    behaviour.block(blockTime);
                  behaviour.setState(1000);
                  break;
@@ -329,6 +321,8 @@ public class OntologicalAction2 extends OntologicalAction
 {
     private SemanticAgent myAgent;
 
+    private long wakeupTime = -1, blockTime;
+    
     public OntologicalAction2(SemanticActionTable table,
         String actionPattern, 
         Formula postconditionPattern,
@@ -340,12 +334,38 @@ public class OntologicalAction2 extends OntologicalAction
 
     public void perform(OntoActionBehaviour behaviour) 
     {
-        if (behaviour.getState() == SemanticBehaviour.START) 
-        {
-            behaviour.block(Long.parseLong(getActionParameter("time").toString()));
-            behaviour.setState(1000);
-        }
-        else behaviour.setState(SemanticBehaviour.SUCCESS);
+           
+               switch (behaviour.getState()) {
+               case SemanticBehaviour.START: {
+                    if (wakeupTime == -1) {
+                        wakeupTime = System.currentTimeMillis()+Long.parseLong((getActionParameter("time").toString()));
+                    }
+                 // in this state the behaviour blocks itself
+                 blockTime = wakeupTime - System.currentTimeMillis();
+                 if (blockTime > 0) 
+                   behaviour.block(blockTime);
+                 behaviour.setState(1000);
+                 break;
+               }
+               case 1000: {
+                 // in this state the behaviour can be restarted for two reasons
+                 // 1. the timeout is elapsed (then the handler method is called 
+                 //                            and the behaviour is definitively finished) 
+                 // 2. a message has arrived for this agent (then it blocks again and
+                 //                            the FSM remains in this state)
+                 blockTime = wakeupTime - System.currentTimeMillis();
+                 if (blockTime <= 0) {
+                   // timeout is expired
+                   behaviour.setState(SemanticBehaviour.SUCCESS);
+                 } else 
+                   behaviour.block(blockTime);
+                 break;
+               }
+               default : {
+                 behaviour.setState(SemanticBehaviour.EXECUTION_FAILURE);
+                 break;
+               }
+               } // end of switch
     }
 }
 #DOTNET_INCLUDE_END*/
