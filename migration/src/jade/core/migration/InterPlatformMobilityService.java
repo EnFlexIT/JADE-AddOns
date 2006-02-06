@@ -602,7 +602,6 @@ public class InterPlatformMobilityService extends BaseService {
 
 				byte[] rawJar = null;
 				String location = getLocator().getAgentCodeLocation(name);
-				String containerName = null;
 				if (location != null) {
 					File jar = new File(location);
 					rawJar = getJarByteArray(jar);
@@ -617,10 +616,7 @@ public class InterPlatformMobilityService extends BaseService {
 					rawJar = ((InterPlatformMobilitySlice) slice)
 							.getAgentCode(name, className);
 				}
-				//Save jar location in AgentsInTransit table so that we can
-				// send
-				//H_DELETEAGENTREFERENCES later if migration is OK.
-				//_transitAgents.setCodeContainer(name,containerName);
+
 				// create AMSInitiator behaviour and add it to ams
 				if (rawJar != null) {
 					AID amsAID = new AID("ams", false);
@@ -736,8 +732,6 @@ public class InterPlatformMobilityService extends BaseService {
 							InterPlatformMobilityHelper.DELETE_AGENT_REFERENCES,
 							InterPlatformMobilityHelper.NAME, null);
 					result.addParam(instance.getAID());
-					// Remove the gone agent from the LADT
-					//_myContainer.removeLocalAgent(instance.getAID());
 
 				} catch (Exception e) {
 					if(logger.isLoggable(Logger.SEVERE))
@@ -749,18 +743,10 @@ public class InterPlatformMobilityService extends BaseService {
 					logger.log(Logger.INFO,
 							"Migration failure: Aborting migration: "
 									+ res);
-				//_myContainer.abortMigration(instance);
 				instance.restoreBufferedState();
 			}
 			_myContainer.releaseLocalAgent(name);
 			return result;
-			/*synchronized (lockName) {
-				if (logger.isLoggable(Logger.FINE))
-					logger
-							.log(Logger.FINE,
-									"ServiceComponent: handleInformMigrationResult: wake up agent thread");
-				lockName.notify();
-			}*/
 		}
 
 		public Node getNode() throws ServiceException {

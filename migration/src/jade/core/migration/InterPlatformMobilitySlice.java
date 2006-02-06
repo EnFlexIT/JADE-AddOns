@@ -42,11 +42,9 @@ public interface InterPlatformMobilitySlice extends Service.Slice {
 
   // Constants for the names of horizontal commands associated to methods
   static final String H_GETAGENTCODE = "1";
-  static final String H_COMMITMIGRATION = "2";
-  static final String H_ABORTMIGRATION = "3";
-  static final String H_TRANSFERINSTANCE = "4";
-  static final String H_INFORMMIGRATIONRESULT = "5";
-  static final String H_DELETEAGENTREFERENCES = "6";
+  static final String H_TRANSFERINSTANCE = "2";
+  static final String H_INFORMMIGRATIONRESULT = "3";
+  static final String H_DELETEAGENTREFERENCES = "4";
 
   byte[] getAgentCode(AID aid, String className) throws IMTPException;
   void transferInstance(
