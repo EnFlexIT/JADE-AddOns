@@ -75,14 +75,7 @@ public class RunnableStarter implements ModelChangedListener {
 	private void startThisModel(IAbstractRunnable absRunnable) {
 		if (absRunnable instanceof IRunnableAgentInstance) {
 			IRunnableAgentInstance agentInstance = (IRunnableAgentInstance)absRunnable;
-			AgentLauncherThread new_thread = new AgentLauncherThread(agentInstance, launcher, null);
-			try {
-				new_thread.getResult();
-			}
-			catch (ModelActionException e) {
-				absRunnable.setStatus(new Error());
-				absRunnable.setDetailedStatus(e.getMessage());
-			}			
+			AgentLauncherThread new_thread = new AgentLauncherThread(agentInstance, launcher, null);		
 		} else if (absRunnable instanceof IRunnableSocietyInstance) {
 			IRunnableSocietyInstance societyInstance = (IRunnableSocietyInstance)absRunnable;
 			myFunctionalController.addModel(societyInstance);

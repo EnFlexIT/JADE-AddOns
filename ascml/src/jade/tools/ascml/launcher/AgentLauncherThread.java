@@ -34,12 +34,15 @@ import jade.core.ContainerID;
 import jade.domain.JADEAgentManagement.CreateAgent;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.lang.acl.ACLMessage;
+import jade.tools.ascml.ASCML;
 import jade.tools.ascml.absmodel.IRunnableAgentInstance;
 import jade.tools.ascml.absmodel.IAgentParameter;
 import jade.tools.ascml.absmodel.IAgentParameterSet;
 import jade.tools.ascml.absmodel.IAgentType;
 import jade.tools.ascml.exceptions.ModelActionException;
 import jade.tools.ascml.events.ProgressUpdateEvent;
+import jade.tools.ascml.onto.Error;
+import jade.util.Logger;
 
 /**
  * Starts an IRunnableAgentInstance
@@ -148,6 +151,9 @@ public class AgentLauncherThread implements Runnable {
             e.printStackTrace();
         }
         // System.out.println("Agent name to start in launcherthread: "+agentName);
+		if (al.myLogger.isLoggable(Logger.INFO)) {
+			al.myLogger.info("Actually starting "+agentName+" right now");
+		}
         al.addAMSBehaviour(msg, result, agentName);
         synchronized(result) {
             try {
@@ -155,6 +161,7 @@ public class AgentLauncherThread implements Runnable {
             } catch(InterruptedException ie) {
             }
         }
+		
     }
 
     /**
@@ -178,6 +185,7 @@ public class AgentLauncherThread implements Runnable {
      * @see java.lang.Runnable#run()
      */
     public void run() {
+		//For debugging purposes only: set this to false to test startup of toolagents:
         boolean startAgent = true;
         int timeout = 15000;
         
@@ -234,6 +242,12 @@ public class AgentLauncherThread implements Runnable {
                     mae = new ModelActionException("Error while starting the agent named '"+aModel.getName()+"'.", "For some reason, the agent couldn't be started, please take a look at the system's error-message: " + result.toString(), e, aModel);
                 }
             }
+			if (mae!=null) {
+				Error ontoError = new Error();
+				ontoError.setDetailedStatus(mae.getMessage());
+				aModel.setStatus(ontoError);
+				aModel.setDetailedStatus(result.toString());
+			}			
         }
     }
 }

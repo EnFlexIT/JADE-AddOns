@@ -21,9 +21,9 @@ public class TypeCountWatcher extends AbstractDependencyWatcher{
 	}
 	
 	private boolean isFulfilled() {
-		synchronized (running) {
-			return (running.value>=needed);			
-		}
+		//synchronized (running) {
+			return (running.value>=needed);
+		//}
 	}
 	
 	public void run() {

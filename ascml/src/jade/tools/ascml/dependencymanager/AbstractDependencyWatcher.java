@@ -19,9 +19,9 @@ public abstract class AbstractDependencyWatcher implements Runnable {
 	}
 	
 	protected void changed() {
-		synchronized (parentDeps) {
+		//synchronized (parentDeps) {
 			parentDeps.dependencyChanged(this);
-		}
+		//}
 	}
 	
 }

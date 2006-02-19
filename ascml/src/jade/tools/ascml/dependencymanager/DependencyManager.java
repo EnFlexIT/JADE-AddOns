@@ -60,7 +60,7 @@ public class DependencyManager implements ModelChangedListener {
 		myDependencyStateController = new DependencyStateController(launcher);
 	}
 
-	public synchronized void modelChanged(ModelChangedEvent evt) {
+	public void modelChanged(ModelChangedEvent evt) { //synchronized
 		if (evt.getEventCode() == ModelChangedEvent.STATUS_CHANGED) {
 			if (evt.getModel() instanceof IAbstractRunnable) {
 				try {

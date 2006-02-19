@@ -79,8 +79,8 @@ public class DependencyStateController extends AbstractDependencyController{
 			//TODO: What is an active AgentInstanceDepedency like:
 			//		What type of agent should we start? 
 		} else if (depType.equals(IDependency.SOCIETYTYPE_DEPENDENCY)) {
-			ISocietyTypeDependency typeDep = ((ISocietyTypeDependency)oneDep);			
-			String fqRunnableName = typeDep.getName().concat(".").concat(((IAgentTypeDependency)oneDep).getName().concat(Long.toString(System.currentTimeMillis()))); 
+			ISocietyTypeDependency typeDep = ((ISocietyTypeDependency)oneDep);
+			String fqRunnableName = typeDep.getName().concat(".").concat(((IAgentTypeDependency)oneDep).getName().concat(Long.toString(System.currentTimeMillis()%(1000*60*60*24*365))));
 			try {
 				IRunnableSocietyInstance runnableAgents = launcher.getRepository().createRunnableSocietyInstance(fqRunnableName);
 				launcher.getDependencyManager().startThisSociety(runnableAgents);

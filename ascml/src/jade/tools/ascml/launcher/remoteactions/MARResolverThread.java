@@ -53,7 +53,7 @@ public class MARResolverThread extends AbstractMARThread {
 	}
 
 	@Override
-	public void doAction() throws Exception{
+	public void doAction() throws Exception {
 		Vector<AgentLauncherThread> altVector = new Vector<AgentLauncherThread>();
 			if (toResolve == RESOLVE_SOCIETY) {
 				while (it.hasNext()) {

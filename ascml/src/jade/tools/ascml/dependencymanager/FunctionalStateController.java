@@ -28,11 +28,12 @@ import java.util.Vector;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
+import jade.util.Logger;
 
 public class FunctionalStateController extends AbstractDependencyController{
 
-	public FunctionalStateController(AgentLauncher al) {
-		super(al);
+	public FunctionalStateController(AgentLauncher launcher) {
+		super(launcher);
 	}
 
 	protected Vector<IDependency> getDependenciesFromModel(IAbstractRunnable societyInstanceModel) {
@@ -46,11 +47,14 @@ public class FunctionalStateController extends AbstractDependencyController{
 	}
 
 	protected void noDependencies(IAbstractRunnable absRunnable) {
+		if (launcher.myLogger.isLoggable(Logger.INFO)) {
+			launcher.myLogger.info("Settings Status to Functional for "+absRunnable.toString());
+		}
 		absRunnable.setStatus(new Functional());
 	}
 
 	protected void handleActiveDependency(IDependency oneDep) {
-		// TODO Now we've got a problem: What the heck is a active functional dependency?
+		// TODO Now we've got a problem: What the heck is an active functional dependency?
 		// Perhaps this means: if the dependency fails, restart it	
 	}
 

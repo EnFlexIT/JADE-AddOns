@@ -160,7 +160,7 @@ public abstract class AbstractDependencyController {
 		try {
 			deps = getDependenciesFromModel(absRunnable);
 		} catch (Exception e) {
-			e.printStackTrace();
+			noDependencies(absRunnable);
 			return;
 		}
 		Iterator<IDependency> depIterator = deps.iterator();
