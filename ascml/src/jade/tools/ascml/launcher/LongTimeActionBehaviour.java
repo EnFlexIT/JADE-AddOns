@@ -23,7 +23,7 @@
  */
 
 
-package jade.tools.ascml.launcher.remoteactions;
+package jade.tools.ascml.launcher;
 
 import jade.core.behaviours.OneShotBehaviour;
 import jade.tools.ascml.repository.Repository;

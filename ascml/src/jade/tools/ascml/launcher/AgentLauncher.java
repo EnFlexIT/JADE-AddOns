@@ -24,56 +24,49 @@
 
 package jade.tools.ascml.launcher;
 
-import jade.content.Term;
-import jade.content.abs.AbsAgentAction;
-import jade.content.abs.AbsAggregate;
 import jade.content.abs.AbsConcept;
-import jade.content.abs.AbsContentElement;
-import jade.content.abs.AbsHelper;
 import jade.content.abs.AbsIRE;
 import jade.content.abs.AbsPredicate;
-import jade.content.abs.AbsTerm;
 import jade.content.abs.AbsVariable;
 import jade.content.lang.Codec;
 import jade.content.lang.Codec.CodecException;
-import jade.content.lang.sl.*;
-import jade.content.onto.BasicOntology;
+import jade.content.lang.sl.SL2Vocabulary;
+import jade.content.lang.sl.SLCodec;
 import jade.content.onto.OntologyException;
-import jade.content.onto.basic.Equals;
-import jade.content.onto.basic.TrueProposition;
-import jade.core.*;
+import jade.core.AID;
 import jade.core.behaviours.SenderBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
 import jade.domain.AMSService;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
-import jade.domain.FIPAAgentManagement.*;
-import jade.domain.JADEAgentManagement.JADEManagementOntology;
-import jade.domain.introspection.*;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.introspection.BornAgent;
+import jade.domain.introspection.DeadAgent;
+import jade.domain.introspection.Event;
+import jade.domain.introspection.IntrospectionVocabulary;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREInitiator;
 import jade.proto.FIPAProtocolNames;
-import jade.proto.SubscriptionResponder;
 import jade.tools.ToolAgent;
-import jade.tools.ascml.absmodel.*;
-import jade.tools.ascml.repository.Repository;
-
-import jade.tools.ascml.onto.*;
-import jade.tools.ascml.launcher.Subscriptions.*;
-import jade.tools.ascml.launcher.abstracts.*;
-import jade.tools.ascml.launcher.remoteactions.*;
+import jade.tools.ascml.absmodel.IRunnableAgentInstance;
+import jade.tools.ascml.dependencymanager.DependencyManager;
+import jade.tools.ascml.gui.GUI;
+import jade.tools.ascml.launcher.remoteactions.AbstractMARWaitThread;
+import jade.tools.ascml.launcher.remoteactions.ModelActionRequestBehaviour;
+import jade.tools.ascml.launcher.remoteactions.ModelActionRequestListener;
 import jade.tools.ascml.launcher.remotestatus.StatusSubscriptionInitiator;
 import jade.tools.ascml.launcher.remotestatus.StatusSubscriptionManager;
-import jade.tools.ascml.model.AgentTypeModel;
-import jade.tools.ascml.dependencymanager.DependencyManager;
-import jade.tools.ascml.events.*;
-import jade.tools.ascml.gui.GUI;
-import jade.tools.sl.SLFormatter;
+import jade.tools.ascml.onto.ASCMLOntology;
+import jade.tools.ascml.onto.AbsModel;
+import jade.tools.ascml.onto.Status;
+import jade.tools.ascml.repository.Repository;
 import jade.util.Logger;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author Sven Lilienthal

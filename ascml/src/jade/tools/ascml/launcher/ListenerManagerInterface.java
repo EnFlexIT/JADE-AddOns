@@ -26,7 +26,6 @@ package jade.tools.ascml.launcher;
 
 import jade.tools.ascml.absmodel.IAbstractRunnable;
 import jade.tools.ascml.events.*;
-import jade.tools.ascml.launcher.remoteactions.LongTimeActionBehaviour;
 
 public class ListenerManagerInterface implements ToolTakeDownListener, ExceptionListener, ModelChangedListener, LongTimeActionStartListener {
 
