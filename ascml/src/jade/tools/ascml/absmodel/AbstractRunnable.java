@@ -29,7 +29,7 @@ import java.util.*;
 import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.events.ModelChangedEvent;
 import jade.tools.ascml.onto.*;
-import jade.tools.ascml.launcher.DependencyManager.DependencyManager;
+import jade.tools.ascml.dependencymanager.DependencyManager;
 
 /**
  *  Model-object containing all required information about a running SocietyInstance. 
@@ -41,7 +41,7 @@ public class AbstractRunnable implements IAbstractRunnable
 	protected String detailedStatus = "";
 	protected Object parentModel;
 	protected IAbstractRunnable parentRunnable;
-	protected IDependency[] dependencies;
+	protected Vector<IDependency> dependencies;
 	protected DependencyManager dependencyManager;
 
 	protected Vector modelChangedListener;
@@ -49,7 +49,7 @@ public class AbstractRunnable implements IAbstractRunnable
 	/**
 	 *  Instantiate a new model and initialize some variables 
 	 */
-	public AbstractRunnable(String name, Object parentModel, IDependency[] dependencies,
+	public AbstractRunnable(String name, Object parentModel, Vector<IDependency> dependencies,
 							Vector modelChangedListener, IAbstractRunnable parentRunnable)
 	{
 		this.name = name;
@@ -59,7 +59,7 @@ public class AbstractRunnable implements IAbstractRunnable
 		if(dependencies != null)
 			this.dependencies = dependencies;
 		else
-			this.dependencies = new IDependency[0];
+			this.dependencies = new Vector<IDependency>();
 
 		this.modelChangedListener = modelChangedListener;
 	}
@@ -141,7 +141,7 @@ public class AbstractRunnable implements IAbstractRunnable
 	 *  Get the dependencies of this runnable model..
 	 *  @return  runnable agentinstance's dependencies or null, if it depends on nothing.
 	 */	
-	public IDependency[] getDependencies()
+	public Vector<IDependency> getDependencies()
 	{
 		return this.dependencies;
 	}
@@ -150,23 +150,24 @@ public class AbstractRunnable implements IAbstractRunnable
 	 *  Add dependencies to this runnable model.
 	 *  @param additionalDependencies  The model's dependencies or null, if it depends on nothing.
 	 */
-	public void addDependencies(IDependency[] additionalDependencies)
+	public void addDependencies(Vector<IDependency> additionalDependencies)
 	{
-		IDependency[] newDependencyArray = new IDependency[dependencies.length + additionalDependencies.length];
-
+		//IDependency[] newDependencyArray = new IDependency[dependencies.length + additionalDependencies.length];
+		dependencies.addAll(additionalDependencies);
+		
 		// set the old dependencies within the new array
-		for (int i=0; i < dependencies.length; i++)
-		{
-			newDependencyArray[i] = dependencies[i];
-		}
+		//for (int i=0; i < dependencies.length; i++)
+		//{
+		//	newDependencyArray[i] = dependencies[i];
+		//}
 
 		// add the new dependencie to the new array
-		for (int i=0; i < additionalDependencies.length; i++)
-		{
-			newDependencyArray[i + dependencies.length] = additionalDependencies[i];
-		}
+		//for (int i=0; i < additionalDependencies.length; i++)
+		//{
+		//	newDependencyArray[i + dependencies.length] = additionalDependencies[i];
+		//}
 
-		dependencies = newDependencyArray;
+		//dependencies = newDependencyArray;
 	}
 
 	/**

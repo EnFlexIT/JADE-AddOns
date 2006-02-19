@@ -23,7 +23,7 @@
  */
 
 
-package jade.tools.ascml.launcher.abstracts;
+package jade.tools.ascml.launcher.remoteactions;
 
 import jade.tools.ascml.absmodel.IAbstractRunnable;
 import jade.tools.ascml.exceptions.ModelActionException;

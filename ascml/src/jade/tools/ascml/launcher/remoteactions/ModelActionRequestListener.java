@@ -24,7 +24,7 @@
 
 
 
-package jade.tools.ascml.launcher.behaviours;
+package jade.tools.ascml.launcher.remoteactions;
 
 import jade.content.ContentElement;
 import jade.content.abs.AbsIRE;
@@ -36,7 +36,6 @@ import jade.lang.acl.MessageTemplate;
 import jade.proto.SimpleAchieveREResponder;
 import jade.tools.ascml.onto.*;
 import jade.tools.ascml.launcher.*;
-import jade.tools.ascml.launcher.abstracts.AbstractMARThread;
 
 import java.util.*;
 

@@ -404,7 +404,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 			try
 			{
 				// create the model
-				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])repository.createRunnableAgentInstance(agentInstance.getType().getFullyQualifiedName() + "." + agentInstance.getName() + "." + agentInstance);
+				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])repository.createRunnableAgentInstance(agentInstance.getType().getFullyQualifiedName() + "." + agentInstance.getName() + "." + agentInstance, 1);
 
 				// and select the newly created instance
 				mainPanel.selectModel(runnableModels[0]);

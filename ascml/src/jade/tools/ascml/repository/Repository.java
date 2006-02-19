@@ -213,7 +213,7 @@ public class Repository
 		try
 		{
 			ISocietyInstance socInst = getSocietyInstance(socInstName);
-			IAbstractRunnable[] runnableInstance = (IAbstractRunnable[])getRunnableManager().createRunnable(runnableSocInstName, socInst);
+			IAbstractRunnable[] runnableInstance = (IAbstractRunnable[])getRunnableManager().createRunnable(runnableSocInstName, socInst, 1);
 			return (IRunnableSocietyInstance)runnableInstance[0];
 		}
 		catch(ModelException me)
@@ -235,14 +235,14 @@ public class Repository
 	 *                           no runnable agentInstance could be created
 	 *                           or the name is not fully qualified.
 	 */
-	public IRunnableAgentInstance[] createRunnableAgentInstance(String fullyQualifiedInstanceName) throws ModelException
+	public IRunnableAgentInstance[] createRunnableAgentInstance(String fullyQualifiedInstanceName, int modelCount) throws ModelException
 	{
 		// System.err.println("Repository.createRunnableAgentInstance: WARNING, maybe > 1 runnableModel has been created, but only 1st is returned.");
 		String agentTypeName = fullyQualifiedInstanceName.substring(0, fullyQualifiedInstanceName.lastIndexOf('.'));
 		String runnableAgentInstanceName = fullyQualifiedInstanceName.substring(fullyQualifiedInstanceName.lastIndexOf('.')+1, fullyQualifiedInstanceName.length());
 
 		IAgentType agentType = getAgentType(agentTypeName, true);
-		IRunnableAgentInstance[] runnableInstance = (IRunnableAgentInstance[])getRunnableManager().createRunnable(runnableAgentInstanceName, agentType);
+		IRunnableAgentInstance[] runnableInstance = (IRunnableAgentInstance[])getRunnableManager().createRunnable(runnableAgentInstanceName, agentType, modelCount);
 		return runnableInstance;
 	}
 

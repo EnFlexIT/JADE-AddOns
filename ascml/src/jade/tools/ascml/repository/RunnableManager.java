@@ -58,10 +58,10 @@ public class RunnableManager implements ModelChangedListener
 		runnableMapByName = new HashMap();
 	}
 
-    public IAbstractRunnable[] createRunnable(String name, Object model) throws ModelException
+    public IAbstractRunnable[] createRunnable(String name, Object model,int modelCount) throws ModelException
 	{
 		// modelCount is int (and not long) because it's needed for the array-sizes
-		int modelCount = 1;
+		//int modelCount = 1;
 
 		String namingScheme = "";
 		if (model instanceof ISocietyInstance)

@@ -23,36 +23,26 @@
  */
 
 
-package jade.tools.ascml.launcher.behaviours;
+package jade.tools.ascml.launcher.remotestatus;
 
-import java.util.Vector;
-
-import jade.content.Predicate;
-import jade.content.abs.AbsConcept;
-import jade.content.abs.AbsIRE;
-import jade.content.abs.AbsObject;
-import jade.content.abs.AbsPredicate;
-import jade.content.abs.AbsVariable;
 import jade.content.lang.Codec.CodecException;
 import jade.content.onto.OntologyException;
 import jade.content.onto.UngroundedException;
-import jade.content.onto.basic.Result;
 import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
-import jade.tools.ascml.launcher.*;
-import jade.tools.ascml.launcher.abstracts.AbstractMARWaitThread;
-import jade.tools.ascml.onto.ASCMLOntology;
-import jade.tools.ascml.onto.Status;
 import jade.tools.ascml.exceptions.ModelActionException;
+import jade.tools.ascml.launcher.AgentLauncher;
+import jade.tools.ascml.launcher.remoteactions.AbstractMARWaitThread;
+import jade.tools.ascml.onto.Status;
 
-public class MARGetStatusBehaviour extends AchieveREInitiator
+public class RemoteStatusInquirer extends AchieveREInitiator
 {
 	AbstractMARWaitThread dt;
-	//private ModelStatus result;
+
 	private Status result = null;
 	private AgentLauncher al;
-	//public MARGetStatusBehaviour(ACLMessage request, AbstractMARWaitThread dt, AgentLauncher al, ModelStatus result)
-	public MARGetStatusBehaviour(ACLMessage request, AbstractMARWaitThread dt, AgentLauncher al)
+
+	public RemoteStatusInquirer(ACLMessage request, AbstractMARWaitThread dt, AgentLauncher al)
 	{
 		super(al, request);
 		this.al=al;
@@ -62,7 +52,7 @@ public class MARGetStatusBehaviour extends AchieveREInitiator
 	protected void handleAgree(ACLMessage agree)
 	{
 		// Our message was apparently ok, now let's wait for the result
-		System.out.println("MARGetStatusBehaviour: We just received an agree");
+		//System.out.println("MARGetStatusBehaviour: We just received an agree");
 	}
 	
 	protected void handleInform(ACLMessage reply)
@@ -71,7 +61,7 @@ public class MARGetStatusBehaviour extends AchieveREInitiator
 			result = al.getStatusFromInform(reply);
 			
 			// We should only receive one inform-ref which contains the status we requested.
-			System.out.println("MARGetStatusBehaviour: We have been informed by the remote agent. Status is: "+result);
+			//System.out.println("MARGetStatusBehaviour: We have been informed by the remote agent. Status is: "+result);
 			// Fill the result with the message content 
 			// This sets the calling DispatcherThread as completed
 			dt.setCompleted();
@@ -96,12 +86,12 @@ public class MARGetStatusBehaviour extends AchieveREInitiator
 		} else {
 			System.err.println("MARGetStatusBehaviour: \n"+s+"\n");
 		}
-		System.out.println("MARGetStatusBehaviour: Got a failure");
+		System.err.println("MARGetStatusBehaviour: Got a failure");
 		dt.error(new ModelActionException("Error while processing the requested action.", "This ASCML sent out a request to perform an action and this request couldn't be successfully processed. The reason for this is: " + s));
 	}
 	protected void handleRefuse(ACLMessage reply)
 	{
-		System.out.println("MARGetStatusBehaviour: Got a refuse");
+		System.err.println("MARGetStatusBehaviour: Got a refuse");
 		dt.error(new ModelActionException("The requested action has been refused.", "This ASCML sent out a request to perform an action and this request has been refused. The reason for this is: " + reply.getContent()));
 	}
 	

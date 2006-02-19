@@ -64,12 +64,12 @@ public class AgentTypeDependencyModel extends AbstractDependencyModel implements
 		if ((quantity != null) && (!quantity.trim().equals("")))
 		{
 			if (quantity.equalsIgnoreCase(ANY))
-				quantity = ANY;
-			else if (quantity.equalsIgnoreCase(ALL))
-				quantity = ALL;
+				quantity = "1";
+			/*else if (quantity.equalsIgnoreCase(ALL))
+				quantity = ALL;*/
 			this.quantity = quantity;
 		}
 		else
-			this.quantity = ANY;
+			this.quantity = "1";
 	}
 }

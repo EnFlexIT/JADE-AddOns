@@ -26,6 +26,7 @@
 package jade.tools.ascml.model;
 
 import java.util.*;
+
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.onto.Status;
 import jade.tools.ascml.onto.Born;
@@ -45,7 +46,7 @@ public class RunnableAgentInstanceModel extends AbstractRunnable implements IRun
 	/**
 	 *  Instantiate a new model and initialize some variables 
 	 */
-	public RunnableAgentInstanceModel(String name, Object parentModel, IDependency[] dependencies, Vector modelChangedListener,
+	public RunnableAgentInstanceModel(String name, Object parentModel, Vector<IDependency> dependencies, Vector modelChangedListener,
 									  IAbstractRunnable parentRunnable, String className, String platformType, IAgentParameter[] parameters, IAgentParameterSet[] parameterSets,
 									  IAgentDescription agentDescription, HashMap<String, HashMap<String, Vector<String>>> toolOptions)
 	{

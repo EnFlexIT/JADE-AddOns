@@ -23,7 +23,7 @@
  */
 
 
-package jade.tools.ascml.launcher.behaviours;
+package jade.tools.ascml.launcher.remoteactions;
 
 import jade.content.ContentElement;
 import jade.content.lang.Codec;
@@ -50,7 +50,6 @@ import jade.tools.ToolAgent;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.onto.*;
 import jade.tools.ascml.launcher.*;
-import jade.tools.ascml.launcher.abstracts.AbstractMARWaitThread;
 import jade.tools.ascml.exceptions.ModelActionException;
 
 	public class ModelActionRequestBehaviour extends AchieveREInitiator

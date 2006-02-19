@@ -134,7 +134,7 @@ public interface IAgentInstance extends IAbstractAgent
 	 *  Get all of the agent's dependency-models.
 	 *  @return  A Vector containing all of the agent's dependency-models.
 	 */
-	public IDependency[] getDependencies();
+	public Vector<IDependency> getDependencies();
 
 	/**
 	 *  Add a parameter to this agent. The parameter overwrites the value of the

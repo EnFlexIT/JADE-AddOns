@@ -26,6 +26,7 @@
 package jade.tools.ascml.model;
 
 import java.util.*;
+
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.onto.Status;
 import jade.tools.ascml.onto.Starting;
@@ -55,7 +56,7 @@ public class RunnableRemoteSocietyInstanceReferenceModel extends AbstractRunnabl
 	 *  Create a new parameter.
 	 */
 	public RunnableRemoteSocietyInstanceReferenceModel(String name, IRunnableSocietyInstance parentModel,
-												 IDependency[] dependencies, Vector runnableModelListener,
+			Vector<IDependency> dependencies, Vector runnableModelListener,
 												 String typeName, String instanceName,
 	                                             String launcherName, String[] launcherAddresses)
 	{

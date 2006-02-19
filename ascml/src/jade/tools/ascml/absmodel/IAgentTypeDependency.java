@@ -41,11 +41,6 @@ public interface IAgentTypeDependency extends IDependency
 	 */
 	public String ANY = "any";
 
-	/**
-	 * Write me: What's the meaning of this constant ?
-	 */
-	public String ALL = "all";
-
 	public String getName();
 
 	public void setName(String name);

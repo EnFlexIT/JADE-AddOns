@@ -26,6 +26,7 @@
 package jade.tools.ascml.model;
 
 import java.util.*;
+
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.events.ModelChangedEvent;
@@ -68,7 +69,7 @@ public class SocietyInstanceReferenceModel implements ISocietyInstanceReference
 	protected ModelException statusException;
 
 	/** The dependencies, that must be fulfilled in order to launch the SocietyInstance */
-	protected Vector dependencies;
+	protected Vector<IDependency> dependencies;
 	
 	/** The number of instances that should be launched. */
 	protected long quantity;
@@ -94,7 +95,7 @@ public class SocietyInstanceReferenceModel implements ISocietyInstanceReference
 		this.locallyReferencedModel = null;
 		this.modelChangedListener = modelChangedListener;
 		this.launcherAddresses = new Vector();
-		this.dependencies = new Vector();
+		this.dependencies = new Vector<IDependency>();
 		this.namingScheme = "";
 	}
 
@@ -331,11 +332,9 @@ public class SocietyInstanceReferenceModel implements ISocietyInstanceReference
 	 * in order to start this SocietyInstance-reference.
 	 * @return  the dependencies for this reference (as IDependency-Vector)
 	 */
-	public IDependency[] getDependencies()
+	public Vector<IDependency> getDependencies()
 	{
-		IDependency[] returnArray = new IDependency[dependencies.size()];
-		dependencies.toArray(returnArray);
-		return returnArray;
+		return dependencies;
 	}
 
 	/**

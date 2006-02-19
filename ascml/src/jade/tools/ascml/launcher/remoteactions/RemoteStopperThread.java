@@ -23,14 +23,14 @@
  */
 
 
-package jade.tools.ascml.launcher;
+package jade.tools.ascml.launcher.remoteactions;
 
 import jade.core.AID;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.tools.ascml.absmodel.IAbstractRunnable;
 import jade.tools.ascml.absmodel.IRunnableRemoteSocietyInstanceReference;
-import jade.tools.ascml.launcher.abstracts.AbstractMARWaitThread;
+import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
 
 public class RemoteStopperThread extends AbstractMARWaitThread {

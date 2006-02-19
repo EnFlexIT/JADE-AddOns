@@ -44,6 +44,7 @@ import jade.content.onto.basic.TrueProposition;
 import jade.core.*;
 import jade.core.behaviours.SenderBehaviour;
 import jade.core.behaviours.SequentialBehaviour;
+import jade.domain.AMSService;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
@@ -62,12 +63,15 @@ import jade.tools.ascml.repository.Repository;
 import jade.tools.ascml.onto.*;
 import jade.tools.ascml.launcher.Subscriptions.*;
 import jade.tools.ascml.launcher.abstracts.*;
-import jade.tools.ascml.launcher.behaviours.*;
+import jade.tools.ascml.launcher.remoteactions.*;
+import jade.tools.ascml.launcher.remotestatus.StatusSubscriptionInitiator;
+import jade.tools.ascml.launcher.remotestatus.StatusSubscriptionManager;
 import jade.tools.ascml.model.AgentTypeModel;
 import jade.tools.ascml.dependencymanager.DependencyManager;
 import jade.tools.ascml.events.*;
 import jade.tools.ascml.gui.GUI;
 import jade.tools.sl.SLFormatter;
+import jade.util.Logger;
 
 import java.util.*;
 
@@ -77,22 +81,18 @@ import java.util.*;
  */
 public class AgentLauncher extends ToolAgent {
 
-	public final static String ASCML_VERSION = "0.49c";
+	public final static String ASCML_VERSION = "0.7";
 
-    public final String introspectorPrefix = "IntrospectorASCML";
-    public final String snifferPrefix = "SnifferASCML";
-
-    public final String benchmarkerSnifferPrefix = "BencherASCML";
+    public final String introspectorPrefix = "ASCMLIntrospector";
+    public final String snifferPrefix = "ASCMLSniffer";
+    public final String benchmarkerSnifferPrefix = "ASCMLBencher";
     
     public Codec codec = new SLCodec(2);
 
     protected Repository repository;
     protected GUI gui;
     public LauncherInterface li;
-
-    private HashMap<String, IRunnableAgentInstance> launchedAgents = new HashMap<String, IRunnableAgentInstance>();
-    private HashMap<String, Integer> startedTypeCountMap = new HashMap<String, Integer>();
-    protected HashMap<String, Vector<AID>> subscribedASCMLS = new HashMap<String, Vector<AID>>();
+	
     private ToolRequester mySniffer = new ToolRequester(this, "jade.tools.sniffer.Sniffer", snifferPrefix, IRunnableAgentInstance.TOOLOPTION_SNIFF, true);
     private ToolRequester myIntrospector = new ToolRequester(this, "jade.tools.introspector.Introspector", introspectorPrefix, IRunnableAgentInstance.TOOLOPTION_DEBUG, false);
     private ToolRequester myBenchmarker = new ToolRequester(this, "jade.tools.benchmarking.BenchmarkSnifferAgent", benchmarkerSnifferPrefix,IRunnableAgentInstance.TOOLOPTION_BENCHMARK, true);
@@ -100,44 +100,32 @@ public class AgentLauncher extends ToolAgent {
 
 	private StatusSubscriptionManager subscriptionManager = new StatusSubscriptionManager(this);
 	private DependencyManager myDependencyManager;
-
+	
+	//TODO: Use the logger
+	public Logger myLogger = Logger.getMyLogger(this.getClass().getName());
+	
     /**
      * Listens to platform evens like DEADAGENT,BORNAGENT,...
-     * We only care about DEADAGENT and use it to notify the repository
+     * We only care about DEADAGENT and use it to notify the dependency manager
      */
     protected class platformEventListener extends AMSListenerBehaviour {
 
-        protected void installHandlers(Map handlersTable) {
+        protected void installHandlers(Map handlersTable) {			
             handlersTable.put(IntrospectionVocabulary.DEADAGENT, new ToolAgent.EventHandler() {
-                public void handle(Event ev) {
-                    DeadAgent da = (DeadAgent) ev;
-                    AID agent = da.getAgent();
-                    if (launchedAgents.containsKey(agent.getLocalName())) {
-                        IRunnableAgentInstance runnableDeadAgent = launchedAgents.get(agent.getLocalName());
-                        removeLaunchedAgent(runnableDeadAgent);
-                        System.err.println("DEADAGENT");
-                        runnableDeadAgent.setStatus(new NonFunctional());
-                    } else {
-                        // System.out.println("Could not find agent
-                        // "+agent.getLocalName());
-                    }
-                }
-            });
-
-            /*
-             * handlersTable.put(IntrospectionVocabulary.BORNAGENT, new
-             * ToolAgent.EventHandler() { public void handle(Event ev) {
-             * BornAgent ba = (BornAgent)ev; AID agent = ba.getAgent();
-             * if(launchedAgents.contains(agent.getLocalName())) {
-             * nameToDependencyMap.depFulfulled(agent.getLocalName()); }
-             * 
-             * String agentType =
-             * (String)nameToTypeMap.get(agent.getLocalName()); if (agentType !=
-             * null) { System.out.println(agent.getLocalName()+ " was born.
-             * Type: " + agentType); } if
-             * (typeToDependencyMap.contains(agentType)) {
-             * typeToDependencyMap.depFulfulled(agentType); } } });
-             */
+				public void handle(Event ev) {
+					DeadAgent da = (DeadAgent) ev;
+					AID agent = da.getAgent();
+					myDependencyManager.agentDied(agent);
+				}
+			});      
+			handlersTable.put(IntrospectionVocabulary.BORNAGENT, new ToolAgent.EventHandler() {
+				public void handle(Event ev) {
+					BornAgent ba = (BornAgent) ev;
+					AID agent = ba.getAgent();
+					myDependencyManager.agentBorn(agent);
+				}
+			});
+             
         }
 
     } // END of inner class plattformEventListener
@@ -225,86 +213,6 @@ public class AgentLauncher extends ToolAgent {
         // Clean up:
         mySniffer.reset();
         myIntrospector.reset();
-        launchedAgents.clear();
-        startedTypeCountMap.clear();
-    }
-
-    /**
-     * Adds a IRunnableAgentInstance to a maps, so we allways now which agents are started.
-     * Additionally we add the instance.getClassName to the startedTypeCountMap or increment 
-     * the count if it is already in there to keep count of how many agents of each type we
-     * already started.   
-     * 
-     * @param instance
-     *              The IRunnableAgentInstance to be added to the launchedAgnets-map
-     *              instance.getName() will be used as the key              
-     */
-    protected void addLaunchedAgent(IRunnableAgentInstance instance) {
-        // System.out.println("Adding '"+instance.getName()+"' to List");
-        launchedAgents.put(instance.getName(), instance);
-        int count;
-        if (startedTypeCountMap.containsKey(instance.getClassName())) {
-            count = startedTypeCountMap.get(instance.getClassName()) + 1;
-        } else {
-            count = 1;
-        }
-        startedTypeCountMap.put(instance.getClassName(), count);
-        // System.out.println("Added "+instance.getClassName()+" with count
-        // "+countStr+" to stcMap");
-    }
-
-    /**
-     * Looks up an IRunnableAgentInstance in the launchedAgents-map and removes it
-     * Additionally we decrement the count of instance.getClassName from the startedTypeCount-map
-     * or remove it if it's zero to keep count of how many agents of each type we already started. 
-     * 
-     * @param instance
-     *              The IRunnableAgentInstance to be searched for in the launchedAgnets-map
-     *              instance.getName() will be used as the key         
-     */
-    protected void removeLaunchedAgent(IRunnableAgentInstance instance) {
-        launchedAgents.remove(instance.getName());
-        int count;
-        if (startedTypeCountMap.containsKey(instance.getClassName())) {
-            count = startedTypeCountMap.get(instance.getClassName()) - 1;
-            // System.out.println("Found "+instance.getClassName()+" in stcMap
-            // with count "+count);
-            if (count == 0) {
-                startedTypeCountMap.remove(instance.getClassName());
-            } else {
-                startedTypeCountMap.put(instance.getClassName(), count);
-            }
-        } else {
-            System.out.println("Could not find " + instance.getClassName() + " in stcMap");
-        }
-    }
-
-
-    /**
-     * @param localName
-     *          The name to search the launchedAgents-map for
-     * @return 
-     *          true if launchedAgents contains localName as a key
-     */
-    public boolean isAgentStarted(String localName) {
-        if (launchedAgents.containsKey(localName))
-            return true;
-        else
-            return false;
-    }
-
-    /**
-     * @param className
-     *          The name to search the startedTypeCount-map for
-     * @return 
-     *          0 if the name wasn't found, else the count of how many agents of this type are running
-     */
-    public int getTypeStartedCount(String className) {
-        if (startedTypeCountMap.containsKey(className)) {
-            return startedTypeCountMap.get(className);
-        } else {
-            return 0;
-        }
     }
     
     protected void toolSetup() {
@@ -380,7 +288,7 @@ public class AgentLauncher extends ToolAgent {
         MessageTemplate template2 = MessageTemplate.MatchOntology(ASCMLOntology.ONTOLOGY_NAME);
 		template2 = MessageTemplate.and(template2, MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_QUERY));
 		template2 = MessageTemplate.and(template2, MessageTemplate.MatchPerformative(ACLMessage.QUERY_REF));
-        addBehaviour(new GetStatusRequestListener(this, template2));
+        addBehaviour(new RemoteStatusResponder(this, template2));
                 
         li = new LauncherInterface(this);
         lmi = new ListenerManagerInterface(this);
@@ -391,6 +299,9 @@ public class AgentLauncher extends ToolAgent {
 		repository.getListenerManager().addModelChangedListener(lmi); // AgentLauncher now has to implement modelChanged-method (see below)
         repository.getListenerManager().addModelActionListener(li);
         repository.getListenerManager().addLongTimeActionStartListener(lmi);
+		
+		myDependencyManager = new DependencyManager(this);
+		repository.getListenerManager().addModelChangedListener(myDependencyManager);
 
 		if (!noGUI)
 			gui = new GUI(repository);
@@ -404,7 +315,6 @@ public class AgentLauncher extends ToolAgent {
         else
 			System.err.println(repository.getModelIndex());
 		
-		myDependencyManager = new DependencyManager(this);
 		/*try
 		{
 			int randomNumber = (int)(Math.random()*1000) % 1000;
@@ -440,14 +350,20 @@ public class AgentLauncher extends ToolAgent {
         send(getCancel());
         try {
             DFService.deregister(this);
-            System.err.println("AgentLauncher.toolTakeDown: ASCML deregistered @ DF");
+//            System.err.println("AgentLauncher.toolTakeDown: ASCML deregistered @ DF");
         } catch (FIPAException e) {
             e.printStackTrace();
         }
         repository.exit();
         gui.exit();
+		try {
+			AMSService.deregister(this);
+		}
+		catch (FIPAException e) {
+			e.printStackTrace();
+		}
         super.toolTakeDown();
-        System.err.println("ASCML shutdown completed.");
+        //System.err.println("ASCML shutdown completed.");
     }
 
     static {

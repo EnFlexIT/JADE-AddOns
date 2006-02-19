@@ -23,12 +23,11 @@
  */
 
 
-package jade.tools.ascml.launcher.abstracts;
+package jade.tools.ascml.launcher.remoteactions;
 
 import jade.content.onto.basic.Action;
 import jade.lang.acl.ACLMessage;
 import jade.tools.ascml.launcher.AgentLauncher;
-import jade.tools.ascml.launcher.behaviours.MARResolverThread;
 import jade.tools.ascml.onto.*;
 
 import java.util.Iterator;

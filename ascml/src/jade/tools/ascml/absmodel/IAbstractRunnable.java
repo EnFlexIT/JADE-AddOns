@@ -25,6 +25,8 @@
 
 package jade.tools.ascml.absmodel;
 
+import java.util.Vector;
+
 import jade.tools.ascml.onto.Status;
 
 /**
@@ -50,9 +52,9 @@ public interface IAbstractRunnable
 	 */
 	public void setParentRunnable(IAbstractRunnable parentRunnable);
 
-	public IDependency[] getDependencies();
+	public Vector<IDependency> getDependencies();
 
-	public void addDependencies(IDependency[] dependencies);
+	public void addDependencies(Vector<IDependency> dependencies);
 
 	public void setStatus(Status status);
 

@@ -26,6 +26,7 @@
 package jade.tools.ascml.model;
 
 import java.util.*;
+
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.events.ModelChangedEvent;
@@ -38,7 +39,7 @@ public class AgentInstanceModel extends AbstractAgentModel implements IAgentInst
 	private HashMap toolOptions;
 	private HashMap parameters;
 	private HashMap parameterSets;
-	private Vector dependencies;
+	private Vector<IDependency> dependencies;
 	private IAgentType type;
 	private String typeName; // used before a type-object is set
 	private String description;
@@ -54,7 +55,7 @@ public class AgentInstanceModel extends AbstractAgentModel implements IAgentInst
 		toolOptions = new HashMap();
 		parameters = new HashMap();
 		parameterSets = new HashMap();
-		dependencies = new Vector();
+		dependencies = new Vector<IDependency>();
 		quantity = 1;
 		namingScheme = "";
 	}
@@ -233,9 +234,9 @@ public class AgentInstanceModel extends AbstractAgentModel implements IAgentInst
 	 *  Get all of the agent's dependency-models.
 	 *  @return A Vector containing all of the agent's dependency-models.
 	 */
-	public IDependency[] getDependencies()
+	public Vector<IDependency> getDependencies()
 	{
-		return (IDependency[])dependencies.toArray(new IDependency[dependencies.size()]);
+		return dependencies;
 	}
 
 	/**

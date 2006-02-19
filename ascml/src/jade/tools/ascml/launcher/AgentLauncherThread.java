@@ -155,7 +155,6 @@ public class AgentLauncherThread implements Runnable {
             } catch(InterruptedException ie) {
             }
         }
-        al.addLaunchedAgent(theAgent);
     }
 
     /**

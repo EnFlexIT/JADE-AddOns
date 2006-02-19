@@ -23,9 +23,10 @@
  */
 
 
-package jade.tools.ascml.launcher.Subscriptions;
+package jade.tools.ascml.launcher.remotestatus;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 import jade.content.abs.AbsAgentAction;
@@ -112,12 +113,12 @@ public class StatusSubscriptionManager implements SubscriptionManager {
 	
 	public void notify(IAbstractRunnable model) {
 		String fqn = model.getFullyQualifiedName();
-		//String typeName = model.getClass().getName();
-		//Is this necessary String myFQN = typeName+"::"+fqn; 
+		
 		if (subTable.containsKey(fqn)) {		
 			Vector<Subscription> subscribers = subTable.get(fqn);
-			for (int i=0;i<subscribers.size();i++) {
-				Subscription s =subscribers.get(i);
+			Iterator<Subscription> subIt = subscribers.iterator();
+			while (subIt.hasNext()) {
+				Subscription s = subIt.next();
 				try {				
 					ACLMessage msg = s.getMessage().createReply();
 					
@@ -131,8 +132,7 @@ public class StatusSubscriptionManager implements SubscriptionManager {
 					al.getContentManager().fillContent(msg, absEquals);
 					s.notify(msg);
 				} catch (Exception e) {
-					e.printStackTrace();
-					//FIXME: Check whether a FAILURE message should be sent back.       
+					e.printStackTrace();      
 				}				
 			}
 		}

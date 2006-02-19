@@ -175,7 +175,7 @@ public interface ISocietyInstanceReference
 	 * in order to start this SocietyInstance-reference.
 	 * @return  the dependencies for this reference (as IDependency-Vector)
 	 */
-	public IDependency[] getDependencies();
+	public Vector<IDependency> getDependencies();
 
 	/**
 	 * Adds an dependency, that must be fulfilled in order to start this reference.

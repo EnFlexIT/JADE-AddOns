@@ -33,6 +33,9 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Iterator;
+import java.util.Vector;
+
 import jade.tools.ascml.absmodel.*;
 
 public class Dependencies extends AbstractPanel implements ChangeListener, ActionListener
@@ -44,9 +47,9 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 
     private JTable dependencyTable;
 
-	private IDependency[] models;
+	private Vector<IDependency> models;
 
-	public Dependencies(AbstractMainPanel mainPanel, IDependency[] models)
+	public Dependencies(AbstractMainPanel mainPanel, Vector<IDependency> models)
 	{
 		super(mainPanel);
 		this.models = models;
@@ -55,7 +58,7 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 		this.setBackground(Color.WHITE);
 
 		this.add(new JLabel("<html><h2>&nbsp;<i>Dependencies</i></h2></html>"), new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-		if (this.models.length > 0)
+		if (this.models.size() > 0)
 		{
 			this.add(new JLabel("<html><h3>&nbsp;The following dependencies have been specified:</h3></html>"), new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 			this.add(createDependencyTable(), new GridBagConstraints(0, 2, 1, 1, 1, 1, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
@@ -70,15 +73,15 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 
 		// prepare delay-spinneer
 		int delay = 0;
-		if (models[0].getType() == IDependency.DELAY_DEPENDENCY)
-			delay = ((IDelayDependency)models[0]).getDelay();
+		if (models.firstElement().getType() == IDependency.DELAY_DEPENDENCY)
+			delay = ((IDelayDependency)models.firstElement()).getDelay();
 		
 		SpinnerModel spinnerModel = new SpinnerNumberModel(delay, 0, MAX_DELAY, 100);
 		delaySpinner = new JSpinner(spinnerModel);
 		delaySpinner.addChangeListener(this);
 		delaySpinner.setToolTipText("Set the amount of milliseconds to wait before the societyinstance is going to start (or before checking the other dependencies). Maximum is one hour ("+MAX_DELAY+" ms) ");
 
-		activeCheckBox = new JCheckBox("actively engage in fulfilling", models[0].isActive());
+		activeCheckBox = new JCheckBox("actively engage in fulfilling", models.firstElement().isActive());
 		activeCheckBox.setBackground(Color.WHITE);
 		activeCheckBox.addActionListener(this);
 		activeCheckBox.setToolTipText("If checked, the ASCML actively engages in fulfilling this dependency by forcing the startup of the appropiate models.");
@@ -97,26 +100,28 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 		String[] tableHeaderEntries = new String[] {"Type", "Attributes", "Provider"};
 		DefaultTableModel dependencyTableModel = new DefaultTableModel(tableHeaderEntries, 0);
 
-		for(int i=0; i < models.length; i++)
-		{
+		Iterator<IDependency> modelIt = models.iterator();
+		while (modelIt.hasNext())
+		{			
+			IDependency oneModel = modelIt.next(); 
 			String[] oneRow = new String[3];
-            oneRow[0] = models[i].getType();
+            oneRow[0] =oneModel.getType();
 
-			if (models[i] instanceof IAgentInstanceDependency)
+			if (oneModel instanceof IAgentInstanceDependency)
 			{
-				IAgentInstanceDependency oneDependency = (IAgentInstanceDependency)models[i];
+				IAgentInstanceDependency oneDependency = (IAgentInstanceDependency)oneModel;
 				oneRow[1] = "<html><b>name</b>=" + oneDependency.getName() + "; <b>status</b>=" + oneDependency.getStatus() + "</html>";
 				oneRow[2] = "<html><b>name</b>=" + oneDependency.getProvider().getName() + "; <b>addresses</b>=" + oneDependency.getProvider().getAddresses() + "</html>";
 			}
-            else if (models[i] instanceof IAgentTypeDependency)
+            else if (oneModel instanceof IAgentTypeDependency)
 			{
-				IAgentTypeDependency oneDependency = (IAgentTypeDependency)models[i];
+				IAgentTypeDependency oneDependency = (IAgentTypeDependency)oneModel;
 				oneRow[1] = "<html><b>name</b>=" + oneDependency.getName() + "; <b>quantity</b>=" + oneDependency.getQuantity() + "</html>";
 				oneRow[2] = "local ASCML";
 			}
-            else if (models[i] instanceof IServiceDependency)
+            else if (oneModel instanceof IServiceDependency)
 			{
-				IServiceDependency oneDependency = (IServiceDependency)models[i];
+				IServiceDependency oneDependency = (IServiceDependency)oneModel;
 				oneRow[1] = "<html><b>name</b>=" + oneDependency.getName() + "; <b>type</b>=" + oneDependency.getServiceType() + "; <b>ownership</b>=" + oneDependency.getOwnership();
 				if (oneDependency.getProtocols().size() > 0)
 					oneRow[1] += "; <b>protocols</b>=" + oneDependency.getProtocols();
@@ -129,21 +134,21 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 				oneRow[1] += "</html>";
 				oneRow[2] = "local ASCML";
 			}
-			else if (models[i] instanceof ISocietyInstanceDependency)
+			else if (oneModel instanceof ISocietyInstanceDependency)
 			{
-				ISocietyInstanceDependency oneDependency = (ISocietyInstanceDependency)models[i];
+				ISocietyInstanceDependency oneDependency = (ISocietyInstanceDependency)oneModel;
 				oneRow[1] = "<html><b>instance-name</b>=" + oneDependency.getSocietyInstanceName() + "; <b>type-name</b>=" + oneDependency.getSocietyTypeName() + "; <b>status</b>=" + oneDependency.getStatus() + "</html>";
 				oneRow[2] = "<html><b>name</b>=" + oneDependency.getProvider().getName() + "; <b>addresses</b>=" + oneDependency.getProvider().getAddresses() + "</html>";
 			}
-			else if (models[i] instanceof ISocietyTypeDependency)
+			else if (oneModel instanceof ISocietyTypeDependency)
 			{
-				ISocietyTypeDependency oneDependency = (ISocietyTypeDependency)models[i];
+				ISocietyTypeDependency oneDependency = (ISocietyTypeDependency)oneModel;
 				oneRow[1] = "<html><b>name</b>=" + oneDependency.getName() + "; <b>quantity</b>=" + oneDependency.getQuantity() + "</html>";
 				oneRow[2] = "local ASCML";
 			}
-			else if (models[i] instanceof IDelayDependency)
+			else if (oneModel instanceof IDelayDependency)
 			{
-				IDelayDependency oneDependency = (IDelayDependency)models[i];
+				IDelayDependency oneDependency = (IDelayDependency)oneModel;
 				oneRow[1] = "<html><b>quantity</b>=" + oneDependency.getDelay() + " (milliseconds)";
 				oneRow[2] = "local ASCML";
 			}
@@ -204,7 +209,7 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 	{
 		if (evt.getSource() == activeCheckBox)
 		{
-            models[0].setActive(activeCheckBox.isSelected());
+            models.firstElement().setActive(activeCheckBox.isSelected());
 		}
 	}
 
@@ -212,8 +217,8 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 	{
 		if (evt.getSource() == delaySpinner)
 		{
-            if (models[0].getType() == IDependency.DELAY_DEPENDENCY)
-				((IDelayDependency)models[0]).setDelay(((Integer)delaySpinner.getValue()).intValue());
+            if (models.firstElement().getType() == IDependency.DELAY_DEPENDENCY)
+				((IDelayDependency)models.firstElement()).setDelay(((Integer)delaySpinner.getValue()).intValue());
 		}
 	}
 

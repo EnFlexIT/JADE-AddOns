@@ -23,7 +23,7 @@
  */
 
 
-package jade.tools.ascml.launcher.behaviours;
+package jade.tools.ascml.launcher.remotestatus;
 
 import jade.content.ContentElement;
 import jade.content.ContentManager;
@@ -44,7 +44,7 @@ import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
 import jade.util.leap.Iterator;
 
-public class ModelStatusListener extends CyclicBehaviour {
+public class RemoteStatusListener extends CyclicBehaviour {
 
     MessageTemplate template;
     AgentLauncher al;
@@ -52,7 +52,7 @@ public class ModelStatusListener extends CyclicBehaviour {
     Codec sl; 
     Ontology onto;
     
-    public ModelStatusListener(AgentLauncher al) {
+    public RemoteStatusListener(AgentLauncher al) {
         super(al);
         this.al=al;   
         cm = new ContentManager();

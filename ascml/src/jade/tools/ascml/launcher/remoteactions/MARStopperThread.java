@@ -23,7 +23,7 @@
  */
 
 
-package jade.tools.ascml.launcher.behaviours;
+package jade.tools.ascml.launcher.remoteactions;
 
 import jade.content.onto.basic.Action;
 import jade.lang.acl.ACLMessage;
@@ -32,7 +32,6 @@ import jade.tools.ascml.absmodel.IRunnableSocietyInstance;
 import jade.tools.ascml.events.ModelActionEvent;
 import jade.tools.ascml.launcher.AgentKillThread;
 import jade.tools.ascml.launcher.AgentLauncher;
-import jade.tools.ascml.launcher.abstracts.AbstractMARThread;
 
 import jade.tools.ascml.onto.*;
 import jade.tools.ascml.exceptions.ModelActionException;
@@ -71,10 +70,12 @@ public class MARStopperThread  extends AbstractMARThread {
 				AgentInstance ai = (AgentInstance) it.next();
 				String instanceName = ai.getFullQuallifiedName();
 				IRunnableAgentInstance rai = (IRunnableAgentInstance) al.getRepository().getRunnableManager().getRunnable(instanceName);
-				if (!al.isAgentStarted(rai.getName())) {
+				
+				//FIXME: rework due to dependecyManager
+				//if (!al.isAgentStarted(rai.getName())) {
 					AgentKillThread akt = new AgentKillThread(rai,al);
 					aktVector.add(akt);
-				}
+				//}
 			}
 			for (int i=0;i<aktVector.size();i++) {
 				AgentKillThread akt =  aktVector.get(i);

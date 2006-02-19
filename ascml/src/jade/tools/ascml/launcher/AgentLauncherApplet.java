@@ -38,7 +38,7 @@ import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.*;
 import jade.lang.acl.MessageTemplate;
 import jade.tools.ascml.onto.*;
-import jade.tools.ascml.launcher.behaviours.ModelActionRequestListener;
+import jade.tools.ascml.launcher.remoteactions.ModelActionRequestListener;
 import jade.tools.ascml.repository.Repository;
 import jade.tools.ascml.gui.GUI;
 

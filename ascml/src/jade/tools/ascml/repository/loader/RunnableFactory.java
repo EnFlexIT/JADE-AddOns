@@ -94,7 +94,7 @@ public class RunnableFactory
 		for (int i=0; i < agentInstanceModels.length; i++)
 		{
 			IAgentInstance oneAgentInstance = agentInstanceModels[i];
-			IAbstractRunnable[] oneRunnableAgentInstance = (IAbstractRunnable[])manager.createRunnable(oneAgentInstance.getName(), oneAgentInstance);
+			IAbstractRunnable[] oneRunnableAgentInstance = (IAbstractRunnable[])manager.createRunnable(oneAgentInstance.getName(), oneAgentInstance, 1);
             // System.err.println("RunnableFactory.createRunnableSocInst: runn-AI=" + oneRunnableAgentInstance);
 			for (int j=0; j < oneRunnableAgentInstance.length; j++)
 			{
@@ -131,7 +131,7 @@ public class RunnableFactory
 					referencedSocietyInstance.setNamingScheme(oneReference.getNamingScheme());
 
 					// String nameAccordingSocietyScheme = manager.createNameOutOfNamingScheme(referencedSocietyInstance.getName(), oneReference.getNamingScheme(), i);
-					IAbstractRunnable[] oneRunnableReference = (IAbstractRunnable[])manager.createRunnable(referencedSocietyInstance.getName(), referencedSocietyInstance);
+					IAbstractRunnable[] oneRunnableReference = (IAbstractRunnable[])manager.createRunnable(referencedSocietyInstance.getName(), referencedSocietyInstance, 1);
 					for (int k=0; k < oneRunnableReference.length; k++)
 					{
 						// System.err.println("RunnableFactory.createRunnableSocietyInstance: dependencies from " + oneReference + " = " + oneReference.getDependencies().length);

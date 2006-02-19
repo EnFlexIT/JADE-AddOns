@@ -23,7 +23,7 @@
  */
 
 
-package jade.tools.ascml.launcher.Subscriptions;
+package jade.tools.ascml.launcher.remotestatus;
 
 import jade.content.abs.AbsAgentAction;
 import jade.content.abs.AbsIRE;

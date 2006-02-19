@@ -48,7 +48,7 @@ public class RunnableSocietyInstanceModel extends AbstractRunnable implements IR
 	{
 		super(name, parentModel, null, parentModel.getParentSocietyType().getModelChangedListener(), parentRunnable); // SocietyInstances themselves have no dependencies, therefore 'null'
 
-		this.status = new Starting();
+		//this.status = new Starting();
 		this.detailedStatus = "Runnable societyinstance has been created";
 	}
 	

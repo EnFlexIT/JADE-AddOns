@@ -164,7 +164,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
             try
 			{
 				// create the model
-				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])getRepository().getRunnableManager().createRunnable(model.getName(), model);
+				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])getRepository().getRunnableManager().createRunnable(model.getName(), model, 1);
 
 				// and select the newly created instance
 				mainPanel.selectModel(runnableModels[0]);

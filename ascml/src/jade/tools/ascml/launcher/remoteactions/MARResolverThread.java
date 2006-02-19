@@ -29,7 +29,7 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package jade.tools.ascml.launcher.behaviours;
+package jade.tools.ascml.launcher.remoteactions;
 
 import java.util.Iterator;
 import java.util.Vector;
@@ -40,7 +40,6 @@ import jade.lang.acl.ACLMessage;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.exceptions.ModelActionException;
 import jade.tools.ascml.launcher.*;
-import jade.tools.ascml.launcher.abstracts.AbstractMARThread;
 import jade.tools.ascml.onto.*;
 
 /**
@@ -59,8 +58,7 @@ public class MARResolverThread extends AbstractMARThread {
 			if (toResolve == RESOLVE_SOCIETY) {
 				while (it.hasNext()) {
                     SocietyInstance sc = (SocietyInstance) it.next();
-					String societyName = sc.getFullQuallifiedName();
-					System.out.println("MARResolver: Received MSG to start: " + societyName);
+					String societyName = sc.getFullQuallifiedName();				
 					IRunnableSocietyInstance rsoc = null;
 					try {
 						rsoc = al.getRepository().createRunnableSocietyInstance(societyName);
@@ -74,7 +72,7 @@ public class MARResolverThread extends AbstractMARThread {
 					while (it.hasNext()) {
 						ToolOption socTO = (ToolOption) it.next();
 						String strTO = socTO.toString();
-						//FIXME: ToolOptions for Societies
+						//TODO: ToolOptions for Societies
 					}
                     
                     Iterator recIt = message.getAllIntendedReceiver();
@@ -82,29 +80,21 @@ public class MARResolverThread extends AbstractMARThread {
                         AID oneAID = (AID)recIt.next();
                     }
                     
-                    System.out.println("MARResolver.doAction: created IRunnableSocietyInstance :" + rsoc);
-					// ModelActionEvent mae= new ModelActionEvent(ModelActionEvent.CMD_START_SOCIETYINSTANCE,rsoc);
-					// al.li.modelActionPerformed(mae);
-					startSociety(rsoc, true);
+					al.getDependencyManager().startThisSociety(rsoc);
 				}
 			} else if (toResolve == RESOLVE_AGENTINSTANCE) {
 				while (it.hasNext()) {					
 					AgentInstance ai = (AgentInstance) it.next();
-					String instanceName = ai.getFullQuallifiedName();
+					String instanceName = ai.getFullQuallifiedName();					
 
-					/* changed by Dirk, 7.12.05
-					   createRunnableAgentInstance now returns an array. It is possible
-					   that an agentinstance defines - using the quantity attribute of the xml-file -
-					   a collection of agentinstances. And this collection
-					   (consisting of 1 or more agentinstances) is returned by the create...-method. */
-
-					IRunnableAgentInstance[] rai = al.getRepository().createRunnableAgentInstance(instanceName);
+					IRunnableAgentInstance[] rai = al.getRepository().createRunnableAgentInstance(instanceName, 1);
 					for (int i=0; i < rai.length; i++)
 					{
-						if (!al.isAgentStarted(rai[i].getName())) {
+						//FIXME: rework due to dependecyManager
+						//if (!al.isAgentStarted(rai[i].getName())) {
 							AgentLauncherThread alt = new AgentLauncherThread(rai[i],al,null);
 							altVector.add(alt);
-						}
+						//}
 					}
                     Iterator recIt = message.getAllIntendedReceiver();
                     while (recIt.hasNext()) {
@@ -120,20 +110,12 @@ public class MARResolverThread extends AbstractMARThread {
 					AgentType at = (AgentType) it.next();
 					String typeName = at.getFullQuallifiedName();
 
-					/* changed by Dirk, 14.2.05
-					   ge�ndert wurde: Runnables werden nun nicht mehr direkt aus den Models gelesen, sondern
-					                   aus dem RunnableManager
-					   Ich weiss nicht genau, ob das Statement unten so funktioniert, wie es soll.
-					   Die RunnableModels allgemein bekommen einen Namen vom Benutzer zugewiesen
-					   und dieser muss sich nicht 'zu Fuss' konstruieren lassen (wie bei message.getSender().getLocalName()+typeName)
-
-					*/
-					System.err.println("MARResolverThread: getRunnable: Don't know if syntax of qualified name is correct ("+message.getSender().getLocalName()+typeName+"), Dirk");
 					IRunnableAgentInstance rai = (IRunnableAgentInstance)al.getRepository().getRunnableManager().getRunnable(message.getSender().getLocalName()+typeName);
-					if (!al.isAgentStarted(rai.getName())) {
+					// FIXME: rework due to dependecyManager
+					//if (!al.isAgentStarted(rai.getName())) {
 						AgentLauncherThread alt = new AgentLauncherThread(rai,al,null);
 						altVector.add(alt);
-					}
+					//}
                     
                     Iterator recIt = message.getAllIntendedReceiver();
                     while (recIt.hasNext()) {
@@ -154,8 +136,8 @@ public class MARResolverThread extends AbstractMARThread {
 	 *            The IRunnableSocietyInstance to start
 	 * @return The DependencyDispatcher to Wait for;
 	 * @throws ModelActionException
-	 */
-	private DependencyDispatcherThread startSociety(IRunnableSocietyInstance instance, boolean doWait)
+	 *//*
+	private void startSociety(IRunnableSocietyInstance instance, boolean doWait)
 			throws ModelActionException {
 		// retrieve list of local dependencies and resolve them
 		IRunnableSocietyInstance[] lsocs = instance.getLocalRunnableSocietyInstanceReferences();
@@ -165,13 +147,13 @@ public class MARResolverThread extends AbstractMARThread {
 			startSociety(sm, doWait);
 		}
 		// Now handled it over to the thread to do the remote ones
-		DependencyDispatcherThread dd = new DependencyDispatcherThread(al, instance, !doWait);
+		//DependencyDispatcherThread dd = new DependencyDispatcherThread(al, instance, !doWait);
 		if (doWait) {
 			dd.join();
-			return null;
+			//return null;
 		} else {
-			return dd;
+			//return dd;
 		}
 	}
-
+*/
 }

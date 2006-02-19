@@ -61,7 +61,7 @@ public class StartSocietyInstanceDialog extends AbstractDialog
 			String instanceName = ((String)result).trim();
 			try
 			{
-				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])repository.getRunnableManager().createRunnable(instanceName, societyInstanceModel);
+				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])repository.getRunnableManager().createRunnable(instanceName, societyInstanceModel, 1);
 
 				// and select the newly created instance
 				parentPanel.selectModel(runnableModels[0]);
