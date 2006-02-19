@@ -129,8 +129,13 @@ public class RunnableGeneral extends AbstractPanel implements ActionListener, Mo
         {
             lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_ERROR);
         }
-
-        ImageIconLoader.scaleImageIcon(lifeCycleIcon, 300, 138);
+		else {
+			// Having no status means, this one was create just right now 
+			lifeCycleIcon = ImageIconLoader.createImageIcon(ImageIconLoader.LIFECYCLE_STARTING);
+        }
+		
+		if (lifeCycleIcon!=null)
+			ImageIconLoader.scaleImageIcon(lifeCycleIcon, 300, 138);
     }
 
     public void updateAllComponents(Status status)
