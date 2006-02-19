@@ -24,20 +24,26 @@
 
 package jade.tools.ascml.dependencymanager;
 
-import java.util.Vector;
-
 import jade.core.AID;
-import jade.tools.ascml.absmodel.*;
-import jade.tools.ascml.events.*;
+import jade.tools.ascml.absmodel.IAbstractRunnable;
+import jade.tools.ascml.absmodel.IRunnableAgentInstance;
+import jade.tools.ascml.absmodel.IRunnableSocietyInstance;
+import jade.tools.ascml.events.ModelChangedEvent;
+import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.exceptions.ModelActionException;
-import jade.tools.ascml.launcher.*;
-import jade.tools.ascml.onto.*;
+import jade.tools.ascml.launcher.AgentLauncher;
+import jade.tools.ascml.onto.Dead;
 import jade.tools.ascml.onto.Error;
+import jade.tools.ascml.onto.Running;
+import jade.tools.ascml.onto.SocietyInstance;
+import jade.tools.ascml.onto.Stopping;
 import jade.tools.ascml.repository.Repository;
+import jade.util.Logger;
+//TODO: Can we use this here: jade.tools.ascml.events.ProgressUpdateEvent?
 
 public class DependencyManager implements ModelChangedListener {
 
-	private AgentLauncher myAgentLauncher;
+	private AgentLauncher launcher;
 	private Repository myRepository;
 	private DependencyManangerLibrary myLibrary;
 	private FunctionalStateController myFunctionalController;
@@ -45,28 +51,42 @@ public class DependencyManager implements ModelChangedListener {
 	private DependencyStateController myDependencyStateController;
 
 	public DependencyManager(AgentLauncher launcher) {
-		myAgentLauncher = launcher;
+		this.launcher = launcher;
 		myRepository = launcher.getRepository();
 		myLibrary = new DependencyManangerLibrary();
 		myFunctionalController = new FunctionalStateController(launcher);
 		myRunnableStarter = new RunnableStarter(launcher, myFunctionalController);
+		launcher.getRepository().getListenerManager().addModelChangedListener(myRunnableStarter);
 		myDependencyStateController = new DependencyStateController(launcher);
 	}
 
 	public synchronized void modelChanged(ModelChangedEvent evt) {
-		if (evt.getEventCode() == ModelChangedEvent.STATUS_CHANGED) {                            
-			try {
-				IAbstractRunnable absRunnable = (IAbstractRunnable)evt.getModel();                
-				if (absRunnable instanceof IRunnableSocietyInstance) {
-					IRunnableSocietyInstance societyInstanceModel = (IRunnableSocietyInstance) absRunnable;
-					myFunctionalController.updateSociety(societyInstanceModel);
-				} else if (absRunnable instanceof IRunnableAgentInstance) {
-					IRunnableAgentInstance agentInstanceModel = (IRunnableAgentInstance) absRunnable;
-					myFunctionalController.updateAgent(agentInstanceModel);
+		if (evt.getEventCode() == ModelChangedEvent.STATUS_CHANGED) {
+			if (evt.getModel() instanceof IAbstractRunnable) {
+				try {
+					IAbstractRunnable absRunnable = (IAbstractRunnable)evt.getModel();
+					if (launcher.myLogger.isLoggable(Logger.INFO)) {
+						launcher.myLogger.info("Status update for: "+absRunnable.getFullyQualifiedName()+ "\nNew Status: "+absRunnable.getStatus());
+					}
+					if (absRunnable instanceof IRunnableSocietyInstance) {
+						IRunnableSocietyInstance societyInstanceModel = (IRunnableSocietyInstance) absRunnable;
+						myFunctionalController.updateSociety(societyInstanceModel);
+						myDependencyStateController.updateSociety(societyInstanceModel);
+					} else if (absRunnable instanceof IRunnableAgentInstance) {
+						IRunnableAgentInstance agentInstanceModel = (IRunnableAgentInstance) absRunnable;
+						myFunctionalController.updateAgent(agentInstanceModel);
+						myDependencyStateController.updateAgent(agentInstanceModel);
+					} else {
+						if (launcher.myLogger.isLoggable(Logger.WARNING)) {
+							launcher.myLogger.warning("Unknown Model: "+absRunnable.getClass().getName()+"\nStatus update for: "+absRunnable.getFullyQualifiedName()+ "\nNew Status: "+absRunnable.getStatus());
+						}						
+					}
+				} catch (ClassCastException cce) {
+					System.err.println("DependencyManager: ClassCastException:");
+					System.err.println(cce.toString());
+					cce.printStackTrace();
+					System.err.println("Model was of type: "+evt.getModel().getClass().getName());				
 				}
-			} catch (ClassCastException cce) {
-				System.err.println("DependencyManager: ClassCastException:");
-				System.err.println(cce.toString());
 			}
 		}
 	}
@@ -74,7 +94,7 @@ public class DependencyManager implements ModelChangedListener {
 	public void agentBorn(AID agentAID) {
 		if (myLibrary.hasAgent(agentAID)) {
 			IRunnableAgentInstance agent = myLibrary.getAgent(agentAID);
-			agent.setStatus(new Running());
+			agent.setStatus(new Running());					
 		}
 		myFunctionalController.agentBorn(agentAID);
 	}
@@ -105,6 +125,11 @@ public class DependencyManager implements ModelChangedListener {
 			throw new ModelActionException("Found society in library", societyInstanceModel);
 		}
 		myLibrary.addSociety(societyInstanceModel.getName(), societyInstanceModel);
+		
+		if (launcher.myLogger.isLoggable(Logger.INFO)) {
+			launcher.myLogger.info("Now adding "+societyInstanceModel.getFullyQualifiedName()+ " to the DependencyStateController");
+		}
+		
 		myDependencyStateController.addModel(societyInstanceModel);
 	}
 

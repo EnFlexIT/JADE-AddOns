@@ -30,23 +30,27 @@ import jade.content.onto.OntologyException;
 import jade.content.onto.UngroundedException;
 import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
+import jade.tools.ascml.absmodel.IAbstractRunnable;
 import jade.tools.ascml.exceptions.ModelActionException;
 import jade.tools.ascml.launcher.AgentLauncher;
-import jade.tools.ascml.launcher.remoteactions.AbstractMARWaitThread;
+import jade.tools.ascml.onto.Error;
 import jade.tools.ascml.onto.Status;
+
+/** 
+ * @author Sven Lilienthal (ascml@sven-lilienthal.de)
+ */
 
 public class RemoteStatusInquirer extends AchieveREInitiator
 {
-	AbstractMARWaitThread dt;
-
 	private Status result = null;
 	private AgentLauncher al;
+	private IAbstractRunnable remoteModel;
 
-	public RemoteStatusInquirer(ACLMessage request, AbstractMARWaitThread dt, AgentLauncher al)
+	public RemoteStatusInquirer(ACLMessage request, AgentLauncher al, IAbstractRunnable remoteModel)
 	{
 		super(al, request);
 		this.al=al;
-		this.dt=dt;
+		this.remoteModel=remoteModel;
 	}
 	
 	protected void handleAgree(ACLMessage agree)
@@ -64,16 +68,11 @@ public class RemoteStatusInquirer extends AchieveREInitiator
 			//System.out.println("MARGetStatusBehaviour: We have been informed by the remote agent. Status is: "+result);
 			// Fill the result with the message content 
 			// This sets the calling DispatcherThread as completed
-			dt.setCompleted();
-		} catch (CodecException e) {
-			dt.error(new ModelActionException("GetStatus failed","The ASCML could not get the remote Status. " + e));
-			System.err.println("GetStatus failed CodecException" + e);
-		} catch (UngroundedException e) {
-			dt.error(new ModelActionException("GetStatus failed","The ASCML could not get the remote Status." + e));
-			System.err.println("GetStatus failed UngroundedException" + e);
-		} catch (OntologyException e) {
-			dt.error(new ModelActionException("GetStatus failed","The ASCML could not get the remote Status." + e));
-			System.err.println("GetStatus failed OntologyException" + e);
+			remoteModel.setStatus(result);
+		} catch (Exception e) {
+			System.err.println("GetStatus failed "+ e.getClass().getSimpleName() +" " + e);
+			remoteModel.setDetailedStatus("The ASCML could not get the remote Status. " + e);
+			remoteModel.setStatus(new Error());
 		}
 	}
 	protected void handleFailure(ACLMessage reply)
@@ -87,16 +86,14 @@ public class RemoteStatusInquirer extends AchieveREInitiator
 			System.err.println("MARGetStatusBehaviour: \n"+s+"\n");
 		}
 		System.err.println("MARGetStatusBehaviour: Got a failure");
-		dt.error(new ModelActionException("Error while processing the requested action.", "This ASCML sent out a request to perform an action and this request couldn't be successfully processed. The reason for this is: " + s));
+		remoteModel.setDetailedStatus("This ASCML sent out a request to perform an action and this request couldn't be successfully processed. The reason for this is: " + s);
+		remoteModel.setStatus(new Error());
 	}
 	protected void handleRefuse(ACLMessage reply)
 	{
 		System.err.println("MARGetStatusBehaviour: Got a refuse");
-		dt.error(new ModelActionException("The requested action has been refused.", "This ASCML sent out a request to perform an action and this request has been refused. The reason for this is: " + reply.getContent()));
-	}
-	
-	public Status getResult() {
-		return result;
+		remoteModel.setDetailedStatus("This ASCML sent out a request to perform an action and this request has been refused. The reason for this is: " + reply.getContent());
+		remoteModel.setStatus(new Error());
 	}
 
 	protected void handleOutOfSequence(ACLMessage msg) {

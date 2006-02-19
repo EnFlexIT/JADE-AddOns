@@ -62,7 +62,7 @@ import java.util.Vector;
 
 
 /**
- * @author sven & Tim Niemueller
+ * @author Tim Niemueller & Sven Lilienthal (ascml@sven-lilienthal.de)
  *
  */
 public class ToolRequester {
@@ -77,7 +77,11 @@ public class ToolRequester {
     private AgentLauncher launcher;
     private boolean isSniffer;
     private String tooloptionConfigType;
+	
     
+    /**
+     * @deprecated
+     */
     public ToolRequester(AgentLauncher launcher, String toolClass, String tooloptionConfigType, String toolPrefix) {
         // This equals stuff is crap! Do not rely on it, use the longer constructor instead!
         this(launcher, toolClass, toolPrefix, tooloptionConfigType, toolClass.equals("jade.tools.sniffer.Sniffer"));

@@ -9,29 +9,35 @@ import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.launcher.AgentLauncherThread;
 import jade.tools.ascml.onto.*;
 import jade.tools.ascml.onto.Error;
+import jade.util.Logger;
 
 public class RunnableStarter implements ModelChangedListener {
 	
-	private AgentLauncher al;
+	private AgentLauncher launcher;
 	private FunctionalStateController myFunctionalController;
 
-	public RunnableStarter(AgentLauncher al,FunctionalStateController myFunctionalController) {
+	public RunnableStarter(AgentLauncher launcher,FunctionalStateController myFunctionalController) {
 		this.myFunctionalController=myFunctionalController;
-		this.al=al;
+		this.launcher=launcher;
 	}
 	
 	public void modelChanged(ModelChangedEvent evt) {
 		if (evt.getEventCode() == ModelChangedEvent.STATUS_CHANGED) {
-			try {
-				IAbstractRunnable absRunnable = (IAbstractRunnable)evt.getModel();
-				if (absRunnable.getStatus().equals(new Starting())) {
-					startThisModel(absRunnable);
-				} else if (absRunnable.getStatus().equals(new Stopping())) {
-					stopThisModel(absRunnable);
+			if (evt.getModel() instanceof IAbstractRunnable) {			
+				try {
+					IAbstractRunnable absRunnable = (IAbstractRunnable)evt.getModel();
+					if (launcher.myLogger.isLoggable(Logger.INFO)) {
+						launcher.myLogger.info("Received starting for "+absRunnable.getFullyQualifiedName());
+					}					
+					if (absRunnable.getStatus().equals(new Starting())) {
+						startThisModel(absRunnable);
+					} else if (absRunnable.getStatus().equals(new Stopping())) {
+						stopThisModel(absRunnable);
+					}
+				} catch (ClassCastException cce) {
+					System.err.println("DependencyManager: ClassCastException:");
+					System.err.println(cce.toString());
 				}
-			} catch (ClassCastException cce) {
-				System.err.println("DependencyManager: ClassCastException:");
-				System.err.println(cce.toString());
 			}
 		}
 	}
@@ -39,7 +45,7 @@ public class RunnableStarter implements ModelChangedListener {
 	private void stopThisModel(IAbstractRunnable absRunnable) {
 		if (absRunnable instanceof IRunnableAgentInstance) {
 			IRunnableAgentInstance agentInstance = (IRunnableAgentInstance)absRunnable;
-            AgentKillThread akt = new AgentKillThread(agentInstance, al);
+            AgentKillThread akt = new AgentKillThread(agentInstance, launcher);
             try {
                 akt.getResult();
             } catch (ModelActionException mae) {
@@ -57,7 +63,7 @@ public class RunnableStarter implements ModelChangedListener {
 			agentInstances[i].setStatus(new Stopping());
 		}
 		IRunnableRemoteSocietyInstanceReference[] remoteSocieties = societyInstance.getRemoteRunnableSocietyInstanceReferences();
-		//FIXME: Now, let's stop the remote ones
+		//FIXME: Now, let's stop the remote references
 		/*Vector<RemoteStopperThread> rstVector = new Vector<RemoteStopperThread>();
 		IRunnableRemoteSocietyInstanceReference[] rsocs = instance.getRemoteRunnableSocietyInstanceReferences();
 		for (int i = 0; i < rsocs.length; i++) {
@@ -69,7 +75,7 @@ public class RunnableStarter implements ModelChangedListener {
 	private void startThisModel(IAbstractRunnable absRunnable) {
 		if (absRunnable instanceof IRunnableAgentInstance) {
 			IRunnableAgentInstance agentInstance = (IRunnableAgentInstance)absRunnable;
-			AgentLauncherThread new_thread = new AgentLauncherThread(agentInstance, al, null);
+			AgentLauncherThread new_thread = new AgentLauncherThread(agentInstance, launcher, null);
 			try {
 				new_thread.getResult();
 			}
@@ -83,7 +89,7 @@ public class RunnableStarter implements ModelChangedListener {
 			IRunnableAgentInstance[] agentInstances = societyInstance.getRunnableAgentInstances();
 			for (int i=0;i<agentInstances.length;i++) {
 				try {
-					al.getDependencyManager().startThisAgent(agentInstances[i]);
+					launcher.getDependencyManager().startThisAgent(agentInstances[i]);
 				}
 				catch (ModelActionException e) {
 					agentInstances[i].setStatus(new Error());
@@ -92,7 +98,8 @@ public class RunnableStarter implements ModelChangedListener {
 			}
 			IRunnableRemoteSocietyInstanceReference[] remoteSocieties = societyInstance.getRemoteRunnableSocietyInstanceReferences();
 			for (int i=0;i<remoteSocieties.length;i++) {
-				//FIXME: Now let's start the remote ones			
+				//TODO: Add some mechanism to watch the status of remote societies
+				launcher.inquirerAndStartRemoteSociety(remoteSocieties[i]);
 			}
 		}	
 	}

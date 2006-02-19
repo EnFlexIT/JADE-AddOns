@@ -52,15 +52,23 @@ import jade.proto.AchieveREInitiator;
 import jade.proto.FIPAProtocolNames;
 import jade.tools.ToolAgent;
 import jade.tools.ascml.absmodel.IRunnableAgentInstance;
+import jade.tools.ascml.absmodel.IRunnableRemoteSocietyInstanceReference;
 import jade.tools.ascml.dependencymanager.DependencyManager;
+import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.gui.GUI;
 import jade.tools.ascml.launcher.remoteactions.AbstractMARWaitThread;
 import jade.tools.ascml.launcher.remoteactions.ModelActionRequestBehaviour;
 import jade.tools.ascml.launcher.remoteactions.ModelActionRequestListener;
+import jade.tools.ascml.launcher.remoteactions.RemoteStarterBehaviour;
+import jade.tools.ascml.launcher.remotestatus.RemoteStatusInquirer;
+import jade.tools.ascml.launcher.remotestatus.RemoteStatusResponder;
 import jade.tools.ascml.launcher.remotestatus.StatusSubscriptionInitiator;
 import jade.tools.ascml.launcher.remotestatus.StatusSubscriptionManager;
 import jade.tools.ascml.onto.ASCMLOntology;
 import jade.tools.ascml.onto.AbsModel;
+import jade.tools.ascml.onto.Error;
+import jade.tools.ascml.onto.SocietyInstance;
+import jade.tools.ascml.onto.Start;
 import jade.tools.ascml.onto.Status;
 import jade.tools.ascml.repository.Repository;
 import jade.util.Logger;
@@ -69,7 +77,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * @author Sven Lilienthal
+ * @author Sven Lilienthal (ascml@sven-lilienthal.de)
  *
  */
 public class AgentLauncher extends ToolAgent {
@@ -124,17 +132,85 @@ public class AgentLauncher extends ToolAgent {
     } // END of inner class plattformEventListener
 
     /**
+     * tries to get the status of the remote society
+     * if it isn't starting or functional it will be started
+     */
+	public void inquirerAndStartRemoteSociety(IRunnableRemoteSocietyInstanceReference remoteSociety) {
+		//First we create a new listener, which will check the status updates of the remote society
+		ModelChangedListener inqAndStart = new RemoteInquirerAndStarter(this,remoteSociety);
+		getRepository().getListenerManager().addModelChangedListener(inqAndStart);
+		
+		try {
+			//Now we will construct the required message and send it
+			AID receiver = new AID(remoteSociety.getLauncherName(), AID.ISGUID);				
+			SocietyInstance newsoc = new SocietyInstance();
+			newsoc.setFullQuallifiedName(remoteSociety.getFullyQualifiedName());
+			receiver.addAddresses(remoteSociety.getLauncherAddresses()[0]);
+			ACLMessage message = createSubscription(receiver, newsoc);
+			message.setPerformative(ACLMessage.QUERY_REF);
+			message.setProtocol(FIPANames.InteractionProtocol.FIPA_QUERY);
+			RemoteStatusInquirer rsi = new RemoteStatusInquirer(message, this, remoteSociety);
+			addBehaviour(rsi);
+		}
+		catch (Exception e) {
+			remoteSociety.setDetailedStatus(e.getMessage());
+			remoteSociety.setStatus(new Error());
+			e.printStackTrace();
+		}
+	}
+	
+	/**
      * adds a Behaviour which attempts to start a society on a remote plattform
      */
-    public void StartRemoteSociety(ACLMessage msg, AbstractMARWaitThread dt) {
-        System.err.print("AgentLauncher.StartRemoteSociety: request-receiver: ");
-        Iterator it = msg.getAllReceiver();
-        while (it.hasNext()) {
-            jade.core.AID recv = (jade.core.AID) it.next();
-            System.out.println(recv.getName());
-        }
-        ModelActionRequestBehaviour srb = new ModelActionRequestBehaviour(msg, dt, this);
-        addBehaviour(srb);
+	public void StartRemoteSociety(IRunnableRemoteSocietyInstanceReference remoteSociety) {
+		// If there are no adresses, then I just don't care.
+		// If there are multiple adresses, I don't know what to do
+		// What has to be done is yet to be defined
+		String[] launcherAdresses = remoteSociety.getLauncherAddresses();
+		String launcherName = remoteSociety.getLauncherName();
+		AID launcherAID = new AID(launcherName,AID.ISGUID);
+		launcherAID.addAddresses(launcherAdresses[0]);
+
+		//If we start a remote society we want to be kept informed about its status
+		AbsModel absSociety = new AbsModel();
+		absSociety.setFullQuallifiedName(remoteSociety.getFullyQualifiedName());		
+		try {
+			StatusSubscriptionInitiator ssi = new StatusSubscriptionInitiator(this,createSubscription(launcherAID, absSociety),remoteSociety);
+			addBehaviour(ssi);			
+		}
+		catch (CodecException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			ACLMessage message = new ACLMessage(ACLMessage.REQUEST);
+			message.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+			message.setOntology(ASCMLOntology.ONTOLOGY_NAME);
+			message.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+			message.addReceiver(launcherAID);
+
+			// Now we fill in the message content
+			jade.content.onto.basic.Action contentAction = new jade.content.onto.basic.Action();
+			Start start = new Start();
+			//TODO: Check FIPA-standard: which one should we use?
+			contentAction.setActor(launcherAID);
+			start.setActor(launcherAID);
+			SocietyInstance newsoc = new SocietyInstance();
+			newsoc.setFullQuallifiedName(remoteSociety.getFullyQualifiedName());		
+			start.addModels(newsoc);
+			contentAction.setAction(start);
+			try {
+				getContentManager().setValidationMode(true);
+				getContentManager().fillContent(message, contentAction);			
+			} catch (Exception e) {
+				e.printStackTrace();
+			}		
+			
+			RemoteStarterBehaviour rsb = new RemoteStarterBehaviour(this, message);
+	        addBehaviour(rsb);		
+		}
+		catch (OntologyException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
     }
 
     /**
@@ -294,7 +370,7 @@ public class AgentLauncher extends ToolAgent {
         repository.getListenerManager().addLongTimeActionStartListener(lmi);
 		
 		myDependencyManager = new DependencyManager(this);
-		repository.getListenerManager().addModelChangedListener(myDependencyManager);
+		repository.getListenerManager().addModelChangedListener(myDependencyManager);		
 
 		if (!noGUI)
 			gui = new GUI(repository);
@@ -529,7 +605,7 @@ public class AgentLauncher extends ToolAgent {
 	 * 			The model to subscribe for
 	 * @return  
 	 * 			The StatusSubscriptionInitiator to cancel the subscription if wanted 
-	 */
+	 *//*
 	public StatusSubscriptionInitiator subscribeTo(AID ascml,AbsModel model) {
 		try {			 
 			StatusSubscriptionInitiator ssi = new StatusSubscriptionInitiator(this, createSubscription(ascml,model), model);
@@ -538,7 +614,7 @@ public class AgentLauncher extends ToolAgent {
 			e.printStackTrace();
 		}		
 		return null;
-	}
+	}*/
 
 	public DependencyManager getDependencyManager() {
 		return myDependencyManager;

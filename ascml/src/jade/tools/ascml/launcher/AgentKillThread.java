@@ -38,6 +38,9 @@ import jade.tools.ascml.exceptions.ModelActionException;
  * If everything works fine getResult returns, 
  * otherwise getResult throws a ModelActionException
  * containing the reason why killing failed.
+ * 
+ * @author Sven Lilienthal (ascml@sven-lilienthal.de)
+ *
  */
 public class AgentKillThread implements Runnable {
 	private IRunnableAgentInstance aModel;

@@ -47,6 +47,9 @@ import jade.tools.ascml.absmodel.IAbstractRunnable;
 import jade.tools.ascml.launcher.*;
 import jade.tools.ascml.onto.*;
 
+/**
+ * @author Sven Lilienthal (ascml@sven-lilienthal.de)
+ */
 public class StatusSubscriptionManager implements SubscriptionManager {
 	
 	HashMap<String, Vector<Subscription>> subTable;

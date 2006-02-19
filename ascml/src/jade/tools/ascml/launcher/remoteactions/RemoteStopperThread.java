@@ -51,7 +51,8 @@ public class RemoteStopperThread extends AbstractMARWaitThread {
 			msg.setOntology(ASCMLOntology.ONTOLOGY_NAME);
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			
-			receiver.addAddresses(remoteRef.getLauncherAddresses()[0]); // FIXME
+			//TODO: What to do if we have multiple adresses
+			receiver.addAddresses(remoteRef.getLauncherAddresses()[0]); 
 			
 			// for(int t =0;t<soc.getLauncherAddresses().length;t++)
 			// System.out.println(soc.getLauncherAddresses()[t]);
@@ -80,7 +81,7 @@ public class RemoteStopperThread extends AbstractMARWaitThread {
 				e.printStackTrace();
 			}
 			
-			al.StartRemoteSociety(msg, this);	
+			//al.StartRemoteSociety(msg, this);	
 		}
 	}
 	

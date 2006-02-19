@@ -44,6 +44,9 @@ import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
 import jade.util.leap.Iterator;
 
+/**
+ * @author Sven Lilienthal (ascml@sven-lilienthal.de)
+ */
 public class RemoteStatusListener extends CyclicBehaviour {
 
     MessageTemplate template;

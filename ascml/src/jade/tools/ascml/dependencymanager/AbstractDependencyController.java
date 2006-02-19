@@ -33,6 +33,7 @@ import jade.core.AID;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
+import jade.util.Logger;
 
 public abstract class AbstractDependencyController {
 	
@@ -155,7 +156,13 @@ public abstract class AbstractDependencyController {
 	protected abstract void handleActiveDependency(IDependency oneDep);
 	
 	public void addModel(IAbstractRunnable absRunnable) {
-		Vector<IDependency> deps = getDependenciesFromModel(absRunnable);
+		Vector<IDependency> deps;
+		try {
+			deps = getDependenciesFromModel(absRunnable);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
+		}
 		Iterator<IDependency> depIterator = deps.iterator();
 		if (depIterator.hasNext()) {
 			while (depIterator.hasNext()) {
@@ -214,6 +221,9 @@ public abstract class AbstractDependencyController {
 			}
 		} else {
 			//We don't have any Dependency
+			if (launcher.myLogger.isLoggable(Logger.INFO)) {
+				launcher.myLogger.info("This one ("+absRunnable.getFullyQualifiedName()+ ") has no dependencies");
+			}
 			noDependencies(absRunnable);
 		}
 	}

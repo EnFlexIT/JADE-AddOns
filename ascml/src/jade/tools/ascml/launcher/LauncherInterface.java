@@ -24,15 +24,15 @@
 
 package jade.tools.ascml.launcher;
 
-import java.util.Vector;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.events.ModelActionListener;
 import jade.tools.ascml.events.ModelActionEvent;
-import jade.tools.ascml.events.ProgressUpdateEvent;
 import jade.tools.ascml.exceptions.ModelActionException;
-import jade.tools.ascml.onto.*;
+import jade.util.Logger;
 
-import jade.tools.ascml.onto.Stopping;
+/**
+* @author Sven Lilienthal (ascml@sven-lilienthal.de)
+**/
 
 public class LauncherInterface implements ModelActionListener {
 	private AgentLauncher al;
@@ -59,6 +59,10 @@ public class LauncherInterface implements ModelActionListener {
 				modelActionPerformed(ae);
 			}
 			
+			if (al.myLogger.isLoggable(Logger.INFO)) {
+				al.myLogger.info("Starting "+societyInstance.getFullyQualifiedName());
+			}
+
 			// Now we start this society
 			al.getDependencyManager().startThisSociety(societyInstance);
 		} else if (event.getActionCommand().equals(ModelActionEvent.CMD_STOP_SOCIETYINSTANCE)) {
@@ -70,6 +74,10 @@ public class LauncherInterface implements ModelActionListener {
 				IRunnableSocietyInstance sm = lsocs[i];
 				ModelActionEvent ae = new ModelActionEvent(ModelActionEvent.CMD_STOP_SOCIETYINSTANCE, lsocs[i]);
 				modelActionPerformed(ae);
+			}
+
+			if (al.myLogger.isLoggable(Logger.INFO)) {
+				al.myLogger.info("Stopping "+instance.getFullyQualifiedName());
 			}
 			
 			al.getDependencyManager().stopThisSociety(instance);

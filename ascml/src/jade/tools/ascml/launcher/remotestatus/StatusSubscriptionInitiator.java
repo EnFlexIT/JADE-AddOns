@@ -25,41 +25,44 @@
 
 package jade.tools.ascml.launcher.remotestatus;
 
-import jade.content.abs.AbsAgentAction;
-import jade.content.abs.AbsIRE;
 import jade.content.abs.AbsObject;
 import jade.content.abs.AbsPredicate;
-import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SLVocabulary;
-import jade.content.onto.BasicOntology;
-import jade.content.onto.OntologyException;
-import jade.core.*;
 import jade.lang.acl.ACLMessage;
 import jade.proto.SubscriptionInitiator;
-import jade.tools.ascml.absmodel.AbstractRunnable;
 import jade.tools.ascml.absmodel.IAbstractRunnable;
-import jade.tools.ascml.launcher.*;
-import jade.tools.ascml.onto.*;
+import jade.tools.ascml.launcher.AgentLauncher;
+import jade.tools.ascml.onto.ASCMLOntology;
+import jade.tools.ascml.onto.Status;
+import jade.tools.ascml.onto.Stopping;
 
+/**
+ * @author Sven Lilienthal (ascml@sven-lilienthal.de)
+ */
 public class StatusSubscriptionInitiator extends SubscriptionInitiator {
 
-	AgentLauncher al;
-	AbsModel model;
+	AgentLauncher launcher;
+	IAbstractRunnable model;
 
-	public StatusSubscriptionInitiator(AgentLauncher al, ACLMessage msg, AbsModel model) {
-		super(al, msg);
+	public StatusSubscriptionInitiator(AgentLauncher launcher, ACLMessage msg, IAbstractRunnable model) {
+		super(launcher, msg);
 		this.model=model;
-		this.al=al;
+		this.launcher=launcher;
 	}	
 	
 	@Override
-	protected void handleInform(ACLMessage inform) {		
+	protected void handleInform(ACLMessage inform) {
+		//FIXME: if the new status is stopped, remove the ssi
 		AbsPredicate absEquals;
 		try {
-			absEquals = (AbsPredicate)  al.getContentManager().extractAbsContent(inform);
+			absEquals = (AbsPredicate)  launcher.getContentManager().extractAbsContent(inform);
 			AbsObject absStatus = absEquals.getAbsObject(SLVocabulary.EQUALS_RIGHT);
-			Status ms = (Status) ASCMLOntology.getInstance().toObject(absStatus);
-			model.setModelStatus(ms);
+			Status ms = (Status) ASCMLOntology.getInstance().toObject(absStatus);		
+			model.setStatus(ms);
+			if (ms.equals(new Stopping())) {
+				//TODO: We should cancel the subscription
+				launcher.removeBehaviour(this);
+			}
 		} catch (Exception e) {
 		}		
 		super.handleInform(inform);

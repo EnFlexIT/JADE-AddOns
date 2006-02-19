@@ -1,4 +1,4 @@
-package jade.tools.ascml.launcher;
+package jade.tools.ascml.launcher.remotestatus;
 
 import jade.content.abs.AbsConcept;
 import jade.content.abs.AbsIRE;
@@ -12,8 +12,12 @@ import jade.lang.acl.MessageTemplate;
 import jade.proto.SimpleAchieveREResponder;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.exceptions.ResourceNotFoundException;
+import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
 
+/**
+ * @author Sven Lilienthal (ascml@sven-lilienthal.de)
+ */
 public class RemoteStatusResponder extends SimpleAchieveREResponder {
 
 	private AgentLauncher al;

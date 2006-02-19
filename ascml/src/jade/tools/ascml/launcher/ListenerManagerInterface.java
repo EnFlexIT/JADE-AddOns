@@ -27,6 +27,10 @@ package jade.tools.ascml.launcher;
 import jade.tools.ascml.absmodel.IAbstractRunnable;
 import jade.tools.ascml.events.*;
 
+/**
+* @author Sven Lilienthal (ascml@sven-lilienthal.de)
+**/
+
 public class ListenerManagerInterface implements ToolTakeDownListener, ExceptionListener, ModelChangedListener, LongTimeActionStartListener {
 
 	AgentLauncher al;
