@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="ASCML" default="compile" basedir=".">
-	<description>ASCML - Agent Society Communication Manager and Launcher build file</description>
+	<description>ASCML - Agent Society Configuration Manager and Launcher build file</description>
 
 	<!-- Include local properties (if present). -->
 	<property file="ant.properties"/>
@@ -28,7 +28,7 @@
 	<path id="classpath">
 		<pathelement path="${classes.dir}"/>
 		<pathelement path="${classpath}"/>
-    <pathelement path="${JADE_PATH}"/>
+    	<pathelement path="${JADE_PATH}"/>
 		<fileset dir=".">
 			<include name="lib/**/*.jar"/>
 		</fileset>
@@ -67,6 +67,12 @@
 		<copy todir="${classes.dir}">
 			<fileset dir="${src.dir}" includes="**/*.gif **/*.png **/*.xml" />
 		</copy>
+		<echo message="apply JiBX-binding-compiler"/>
+		<java classname="org.jibx.binding.Compile" failonerror="true" fork="true">
+			<classpath refid="classpath"/>
+			<!--<arg value="-v" />-->
+			<arg value="${src.dir}/jade/tools/ascml/model/jibx/binding.xml" />
+		</java>
 		<!--<copy todir="${classes.dir}/jade/tools/benchmarking">
 			<fileset file="${src.dir}/jade/tools/benchmarking/BenchmarkAdapterAgentTemplate.java" />
 		</copy>-->
