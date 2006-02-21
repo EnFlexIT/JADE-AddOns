@@ -23,6 +23,12 @@ public class ContainerMonitorAgent extends Agent {
 	private AgentContainerImpl myContainer;
 	private LADT myLADT;
 	
+	private MessageTemplate template = MessageTemplate.and(
+			MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
+			MessageTemplate.MatchOntology(CONTAINER_MONITOR_ONTOLOGY) );
+	
+	private MessageTemplate helpTemplate = MessageTemplate.not(template);
+	
 	protected void setup() {
 		Object[] args = getArguments();
 		myContainer = (AgentContainerImpl) args[0];
@@ -31,9 +37,6 @@ public class ContainerMonitorAgent extends Agent {
 		addBehaviour(new IntrospectionServer(this));
 		
 		addBehaviour(new CyclicBehaviour(this) {
-			private MessageTemplate template = MessageTemplate.and(
-					MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
-					MessageTemplate.MatchOntology(CONTAINER_MONITOR_ONTOLOGY) );
 			
 			public void action() {
 				ACLMessage msg = myAgent.receive(template);
@@ -46,7 +49,7 @@ public class ContainerMonitorAgent extends Agent {
 							reply.setPerformative(ACLMessage.INFORM);
 							reply.setContent(getAgentsDump());
 						}
-						if (contentUC.startsWith(DUMP_MESSAGEQUEUE_ACTION)) {
+						else if (contentUC.startsWith(DUMP_MESSAGEQUEUE_ACTION)) {
 							String agentName = getParameter(content);
 							reply.setPerformative(ACLMessage.INFORM);
 							reply.setContent(getMessageQueueDump(agentName));
@@ -79,10 +82,26 @@ public class ContainerMonitorAgent extends Agent {
 				}
 			}
 		});
+		
+		addBehaviour(new CyclicBehaviour(this) {
+			public void action() {
+				ACLMessage msg = myAgent.receive(helpTemplate);
+				if (msg != null) {
+					ACLMessage reply = msg.createReply();
+					reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+					reply.setContent(getHelp());
+					myAgent.send(reply);
+				}
+				else {
+					block();
+				}
+			}
+		} );
+		
 	}
 	
 	public String getHelp() {
-		StringBuffer sb = new StringBuffer("Supported actions:\n");
+		StringBuffer sb = new StringBuffer("This agent accepts REQUEST messages refering to the "+CONTAINER_MONITOR_ONTOLOGY+" ontology.\nSupported actions:\n");
 		sb.append(DUMP_AGENTS_ACTION);
 		sb.append('\n');
 		sb.append(DUMP_MESSAGEQUEUE_ACTION);

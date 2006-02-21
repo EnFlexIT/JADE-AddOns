@@ -33,7 +33,7 @@ import jade.util.leap.List;
    @author Giovanni Caire - TILAB
  */
 public interface RemoteManager extends Remote {
-	int launchJadeInstance(String instanceName, String classpath, String mainClass, String jadeArgs, String[] protoNames) throws TestException, RemoteException;
+	int launchJadeInstance(String instanceName, String classpath, String jvmArgs, String mainClass, String jadeArgs, String[] protoNames) throws TestException, RemoteException;
 	List getJadeInstanceAddresses(int id) throws TestException, RemoteException;
 	String getJadeInstanceContainerName(int id) throws TestException, RemoteException;
 	void killJadeInstance(int id) throws TestException, RemoteException;

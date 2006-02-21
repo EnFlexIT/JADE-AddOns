@@ -47,7 +47,7 @@
 
   <target name="lib" depends="compile" description="generate jar archive">
     <jar jarfile="${lib}/jadeMisc.jar">
-      <fileset dir="${build}" includes="**/jade/misc/*"/>
+      <fileset dir="${build}" includes="**/jade/**"/>
     </jar>
   </target>
 

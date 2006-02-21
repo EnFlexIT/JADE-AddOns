@@ -36,14 +36,16 @@ import java.util.StringTokenizer;
 /**
    @author Giovanni Caire - TILAB
  */
-class LocalJadeController implements JadeController {
+class LocalJadeController implements JadeController, OutputHandler {
 	private Object lock = new Object();
 	private boolean ready = false;
 	private List addresses = new ArrayList();
 	private String containerName = null;
 	private Process proc;
+	private OutputHandler outHandler;
 	
-	public LocalJadeController(String instanceName, String cmdLine, String[] protoNames) throws TestException {
+	public LocalJadeController(String instanceName, String cmdLine, String[] protoNames, OutputHandler handler) throws TestException {
+		outHandler = (handler != null ? handler : this);
 		try {
 			// Start a JADE instance in a different Process
 			System.out.println("Starting JADE with command line: "+cmdLine);
@@ -166,8 +168,8 @@ class LocalJadeController implements JadeController {
 		
 		private void handleLine(String line) {
 			if (line != null) {
-				// Redirect sub-process output to standard output
-				System.out.println(name+">> "+line);
+				// Redirect sub-process output
+				outHandler.handleOutput(name, line);
 				
 				// Possibly update the list of addresses of this JADE instance
 				catchAddress(line);
@@ -226,4 +228,12 @@ class LocalJadeController implements JadeController {
 			}
 		}			
 	}   // END of inner class SubProcessManager
+	
+	
+	/////////////////////////////////////////////////
+	// OutputHandler interface implementation
+	/////////////////////////////////////////////////
+	public void handleOutput(String source, String msg) {
+		System.out.println(source+">> "+msg);
+	}
 }
