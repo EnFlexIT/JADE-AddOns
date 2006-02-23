@@ -34,7 +34,6 @@ import jade.tools.ascml.gui.panels.ParameterSet;
 import jade.tools.ascml.gui.components.tree.RepositoryTree;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.model.jibx.*;
-import jade.tools.ascml.model.runnable.AbstractRunnable;
 import jade.tools.ascml.absmodel.*;
 
 public class TabbedPaneManager extends JTabbedPane implements ChangeListener
@@ -162,7 +161,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 		this.addTab("Load an Agent", null, new LoadAgent(mainPanel), "Load an Agent from a datasource");
 	}
 
-	private void setRunnablePanes(AbstractRunnable model)
+	private void setRunnablePanes(IAbstractRunnable model)
 	{
 		finalizeOldTabs();
 		this.addTab("Runnable Instance ("+model.getName()+")", null, new RunnableGeneral(mainPanel, model), "Show Details about a runnable Instance");
@@ -190,9 +189,9 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 		{
 			setAgentInstancePanes((IAgentInstance)model);
 		}
-		else if(model instanceof AbstractRunnable)
+		else if(model instanceof IAbstractRunnable)
 		{
-			setRunnablePanes((AbstractRunnable)model);
+			setRunnablePanes((IAbstractRunnable)model);
 		}
 		else if(model instanceof ISocietyType)
 		{
