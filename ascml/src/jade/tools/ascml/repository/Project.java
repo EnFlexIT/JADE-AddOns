@@ -25,12 +25,15 @@
 
 package jade.tools.ascml.repository;
 
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.exceptions.ResourceNotFoundException;
 import jade.tools.ascml.events.ProjectListener;
 import jade.tools.ascml.events.ProjectChangedEvent;
-import jade.tools.ascml.model.AgentTypeModel;
+import jade.tools.ascml.absmodel.IAgentType;
+import jade.tools.ascml.absmodel.ISocietyInstance;
+import jade.tools.ascml.absmodel.ISocietyType;
+import jade.tools.ascml.model.jibx.SocietyType;
+import jade.tools.ascml.model.jibx.AgentType;
 
 import java.util.*;
 import java.io.File;
@@ -81,8 +84,67 @@ public class Project
 		societyTypesNameMap			= new HashMap();
 		agentTypesNameMap			= new HashMap();
 	}
-	
-	
+
+	/**
+	 * Initialize this project. Initializing means, remove the model-locations
+	 * from the temporaryModelLocation-Vectors and load the real model-objects.
+	 */
+	public void init(ModelManager modelManager) throws ModelException
+	{
+		// System.err.println("Project.init: initializing Project, loading models ...");
+
+		// this exception is only thrown when some exceptions occured (exceptionsOccured == true)
+		// In this case, all exceptions are attached to this mainException-object.
+		ModelException mainException = new ModelException("Errors occured while loading the Project named '"+getName()+"'", "The Project named '"+getName()+"' has been initialized, but not all elements (agent- and societytypes) contained in this project could be loaded. For example: there may have been an agent- or societytype, which description-file (e.g. XML-file) misses some mandatory description-elements and without these the agent- or societytype cannot be loaded into the repository. So have a look in your description-files and correct the problem.");
+
+		this.modelManager = modelManager;
+
+		Iterator iter = temporaryAgentTypesCache.keySet().iterator();
+		while (iter.hasNext())
+		{
+			String oneLocation = (String)iter.next();
+			// System.err.println("Project.init(): Load agent from " + oneLocation);
+			try
+			{
+				addAgentType((String)oneLocation);
+			}
+			catch(ModelException me)
+			{
+                mainException.addNestedException(me);
+			}
+		}
+        temporaryAgentTypesCache.clear();
+
+        iter = temporarySocietyTypesCache.keySet().iterator();
+		while (iter.hasNext())
+		{
+			String oneLocation = (String)iter.next();
+			// System.err.println("Project.init(): Load society from " + oneLocation);
+			try
+			{
+				addSocietyType((String)oneLocation);
+			}
+			catch(Exception exc)
+			{
+                mainException.addNestedException(exc);
+			}
+		}
+		temporarySocietyTypesCache.clear();
+		if (mainException.hasNestedExceptions())
+			throw mainException;
+	}
+
+	/**
+	 * Has this project already been initialized ? A project is initialized when
+	 * all model-mappings have been done
+	 * If a project is not initialized, not all mappings from model-objects to
+	 * source-locations are resolved.
+	 */
+	public boolean isInitialized()
+	{
+		return (this.temporarySocietyTypesCache.isEmpty() && temporaryAgentTypesCache.isEmpty() && (modelManager != null));
+	}
+
 	/**
 	 *  Get a societyType-model specified by it's fully qualified name.
 	 *  @param fullyQualifiedName  The name of the societyType.
@@ -131,7 +193,7 @@ public class Project
 		ModelException me = new ModelException("Error while adding one or more societytypes.", "Write me !!!");
 		ISocietyType[] returnArray = new ISocietyType[societyLocations.size()];
 
-		HashMap<ISocietyType, ModelException> erroneousSocietyTypes = new HashMap();
+		HashMap<ISocietyType, ModelException> erroneousSocietyTypes = new HashMap<ISocietyType, ModelException>();
 
 		for (int i=0; i < societyLocations.size(); i++)
 		{
@@ -145,27 +207,6 @@ public class Project
 				if ((exc.getUserObject() != null) && (exc.getUserObject() instanceof ISocietyType))
 					returnArray[i] = (ISocietyType)exc.getUserObject();
 				erroneousSocietyTypes.put(returnArray[i], exc);
-			}
-		}
-
-		// now retry to resolve the references, this may lead to success, because
-		// the models, that were added above are now present in the repository,
-		// so resolving the reference should find the referenced models.
-		boolean resolvingSuccessful = true;
-		while (resolvingSuccessful)
-		{
-			resolvingSuccessful = false;
-			Iterator<ISocietyType> modelIterator = erroneousSocietyTypes.keySet().iterator();
-
-			while (modelIterator.hasNext())
-			{
-				ISocietyType socTypeToResolve = modelIterator.next();
-				// System.err.println("Project.addSocTypes: SocType " + socTypeToResolve + " needs resolving");
-				resolvingSuccessful = resolveSocietyReferences(socTypeToResolve);
-				String status = socTypeToResolve.getStatus();
-
-				if ((status != ISocietyType.STATUS_ERROR) && (status != ISocietyType.STATUS_REFERENCE_ERROR))
-					erroneousSocietyTypes.remove(socTypeToResolve);
 			}
 		}
 
@@ -193,7 +234,7 @@ public class Project
 		ModelException me = new ModelException("Error while loading a societytype from '"+societyLocation, "There has been an error while loading the societytype. The societytype has nevertheless been loaded and added to the repository, but it is marked as errorneous and some (or all) societyinstances may not be started until the error is corrected.");
 		try
 		{
-			model = (ISocietyType)modelManager.getModel(societyLocation);
+			model = (ISocietyType)modelManager.loadModelByFileName(societyLocation);
 		}
 		catch(ResourceNotFoundException exc)
 		{
@@ -210,8 +251,6 @@ public class Project
 
 		if (model != null)
 		{
-			// try to resolve the references to subsocieties and agenttypes within the society
-			resolveSocietyReferences(model);
 			try
 			{
 				// System.err.println("Project.addSocietyType(String): try to add model " + model);
@@ -241,21 +280,34 @@ public class Project
 	{
 		String societyTypeName = societyType.getFullyQualifiedName();
 
-		societyTypesNameMap.put(societyTypeName, societyType);
-
-		// update the status of all societytypes
-		ISocietyType[] societyTypes = repository.getModelIndex().getSocietyTypeObjects();
-		for (int i=0; i < societyTypes.length; i++)
+		if (!societyTypesNameMap.containsKey(societyTypeName))
 		{
-			societyTypes[i].updateStatus();
-		}
+			societyTypesNameMap.put(societyTypeName, societyType);
 
-		// System.err.println("Project.addSocietyType: socType=" + societyType);
-		throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.SOCIETYTYPE_ADDED, societyType, this));
-		
-		if ((societyType.getStatus() == ISocietyType.STATUS_ERROR) ||
-			(societyType.getStatus() == ISocietyType.STATUS_REFERENCE_ERROR))
-			throw societyType.getStatusException();
+			// System.err.println("Project.addSocietyType: socType=" + societyType);
+			throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.SOCIETYTYPE_ADDED, societyType, this));
+
+			if ((societyType.getStatus() == ISocietyType.STATUS_ERROR) ||
+				(societyType.getStatus() == ISocietyType.STATUS_REFERENCE_ERROR))
+				throw societyType.getIntegrityStatus();
+		}
+	}
+
+	/**
+	 * Create a new SocietyType, set the default-values and add it to the active Project.
+	 */
+	public void createSocietyType()
+	{
+		ISocietyType societyType = new SocietyType();
+		societyType.setStatus(SocietyType.STATUS_OK);
+		try
+		{
+			addSocietyType(societyType);
+		}
+		catch (ModelException e)
+		{
+		    // not bad, because the SocietyType has been newly created.
+		}
 	}
 
 	/**
@@ -290,40 +342,7 @@ public class Project
 		{
 			this.societyTypesNameMap.remove(societyTypeName);
 			modelHasBeenRemoved = true;
-
-			/*// check if the society is referenced somewhere
-			Vector references = getReferences(societyType);
-			if (references.size() == 0)
-			{
-				// if it is not referenced it may now completly be removed
-				this.societyTypesNameMap.remove(societyTypeName);
-
-				// now test, if the agentTypes belonging to the society that should be removed,
-				// are elsewhere in use (means referenced by any other society or explicitly loaded by the user)
-				// and if NOT, than also remove them.
-
-				IAgentType[] agentTypes = societyType.getAgentTypes();
-
-				for (int i=0; i < agentTypes.length; i++)
-				{
-					boolean agentIsReferenced = (getReferences(agentTypes[i]).size() > 0);
-
-					// completly remove the agentTypes from the repository
-					if (!agentIsReferenced)
-					{
-						this.agentTypesNameMap.remove(agentTypes[i].getFullyQualifiedName());
-					}
-				}
-			}
-			else // there are references to this society
-			{
-				setSocietyTypeViewable(societyTypeName, false);
-			}
-			modelHasBeenRemoved = true;
-			*/
 		}
-
-		updateSocietyTypeStatus();
 
 		if (modelHasBeenRemoved)
 			throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.SOCIETYTYPE_REMOVED, societyType, this));
@@ -338,13 +357,13 @@ public class Project
 	public void reloadSocietyType(String societyTypeName)
 	{
 		ISocietyType societyType = ((ISocietyType)societyTypesNameMap.get(societyTypeName));
-		String source = (String)societyType.getDocument().getSource();
+		String source = societyType.getDocument().getSource();
 		try
 		{
 			boolean modelHasBeenRemoved = removeSocietyType(societyTypeName);
 			if (modelHasBeenRemoved)
 			{
-				modelManager.getModelIndex().removeModel(source);
+				modelManager.getModelIndex().removeModel(societyTypeName);
 				addSocietyType(source);
 			}
 		}
@@ -352,281 +371,6 @@ public class Project
 		{
 			repository.throwExceptionEvent(new ModelException("Error reloading the societytype '" + societyTypeName + "'.", "The societytype you tried to reload contains errors, therefore it is removed from the repository, but not added again. Please have a look at the other exception-messages for further details.", exc));
 		}
-	}
-
-	/**
-	 * This method tries to resolve the references to agenttypes and subsocieties contained
-	 * within the societyType.
-	 * @param model  The model-object which references needs to be resolved into real models.
-	 */
-	private boolean resolveSocietyReferences(ISocietyType model)
-	{
-		boolean atLeastOneReferenceResolved = true;
-
-		// The loop is iterated as long one reference could be resolved.
-		// If no reference could be resolved any longer, we're finished or stuck.
-		// Nevertheless resolving quits.
-		while (atLeastOneReferenceResolved)
-		{
-			atLeastOneReferenceResolved = false;
-			// 1. Resolve referenced agenttype-Strings into AgentTypeModels
-			//
-			// a) Iterate through all referenced agentTypeNames.
-			// b) Check if model of a name-model pair is null
-			// c) if so, try to get model from modelIndex (if not found try using fq-package-name or imports)
-			// d) if model has been found set it in the SocietyTypeModel
-
-			String[] agentTypeNames = model.getAgentTypeNames();
-			for (int i=0; i < agentTypeNames.length; i++) // a
-			{
-				IAgentType oneAgentType = model.getAgentType(agentTypeNames[i]);
-				if (oneAgentType == null) // b)
-				{
-					// System.err.println("Project: 1 Try to resolve AgentType " + agentTypeNames[i]);
-					Object possibleModel = repository.getModelIndex().getModel(agentTypeNames[i]);
-
-					if (possibleModel == null) // c
-					{
-						// try using package-name
-						possibleModel = repository.getModelIndex().getModel(model.getDocument().getPackageName() + "." + agentTypeNames[i]);
-						if (possibleModel != null)
-						{
-							// model found with fq-name, remove the old reference-identifier (cause it's not fully qualified)
-							// and set the new fully-qualified name
-							model.removeAgentType(agentTypeNames[i]);
-							agentTypeNames[i] = model.getDocument().getPackageName() + "." + agentTypeNames[i];
-						}
-						else
-						{
-                            // try using imports
-							String[] imports = model.getDocument().getImports();
-							for (int j=0; j < imports.length; j++)
-							{
-								possibleModel = repository.getModelIndex().getModel(imports[j] + "." + agentTypeNames[i]);
-								if (possibleModel != null)
-								{
-									// model found with import-prefix, remove the old reference-identifier
-									// and set the new fully-qualified name with import
-									model.removeAgentType(agentTypeNames[i]);
-									agentTypeNames[i] = imports[j] + "." + agentTypeNames[i];
-									j = Integer.MAX_VALUE - 1; // break out of for-loop
-								}
-							}
-						}
-					} // end of c)
-
-					if (possibleModel != null) // d
-					{
-						// System.err.println("Project: 1 Successfully resolved " + possibleModel);
-						model.addAgentType(agentTypeNames[i], (IAgentType)possibleModel);
-						atLeastOneReferenceResolved = true;
-					}
-				}
-			} // end of agenttype-reference resolving
-
-			// 2. Resolve referenced societytype-Strings into SocietyTypeModels
-			//
-			// a) Iterate through all referenced agentTypeNames.
-			// b) Check if model of a name-model pair is null
-			// c) if so, try to get model from modelIndex (if not found try using fq-package-name or imports)
-			// d) if model has been found set it in the SocietyTypeModel
-
-			String[] societyTypeNames = model.getSocietyTypeNames();
-			for (int i=0; i < societyTypeNames.length; i++) // a
-			{
-				// System.err.println("Project: 2 Try to resolve SocietyType " + societyTypeNames[i]);
-				ISocietyType oneSocietyType = model.getSocietyType(societyTypeNames[i]);
-				if (oneSocietyType == null) // b)
-				{
-					Object possibleModel = repository.getModelIndex().getModel(societyTypeNames[i]);
-
-					if (possibleModel == null) // c
-					{
-						// try using package-name
-						possibleModel = repository.getModelIndex().getModel(model.getDocument().getPackageName() + "." + societyTypeNames[i]);
-						if (possibleModel != null)
-						{
-							// model found with fq-name, remove the old reference-identifier (cause it's not fully qualified)
-							// and set the new fully-qualified name
-							model.removeSocietyType(societyTypeNames[i]);
-							societyTypeNames[i] = model.getDocument().getPackageName() + "." + societyTypeNames[i];
-						}
-						else
-						{
-                            // try using imports
-							String[] imports = model.getDocument().getImports();
-							for (int j=0; j < imports.length; j++)
-							{
-								possibleModel = repository.getModelIndex().getModel(imports[j] + "." + societyTypeNames[i]);
-								if (possibleModel != null)
-								{
-									// model found with import-prefix, remove the old reference-identifier
-									// and set the new fully-qualified name with import
-									model.removeSocietyType(societyTypeNames[i]);
-									societyTypeNames[i] = imports[j] + "." + societyTypeNames[i];
-									j = Integer.MAX_VALUE - 1; // break out of for-loop
-								}
-							}
-						}
-					} // end of c)
-
-					if (possibleModel != null) // d
-					{
-						// System.err.println("Project: 2 Successfully resolved " + possibleModel);
-						model.addSocietyType(societyTypeNames[i], (ISocietyType)possibleModel);
-						atLeastOneReferenceResolved = true;
-					}
-				}
-			} // end of societytype-reference resolving
-
-			// 3. Iterate through all SocietyInstances and resolve referenced agenttype-Strings into AgentTypeModels
-			//
-			// a) Iterate through all referenced agentInstances.
-			// b) check if typeName != null (means type could not be resolved)
-			// c) if type could not be resolved try to get the type from societyType.getAgentType(name)
-			// d) if type could not be resolved try to get the type from modelIndex
-			// e) if type could not be resolved try to get the type from modelIndex with package-name
-			// f) if type could not be resolved try to get the type from modelIndex with imports
-			// g) if model has been found set it in the AgentInstanceModel
-
-			ISocietyInstance[] societyInstances = model.getSocietyInstances();
-			for (int i=0; i < societyInstances.length; i++)
-			{
-				IAgentInstance[] agentInstances = societyInstances[i].getAgentInstanceModels();
-				for (int j=0; j < agentInstances.length; j++) // a
-				{
-					String typeName = agentInstances[j].getTypeName();
-					if (typeName != null) // b
-					{
-						// System.err.println("Project: 3 Try to resolve " + typeName + " in " + societyInstances[i]);
-						Object possibleModel = model.getAgentType(typeName); // c
-
-						if (possibleModel == null) // d
-						{
-							// try using package-name
-							possibleModel = repository.getModelIndex().getModel(model.getDocument().getPackageName() + "." + typeName);
-							if (possibleModel == null) // e
-							{
-								// try using imports
-								String[] imports = model.getDocument().getImports();
-								for (int k=0; k < imports.length; k++)
-								{
-									if (possibleModel == null) // f
-										possibleModel = repository.getModelIndex().getModel(imports[k] + "." + typeName);
-								}
-							}
-						}
-
-						// g)
-						if (possibleModel != null)
-						{
-							// System.err.println("Project: 3 Successfully resolved " + possibleModel);
-							agentInstances[j].setType((IAgentType)possibleModel);
-						}
-						else
-						{
-							// Set a dummy AgentType
-							IAgentType newAgentType = new AgentTypeModel(repository.getListenerManager().getModelChangedListener());
-							newAgentType.updateStatus();
-							agentInstances[j].setType(newAgentType);
-						}
-					}
-				}
-			} // end of 3.
-
-			// 4. Iterate through all SocietyInstances and resolve referenced agenttype-Strings into AgentTypeModels
-			//
-			// a) Iterate through all referenced agentInstances.
-			// b) check if no type has been set before and if reference is local (remote reference do not have to be resolved)
-			// c) if type could not be resolved try to get the type from societyType.getSocietyType(name)
-			// d) if type could not be resolved try to get the type from modelIndex
-			// e) if type could not be resolved try to get the type from modelIndex with package-name
-			// f) if type could not be resolved try to get the type from modelIndex with imports
-			// g) if model has been found set it in the SocietyInstanceReferenceModel as 'locallyReferencedModel'
-
-			for (int i=0; i < societyInstances.length; i++)
-			{
-				ISocietyInstanceReference[] instanceReferences = societyInstances[i].getSocietyInstanceReferences();
-				for (int j=0; j < instanceReferences.length; j++) // a
-				{
-					String typeName = instanceReferences[j].getTypeName();
-					String instanceName = instanceReferences[j].getInstanceName();
-
-					if (!instanceReferences[j].isRemoteReference() || (instanceReferences[j].getLocallyReferencedModel() == null)) // b
-					{
-						// System.err.println("Project: 4 Try to resolve reference " + typeName + "." + instanceName);
-						Object possibleModel = model.getSocietyType(typeName); // c
-
-						if (possibleModel == null) // d
-						{
-							// try getting model from model-index with fully qualified name as given in description-file
-							possibleModel = repository.getModelIndex().getModel(typeName);
-
-							// try getting model from model-index with packagename of parent-model
-							if (possibleModel == null)
-								possibleModel = repository.getModelIndex().getModel(model.getDocument().getPackageName() + "." + typeName);
-
-							if (possibleModel == null) // e
-							{
-								// try using imports
-								String[] imports = model.getDocument().getImports();
-								for (int k=0; k < imports.length; k++)
-								{
-									if (possibleModel == null) // f
-										possibleModel = repository.getModelIndex().getModel(imports[k] + "." + typeName);
-								}
-							}
-						}
-
-						// g)
-						if (possibleModel != null)
-						{
-							// System.err.println("Project: 4 Successfully resolved " + possibleModel);
-							ISocietyType typeModel = (ISocietyType)possibleModel;
-							instanceReferences[j].setLocallyReferencedModel(typeModel.getSocietyInstance(instanceName));
-						}
-					}
-				}
-			} // end of 4.
-		}
-
-		model.updateStatus();
-		if (model.getStatus() == ISocietyType.STATUS_REFERENCE_ERROR)
-			return false;
-		else
-			return true;
-	}
-
-	private Vector getReferences(Object model)
-	{
-		Vector referenceVector = new Vector();
-
-		// get all societies contained in the repository
-		ISocietyType[] societies = getSocietyTypes();
-
-		// iterate through all societies and their agentTypes.
-		for (int i=0; i < societies.length; i++)
-		{
-			ISocietyType oneSociety = societies[i];
-
-			IAgentType[] oneSocietiesAgents = oneSociety.getAgentTypes();
-			for (int j=0; j < oneSocietiesAgents.length; j++)
-			{
-				if (model == oneSocietiesAgents[j])
-					referenceVector.add(oneSociety);
-			}
-
-			ISocietyType[] oneSocietiesSubSocieties = oneSociety.getSocietyTypes();
-			for (int j=0; j < oneSocietiesSubSocieties.length; j++)
-			{
-				if (model == oneSocietiesSubSocieties[j])
-				{
-					if (!referenceVector.contains(oneSociety))
-						referenceVector.add(oneSociety);
-				}
-			}
-		}
-        return referenceVector;
 	}
 
 	/**
@@ -704,7 +448,7 @@ public class Project
 		IAgentType model = null;
 		try
 		{
-			model = (IAgentType)modelManager.getModel(agentLocation);
+			model = (IAgentType)modelManager.loadModelByFileName(agentLocation);
 		}
 		catch(ResourceNotFoundException exc)
 		{
@@ -732,30 +476,31 @@ public class Project
 	{
 		String agentTypeName = agentType.getFullyQualifiedName();
 
-		agentTypesNameMap.put(agentTypeName, agentType);
+		if (!agentTypesNameMap.containsKey(agentTypeName))
+		{
+			agentTypesNameMap.put(agentTypeName, agentType);
 
-		// update the status of the agent and all societytypes
-		agentType.updateStatus();
+			throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.AGENTTYPE_ADDED, agentType, this));
 
-		updateSocietyTypeStatus();
-
-		throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.AGENTTYPE_ADDED, agentType, this));
-
-        // if (agentType.getStatus() == IAgentType.STATUS_ERROR)
-		//	throw agentType.getStatusException();
+			if (agentType.getStatus() == IAgentType.STATUS_ERROR)
+				throw agentType.getIntegrityStatus();
+		}
 	}
 
-	private void updateSocietyTypeStatus()
+	/**
+	 * Create a new AgentType, set the default-values and add it to the active Project.
+	 */
+	public void createAgentType()
 	{
-		ISocietyType[] societyTypes = repository.getModelIndex().getSocietyTypeObjects();
-		for (int i=0; i < societyTypes.length; i++)
+		IAgentType agentType = new AgentType();
+		agentType.setStatus(SocietyType.STATUS_OK);
+		try
 		{
-			String societyStatus = societyTypes[i].getStatus();
-			if (societyStatus == ISocietyType.STATUS_REFERENCE_ERROR)
-			{
-				resolveSocietyReferences(societyTypes[i]);
-			}
-			societyTypes[i].updateStatus();
+			addAgentType(agentType);
+		}
+		catch (ModelException e)
+		{
+		    // not bad, because the SocietyType has been newly created.
 		}
 	}
 
@@ -783,24 +528,6 @@ public class Project
 
 			this.agentTypesNameMap.remove(agentTypeName);
 			modelHasBeenRemoved = true;
-			/*Vector references = getReferences(agentType);
-
-			if (references.size() == 0)
-			{
-				this.agentTypesNameMap.remove(agentTypeName);
-				this.agentTypesViewableMap.remove(agentTypeName);
-			}
-			else
-			{
-				// setAgentTypeViewable(agentTypeName, false);
-				for (int i=0; i < references.size(); i++)
-				{
-					ISocietyType societyType = (ISocietyType)references.elementAt(i);
-					// societyType.setStatus(ISocietyType.STATUS_REFERENCE_ERROR)
-					societyType.updateStatus();
-				}
-			}
-			modelHasBeenRemoved = true;*/
 		}
 
 		// updateSocietyTypeStatus();
@@ -818,13 +545,13 @@ public class Project
 	public void reloadAgentType(String agentTypeName)
 	{
 		IAgentType agentType = ((IAgentType)agentTypesNameMap.get(agentTypeName));
-		String source = (String)agentType.getDocument().getSource();
+		String source = agentType.getDocument().getSource();
 		try
 		{
 			boolean modelHasBeenRemoved = removeAgentType(agentTypeName);
 			if (modelHasBeenRemoved)
 			{
-				modelManager.getModelIndex().removeModel(source);
+				modelManager.getModelIndex().removeModel(agentTypeName);
 				addAgentType(source);
 			}
 		}
@@ -908,70 +635,10 @@ public class Project
 	{
 		return this.name;
 	}
-	
-	/**
-	 * Initialize this project. Initializing means, remove the model-locations
-	 * from the temporaryModelLocation-Vectors and load the real model-objects.
-	 */
-	public void init(ModelManager modelManager) throws ModelException
-	{
-		// System.err.println("Project.init: initializing Project, loading models ...");
-
-		// this exception is only thrown when some exceptions occured (exceptionsOccured == true)
-		// In this case, all exceptions are attached to this mainException-object.
-		ModelException mainException = new ModelException("Errors occured while loading the Project named '"+getName()+"'", "The Project named '"+getName()+"' has been initialized, but not all elements (agent- and societytypes) contained in this project could be loaded. For example: there may have been an agent- or societytype, which description-file (e.g. XML-file) misses some mandatory description-elements and without these the agent- or societytype cannot be loaded into the repository. So have a look in your description-files and correct the problem.");
-
-		this.modelManager = modelManager;
-
-		Iterator iter = temporaryAgentTypesCache.keySet().iterator();
-		while (iter.hasNext())
-		{
-			String oneLocation = (String)iter.next();
-			// System.err.println("Project.init(): Load agent from " + oneLocation);
-			try
-			{
-				addAgentType((String)oneLocation);
-			}
-			catch(ModelException me)
-			{
-                mainException.addNestedException(me);
-			}
-		}
-        temporaryAgentTypesCache.clear();
-
-        iter = temporarySocietyTypesCache.keySet().iterator();
-		while (iter.hasNext())
-		{
-			String oneLocation = (String)iter.next();
-			// System.err.println("Project.init(): Load society from " + oneLocation);
-			try
-			{
-				addSocietyType((String)oneLocation);
-			}
-			catch(Exception exc)
-			{
-                mainException.addNestedException(exc);
-			}
-		}
-		temporarySocietyTypesCache.clear();
-		if (mainException.hasNestedExceptions())
-			throw mainException;
-	}
-	
-	/**
-	 * Has this project already been initialized ? A project is initialized when
-	 * all model-mappings have been done
-	 * If a project is not initialized, not all mappings from model-objects to 
-	 * source-locations are resolved.
-	 */
-	public boolean isInitialized()
-	{
-		return (this.temporarySocietyTypesCache.isEmpty() && temporaryAgentTypesCache.isEmpty() && (modelManager != null));
-	}
 
 	private void throwProjectChangedEvent(ProjectChangedEvent event)
 	{
-		// System.err.println("Project.throwProjectChangedEvent: event=" + event.getEventCode());
+		System.err.println("Project.throwProjectChangedEvent: event=" + event.getEventCode());
 
         Vector projectListener = repository.getListenerManager().getProjectListener();
 		for (int i=0; i < projectListener.size(); i++)

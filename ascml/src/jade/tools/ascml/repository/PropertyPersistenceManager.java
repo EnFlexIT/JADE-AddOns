@@ -37,8 +37,8 @@ import javax.xml.transform.dom.DOMSource;
 import org.xml.sax.SAXException;
 import jade.tools.ascml.exceptions.ResourceNotFoundException;
 import jade.tools.ascml.exceptions.ResourceIOException;
-import jade.tools.ascml.absmodel.ISocietyType;
 import jade.tools.ascml.absmodel.IAgentType;
+import jade.tools.ascml.absmodel.ISocietyType;
 
 public class PropertyPersistenceManager
 {
@@ -173,7 +173,7 @@ public class PropertyPersistenceManager
 		for (int i=0; i < societyTypes.length; i++)
 		{
 			Element societyElement = document.createElement(TAG_SOCIETY);
-			societyElement.appendChild(document.createTextNode("" + societyTypes[i].getDocument().getSource()));
+			societyElement.appendChild(document.createTextNode(societyTypes[i].getDocument().getSource()));
 
 			socTypesRootNode.appendChild( societyElement );
 		}
@@ -186,7 +186,7 @@ public class PropertyPersistenceManager
 		for (int i=0; i < agentTypes.length; i++)
 		{
 			Element agentElement = document.createElement(TAG_AGENT);
-			agentElement.appendChild(document.createTextNode("" + agentTypes[i].getDocument().getSource()));
+			agentElement.appendChild(document.createTextNode(agentTypes[i].getDocument().getSource()));
 
 			agentTypesRootNode.appendChild( agentElement );
 		}

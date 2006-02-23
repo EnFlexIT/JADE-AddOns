@@ -27,8 +27,6 @@ package jade.tools.ascml.repository;
 
 import jade.tools.ascml.events.PropertyListener;
 import jade.tools.ascml.events.PropertyChangedEvent;
-import jade.tools.ascml.exceptions.ModelException;
-import jade.tools.ascml.exceptions.ResourceNotFoundException;
 import jade.tools.ascml.exceptions.ResourceIOException;
 import jade.tools.ascml.exceptions.ASCMLException;
 
@@ -40,7 +38,7 @@ public class PropertyManager
 	public final static String DEFAULT_PROPERTY_FILE = "ascml.repository.properties.xml";
 
 	/** The ASCML default factory. */
-	public static final String DEFAULT_FACTORY = "jade.tools.ascml.repository.XMLFileModelFactory";
+	public static final String DEFAULT_FACTORY = "jade.tools.ascml.repository.JiBXModelFactory";
 
 	private HashMap projects;
 	private String source;					/** Source of the Properties (i.e. property-file) */
