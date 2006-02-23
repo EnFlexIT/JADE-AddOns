@@ -27,9 +27,10 @@ package jade.tools.ascml.gui.components.tree;
 
 import javax.swing.tree.*;
 import java.util.*;
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.repository.Repository;
 import jade.tools.ascml.events.ModelChangedEvent;
+import jade.tools.ascml.model.runnable.AbstractRunnable;
+import jade.tools.ascml.absmodel.IAgentType;
 
 public class AgentTypeNode extends DefaultMutableTreeNode implements IRepositoryTreeNode
 {
@@ -53,27 +54,27 @@ public class AgentTypeNode extends DefaultMutableTreeNode implements IRepository
 		this.removeAllChildren();
 		
 		// add new children (running instances)
-		IAbstractRunnable[] runningInstances = repository.getRunnableManager().getRunnables(model);
+		AbstractRunnable[] runningInstances = repository.getRunnableManager().getRunnables(model);
 		for (int i=0; i < runningInstances.length; i++)
 		{
 			addRunnableInstanceNode(runningInstances[i]);
 		}
 	}
 
-	private void addRunnableInstanceNode(IAbstractRunnable runnableInstance)
+	private void addRunnableInstanceNode(AbstractRunnable runnableInstance)
 	{
 		DefaultMutableTreeNode oneInstanceNode = new DefaultMutableTreeNode(runnableInstance);
 		// System.err.println("AgentTypeNode.addRunnableInstanceNode: " + runnableInstance);
         treeModel.insertNodeInto(oneInstanceNode, this, 0);
 	}
 
-	private void removeRunnableInstanceNode(IAbstractRunnable runnableInstanceToRemove)
+	private void removeRunnableInstanceNode(AbstractRunnable runnableInstanceToRemove)
 	{
 		Enumeration allRunnableNodes = this.children();
 		while (allRunnableNodes.hasMoreElements())
 		{
 			DefaultMutableTreeNode oneNode = ((DefaultMutableTreeNode)allRunnableNodes.nextElement());
-			IAbstractRunnable oneRunnableInstance = (IAbstractRunnable)oneNode.getUserObject();
+			AbstractRunnable oneRunnableInstance = (AbstractRunnable)oneNode.getUserObject();
 			if (runnableInstanceToRemove == oneRunnableInstance)
 			{
                 // System.err.println("AgentTypeNode.removeRunnableInstanceNode: " + runnableInstanceToRemove);
@@ -91,9 +92,9 @@ public class AgentTypeNode extends DefaultMutableTreeNode implements IRepository
 		if (this.model == model)
 		{
 			if (eventCode == ModelChangedEvent.RUNNABLE_ADDED)
-				addRunnableInstanceNode((IAbstractRunnable)event.getUserObject());
+				addRunnableInstanceNode((AbstractRunnable)event.getUserObject());
 			else if (eventCode == ModelChangedEvent.RUNNABLE_REMOVED)
-				removeRunnableInstanceNode((IAbstractRunnable)event.getUserObject());
+				removeRunnableInstanceNode((AbstractRunnable)event.getUserObject());
 		}
 	}
 
