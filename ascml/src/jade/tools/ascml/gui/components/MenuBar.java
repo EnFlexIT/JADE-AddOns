@@ -53,6 +53,8 @@ public class MenuBar extends JMenuBar implements ActionListener
 	private JMenuItem changeOptionsItem;
 	private JMenuItem addAgentTypeItem;
 	private JMenuItem addSocietyItem;
+	private JMenuItem createAgentItem;
+	private JMenuItem createSocietyItem;
 	private JMenuItem autoSearchItem;
 
 	private AbstractMainPanel parentPanel;
@@ -92,14 +94,21 @@ public class MenuBar extends JMenuBar implements ActionListener
 		changeOptionsItem.addActionListener(this);
 		addAgentTypeItem = new JMenuItem("Load an Agent ...");
 		addAgentTypeItem.addActionListener(this);
-		addSocietyItem = new JMenuItem("Load a  Society ...");
+		addSocietyItem = new JMenuItem("Load a Society ...");
 		addSocietyItem.addActionListener(this);
 		autoSearchItem = new JMenuItem("Auto-Search for Agents/Societies");
 		autoSearchItem.addActionListener(this);
-		
+		createSocietyItem = new JMenuItem("Create a Society ...");
+		createSocietyItem.addActionListener(this);
+        createAgentItem = new JMenuItem("Create an Agent ...");
+		createAgentItem.addActionListener(this);
+
 		projectMenu = new JMenu("Project");
 		projectMenu.setMnemonic(KeyEvent.VK_P);
 
+		projectMenu.add(createSocietyItem);
+		projectMenu.add(createAgentItem);
+		projectMenu.addSeparator();
 		projectMenu.add(addSocietyItem);
 		projectMenu.add(addAgentTypeItem);
 		projectMenu.add(autoSearchItem);
@@ -212,9 +221,17 @@ public class MenuBar extends JMenuBar implements ActionListener
 		{
             parentPanel.showDialog(AbstractMainPanel.ADD_AGENTTYPE_DIALOG);
 		}
+		else if (source == createAgentItem)
+		{
+            parentPanel.getRepository().getProject().createAgentType();
+		}
 		else if (source == addSocietyItem)
 		{
             parentPanel.showDialog(AbstractMainPanel.ADD_SOCIETYTYPE_DIALOG);
+		}
+		else if (source == createSocietyItem)
+		{
+            parentPanel.getRepository().getProject().createSocietyType();
 		}
 		else if (source == autoSearchItem)
 		{
