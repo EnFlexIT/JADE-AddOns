@@ -44,7 +44,7 @@ public class RemoteStopperThread extends AbstractMARWaitThread {
 		if (ar instanceof IRunnableRemoteSocietyInstanceReference) {
 			IRunnableRemoteSocietyInstanceReference remoteRef = (IRunnableRemoteSocietyInstanceReference) ar;
 			ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-			AID receiver = new AID(remoteRef.getLauncherName(), AID.ISGUID);
+			AID receiver = new AID(remoteRef.getLauncher().getName(), AID.ISGUID);
 			
 			msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 			
@@ -52,7 +52,7 @@ public class RemoteStopperThread extends AbstractMARWaitThread {
 			msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			
 			//TODO: What to do if we have multiple adresses
-			receiver.addAddresses(remoteRef.getLauncherAddresses()[0]); 
+			receiver.addAddresses(remoteRef.getLauncher().getAddresses()[0]); 
 			
 			// for(int t =0;t<soc.getLauncherAddresses().length;t++)
 			// System.out.println(soc.getLauncherAddresses()[t]);
