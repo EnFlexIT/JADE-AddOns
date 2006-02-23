@@ -98,7 +98,6 @@ public class AddModelDialog extends AbstractDialog
 	 *
 	 * @param parentFrame
 	 * @return  The model-object of the model to add
-	 * @throws ModelException
 	 */
 	public Object showDialog(JFrame parentFrame)
 	{
