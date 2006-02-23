@@ -42,9 +42,9 @@ public class RunnableFactory
 	{
 	}
 
-	public synchronized static AbstractRunnable createRunnable(String name, Object model, RunnableManager manager) throws ModelException
+	public synchronized static IAbstractRunnable createRunnable(String name, Object model, RunnableManager manager) throws ModelException
 	{
-		AbstractRunnable returnModel = null;
+		IAbstractRunnable returnModel = null;
 
 		if (model instanceof IAgentType)
 			returnModel = createRunnableAgentInstanceOutOfAgentType(name, (IAgentType)model);
