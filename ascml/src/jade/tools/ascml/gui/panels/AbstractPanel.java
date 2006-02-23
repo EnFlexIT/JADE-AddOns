@@ -34,6 +34,7 @@ import jade.tools.ascml.gui.dialogs.ExceptionDialog;
 import jade.tools.ascml.gui.dialogs.ProgressDialog;
 import jade.tools.ascml.absmodel.ISocietyInstance;
 import jade.tools.ascml.absmodel.IRunnableSocietyInstance;
+import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
 
 import javax.swing.*;
 import java.awt.*;
@@ -136,11 +137,11 @@ public abstract class AbstractPanel extends JPanel
                 if (mae.getActionCommand() == ModelActionEvent.CMD_START_SOCIETYINSTANCE)
 				{
 					// Count all the agents, that should be started locally
-					ISocietyInstance societyInstance = ((ISocietyInstance)((IRunnableSocietyInstance)mae.getModel()).getParentModel());
+					ISocietyInstance societyInstance = ((ISocietyInstance)((RunnableSocietyInstance)mae.getModel()).getParentModel());
 					// int agentCount = societyInstance.getLocalAgentInstanceCount();
 					int agentCount = ((IRunnableSocietyInstance)mae.getModel()).getLocalAgentInstanceCount();
 					// String name = societyInstance.getName();
-					String name = ((IRunnableSocietyInstance)mae.getModel()).getName();
+					String name = ((RunnableSocietyInstance)mae.getModel()).getName();
                     if (agentCount > 0)
 					{
 						ProgressDialog dialog = new ProgressDialog(getRepository(), agentCount, "Starting '"+name+"'...", "Starting, please wait ...");
@@ -168,7 +169,7 @@ public abstract class AbstractPanel extends JPanel
 				{
                     // ((ModelActionListener)modelActionListener.elementAt(i)).modelActionPerformed(mae);
                     // Count all the agents, that should be stopped
-					ISocietyInstance societyInstance = ((ISocietyInstance)((IRunnableSocietyInstance)mae.getModel()).getParentModel());
+					ISocietyInstance societyInstance = ((ISocietyInstance)((RunnableSocietyInstance)mae.getModel()).getParentModel());
 					String name = societyInstance.getName();
 
                     // ProgressDialog dialog = new ProgressDialog(getRepository(), "Stopping '"+name+"'...", "Stopping, please wait ...");
