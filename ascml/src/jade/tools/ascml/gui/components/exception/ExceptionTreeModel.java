@@ -25,15 +25,6 @@
 
 package jade.tools.ascml.gui.components.exception;
 
-import jade.tools.ascml.absmodel.IAgentType;
-import jade.tools.ascml.absmodel.ISocietyType;
-import jade.tools.ascml.absmodel.ISocietyInstance;
-import jade.tools.ascml.absmodel.IRunnableSocietyInstance;
-import jade.tools.ascml.gui.components.tree.*;
-import jade.tools.ascml.gui.components.tree.model.AbstractRepositoryTreeModel;
-import jade.tools.ascml.events.ProjectChangedEvent;
-import jade.tools.ascml.events.PropertyChangedEvent;
-import jade.tools.ascml.repository.Repository;
 import jade.tools.ascml.exceptions.ASCMLException;
 
 import javax.swing.tree.*;
@@ -59,7 +50,7 @@ public class ExceptionTreeModel extends DefaultTreeModel
 	{
 		if (rootException instanceof ASCMLException)
 		{
-			DefaultMutableTreeNode exceptionNode = new DefaultMutableTreeNode(((ASCMLException)rootException).getShortMessage());
+			DefaultMutableTreeNode exceptionNode = new DefaultMutableTreeNode(rootException);
 			rootNode.add(exceptionNode);
 
 			for (int i=0; i < ((ASCMLException)rootException).getExceptionDetails().size(); i++)
