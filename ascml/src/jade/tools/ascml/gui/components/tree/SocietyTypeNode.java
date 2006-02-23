@@ -26,9 +26,10 @@
 package jade.tools.ascml.gui.components.tree;
 
 import javax.swing.tree.*;
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.repository.Repository;
 import jade.tools.ascml.events.ModelChangedEvent;
+import jade.tools.ascml.absmodel.ISocietyInstance;
+import jade.tools.ascml.absmodel.ISocietyType;
 
 public class SocietyTypeNode extends DefaultMutableTreeNode implements IRepositoryTreeNode
 {
