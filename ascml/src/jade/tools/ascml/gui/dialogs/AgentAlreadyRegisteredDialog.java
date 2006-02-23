@@ -28,8 +28,8 @@ package jade.tools.ascml.gui.dialogs;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import jade.tools.ascml.absmodel.IAgentInstance;
 import jade.tools.ascml.exceptions.ModelActionException;
+import jade.tools.ascml.absmodel.IAgentInstance;
 
 public class AgentAlreadyRegisteredDialog extends JDialog implements ActionListener
 {
