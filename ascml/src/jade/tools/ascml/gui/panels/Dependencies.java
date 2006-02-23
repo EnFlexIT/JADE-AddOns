@@ -25,7 +25,6 @@
 
 package jade.tools.ascml.gui.panels;
 
-import jade.tools.ascml.model.jibx.dependency.*;
 import jade.tools.ascml.absmodel.dependency.*;
 import jade.tools.ascml.absmodel.IServiceDescription;
 
@@ -37,6 +36,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Vector;
+import java.util.Iterator;
 
 public class Dependencies extends AbstractPanel implements ChangeListener, ActionListener
 {
