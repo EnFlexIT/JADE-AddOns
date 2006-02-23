@@ -32,13 +32,13 @@ import javax.swing.tree.*;
 import java.awt.*;
 import java.util.HashMap;
 
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.gui.panels.AbstractMainPanel;
 import jade.tools.ascml.gui.components.tree.model.*;
 import jade.tools.ascml.gui.components.TabbedPaneManager;
 import jade.tools.ascml.repository.Project;
 import jade.tools.ascml.repository.Repository;
 import jade.tools.ascml.events.*;
+import jade.tools.ascml.absmodel.ISocietyInstance;
 
 public class RepositoryTree extends JTree implements TreeSelectionListener, ProjectListener,
 		                                             PropertyListener, ModelChangedListener
@@ -252,6 +252,7 @@ public class RepositoryTree extends JTree implements TreeSelectionListener, Proj
 
 	public void projectChanged(ProjectChangedEvent event)
 	{
+		System.err.println("RepositoryTree: Project changed, evt-code=" + event.getEventCode());
 		if (event.getEventCode().equals(ProjectChangedEvent.VIEW_CHANGED))
 		{
 			setView(event.getProject().getView());
