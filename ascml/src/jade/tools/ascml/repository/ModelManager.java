@@ -28,15 +28,15 @@ package jade.tools.ascml.repository;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.jar.JarFile;
-import java.io.File;
-import java.io.IOException;
-
-import jade.tools.ascml.absmodel.*;
+import java.io.*;
 import jade.tools.ascml.repository.loader.ModelIndex;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.exceptions.ResourceNotFoundException;
-import jade.tools.ascml.gui.components.StatusBar;
 import jade.tools.ascml.events.ProgressUpdateEvent;
+import jade.tools.ascml.model.jibx.SocietyType;
+import jade.tools.ascml.model.jibx.AgentType;
+import jade.tools.ascml.absmodel.IAgentType;
+import jade.tools.ascml.absmodel.ISocietyType;
 
 
 /**
@@ -56,7 +56,7 @@ public class ModelManager
 	private static final long INDEX_REFRESH_TIME = 5000;
 
 	private ModelIndex modelIndex;
-	private IModelFactory modelFactory;
+	private AbstractModelFactory modelFactory;
 	private Repository repository;
 
 	/**
@@ -68,20 +68,6 @@ public class ModelManager
 		this.repository = repository;
 		modelFactory	= createModelFactory(repository.getProperties().getModelFactory());
 		modelIndex		= new ModelIndex();
-	}
-
-	private IModelFactory createModelFactory(String modelFactoryString) throws ResourceNotFoundException
-	{
-		try
-		{
-			Class fac = Class.forName(modelFactoryString);
-			return (IModelFactory)fac.newInstance();
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-			throw new ResourceNotFoundException("Factory '"+modelFactoryString+"' not found !", modelFactoryString, ResourceNotFoundException.FACTORY_NOT_FOUND);
-		}
 	}
 
 	/**
@@ -96,37 +82,38 @@ public class ModelManager
 	}
 
 	/**
-	 * Get a model (either agenttype or societytype). If the model has been loaded before, the reference
-	 * to this model is returned, otherwise the model-object is created out of the description from a given source.
-	 * @param modelIdentifierObject model-identifier, this is a String containing either the source-name
-	 *                        or the fully qualified model-name. In case the model is contained
-	 *                        within a jar/zip-Archive, the name has to be in the following form:
+	 * Load a model (either AgentType or SocietyType) from the file-system.
+	 * If the model has been loaded before, the reference to this model is returned,
+	 * otherwise the model-object is created out of the description-file from the given source.
+	 * @param modelIdentifier  String pointing to the description file.
+	 *                         In case the model is contained within a jar/zip-Archive,
+	 *                         the name has to be in the following form:
 	 *                        'jarFile.[jar|zip]::modelFile.[agent|society].xml'.
 	 *                        Note the '::' to separate the jarFile's name from the model-name !
 	 * @return model-object containing all the information specified within the source.
 	 *         Either a SocietyTypeModel or an AgentTypeModel is returned.
 	 * @exception  ModelException is thrown when ... (toDo)
 	 */
-	public synchronized Object getModel(Object modelIdentifierObject) throws ModelException, ResourceNotFoundException
+	public synchronized Object loadModelByFileName(Object modelIdentifier) throws ModelException, ResourceNotFoundException
 	{
-		// toDo: Bis jetzt werden nur fileNames als ModelsSource zugelassen --> etwas generischer gestalten (z.B.datenbank)
-		String modelIdentifier = (String) modelIdentifierObject;
-		if(modelIdentifier.indexOf(".jar::") != -1)
+		// toDo: Bis jetzt werden nur fileNames als ModelSource zugelassen --> etwas generischer gestalten (z.B.datenbank)
+		String modelID = (String) modelIdentifier;
+		if(modelID.indexOf(".jar::") != -1)
 		{
-			modelIdentifier = modelIdentifier.substring(modelIdentifier.indexOf(".jar::")+6, modelIdentifier.length());
+			modelID = modelID.substring(modelID.indexOf(".jar::")+6, modelID.length());
 		}
-		else if(modelIdentifier.indexOf(".zip::") != -1)
+		else if(modelID.indexOf(".zip::") != -1)
 		{
-			modelIdentifier = modelIdentifier.substring(modelIdentifier.indexOf(".zip::")+6, modelIdentifier.length());
+			modelID = modelID.substring(modelID.indexOf(".zip::")+6, modelID.length());
 		}
 
 		// AgentTypeModels are reused throughout the whole ASCML-agent, this
 		// means every agentInstance only keeps a reference to the appropiate
-		// global AgentTypeModel-object. A change in this object effects therefor
+		// global AgentTypeModel-object. A change in this object effects therefore
 		// all other agentInstanceModels with this type.
 		// Each AgentTypeModel is stored in a HashMap once it is has been loaded and
 		// a reference to it is returned if requested.
-		Object model = modelIndex.getModel(modelIdentifierObject.toString());
+		Object model = modelIndex.getModel(modelID.toString());
 		if (model != null)
 		{
 			return model;
@@ -136,23 +123,399 @@ public class ModelManager
 		// and store it in the ModelIndex
 		try
 		{
-			model = modelFactory.createModel(modelIdentifier, repository);
-			modelIndex.addModel(modelIdentifier, model); // model may be null
+			if (modelID.contains(".society.xml"))
+			{
+				model = modelFactory.createSocietyTypeModel(modelID, repository);
+				modelIndex.addModel(((ISocietyType)model).getFullyQualifiedName(), model);
+			}
+			if (modelID.contains(".agent.xml"))
+			{
+				model = modelFactory.createAgentTypeModel(modelID, repository);
+				modelIndex.addModel(((IAgentType)model).getFullyQualifiedName(), model);
+			}
 		}
 		catch(ModelException me)
 		{
-			if (me.getUserObject() != null)
-			{
-				modelIndex.addModel(modelIdentifier, me.getUserObject());
-			}
 			throw me;
 		}
 		catch(ResourceNotFoundException re)
 		{
-			re.setUserObject(modelIdentifierObject);
 			throw re;
 		}
+
+		// Resolve references of the SocietyType
+		// (AgentTypes need no reference-resolving, because they contain no references)
+		if (model instanceof ISocietyType)
+		{
+			ModelReferenceResolver resolver = new ModelReferenceResolver();
+			resolver.resolveReferences((ISocietyType)model, this);
+		}
+
+		// check the integrity of the model
+		ModelIntegrityChecker checker = new ModelIntegrityChecker();
+        checker.checkIntegrity(model);
+
 		return model;
+	}
+
+	/**
+	 * Load an AgentType-model from the ModelIndex or the file-system.
+	 * If the model has been loaded before, the reference to this model is returned,
+	 * otherwise the model-object is created out of the description-file from the given source.
+	 * This method is used exclusivly by the ModelReferenceResolver.
+	 * @param agentName  The name of the AgentType (if not fully-qualified, make sure you specify agentTypeNames or imports
+	 * @param agentTypeNames  A list of fully-qualified AgentType-names; one of these should match the not-fully-qualified agentName
+	 * @param imports  A list of imports; if the agentName is not fully-qualified and also not
+	 *                 found in the list of fully-qualified AgentType-names, the list of imports
+	 *                 is used to construct possible fully-qualified names.
+	 * @param basePackageName  This package-name is used to construct a fully-qualified agentName if all the
+	 *                         above stated methods of constructing a fq-name fail.
+	 * @return AgentType-model containing all the information specified within the source.
+	 * @exception  ModelException is thrown when ... (toDo)
+	 */
+	public synchronized IAgentType loadAgentTypeByName(String agentName, String[] agentTypeNames, String[] imports, String basePackageName) throws ModelException, ResourceNotFoundException
+	{
+        // assume name is fully qualified and check if model has already been loaded
+		AgentType model = (AgentType)modelIndex.getModel(agentName);
+		if (model != null)
+		{
+			repository.getProject().addAgentType(model);
+			return model; // it has been loaded, so return it
+		}
+
+		// check if suffix of agentTypeNames match the agentName
+		for (int i=0; i < agentTypeNames.length; i++)
+		{
+			if (agentTypeNames[i].endsWith(agentName))
+				model = (AgentType)modelIndex.getModel(agentTypeNames[i]);
+			if (model != null)
+			{
+				repository.getProject().addAgentType(model);
+				return model;
+			}
+		}
+
+		// check if import + agentName is contained within the ModelIndex
+		for (int i=0; i < imports.length; i++)
+		{
+			model = (AgentType)modelIndex.getModel(imports[i] + "." + agentName);
+			if (model != null)
+			{
+				repository.getProject().addAgentType(model);
+				return model;
+			}
+		}
+
+		// check if basepackage-name + agentName is contained within the ModelIndex
+		model = (AgentType)modelIndex.getModel(basePackageName + "." + agentName);
+		if (model != null)
+		{
+			repository.getProject().addAgentType(model);
+			return model;
+		}
+
+		// if the model-object has not been found, try to load from the file-system
+        try
+		{
+			model = modelFactory.createAgentTypeModel(agentName, repository);
+			if (model != null)
+			{
+				// check the integrity of the model
+				ModelIntegrityChecker checker = new ModelIntegrityChecker();
+				checker.checkIntegrity(model);
+				modelIndex.addModel(model.getFullyQualifiedName(), model);
+
+				repository.getProject().addAgentType(model);
+				return model;
+			}
+		}
+		catch(ResourceNotFoundException exc)
+		{
+			// not bad, try harder ...
+		}
+
+		// try to load the model from file-system using the fully-qualified name
+		for (int i=0; i < agentTypeNames.length; i++)
+		{
+			try
+			{
+				if (agentTypeNames[i].endsWith(agentName))
+				{
+					model = modelFactory.createAgentTypeModel(agentTypeNames[i], repository);
+					if (model != null)
+					{
+						// check the integrity of the model
+						ModelIntegrityChecker checker = new ModelIntegrityChecker();
+						checker.checkIntegrity(model);
+						modelIndex.addModel(model.getFullyQualifiedName(), model);
+
+						repository.getProject().addAgentType(model);
+						return model;
+					}
+				}
+
+			}
+			catch(ResourceNotFoundException exc)
+			{
+				// not bad, try harder ...
+			}
+		}
+
+		// try to load the model from file-system using the imports
+		for (int i=0; i < imports.length; i++)
+		{
+			try
+			{
+				model = modelFactory.createAgentTypeModel(imports[i] + "." + agentName, repository);
+				if (model != null)
+				{
+					// check the integrity of the model
+					ModelIntegrityChecker checker = new ModelIntegrityChecker();
+					checker.checkIntegrity(model);
+					modelIndex.addModel(model.getFullyQualifiedName(), model);
+
+					repository.getProject().addAgentType(model);
+					return model;
+				}
+			}
+			catch(ResourceNotFoundException exc)
+			{
+				// not bad, try harder ...
+			}
+		}
+
+		// try to load the model from file-system using the basepackage-name
+		// if this fails, loadModelByFileName throws an Exception, don't catch this
+		// but let it pass to calling method, because the model could finally not be found
+		model = modelFactory.createAgentTypeModel(basePackageName + "." + agentName, repository);
+		if (model != null)
+		{
+			// check the integrity of the model
+			ModelIntegrityChecker checker = new ModelIntegrityChecker();
+			checker.checkIntegrity(model);
+			modelIndex.addModel(model.getFullyQualifiedName(), model);
+
+			repository.getProject().addAgentType(model);
+			return model;
+		}
+
+		// the model could not even be found in the file-system, so return null
+		return null;
+	}
+
+	/**
+	 * Load a SocietyType-model from the ModelIndex or the file-system.
+	 * If the model has been loaded before, the reference to this model is returned,
+	 * otherwise the model-object is created out of the description-file from the given source.
+	 * This method is used exclusivly by the ModelReferenceResolver.
+	 * @param societyName  The name of the SocietyType (if not fully-qualified, make sure you specify societyTypeNames or imports
+	 * @param societyTypeNames  A list of fully-qualified SocietyType-names; one of these should match the not-fully-qualified societyName
+	 * @param imports  A list of imports; if the societyName is not fully-qualified and also not
+	 *                 found in the list of fully-qualified SocietyType-names, the list of imports
+	 *                 is used to construct possible fully-qualified names.
+	 * @param basePackageName  This package-name is used to construct a fully-qualified societyName if all the
+	 *                         above stated methods of constructing a fq-name fail.
+	 * @return SocietyType-model containing all the information specified within the source.
+	 * @exception  ModelException is thrown when ... (toDo)
+	 */
+	public synchronized ISocietyType loadSocietyTypeByName(String societyName, String[] societyTypeNames, String[] imports, String basePackageName) throws ModelException, ResourceNotFoundException
+	{
+        // assume name is fully qualified and check if model has already been loaded
+		SocietyType model = (SocietyType)modelIndex.getModel(societyName);
+		if (model != null)
+		{
+			repository.getProject().addSocietyType(model);
+			return model; // it has been loaded, so return it
+		}
+
+		// check if suffix of societyTypeNames match the societyName
+		for (int i=0; i < societyTypeNames.length; i++)
+		{
+			if (societyTypeNames[i].endsWith(societyName))
+				model = (SocietyType)modelIndex.getModel(societyTypeNames[i]);
+			if (model != null)
+			{
+				repository.getProject().addSocietyType(model);
+				return model;
+			}
+		}
+
+		// check if import + agentName is contained within the ModelIndex
+		for (int i=0; i < imports.length; i++)
+		{
+			model = (SocietyType)modelIndex.getModel(imports[i] + "." + societyName);
+			if (model != null)
+			{
+				repository.getProject().addSocietyType(model);
+				return model;
+			}
+		}
+
+		// check if basepackage-name + agentName is contained within the ModelIndex
+		model = (SocietyType)modelIndex.getModel(basePackageName + "." + societyName);
+		if (model != null)
+		{
+			repository.getProject().addSocietyType(model);
+			return model;
+		}
+
+		// if the model-object has not been found, try to load from the file-system
+        try
+		{
+			model = modelFactory.createSocietyTypeModel(societyName, repository);
+			if (model != null)
+			{
+				// resolve the references
+				modelIndex.addModel(model.getFullyQualifiedName(), model);
+				ModelReferenceResolver resolver = new ModelReferenceResolver();
+				resolver.resolveReferences(model, this);
+				// check the integrity of the model
+				ModelIntegrityChecker checker = new ModelIntegrityChecker();
+				checker.checkIntegrity(model);
+
+				repository.getProject().addSocietyType(model);
+				return model;
+			}
+		}
+		catch(ResourceNotFoundException exc)
+		{
+			// not bad, try harder ...
+		}
+
+		// try to load the model from file-system using the fully-qualified name
+		for (int i=0; i < societyTypeNames.length; i++)
+		{
+			try
+			{
+				if (societyTypeNames[i].endsWith(societyName))
+				{
+					model = modelFactory.createSocietyTypeModel(societyTypeNames[i], repository);
+					if (model != null)
+					{
+						// resolve the references
+						modelIndex.addModel(model.getFullyQualifiedName(), model);
+						ModelReferenceResolver resolver = new ModelReferenceResolver();
+						resolver.resolveReferences(model, this);
+						// check the integrity of the model
+						ModelIntegrityChecker checker = new ModelIntegrityChecker();
+						checker.checkIntegrity(model);
+
+						repository.getProject().addSocietyType(model);
+						return model;
+					}
+				}
+
+			}
+			catch(ResourceNotFoundException exc)
+			{
+				// not bad, try harder ...
+			}
+		}
+
+		// try to load the model from file-system using the imports
+		for (int i=0; i < imports.length; i++)
+		{
+			try
+			{
+				model = modelFactory.createSocietyTypeModel(imports[i] + "." + societyName, repository);
+				if (model != null)
+				{
+					// resolve the references
+					modelIndex.addModel(model.getFullyQualifiedName(), model);
+					ModelReferenceResolver resolver = new ModelReferenceResolver();
+					resolver.resolveReferences(model, this);
+					// check the integrity of the model
+					ModelIntegrityChecker checker = new ModelIntegrityChecker();
+					checker.checkIntegrity(model);
+
+					repository.getProject().addSocietyType(model);
+					return model;
+				}
+			}
+			catch(ResourceNotFoundException exc)
+			{
+				// not bad, try harder ...
+			}
+		}
+
+		// try to load the model from file-system using the basepackage-name
+		// if this fails, loadModelByFileName throws an Exception, don't catch this
+		// but let it pass to calling method, because the model could finally not be found
+		model = modelFactory.createSocietyTypeModel(basePackageName + "." + societyName, repository);
+		if (model != null)
+		{
+			// resolve the references
+			modelIndex.addModel(model.getFullyQualifiedName(), model);
+			ModelReferenceResolver resolver = new ModelReferenceResolver();
+			resolver.resolveReferences(model, this);
+			// check the integrity of the model
+			ModelIntegrityChecker checker = new ModelIntegrityChecker();
+			checker.checkIntegrity(model);
+
+			repository.getProject().addSocietyType(model);
+			return model;
+		}
+
+		// the model could not even be found in the file-system, so return null
+		return null;
+	}
+
+	/**
+	 * When this method is called, the index, which contains all agent- and society-
+	 * description-filenames is refreshed. The method may be called due to a change
+	 * of the model-path or when files are added or deleted within this path.
+	 * The 'searchRoots'-method scans the complete model-path for model-description-files
+	 * and stores the name of the files found in a global HashMap.
+	 * @return The HashMap containing all models, that were found.
+	 *         The key of this HashMap is the file-name of the model, the value either also
+	 *         the file-name or the name of the jar-file containg the model-file.
+	 */
+	public HashMap rebuildModelIndex()
+	{
+		String[] modelPaths = repository.getProperties().getModelLocations();
+		String[] excludePaths = repository.getProperties().getExcludeSet();
+
+		// check if the index is up to date and if so return it immediately.
+		long now = System.currentTimeMillis();
+		if ((now - INDEX_REFRESH_TIME) < modelIndex.getLastIndexRefreshTime())
+			return modelIndex.getModels();
+
+		// start refreshing the index
+
+        repository.throwProgressUpdateEvent(new ProgressUpdateEvent("Creating autosearch-environment", ProgressUpdateEvent.PROGRESS_ADVANCE));
+
+		String[] rootSearchPaths = getExclusiveModelSearchPath(modelPaths, excludePaths);
+
+		for(int i = 0; i<rootSearchPaths.length; i++)
+		{
+			File filePointer = new File(rootSearchPaths[i]);
+			File[] fileArray;
+
+			if(rootSearchPaths[i].endsWith(".jar") || rootSearchPaths[i].endsWith(".zip"))
+			{
+				fileArray = new File[]{filePointer};
+			}
+			else
+				fileArray = filePointer.listFiles();
+
+			// now search in all subfolders recursively
+			searchRoots(fileArray, new Vector());
+		}
+		return modelIndex.getModels();
+	}
+
+	private AbstractModelFactory createModelFactory(String modelFactoryString) throws ResourceNotFoundException
+	{
+		try
+		{
+			Class fac = Class.forName(modelFactoryString);
+			return (AbstractModelFactory)fac.newInstance();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			throw new ResourceNotFoundException("ModelFactory '"+modelFactoryString+"' not found !", "The Factory-class used for loading, parsing and building the Agent- and SocietyType-models could not be found. Please check the spelling and make sure, that the class lies within your classpath.", ResourceNotFoundException.FACTORY_NOT_FOUND);
+		}
 	}
 
 	/**
@@ -210,50 +573,6 @@ public class ModelManager
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * When this method is called, the index, which contains all agent- and society-
-	 * description-filenames is refreshed. The method may be called due to a change
-	 * of the model-path or when files are added or deleted within this path.
-	 * The 'searchRoots'-method scans the complete model-path for model-description-files
-	 * and stores the name of the files found in a global HashMap.
-	 * @return The HashMap containing all models, that were found.
-	 *         The key of this HashMap is the file-name of the model, the value either also
-	 *         the file-name or the name of the jar-file containg the model-file.
-	 */
-	public HashMap rebuildModelIndex()
-	{
-		String[] modelPaths = repository.getProperties().getModelLocations();
-		String[] excludePaths = repository.getProperties().getExcludeSet();
-
-		// check if the index is up to date and if so return it immediately.
-		long now = System.currentTimeMillis();
-		if ((now - INDEX_REFRESH_TIME) < modelIndex.getLastIndexRefreshTime())
-			return modelIndex.getModels();
-
-		// start refreshing the index
-
-        repository.throwProgressUpdateEvent(new ProgressUpdateEvent("Creating autosearch-environment", ProgressUpdateEvent.PROGRESS_ADVANCE));
-
-		String[] rootSearchPaths = getExclusiveModelSearchPath(modelPaths, excludePaths);
-
-		for(int i = 0; i<rootSearchPaths.length; i++)
-		{
-			File filePointer = new File(rootSearchPaths[i]);
-			File[] fileArray;
-
-			if(rootSearchPaths[i].endsWith(".jar") || rootSearchPaths[i].endsWith(".zip"))
-			{
-				fileArray = new File[]{filePointer};
-			}
-			else
-				fileArray = filePointer.listFiles();
-
-			// now search in all subfolders recursively
-			searchRoots(fileArray, new Vector());
-		}
-		return modelIndex.getModels();
 	}
 
 	/**
@@ -320,7 +639,7 @@ public class ModelManager
 			// it's just a path in the modelPaths that doesn't exist, no worry
 			// e.printStackTrace();
 		}
-	}	// end of search
+	}
 
 	public void exit()
 	{
