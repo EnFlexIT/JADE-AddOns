@@ -25,9 +25,11 @@
 
 package jade.tools.ascml.gui.models;
 
+import jade.tools.ascml.absmodel.IParameter;
+import jade.tools.ascml.absmodel.IParameterSet;
+
 import javax.swing.table.AbstractTableModel;
 import java.util.*;
-import jade.tools.ascml.absmodel.*;
 
 public class ParameterTableModel extends AbstractTableModel
 {
@@ -44,7 +46,7 @@ public class ParameterTableModel extends AbstractTableModel
 		
 		if(isParameterSet)
 		{
-			IAgentParameterSet[] aps = (IAgentParameterSet[])parameterOrParameterSet;
+			IParameterSet[] aps = (IParameterSet[])parameterOrParameterSet;
 			for(int i=0; i<aps.length; i++)
 			{
 				addRow(aps[i]);
@@ -52,7 +54,7 @@ public class ParameterTableModel extends AbstractTableModel
 		}
 		else
 		{
-			IAgentParameter[] ap = (IAgentParameter[])parameterOrParameterSet;
+			IParameter[] ap = (IParameter[])parameterOrParameterSet;
 			for(int i=0; i<ap.length; i++)
 			{
 				addRow(ap[i]);
@@ -99,9 +101,9 @@ public class ParameterTableModel extends AbstractTableModel
 
 	public void addRow(Object parameter)
 	{
-		if (parameter instanceof IAgentParameterSet)
+		if (parameter instanceof IParameterSet)
 		{
-			IAgentParameterSet aps = (IAgentParameterSet)parameter;
+			IParameterSet aps = (IParameterSet)parameter;
 		
 			HashMap oneparam = new HashMap();
 			oneparam.put("name", aps.getName());
@@ -119,7 +121,7 @@ public class ParameterTableModel extends AbstractTableModel
 		}
 		else
 		{
-			IAgentParameter ap = (IAgentParameter)parameter;
+			IParameter ap = (IParameter)parameter;
 			
 			HashMap oneparam = new HashMap();
 			oneparam.put("name", ap.getName());
