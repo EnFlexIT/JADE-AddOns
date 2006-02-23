@@ -3,6 +3,8 @@ package jade.tools.ascml.absmodel;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.onto.Status;
 
+import java.util.Vector;
+
 /**
  * 
  */
@@ -50,6 +52,12 @@ public interface IAbstractRunnable
 	 *  @return  runnable agentinstance's dependencies or null, if it depends on nothing.
 	 */
 	IDependency[] getDependencies();
+
+	/**
+		 *  Get the dependencies of this runnable model..
+		 *  @return  runnable agentinstance's dependencies or null, if it depends on nothing.
+		 */
+	Vector<IDependency> getDependencyList();
 
 	/**
 	 *  Add dependencies to this runnable model.
