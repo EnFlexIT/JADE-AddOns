@@ -29,13 +29,15 @@ import javax.swing.*;
 import java.awt.*;
 
 import java.awt.event.*;
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.gui.dialogs.StartAgentInstanceDialog;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
+import jade.tools.ascml.absmodel.IAgentType;
 
 public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 {
-	private JButton buttonStartInstance;
+	private JButton buttonApply;
+    private JButton buttonSave;
+	private JButton buttonStart;
 
 	private IAgentType model;
 
@@ -54,12 +56,20 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 		// toDO: repository.addModelChangedListener(this);
 
 		// ... and add the content (content is layout out in it's own panel)
-		this.add(createAttributePanel(), new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+		this.add(createAttributePanel(), new GridBagConstraints(0, 0, 3, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 
-		buttonStartInstance = new JButton("Start new Instance");
-		buttonStartInstance.addActionListener(this);
+		buttonStart = new JButton("Start Instance");
+		buttonStart.addActionListener(this);
 
-		this.add(buttonStartInstance, new GridBagConstraints(0, 1, 1, 1, 1, 0.01, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		buttonApply = new JButton("Apply Changes");
+		buttonApply.addActionListener(this);
+
+		buttonSave = new JButton("Save AgentType");
+		buttonSave.addActionListener(this);
+
+		this.add(buttonApply, new GridBagConstraints(0, 1, 1, 1, 0.33, 0.01, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		this.add(buttonSave, new GridBagConstraints(1, 1, 1, 1, 0.33, 0.01, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		this.add(buttonStart, new GridBagConstraints(2, 1, 1, 1, 0.33, 0.01, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
 	}
 
 	private JPanel createAttributePanel()
@@ -72,7 +82,7 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 		textName.setBackground(Color.WHITE);
 
 		// prepare File-Name
-		JTextField textFileName = new JTextField((String)model.getDocument().getSource(), 20);
+		JTextField textFileName = new JTextField(model.getDocument().getSource(), 20);
 		textFileName.setEditable(false);
 		textFileName.setBackground(Color.WHITE);
 		JButton buttonFileName = new JButton("...");
@@ -123,9 +133,18 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 
 	public void actionPerformed(ActionEvent evt)
 	{
-		if (evt.getSource() == buttonStartInstance)
+		if (evt.getSource() == buttonStart)
 		{
             mainPanel.showDialog(new StartAgentInstanceDialog(mainPanel, model));
 		}
+		else if (evt.getSource() == buttonApply)
+		{
+            System.err.println("AgentTypeGeneral.actionPerformed: Apply Changes, implement me !!!");
+		}
+		else if (evt.getSource() == buttonSave)
+		{
+            System.err.println("AgentTypeGeneral.actionPerformed: Save AgentType, implement me !!!");
+		}
+
 	}
 }
