@@ -54,14 +54,14 @@ public class ExceptionPanel extends JPanel implements TreeSelectionListener
 		typeLabel			= new JLabel();
 		errorCodeLabel		= new JLabel();
 
-		detailsTextArea		= new JTextArea();
+		detailsTextArea	= new JTextArea(exception.getExceptionDetails().toString());
 		detailsTextArea.setEditable(false);
 		detailsTextArea.setLineWrap(true);
 		detailsTextArea.setWrapStyleWord(true);
 		detailsTextArea.setBackground(Color.WHITE);
 		detailsTextArea.setFont(new Font("Arial", Font.PLAIN, 12));
 
-		stackTraceTextArea	= new JTextArea();
+		stackTraceTextArea	= new JTextArea(exception.getStackTraceString());
 		stackTraceTextArea.setEditable(false);
         stackTraceTextArea.setLineWrap(true);
 		stackTraceTextArea.setWrapStyleWord(true);
@@ -70,6 +70,7 @@ public class ExceptionPanel extends JPanel implements TreeSelectionListener
 
 		createMainPanel();
 
+		tree.addTreeSelectionListener(this);
 		for (int i=0; i < tree.getRowCount(); i++)
 		{
 			tree.expandRow(i);
