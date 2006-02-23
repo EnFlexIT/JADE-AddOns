@@ -26,24 +26,20 @@
 package jade.tools.ascml.gui.panels;
 
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.*;
-import jade.tools.ascml.absmodel.*;
+
+import jade.tools.ascml.absmodel.ISocietyInstanceReference;
 
 public class ReferenceGeneral extends AbstractPanel
 {
     private JTable addressTable;
-    private ISocietyInstanceReference model;
 
 	public ReferenceGeneral(AbstractMainPanel mainPanel, ISocietyInstanceReference model)
 	{
 		super(mainPanel);
-        this.model = model;
 
 		this.setLayout(new GridBagLayout());
 		this.setBackground(Color.WHITE);
@@ -62,9 +58,9 @@ public class ReferenceGeneral extends AbstractPanel
 		this.add(new JLabel("<html>&nbsp;</html>"), new GridBagConstraints(0, 4, 2, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 
 		this.add(new JLabel("Launcher-Name: "), new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-		this.add(new JTextField(model.getLauncherName()), new GridBagConstraints(1, 5, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+		this.add(new JTextField(model.getLauncher().getName()), new GridBagConstraints(1, 5, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 
-		this.add(createAddressTable(model.getLauncherAddresses()), new GridBagConstraints(0, 6, 2, 1, 1, 1, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
+		this.add(createAddressTable(model.getLauncher().getAddresses()), new GridBagConstraints(0, 6, 2, 1, 1, 1, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
 	}
 	
 	private JScrollPane createAddressTable(String[] launcherAddresses)
