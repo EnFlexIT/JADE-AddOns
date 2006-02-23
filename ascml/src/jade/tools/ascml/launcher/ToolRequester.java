@@ -56,6 +56,7 @@ import jade.domain.toolagent.ToolAgentParameterSetOntology;
 import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
 import jade.tools.ascml.model.runnable.RunnableAgentInstance;
+import jade.tools.ascml.absmodel.IRunnableAgentInstance;
 import jade.wrapper.ControllerException;
 import java.util.HashMap;
 import java.util.Vector;
@@ -389,7 +390,7 @@ public class ToolRequester {
         sendRequest(agent, synchobject);
     }
     
-    public void requestTool(RunnableAgentInstance agentModel, StringBuffer synchobject ) {
+    public void requestTool(IRunnableAgentInstance agentModel, StringBuffer synchobject ) {
         if (waitingAgents.containsKey(agentModel.getName())) {
             return;
         }

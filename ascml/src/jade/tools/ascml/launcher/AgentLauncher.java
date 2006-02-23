@@ -53,6 +53,7 @@ import jade.proto.FIPAProtocolNames;
 import jade.tools.ToolAgent;
 import jade.tools.ascml.absmodel.IRunnableAgentInstance;
 import jade.tools.ascml.absmodel.IRunnableRemoteSocietyInstanceReference;
+import jade.tools.ascml.absmodel.IToolOption;
 import jade.tools.ascml.dependencymanager.DependencyManager;
 import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.gui.GUI;
@@ -94,9 +95,9 @@ public class AgentLauncher extends ToolAgent {
     protected GUI gui;
     public LauncherInterface li;
 	
-    private ToolRequester mySniffer = new ToolRequester(this, "jade.tools.sniffer.Sniffer", snifferPrefix, IRunnableAgentInstance.TOOLOPTION_SNIFF, true);
-    private ToolRequester myIntrospector = new ToolRequester(this, "jade.tools.introspector.Introspector", introspectorPrefix, IRunnableAgentInstance.TOOLOPTION_DEBUG, false);
-    private ToolRequester myBenchmarker = new ToolRequester(this, "jade.tools.benchmarking.BenchmarkSnifferAgent", benchmarkerSnifferPrefix,IRunnableAgentInstance.TOOLOPTION_BENCHMARK, true);
+    private ToolRequester mySniffer = new ToolRequester(this, "jade.tools.sniffer.Sniffer", snifferPrefix, IToolOption.TOOLOPTION_SNIFF, true);
+    private ToolRequester myIntrospector = new ToolRequester(this, "jade.tools.introspector.Introspector", introspectorPrefix, IToolOption.TOOLOPTION_DEBUG, false);
+    private ToolRequester myBenchmarker = new ToolRequester(this, "jade.tools.benchmarking.BenchmarkSnifferAgent", benchmarkerSnifferPrefix,IToolOption.TOOLOPTION_BENCHMARK, true);
     private ListenerManagerInterface lmi;
 
 	private StatusSubscriptionManager subscriptionManager = new StatusSubscriptionManager(this);
@@ -142,10 +143,10 @@ public class AgentLauncher extends ToolAgent {
 		
 		try {
 			//Now we will construct the required message and send it
-			AID receiver = new AID(remoteSociety.getLauncherName(), AID.ISGUID);				
+			AID receiver = new AID(remoteSociety.getLauncher().getName(), AID.ISGUID);
 			SocietyInstance newsoc = new SocietyInstance();
 			newsoc.setFullQuallifiedName(remoteSociety.getFullyQualifiedName());
-			receiver.addAddresses(remoteSociety.getLauncherAddresses()[0]);
+			receiver.addAddresses(remoteSociety.getLauncher().getAddresses()[0]);
 			ACLMessage message = createSubscription(receiver, newsoc);
 			message.setPerformative(ACLMessage.QUERY_REF);
 			message.setProtocol(FIPANames.InteractionProtocol.FIPA_QUERY);
@@ -166,8 +167,8 @@ public class AgentLauncher extends ToolAgent {
 		// If there are no adresses, then I just don't care.
 		// If there are multiple adresses, I don't know what to do
 		// What has to be done is yet to be defined
-		String[] launcherAdresses = remoteSociety.getLauncherAddresses();
-		String launcherName = remoteSociety.getLauncherName();
+		String[] launcherAdresses = remoteSociety.getLauncher().getAddresses();
+		String launcherName = remoteSociety.getLauncher().getName();
 		AID launcherAID = new AID(launcherName,AID.ISGUID);
 		launcherAID.addAddresses(launcherAdresses[0]);
 
@@ -362,7 +363,7 @@ public class AgentLauncher extends ToolAgent {
         li = new LauncherInterface(this);
         lmi = new ListenerManagerInterface(this);
 
-        repository = new Repository(noGUI);
+        repository = new Repository();
         repository.getListenerManager().addExceptionListener(lmi); // AgentLauncher now has to implement exceptionThrown-method (see below)
         repository.getListenerManager().addToolTakeDownListener(lmi); // AgentLauncher now has to implement toolTakeDown-method (see below)
 		repository.getListenerManager().addModelChangedListener(lmi); // AgentLauncher now has to implement modelChanged-method (see below)

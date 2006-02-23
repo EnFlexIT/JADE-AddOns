@@ -34,11 +34,7 @@ import jade.core.ContainerID;
 import jade.domain.JADEAgentManagement.CreateAgent;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.lang.acl.ACLMessage;
-import jade.tools.ascml.ASCML;
-import jade.tools.ascml.absmodel.IRunnableAgentInstance;
-import jade.tools.ascml.absmodel.IAgentParameter;
-import jade.tools.ascml.absmodel.IAgentParameterSet;
-import jade.tools.ascml.absmodel.IAgentType;
+import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.exceptions.ModelActionException;
 import jade.tools.ascml.events.ProgressUpdateEvent;
 import jade.tools.ascml.onto.Error;
@@ -103,7 +99,7 @@ public class AgentLauncherThread implements Runnable {
         // System.out.println("DEBUG 1");
         
         // iterate through all arguments contained in the agentModel
-        IAgentParameter[] params = theAgent.getParameters();
+        IParameter[] params = theAgent.getParameters();
         for(int i=0; i<params.length; i++) {
             // get the argument-name and add the argument's value to the
             // agent-to-start
@@ -121,7 +117,7 @@ public class AgentLauncherThread implements Runnable {
 	        ca.addArguments(arg);
         }
         // System.out.println("DEBUG 2");
-        IAgentParameterSet[] paramsets = theAgent.getParameterSets();
+        IParameterSet[] paramsets = theAgent.getParameterSets();
         for(int i=0; i<paramsets.length; i++) {
             // get the argument-name and add the argument's value to the
             // agent-to-start
@@ -189,7 +185,7 @@ public class AgentLauncherThread implements Runnable {
         boolean startAgent = true;
         int timeout = 15000;
         
-        if(aModel.hasToolOption(IRunnableAgentInstance.TOOLOPTION_SNIFF) || socToolOptions.containsKey(IRunnableAgentInstance.TOOLOPTION_SNIFF)) {
+        if(aModel.hasToolOption(IToolOption.TOOLOPTION_SNIFF) || socToolOptions.containsKey(IToolOption.TOOLOPTION_SNIFF)) {
             al.doSniff(aModel, synchobject);
             synchronized(synchobject) {
                 try {
@@ -200,8 +196,8 @@ public class AgentLauncherThread implements Runnable {
             }
             al.snifferReady();
         }
-        if(aModel.hasToolOption(IRunnableAgentInstance.TOOLOPTION_DEBUG) || aModel.hasToolOption(IRunnableAgentInstance.TOOLOPTION_INTROSPECTOR)
-				||  socToolOptions.containsKey(IRunnableAgentInstance.TOOLOPTION_DEBUG) || socToolOptions.containsKey(IRunnableAgentInstance.TOOLOPTION_INTROSPECTOR)) 
+        if(aModel.hasToolOption(IToolOption.TOOLOPTION_DEBUG) || aModel.hasToolOption(IToolOption.TOOLOPTION_INTROSPECTOR)
+				||  socToolOptions.containsKey(IToolOption.TOOLOPTION_DEBUG) || socToolOptions.containsKey(IToolOption.TOOLOPTION_INTROSPECTOR))
         {
             al.doIntrospect(aModel, synchobject);
             synchronized(synchobject) {
@@ -213,7 +209,7 @@ public class AgentLauncherThread implements Runnable {
             }
             al.introReady();
         }
-        if( aModel.hasToolOption(IRunnableAgentInstance.TOOLOPTION_BENCHMARK) || socToolOptions.containsKey(IRunnableAgentInstance.TOOLOPTION_BENCHMARK) ) {
+        if( aModel.hasToolOption(IToolOption.TOOLOPTION_BENCHMARK) || socToolOptions.containsKey(IToolOption.TOOLOPTION_BENCHMARK) ) {
             al.doBenchmark(aModel, synchobject);
             synchronized(synchobject) {
                 try {
@@ -224,7 +220,7 @@ public class AgentLauncherThread implements Runnable {
             }
             al.benchmarkReady();
         }
-	    if( aModel.hasToolOption(IRunnableAgentInstance.TOOLOPTION_LOG) || socToolOptions.containsKey(IRunnableAgentInstance.TOOLOPTION_LOG)) {
+	    if( aModel.hasToolOption(IToolOption.TOOLOPTION_LOG) || socToolOptions.containsKey(IToolOption.TOOLOPTION_LOG)) {
             System.err.println("AgentLauncherThread.run: Please implement JADE's log-tooloption !");
         }
         if (startAgent) {

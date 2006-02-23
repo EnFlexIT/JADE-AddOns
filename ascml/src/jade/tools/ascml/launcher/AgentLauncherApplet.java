@@ -111,7 +111,7 @@ public class AgentLauncherApplet extends AgentLauncher {
 		
 		li = new LauncherInterface(this);
 
-		repository = new Repository(false);
+		repository = new Repository();
 		repository.getListenerManager().addExceptionListener(this.getlmi()); // AgentLauncher now has to implement exceptionThrown-method (see below)
 		repository.getListenerManager().addToolTakeDownListener(this.getlmi()); // AgentLauncher now has to implement toolTakeDown-method (see below)
 
