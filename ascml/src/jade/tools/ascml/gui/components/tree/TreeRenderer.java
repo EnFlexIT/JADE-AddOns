@@ -28,12 +28,16 @@ package jade.tools.ascml.gui.components.tree;
 import javax.swing.*;
 import javax.swing.tree.*;
 import java.awt.*;
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.repository.Project;
 import jade.tools.ascml.repository.Repository;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.onto.Status;
+import jade.tools.ascml.model.runnable.RunnableAgentInstance;
+import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
+import jade.tools.ascml.model.runnable.RunnableRemoteSocietyInstanceReference;
+import jade.tools.ascml.model.jibx.*;
+import jade.tools.ascml.absmodel.*;
 
 public class TreeRenderer extends DefaultTreeCellRenderer
 {
@@ -60,8 +64,8 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 		{
 			processStaticModel(nodeContent);
 		}
-        else if ((nodeContent instanceof IRunnableSocietyInstance) || (nodeContent instanceof IRunnableRemoteSocietyInstanceReference) ||
-				(nodeContent instanceof IRunnableAgentInstance))
+        else if ((nodeContent instanceof RunnableSocietyInstance) || (nodeContent instanceof RunnableRemoteSocietyInstanceReference) ||
+				(nodeContent instanceof RunnableAgentInstance))
 		{
 			processRunnableModel(nodeContent);
 		}
@@ -110,7 +114,7 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 
 			if (status == ISocietyType.STATUS_ERROR)
 				typeIcon = ImageIconLoader.createImageIcon(ImageIconLoader.STATUS_MODEL_ERROR);
-			// else if (status == ISocietyType.STATUS_REFERENCE_ERROR)
+			// else if (status == SocietyType.STATUS_REFERENCE_ERROR)
 				// typeIcon = ImageIconLoader.createImageIcon(ImageIconLoader.STATUS_MODEL_REFERENCE_ERROR);
 
 			setIcon(ImageIconLoader.scaleImageIcon(typeIcon, 14, 14));
@@ -188,26 +192,26 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 
 	private void processRunnableModel(Object nodeContent)
 	{
-		if (nodeContent instanceof IRunnableSocietyInstance)
+		if (nodeContent instanceof RunnableSocietyInstance)
 		{
-			IRunnableSocietyInstance runnableInstance = (IRunnableSocietyInstance)nodeContent;
+			RunnableSocietyInstance runnableInstance = (RunnableSocietyInstance)nodeContent;
 			Status status = runnableInstance.getStatus();
 
 			setIcon(ImageIconLoader.createRunnableStatusIcon(status, 16, 16));
 			setToolTipText("Runnable SocietyInstance: "+runnableInstance.getName()+ " Status:" + status);
 		}
-		else if (nodeContent instanceof IRunnableRemoteSocietyInstanceReference)
+		else if (nodeContent instanceof RunnableRemoteSocietyInstanceReference)
 		{
-			IRunnableRemoteSocietyInstanceReference instanceReference = (IRunnableRemoteSocietyInstanceReference)nodeContent;
+			RunnableRemoteSocietyInstanceReference instanceReference = (RunnableRemoteSocietyInstanceReference)nodeContent;
 			Status status = instanceReference.getStatus();
 
 			setIcon(ImageIconLoader.createRunnableStatusIcon(status, 16, 16));
 
 			setToolTipText("remote SocietyInstance: " + instanceReference.getName() + " (" + status + ")");
 		}
-		else if (nodeContent instanceof IRunnableAgentInstance)
+		else if (nodeContent instanceof RunnableAgentInstance)
 		{
-			IRunnableAgentInstance agentInstance = (IRunnableAgentInstance)nodeContent;
+			RunnableAgentInstance agentInstance = (RunnableAgentInstance)nodeContent;
 
 			Status status = agentInstance.getStatus();
 			String detailedStatus = agentInstance.getDetailedStatus();
