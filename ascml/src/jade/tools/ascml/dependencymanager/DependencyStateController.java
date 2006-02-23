@@ -24,14 +24,14 @@
 
 package jade.tools.ascml.dependencymanager;
 
-import java.sql.Time;
-import java.util.Random;
 import java.util.Vector;
 import jade.tools.ascml.absmodel.*;
+import jade.tools.ascml.absmodel.dependency.IDependency;
+import jade.tools.ascml.absmodel.dependency.IAgentTypeDependency;
+import jade.tools.ascml.absmodel.dependency.ISocietyTypeDependency;
 import jade.tools.ascml.exceptions.ModelActionException;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.launcher.AgentLauncher;
-import jade.tools.ascml.model.dependency.AgentInstanceDependencyModel;
 import jade.tools.ascml.onto.*;
 
 public class DependencyStateController extends AbstractDependencyController{
@@ -41,7 +41,7 @@ public class DependencyStateController extends AbstractDependencyController{
 	}
 
 	protected Vector<IDependency> getDependenciesFromModel(IAbstractRunnable societyInstanceModel) {
-		return societyInstanceModel.getDependencies();
+		return new Vector<IDependency>(societyInstanceModel.getDependencyList());
 	}
 
 	protected AbstractDependencyRecord getNewRecord(IAbstractRunnable absRunnable) {

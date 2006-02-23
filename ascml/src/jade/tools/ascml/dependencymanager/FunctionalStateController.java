@@ -26,6 +26,7 @@ package jade.tools.ascml.dependencymanager;
 
 import java.util.Vector;
 import jade.tools.ascml.absmodel.*;
+import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
 import jade.util.Logger;
@@ -38,8 +39,8 @@ public class FunctionalStateController extends AbstractDependencyController{
 
 	protected Vector<IDependency> getDependenciesFromModel(IAbstractRunnable societyInstanceModel) {
 		ISocietyInstance parentSoc = (ISocietyInstance) societyInstanceModel.getParentModel();
-		IFunctional myFunctional = parentSoc.getFunctionalModel();
-		return myFunctional.getDependencies();
+		IFunctional myFunctional = parentSoc.getFunctional();
+		return new Vector<IDependency>(myFunctional.getDependencyList());
 	}
 
 	protected AbstractDependencyRecord getNewRecord(IAbstractRunnable absRunnable) {

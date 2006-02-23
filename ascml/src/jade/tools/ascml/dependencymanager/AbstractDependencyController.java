@@ -31,6 +31,9 @@ import java.util.Vector;
 
 import jade.core.AID;
 import jade.tools.ascml.absmodel.*;
+import jade.tools.ascml.absmodel.dependency.IDependency;
+import jade.tools.ascml.absmodel.dependency.IAgentInstanceDependency;
+import jade.tools.ascml.absmodel.dependency.IAgentTypeDependency;
 import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
 import jade.util.Logger;

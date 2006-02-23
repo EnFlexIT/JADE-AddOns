@@ -1,6 +1,6 @@
 package jade.tools.ascml.dependencymanager;
 
-import jade.tools.ascml.absmodel.IAgentInstanceDependency;
+import jade.tools.ascml.absmodel.dependency.IAgentInstanceDependency;
 import jade.tools.ascml.launcher.AgentLauncher;
 
 public class RemoteInstanceWatcher extends AbstractDependencyWatcher{
