@@ -25,12 +25,13 @@
 
 package jade.tools.ascml.repository.loader;
 
-import jade.tools.ascml.absmodel.*;
-import jade.tools.ascml.model.RunnableAgentInstanceModel;
-import jade.tools.ascml.model.RunnableSocietyInstanceModel;
-import jade.tools.ascml.model.RunnableRemoteSocietyInstanceReferenceModel;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.repository.RunnableManager;
+import jade.tools.ascml.model.runnable.AbstractRunnable;
+import jade.tools.ascml.model.runnable.RunnableAgentInstance;
+import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
+import jade.tools.ascml.model.runnable.RunnableRemoteSocietyInstanceReference;
+import jade.tools.ascml.absmodel.*;
 
 /**
  * 
@@ -41,9 +42,9 @@ public class RunnableFactory
 	{
 	}
 
-	public synchronized static IAbstractRunnable createRunnable(String name, Object model, RunnableManager manager) throws ModelException
+	public synchronized static AbstractRunnable createRunnable(String name, Object model, RunnableManager manager) throws ModelException
 	{
-		IAbstractRunnable returnModel = null;
+		AbstractRunnable returnModel = null;
 
 		if (model instanceof IAgentType)
 			returnModel = createRunnableAgentInstanceOutOfAgentType(name, (IAgentType)model);
@@ -57,24 +58,24 @@ public class RunnableFactory
 		return returnModel;
 	}
 
-	private synchronized static IRunnableAgentInstance createRunnableAgentInstanceOutOfAgentType(String name, IAgentType model)
+	private synchronized static RunnableAgentInstance createRunnableAgentInstanceOutOfAgentType(String name, IAgentType model)
 	{
-		IRunnableAgentInstance returnInstance =
-			new RunnableAgentInstanceModel(name, model, null, model.getModelChangedListener(), null, model.getClassName(), model.getPlatformType(),
+		RunnableAgentInstance returnInstance =
+			new RunnableAgentInstance(name, model, null, model.getModelChangedListener(), null, model.getClassName(), model.getPlatformType(),
 			                               model.getParameters(), model.getParameterSets(),
-										   model.getAgentDescription(), null);
+										   model.getAgentDescriptions(), null);
 		return returnInstance;
 	}
 
-	private synchronized static IRunnableAgentInstance createRunnableAgentInstanceOutOfAgentInstance(String name, IAgentInstance model) throws ModelException
+	private synchronized static IRunnableAgentInstance createRunnableAgentInstanceOutOfAgentInstance(String name, IAgentInstance model)
 	{
-		IRunnableAgentInstance returnInstance = null;
+		RunnableAgentInstance returnInstance = null;
 
-        IAgentType type = (IAgentType)model.getType();
+        IAgentType type = model.getType();
 		returnInstance = createRunnableAgentInstanceOutOfAgentType(name, type);
 
-		returnInstance.setParameters(model.getParameterClones());
-		returnInstance.setParameterSets(model.getParameterSetClones());
+		returnInstance.setParameters(model.getParameters());
+		returnInstance.setParameterSets(model.getParameterSets());
         returnInstance.setToolOptions(model.getToolOptions());
 		returnInstance.addDependencies(model.getDependencies());
 
@@ -85,9 +86,9 @@ public class RunnableFactory
 	private synchronized static IRunnableSocietyInstance createRunnableSocietyInstance(String name, ISocietyInstance model, RunnableManager manager) throws ModelException
 	{
 		// System.err.println("RunableFactory.createRunnableSocietyInstance: creating society = " + name);
-		IRunnableSocietyInstance returnInstance = null;
+		RunnableSocietyInstance returnInstance = null;
 
-		returnInstance = new RunnableSocietyInstanceModel(name, model, null);
+		returnInstance = new RunnableSocietyInstance(name, model, null);
 
 		// create runnableAgentInstances out of agentInstance-models
 		IAgentInstance[] agentInstanceModels = model.getAgentInstanceModels();
@@ -98,8 +99,8 @@ public class RunnableFactory
             // System.err.println("RunnableFactory.createRunnableSocInst: runn-AI=" + oneRunnableAgentInstance);
 			for (int j=0; j < oneRunnableAgentInstance.length; j++)
 			{
-				((IRunnableAgentInstance)oneRunnableAgentInstance[j]).setParentRunnable(returnInstance);
-				returnInstance.addRunnableAgentInstance((IRunnableAgentInstance)oneRunnableAgentInstance[j]);
+				((RunnableAgentInstance)oneRunnableAgentInstance[j]).setParentRunnable(returnInstance);
+				returnInstance.addRunnableAgentInstance((RunnableAgentInstance)oneRunnableAgentInstance[j]);
 			}
 		}
 
@@ -116,8 +117,8 @@ public class RunnableFactory
 				if (oneReference.isRemoteReference())
 				{
 					// create the remote runnable reference-object
-					RunnableRemoteSocietyInstanceReferenceModel oneRunnableReference =
-						new RunnableRemoteSocietyInstanceReferenceModel(oneReference.getName(), returnInstance, oneReference.getDependencies(), oneReference.getModelChangedListener(), oneReference.getTypeName(), oneReference.getInstanceName(), oneReference.getLauncherName(), oneReference.getLauncherAddresses());
+					RunnableRemoteSocietyInstanceReference oneRunnableReference =
+						new RunnableRemoteSocietyInstanceReference(oneReference.getName(), returnInstance, oneReference.getDependencies(), oneReference.getModelChangedListener(), oneReference.getTypeName(), oneReference.getInstanceName(), oneReference.getLauncher());
 					returnInstance.addRemoteRunnableSocietyInstanceReference(oneRunnableReference);
 				}
 				else
@@ -136,9 +137,9 @@ public class RunnableFactory
 					{
 						// System.err.println("RunnableFactory.createRunnableSocietyInstance: dependencies from " + oneReference + " = " + oneReference.getDependencies().length);
 						// System.err.println("RunnableFactory.createRunnableSocietyInstance: add dependencies from "+oneReference+" to " + oneRunnableReference[k]);
-						((IRunnableSocietyInstance)oneRunnableReference[k]).setParentRunnable(returnInstance);
+						((RunnableSocietyInstance)oneRunnableReference[k]).setParentRunnable(returnInstance);
 						oneRunnableReference[k].addDependencies(oneReference.getDependencies());
-						returnInstance.addLocalRunnableSocietyInstanceReference((IRunnableSocietyInstance)oneRunnableReference[k]);
+						returnInstance.addLocalRunnableSocietyInstanceReference((RunnableSocietyInstance)oneRunnableReference[k]);
 					}
 
 					// reset namingscheme
