@@ -29,48 +29,33 @@ import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.gui.models.ParameterTableModel;
-import jade.tools.ascml.exceptions.ModelException;
+import jade.tools.ascml.absmodel.IAgentInstance;
+import jade.tools.ascml.absmodel.IAgentType;
 
 public class Parameter extends AbstractPanel implements ActionListener
 {
 
-	private boolean isParameterSet;
-	private Object[] parameter;
+	private jade.tools.ascml.absmodel.IParameter[] parameter;
 	private JTable table;
 	
 	/**
 	 * @param model the AgentModel to show in the dialog, this may be an
 	 *              AgentInstanceModel or an AgentTypeModel
 	 */
-	public Parameter(AbstractMainPanel mainPanel, Object model, boolean isParameterSet)
+	public Parameter(AbstractMainPanel mainPanel, Object model)
 	{
 		super(mainPanel);
-		this.isParameterSet = isParameterSet;
 
         // toDo: repository.addModelChangedListener(this);
 		// initialize model-objects
 		if(model instanceof IAgentType)
 		{
-			if (isParameterSet)
-				this.parameter = ((IAgentType)model).getParameterSets();
-			else
-				this.parameter = ((IAgentType)model).getParameters();
+			this.parameter = ((IAgentType)model).getParameters();
 		}
 		else
 		{
-			try
-			{
-				if (isParameterSet)
-				    this.parameter = ((IAgentInstance)model).getParameterSetClones();
-				else
-					this.parameter = ((IAgentInstance)model).getParameterClones();;
-			}
-			catch(ModelException exc)
-			{
-				exc.printStackTrace();
-			}
+			this.parameter = ((IAgentInstance)model).getParameters();;
 		}
 
 		// set global layout-parameters
@@ -79,10 +64,8 @@ public class Parameter extends AbstractPanel implements ActionListener
 		
 		// create the constraints for this layout
 		// this.add(new JLabel("<html><h2>Parameter</h2>&nbsp;&nbsp;Here, you may edit or add parameters, that are passed to the agent at startup.<br>&nbsp;&nbsp;Just edit the table-cells below or add a new parameter in the empty table-row.<br></html>"), BorderLayout.NORTH);
-		if (isParameterSet)
-			this.add(new JLabel("<html><h2>&nbsp;Parameter-Set</h2></html>"), BorderLayout.NORTH);
-	    else
-			this.add(new JLabel("<html><h2>&nbsp;Parameter</h2></html>"), BorderLayout.NORTH);
+		this.add(new JLabel("<html><h2>&nbsp;Parameter</h2></html>"), BorderLayout.NORTH);
+
 		// ... and add the content step by step with special constraint-options
 		this.add(createParameterPanel(), BorderLayout.CENTER);
 	}
@@ -90,7 +73,7 @@ public class Parameter extends AbstractPanel implements ActionListener
 	private JPanel createParameterPanel()
 	{
 		// prepare parameterTable and scrollPane
-		table = new JTable(new ParameterTableModel(parameter, isParameterSet));
+		table = new JTable(new ParameterTableModel(parameter, false));
 		table.setBackground(Color.WHITE);
 		table.setRowSelectionAllowed(false);
 		table.setColumnSelectionAllowed(false);
