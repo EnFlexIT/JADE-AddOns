@@ -64,8 +64,8 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 		{
 			processStaticModel(nodeContent);
 		}
-        else if ((nodeContent instanceof RunnableSocietyInstance) || (nodeContent instanceof RunnableRemoteSocietyInstanceReference) ||
-				(nodeContent instanceof RunnableAgentInstance))
+        else if ((nodeContent instanceof IRunnableSocietyInstance) || (nodeContent instanceof IRunnableRemoteSocietyInstanceReference) ||
+				(nodeContent instanceof IRunnableAgentInstance))
 		{
 			processRunnableModel(nodeContent);
 		}
@@ -192,7 +192,7 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 
 	private void processRunnableModel(Object nodeContent)
 	{
-		if (nodeContent instanceof RunnableSocietyInstance)
+		if (nodeContent instanceof IRunnableSocietyInstance)
 		{
 			RunnableSocietyInstance runnableInstance = (RunnableSocietyInstance)nodeContent;
 			Status status = runnableInstance.getStatus();
@@ -200,7 +200,7 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 			setIcon(ImageIconLoader.createRunnableStatusIcon(status, 16, 16));
 			setToolTipText("Runnable SocietyInstance: "+runnableInstance.getName()+ " Status:" + status);
 		}
-		else if (nodeContent instanceof RunnableRemoteSocietyInstanceReference)
+		else if (nodeContent instanceof IRunnableRemoteSocietyInstanceReference)
 		{
 			RunnableRemoteSocietyInstanceReference instanceReference = (RunnableRemoteSocietyInstanceReference)nodeContent;
 			Status status = instanceReference.getStatus();
@@ -209,7 +209,7 @@ public class TreeRenderer extends DefaultTreeCellRenderer
 
 			setToolTipText("remote SocietyInstance: " + instanceReference.getName() + " (" + status + ")");
 		}
-		else if (nodeContent instanceof RunnableAgentInstance)
+		else if (nodeContent instanceof IRunnableAgentInstance)
 		{
 			RunnableAgentInstance agentInstance = (RunnableAgentInstance)nodeContent;
 

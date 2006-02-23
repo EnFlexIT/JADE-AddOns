@@ -28,11 +28,7 @@ package jade.tools.ascml.gui.components.tree;
 import javax.swing.tree.*;
 import jade.tools.ascml.repository.Repository;
 import jade.tools.ascml.events.ModelChangedEvent;
-import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
-import jade.tools.ascml.model.runnable.AbstractRunnable;
-import jade.tools.ascml.absmodel.IAgentInstance;
-import jade.tools.ascml.absmodel.ISocietyInstance;
-import jade.tools.ascml.absmodel.ISocietyInstanceReference;
+import jade.tools.ascml.absmodel.*;
 
 import java.util.Enumeration;
 
@@ -101,10 +97,10 @@ public class SocietyInstanceNode extends DefaultMutableTreeNode implements IRepo
 
 	private void createRunnableInstanceNodes(boolean showDetails)
 	{
-		AbstractRunnable[] runningInstances = repository.getRunnableManager().getRunnables(societyModel);
+		IAbstractRunnable[] runningInstances = repository.getRunnableManager().getRunnables(societyModel);
 		for (int i=0; i < runningInstances.length; i++)
 		{
-			RunnableSocietyInstance oneRunningInstance = (RunnableSocietyInstance)runningInstances[i];
+			IRunnableSocietyInstance oneRunningInstance = (IRunnableSocietyInstance)runningInstances[i];
 
 			// create the root-node of a running society-instance. This root-Node contains a String
 			// representing the name of the running societyInstance. This name is given by the user
@@ -165,13 +161,13 @@ public class SocietyInstanceNode extends DefaultMutableTreeNode implements IRepo
 				boolean showDetails = (subTreeLevelToShow == SocietyTypeNode.SUBTREE_LEVEL_RUNNINGINSTANCES_ONLY) ||
 				        ((subTreeLevelToShow != SocietyTypeNode.SUBTREE_LEVEL_TEMPLATES_ONLY) && (subTreeLevelToShow != SocietyTypeNode.SUBTREE_LEVEL_RUNNINGINSTANCES_ONLY));
 
-				RunnableSocietyInstance runnableModel = (RunnableSocietyInstance)event.getUserObject();
+				IRunnableSocietyInstance runnableModel = (IRunnableSocietyInstance)event.getUserObject();
 				RunnableSocietyInstanceNode oneRunnableSocInstNode = new RunnableSocietyInstanceNode(runnableModel, showDetails, repository, treeModel);
 				treeModel.insertNodeInto(oneRunnableSocInstNode, runnableRootNode, 0);
 			}
 			else if (eventCode == ModelChangedEvent.RUNNABLE_REMOVED)
 			{
-				RunnableSocietyInstance runnableModel = (RunnableSocietyInstance)event.getUserObject();
+				IRunnableSocietyInstance runnableModel = (IRunnableSocietyInstance)event.getUserObject();
 				Enumeration nodes = runnableRootNode.breadthFirstEnumeration();
 				while (nodes.hasMoreElements())
 				{

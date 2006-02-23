@@ -40,7 +40,6 @@ import jade.tools.ascml.events.ModelActionEvent;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
 import jade.tools.ascml.model.runnable.RunnableAgentInstance;
-import jade.tools.ascml.model.runnable.AbstractRunnable;
 import jade.tools.ascml.model.jibx.*;
 import jade.tools.ascml.onto.Status;
 import jade.tools.ascml.onto.Stopping;
@@ -249,7 +248,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 					popup.add(mi);
 				}
 			}
-			else if (popupOnObject instanceof RunnableAgentInstance)
+			else if (popupOnObject instanceof IRunnableAgentInstance)
 			{
 				RunnableAgentInstance runnableModel = (RunnableAgentInstance)popupOnObject;
 				Status status = runnableModel.getStatus();
@@ -276,7 +275,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 					popup.add(mi);
 				}
 			}
-			else if (popupOnObject instanceof RunnableSocietyInstance)
+			else if (popupOnObject instanceof IRunnableSocietyInstance)
 			{
 				RunnableSocietyInstance runnableModel = (RunnableSocietyInstance)popupOnObject;
 				Status status = runnableModel.getStatus();
@@ -409,7 +408,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 			try
 			{
 				// create the model
-				AbstractRunnable[] runnableModels = (AbstractRunnable[])repository.createRunnableAgentInstance(agentInstance.getType().getFullyQualifiedName() + "." + agentInstance.getName() + "." + agentInstance);
+				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])repository.createRunnableAgentInstance(agentInstance.getType().getFullyQualifiedName() + "." + agentInstance.getName() + "." + agentInstance);
 
 				// and select the newly created instance
 				mainPanel.selectModel(runnableModels[0]);
@@ -428,7 +427,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 		}
 		else if (actionCommand.equals(CMD_STOP_RUNNABLEAGENTINSTANCE))
 		{
-            RunnableAgentInstance runnableModel = (RunnableAgentInstance)popupOnObject;
+            IRunnableAgentInstance runnableModel = (IRunnableAgentInstance)popupOnObject;
 			ModelActionEvent actionEvent = new ModelActionEvent(ModelActionEvent.CMD_STOP_AGENTINSTANCE, runnableModel);
 			mainPanel.throwModelActionEvent(actionEvent);
 
@@ -437,7 +436,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 		}
 		else if (actionCommand.equals(CMD_STOP_RUNNABLESOCIETYINSTANCE))
 		{
-			RunnableSocietyInstance runnableModel = (RunnableSocietyInstance)popupOnObject;
+			IRunnableSocietyInstance runnableModel = (IRunnableSocietyInstance)popupOnObject;
 			ModelActionEvent actionEvent = new ModelActionEvent(ModelActionEvent.CMD_STOP_SOCIETYINSTANCE, runnableModel);
 			mainPanel.throwModelActionEvent(actionEvent);
 
@@ -459,7 +458,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 		{
 			try
 			{
-				repository.getRunnableManager().removeRunnable((AbstractRunnable)popupOnObject);
+				repository.getRunnableManager().removeRunnable((IAbstractRunnable)popupOnObject);
 			}
 			catch(ModelException exc)
 			{
