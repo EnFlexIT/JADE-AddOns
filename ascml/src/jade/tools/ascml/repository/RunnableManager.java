@@ -25,13 +25,17 @@
 
 package jade.tools.ascml.repository;
 
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.repository.loader.RunnableFactory;
 import jade.tools.ascml.events.ModelChangedEvent;
 import jade.tools.ascml.events.ModelChangedListener;
-import jade.tools.ascml.model.AbstractAgentModel;
-import jade.tools.ascml.onto.*;
+import jade.tools.ascml.model.runnable.AbstractRunnable;
+import jade.tools.ascml.onto.Known;
+import jade.tools.ascml.onto.Status;
+import jade.tools.ascml.absmodel.IAgentInstance;
+import jade.tools.ascml.absmodel.ISocietyInstance;
+import jade.tools.ascml.absmodel.IAbstractRunnable;
+import jade.tools.ascml.absmodel.IRunnableRemoteSocietyInstanceReference;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -85,7 +89,7 @@ public class RunnableManager implements ModelChangedListener
 
 			String nameAccordingScheme = createNameOutOfNamingScheme(name, namingScheme);
 			// System.err.println("RunnableManager.createRunnable: nameAccordingScheme=" + nameAccordingScheme);
-			IAbstractRunnable oneRunnableModel = RunnableFactory.createRunnable(nameAccordingScheme, model, this);
+			AbstractRunnable oneRunnableModel = RunnableFactory.createRunnable(nameAccordingScheme, model, this);
 			// System.err.println("RunnableManager.createRunnable: addRunnable=" + oneRunnableModel);
 			addRunnable(oneRunnableModel);
 			runnableModels[i] = oneRunnableModel;
@@ -164,7 +168,7 @@ public class RunnableManager implements ModelChangedListener
 		return nameAccordingScheme;
 	}
 
-	public void addRunnable(IAbstractRunnable runnableModel) throws ModelException
+	public void addRunnable(AbstractRunnable runnableModel) throws ModelException
 	{
 		// first check, if a runnable with the given name is already present.
 		// If so, throw an exception cause runnables must have unique names.
@@ -198,9 +202,9 @@ public class RunnableManager implements ModelChangedListener
 		{
 			((ISocietyInstance)parentModel).throwModelChangedEvent(ModelChangedEvent.RUNNABLE_ADDED, runnableModel);
 		}
-		else if (parentModel instanceof AbstractAgentModel)
+		else if (parentModel instanceof IAgentInstance)
 		{
-			((AbstractAgentModel)parentModel).throwModelChangedEvent(ModelChangedEvent.RUNNABLE_ADDED, runnableModel);
+			((IAgentInstance)parentModel).throwModelChangedEvent(ModelChangedEvent.RUNNABLE_ADDED, runnableModel);
 		}
 	}
 
@@ -227,9 +231,9 @@ public class RunnableManager implements ModelChangedListener
 		{
 			((ISocietyInstance)parentModel).throwModelChangedEvent(ModelChangedEvent.RUNNABLE_REMOVED, runnableModel);
 		}
-		else if (parentModel instanceof AbstractAgentModel)
+		else if (parentModel instanceof IAgentInstance)
 		{
-			((AbstractAgentModel)parentModel).throwModelChangedEvent(ModelChangedEvent.RUNNABLE_REMOVED, runnableModel);
+			((IAgentInstance)parentModel).throwModelChangedEvent(ModelChangedEvent.RUNNABLE_REMOVED, runnableModel);
 		}
 	}
 
@@ -284,7 +288,7 @@ public class RunnableManager implements ModelChangedListener
 		{
 			runnableModels = new Vector();
 		}
-		IAbstractRunnable[] returnArray = new IAbstractRunnable[runnableModels.size()];
+		AbstractRunnable[] returnArray = new AbstractRunnable[runnableModels.size()];
 		runnableModels.toArray(returnArray);
 		return returnArray;
 	}
@@ -309,7 +313,7 @@ public class RunnableManager implements ModelChangedListener
 			IAbstractRunnable model = (IAbstractRunnable)event.getModel();
 			Status status = model.getStatus();
 			// RunnableRemoteSocietyInstanceReference there exist no RunnableModel in the RunnabelIndex
-			//if ((status == IAbstractRunnable.STATUS_NOT_RUNNING) && !(model instanceof IRunnableRemoteSocietyInstanceReference))
+			//if ((status == AbstractRunnable.STATUS_NOT_RUNNING) && !(model instanceof IRunnableRemoteSocietyInstanceReference))
 			// I can not check for it being available here, Maybe we need to specify Stopped for this to work
 			// or: Every new Model gets flagged Starting immediatelly. I prefer that
 			if ((status instanceof Known) && !(model instanceof IRunnableRemoteSocietyInstanceReference))
