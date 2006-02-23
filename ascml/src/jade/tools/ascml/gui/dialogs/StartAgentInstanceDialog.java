@@ -26,11 +26,11 @@
 package jade.tools.ascml.gui.dialogs;
 
 import jade.tools.ascml.events.ModelActionEvent;
-import jade.tools.ascml.absmodel.IAgentType;
-import jade.tools.ascml.absmodel.IRunnableAgentInstance;
-import jade.tools.ascml.absmodel.IAbstractRunnable;
 import jade.tools.ascml.gui.panels.AbstractMainPanel;
 import jade.tools.ascml.exceptions.ModelException;
+import jade.tools.ascml.absmodel.IAgentType;
+import jade.tools.ascml.absmodel.IAbstractRunnable;
+
 import javax.swing.*;
 
 /**
