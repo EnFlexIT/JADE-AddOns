@@ -25,15 +25,12 @@
 
 package jade.tools.ascml.repository.loader;
 
-import jade.tools.ascml.gui.components.StatusBar;
+import jade.tools.ascml.model.jibx.SocietyType;
+import jade.tools.ascml.model.jibx.AgentType;
 import jade.tools.ascml.absmodel.IAgentType;
 import jade.tools.ascml.absmodel.ISocietyType;
-import jade.tools.ascml.exceptions.ResourceNotFoundException;
 
-import java.util.zip.*;
-import java.util.jar.*;
 import java.util.*;
-import java.io.*;
 
 /**
  *  This class holds information about all models available.
@@ -61,22 +58,22 @@ public class ModelIndex
 
 	/**
 	 * Add a model-source and its model-object to the index.
-	 * @param sourceName  The source-name of the model.
+	 * @param fullyQualifiedName  The fully-qualified name of the model.
 	 * @param modelObject  The model-object loaded from the source.
 	 */
-	public void addModel(String sourceName, Object modelObject)
+	public void addModel(String fullyQualifiedName, Object modelObject)
 	{
-		models.put(sourceName, modelObject);
+		models.put(fullyQualifiedName, modelObject);
 		lastIndexRefresh = System.currentTimeMillis();
 	}
 
     /**
 	 * Add a model-source to the index (this method is used for example by the 'autosearch').
-	 * @param sourceName  The source-name of the model.
+	 * @param fullyQualifiedNameOrSourceName The fullyQualified-name of the model or the source-path of the model.
 	 */
-	public void addModel(String sourceName)
+	public void addModel(String fullyQualifiedNameOrSourceName)
 	{
-		addModel(sourceName, null);
+		addModel(fullyQualifiedNameOrSourceName, null);
 	}
 
 	/**
@@ -127,7 +124,7 @@ public class ModelIndex
 				dummyVector.add(modelObject);
 		}
 
-		ISocietyType[] returnArray = new ISocietyType[dummyVector.size()];
+		SocietyType[] returnArray = new SocietyType[dummyVector.size()];
 		dummyVector.toArray(returnArray);
 		return returnArray;
 	}
@@ -148,32 +145,32 @@ public class ModelIndex
 				dummyVector.add(modelObject);
 		}
 
-		IAgentType[] returnArray = new IAgentType[dummyVector.size()];
+		AgentType[] returnArray = new AgentType[dummyVector.size()];
 		dummyVector.toArray(returnArray);
 		return returnArray;
 	}
 
 	/**
 	 * Get a specific model.
-	 * @param modelName  Either fully qualified name or sourceName
+	 * @param fullyQualifiedName  fully-qualified name of the model to remove
 	 * @return  The model-object with the given name
 	 */
-	public Object getModel(String modelName)
+	public Object getModel(String fullyQualifiedName)
 	{
 		Object[] modelObjects = getModelObjects();
 		for (int i=0; i < modelObjects.length; i++)
 		{
 			if ((modelObjects[i] instanceof IAgentType) &&
-				(((IAgentType)modelObjects[i]).getFullyQualifiedName().equals(modelName)))
+				(((IAgentType)modelObjects[i]).getFullyQualifiedName().equals(fullyQualifiedName)))
 				return modelObjects[i];
 
 			else if ((modelObjects[i] instanceof ISocietyType) &&
-				(((ISocietyType)modelObjects[i]).getFullyQualifiedName().equals(modelName)))
+				(((ISocietyType)modelObjects[i]).getFullyQualifiedName().equals(fullyQualifiedName)))
 				return modelObjects[i];
 		}
 
-		if (models.containsKey(modelName) && (models.get(modelName) != null))
-			return models.get(modelName);
+		if (models.containsKey(fullyQualifiedName) && (models.get(fullyQualifiedName) != null))
+			return models.get(fullyQualifiedName);
 
 		return null;
 	}
@@ -198,12 +195,12 @@ public class ModelIndex
 
 	/**
 	 * Remove a model-source and its model-object from the index.
-	 * @param sourceName  The source-name of the model.
+	 * @param fullyQualifiedName  The source-name of the model.
 	 */
-	public void removeModel(String sourceName)
+	public void removeModel(String fullyQualifiedName)
 	{
-		if (models.containsKey(sourceName))
-			models.remove(sourceName);
+		if (models.containsKey(fullyQualifiedName))
+			models.remove(fullyQualifiedName);
 		lastIndexRefresh = System.currentTimeMillis();
 	}
 
