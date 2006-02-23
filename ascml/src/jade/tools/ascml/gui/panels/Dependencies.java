@@ -25,6 +25,10 @@
 
 package jade.tools.ascml.gui.panels;
 
+import jade.tools.ascml.model.jibx.dependency.*;
+import jade.tools.ascml.absmodel.dependency.*;
+import jade.tools.ascml.absmodel.IServiceDescription;
+
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
@@ -33,10 +37,6 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Iterator;
-import java.util.Vector;
-
-import jade.tools.ascml.absmodel.*;
 
 public class Dependencies extends AbstractPanel implements ChangeListener, ActionListener
 {
@@ -66,16 +66,16 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 		else
 			this.add(new JLabel("<html><h3>&nbsp;No dependencies specified</h3></html>"), new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 	}
-	
+
 	private JPanel createAttributePanel()
 	{
 		// first prepare all the components to display
 
-		// prepare delay-spinneer
+		// prepare delay-spinner
 		int delay = 0;
 		if (models.firstElement().getType() == IDependency.DELAY_DEPENDENCY)
-			delay = ((IDelayDependency)models.firstElement()).getDelay();
-		
+			delay = ((IDelayDependency)models.firstElement()).getQuantityAsInt();
+
 		SpinnerModel spinnerModel = new SpinnerNumberModel(delay, 0, MAX_DELAY, 100);
 		delaySpinner = new JSpinner(spinnerModel);
 		delaySpinner.addChangeListener(this);
@@ -102,8 +102,8 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 
 		Iterator<IDependency> modelIt = models.iterator();
 		while (modelIt.hasNext())
-		{			
-			IDependency oneModel = modelIt.next(); 
+		{
+			IDependency oneModel = modelIt.next();
 			String[] oneRow = new String[3];
             oneRow[0] =oneModel.getType();
 
@@ -122,22 +122,23 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
             else if (oneModel instanceof IServiceDependency)
 			{
 				IServiceDependency oneDependency = (IServiceDependency)oneModel;
-				oneRow[1] = "<html><b>name</b>=" + oneDependency.getName() + "; <b>type</b>=" + oneDependency.getServiceType() + "; <b>ownership</b>=" + oneDependency.getOwnership();
-				if (oneDependency.getProtocols().size() > 0)
-					oneRow[1] += "; <b>protocols</b>=" + oneDependency.getProtocols();
-				if (oneDependency.getOntologies().size() > 0)
-					oneRow[1] += "; <b>ontologies</b>=" + oneDependency.getOntologies();
-				if (oneDependency.getLanguages().size() > 0)
-					oneRow[1] += "; <b>languages</b>=" + oneDependency.getLanguages();
-				if (oneDependency.getProperties().size() > 0)
-					oneRow[1] += "; <b>properties</b>=" + oneDependency.getProperties();
+				IServiceDescription description = oneDependency.getServiceDescription();
+				oneRow[1] = "<html><b>name</b>=" + description.getName() + "; <b>type</b>=" + description.getType() + "; <b>ownership</b>=" + description.getOwnership();
+				if (description.getProtocols().length > 0)
+					oneRow[1] += "; <b>protocols</b>=" + description.getProtocols();
+				if (description.getOntologies().length > 0)
+					oneRow[1] += "; <b>ontologies</b>=" + description.getOntologies();
+				if (description.getLanguages().length > 0)
+					oneRow[1] += "; <b>languages</b>=" + description.getLanguages();
+				if (description.getProperties().length > 0)
+					oneRow[1] += "; <b>properties</b>=" + description.getProperties();
 				oneRow[1] += "</html>";
 				oneRow[2] = "local ASCML";
 			}
 			else if (oneModel instanceof ISocietyInstanceDependency)
 			{
 				ISocietyInstanceDependency oneDependency = (ISocietyInstanceDependency)oneModel;
-				oneRow[1] = "<html><b>instance-name</b>=" + oneDependency.getSocietyInstanceName() + "; <b>type-name</b>=" + oneDependency.getSocietyTypeName() + "; <b>status</b>=" + oneDependency.getStatus() + "</html>";
+				oneRow[1] = "<html><b>instance-name</b>=" + oneDependency.getSocietyInstance() + "; <b>type-name</b>=" + oneDependency.getSocietyType() + "; <b>status</b>=" + oneDependency.getStatus() + "</html>";
 				oneRow[2] = "<html><b>name</b>=" + oneDependency.getProvider().getName() + "; <b>addresses</b>=" + oneDependency.getProvider().getAddresses() + "</html>";
 			}
 			else if (oneModel instanceof ISocietyTypeDependency)
@@ -149,7 +150,7 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 			else if (oneModel instanceof IDelayDependency)
 			{
 				IDelayDependency oneDependency = (IDelayDependency)oneModel;
-				oneRow[1] = "<html><b>quantity</b>=" + oneDependency.getDelay() + " (milliseconds)";
+				oneRow[1] = "<html><b>quantity</b>=" + oneDependency.getQuantity() + " (milliseconds)";
 				oneRow[2] = "local ASCML";
 			}
 
@@ -218,7 +219,7 @@ public class Dependencies extends AbstractPanel implements ChangeListener, Actio
 		if (evt.getSource() == delaySpinner)
 		{
             if (models.firstElement().getType() == IDependency.DELAY_DEPENDENCY)
-				((IDelayDependency)models.firstElement()).setDelay(((Integer)delaySpinner.getValue()).intValue());
+				((IDelayDependency)models.firstElement()).setQuantity(((Integer)delaySpinner.getValue()).intValue());
 		}
 	}
 
