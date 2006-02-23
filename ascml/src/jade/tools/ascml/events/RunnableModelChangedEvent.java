@@ -25,22 +25,22 @@
 
 package jade.tools.ascml.events;
 
-import jade.tools.ascml.absmodel.IAbstractRunnable;
+import jade.tools.ascml.model.runnable.AbstractRunnable;
 
 public class RunnableModelChangedEvent
 {
 	public static final String STATUS_CHANGED = "status_changed";
 
-	private IAbstractRunnable model;
+	private AbstractRunnable model;
 	private String eventCode;
 
-	public RunnableModelChangedEvent(IAbstractRunnable model, String eventCode)
+	public RunnableModelChangedEvent(AbstractRunnable model, String eventCode)
 	{
 		this.model = model;
 		this.eventCode = eventCode;
 	}
 	
-	public IAbstractRunnable getModel()
+	public AbstractRunnable getModel()
 	{
 		return model;
 	}
