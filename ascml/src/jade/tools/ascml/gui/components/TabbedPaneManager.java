@@ -29,10 +29,13 @@ import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
 import jade.tools.ascml.gui.panels.*;
-import jade.tools.ascml.absmodel.*;
+import jade.tools.ascml.gui.panels.Parameter;
+import jade.tools.ascml.gui.panels.ParameterSet;
 import jade.tools.ascml.gui.components.tree.RepositoryTree;
-import jade.tools.ascml.gui.components.tree.TreeIconLoader;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
+import jade.tools.ascml.model.jibx.*;
+import jade.tools.ascml.model.runnable.AbstractRunnable;
+import jade.tools.ascml.absmodel.*;
 
 public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 {
@@ -92,8 +95,8 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 	{
 		finalizeOldTabs();
 		this.addTab("General Settings", null, new AgentTypeGeneral(mainPanel, model), "General information about this agentType");
-		this.addTab("Parameter", null, new Parameter(mainPanel, model, false), "Parameters specified for this agentType");
-		this.addTab("Parameter-Sets", null, new Parameter(mainPanel, model, true), "Parameter-Sets specified for this agentType");
+		this.addTab("Parameter", null, new Parameter(mainPanel, model), "Parameters specified for this agentType");
+		this.addTab("Parameter-Sets", null, new ParameterSet(mainPanel, model), "Parameter-Sets specified for this agentType");
 		
 		this.setSelectedIndex(0);
 	}
@@ -102,8 +105,8 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 	{
 		finalizeOldTabs();
 		this.addTab("General Settings", null, new AgentInstanceGeneral(mainPanel, model), "General information about this agentType");
-		this.addTab("Parameter", null, new Parameter(mainPanel, model, false), "Parameters specified for this agentType");
-		this.addTab("Parameter-Sets", null, new Parameter(mainPanel, model, true), "Parameter-Sets specified for this agentType");
+		this.addTab("Parameter", null, new Parameter(mainPanel, model), "Parameters specified for this agentType");
+		this.addTab("Parameter-Sets", null, new ParameterSet(mainPanel, model), "Parameter-Sets specified for this agentType");
 		this.addTab("Dependencies", null, new Dependencies(mainPanel, model.getDependencies()), "Shows all dependencies definded for this reference");
 
 		this.setSelectedIndex(0);
@@ -111,6 +114,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 
 	private void setSocietyTypePanes(ISocietyType model)
 	{
+		System.err.println("TabbedPaneManager.setSocietyTypePanes: model=" + model);
 		finalizeOldTabs();
 		this.addTab("General Settings", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYTYPE, 16, 16), new SocietyTypeGeneral(mainPanel, model), "General information about this societyType");
 
@@ -125,6 +129,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 
 	private void setSocietyInstancePanes(ISocietyInstance model)
 	{
+		System.err.println("TabbedPaneManager.setSocietyInstancePanes: model=" + model);
 		finalizeOldTabs();
 		this.addTab("Type Settings", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYTYPE, 16, 16), new SocietyTypeGeneral(mainPanel, model.getParentSocietyType()), "General information about the societyType");
 		this.addTab(model.getName(), ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new SocietyInstanceGeneral(mainPanel, model), "General information about this societyInstance");
@@ -157,7 +162,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 		this.addTab("Load an Agent", null, new LoadAgent(mainPanel), "Load an Agent from a datasource");
 	}
 
-	private void setRunnablePanes(IAbstractRunnable model)
+	private void setRunnablePanes(AbstractRunnable model)
 	{
 		finalizeOldTabs();
 		this.addTab("Runnable Instance ("+model.getName()+")", null, new RunnableGeneral(mainPanel, model), "Show Details about a runnable Instance");
@@ -185,9 +190,9 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 		{
 			setAgentInstancePanes((IAgentInstance)model);
 		}
-		else if(model instanceof IAbstractRunnable)
+		else if(model instanceof AbstractRunnable)
 		{
-			setRunnablePanes((IAbstractRunnable)model);
+			setRunnablePanes((AbstractRunnable)model);
 		}
 		else if(model instanceof ISocietyType)
 		{
