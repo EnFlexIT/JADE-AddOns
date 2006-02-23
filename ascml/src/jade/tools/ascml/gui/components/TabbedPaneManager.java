@@ -28,6 +28,8 @@ package jade.tools.ascml.gui.components;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
+import java.util.Vector;
+
 import jade.tools.ascml.gui.panels.*;
 import jade.tools.ascml.gui.panels.Parameter;
 import jade.tools.ascml.gui.panels.ParameterSet;
@@ -106,7 +108,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 		this.addTab("General Settings", null, new AgentInstanceGeneral(mainPanel, model), "General information about this agentType");
 		this.addTab("Parameter", null, new Parameter(mainPanel, model), "Parameters specified for this agentType");
 		this.addTab("Parameter-Sets", null, new ParameterSet(mainPanel, model), "Parameter-Sets specified for this agentType");
-		this.addTab("Dependencies", null, new Dependencies(mainPanel, model.getDependencies()), "Shows all dependencies definded for this reference");
+		this.addTab("Dependencies", null, new Dependencies(mainPanel, new Vector(model.getDependencyList())), "Shows all dependencies definded for this reference");
 
 		this.setSelectedIndex(0);
 	}
@@ -140,7 +142,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 	{
 		finalizeOldTabs();
 		this.addTab("Referenced Instance", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new SocietyInstanceGeneral(mainPanel, model.getLocallyReferencedModel()), "General information about the referenced societyinstance");
-		this.addTab("Dependencies", null, new Dependencies(mainPanel, model.getDependencies()), "Shows all dependencies definded for this reference");
+		this.addTab("Dependencies", null, new Dependencies(mainPanel, new Vector(model.getDependencyList())), "Shows all dependencies definded for this reference");
 
 		this.setSelectedIndex(0);
 	}
@@ -149,7 +151,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 	{
 		finalizeOldTabs();
 		this.addTab("Referenced Instance", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new ReferenceGeneral(mainPanel, model), "General information about the remotly referenced societyinstance");
-		this.addTab("Dependencies", null, new Dependencies(mainPanel, model.getDependencies()), "Shows all dependencies definded for this reference");
+		this.addTab("Dependencies", null, new Dependencies(mainPanel, new Vector(model.getDependencyList())), "Shows all dependencies definded for this reference");
 
 		this.setSelectedIndex(0);
 	}
