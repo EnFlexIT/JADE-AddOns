@@ -105,7 +105,7 @@ public class GUI extends WindowAdapter implements ExceptionListener
 		applicationFrame.setVisible(true);
 		applicationFrame.toFront();
 		applicationFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-		// System.err.println("GUI.showMainApplicationGUI: application is up and running ...");
+		System.out.println("GUI ready.");
 	}
 
 	/**
