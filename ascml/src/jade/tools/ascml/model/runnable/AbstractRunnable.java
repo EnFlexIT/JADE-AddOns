@@ -151,6 +151,21 @@ public class AbstractRunnable implements IAbstractRunnable
 	}
 
 	/**
+	 *  Get the dependencies of this runnable model..
+	 *  @return  runnable agentinstance's dependencies or null, if it depends on nothing.
+	 */
+	public Vector<IDependency> getDependencyList()
+	{
+		Vector<IDependency> dummy = new Vector<IDependency>();
+
+		for (int i=0; i < dependencies.length; i++)
+		{
+			dummy.add(dependencies[i]);
+		}
+		return dummy;
+	}
+
+	/**
 	 *  Add dependencies to this runnable model.
 	 *  @param additionalDependencies  The model's dependencies or null, if it depends on nothing.
 	 */
