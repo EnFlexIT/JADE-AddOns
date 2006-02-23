@@ -25,11 +25,6 @@
 
 package jade.tools.ascml.gui.models;
 
-import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import java.util.*;
-import jade.tools.ascml.absmodel.IDocument;
-
 public class SearchResultTableModel // extends AbstractTableModel
 {
 	// not in use (so far)
