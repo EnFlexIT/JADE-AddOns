@@ -29,10 +29,12 @@ import javax.swing.*;
 import java.awt.*;
 
 import java.awt.event.*;
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.events.ModelActionEvent;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
+import jade.tools.ascml.absmodel.IAgentInstance;
+import jade.tools.ascml.absmodel.IToolOption;
+import jade.tools.ascml.absmodel.IAbstractRunnable;
 
 public class AgentInstanceGeneral extends AbstractPanel implements ActionListener
 {
@@ -84,22 +86,22 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 
 		toolOptionSniffer = new JCheckBox("Sniffer");
 		toolOptionSniffer.addActionListener(this);
-		toolOptionSniffer.setSelected(model.hasToolOption(IRunnableAgentInstance.TOOLOPTION_SNIFF));
+		toolOptionSniffer.setSelected(model.hasToolOption(IToolOption.TOOLOPTION_SNIFF));
 		toolOptionSniffer.setBackground(Color.WHITE);
 
 		toolOptionLogger = new JCheckBox("Logger");
 		toolOptionLogger.addActionListener(this);
-		toolOptionLogger.setSelected(model.hasToolOption(IRunnableAgentInstance.TOOLOPTION_LOG));
+		toolOptionLogger.setSelected(model.hasToolOption(IToolOption.TOOLOPTION_LOG));
 		toolOptionLogger.setBackground(Color.WHITE);
 
 		toolOptionIntrospector = new JCheckBox("Introspector");
 		toolOptionIntrospector.addActionListener(this);
-		toolOptionIntrospector.setSelected(model.hasToolOption(IRunnableAgentInstance.TOOLOPTION_INTROSPECTOR));
+		toolOptionIntrospector.setSelected(model.hasToolOption(IToolOption.TOOLOPTION_INTROSPECTOR));
 		toolOptionIntrospector.setBackground(Color.WHITE);
 
 		toolOptionBenchmark = new JCheckBox("Benchmark");
 		toolOptionBenchmark.addActionListener(this);
-		toolOptionBenchmark.setSelected(model.hasToolOption(IRunnableAgentInstance.TOOLOPTION_BENCHMARK));
+		toolOptionBenchmark.setSelected(model.hasToolOption(IToolOption.TOOLOPTION_BENCHMARK));
 		toolOptionBenchmark.setBackground(Color.WHITE);
 
 		JPanel toolOptionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -134,30 +136,30 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		if (evt.getSource() == toolOptionSniffer)
 		{
 			if (toolOptionSniffer.isSelected())
-				model.addToolOption(IRunnableAgentInstance.TOOLOPTION_SNIFF, null);
+				model.addToolOption(IToolOption.TOOLOPTION_SNIFF);
 			else
-				model.removeToolOption(IRunnableAgentInstance.TOOLOPTION_SNIFF);
+				model.removeToolOption(IToolOption.TOOLOPTION_SNIFF);
 		}
 		else if (evt.getSource() == toolOptionLogger)
 		{
 			if (toolOptionLogger.isSelected())
-				model.addToolOption(IRunnableAgentInstance.TOOLOPTION_LOG, null);
+				model.addToolOption(IToolOption.TOOLOPTION_LOG);
 			else
-				model.removeToolOption(IRunnableAgentInstance.TOOLOPTION_LOG);
+				model.removeToolOption(IToolOption.TOOLOPTION_LOG);
 		}
 		else if (evt.getSource() == toolOptionIntrospector)
 		{
 			if (toolOptionIntrospector.isSelected())
-				model.addToolOption(IRunnableAgentInstance.TOOLOPTION_INTROSPECTOR, null);
+				model.addToolOption(IToolOption.TOOLOPTION_INTROSPECTOR);
 			else
-				model.removeToolOption(IRunnableAgentInstance.TOOLOPTION_INTROSPECTOR);
+				model.removeToolOption(IToolOption.TOOLOPTION_INTROSPECTOR);
 		}
 		else if (evt.getSource() == toolOptionBenchmark)
 		{
 			if (toolOptionBenchmark.isSelected())
-				model.addToolOption(IRunnableAgentInstance.TOOLOPTION_BENCHMARK, null);
+				model.addToolOption(IToolOption.TOOLOPTION_BENCHMARK);
 			else
-				model.removeToolOption(IRunnableAgentInstance.TOOLOPTION_BENCHMARK);
+				model.removeToolOption(IToolOption.TOOLOPTION_BENCHMARK);
 		}
 		else if (evt.getSource() == buttonStartInstance)
 		{
