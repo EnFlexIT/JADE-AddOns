@@ -25,24 +25,17 @@
 
 package jade.tools.ascml.launcher.remotestatus;
 
-import jade.content.ContentElement;
 import jade.content.ContentManager;
 import jade.content.lang.Codec;
-import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
-import jade.content.onto.OntologyException;
-import jade.content.onto.UngroundedException;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.ReceiverBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import jade.tools.ascml.absmodel.AbstractRunnable;
 import jade.tools.ascml.absmodel.IAbstractRunnable;
 import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
-import jade.util.leap.Iterator;
 
 /**
  * @author Sven Lilienthal (ascml@sven-lilienthal.de)

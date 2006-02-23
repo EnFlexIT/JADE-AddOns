@@ -10,8 +10,6 @@ import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.SimpleAchieveREResponder;
-import jade.tools.ascml.exceptions.ModelException;
-import jade.tools.ascml.exceptions.ResourceNotFoundException;
 import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
 
@@ -60,18 +58,8 @@ public class RemoteStatusResponder extends SimpleAchieveREResponder {
 		Status status = new Unknown();
 		if (fqn != "") {
 			status = al.getRepository().getRunnableStatus(fqn);
-			try {
-				if (status == null && al.getRepository().getModelManager().getModel(fqn) != null) {
-					status = new Known();
-				}
-			}
-			catch (ModelException e) {
-				System.err.println("GetStatusRequestListener: ModelException:");
-				e.printStackTrace();
-			}
-			catch (ResourceNotFoundException e) {
-				System.err.println("GetStatusRequestListener: ResourceNotFoundException:");
-				e.printStackTrace();
+			if (status == null && al.getRepository().getModelManager().getModelIndex().getModel(fqn) != null) {
+				status = new Known();
 			}
 		}
 		//This is an example of how to answer these messages:
