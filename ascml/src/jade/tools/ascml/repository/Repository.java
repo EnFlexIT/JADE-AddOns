@@ -25,14 +25,21 @@
 
 package jade.tools.ascml.repository;
 
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.repository.loader.ModelIndex;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.exceptions.ASCMLException;
 import jade.tools.ascml.exceptions.ResourceNotFoundException;
 import jade.tools.ascml.events.*;
-import jade.tools.ascml.onto.*;
+import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
+import jade.tools.ascml.model.runnable.RunnableAgentInstance;
+import jade.tools.ascml.onto.Status;
+import jade.tools.ascml.onto.Known;
+import jade.tools.ascml.absmodel.IAgentType;
+import jade.tools.ascml.absmodel.ISocietyInstance;
+import jade.tools.ascml.absmodel.ISocietyType;
+import jade.tools.ascml.absmodel.IAbstractRunnable;
+
 import java.util.Vector;
 
 public class Repository
@@ -75,7 +82,7 @@ public class Repository
 		}
 
 		// now initialize all projects
-		
+
 		String[] projectNames = propertyManager.getProjectNames();
 		for (int i=0; i < projectNames.length; i++)
 		{
@@ -93,6 +100,7 @@ public class Repository
 				}
 			}
 		}
+		System.out.println("Repository ready.");
 	}
 
 	/** Interface-methods used by the AgentLauncher **/
@@ -204,7 +212,7 @@ public class Repository
 	 *                           no runnable societyInstance could be created
 	 *                           or the name is not fully qualified.
 	 */
-	public IRunnableSocietyInstance createRunnableSocietyInstance(String fullyQualifiedInstanceName) throws ModelException
+	public RunnableSocietyInstance createRunnableSocietyInstance(String fullyQualifiedInstanceName) throws ModelException
 	{
 		// System.err.println("Repository.createRunnableSocietyInstance: WARNING, maybe > 1 runnableModel has been created, but only 1st is returned.");
 		String socInstName = fullyQualifiedInstanceName.substring(0, fullyQualifiedInstanceName.lastIndexOf('.'));
@@ -214,7 +222,7 @@ public class Repository
 		{
 			ISocietyInstance socInst = getSocietyInstance(socInstName);
 			IAbstractRunnable[] runnableInstance = (IAbstractRunnable[])getRunnableManager().createRunnable(runnableSocInstName, socInst, 1);
-			return (IRunnableSocietyInstance)runnableInstance[0];
+			return (RunnableSocietyInstance)runnableInstance[0];
 		}
 		catch(ModelException me)
 		{
@@ -296,8 +304,9 @@ public class Repository
 	 */
 	public void throwExceptionEvent(ASCMLException exc)
 	{
-		System.err.println(exc);
-		
+		System.err.println(exc.toLongString());
+		exc.printStackTrace();
+
 		Vector exceptionListener = listenerManager.getExceptionListener();
 		// copy into an array, because listener may remove themselves in exceptionThrown-method
 		ExceptionListener[] listenerArray = new ExceptionListener[exceptionListener.size()];
