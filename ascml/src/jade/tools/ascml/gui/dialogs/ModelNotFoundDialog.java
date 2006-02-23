@@ -33,7 +33,6 @@ import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.absmodel.IAgentType;
 import jade.tools.ascml.absmodel.ISocietyType;
 
-
 public class ModelNotFoundDialog extends AbstractDialog implements ActionListener
 {
 	public final static String MESSAGE = "<html><h2>&nbsp;<i>Model not found </i></h2>" +
@@ -134,13 +133,13 @@ public class ModelNotFoundDialog extends AbstractDialog implements ActionListene
 
 			if (result != null)
 			{
-				Object sourceName;
+				String sourceName;
 				if (result instanceof IAgentType)
 					sourceName = ((IAgentType)result).getDocument().getSource();
 				else
 					sourceName = ((ISocietyType)result).getDocument().getSource();
 
-				modelLocationTextField.setText((String)sourceName);
+				modelLocationTextField.setText(sourceName);
 			}
 		}
 	}
