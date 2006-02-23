@@ -29,8 +29,10 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.gui.dialogs.StartSocietyInstanceDialog;
+import jade.tools.ascml.absmodel.IAgentInstance;
+import jade.tools.ascml.absmodel.ISocietyInstance;
+import jade.tools.ascml.absmodel.ISocietyInstanceReference;
 
 public class SocietyInstanceGeneral extends AbstractPanel implements ActionListener
 {
@@ -52,7 +54,7 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 
 		this.add(new JLabel("<html><h2>&nbsp;<i>" + model.getName() + "</i> - Details</h2></html>"), new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 		this.add(createAttributePanel(), new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-		this.add(createAgentInstanceTabelPane(), new GridBagConstraints(0, 2, 1, 1, 1, 0.5, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
+		this.add(createAgentInstanceTablePane(), new GridBagConstraints(0, 2, 1, 1, 1, 0.5, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
 		this.add(createSocietyInstanceReferenceTablePane(), new GridBagConstraints(0, 3, 1, 1, 1, 0.5, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
 		this.add(buttonStartInstance, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
 	}
@@ -86,7 +88,7 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 		return attributePanel;
 	}
 
-	private JScrollPane createAgentInstanceTabelPane()
+	private JScrollPane createAgentInstanceTablePane()
 	{
 		String[] tableHeaderEntries = new String[] {"Agent-Name", "Agent-Type"};
 
@@ -133,8 +135,8 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 			String[] oneRow = new String[3];
 			String typeName = oneSocInstRef.getTypeName();
 			String instanceName = oneSocInstRef.getInstanceName();
-			String launcherName = oneSocInstRef.getLauncherName();
-			String[] launcherAddresses = oneSocInstRef.getLauncherAddresses();
+			String launcherName = oneSocInstRef.getLauncher().getName();
+			String[] launcherAddresses = oneSocInstRef.getLauncher().getAddresses();
 			if (launcherAddresses.length > 0)
 				launcherName += "(";
 			for (int j=0; j < launcherAddresses.length-1; j++)

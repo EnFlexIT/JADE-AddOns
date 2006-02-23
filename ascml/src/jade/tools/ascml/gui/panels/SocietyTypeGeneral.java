@@ -30,9 +30,9 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.gui.dialogs.StartSocietyInstanceDialog;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
+import jade.tools.ascml.absmodel.ISocietyType;
 
 public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 {
@@ -51,6 +51,7 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 	public SocietyTypeGeneral(AbstractMainPanel mainPanel, ISocietyType model)
 	{
 		super(mainPanel);
+		System.err.println("SocietyTypeGeneral: model=" + model);
 		// toDO: repository.addModelChangedListener(this);
 		this.model = model;
 
@@ -77,7 +78,7 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 		textName.setBackground(Color.WHITE);
 
 		// prepare File-Name
-		textFileName = new JTextField(model.getDocument().getSource().toString(), 20);
+		textFileName = new JTextField(model.getDocument().getSource(), 20);
 		textFileName.setEditable(false);
 		textFileName.setBackground(Color.WHITE);
 		buttonFileName = new JButton("...");

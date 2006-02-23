@@ -29,11 +29,11 @@ import javax.swing.*;
 import java.awt.*;
 
 import java.awt.event.*;
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.events.ModelChangedEvent;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.onto.*;
+import jade.tools.ascml.absmodel.IAbstractRunnable;
 
 public class RunnableGeneral extends AbstractPanel implements ActionListener, ModelChangedListener
 {
