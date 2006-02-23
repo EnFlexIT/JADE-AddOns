@@ -89,7 +89,7 @@ public class RunnableManager implements ModelChangedListener
 
 			String nameAccordingScheme = createNameOutOfNamingScheme(name, namingScheme);
 			// System.err.println("RunnableManager.createRunnable: nameAccordingScheme=" + nameAccordingScheme);
-			AbstractRunnable oneRunnableModel = RunnableFactory.createRunnable(nameAccordingScheme, model, this);
+			IAbstractRunnable oneRunnableModel = RunnableFactory.createRunnable(nameAccordingScheme, model, this);
 			// System.err.println("RunnableManager.createRunnable: addRunnable=" + oneRunnableModel);
 			addRunnable(oneRunnableModel);
 			runnableModels[i] = oneRunnableModel;
@@ -168,7 +168,7 @@ public class RunnableManager implements ModelChangedListener
 		return nameAccordingScheme;
 	}
 
-	public void addRunnable(AbstractRunnable runnableModel) throws ModelException
+	public void addRunnable(IAbstractRunnable runnableModel) throws ModelException
 	{
 		// first check, if a runnable with the given name is already present.
 		// If so, throw an exception cause runnables must have unique names.

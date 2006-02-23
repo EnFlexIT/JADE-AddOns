@@ -26,19 +26,14 @@
 package jade.tools.ascml.repository;
 
 import jade.tools.ascml.repository.loader.ModelIndex;
-import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.exceptions.ASCMLException;
 import jade.tools.ascml.exceptions.ResourceNotFoundException;
 import jade.tools.ascml.events.*;
 import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
-import jade.tools.ascml.model.runnable.RunnableAgentInstance;
 import jade.tools.ascml.onto.Status;
 import jade.tools.ascml.onto.Known;
-import jade.tools.ascml.absmodel.IAgentType;
-import jade.tools.ascml.absmodel.ISocietyInstance;
-import jade.tools.ascml.absmodel.ISocietyType;
-import jade.tools.ascml.absmodel.IAbstractRunnable;
+import jade.tools.ascml.absmodel.*;
 
 import java.util.Vector;
 
@@ -48,16 +43,11 @@ public class Repository
 	private PropertyManager propertyManager;
 	private ListenerManager listenerManager;
 	private RunnableManager runnableManager;
-	private ImageIconLoader imageIconLoader;
 
-	private boolean noGUI;
-
-	public Repository(boolean noGUI)
+	public Repository()
 	{
-		this.noGUI = noGUI;
 		this.listenerManager = new ListenerManager();
 		this.runnableManager = new RunnableManager(this);
-		this.imageIconLoader = new ImageIconLoader();
 	}
 
 	public void init(String propertyLocation)
