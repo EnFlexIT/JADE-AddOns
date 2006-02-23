@@ -41,30 +41,16 @@ import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/03/14 Revision: 1.0
  */
-public class Subscribe extends Subscription {
-    
-//  /**
-//  * Pattern used to test the applicability of the principle
-//  */
-//  private Formula anyPattern = SLPatternManip.fromFormula("??property");
-    /**
-     * Pattern used to test the applicability of the principle
-     */
-    private Formula iotaPattern = SLPatternManip.fromFormula("(= (iota ??x ??property) ??y)");
-    /**
-     * Pattern used to test the applicability of the principle
-     */
-    private Formula allPattern = SLPatternManip.fromFormula("(= (all ??x ??property) ??y))");
+public class Subscribe extends RequestWhenever {
     
     /**
-     * Pattern used to test the applicability of the principle
+     * Pattern of Formula to create the Formula to observe to deal with the required Subscribe
      */
-    private Formula somePattern = SLPatternManip.fromFormula("(= (some ??x ??property) ??y))");
+    private Formula observedPattern = SLPatternManip.fromFormula("(= ??ire ??y)");
     
     /*********************************************************************/
     /**                         CONSTRUCTOR                             **/
     /*********************************************************************/
-    
     
     /**
      * Creates a new principle
@@ -72,9 +58,7 @@ public class Subscribe extends Subscription {
      * semantic interpretation principle
      */
     public Subscribe(SemanticCapabilities capabilities) {
-        super(capabilities, "(or (I ??subscriber ??goal) " +
-                "    (or (forall ??y (not (B ??agent ??ire )))" +
-                "        (forall ??e (not (done ??e (forall ??y (not (B ??agent ??ire )))))))))", false);
+        super(capabilities, "(forall ??y (not (B ??agent (= ??ire ??y))))");
     } // End of Subscribe/1
     
     
@@ -86,26 +70,7 @@ public class Subscribe extends Subscription {
      * @inheritDoc
      */
     protected Formula computePropertyToObserve(MatchResult applyResult) throws WrongTypeException {
-        Formula observedFormula = null;
-        Formula property = applyResult.getFormula("ire");
-        MatchResult matchResult;
-        if ((matchResult = SLPatternManip.match(iotaPattern, property)) != null) {
-            observedFormula = (Formula)SLPatternManip.toPattern(matchResult.getFormula("property"), (Variable)matchResult.getTerm("x"));
-        } else if ((matchResult = SLPatternManip.match(allPattern, property)) != null) {
-            observedFormula = (Formula)SLPatternManip.toPattern(matchResult.getFormula("property"), (Variable)matchResult.getTerm("x"));
-        } else if ((matchResult = SLPatternManip.match(somePattern, property)) != null) {
-            observedFormula = (Formula)SLPatternManip.toPattern(matchResult.getFormula("property"), (Variable)matchResult.getTerm("x"));
-        } else {
-            observedFormula = (Formula)SLPatternManip.toPattern(property, (Variable)applyResult.getTerm("y"));
-        }
-        return observedFormula;
+        return (Formula)SLPatternManip.instantiate(observedPattern, "ire", applyResult.getTerm("ire"));
     } // End of computePropertyToObserve/1
-    
-    /**
-     * @inheritDoc
-     */
-    protected Formula computeEventToExecute(MatchResult applyResult) throws WrongTypeException {
-        return applyResult.getFormula("goal");
-    }
-    
+        
 } // End of class Subscribe

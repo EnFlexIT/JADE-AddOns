@@ -74,14 +74,14 @@ public class SensorCapabilities extends SemanticCapabilities {
      */
     public void setupStandardCustomization() {
         setMyStandardCustomization( new StandardCustomizationAdapter() {
-            // Accepts any information on the temperature
+            // Accepts no information about the temperature
             public boolean acceptBeliefTransfer(Formula formula, Term agent) {
                 return (SLPatternManip.match(temperatureDefinition.VALUE_X_PATTERN, formula)==null)
                 && (SLPatternManip.match(temperatureDefinition.NOT_VALUE_X_PATTERN, formula)==null)
                 && (SLPatternManip.match(temperatureDefinition.VALUE_GT_X_PATTERN, formula)==null)
                 && (SLPatternManip.match(temperatureDefinition.NOT_VALUE_GT_X_PATTERN, formula)==null);
             }
-			
+			// Reply to a CFP about the precision by the sensor precision
 			public ListOfTerm handleCFPAny(Variable variable, Formula formula, ActionExpression action, Term agent) {
 				if ( SLPatternManip.match(SLPatternManip.fromFormula("(precision ??X)"), formula) != null ) {
 					return myKBase.queryRef(new AnyNode(variable, formula));

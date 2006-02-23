@@ -585,7 +585,7 @@ public class SLPatternManip {
          *            the first expression.
          * @param expression2
          *            the second expression.
-         * @return A matching result if the matching complete, null otherwise.
+         * @return A matching result if the matching completes, null otherwise.
          */
         public MatchResult match(Node expression1, Node expression2) {
             ListOfNodes fAndList = new ListOfNodes();
@@ -593,11 +593,12 @@ public class SLPatternManip {
             ListOfNodes fOrList = new ListOfNodes();
             ListOfNodes sOrList = new ListOfNodes();
             if (match(expression1, expression2, new MatchResult(), fAndList, sAndList, fOrList, sOrList)) {
-
-                // Because, the complete instanciation of result also
-                // depends on the two expressions, these expressions
-                // must be consolidated before the instanciation.
-                completeExpsAssignments();
+            	try {
+					_metaReferences.completeClosure();
+				} catch (WrongTypeException e) {
+	                removeExpsAssignments();
+					return null;
+				}
                 _metaReferences.instantiate();
                 removeExpsAssignments();
                 return _metaReferences;
@@ -606,34 +607,10 @@ public class SLPatternManip {
                 return null;
             }
         }
-        
+                
         // ===============================================
         // Private implementation
         // ===============================================
-        // -----------------------------------------------
-        private void completeExpsAssignments()
-        // This method consolidate both expressions
-        // by assigning all meta vrariables according to
-        // the matching result.
-        // -----------------------------------------------
-        {
-            for (int i = 0; i < _metaReferences.size(); i++) {
-                Node var = _metaReferences.get(i);
-                Node value = getMetaReferenceValue(var);
-                String name = getMetaReferenceName(var);
-                ListOfNodes metaReferences = new ListOfNodes();
-                if (_expression1.find(var.getClass(), "lx_name", name, metaReferences, true)
-                        || _expression2.find(var.getClass(), "lx_name", name, metaReferences, true)) {
-                    for (int j = 0; j < metaReferences.size(); j++) {
-                        try {
-                            setMetaReferenceValue(metaReferences.get(j), value);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }
         
         private void removeExpsAssignments()
         // This method remove all assigments in expressions.
@@ -730,7 +707,9 @@ public class SLPatternManip {
             Node otherRef = getMetaReference(metaRef);
             if (otherRef != null) {
                 Node otherValue = getMetaReferenceValue(otherRef);
-                _match = otherValue == exp || otherValue.equals(exp) || matchExpressions(otherValue, exp);
+				
+				_match = otherValue == exp || otherValue.equals(exp) || matchExpressions(otherValue, exp);
+				
                 if (_match) {
                     try {
                         setMetaReferenceValue(metaRef, otherValue);
@@ -741,7 +720,7 @@ public class SLPatternManip {
             } else {
                 _match = true;
                 _metaReferences.add(metaRef);
-                try {
+				try {
                     setMetaReferenceValue(metaRef, exp);
                 } catch (WrongTypeException e) {
                     e.printStackTrace();

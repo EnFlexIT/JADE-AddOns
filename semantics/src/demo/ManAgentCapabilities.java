@@ -45,6 +45,7 @@ import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.grammar.WordConstantNode;
 import jade.semantics.lang.sl.tools.SLPatternManip;
+import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
 
 /**
 * Capabilities of the Son Agent.
@@ -189,7 +190,7 @@ public class ManAgentCapabilities extends SemanticCapabilities {
                try {
                    return agent.equals(SLPatternManip.instantiate(AGENT_TERM, "agent", new WordConstantNode(motherAID.getName())));
                }
-               catch (Exception e) {return false;}
+               catch (WrongTypeException wte) {return false;}
            }
        });
    } // End of setupStandardCustomization/0
@@ -236,7 +237,7 @@ public class ManAgentCapabilities extends SemanticCapabilities {
        });
         //#DOTNET_EXCLUDE_END
         /*#DOTNET_INCLUDE_BEGIN
-       getMySemanticActionTable().addSemanticAction(new OntologicalAction1(getMySemanticActionTable(),
+       getMySemanticActionTable().addSemanticAction(new OntologicalAction2(getMySemanticActionTable(),
                "(TAKE-OFF :clothing ??clothing)",
                SLPatternManip.fromFormula("(not (wearing ??sender ??clothing))"),
                SLPatternManip.fromFormula("(wearing ??sender ??clothing)"), myAgent));
@@ -286,7 +287,7 @@ public class ManAgentCapabilities extends SemanticCapabilities {
        });
         //#DOTNET_EXCLUDE_END
         /*#DOTNET_INCLUDE_BEGIN
-       getMySemanticActionTable().addSemanticAction(new OntologicalAction2(getMySemanticActionTable(),
+       getMySemanticActionTable().addSemanticAction(new OntologicalAction3(getMySemanticActionTable(),
                "(WAIT :time ??time)",
                SLPatternManip.fromFormula("true"),
                SLPatternManip.fromFormula("true"), myAgent));
@@ -313,6 +314,26 @@ public class OntologicalAction1 extends OntologicalAction
     public void perform(OntoActionBehaviour behaviour) 
     {
         ((ManAgent)myAgent).putOn(getActionParameter("clothing").toString());
+        behaviour.setState(SemanticBehaviour.SUCCESS);
+    }
+}
+
+public class OntologicalAction2 extends OntologicalAction
+{
+    private SemanticAgent myAgent;
+
+    public OntologicalAction1(SemanticActionTable table,
+        String actionPattern, 
+        Formula postconditionPattern,
+        Formula preconditionPattern, SemanticAgent ag) 
+    {
+        super(table, actionPattern, postconditionPattern, preconditionPattern);
+        myAgent = ag;
+    }
+
+    public void perform(OntoActionBehaviour behaviour) 
+    {
+        ((ManAgent)myAgent).takeOff(getActionParameter("clothing").toString());
         behaviour.setState(SemanticBehaviour.SUCCESS);
     }
 }

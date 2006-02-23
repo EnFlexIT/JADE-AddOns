@@ -168,17 +168,19 @@ public class SingleNumValueDefinition extends FiltersDefinition {
               return queryResult;
            }
            
-           public void getObserverTriggerPatterns(Formula formula, Set set) {
+           public boolean getObserverTriggerPatterns(Formula formula, Set set) {
                try {
                    MatchResult applyResult = SLPatternManip.match(pattern, formula);
                    if (applyResult != null && applyResult.getTerm("X") instanceof Constant) {
                        set.add(VALUE_X_PATTERN);
                        set.add(VALUE_GT_X_PATTERN);
                        set.add(NOT_VALUE_GT_X_PATTERN);
+                       return false;
                    }
                }catch (SLPatternManip.WrongTypeException wte) {
                    wte.printStackTrace();
                }
+               return true;
            }
        });
        
@@ -212,17 +214,19 @@ public class SingleNumValueDefinition extends FiltersDefinition {
                } catch(Exception e) {e.printStackTrace();}
                return queryResult;
            }
-           public void getObserverTriggerPatterns(Formula formula, Set set) {
+           public boolean getObserverTriggerPatterns(Formula formula, Set set) {
                try {
                MatchResult applyResult = SLPatternManip.match(pattern, formula);
                if (applyResult != null && applyResult.getTerm("X") instanceof Constant) {
                    set.add(NOT_VALUE_GT_X_PATTERN);
                    set.add(VALUE_X_PATTERN);
                    set.add(VALUE_GT_X_PATTERN);
+                   return false;
                }
                }catch (SLPatternManip.WrongTypeException wte) {
                    wte.printStackTrace();
                }
+               return true;
            }
        });
        

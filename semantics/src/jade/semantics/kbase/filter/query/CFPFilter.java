@@ -77,7 +77,7 @@ public class CFPFilter extends KBQueryFilter {
      */
     public CFPFilter(StandardCustomization standardCustomization) {
         this.standardCustomization = standardCustomization;
-        pattern1 = SLPatternManip.fromFormula("(B ??agent (= ??ire ??Result))");
+        pattern1 = SLPatternManip.fromFormula("(B ??agent (= ??ire ??localResult))");
         pattern2 = SLPatternManip.fromFormula("(or (not (I ??agent1 (done ??act ??proposition))) (I ??agent2 (done ??act ??proposition)))");
     } // End of CFPFilter/1
     
@@ -105,9 +105,9 @@ public class CFPFilter extends KBQueryFilter {
                 String resultName;
                 if (applyResult1.getTerm("ire") instanceof IdentifyingExpression) {
                     ire = (IdentifyingExpression)applyResult1.getTerm("ire");
-                    resultName = "Result";
-                } else if (applyResult1.getTerm("Result") instanceof IdentifyingExpression) {
-                    ire = (IdentifyingExpression)applyResult1.getTerm("Result");
+                    resultName = "localResult";
+                } else if (applyResult1.getTerm("localResult") instanceof IdentifyingExpression) {
+                    ire = (IdentifyingExpression)applyResult1.getTerm("localResult");
                     resultName= "ire";
                 } else {
                     return queryResult;
@@ -124,7 +124,7 @@ public class CFPFilter extends KBQueryFilter {
                             if (ire instanceof IotaNode) {
                                 list = standardCustomization.handleCFPIota((Variable)ire.as_term(), applyResult2.getFormula("proposition"), (ActionExpression)applyResult2.getTerm("act"),  applyResult2.getTerm("agent1"));
                                 if (list != null && list.size() == 1) {
-                                    if (Util.instantiateInMatchResult(applyResult1, resultName, list.get(0))) {
+                                    if (applyResult1.set(resultName, list.get(0))) {
                                         result = new ListOfMatchResults();
                                         result.add(applyResult1);
                                         queryResult.setResult(result);
@@ -134,7 +134,7 @@ public class CFPFilter extends KBQueryFilter {
                             } else if (ire instanceof AnyNode) {
                                 list = standardCustomization.handleCFPAny((Variable)ire.as_term(), applyResult2.getFormula("proposition"), (ActionExpression)applyResult2.getTerm("act"),  applyResult2.getTerm("agent1"));
                                 if (list != null && list.size() >= 1) {
-                                    if (Util.instantiateInMatchResult(applyResult1, resultName, list.get(0))) {
+                                    if (applyResult1.set(resultName, list.get(0))) {
                                         result = new ListOfMatchResults();
                                         result.add(applyResult1);
                                         queryResult.setResult(result);
@@ -164,7 +164,7 @@ public class CFPFilter extends KBQueryFilter {
         if (list != null) {
             for (int i = 0; i < list.size(); i++) {
                 MatchResult match = (MatchResult)applyResult.getClone();
-                if (Util.instantiateInMatchResult(match, varName, list.get(i))) {
+                if (match.set(varName, list.get(i))) {
                     result.add(match);
                 } else {
                     queryResult.setResult(null);
@@ -179,7 +179,8 @@ public class CFPFilter extends KBQueryFilter {
     /**
      * @see jade.semantics.kbase.filter.KBQueryFilter#getObserverTriggerPatterns(jade.semantics.lang.sl.grammar.Formula, jade.util.leap.Set)
      */
-    public void getObserverTriggerPatterns(Formula formula, Set set) {
+    public boolean getObserverTriggerPatterns(Formula formula, Set set) {
+    	return true;
     }
 
 }

@@ -130,17 +130,23 @@ public class ExistsFilter extends KBQueryFilter {
      * which, if it is asserted in the base, triggers the observer that
      * observes the formula given in parameter.
      */
-    public void getObserverTriggerPatterns(Formula formula, Set set) {
+    public boolean getObserverTriggerPatterns(Formula formula, Set set) {
+        MatchResult applyResult = SLPatternManip.match(pattern,formula);
+        if (applyResult == null) {
+            applyResult = SLPatternManip.match(pattern2,formula);
+        }
         try {
-            MatchResult applyResult = SLPatternManip.match(pattern,formula);
-            if (applyResult == null) {
-                applyResult = SLPatternManip.match(pattern2,formula);
-            }
             if (applyResult != null) {
-                set.add(SLPatternManip.toPattern(applyResult.getFormula("phi"), applyResult.getVariable("var"), applyResult.getVariable("var").lx_name()));
+            	myKBase.getObserverTriggerPatterns((Formula)SLPatternManip.toPattern(
+            			applyResult.getFormula("phi"),
+            			applyResult.getVariable("var"),
+            			applyResult.getVariable("var").lx_name()), set);
+            	return false;
+                //set.add(SLPatternManip.toPattern(applyResult.getFormula("phi"), applyResult.getVariable("var"), applyResult.getVariable("var").lx_name()));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return true;
     }
 } // End of class ExistsFilter

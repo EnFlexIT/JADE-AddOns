@@ -84,6 +84,11 @@ public class ActionFeatures extends SemanticInterpretationPrinciple {
      */
     private Formula postConditionPattern;
     
+    /**
+     * Flag used to generate the full feasibility precondition
+     */
+    private boolean activeFP;
+    
     /*********************************************************************/
     /**				 			CONSTRUCTOR								**/
     /*********************************************************************/
@@ -93,13 +98,24 @@ public class ActionFeatures extends SemanticInterpretationPrinciple {
      * @param capabilities the capabilities of a semantic agent
      */
     public ActionFeatures(SemanticCapabilities capabilities) {
+    	this(capabilities, true);
+    }
+    
+    /**
+     * Constructor of the principle
+     * @param capabilities the capabilities of a semantic agent
+     * @param activeFP true if the FP must be handled
+     */    
+    public ActionFeatures(SemanticCapabilities capabilities, boolean activeFP) {
         super(capabilities);
+        this.activeFP = activeFP;
         pattern = SLPatternManip.fromFormula("(B " + myCapabilities.getAgentName() + " (done ??act true))");
         feasibilityPreconditonPattern = SLPatternManip.fromFormula("(B " + myCapabilities.getAgentName() + " (done ??act ??fp))");
         persistentPreconditionPattern = SLPatternManip.fromFormula("(B " + myCapabilities.getAgentName() + " ??p)");
         intentionalEffectPattern = SLPatternManip.fromFormula("(B " + myCapabilities.getAgentName() + " (I ??sender ??re))");
         postConditionPattern = SLPatternManip.fromFormula("(B " + myCapabilities.getAgentName() + " ??pc)");
-    } // End of ActionFeatures/1
+    }
+    
     /*********************************************************************/
     /**				 			METHODS									**/
     /*********************************************************************/
@@ -118,13 +134,17 @@ public class ActionFeatures extends SemanticInterpretationPrinciple {
                 ActionExpression action = (ActionExpression)matchResult.getTerm("act");
                 SemanticAction act = myCapabilities.getMySemanticActionTable().getSemanticActionInstance(action);
                 if (act != null) {
+                	ArrayList listOfSR = new ArrayList();
                     // Feasibility Precondition 
-                    SemanticRepresentation feasibilityPreconditionSR = new SemanticRepresentation(); 
-                    feasibilityPreconditionSR.setMessage(sr.getMessage());
-                    feasibilityPreconditionSR.setSLRepresentation(
-                            ((Formula)SLPatternManip.instantiate(feasibilityPreconditonPattern,
-                                    "act", action,
-                                    "fp", act.getFeasibilityPrecondition())));
+                	if (activeFP) {
+                		SemanticRepresentation feasibilityPreconditionSR = new SemanticRepresentation(); 
+                		feasibilityPreconditionSR.setMessage(sr.getMessage());
+                		feasibilityPreconditionSR.setSLRepresentation(
+                				((Formula)SLPatternManip.instantiate(feasibilityPreconditonPattern,
+                						"act", action,
+                						"fp", act.getFeasibilityPrecondition())));
+                        listOfSR.add(feasibilityPreconditionSR);
+                	}
                     
                     // Persistent Precondition 
                     SemanticRepresentation persistentPreconditionSR = new SemanticRepresentation();
@@ -132,6 +152,7 @@ public class ActionFeatures extends SemanticInterpretationPrinciple {
                     persistentPreconditionSR.setSLRepresentation(
                             ((Formula)SLPatternManip.instantiate(persistentPreconditionPattern,
                                     "p", act.getPersistentFeasibilityPrecondition())));
+                    listOfSR.add(persistentPreconditionSR);
                     
                     // Intentional Effect 
                     SemanticRepresentation intentionaleEffectSR = new SemanticRepresentation();
@@ -140,6 +161,7 @@ public class ActionFeatures extends SemanticInterpretationPrinciple {
                             ((Formula)SLPatternManip.instantiate(intentionalEffectPattern,
                                     "sender", ((ActionExpressionNode)action).as_agent(),
                                     "re", act.getRationalEffect())));
+                    listOfSR.add(intentionaleEffectSR);
                     
                     // Postconditions 
                     SemanticRepresentation postConditionsSR = new SemanticRepresentation();
@@ -147,12 +169,9 @@ public class ActionFeatures extends SemanticInterpretationPrinciple {
                     postConditionsSR.setSLRepresentation(
                             ((Formula)SLPatternManip.instantiate(postConditionPattern, 
                                     "pc", act.getPostCondition())));
-                    ArrayList listOfSR = new ArrayList();
-                    listOfSR.add(feasibilityPreconditionSR);
-                    listOfSR.add(persistentPreconditionSR);
-                    listOfSR.add(intentionaleEffectSR);
                     listOfSR.add(postConditionsSR);
-                    action = null;
+
+                    //action = null;
                     return listOfSR;
                 }
             } 

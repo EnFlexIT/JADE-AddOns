@@ -114,7 +114,16 @@ public abstract class KBQueryFilterAdapter extends KBQueryFilter {
      * which, if it is asserted in the base, triggers the observer that
      * observes the formula given in parameter.
      */
-    public void getObserverTriggerPatterns(Formula formula, Set set) {
+    public boolean getObserverTriggerPatterns(Formula formula, Set set) {
+        MatchResult match = SLPatternManip.match(formula, pattern);
+        if (match != null) {
+        	return doGetObserverTriggerPatterns(match, set);
+        }
+        return true;
+    }
+    
+    public boolean doGetObserverTriggerPatterns(MatchResult match, Set set) {
+    	return true;
     }
     
     /**

@@ -63,5 +63,5 @@ public abstract class KBQueryFilter extends KBFilter {
      * which, if it is asserted in the base, triggers the observer that
      * observes the formula given in parameter.
      */
-    public abstract void getObserverTriggerPatterns(Formula formula, Set set);
+    public abstract boolean getObserverTriggerPatterns(Formula formula, Set set);
 } // End of class KBQueryFilter

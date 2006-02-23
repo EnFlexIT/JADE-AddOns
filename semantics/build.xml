@@ -180,11 +180,14 @@ It is created according a JADE's build.xml.
 	<target name="compile-pjava" if="pjava" depends="do-setup">
 		<javac srcdir="${pjava-src}"
 		       destdir="${pjava-build}"
-			   nowarn="off" 
-			   optimize="${javac.optimize}" 
-			   debug="${javac.debug}" 
+		       nowarn="off" 
+		       optimize="${javac.optimize}" 
+		       debug="${javac.debug}" 
 		       deprecation="on"
-			   excludes="test/**">
+		       excludes="test/**"
+		       compiler="classic"
+		       source="1.1"
+		       target="1.1">
 	      <classpath>
 	        <fileset dir="${libJADEPJAVADir}" includes="*.jar"/>
 	      </classpath>

@@ -55,7 +55,7 @@ public class Tools {
      */
     static final private Term AGENT_IDENTIFIER_PATTERN = SLPatternManip
     .fromTerm("(agent-identifier " +
-                "(::? :addresses ??adresses) " +
+                "(::? :addresses ??addresses) " +
                 ":name ??name " +
                 "(::? :resolvers ??resolvers))");
     
@@ -76,7 +76,7 @@ public class Tools {
             try {
                 result = new AID(((WordConstantNode)matchResult.getTerm("name")).lx_value(), true);
                 Term addresses = matchResult.getTerm("addresses");
-                if (addresses != null && addresses instanceof TermSequenceNode) {
+	            if (addresses != null && addresses instanceof TermSequenceNode) {
                     for (int i = 0 ; i < ((TermSequenceNode)addresses).as_terms().size() ; i++) {
                         result.addAddresses(((StringConstantNode)((TermSequenceNode)addresses).as_terms().get(i)).lx_value());
                     }
@@ -103,18 +103,18 @@ public class Tools {
      * @return a term representing an agent, or null.
      */
     public static Term AID2Term(AID aid) {
-        TermSetNode addresses = null;
-        TermSetNode resolvers = null;
+        TermSequenceNode addresses = null;
+        TermSequenceNode resolvers = null;
         Iterator aidIterator = aid.getAllAddresses();
         if (aidIterator.hasNext()) {
-            addresses = new TermSetNode(new ListOfTerm());
+            addresses = new TermSequenceNode(new ListOfTerm());
             while (aidIterator.hasNext()) {
                 addresses.as_terms().add(new StringConstantNode((String)aidIterator.next()));
             }
         }
         aidIterator = aid.getAllResolvers();
         if (aidIterator.hasNext()) {
-            resolvers = new TermSetNode(new ListOfTerm());
+            resolvers = new TermSequenceNode(new ListOfTerm());
             while (aidIterator.hasNext()) {
                 resolvers.as_terms().add(AID2Term((AID)aidIterator.next()));
             }

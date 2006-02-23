@@ -1,20 +1,20 @@
 /*****************************************************************
- JADE - Java Agent DEvelopment Framework is a framework to develop 
+ JADE - Java Agent DEvelopment Framework is a framework to develop
  multi-agent systems in compliance with the FIPA specifications.
  Copyright (C) 2004 France Télécom
- 
+
  GNU Lesser General Public License
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation, 
- version 2.1 of the License. 
- 
+ License as published by the Free Software Foundation,
+ version 2.1 of the License.
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the
  Free Software Foundation, Inc., 59 Temple Place - Suite 330,
@@ -49,40 +49,40 @@ import jade.semantics.interpreter.sips.Unsubscribe;
 import jade.util.leap.ArrayList;
 
 /**
- * Class that represents a table which contains all the semantic interpretation 
+ * Class that represents a table which contains all the semantic interpretation
  * principles known by the agent.
  * @author Vincent Pautret - France Telecom
- * @version Date: 2004/11/02 Revision: 1.0 
+ * @version Date: 2004/11/02 Revision: 1.0
  */
 public class SemanticInterpretationPrincipleTableImpl extends ArrayList implements SemanticInterpretationPrincipleTable {
-    
-    
+
+
     /*********************************************************************/
     /**                         CONSTRUCTOR                             **/
     /*********************************************************************/
-    
+
     /**
      * Creates a new table
      */
     public SemanticInterpretationPrincipleTableImpl() {
         super();
     } // End of SemanticInterpretationPrincipleTableImpl/0
-    
+
     /**************************************************************************/
     /**                                 PUBLIC METHODS                       **/
     /**************************************************************************/
-    
+
     /**
-     * Adds a semantic interpretation principle at the beginning of the the 
-     * table and updates the semantic interpretation principle index of the 
-     * added sip.  
+     * Adds a semantic interpretation principle at the beginning of the the
+     * table and updates the semantic interpretation principle index of the
+     * added sip.
      * @param sip the semantic interpretation principle to be added
      */
     public void addSemanticInterpretationPrinciple(SemanticInterpretationPrinciple sip) {
         this.addSemanticInterpretationPrinciple(sip, SemanticInterpretationPrincipleTable.FRONT);
     } // End of addSemanticInterpretationPrinciple/1
-    
-    
+
+
     /**
      * Returns the semantic interpretation principle at the specified index
      * @param index an index
@@ -91,9 +91,9 @@ public class SemanticInterpretationPrincipleTableImpl extends ArrayList implemen
     public SemanticInterpretationPrinciple getSemanticInterpretationPrinciple(int index) {
         return (SemanticInterpretationPrinciple)get(index);
     } // End of getSemanticInterpretationPrinciple/1
-    
+
     /**
-     * Removes the semantic interpretation principle corresponding to a given 
+     * Removes the semantic interpretation principle corresponding to a given
      * specification
      * @param sipFinder specifies the semantic interpretation principle to remove
      */
@@ -103,16 +103,21 @@ public class SemanticInterpretationPrincipleTableImpl extends ArrayList implemen
             ((SemanticInterpretationPrinciple)this.get(i)).setOrderIndex(i);
         }
     } // End of removeSemanticInterpretationPrinciple/1
-    
+
     /**
-     * Loads all the semantic interpretation principles defined in the 
+     * Loads all the semantic interpretation principles defined in the
      * sip package. Do not change the load order.
      * @param capabilities the semantic capabilities of the agent
      */
     public  void loadTable(SemanticCapabilities capabilities) {
         this.addSemanticInterpretationPrinciple(new And(capabilities),0);
         this.addSemanticInterpretationPrinciple(new EqualsIRE(capabilities),1);
+        //#PJAVA_EXCLUDE_BEGIN
         this.addSemanticInterpretationPrinciple(new ActionFeatures(capabilities),2);
+        //#PJAVA_EXCLUDE_END
+        /*#PJAVA_INCLUDE_BEGIN
+        this.addSemanticInterpretationPrinciple(new ActionFeatures(capabilities, false),2);
+        #PJAVA_INCLUDE_END*/
         this.addSemanticInterpretationPrinciple(new AlreadyReachedGoal(capabilities),3);
         this.addSemanticInterpretationPrinciple(new BeliefTransfer(capabilities),4);
         this.addSemanticInterpretationPrinciple(new RequestWhen(capabilities),5);
@@ -124,14 +129,14 @@ public class SemanticInterpretationPrincipleTableImpl extends ArrayList implemen
         this.addSemanticInterpretationPrinciple(new RejectProposal(capabilities),11);
         this.addSemanticInterpretationPrinciple(new Agree(capabilities),12);
         this.addSemanticInterpretationPrinciple(new Propose(capabilities),13);
-        this.addSemanticInterpretationPrinciple(new RequestWhenever(capabilities),14); 
+        this.addSemanticInterpretationPrinciple(new RequestWhenever(capabilities),14);
         this.addSemanticInterpretationPrinciple(new Subscribe(capabilities),15);
         this.addSemanticInterpretationPrinciple(new Unsubscribe(capabilities),16);
         this.addSemanticInterpretationPrinciple(new UnreachableGoal(capabilities),17);
     } // End of loadTable/0
-    
+
     /**
-     * Adds a semantic interpretation principle in the table at the specified 
+     * Adds a semantic interpretation principle in the table at the specified
      * index
      * @param sip the sip to add
      * @param index the index in the table
@@ -149,10 +154,10 @@ public class SemanticInterpretationPrincipleTableImpl extends ArrayList implemen
             }
         }
     } // End of addSemanticInterpretationPrinciple/2
-    
+
     /**
-     * Removes the semantic interpretation principle corresponding to the 
-     * specified index. 
+     * Removes the semantic interpretation principle corresponding to the
+     * specified index.
      * @param index index int the table of the semantic interpretation principle
      *  to remove
      */
@@ -162,5 +167,5 @@ public class SemanticInterpretationPrincipleTableImpl extends ArrayList implemen
             ((SemanticInterpretationPrinciple)this.get(i)).setOrderIndex(i);
         }
     } // End of removeSemanticInterpretationPrinciple/1
-    
+
 } // End of class semanticInterpretationPrincipleTableImpl

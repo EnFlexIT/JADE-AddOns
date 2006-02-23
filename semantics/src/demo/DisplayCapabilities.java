@@ -33,6 +33,7 @@ import jade.semantics.interpreter.StandardCustomizationAdapter;
 import jade.semantics.kbase.FilterKBase;
 import jade.semantics.kbase.filter.KBAssertFilterAdapter;
 import jade.semantics.lang.sl.grammar.ActionExpression;
+import jade.semantics.lang.sl.grammar.Constant;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.IdentifyingExpression;
 import jade.semantics.lang.sl.grammar.IntegerConstantNode;
@@ -40,6 +41,7 @@ import jade.semantics.lang.sl.grammar.RealConstantNode;
 import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
+import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
 
 /**
 * Capabilities of the display.
@@ -120,17 +122,10 @@ public class DisplayCapabilities extends SemanticCapabilities {
                    // Sets the temperature to display with the suitable characteristics of display
                    public void afterAssert(Formula formula) {
                        try {
-                           ((DisplayAgent)getAgent()).display.setTemperature(((RealConstantNode)applyResult.getTerm("X")).lx_value());
+                           ((DisplayAgent)getAgent()).display.setTemperature(((Constant)applyResult.getTerm("X")).realValue());
                        } 
-                        catch (ClassCastException cce) 
-                        {
-                           try {
-                            ((DisplayAgent)getAgent()).display.setTemperature(new Double(((IntegerConstantNode)applyResult.getTerm("X")).lx_value().doubleValue()));             
-                           } catch (Exception e) {
-                               e.printStackTrace();
-                           }
-                       } catch (Exception e) {
-                           e.printStackTrace();
+                       catch (WrongTypeException wte) {
+                           wte.printStackTrace();
                        }
                    }
                });

@@ -134,15 +134,17 @@ public class AndFilter extends KBQueryFilter {
     * which, if it is asserted in the base, triggers the observer that
     * observes the formula given in parameter.
     */
-   public void getObserverTriggerPatterns(Formula formula, Set set) {
-       MatchResult applyResult = SLPatternManip.match(pattern,formula);
-       if (applyResult != null) {
-           try {
-               getObserverTriggerPatterns(applyResult.getFormula("phi"), set);
-               getObserverTriggerPatterns(applyResult.getFormula("psi"), set);
-           } catch (SLPatternManip.WrongTypeException wte) {
-               wte.printStackTrace();
-           }
-       }
+   public boolean getObserverTriggerPatterns(Formula formula, Set set) {
+	   MatchResult match = SLPatternManip.match(formula, pattern);
+	   if (match != null) {
+		   try {
+			   myKBase.getObserverTriggerPatterns(match.getFormula("phi"), set);
+			   myKBase.getObserverTriggerPatterns(match.getFormula("psi"), set);
+			   return false;
+		   } catch (SLPatternManip.WrongTypeException wte) {
+			   wte.printStackTrace();
+		   }
+	   }
+	   return true;
    }
 } // End of class AndFilter

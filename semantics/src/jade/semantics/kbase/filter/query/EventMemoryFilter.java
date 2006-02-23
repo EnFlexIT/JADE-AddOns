@@ -177,7 +177,8 @@ public class EventMemoryFilter extends KBQueryFilter {
      * which, if it is asserted in the base, triggers the observer that
      * observes the formula given in parameter.
      */
-    public void getObserverTriggerPatterns(Formula formula, Set set) {
+    public boolean getObserverTriggerPatterns(Formula formula, Set set) {
+    	return true;
     }
 
 } // End of class EventMemoryFilter

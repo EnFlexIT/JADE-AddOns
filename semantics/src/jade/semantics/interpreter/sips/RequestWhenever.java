@@ -51,12 +51,12 @@ public class RequestWhenever extends Subscription {
      * Constructor of the principle with a specified subscribe property.
      * @param capabilities capabilities of the owner (the agent) of this 
      * semantic interpretation principle
-     * @param subscribeProperty precondition to perform the action
+     * @param subscribedPropertyPattern precondition to perform the action
     */
-    public RequestWhenever(SemanticCapabilities capabilities, String subscribeProperty) {
-        super(capabilities, "(or (not (B ??agent " + subscribeProperty + " )) " +
+    public RequestWhenever(SemanticCapabilities capabilities, String subscribedPropertyPattern) {
+        super(capabilities, "(or " + subscribedPropertyPattern +
                 "    (or (I ??subscriber ??goal)" +
-                "        (forall ??e (not (done ??e (not (B ??agent " + subscribeProperty + " )))))))", false);
+                "        (forall ??e (not (done ??e " + subscribedPropertyPattern + " )))))", false);
     } // End of RequestWhenever/1
     
     /**
@@ -65,7 +65,7 @@ public class RequestWhenever extends Subscription {
      * semantic interpretation principle
      */
     public RequestWhenever(SemanticCapabilities capabilities) {
-        this(capabilities, "??property");
+        this(capabilities, "(not (B ??agent ??property))");
     } // End of RequestWhenever/1
     
     

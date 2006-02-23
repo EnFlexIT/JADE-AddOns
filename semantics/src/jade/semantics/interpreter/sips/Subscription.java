@@ -82,7 +82,8 @@ public abstract class Subscription extends SemanticInterpretationPrinciple {
     public Subscription(SemanticCapabilities capabilities, String subscribe, boolean isOneShot) {
         super(capabilities);
         try {
-            subscribePattern = (Formula)SLPatternManip.instantiate(SLPatternManip.fromFormula("(B ??agent " + subscribe + ")"),
+            subscribePattern = (Formula)SLPatternManip.instantiate(
+            		SLPatternManip.fromFormula("(B ??agent " + subscribe + ")"),
                     "agent", myCapabilities.getAgentName());
         } catch (SLPatternManip.WrongTypeException wte) {
             wte.printStackTrace();
@@ -103,28 +104,30 @@ public abstract class Subscription extends SemanticInterpretationPrinciple {
      */
     public ArrayList apply(SemanticRepresentation sr)
     throws SemanticInterpretationPrincipleException {
-        try {
-            Term subscriber;
-            MatchResult applyResult = SLPatternManip.match(subscribePattern, sr.getSLRepresentation());
-            if (applyResult != null 
-                    && !(subscriber = applyResult.getTerm("subscriber")).equals(myCapabilities.getAgentName())) {
-                
-                Formula observedFormula = (Formula)SLPatternManip.instantiate(observedPattern,
-                        "property", computePropertyToObserve(applyResult));
-                
-                Formula subscribedEvent = (Formula)SLPatternManip
-                .instantiate(eventPattern,
-                        "subscriber", subscriber,
-                        "goal", computeEventToExecute(applyResult));                
-                myCapabilities.getMyKBase().addObserver(new EventCreationObserver(myCapabilities.getAgent(), observedFormula, subscribedEvent, isOneShot));
-                myCapabilities.getMyStandardCustomization().notifySubscribe(subscriber, observedFormula, applyResult.getFormula("goal"));
-                return new ArrayList();
-            }
-        } catch (SLPatternManip.WrongTypeException e) {
-            e.printStackTrace();
-            throw new SemanticInterpretationPrincipleException();
-        }
-        return null;    
+    	MatchResult applyResult = SLPatternManip.match(subscribePattern, sr.getSLRepresentation());
+    	if (applyResult != null) {
+    		try {
+    			Term subscriber = applyResult.getTerm("subscriber");
+    			if (!subscriber.equals(myCapabilities.getAgentName())) {
+    				Formula observedFormula = (Formula)SLPatternManip.instantiate(
+    						observedPattern,
+    						"property", computePropertyToObserve(applyResult));
+    				
+    				Formula subscribedEvent = (Formula)SLPatternManip.instantiate(
+    						eventPattern,
+    						"subscriber", subscriber,
+    						"goal", computeEventToExecute(applyResult));
+    				
+    				myCapabilities.getMyKBase().addObserver(new EventCreationObserver(myCapabilities.getAgent(), observedFormula, subscribedEvent, isOneShot));
+    				myCapabilities.getMyStandardCustomization().notifySubscribe(subscriber, observedFormula, applyResult.getFormula("goal"));
+    				return new ArrayList();
+    			}
+    		} catch (SLPatternManip.WrongTypeException e) {
+    			e.printStackTrace();
+    			throw new SemanticInterpretationPrincipleException();
+    		}
+    	}
+    	return null;    
     }
     
     /**

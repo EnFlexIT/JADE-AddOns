@@ -44,6 +44,7 @@ import jade.semantics.lang.sl.grammar.VariableNode;
 import jade.semantics.lang.sl.tools.ListOfMatchResults;
 import jade.semantics.lang.sl.tools.MatchResult;
 import jade.semantics.lang.sl.tools.SLPatternManip;
+import jade.semantics.lang.sl.tools.SLPatternManip.WrongTypeException;
 import jade.util.leap.Set;
 
 /**
@@ -112,6 +113,9 @@ public class IREFilter extends KBQueryFilter {
      */
     public QueryResult apply(Formula formula, Term agent) {
         QueryResult queryResult = new QueryResult();
+        ListOfNodes listOfNodes = null;
+        Term termPattern = null;
+        Formula formulaPattern = null;
         try {
             MatchResult applyResult = SLPatternManip.match(pattern,formula);
             if (applyResult != null) {
@@ -126,7 +130,11 @@ public class IREFilter extends KBQueryFilter {
                 }
                 believeFormulaPattern = SLPatternManip.fromFormula("(B "+ agent +" ??Formula)");
                 getPattern();
-                queryResult.setResult(patternProcess(formula));
+                listOfNodes = this.listOfNodes;
+                termPattern = this.termPattern;
+                formulaPattern = this.formulaPattern;
+                
+                queryResult.setResult(patternProcess(formula, listOfNodes, termPattern, formulaPattern));
                 queryResult.setFilterApplied(true);
                 return queryResult;
             } else {
@@ -143,7 +151,11 @@ public class IREFilter extends KBQueryFilter {
                     }
                     believeFormulaPattern = SLPatternManip.fromFormula("(B "+ agent +" ??Formula)");
                     getPattern();
-                    queryResult.setResult(notPatternProcess(formula));
+                    listOfNodes = this.listOfNodes;
+                    termPattern = this.termPattern;
+                    formulaPattern = this.formulaPattern;
+
+                    queryResult.setResult(notPatternProcess(formula, listOfNodes, termPattern, formulaPattern));
                     queryResult.setFilterApplied(true);
                     return queryResult;
                 }
@@ -163,7 +175,7 @@ public class IREFilter extends KBQueryFilter {
      * @param formula the formula to be queried
      * @return a list of solutions.
      */
-    private ListOfMatchResults patternProcess(Formula formula) {
+    private ListOfMatchResults patternProcess(Formula formula, ListOfNodes listOfNodes, Term termPattern, Formula formulaPattern) {
         MatchResult bMatchResult = SLPatternManip.match(formulaPattern, believeFormulaPattern);
         ListOfMatchResults listOfMatchResults = myKBase.query(formulaPattern);
         if (listOfMatchResults == null && myKBase.isClosed(formulaPattern, listOfMatchResults)) {
@@ -246,7 +258,7 @@ public class IREFilter extends KBQueryFilter {
      * @param formula the formula to be queried
      * @return a list of solutions.
      */
-    private ListOfMatchResults notPatternProcess(Formula formula) {
+    private ListOfMatchResults notPatternProcess(Formula formula, ListOfNodes listOfNodes, Term termPattern, Formula formulaPattern) {
         IdentifyingExpression ide = ire;
         MatchResult bMatchResult = SLPatternManip.match(formulaPattern, believeFormulaPattern);
         ListOfMatchResults listOfMatchResults = myKBase.query(formulaPattern);
@@ -333,6 +345,29 @@ public class IREFilter extends KBQueryFilter {
      * which, if it is asserted in the base, triggers the observer that
      * observes the formula given in parameter.
      */
-    public void getObserverTriggerPatterns(Formula formula, Set set) {      
+    public boolean getObserverTriggerPatterns(Formula formula, Set set) {
+    	MatchResult applyResult = SLPatternManip.match(pattern,formula);
+        if (applyResult != null) {
+        	try {
+        		if (applyResult.getTerm("ire") instanceof IdentifyingExpression) {
+        			ire = (IdentifyingExpression)applyResult.getTerm("ire");
+        			term = applyResult.getTerm("term");
+        		} else if (applyResult.getTerm("term") instanceof IdentifyingExpression) {
+        			ire = (IdentifyingExpression)applyResult.getTerm("term");
+        			term = applyResult.getTerm("ire");
+        		} else {
+        			return true;
+        		}
+        		believeFormulaPattern = SLPatternManip.fromFormula("(B "+ myKBase.getAgent().getSemanticCapabilities().getAgentName() +" ??Formula)");
+        		getPattern();
+        		myKBase.getObserverTriggerPatterns((Formula)SLPatternManip.instantiate(believeFormulaPattern,
+        				"Formula", formulaPattern), set);
+        		return false;
+        	}
+        	catch (WrongTypeException wte) {
+        		wte.printStackTrace();
+        	}
+        }
+        return true;
     }
 }

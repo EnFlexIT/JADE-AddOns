@@ -25,6 +25,7 @@ package jade.semantics.lang.sl.tools;
 
 import jade.semantics.lang.sl.grammar.ByteConstantNode;
 import jade.semantics.lang.sl.grammar.DateTimeConstantNode;
+import jade.semantics.lang.sl.grammar.FunctionalTermParamNode;
 import jade.semantics.lang.sl.grammar.IntegerConstantNode;
 import jade.semantics.lang.sl.grammar.MetaContentExpressionReferenceNode;
 import jade.semantics.lang.sl.grammar.MetaFormulaReferenceNode;
@@ -64,7 +65,14 @@ import jade.util.leap.HashMap;
 				Node[] children2 = expression2.children();
 				equal = (children1.length == children2.length);
 				if ( equal ) {
-					if ( expression1 instanceof MetaContentExpressionReferenceNode ) {
+					if ( expression1 instanceof FunctionalTermParamNode &&
+						((FunctionalTermParamNode)expression1).as_symbol() instanceof SymbolNode &&
+						((SymbolNode)((FunctionalTermParamNode)expression1).as_symbol()).lx_value().equals("agent-identifier") &&
+						((FunctionalTermParamNode)expression1).as_symbol().equals(((FunctionalTermParamNode)expression2).as_symbol())) {
+						return ((FunctionalTermParamNode)expression1).getParameter("name")
+						.equals(((FunctionalTermParamNode)expression2).getParameter("name"));
+					}
+					else if ( expression1 instanceof MetaContentExpressionReferenceNode ) {
 						equal = ((MetaContentExpressionReferenceNode)expression1).lx_name()
 						.equals(((MetaContentExpressionReferenceNode)expression2).lx_name());
 					}

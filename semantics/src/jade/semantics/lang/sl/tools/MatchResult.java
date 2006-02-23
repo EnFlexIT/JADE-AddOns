@@ -43,6 +43,14 @@ public class MatchResult extends ListOfNodes {
 		if (find(MetaFormulaReferenceNode.class, "lx_name", nameOf(name), metaReferences, true)) {
 			result = ((MetaFormulaReferenceNode) metaReferences
 					.getFirst()).sm_value();
+//			if (result instanceof MetaFormulaReferenceNode &&
+//					!((MetaFormulaReferenceNode)result).lx_name().equals(name) &&
+//					((MetaFormulaReferenceNode)result).sm_value() == null) {
+//				Formula result2 = getFormula(((MetaFormulaReferenceNode)result).lx_name());
+//				if (result2 != null) {
+//					result = result2;
+//				}
+//			}
 		}
 		return result;
 	}
@@ -85,6 +93,14 @@ public class MatchResult extends ListOfNodes {
 		if (find(MetaTermReferenceNode.class, "lx_name", nameOf(name), metaReferences, true)) {
 			result = ((MetaTermReferenceNode) metaReferences.getFirst())
 			.sm_value();
+//			if (result instanceof MetaTermReferenceNode &&
+//					!((MetaTermReferenceNode)result).lx_name().equals(name) &&
+//					((MetaTermReferenceNode)result).sm_value() == null) {
+//				Term result2 = getTerm(((MetaTermReferenceNode)result).lx_name());
+//				if (result2 != null) {
+//					result = result2;
+//				}
+//			}
 		} 
 		else {
 			result = getVariable(name);
@@ -130,6 +146,14 @@ public class MatchResult extends ListOfNodes {
 		if (find(MetaVariableReferenceNode.class, "lx_name", nameOf(name), metaReferences, true)) {
 			result = ((MetaVariableReferenceNode) metaReferences
 					.getFirst()).sm_value();
+//			if (result instanceof MetaVariableReferenceNode &&
+//					!((MetaVariableReferenceNode)result).lx_name().equals(name) &&
+//					((MetaVariableReferenceNode)result).sm_value() == null) {
+//				Variable result2 = getVariable(((MetaVariableReferenceNode)result).lx_name());
+//				if (result2 != null) {
+//					result = result2;
+//				}
+//			}
 		}
 		return result;
 	}
@@ -172,6 +196,14 @@ public class MatchResult extends ListOfNodes {
 		if (find(MetaSymbolReferenceNode.class, "lx_name", nameOf(name), metaReferences, true)) {
 			result = ((MetaSymbolReferenceNode) metaReferences
 					.getFirst()).sm_value();
+//			if (result instanceof MetaSymbolReferenceNode &&
+//					!((MetaSymbolReferenceNode)result).lx_name().equals(name) &&
+//					((MetaSymbolReferenceNode)result).sm_value() == null) {
+//				Symbol result2 = getSymbol(((MetaSymbolReferenceNode)result).lx_name());
+//				if (result2 != null) {
+//					result = result2;
+//				}
+//			}
 		}
 		return result;
 	}
@@ -217,6 +249,14 @@ public class MatchResult extends ListOfNodes {
 		if (find(MetaContentExpressionReferenceNode.class, "lx_name", nameOf(name), metaReferences, true)) {
 			result = ((MetaContentExpressionReferenceNode) metaReferences
 					.getFirst()).sm_value();
+//			if (result instanceof MetaContentExpressionReferenceNode &&
+//					!((MetaContentExpressionReferenceNode)result).lx_name().equals(name) &&
+//					((MetaContentExpressionReferenceNode)result).sm_value() == null) {
+//				ContentExpression result2 = getContentExpression(((MetaContentExpressionReferenceNode)result).lx_name());
+//				if (result2 != null) {
+//					result = result2;
+//				}
+//			}
 		}
 		return result;
 	}
@@ -322,14 +362,16 @@ public class MatchResult extends ListOfNodes {
 			for (int i = 0; i < size(); i++) {
 				Node m = get(i);
 				ListOfNodes lo = new ListOfNodes();
-				if ( !result.find(m.getClass(), "lx_name", SLPatternManip.getMetaReferenceName(m), lo, true) ) {
+//				if ( !result.find(m.getClass(), "lx_name", SLPatternManip.getMetaReferenceName(m), lo, true) ) {
+				if ( !result.contains(m) ) {
 					result.add(m.getClone());
 				}
 			}
 			for (int i = 0; i < other.size(); i++) {
 				Node m = other.get(i);
 				ListOfNodes lo = new ListOfNodes();
-				if ( !result.find(m.getClass(), "lx_name", SLPatternManip.getMetaReferenceName(m), lo, true) ) {
+//				if ( !result.find(m.getClass(), "lx_name", SLPatternManip.getMetaReferenceName(m), lo, true) ) {
+				if ( !result.contains(m) ) {
 					result.add(m.getClone());
 				}
 			}
@@ -347,6 +389,95 @@ public class MatchResult extends ListOfNodes {
         clone.copyValueOf(this);
         return clone;
     }	
+	
+    public static Class[] META_REFERENCE_CLASSES = new Class[] {MetaContentExpressionReferenceNode.class,
+        MetaFormulaReferenceNode.class, 
+        MetaSymbolReferenceNode.class, 
+        MetaTermReferenceNode.class, 
+        MetaVariableReferenceNode.class};
+    
+    /**
+     * Assigns the value of all occurrences of the meta-reference meta within exp
+     * with the value of meta 
+     */
+    public void completeClosure() throws WrongTypeException {
+        ListOfNodes metaReferences = new ListOfNodes();
+                
+        for (int i=0; i<size(); i++) {
+        	Node value = SLPatternManip.getMetaReferenceValue(get(i));
+        	if (value!=null) {
+        		value.childrenOfKind(META_REFERENCE_CLASSES, metaReferences);
+        	}
+        }
+        for (int i=0; i<metaReferences.size(); i++) {
+        	if (!contains(metaReferences.get(i))) {
+        		add(metaReferences.get(i));
+        	}
+        }
+        for (int i=0; i<metaReferences.size(); i++) {
+        	Node metaToAssign = metaReferences.get(i);
+        	if (SLPatternManip.getMetaReferenceValue(metaToAssign) == null) {
+        		ListOfNodes result = new ListOfNodes();
+        		find(META_REFERENCE_CLASSES, "lx_name", SLPatternManip.getMetaReferenceName(metaToAssign), result, false);
+				SLPatternManip.setMetaReferenceValue(metaToAssign, SLPatternManip.getMetaReferenceValue(result.get(0)));
+        	}
+        }
+    }
+
+	 
+    /**
+     * This method returns true if a MetaVariable has the given varName in the 
+     * given MatchResult and if it succeeds in giving it the given value.  
+     * @param varName the name of a metavaraible
+     * @param value the value of the metavariable
+     * @return true if a MetaVariable has the given varName in the 
+     * given MatchResult and if it succeeds in giving it the given value, false
+     * if not.
+     */
+	public boolean set(String varName, Node value) {
+        try {
+			for (int i = 0; i < size(); i++) {
+				Node meta = (Node)get(i);
+				if ( SLPatternManip.getMetaReferenceName(meta).equals(varName)) {
+					// The meta reference to be assigned has been found.
+					Node metaValue = SLPatternManip.getMetaReferenceValue(meta);
+					if ( metaValue == null ) {
+						SLPatternManip.setMetaReferenceValue(meta, value);
+						completeClosure();
+						return true;
+					}
+					else {
+						// Assuming the meta variable already has a value
+						MatchResult matchValue = SLPatternManip.match(metaValue, value);
+						if ( matchValue == null ) {
+							// The two values are not compatible
+							return false;
+						}
+						else {
+							for (int j=0; j<matchValue.size(); j++) {
+								boolean toAdd = true;
+								for (int k=0; k<size(); k++) {
+									if (get(k).equals(matchValue.get(j))) {
+										SLPatternManip.setMetaReferenceValue(get(k), SLPatternManip.getMetaReferenceValue(matchValue.get(j)));
+										toAdd = false;
+										break;
+									}
+								}
+								if (toAdd) {
+									add(matchValue.get(j));
+								}
+							}
+							completeClosure();
+							return true;
+						}
+					}
+                }
+            }
+        } catch (SLPatternManip.WrongTypeException wte) {
+            wte.printStackTrace();
+        }
+        return false;
+    }
 
 	// ===============================================
 	// Package private implementation
@@ -360,10 +491,12 @@ public class MatchResult extends ListOfNodes {
 	void instantiate() {
 		for (int i = 0; i < size(); i++) {
 			replace(i, get(i).getClone());
-			try {
-				SLPatternManip.setMetaReferenceValue(get(i), SLPatternManip.instantiate(SLPatternManip.getMetaReferenceValue(get(i))));
-			} catch (WrongTypeException e) {
-				e.printStackTrace();
+			if (SLPatternManip.getMetaReferenceValue(get(i)) != null) {
+				try {
+					SLPatternManip.setMetaReferenceValue(get(i), SLPatternManip.instantiate(SLPatternManip.getMetaReferenceValue(get(i))));
+				} catch (WrongTypeException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

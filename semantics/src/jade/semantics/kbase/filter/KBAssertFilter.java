@@ -58,6 +58,17 @@ public class KBAssertFilter extends KBFilter {
     } // End of apply/1
     
     /**
+     * This method is deprecated and does nothing.
+     * Use the new <code>apply</code> method instead.
+     * @param formula
+     * @return
+     * @deprecated
+     */
+    final public Formula beforeAssert(Formula formula) {
+    	return null;
+    }
+    
+    /**
      * Applies the filter after the given formula has been asserted into the KBase.
      * By default, does nothing.
      * @param formula the formula that has been asserted into the KBase.

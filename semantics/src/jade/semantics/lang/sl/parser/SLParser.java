@@ -735,11 +735,12 @@ public class SLParser implements SLParserConstants {
     case BYTES:
       token = jj_consume_token(BYTES);
         int n = Integer.parseInt(token.image.substring(1, token.image.length()-1));
-                char[] chars = new char[n];
-                try {
-                          for (int i=0; i<n;i++) {chars[i] = jj_input_stream.readChar();}
-                }
-                catch(Exception e) {e.printStackTrace();}
+		char[] chars = new char[n];	
+		try {
+			jj_input_stream.readChars(chars);
+//			for (int i=0; i<n;i++) {chars[i] = jj_input_stream.readChar();}
+		}
+		catch(Exception e) {e.printStackTrace();}
                 {if (true) return new ByteConstantNode(Base64.decode(chars));}
       break;
     case FLOAT:

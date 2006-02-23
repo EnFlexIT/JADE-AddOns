@@ -172,6 +172,25 @@ public class SimpleCharStream
      bufcolumn[bufpos] = column;
   }
 
+  protected void UpdateLineColumn(char[] c)
+  {
+     if (prevCharIsLF)
+     {
+        prevCharIsLF = false;
+        line += (column = 0);
+     }
+     else if (prevCharIsCR)
+     {
+        prevCharIsCR = false;
+        line += (column = 0);
+     }
+     
+     column += c.length;
+
+     bufline[bufpos] = line;
+     bufcolumn[bufpos] = column;
+  }
+
   public char readChar() throws java.io.IOException
   {
      if (inBuf > 0)
@@ -193,6 +212,35 @@ public class SimpleCharStream
      return (c);
   }
 
+  public void readChars(char[] bufToFill) throws java.io.IOException
+  {
+	  int charsToFill = bufToFill.length;
+	  
+	  int fromBuffer = Math.min(charsToFill, maxNextCharInd - bufpos -1);
+	  if (fromBuffer > 0) {
+		  System.arraycopy(buffer, bufpos+1, bufToFill, 0, fromBuffer);
+		  bufpos += fromBuffer;
+		  charsToFill -= fromBuffer;
+	  }
+	  
+	  while (charsToFill > 0) {
+		  int readChars; 
+		  if ((readChars = inputStream.read(bufToFill, bufToFill.length - charsToFill, charsToFill)) == -1) {
+			  inputStream.close();
+			  throw new java.io.IOException();
+		  }
+		  else {
+			  charsToFill -= readChars;
+		  }		  
+	  }
+	  
+//	  if (fromBuffer < bufToFill.length) {
+//		  FillBuff();
+//	  }
+	  
+	  UpdateLineColumn(bufToFill);
+  }		  	  
+  
   /**
    * @deprecated 
    * @see #getEndColumn

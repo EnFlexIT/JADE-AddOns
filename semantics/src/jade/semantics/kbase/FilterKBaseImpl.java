@@ -679,7 +679,7 @@ public class FilterKBaseImpl implements FilterKBase {
     public void addObserver(final Observer o) {
         Observation observation = new Observation(o);
         observation.setCurrentValue(query(o.getObservedFormula()));
-        observation.setTriggerPatterns(getObserverTriggerPatterns(o.getObservedFormula()));
+        observation.setTriggerPatterns(computeObserverTriggerPatterns(o.getObservedFormula()));
         for (Iterator iter = observation.getTriggerPatterns().iterator(); iter.hasNext();) {
             observationTable.put(iter.next(), observation);
         }
@@ -943,10 +943,17 @@ public class FilterKBaseImpl implements FilterKBase {
      * which, if it is asserted in the base, triggers the observer that
      * observes the formula given in parameter. 
      */
-    public Set getObserverTriggerPatterns(Formula formula) {
+    private Set computeObserverTriggerPatterns(Formula formula) {
         Set result = new SortedSetImpl();
-        for (int i =0; i < queryFilterList.size(); i++) {
-            ((KBQueryFilter)queryFilterList.get(i)).getObserverTriggerPatterns(formula, result);
+        getObserverTriggerPatterns(formula, result);
+        return result;
+    }
+    
+    public void getObserverTriggerPatterns(Formula formula, Set result) {
+        for (int i =0; (i < queryFilterList.size()); i++) {
+        	if (!((KBQueryFilter)queryFilterList.get(i)).getObserverTriggerPatterns(formula, result)) {
+        		return;
+        	}
         }
         try {
             MatchResult matchResult = SLPatternManip.match(bPattern,formula);
@@ -960,8 +967,7 @@ public class FilterKBaseImpl implements FilterKBase {
             }
         } catch (SLPatternManip.WrongTypeException wte) {
             wte.printStackTrace();
-        }
-        return result;
+        }    	
     }
     
     /**
