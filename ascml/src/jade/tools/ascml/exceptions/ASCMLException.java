@@ -42,7 +42,7 @@ public abstract class ASCMLException extends Exception
 	
 	/** the 'nestedException'-Vector is initialized in case exceptions
 	    should be contained within this ASCMLException-object. */
-	private Vector nestedExceptions;
+	private Vector<Exception> nestedExceptions;
 	
 	/**
 	 *  Instantiate a new ASCMLException with a default messageText. 
@@ -50,7 +50,7 @@ public abstract class ASCMLException extends Exception
 	public ASCMLException()
 	{
 		this.errorCode = ERRORCODE_UNSPECIFIED;
-		this.nestedExceptions = new Vector();
+		this.nestedExceptions = new Vector<Exception>();
 		shortMessage = "";
 		longMessage = "";
 		this.exceptionDetails = new Vector();
@@ -235,7 +235,7 @@ public abstract class ASCMLException extends Exception
 		return longMessage;
 	}
 
-	public String toString()
+	public String toLongString()
 	{
 		String str = "ASCMLException: " + getShortMessage() + "\n";
 		for (int i=0; i < exceptionDetails.size(); i++)
@@ -244,8 +244,26 @@ public abstract class ASCMLException extends Exception
 		}
 		for (int i=0; i < nestedExceptions.size(); i++)
 		{
-			str += "Nested Exception: " + nestedExceptions.elementAt(i) + "\n";
+			Exception nestedException = nestedExceptions.elementAt(i);
+			if (nestedException instanceof ASCMLException)
+			{
+				str += ((ASCMLException)nestedException).toLongString() + "\n";
+				str += ((ASCMLException)nestedException).getStackTraceString() + "\n";
+			}
+			else
+			{
+				StringWriter sw = new StringWriter();
+				nestedException.printStackTrace(new PrintWriter(sw));
+				str += sw.toString();
+			}
+			str += "Nested Exception: " + nestedException + "\n";
+
 		}
 		return str;
+	}
+
+	public String toString()
+	{
+		return this.getShortMessage();
 	}
 }
