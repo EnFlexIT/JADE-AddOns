@@ -28,7 +28,6 @@ package jade.tools.ascml.gui.components.tree;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.event.*;
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.gui.dialogs.StartAgentInstanceDialog;
 import jade.tools.ascml.gui.dialogs.StartSocietyInstanceDialog;
 import jade.tools.ascml.gui.dialogs.ExceptionDialog;
@@ -39,8 +38,14 @@ import jade.tools.ascml.gui.components.TabbedPaneManager;
 import jade.tools.ascml.repository.Repository;
 import jade.tools.ascml.events.ModelActionEvent;
 import jade.tools.ascml.exceptions.ModelException;
-import jade.tools.ascml.model.AbstractAgentModel;
-import jade.tools.ascml.onto.*;
+import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
+import jade.tools.ascml.model.runnable.RunnableAgentInstance;
+import jade.tools.ascml.model.runnable.AbstractRunnable;
+import jade.tools.ascml.model.jibx.*;
+import jade.tools.ascml.onto.Status;
+import jade.tools.ascml.onto.Stopping;
+import jade.tools.ascml.onto.Functional;
+import jade.tools.ascml.absmodel.*;
 
 public class PopupHandler extends MouseAdapter implements ActionListener
 {
@@ -84,11 +89,11 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 		this.mainPanel = parentPanel;
 		this.repository = parentPanel.getRepository();
 	}
-	
-	public void mouseReleased( MouseEvent e ) 
+
+	public void mouseReleased( MouseEvent e )
 	{
 		if ( e.isPopupTrigger() ||
-			 ( e.isControlDown() && e.getButton() == 1 ) ||	
+			 ( e.isControlDown() && e.getButton() == 1 ) ||
 			 ( e.getButton() == 3) )
 		{
 			repositoryTree = (RepositoryTree)e.getSource();
@@ -104,7 +109,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)repositoryTree.getLastSelectedPathComponent();
 			if (node == null)
 				return; // in case no node is selected, but context-menu should be shown
-			
+
 			popupOnObject = node.getUserObject();
 
 			popup = new JPopupMenu();
@@ -244,9 +249,9 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 					popup.add(mi);
 				}
 			}
-			else if (popupOnObject instanceof IRunnableAgentInstance)
+			else if (popupOnObject instanceof RunnableAgentInstance)
 			{
-				IRunnableAgentInstance runnableModel = (IRunnableAgentInstance)popupOnObject;
+				RunnableAgentInstance runnableModel = (RunnableAgentInstance)popupOnObject;
 				Status status = runnableModel.getStatus();
 				popup.add(new JLabel("<html>&nbsp;&nbsp;&nbsp;<i>Agent-Instance: " + runnableModel.getName() + " (" + status + ")</i></html>"));
 				popup.addSeparator();
@@ -271,9 +276,9 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 					popup.add(mi);
 				}
 			}
-			else if (popupOnObject instanceof IRunnableSocietyInstance)
+			else if (popupOnObject instanceof RunnableSocietyInstance)
 			{
-				IRunnableSocietyInstance runnableModel = (IRunnableSocietyInstance)popupOnObject;
+				RunnableSocietyInstance runnableModel = (RunnableSocietyInstance)popupOnObject;
 				Status status = runnableModel.getStatus();
 
 				popup.add(new JLabel("<html>&nbsp;&nbsp;&nbsp;<i>Society-Instance: " + runnableModel.getName() + " (" + status + ")</i></html>"));
@@ -404,7 +409,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 			try
 			{
 				// create the model
-				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])repository.createRunnableAgentInstance(agentInstance.getType().getFullyQualifiedName() + "." + agentInstance.getName() + "." + agentInstance, 1);
+				AbstractRunnable[] runnableModels = (AbstractRunnable[])repository.createRunnableAgentInstance(agentInstance.getType().getFullyQualifiedName() + "." + agentInstance.getName() + "." + agentInstance);
 
 				// and select the newly created instance
 				mainPanel.selectModel(runnableModels[0]);
@@ -423,7 +428,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 		}
 		else if (actionCommand.equals(CMD_STOP_RUNNABLEAGENTINSTANCE))
 		{
-            IRunnableAgentInstance runnableModel = (IRunnableAgentInstance)popupOnObject;
+            RunnableAgentInstance runnableModel = (RunnableAgentInstance)popupOnObject;
 			ModelActionEvent actionEvent = new ModelActionEvent(ModelActionEvent.CMD_STOP_AGENTINSTANCE, runnableModel);
 			mainPanel.throwModelActionEvent(actionEvent);
 
@@ -432,7 +437,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 		}
 		else if (actionCommand.equals(CMD_STOP_RUNNABLESOCIETYINSTANCE))
 		{
-			IRunnableSocietyInstance runnableModel = (IRunnableSocietyInstance)popupOnObject;
+			RunnableSocietyInstance runnableModel = (RunnableSocietyInstance)popupOnObject;
 			ModelActionEvent actionEvent = new ModelActionEvent(ModelActionEvent.CMD_STOP_SOCIETYINSTANCE, runnableModel);
 			mainPanel.throwModelActionEvent(actionEvent);
 
@@ -454,7 +459,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 		{
 			try
 			{
-				repository.getRunnableManager().removeRunnable((IAbstractRunnable)popupOnObject);
+				repository.getRunnableManager().removeRunnable((AbstractRunnable)popupOnObject);
 			}
 			catch(ModelException exc)
 			{
@@ -478,13 +483,15 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 		{
             ModelException exc = null;
 			if (popupOnObject instanceof ISocietyType)
-				exc = ((ISocietyType)popupOnObject).getStatusException();
-			else if (popupOnObject instanceof AbstractAgentModel)
-				exc = ((AbstractAgentModel)popupOnObject).getStatusException();
+				exc = ((ISocietyType)popupOnObject).getIntegrityStatus();
+			else if (popupOnObject instanceof IAgentType)
+				exc = ((IAgentType)popupOnObject).getIntegrityStatus();
 			else if (popupOnObject instanceof ISocietyInstance)
-				exc = ((ISocietyInstance)popupOnObject).getStatusException();
+				exc = ((ISocietyInstance)popupOnObject).getParentSocietyType().getIntegrityStatus();
+			else if (popupOnObject instanceof IAgentInstance)
+				exc = ((IAgentInstance)popupOnObject).getParentSocietyInstance().getParentSocietyType().getIntegrityStatus();
 			else if (popupOnObject instanceof ISocietyInstanceReference)
-				exc = ((ISocietyInstanceReference)popupOnObject).getStatusException();
+				exc = ((ISocietyInstanceReference)popupOnObject).getParentSocietyInstance().getParentSocietyType().getIntegrityStatus();
 
 			mainPanel.showDialog(new ExceptionDialog(exc));
 		}
