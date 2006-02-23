@@ -25,14 +25,12 @@
 
 package jade.tools.ascml.gui.components.tree.model;
 
-import jade.tools.ascml.absmodel.IAgentType;
-import jade.tools.ascml.absmodel.ISocietyType;
-import jade.tools.ascml.absmodel.ISocietyInstance;
-import jade.tools.ascml.absmodel.IRunnableSocietyInstance;
 import jade.tools.ascml.gui.components.tree.*;
 import jade.tools.ascml.events.ProjectChangedEvent;
 import jade.tools.ascml.events.PropertyChangedEvent;
 import jade.tools.ascml.repository.Repository;
+import jade.tools.ascml.absmodel.IAgentType;
+import jade.tools.ascml.absmodel.ISocietyType;
 
 import javax.swing.tree.*;
 import java.util.Vector;

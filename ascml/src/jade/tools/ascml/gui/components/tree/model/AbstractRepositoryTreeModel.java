@@ -27,13 +27,13 @@ package jade.tools.ascml.gui.components.tree.model;
 
 import javax.swing.tree.*;
 
-import jade.tools.ascml.absmodel.IAgentType;
-import jade.tools.ascml.absmodel.ISocietyType;
 import jade.tools.ascml.gui.components.tree.RepositoryTree;
 import jade.tools.ascml.gui.components.tree.IRepositoryTreeNode;
 import jade.tools.ascml.events.ProjectListener;
 import jade.tools.ascml.events.ProjectChangedEvent;
 import jade.tools.ascml.repository.Repository;
+import jade.tools.ascml.absmodel.IAgentType;
+import jade.tools.ascml.absmodel.ISocietyType;
 
 /**
  *  Abstract Tree-model-object.
