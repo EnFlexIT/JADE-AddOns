@@ -26,19 +26,21 @@
 package jade.tools.ascml.gui.components.tree;
 
 import javax.swing.tree.*;
-import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.events.ModelChangedEvent;
 import jade.tools.ascml.repository.Repository;
+import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
+import jade.tools.ascml.model.runnable.RunnableAgentInstance;
+import jade.tools.ascml.model.runnable.RunnableRemoteSocietyInstanceReference;
 
 public class RunnableSocietyInstanceNode extends DefaultMutableTreeNode implements IRepositoryTreeNode
 {
 
-	private IRunnableSocietyInstance runnableModel = null;
+	private RunnableSocietyInstance runnableModel = null;
 	private boolean showDetails;
 	private DefaultTreeModel treeModel;
 	private Repository repository;
 
-	public RunnableSocietyInstanceNode(IRunnableSocietyInstance runnableModel, boolean showDetails, Repository repository, DefaultTreeModel treeModel)
+	public RunnableSocietyInstanceNode(RunnableSocietyInstance runnableModel, boolean showDetails, Repository repository, DefaultTreeModel treeModel)
 	{
 		super(runnableModel);
 		this.runnableModel = runnableModel;
@@ -69,7 +71,7 @@ public class RunnableSocietyInstanceNode extends DefaultMutableTreeNode implemen
 		DefaultMutableTreeNode agentsNode = new DefaultMutableTreeNode(RepositoryTree.AGENT_DESCRIPTION_STRING);
 		
 		// add new children (running agentinstances) to the "Agents"-node of the running society-instance's root-node 
-		IRunnableAgentInstance[] runningAgentInstances = runnableModel.getRunnableAgentInstances();
+		RunnableAgentInstance[] runningAgentInstances = runnableModel.getRunnableAgentInstances();
 		for (int i=0; i < runningAgentInstances.length; i++)
 		{
 			DefaultMutableTreeNode oneRunningAgentInstance = new DefaultMutableTreeNode(runningAgentInstances[i]);
@@ -84,19 +86,19 @@ public class RunnableSocietyInstanceNode extends DefaultMutableTreeNode implemen
 		DefaultMutableTreeNode referencesNode = new DefaultMutableTreeNode(RepositoryTree.REFERENCE_DESCRIPTION_STRING);
 		
 		// add local running SocietyInstance-references to "References"-node
-		IRunnableSocietyInstance[] runningSocInstRefs = runnableModel.getLocalRunnableSocietyInstanceReferences();
+		RunnableSocietyInstance[] runningSocInstRefs = runnableModel.getLocalRunnableSocietyInstanceReferences();
 		for (int i=0; i < runningSocInstRefs.length; i++)
 		{
-			IRunnableSocietyInstance oneReference = runningSocInstRefs[i];
+			RunnableSocietyInstance oneReference = runningSocInstRefs[i];
 			RunnableSocietyInstanceNode oneReferenceNode = new RunnableSocietyInstanceNode(oneReference, showDetails, repository, treeModel);
 			referencesNode.add(oneReferenceNode);
 		}
 		
 		// add remote running SocietyInstance-references to "References"-node
-		IRunnableRemoteSocietyInstanceReference[] remoteSocietyReferences = runnableModel.getRemoteRunnableSocietyInstanceReferences();
+		RunnableRemoteSocietyInstanceReference[] remoteSocietyReferences = runnableModel.getRemoteRunnableSocietyInstanceReferences();
 		for (int i=0; i < remoteSocietyReferences.length; i++)
 		{
-			IRunnableRemoteSocietyInstanceReference oneRemoteReference = remoteSocietyReferences[i];
+			RunnableRemoteSocietyInstanceReference oneRemoteReference = remoteSocietyReferences[i];
 			DefaultMutableTreeNode oneRemoteReferenceNode = new DefaultMutableTreeNode(oneRemoteReference);
 			referencesNode.add(oneRemoteReferenceNode);
 		}
@@ -117,7 +119,7 @@ public class RunnableSocietyInstanceNode extends DefaultMutableTreeNode implemen
 			}
 			else if (eventCode == ModelChangedEvent.STATUS_CHANGED)
 			{
-				// System.err.println("RunnableSocietyInstanceNode.modelChanged: status change("+((IRunnableSocietyInstance)model).getStatus()+"), simply call nodeChange(this)");
+				// System.err.println("RunnableSocietyInstanceNode.modelChanged: status change("+((RunnableSocietyInstance)model).getStatus()+"), simply call nodeChange(this)");
 				treeModel.nodeChanged(this);
 			}
 			else
