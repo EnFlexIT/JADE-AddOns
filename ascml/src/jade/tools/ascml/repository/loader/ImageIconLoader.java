@@ -81,6 +81,10 @@ public class ImageIconLoader
 	public static final String TREEICON_FOLDER_AGENTTYPES	= "images/misc_treeicons/folder_blue.gif";
 	public static final String TREEICON_FOLDER_SOCIETYTYPES	= "images/misc_treeicons/folder_yellow.gif";
 
+	public static final String BUTTON_APPLY	= "images/button/apply.png";
+	public static final String BUTTON_SAVE	= "images/button/save.png";
+	public static final String BUTTON_START	= "images/button/start.png";
+
 	private static HashMap imageCache = new HashMap();
 	private static HashMap scaledImageCache = new HashMap();
 
