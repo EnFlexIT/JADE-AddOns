@@ -16,6 +16,8 @@ public interface IAgentType
 	String PLATFORM_TYPE_JADE = "jade";
 	String PLATFORM_TYPE_JADEX = "jadex";
 	String NAME_UNKNOWN = "Unknown";
+	String CLASS_UNKNOWN = "Unknown";
+
 	/**
 	 * This constant is used to indicate, that this model has successfully been loaded.
 	 */
