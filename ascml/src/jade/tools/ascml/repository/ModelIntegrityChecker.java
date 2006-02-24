@@ -16,7 +16,7 @@ public class ModelIntegrityChecker
 
 	}
 
-	public void checkIntegrity(Object model)
+	public boolean checkIntegrity(Object model)
 	{
 		if (model instanceof ISocietyType)
 		{
@@ -30,6 +30,11 @@ public class ModelIntegrityChecker
 			checkAgentType((IAgentType)model);
 			System.err.println("ModelIntegrityChecker.check: " + ((IAgentType)model).getName() + " has status '"+((IAgentType)model).getStatus()+"'");
 		}
+
+		if (statusException.hasExceptionDetails())
+			return false;
+		else
+			return true;
 	}
 
 	private void checkSocietyType(ISocietyType model)
@@ -91,7 +96,7 @@ public class ModelIntegrityChecker
 			statusException.addExceptionDetails("The name doesn't correspond to the filename", "write me!");
 		if ((model.getPackageName() == null) || model.getPackageName().equals(""))
 			statusException.addExceptionDetails("The package-name is missing", "write me!");
-		if ((model.getClassName() == null) || model.getClassName().equals(""))
+		if ((model.getClassName() == null) || model.getClassName().equals("") || model.getClassName().equals(IAgentType.CLASS_UNKNOWN))
 			statusException.addExceptionDetails("The class-name is missing", "write me!");
 		if ((model.getPlatformType() == null) || model.getPlatformType().equals(""))
 			statusException.addExceptionDetails("The platform-type is missing", "write me!");
