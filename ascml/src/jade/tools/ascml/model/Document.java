@@ -36,6 +36,9 @@ public class Document implements IDocument
 	/** The source. */
 	protected String source = SOURCE_UNKNOWN;
 
+	/** indicates whether this document has changed and is saved or not. */
+	protected boolean isSaved = true;
+
 	//-------- constructors --------
 
 	/**
@@ -85,7 +88,7 @@ public class Document implements IDocument
 	 */
 	public String getSourcePath()
 	{
-		if ((source == null) || (source.equals("")))
+		if ((source == null) || source.equals("") || source.equals(SOURCE_UNKNOWN))
 			return SOURCE_UNKNOWN;
 
 		int lastIndexOfSeparator = source.lastIndexOf('\\');
@@ -133,7 +136,7 @@ public class Document implements IDocument
 	 */
 	public String getSourceName()
 	{
-		if ((source == null) || (source.equals("")))
+		if ((source == null) || source.equals("") || source.equals(SOURCE_UNKNOWN))
 			return SOURCE_UNKNOWN;
 
 		int lastIndexOfSeparator = source.lastIndexOf('\\');
@@ -141,5 +144,23 @@ public class Document implements IDocument
 			lastIndexOfSeparator = source.lastIndexOf('/');
 
 		return source.substring(lastIndexOfSeparator+1, source.length());
+	}
+
+	/**
+	 * Return whether the document is saved or not.
+	 * @return true, if this document is saved as it is (without any pending changes), false otherwise.
+	 */
+	public boolean isSaved()
+	{
+		return isSaved;
+	}
+
+	/**
+	 * Set whether the document is saved or not.
+	 * @param isSaved  true, if this document is saved as it is (without any pending changes), false otherwise.
+	 */
+	public void setSaved(boolean isSaved)
+	{
+		this.isSaved = isSaved;
 	}
 }
