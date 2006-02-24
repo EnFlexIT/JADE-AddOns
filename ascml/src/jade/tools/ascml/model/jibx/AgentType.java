@@ -69,8 +69,12 @@ public class AgentType implements IAgentType
 	public void setName(String name)
 	{
 		if(name == null)
-			name = "";
+			name = NAME_UNKNOWN;
+		if (name.equals(getName()))
+			return;
+
 		this.name = name.trim();
+		throwModelChangedEvent(ModelChangedEvent.NAME_CHANGED);
 	}
 
 	/**
@@ -88,7 +92,13 @@ public class AgentType implements IAgentType
 	 */
 	public void setPackageName(String packageName)
 	{
+		if (packageName == null)
+			packageName = NAME_UNKNOWN;
+		if (packageName.equals(getPackageName()))
+			return;
+
 		this.packageName = packageName;
+		throwModelChangedEvent(ModelChangedEvent.PACKAGE_CHANGED);
 	}
 
 	/**
@@ -123,7 +133,11 @@ public class AgentType implements IAgentType
 	{
 		if(platformType == null)
 			platformType = "";
+		if (platformType.equals(getPlatformType()))
+			return;
+
 		this.platformType = platformType.trim();
+		throwModelChangedEvent(ModelChangedEvent.PLATFORM_CHANGED);
 	}
 
 	/**
@@ -143,7 +157,11 @@ public class AgentType implements IAgentType
 	{
 		if (className == null)
 			className = "";
+		if (className.equals(getClassName()))
+			return;
+
 		this.className = className.trim();
+		throwModelChangedEvent(ModelChangedEvent.CLASS_CHANGED);
 	}
 
 	/**
@@ -180,7 +198,13 @@ public class AgentType implements IAgentType
 	 */
 	public void setIconName(String iconName)
 	{
+		if (iconName == null)
+			iconName = ImageIconLoader.AGENTTYPE;
+		if (iconName.equals(getIconName()))
+			return;
+
 		this.iconName = iconName;
+		throwModelChangedEvent(ModelChangedEvent.ICON_CHANGED);
 	}
 
 	/**
@@ -215,7 +239,10 @@ public class AgentType implements IAgentType
 	{
 		if (description == null)
 			description = "";
+		if (description.equals(getDescription()))
+			return;
 		this.description = description.trim();
+		throwModelChangedEvent(ModelChangedEvent.DESCRIPTION_CHANGED);
 	}
 
 	/**
