@@ -32,7 +32,9 @@ import java.awt.event.*;
 import java.io.File;
 
 import jade.tools.ascml.gui.dialogs.StartAgentInstanceDialog;
+import jade.tools.ascml.gui.dialogs.ExceptionDialog;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
+import jade.tools.ascml.repository.ModelIntegrityChecker;
 import jade.tools.ascml.absmodel.IAgentType;
 
 public class AgentTypeGeneral extends AbstractPanel implements ActionListener
@@ -242,6 +244,13 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 		model.setDescription(textAreaDescription.getText());
 		model.setPlatformType((String)comboBoxPlatform.getSelectedItem());
 		model.setIconName(iconName);
+
+		ModelIntegrityChecker checker = new ModelIntegrityChecker();
+		boolean ok = checker.checkIntegrity(model);
+		if (!ok)
+			mainPanel.showDialog(new ExceptionDialog(model.getIntegrityStatus()));
+
+		model.getDocument().setSaved(false);
 	}
 
 	public void actionPerformed(ActionEvent evt)
@@ -279,7 +288,10 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 		else if (evt.getSource() == buttonSave)
 		{
             applyChanges();
-			System.err.println("AgentTypeGeneral.actionPerformed: Save AgentType, implement me !!!");
+			boolean savingSuccessful = getRepository().getModelManager().saveModel(model);
+
+			if (savingSuccessful)
+				JOptionPane.showMessageDialog(parentFrame, "<html><h3>AgentType saved !</h3>The AgentType has been saved to:<p>"+model.getDocument().getSource()+"</html>");
 		}
 
 	}
