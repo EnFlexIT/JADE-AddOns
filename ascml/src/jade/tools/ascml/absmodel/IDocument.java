@@ -32,4 +32,16 @@ public interface IDocument
 	 * @return  The source-path.
 	 */
 	String getSourceName();
+
+	/**
+	 * Set the source-path.
+	 * @param path  The new source-path.
+	 */
+	void setSourcePath(String path);
+
+	/**
+	 * Set the source-name (i.e. file-name - must end with '.agent.xml' or '.society.xml').
+	 * @param name  The new source-name (must end with '.agent.xml' or '.society.xml')
+	 */
+	void setSourceName(String name);
 }
