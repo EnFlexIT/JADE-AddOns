@@ -43,10 +43,15 @@ import java.awt.image.BufferedImage;
 public abstract class AbstractMainPanel extends AbstractPanel
 {
 
-	public final static String ADD_AGENTTYPE_DIALOG		= "add_agenttype_dialog";
-	public final static String ADD_SOCIETYTYPE_DIALOG	= "add_societytype_dialog";
-	public final static String ADD_PROJECT_DIALOG		= "add_project_dialog";
-	public final static String EXIT_DIALOG				= "show_exit_dialog";
+	public final static String ADD_AGENTTYPE_DIALOG				= "add_agenttype_dialog";
+	public final static String ADD_SOCIETYTYPE_DIALOG			= "add_societytype_dialog";
+	public final static String ADD_PROJECT_DIALOG				= "add_project_dialog";
+	public final static String CHOOSE_ICON_DIALOG				= "choose_icon_dialog";
+	public final static String CHOOSE_DIRECTORY_DIALOG			= "choose_directory_dialog";
+	public final static String CHOOSE_AGENTTYPE_FILE_DIALOG		= "choose_agenttype_file_dialog";
+	public final static String CHOOSE_SOCIETYTYPE_FILE_DIALOG	= "choose_societytype_file_dialog";
+	public final static String CHOOSE_JAVA_FILE_DIALOG			= "choose_java_file_dialog";
+	public final static String EXIT_DIALOG						= "show_exit_dialog";
 
 	public final static String CROSS_PLATFORM_LOOK_AND_FEEL		= "crossplatform";
 	public final static String SYSTEM_LOOK_AND_FEEL				= "system";

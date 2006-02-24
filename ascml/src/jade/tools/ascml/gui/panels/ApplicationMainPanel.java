@@ -30,9 +30,7 @@ import java.awt.*;
 import jade.tools.ascml.gui.components.tree.RepositoryTree;
 import jade.tools.ascml.gui.components.StatusBar;
 import jade.tools.ascml.gui.components.TabbedPaneManager;
-import jade.tools.ascml.gui.dialogs.AddModelDialog;
-import jade.tools.ascml.gui.dialogs.ExitDialog;
-import jade.tools.ascml.gui.dialogs.AddProjectDialog;
+import jade.tools.ascml.gui.dialogs.*;
 import jade.tools.ascml.repository.*;
 
 public class ApplicationMainPanel extends AbstractMainPanel
@@ -111,13 +109,33 @@ public class ApplicationMainPanel extends AbstractMainPanel
 		}
 		else if (dialogIdentifier == ADD_PROJECT_DIALOG)
 		{
-			return showDialog(new AddProjectDialog(getRepository())); // false == SocietyTypeDialog
+			return showDialog(new AddProjectDialog(getRepository()));
 		}
 		else if (dialogIdentifier == EXIT_DIALOG)
 		{
-			return showDialog(new ExitDialog(this)); // false == SocietyTypeDialog
+			return showDialog(new ExitDialog(this));
 		}
-		System.err.println("WARNING: tried to show a Dialog which is not a standard-Dialog. Have a look at ApplicationMainPanel");
+		else if (dialogIdentifier == CHOOSE_ICON_DIALOG)
+		{
+			return showDialog(new ChooseIconDialog(getRepository()));
+		}
+		else if (dialogIdentifier == CHOOSE_DIRECTORY_DIALOG)
+		{
+			return showDialog(new ChooseDirectoryDialog(getRepository()));
+		}
+		else if (dialogIdentifier == CHOOSE_AGENTTYPE_FILE_DIALOG)
+		{
+			return showDialog(new ChooseAgentTypeFileDialog(getRepository()));
+		}
+		else if (dialogIdentifier == CHOOSE_SOCIETYTYPE_FILE_DIALOG)
+		{
+			return showDialog(new ChooseSocietyTypeFileDialog(getRepository()));
+		}
+		else if (dialogIdentifier == CHOOSE_JAVA_FILE_DIALOG)
+		{
+			return showDialog(new ChooseJavaFileDialog(getRepository()));
+		}
+		System.err.println("WARNING:ApplicationMainPanel tried to show a Dialog which is not a standard-Dialog. Have a look at ApplicationMainPanel");
 		return null;
 	}
 
