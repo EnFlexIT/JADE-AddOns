@@ -240,8 +240,14 @@ public class Repository
 		String runnableAgentInstanceName = fullyQualifiedInstanceName.substring(fullyQualifiedInstanceName.lastIndexOf('.')+1, fullyQualifiedInstanceName.length());
 
 		IAgentType agentType = getAgentType(agentTypeName, true);
-		IRunnableAgentInstance[] runnableInstance = (IRunnableAgentInstance[])getRunnableManager().createRunnable(runnableAgentInstanceName, agentType, modelCount);
-		return runnableInstance;
+		IAbstractRunnable[] abstractRunnables = getRunnableManager().createRunnable(runnableAgentInstanceName, agentType, modelCount);
+
+		IRunnableAgentInstance[] runnableInstances = new IRunnableAgentInstance[abstractRunnables.length];
+		for (int i=0; i < runnableInstances.length; i++)
+		{
+			runnableInstances[i] = (IRunnableAgentInstance)abstractRunnables[i];
+		}
+		return runnableInstances;
 	}
 
 	public Status getRunnableStatus(String fullyQualifiedName)
