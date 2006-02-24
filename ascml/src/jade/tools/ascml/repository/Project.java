@@ -299,6 +299,7 @@ public class Project
 	public void createSocietyType()
 	{
 		ISocietyType societyType = new SocietyType();
+		societyType.setModelChangedListener(repository.getListenerManager().getModelChangedListener());
 		societyType.setStatus(SocietyType.STATUS_OK);
 		try
 		{
@@ -493,6 +494,7 @@ public class Project
 	public void createAgentType()
 	{
 		IAgentType agentType = new AgentType();
+		agentType.setModelChangedListener(repository.getListenerManager().getModelChangedListener());
 		agentType.setStatus(SocietyType.STATUS_OK);
 		try
 		{
@@ -638,8 +640,6 @@ public class Project
 
 	private void throwProjectChangedEvent(ProjectChangedEvent event)
 	{
-		System.err.println("Project.throwProjectChangedEvent: event=" + event.getEventCode());
-
         Vector projectListener = repository.getListenerManager().getProjectListener();
 		for (int i=0; i < projectListener.size(); i++)
 		{
