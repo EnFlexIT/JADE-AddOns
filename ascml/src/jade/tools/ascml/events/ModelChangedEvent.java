@@ -39,6 +39,24 @@ public class ModelChangedEvent
 	/** indicates, that a RunnableModel has been added */
 	public static final String RUNNABLE_REMOVED = "runnable_removed";
 
+	/** indicates, that the name of the model has changed */
+	public static final String NAME_CHANGED = "name_changed";
+
+	/** indicates, that the package-name of the model has changed */
+	public static final String PACKAGE_CHANGED = "package_changed";
+
+	/** indicates, that the class of the model has changed */
+	public static final String CLASS_CHANGED = "class_changed";
+
+	/** indicates, that the description of the model has changed */
+	public static final String DESCRIPTION_CHANGED = "description_changed";
+
+	/** indicates, that the platform-type of the model has changed */
+	public static final String PLATFORM_CHANGED = "platform_changed";
+
+	/** indicates, that the icon of the model has changed */
+	public static final String ICON_CHANGED = "platform_changed";
+
 	private Object model;
 	private Object userObject;
 	private String eventCode;
