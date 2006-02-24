@@ -461,6 +461,32 @@ public class ModelManager
 	}
 
 	/**
+	 * Save a model (either AgentType or SocietyType) to the file-system.
+	 * @param model  The model-object to save (either AgentType or SocietyType).
+	 * @return  true, if the model has been successfully saved, false otherwise
+	 */
+	public synchronized boolean saveModel(Object model)
+	{
+        try
+		{
+			if (model instanceof AgentType)
+			{
+				modelFactory.saveAgentTypeModel((AgentType)model);
+			}
+			else if (model instanceof SocietyType)
+			{
+				modelFactory.saveSocietyTypeModel((SocietyType)model);
+			}
+			return true; // saving successful
+		}
+		catch(ModelException me)
+		{
+			repository.throwExceptionEvent(me);
+			return false; // saving not successful
+		}
+	}
+
+	/**
 	 * When this method is called, the index, which contains all agent- and society-
 	 * description-filenames is refreshed. The method may be called due to a change
 	 * of the model-path or when files are added or deleted within this path.
