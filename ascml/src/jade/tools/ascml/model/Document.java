@@ -96,6 +96,37 @@ public class Document implements IDocument
 	}
 
 	/**
+	 * Set the source-path.
+	 * @param path  The new source-path.
+	 */
+	public void setSourcePath(String path)
+	{
+		if ((path == null) || (path.equals("")))
+			return;
+
+		if (path.contains("\\") && !path.endsWith("\\"))
+			path += "\\";
+		else if (path.contains("/") && !path.endsWith("/"))
+			path+= "/";
+
+		source =  path + getSourceName();
+	}
+
+	/**
+	 * Set the source-name (i.e. file-name - must end with '.agent.xml' or '.society.xml').
+	 * @param name  The new source-name (must end with '.agent.xml' or '.society.xml')
+	 */
+	public void setSourceName(String name)
+	{
+		if ((name == null) || name.equals(""))
+			return;
+		if (!name.endsWith(".agent.xml") && !name.endsWith(".society.xml"))
+			return;
+
+		source =  getSourcePath() + name;
+	}
+
+	/**
 	 * Get the source-name.
 	 * If the source is a file, than the file-name (without it's path) is returned.
 	 * @return  The source-path.
