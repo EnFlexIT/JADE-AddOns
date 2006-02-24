@@ -27,7 +27,6 @@ package jade.tools.ascml.model.runnable;
 
 import java.util.*;
 import jade.tools.ascml.onto.Born;
-import jade.tools.ascml.model.jibx.*;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.absmodel.*;
 
@@ -54,15 +53,14 @@ public class RunnableAgentInstance extends AbstractRunnable implements IRunnable
 
 		this.className = className;
 		this.platformType = platformType;
-		this.parameters = parameters;
-		this.parameterSets = parameterSets;
-
 		this.agentDescriptions = agentDescriptions;
 
-		this.toolOptions = toolOptions;
+		setParameters(parameters);
+		setParameterSets(parameterSets);
+		setToolOptions(toolOptions);
 
 		this.status = new Born();
-		this.detailedStatus = "Runnable agentinstance has been created";
+		this.detailedStatus = "Runnable AgentInstance has been created";
 	}
 
 	public String getClassName()
@@ -129,7 +127,10 @@ public class RunnableAgentInstance extends AbstractRunnable implements IRunnable
 	 */
 	public void setToolOptions(IToolOption[] toolOptions)
 	{
-		this.toolOptions = toolOptions;
+		if (toolOptions != null)
+			this.toolOptions = toolOptions;
+		else
+			this.toolOptions = new IToolOption[0];
 	}
 
 	/**
