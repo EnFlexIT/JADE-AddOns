@@ -31,6 +31,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 import java.util.HashMap;
+import java.io.File;
 
 
 public class ImageIconLoader
@@ -154,6 +155,11 @@ public class ImageIconLoader
 						// not important
 					}
 				}
+
+				if (returnIcon == null)
+					returnIcon = new ImageIcon(path);
+				if (returnIcon == null)
+					throw new Exception();
 			}
 			catch(Exception exc)
 			{
