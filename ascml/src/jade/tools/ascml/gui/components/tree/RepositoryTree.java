@@ -286,7 +286,15 @@ public class RepositoryTree extends JTree implements TreeSelectionListener, Proj
 	 */
 	public synchronized void modelChanged(ModelChangedEvent event)
 	{
-
+		if ((event.getEventCode() == ModelChangedEvent.NAME_CHANGED) || (event.getEventCode() == ModelChangedEvent.ICON_CHANGED))
+		{
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run()
+				{
+					repaint();
+				}
+			});
+		}
 		/*
 
 		comment because each node now registers itself as a ModelChangedListener
