@@ -85,7 +85,7 @@ public class JiBXModelFactory extends AbstractModelFactory
 		}
 		catch (JiBXException e)
 		{
-			throw new ModelException("Failed to load agenttype-model from '"+xmlFile+"'", e);
+			throw new ModelException("Failed to load AgentType from '"+xmlFile+"'", "The AgentType-model could not be loaded. Please make sure, the JiBX-binding compiler (ant-target 'compile') processed the model's class-files before startup.", e);
 		}
 	}
 
@@ -129,7 +129,7 @@ public class JiBXModelFactory extends AbstractModelFactory
 		}
 		catch (JiBXException e)
 		{
-			throw new ModelException("Failed to load societytype-model from '"+xmlFile+"'", e);
+			throw new ModelException("Failed to load SocietyType from '"+xmlFile+"'", "The SocietyType-model could not be loaded. Please make sure, the JiBX-binding compiler (ant-target 'compile') processed the model's class-files before startup.", e);
 		}
 	}
 }
