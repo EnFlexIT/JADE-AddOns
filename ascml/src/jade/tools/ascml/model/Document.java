@@ -25,12 +25,13 @@
 
 package jade.tools.ascml.model;
 
+import jade.tools.ascml.absmodel.IDocument;
+
 /**
  *  The document model for file related info.
  */
-public class Document
+public class Document implements IDocument
 {
-	public final static String SOURCE_UNKNOWN = "Source Unknown";
 
 	/** The source. */
 	protected String source = SOURCE_UNKNOWN;
@@ -58,7 +59,7 @@ public class Document
 	//-------- methods --------
 
 	/**
-	 *  Set the source.
+	 *  Set the source (path + file-name).
 	 *  @param source  The source-object.
 	 */
 	public void setSource(String source)
@@ -67,7 +68,7 @@ public class Document
 	}
 
 	/**
-	 *  Get the source.
+	 *  Get the source (path + file-name).
 	 *  @return  The source-object.
 	 */
 	public String getSource()
@@ -75,5 +76,39 @@ public class Document
 		if ((source == null) || (source.equals("")))
 			source = SOURCE_UNKNOWN;
 		return source;
+	}
+
+	/**
+	 * Get the source-path.
+	 * If the source is a file, than the path within the file-system is returned.
+	 * @return  The source-path.
+	 */
+	public String getSourcePath()
+	{
+		if ((source == null) || (source.equals("")))
+			return SOURCE_UNKNOWN;
+
+		int lastIndexOfSeparator = source.lastIndexOf('\\');
+		if (lastIndexOfSeparator == -1)
+			lastIndexOfSeparator = source.lastIndexOf('/');
+
+		return source.substring(0, lastIndexOfSeparator+1);
+	}
+
+	/**
+	 * Get the source-name.
+	 * If the source is a file, than the file-name (without it's path) is returned.
+	 * @return  The source-path.
+	 */
+	public String getSourceName()
+	{
+		if ((source == null) || (source.equals("")))
+			return SOURCE_UNKNOWN;
+
+		int lastIndexOfSeparator = source.lastIndexOf('\\');
+		if (lastIndexOfSeparator == -1)
+			lastIndexOfSeparator = source.lastIndexOf('/');
+
+		return source.substring(lastIndexOfSeparator+1, source.length());
 	}
 }
