@@ -44,4 +44,16 @@ public interface IDocument
 	 * @param name  The new source-name (must end with '.agent.xml' or '.society.xml')
 	 */
 	void setSourceName(String name);
+
+	/**
+	 * Return whether the document is saved or not.
+	 * @return true, if this document is saved as it is (without any pending changes), false otherwise.
+	 */
+	public boolean isSaved();
+
+	/**
+	 * Set whether the document is saved or not.
+	 * @param isSaved  true, if this document is saved as it is (without any pending changes), false otherwise.
+	 */
+	public void setSaved(boolean isSaved);
 }
