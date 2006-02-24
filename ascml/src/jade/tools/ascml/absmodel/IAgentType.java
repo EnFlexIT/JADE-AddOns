@@ -1,6 +1,5 @@
 package jade.tools.ascml.absmodel;
 
-import jade.tools.ascml.model.Document;
 import jade.tools.ascml.model.jibx.AgentDescription;
 import jade.tools.ascml.model.jibx.Parameter;
 import jade.tools.ascml.model.jibx.ParameterSet;
@@ -92,13 +91,13 @@ public interface IAgentType
 	 *  Set the document.
 	 *  @param document  The document.
 	 */
-	void setDocument(Document document);
+	void setDocument(IDocument document);
 
 	/**
 	 *  Get the document, which contains the AgentType's source-path.
 	 *  @return document  The document.
 	 */
-	Document getDocument();
+	IDocument getDocument();
 
 	/**
 	 *  Set the path+name of the AgentType's icon-name. Using the getIcon-method

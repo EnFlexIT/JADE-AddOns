@@ -1,7 +1,6 @@
 package jade.tools.ascml.absmodel;
 
 import jade.tools.ascml.exceptions.ModelException;
-import jade.tools.ascml.model.Document;
 import jade.tools.ascml.model.jibx.SocietyInstance;
 
 import javax.swing.*;
@@ -111,13 +110,13 @@ public interface ISocietyType
 	 *  Set the document specifying the source from which this SocietyType has been loaded.
 	 *  @param document  The document from which this SocietyType has been loaded..
 	 */
-	void setDocument(Document document);
+	void setDocument(IDocument document);
 
 	/**
 	 *  Get the document specifying the source from which this SocietyType has been loaded.
 	 *  @return  The document from which this SocietyType has been loaded..
 	 */
-	Document getDocument();
+	IDocument getDocument();
 
 	/**
 	 * Set the SocietyType's description.
