@@ -34,6 +34,7 @@ import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.model.Document;
 import jade.tools.ascml.absmodel.ISocietyInstance;
 import jade.tools.ascml.absmodel.ISocietyType;
+import jade.tools.ascml.absmodel.IDocument;
 
 /**
  * Model-object containing all required information about a society including all
@@ -54,7 +55,7 @@ public class SocietyType implements ISocietyType
 	protected String defaultSocietyInstance = NAME_UNKNOWN;
     protected ArrayList<ISocietyInstance> societyInstanceList = new ArrayList<ISocietyInstance>();
 
-	protected Document document = new Document();
+	protected IDocument document = new Document();
 
 	/**
 		 * The status indicates if this model has successfully been loaded.
@@ -219,7 +220,7 @@ public class SocietyType implements ISocietyType
 	 *  Set the document specifying the source from which this SocietyType has been loaded.
 	 *  @param document  The document from which this SocietyType has been loaded..
 	 */
-	public void setDocument(Document document)
+	public void setDocument(IDocument document)
 	{
 		this.document = document;
 	}
@@ -228,7 +229,7 @@ public class SocietyType implements ISocietyType
 	 *  Get the document specifying the source from which this SocietyType has been loaded.
 	 *  @return  The document from which this SocietyType has been loaded..
 	 */
-	public Document getDocument()
+	public IDocument getDocument()
 	{
 		return document;
 	}

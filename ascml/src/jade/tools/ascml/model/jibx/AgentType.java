@@ -41,7 +41,7 @@ public class AgentType implements IAgentType
 	protected ArrayList<IServiceDescription> serviceDescriptionList = new ArrayList<IServiceDescription>();
 
 	/** The document. */
-	protected Document document = new Document();
+	protected IDocument document = new Document();
 
 	/**
 	 * The status indicates if this model has successfully been loaded.
@@ -159,7 +159,7 @@ public class AgentType implements IAgentType
 	 *  Set the document.
 	 *  @param document  The document.
 	 */
-	public void setDocument(Document document)
+	public void setDocument(IDocument document)
 	{
 		this.document = document;
 	}
@@ -168,7 +168,7 @@ public class AgentType implements IAgentType
 	 *  Get the document, which contains the AgentType's source-path.
 	 *  @return document  The document.
 	 */
-	public Document getDocument()
+	public IDocument getDocument()
 	{
 		return this.document;
 	}
