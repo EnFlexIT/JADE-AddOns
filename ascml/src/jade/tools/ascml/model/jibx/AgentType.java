@@ -21,7 +21,7 @@ public class AgentType implements IAgentType
 	protected String packageName = NAME_UNKNOWN;;
 
 	/** The agent class name. */
-	protected String className = "";
+	protected String className = CLASS_UNKNOWN;
 
 	/** The platform-identifier (e.g. jade). */
 	protected String platformType = "";
@@ -155,8 +155,8 @@ public class AgentType implements IAgentType
 	 */
 	public void setClassName(String className)
 	{
-		if (className == null)
-			className = "";
+		if ((className == null) || className.equals(""))
+			className = CLASS_UNKNOWN;
 		if (className.equals(getClassName()))
 			return;
 
@@ -517,7 +517,11 @@ public class AgentType implements IAgentType
 	 */
 	public String toString()
 	{
-		return getName(); // + " " + super.toString();
+		String str = getName();
+		// if (!getDocument().isSaved())
+		//	str += "*";
+
+		return str; // + " " + super.toString();
 	}
 
 	/**
