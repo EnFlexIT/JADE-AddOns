@@ -35,6 +35,18 @@ public abstract class AbstractModelFactory
 	public abstract SocietyType createSocietyTypeModel(String xmlFile, Repository repository) throws ModelException, ResourceNotFoundException;
 
 	/**
+	 *  Save a SocietyType to the file-system.
+	 *  @param model  The SocietyType to save.
+	 */
+	public abstract void saveSocietyTypeModel(SocietyType model) throws ModelException;
+
+	/**
+	 *  Save an AgentType to the file-system.
+	 *  @param model  The AgentType to save.
+	 */
+	public abstract void saveAgentTypeModel(AgentType model) throws ModelException;
+
+	/**
 	 *  Get an input stream for whatever provided.
 	 *  1. It is tried to load the resource as file.
 	 *  2. It is tried to load the resource via the ClassLoader.

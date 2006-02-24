@@ -34,10 +34,7 @@ import jade.tools.ascml.model.jibx.SocietyType;
 import jade.tools.ascml.model.Document;
 import jade.tools.ascml.absmodel.IAgentType;
 import jade.tools.ascml.absmodel.ISocietyType;
-import org.jibx.runtime.BindingDirectory;
-import org.jibx.runtime.IBindingFactory;
-import org.jibx.runtime.JiBXException;
-import org.jibx.runtime.IUnmarshallingContext;
+import org.jibx.runtime.*;
 
 /**
  *  The default model loader creates the default model elements.
@@ -130,6 +127,55 @@ public class JiBXModelFactory extends AbstractModelFactory
 		catch (JiBXException e)
 		{
 			throw new ModelException("Failed to load SocietyType from '"+xmlFile+"'", "The SocietyType-model could not be loaded. Please make sure, the JiBX-binding compiler (ant-target 'compile') processed the model's class-files before startup.", e);
+		}
+	}
+
+	/**
+	 *  Save a SocietyType to the file-system.
+	 *  @param model  The SocietyType to save.
+	 */
+	public void saveSocietyTypeModel(SocietyType model) throws ModelException
+	{
+		try
+		{
+			IBindingFactory bfact = BindingDirectory.getFactory(SocietyType.class);
+			IMarshallingContext mctx = bfact.createMarshallingContext();
+			mctx.setIndent(4);
+			mctx.marshalDocument(model, "UTF-8", null, new FileOutputStream(model.getDocument().getSource(), false));
+			model.getDocument().setSaved(true);
+		}
+		catch (JiBXException e)
+		{
+			throw new ModelException("Failed to save the SocietyType to '"+model.getDocument().getSource()+"'", "The SocietyType-model could not be save. Please make sure, the JiBX-binding compiler (ant-target 'compile') processed the model's class-files before startup.", e);
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new ModelException("Failed to save the SocietyType to '"+model.getDocument().getSource()+"'", "The SocietyType-model could not be save. Please make sure you have the right to write to the file-system", e);
+		}
+	}
+
+	/**
+	 *  Save an AgentType to the file-system.
+	 *  @param model  The AgentType to save.
+	 */
+	public void saveAgentTypeModel(AgentType model) throws ModelException
+	{
+		String target = model.getDocument().getSource();
+		try
+		{
+			IBindingFactory bfact = BindingDirectory.getFactory(AgentType.class);
+			IMarshallingContext mctx = bfact.createMarshallingContext();
+			mctx.setIndent(4);
+			mctx.marshalDocument(model, "UTF-8", null, new FileOutputStream(target, false));
+			model.getDocument().setSaved(true);
+		}
+		catch (JiBXException e)
+		{
+			throw new ModelException("Failed to save the AgentType to '"+target+"'", "The AgentType-model could not be save. Please make sure, the JiBX-binding compiler (ant-target 'compile') processed the model's class-files before startup.", e);
+		}
+		catch (FileNotFoundException e)
+		{
+			throw new ModelException("Failed to save the AgentType to '"+target+"'", "The AgentType-model could not be save. Please make sure you have the right to write to the file-system", e);
 		}
 	}
 }
