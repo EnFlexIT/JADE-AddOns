@@ -37,7 +37,7 @@
 					</tooloption>
 
 					<dependencies>
-						<agentinstancedependency active="true" name="AgentInstanceName_fq" status="FUNCTIONAL">
+						<agentinstancedependency name="AgentInstanceName_fq" status="FUNCTIONAL">
 							<provider name="Test-Name" reference="Test-Reference">
 								<address>127.0.0.1</address>
 								<address>127.0.0.2</address>
@@ -90,7 +90,7 @@
 
 			<functional>
 				<dependencies>
-					<agentinstancedependency active="true" name="AgentInstanceName_fq" status="FUNCTIONAL"/>
+					<agentinstancedependency name="AgentInstanceName_fq" status="FUNCTIONAL"/>
 				</dependencies>
 				<invariant>Test-Invariant</invariant>
 			</functional>
