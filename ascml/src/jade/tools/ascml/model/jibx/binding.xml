@@ -249,7 +249,6 @@
   </mapping>
 
   <mapping name="agentinstancedependency" class="jade.tools.ascml.model.jibx.dependency.AgentInstanceDependency">
-	<value name="active" field="active" usage="optional" style="attribute"/>
 	<value name="name" field="name" usage="required" style="attribute"/>
 	<value name="status" field="status" set-method="setStatus" usage="optional" style="attribute"/>
 	<structure field="provider" usage="optional" map-as="jade.tools.ascml.model.jibx.Provider"/>
