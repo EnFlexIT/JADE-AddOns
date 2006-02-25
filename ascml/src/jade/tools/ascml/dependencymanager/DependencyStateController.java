@@ -26,18 +26,20 @@ package jade.tools.ascml.dependencymanager;
 
 import java.util.Vector;
 import jade.tools.ascml.absmodel.*;
-import jade.tools.ascml.absmodel.dependency.IDependency;
-import jade.tools.ascml.absmodel.dependency.IAgentTypeDependency;
-import jade.tools.ascml.absmodel.dependency.ISocietyTypeDependency;
+import jade.tools.ascml.absmodel.dependency.*;
 import jade.tools.ascml.exceptions.ModelActionException;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
+import jade.util.Logger;
 
 public class DependencyStateController extends AbstractDependencyController{
+	
+	private AgentLauncher launcher;
 
-	public DependencyStateController(AgentLauncher al) {
-		super(al);
+	public DependencyStateController(AgentLauncher launcher) {
+		super(launcher);
+		this.launcher=launcher;
 	}
 
 	protected Vector<IDependency> getDependenciesFromModel(IAbstractRunnable societyInstanceModel) {
@@ -49,21 +51,35 @@ public class DependencyStateController extends AbstractDependencyController{
 	}
 
 	protected void noDependencies(IAbstractRunnable absRunnable) {
+		if (launcher.myLogger.isLoggable(Logger.INFO)) {
+			launcher.myLogger.info("Setting status of "+absRunnable.getFullyQualifiedName()+" to starting");
+		}			
 		absRunnable.setStatus(new Starting());
 	}
 
 	protected void handleActiveDependency(IDependency oneDep) {
 		String depType = oneDep.getType();
-		if (depType.equals(IDependency.AGENTINSTANCE_DEPENDENCY)) {		
-			//TODO: What is an active AgentInstanceDepedency like:
-			//		What type of agent should we start?
+		if (depType.equals(IDependency.AGENTINSTANCE_DEPENDENCY)) {
+			//This is not possible
+			/*
+			IAgentInstanceDependency instDep = (IAgentInstanceDependency) oneDep;
+			try {				
+				IRunnableAgentInstance[] runnableAgents = launcher.getRepository().createRunnableAgentInstance(instDep.getName(), 1);					
+				launcher.getDependencyManager().startThisAgent(runnableAgents[0]);
+			}
+			catch (ModelException e) {
+				e.printStackTrace();
+			}
+			catch (ModelActionException e) {
+				e.printStackTrace();
+			}*/		
 		} else if (depType.equals(IDependency.AGENTTYPE_DEPENDENCY)) {
 			IAgentTypeDependency typeDep = ((IAgentTypeDependency)oneDep);
 			String fqRunnableName = typeDep.getName().concat(".").concat(((IAgentTypeDependency)oneDep).getName().concat(Long.toString(System.currentTimeMillis()))); 
 			try {
 				IRunnableAgentInstance[] runnableAgents = launcher.getRepository().createRunnableAgentInstance(fqRunnableName,Integer.parseInt(typeDep.getQuantity()));
 				for (int i=0; i<runnableAgents.length; i++) {						
-						launcher.getDependencyManager().startThisAgent(runnableAgents[i]);
+					launcher.getDependencyManager().startThisAgent(runnableAgents[i]);
 				}
 			}
 			catch (NumberFormatException e) {
@@ -76,8 +92,17 @@ public class DependencyStateController extends AbstractDependencyController{
 				e.printStackTrace();
 			}
 		} else if (depType.equals(IDependency.SOCIETYINSTANCE_DEPENDENCY)) {
-			//TODO: What is an active AgentInstanceDepedency like:
-			//		What type of agent should we start? 
+			ISocietyInstanceDependency instDep = (ISocietyInstanceDependency) oneDep;
+			try {
+				IRunnableSocietyInstance runnableSociety = launcher.getRepository().createRunnableSocietyInstance(instDep.getFullyQualifiedSocietyInstance());					
+				launcher.getDependencyManager().startThisSociety(runnableSociety);
+			}
+			catch (ModelException e) {
+				e.printStackTrace();
+			}
+			catch (ModelActionException e) {
+				e.printStackTrace();
+			}
 		} else if (depType.equals(IDependency.SOCIETYTYPE_DEPENDENCY)) {
 			ISocietyTypeDependency typeDep = ((ISocietyTypeDependency)oneDep);
 			String fqRunnableName = typeDep.getName().concat(".").concat(((IAgentTypeDependency)oneDep).getName().concat(Long.toString(System.currentTimeMillis()%(1000*60*60*24*365))));

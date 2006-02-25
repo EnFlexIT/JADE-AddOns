@@ -15,13 +15,16 @@ public class RunnableStarter implements ModelChangedListener {
 	
 	private AgentLauncher launcher;
 	private FunctionalStateController myFunctionalController;
-
+	
 	public RunnableStarter(AgentLauncher launcher,FunctionalStateController myFunctionalController) {
 		this.myFunctionalController=myFunctionalController;
 		this.launcher=launcher;
 	}
 	
 	public void modelChanged(ModelChangedEvent evt) {
+		if (launcher.myLogger.isLoggable(Logger.INFO)) {
+			launcher.myLogger.info("Received update: "+evt.getEventCode());
+		}	
 		if (evt.getEventCode() == ModelChangedEvent.STATUS_CHANGED) {
 			if (evt.getModel() instanceof IAbstractRunnable) {			
 				try {
@@ -64,12 +67,12 @@ public class RunnableStarter implements ModelChangedListener {
 		}
 		IRunnableRemoteSocietyInstanceReference[] remoteSocieties = societyInstance.getRemoteRunnableSocietyInstanceReferences();
 		//FIXME: Now, let's stop the remote references
-		/*Vector<RemoteStopperThread> rstVector = new Vector<RemoteStopperThread>();
-		IRunnableRemoteSocietyInstanceReference[] rsocs = instance.getRemoteRunnableSocietyInstanceReferences();
-		for (int i = 0; i < rsocs.length; i++) {
-			RemoteStopperThread rst = new RemoteStopperThread(rsocs[i], al, 60000);
-			rstVector.add(rst);
-		}*/		
+		for (int i=0;i<remoteSocieties.length;i++) {
+			//TODO: Add some mechanism to watch the status of remote societies
+			launcher.stopRemoteSociety(remoteSocieties[i]);
+//			RemoteStopperThread rst = new RemoteStopperThread(rsocs[i], al, 60000);
+//			rstVector.add(rst);
+		}		
 	}
 
 	private void startThisModel(IAbstractRunnable absRunnable) {

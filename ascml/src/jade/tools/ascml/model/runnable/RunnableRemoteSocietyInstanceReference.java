@@ -26,6 +26,8 @@
 package jade.tools.ascml.model.runnable;
 
 import java.util.*;
+
+import jade.tools.ascml.onto.Born;
 import jade.tools.ascml.onto.Starting;
 import jade.tools.ascml.model.jibx.Launcher;
 import jade.tools.ascml.absmodel.dependency.IDependency;
@@ -62,7 +64,7 @@ public class RunnableRemoteSocietyInstanceReference extends AbstractRunnable imp
 		this.instanceName = instanceName;
 		this.launcher = launcher;
 
-		this.status = new Starting();
+		this.status = new Born();
 		this.detailedStatus = "Runnable remote societyinstance-reference has been created";
 	}
 

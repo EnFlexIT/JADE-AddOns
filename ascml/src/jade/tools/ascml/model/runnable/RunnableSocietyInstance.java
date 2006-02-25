@@ -25,6 +25,7 @@
 
 package jade.tools.ascml.model.runnable;
 
+import jade.tools.ascml.onto.Born;
 import jade.tools.ascml.onto.Status;
 import jade.tools.ascml.onto.Starting;
 import jade.tools.ascml.absmodel.ISocietyInstance;
@@ -53,7 +54,7 @@ public class RunnableSocietyInstance extends AbstractRunnable implements IRunnab
 	{
 		super(name, parentModel, null, parentModel.getParentSocietyType().getModelChangedListener(), parentRunnable); // SocietyInstances themselves have no dependencies, therefore 'null'
 
-		this.status = new Starting();
+		this.status = new Born();
 		this.detailedStatus = "Runnable societyinstance has been created";
 	}
 	
