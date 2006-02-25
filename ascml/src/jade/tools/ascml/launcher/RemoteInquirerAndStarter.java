@@ -57,7 +57,7 @@ public class RemoteInquirerAndStarter implements ModelChangedListener {
 					Status socStatus = remoteSociety.getStatus();
 					if (!(socStatus.equals(new Functional()) || socStatus.equals(new Starting()))) {
 						//Ok, the remote society isn't functional or starting, then we have to start it
-						launcher.StartRemoteSociety(remoteSociety);
+						launcher.startRemoteSociety(remoteSociety);
 					}
 					//After we have updated the status, we are of no more use
 					launcher.getRepository().getListenerManager().removeModelChangedListener(this);

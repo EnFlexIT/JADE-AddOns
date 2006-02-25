@@ -30,24 +30,23 @@ import jade.tools.ascml.launcher.remotestatus.StatusSubscriptionInitiator;
 
 /**
  * @author Sven Lilienthal (ascml@sven-lilienthal.de)
+ *
  */
-public class RemoteStarterBehaviour extends AchieveREInitiator {
+public class RemoteStopperBehaviour  extends AchieveREInitiator {
 	
-	AgentLauncher launcher;
-	ACLMessage subscriptionMessage;
+	private StatusSubscriptionInitiator ssi;
 
-	public RemoteStarterBehaviour(AgentLauncher launcher, ACLMessage request, ACLMessage subscriptionMessage) {
+	public RemoteStopperBehaviour(AgentLauncher launcher, ACLMessage request, StatusSubscriptionInitiator ssi) {
 		super(launcher, request);
-		this.launcher=launcher;
-		this.subscriptionMessage=subscriptionMessage;
-	}
+		this.ssi=ssi;
+	}	
 
 	protected void handleInform(ACLMessage arg0) {
-		//Everything worked out, do we have to do anything else?
+		ssi.cancel();
 	}
 
 	protected void handleRefuse(ACLMessage arg0) {
-		subscriptionMessage.setPerformative(ACLMessage.CANCEL);
-		launcher.send(subscriptionMessage);
+		// TODO Auto-generated method stub
+		super.handleRefuse(arg0);
 	}
 }

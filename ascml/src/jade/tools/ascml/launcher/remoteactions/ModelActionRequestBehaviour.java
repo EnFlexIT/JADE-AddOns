@@ -51,7 +51,7 @@ import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.onto.*;
 import jade.tools.ascml.launcher.*;
 import jade.tools.ascml.exceptions.ModelActionException;
-
+/*
 	public class ModelActionRequestBehaviour extends AchieveREInitiator
 	{
 		AbstractMARWaitThread dt;
@@ -90,3 +90,4 @@ import jade.tools.ascml.exceptions.ModelActionException;
 			dt.error(new ModelActionException("The requested action has been refused.", "This ASCML sent out a request to perform an action and this request has been refused. The reason for this is: " + reply.getContent()));
 		}
 	}
+*/

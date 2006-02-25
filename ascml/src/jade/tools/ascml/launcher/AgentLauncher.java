@@ -49,31 +49,22 @@ import jade.domain.introspection.IntrospectionVocabulary;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREInitiator;
-import jade.proto.FIPAProtocolNames;
 import jade.tools.ToolAgent;
 import jade.tools.ascml.absmodel.IRunnableAgentInstance;
 import jade.tools.ascml.absmodel.IRunnableRemoteSocietyInstanceReference;
 import jade.tools.ascml.absmodel.IToolOption;
+import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.dependencymanager.DependencyManager;
 import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.gui.GUI;
-import jade.tools.ascml.launcher.remoteactions.AbstractMARWaitThread;
-import jade.tools.ascml.launcher.remoteactions.ModelActionRequestBehaviour;
-import jade.tools.ascml.launcher.remoteactions.ModelActionRequestListener;
-import jade.tools.ascml.launcher.remoteactions.RemoteStarterBehaviour;
-import jade.tools.ascml.launcher.remotestatus.RemoteStatusInquirer;
-import jade.tools.ascml.launcher.remotestatus.RemoteStatusResponder;
-import jade.tools.ascml.launcher.remotestatus.StatusSubscriptionInitiator;
-import jade.tools.ascml.launcher.remotestatus.StatusSubscriptionManager;
-import jade.tools.ascml.onto.ASCMLOntology;
-import jade.tools.ascml.onto.AbsModel;
+import jade.tools.ascml.launcher.remoteactions.*;
+import jade.tools.ascml.launcher.remotestatus.*;
+import jade.tools.ascml.onto.*;
 import jade.tools.ascml.onto.Error;
-import jade.tools.ascml.onto.SocietyInstance;
-import jade.tools.ascml.onto.Start;
-import jade.tools.ascml.onto.Status;
 import jade.tools.ascml.repository.Repository;
 import jade.util.Logger;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -106,6 +97,8 @@ public class AgentLauncher extends ToolAgent {
 	//TODO: Use the logger
 	public Logger myLogger = Logger.getMyLogger(this.getClass().getName());
 	
+	protected HashMap<IRunnableRemoteSocietyInstanceReference,StatusSubscriptionInitiator> remoteSocietySubscriptions;
+	
     /**
      * Listens to platform evens like DEADAGENT,BORNAGENT,...
      * We only care about DEADAGENT and use it to notify the dependency manager
@@ -126,8 +119,7 @@ public class AgentLauncher extends ToolAgent {
 					AID agent = ba.getAgent();
 					myDependencyManager.agentBorn(agent);
 				}
-			});
-             
+			});             
         }
 
     } // END of inner class plattformEventListener
@@ -163,7 +155,7 @@ public class AgentLauncher extends ToolAgent {
 	/**
      * adds a Behaviour which attempts to start a society on a remote plattform
      */
-	public void StartRemoteSociety(IRunnableRemoteSocietyInstanceReference remoteSociety) {
+	public void startRemoteSociety(IRunnableRemoteSocietyInstanceReference remoteSociety) {
 		// If there are no adresses, then I just don't care.
 		// If there are multiple adresses, I don't know what to do
 		// What has to be done is yet to be defined
@@ -174,13 +166,15 @@ public class AgentLauncher extends ToolAgent {
 
 		//If we start a remote society we want to be kept informed about its status
 		AbsModel absSociety = new AbsModel();
-		absSociety.setFullQuallifiedName(remoteSociety.getFullyQualifiedName());		
+		absSociety.setFullQuallifiedName(remoteSociety.getFullyQualifiedName());
+		ACLMessage subscriptionMessage=null;
 		try {
-			StatusSubscriptionInitiator ssi = new StatusSubscriptionInitiator(this,createSubscription(launcherAID, absSociety),remoteSociety);
-			addBehaviour(ssi);			
+			subscriptionMessage=createSubscription(launcherAID, absSociety);
+			StatusSubscriptionInitiator ssi = new StatusSubscriptionInitiator(this,subscriptionMessage,remoteSociety);
+			addBehaviour(ssi);
+			remoteSocietySubscriptions.put(remoteSociety,ssi);
 		}
 		catch (CodecException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			ACLMessage message = new ACLMessage(ACLMessage.REQUEST);
 			message.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
@@ -200,28 +194,71 @@ public class AgentLauncher extends ToolAgent {
 			contentAction.setAction(start);
 			try {
 				getContentManager().setValidationMode(true);
-				getContentManager().fillContent(message, contentAction);			
+				getContentManager().fillContent(message, contentAction);
+				RemoteStarterBehaviour rsb = new RemoteStarterBehaviour(this, message, subscriptionMessage);
+		        addBehaviour(rsb);
 			} catch (Exception e) {
 				e.printStackTrace();
-			}		
-			
-			RemoteStarterBehaviour rsb = new RemoteStarterBehaviour(this, message);
-	        addBehaviour(rsb);		
+			}
 		}
 		catch (OntologyException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
     }
+	
+	/**
+     * adds a Behaviour which attempts to stop a society on a remote plattform
+     */	
+	public void stopRemoteSociety(IRunnableRemoteSocietyInstanceReference remoteSociety) {
+		// If there are no adresses, then I just don't care.
+		// If there are multiple adresses, I don't know what to do
+		// What has to be done is yet to be defined
+		String[] launcherAdresses = remoteSociety.getLauncher().getAddresses();
+		String launcherName = remoteSociety.getLauncher().getName();
+		AID launcherAID = new AID(launcherName, AID.ISGUID);
+		launcherAID.addAddresses(launcherAdresses[0]);
+
+		ACLMessage message = new ACLMessage(ACLMessage.REQUEST);
+		message.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
+		message.setOntology(ASCMLOntology.ONTOLOGY_NAME);
+		message.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+		message.addReceiver(launcherAID);
+
+		// Now we fill in the message content
+		jade.content.onto.basic.Action contentAction = new jade.content.onto.basic.Action();
+		Stop stop = new Stop();
+		// TODO: Check FIPA-standard: which one should we use?
+		contentAction.setActor(launcherAID);
+		stop.setActor(launcherAID);
+		SocietyInstance newsoc = new SocietyInstance();
+		newsoc.setFullQuallifiedName(remoteSociety.getFullyQualifiedName());
+		stop.addModels(newsoc);
+		contentAction.setAction(stop);
+		try {
+			getContentManager().setValidationMode(true);
+			getContentManager().fillContent(message, contentAction);
+			RemoteStopperBehaviour rsb = new RemoteStopperBehaviour(this, message, remoteSocietySubscriptions.get(remoteSociety));
+			addBehaviour(rsb);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void startRemoteDependency(IDependency remoteDep) {
+		
+	}
+	
 
     /**
-     * Send a message to the Sniffer to sniff an agent
-     * 
-     * @param agentModel
-     *            Name of the agent to be sniffed
-     * @param synchobject
-     *            Object to be notified when the Sniffer answers
-     */
+	 * Send a message to the Sniffer to sniff an agent
+	 * 
+	 * @param agentModel
+	 *            Name of the agent to be sniffed
+	 * @param synchobject
+	 *            Object to be notified when the Sniffer answers
+	 */
     public void doSniff(IRunnableAgentInstance agentModel, StringBuffer synchobject) {
         mySniffer.requestTool(agentModel, synchobject);
     }
@@ -349,11 +386,8 @@ public class AgentLauncher extends ToolAgent {
         // Schedule Behaviours for execution
         addBehaviour(AMSSubscribe);
 
-        // adding ModelActionRequestListener
-        MessageTemplate template = MessageTemplate.MatchOntology(ASCMLOntology.ONTOLOGY_NAME);
-        template = MessageTemplate.and(template, MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST));
-        template = MessageTemplate.and(template, MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-        addBehaviour(new ModelActionRequestListener(template, this));
+        // adding ActionRequestListener
+        addBehaviour(new RemoteActionRequestListener(this));
 		
         MessageTemplate template2 = MessageTemplate.MatchOntology(ASCMLOntology.ONTOLOGY_NAME);
 		template2 = MessageTemplate.and(template2, MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_QUERY));
@@ -384,6 +418,8 @@ public class AgentLauncher extends ToolAgent {
         	gui.showMainApplicationGUI(getName());
         else
 			System.err.println(repository.getModelIndex());
+		
+		remoteSocietySubscriptions = new HashMap<IRunnableRemoteSocietyInstanceReference,StatusSubscriptionInitiator>();
 		
 		/*try
 		{
@@ -564,8 +600,8 @@ public class AgentLauncher extends ToolAgent {
 	 * @throws OntologyException
 	 */
 	public ACLMessage createSubscription(AID ascml, AbsModel model) throws CodecException, OntologyException {
-		ACLMessage msg = new ACLMessage(ACLMessage.SUBSCRIBE);
-		msg.setProtocol(FIPAProtocolNames.FIPA_SUBSCRIBE);
+		ACLMessage msg = new ACLMessage(ACLMessage.SUBSCRIBE);		
+		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);		
 		msg.setLanguage(codec.getName());
 		msg.setOntology(ASCMLOntology.ONTOLOGY_NAME);	
 		msg.addReceiver(ascml);
@@ -620,4 +656,5 @@ public class AgentLauncher extends ToolAgent {
 	public DependencyManager getDependencyManager() {
 		return myDependencyManager;
 	}
+
 }

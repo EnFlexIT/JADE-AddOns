@@ -38,7 +38,7 @@ import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.*;
 import jade.lang.acl.MessageTemplate;
 import jade.tools.ascml.onto.*;
-import jade.tools.ascml.launcher.remoteactions.ModelActionRequestListener;
+import jade.tools.ascml.launcher.remoteactions.RemoteActionRequestListener;
 import jade.tools.ascml.repository.Repository;
 import jade.tools.ascml.gui.GUI;
 
@@ -104,10 +104,8 @@ public class AgentLauncherApplet extends AgentLauncher {
 		// Schedule Behaviours for execution
 		addBehaviour(AMSSubscribe);
 
-		// adding ModelActionRequestListener
-		MessageTemplate template = MessageTemplate.MatchOntology(ASCMLOntology.ONTOLOGY_NAME);
-		template = MessageTemplate.and(template, MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST));
-		addBehaviour(new ModelActionRequestListener(template, this));
+		// adding ActionRequestListener
+		addBehaviour(new RemoteActionRequestListener(this));
 		
 		li = new LauncherInterface(this);
 

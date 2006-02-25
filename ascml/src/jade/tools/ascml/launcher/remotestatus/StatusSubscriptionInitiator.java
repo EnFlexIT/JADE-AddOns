@@ -28,6 +28,7 @@ package jade.tools.ascml.launcher.remotestatus;
 import jade.content.abs.AbsObject;
 import jade.content.abs.AbsPredicate;
 import jade.content.lang.sl.SLVocabulary;
+import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 import jade.proto.SubscriptionInitiator;
 import jade.tools.ascml.absmodel.IAbstractRunnable;
@@ -43,11 +44,13 @@ public class StatusSubscriptionInitiator extends SubscriptionInitiator {
 
 	AgentLauncher launcher;
 	IAbstractRunnable model;
+	AID receiver;
 
 	public StatusSubscriptionInitiator(AgentLauncher launcher, ACLMessage msg, IAbstractRunnable model) {
 		super(launcher, msg);
 		this.model=model;
 		this.launcher=launcher;
+		this.receiver=(AID) msg.getAllReceiver().next();
 	}	
 	
 	@Override
@@ -66,6 +69,10 @@ public class StatusSubscriptionInitiator extends SubscriptionInitiator {
 		} catch (Exception e) {
 		}		
 		super.handleInform(inform);
+	}
+	
+	public void cancel() {
+		super.cancel(receiver,true);
 	}
 
 }
