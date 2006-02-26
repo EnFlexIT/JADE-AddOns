@@ -182,6 +182,7 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 	 */
 	public void setQuantity(String quantity)
 	{
+		quantity = quantity.replace(".", "");
 		if ((quantity == null) || (quantity.trim().equals("")))
 			this.quantity = "1";
 		else
