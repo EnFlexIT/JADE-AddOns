@@ -140,6 +140,7 @@ public class AgentInstance implements IAgentInstance
 	 */
 	public void setQuantity(String quantity)
 	{
+		quantity = quantity.replace(".", "");
 		if ((quantity == null) || (quantity.trim().equals("")))
 			this.quantity = "1";
 		else
@@ -394,37 +395,38 @@ public class AgentInstance implements IAgentInstance
 	{
 	    ArrayList<IParameter> allParameters = new ArrayList<IParameter>();
 
-		// first add all instance-parameters to the new parameter-list
-		for (int i=0; i < parameterList.size(); i++)
-		{
-			allParameters.add(parameterList.get(i));
-		}
-
 		// then, add the type-parameters. Parameters, whose values are overwritten
 		// by the instance's parameter-values are not added, instead only their variables
 		// are copied to the instance's parameter.
 
-		System.err.println("AgentInstance.getParameters: FixMe !!! instance and type-parameters have to be merged.");
-
-		Parameter[] typeParameters = type.getParameters();
+		IParameter[] typeParameters = type.getParameters();
 		for (int i=0; i < typeParameters.length; i++)
 		{
-			allParameters.add(typeParameters[i]);
+			allParameters.add((IParameter)typeParameters[i].clone());
 		}
 
-		/*Parameter[] typeParameters = type.getParameters();
-		for (int i=0; i < typeParameters.length; i++)
+		// add all instance-parameters to the new parameter-list, overwriting values of the type-parameters
+		for (int i=0; i < parameterList.size(); i++)
 		{
-			for (int j=0; j < allParameters.size(); j++)
+			boolean parameterOverwritten = false;
+
+			// check for overwritten-parameters and set new values
+			for (int j=0; j < typeParameters.length; j++)
 			{
-				if (typeParameters[i].getName().equals(allParameters.get(j).getName()))
+				if (typeParameters[j].getName().equals(parameterList.get(i).getName()))
 				{
-					// copy the type's parameter into
+					IParameter overwrittenTypeParameter = allParameters.get(j); // get cloned parameter
+					overwrittenTypeParameter.setValue(parameterList.get(i).getValue()); // and set new value
+					parameterOverwritten = true;
 				}
 			}
+
+			// only add instance-parameter to list when it does not overwrite an type-parameter
+			if (!parameterOverwritten)
+				allParameters.add(parameterList.get(i));
 		}
-		*/
-        Parameter[] returnArray = new Parameter[allParameters.size()];
+
+        IParameter[] returnArray = new Parameter[allParameters.size()];
 		allParameters.toArray(returnArray);
 		return returnArray;
 	}
@@ -534,37 +536,37 @@ public class AgentInstance implements IAgentInstance
 	{
 	    ArrayList<IParameterSet> allParameterSets = new ArrayList<IParameterSet>();
 
-		// first add all instance-parameters to the new parameter-list
-		for (int i=0; i < parameterSetList.size(); i++)
-		{
-			allParameterSets.add(parameterSetList.get(i));
-		}
-
 		// then, add the type-parameters. Parameters, whose values are overwritten
 		// by the instance's parameter-values are not added, instead only their variables
 		// are copied to the instance's parameter.
 
-		System.err.println("AgentInstance.getParameterSets: FixMe !!! instance and type-parameters have to be merged.");
-
-		ParameterSet[] typeParameterSets = type.getParameterSets();
+		IParameterSet[] typeParameterSets = type.getParameterSets();
 		for (int i=0; i < typeParameterSets.length; i++)
 		{
-			allParameterSets.add(typeParameterSets[i]);
+			allParameterSets.add((IParameterSet)typeParameterSets[i].clone());
 		}
 
-		/*Parameter[] typeParameters = type.getParameters();
-		for (int i=0; i < typeParameters.length; i++)
+		// add all instance-parametersets to the new parameterset-list, overwriting all values of the type-parametersets
+		for (int i=0; i < parameterSetList.size(); i++)
 		{
-			for (int j=0; j < allParameters.size(); j++)
+			boolean parameterOverwritten = false;
+
+			// check for overwritten-parameters and set new values
+			for (int j=0; j < typeParameterSets.length; j++)
 			{
-				if (typeParameters[i].getName().equals(allParameters.get(j).getName()))
+				if (typeParameterSets[j].getName().equals(parameterSetList.get(i).getName()))
 				{
-					// copy the type's parameter into
+					IParameterSet overwrittenTypeParameterSet = allParameterSets.get(j); // get cloned parameterSet
+					overwrittenTypeParameterSet.setValues(parameterSetList.get(i).getValues()); // and set new values
+					parameterOverwritten = true;
 				}
 			}
-		}
-		*/
 
+			// only add instance-parameter to list when it does not overwrite an type-parameter
+			if (!parameterOverwritten)
+				allParameterSets.add(parameterSetList.get(i));
+		}
+		
 		ParameterSet[] returnArray = new ParameterSet[allParameterSets.size()];
 		allParameterSets.toArray(returnArray);
 		return returnArray;
