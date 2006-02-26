@@ -69,6 +69,12 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 		this.setOpaque(true);
 		
 		setRepositoryPanes();
+		JTabbedPane test = new JTabbedPane();
+		test.add(new JLabel("Test 1"));
+		test.add(new JLabel("Test 2"));
+		test.add(new JLabel("Test 3"));
+
+		this.add(test);
 	}
 	
 	private void addTab(String title, Icon icon, JPanel component, String tip)
@@ -105,7 +111,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 	private void setAgentInstancePanes(IAgentInstance model)
 	{
 		finalizeOldTabs();
-		this.addTab("General Settings", null, new AgentInstanceGeneral(mainPanel, model), "General information about this agentType");
+		this.addTab("General Settings", null, new AgentInstanceGeneral(mainPanel, model.getParentSocietyInstance()), "General information about this agentType");
 		this.addTab("Parameter", null, new Parameter(mainPanel, model), "Parameters specified for this agentType");
 		this.addTab("Parameter-Sets", null, new ParameterSet(mainPanel, model), "Parameter-Sets specified for this agentType");
 		this.addTab("Dependencies", null, new Dependencies(mainPanel, new Vector(model.getDependencyList())), "Shows all dependencies definded for this reference");
@@ -115,27 +121,27 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 
 	private void setSocietyTypePanes(ISocietyType model)
 	{
-		System.err.println("TabbedPaneManager.setSocietyTypePanes: model=" + model);
 		finalizeOldTabs();
-		this.addTab("General Settings", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYTYPE, 16, 16), new SocietyTypeGeneral(mainPanel, model), "General information about this societyType");
+		this.addTab("SocietyType Settings", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYTYPE, 16, 16), new SocietyTypeGeneral(mainPanel, model), "General information about this societyType");
 
+		/*
 		ISocietyInstance[] socInstances = model.getSocietyInstances();
 		for (int i=0; i < socInstances.length; i++)
 		{
 			this.addTab(socInstances[i].getName(), ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new SocietyInstanceGeneral(mainPanel, socInstances[i]), "General information about this societyInstance");
 		}
-
+        */
 		this.setSelectedIndex(0);
 	}
 
 	private void setSocietyInstancePanes(ISocietyInstance model)
 	{
-		System.err.println("TabbedPaneManager.setSocietyInstancePanes: model=" + model);
 		finalizeOldTabs();
-		this.addTab("Type Settings", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYTYPE, 16, 16), new SocietyTypeGeneral(mainPanel, model.getParentSocietyType()), "General information about the societyType");
-		this.addTab(model.getName(), ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new SocietyInstanceGeneral(mainPanel, model), "General information about this societyInstance");
-
-		this.setSelectedIndex(1);
+		this.addTab("Main-Settings", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new SocietyInstanceGeneral(mainPanel, model), "View and edit the main settings of this SocietyInstance");
+		this.addTab("AgentInstances", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), new AgentInstanceGeneral(mainPanel, model), "View and edit all contained AgentInstances");
+		this.addTab("SocietyInstance-references", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), null, "View and edit the references to other SocietyInstances");
+		this.addTab("Functional", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), null, "View and edit the dependencies defining the functional-state");
+		this.setSelectedIndex(0);
 	}
 
 	private void setSocietyInstanceReferencePanes(ISocietyInstanceReference model)
