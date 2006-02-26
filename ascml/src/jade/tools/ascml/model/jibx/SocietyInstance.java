@@ -36,8 +36,6 @@ import jade.tools.ascml.absmodel.*;
  */
 public class SocietyInstance implements ISocietyInstance
 {
-
-
 	protected String name = NAME_UNKNOWN;
 	protected String description = "";
 	protected String quantity = "1";
@@ -141,6 +139,7 @@ public class SocietyInstance implements ISocietyInstance
 	 */
 	public void setQuantity(String quantity)
 	{
+		quantity = quantity.replace(".", "");
 		if ((quantity == null) || (quantity.trim().equals("")))
 			this.quantity = "1";
 		else
