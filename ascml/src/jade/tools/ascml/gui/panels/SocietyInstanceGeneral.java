@@ -33,64 +33,112 @@ import jade.tools.ascml.gui.dialogs.StartSocietyInstanceDialog;
 import jade.tools.ascml.absmodel.IAgentInstance;
 import jade.tools.ascml.absmodel.ISocietyInstance;
 import jade.tools.ascml.absmodel.ISocietyInstanceReference;
+import jade.tools.ascml.repository.loader.ImageIconLoader;
+import jade.tools.ascml.model.jibx.Launcher;
 
 public class SocietyInstanceGeneral extends AbstractPanel implements ActionListener
 {
-	private JButton buttonStartInstance;
+	private JLabel iconLabel;
+
+	private JButton buttonStart;
+	private JButton buttonApply;
+
+	private JTextField textFieldName;
+	private JTextField textFieldScheme;
+
+	private JTextArea textAreaDescription;
+
+	private JSpinner spinnerQuantity;
 
 	private ISocietyInstance model;
 
 	public SocietyInstanceGeneral(AbstractMainPanel mainPanel, ISocietyInstance model)
 	{
 		super(mainPanel);
-
 		this.model = model;
 				
 		this.setLayout(new GridBagLayout());
 		this.setBackground(Color.WHITE);
 
-		buttonStartInstance = new JButton("Start Instance");
-		buttonStartInstance.addActionListener(this);
+		buttonStart = new JButton("Start Instance", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_START, 16, 16));
+		buttonStart.addActionListener(this);
+		buttonStart.setPreferredSize(new Dimension(145,22));
+		buttonStart.setMinimumSize(new Dimension(145,22));
+		buttonStart.setMaximumSize(new Dimension(145,22));
 
-		this.add(new JLabel("<html><h2>&nbsp;<i>" + model.getName() + "</i> - Details</h2></html>"), new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-		this.add(createAttributePanel(), new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-		this.add(createAgentInstanceTablePane(), new GridBagConstraints(0, 2, 1, 1, 1, 0.5, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
-		this.add(createSocietyInstanceReferenceTablePane(), new GridBagConstraints(0, 3, 1, 1, 1, 0.5, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
-		this.add(buttonStartInstance, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		buttonApply = new JButton("Apply Changes", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_APPLY, 16, 16));
+		buttonApply.addActionListener(this);
+		buttonApply.setPreferredSize(new Dimension(145,22));
+		buttonApply.setMinimumSize(new Dimension(145,22));
+		buttonApply.setMaximumSize(new Dimension(145,22));
+
+        this.add(createAttributePanel(), new GridBagConstraints(0, 0, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+
+		this.add(buttonApply, new GridBagConstraints(0, 1, 1, 1, 0.5, 0.01, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		this.add(buttonStart, new GridBagConstraints(1, 1, 1, 1, 0.5, 0.01, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+
+		this.add(createAgentInstanceTablePane(), new GridBagConstraints(0, 2, 2, 1, 1, 0.5, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
+		this.add(createSocietyInstanceReferenceTablePane(), new GridBagConstraints(0, 3, 2, 1, 1, 0.5, GridBagConstraints.LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
 	}
 	
 	private JPanel createAttributePanel()
 	{
-		// first prepare all the components to display
+		// first create all the components
+		iconLabel = new JLabel(ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 32, 32));
 
-		// prepare Name
-		JTextField textName = new JTextField("" + model.getName(), 20);
-		textName.setEditable(false);
-		textName.setBackground(Color.WHITE);
-				
+		textFieldName = new JTextField(model.getName(), 30);
+		textFieldName.setMinimumSize(new Dimension(320, (int)textFieldName.getPreferredSize().getHeight()));
+		textFieldName.setBackground(Color.WHITE);
+
+		textFieldScheme = new JTextField(model.getNamingScheme(), 10);
+		textFieldScheme.setMinimumSize(new Dimension(100, (int)textFieldScheme.getPreferredSize().getHeight()));
+		textFieldScheme.setBackground(Color.WHITE);
+
 		// prepare Description
-		JTextArea textDesc = new JTextArea(model.getDescription(), 3, 20);
-		textDesc.setFont(new Font("Arial", Font.PLAIN, 12));
-		textDesc.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-		textDesc.setEditable(false);
-		textDesc.setLineWrap(true);
-		textDesc.setWrapStyleWord(true);
-		textDesc.setBackground(Color.WHITE);
+		textAreaDescription = new JTextArea(model.getDescription(), 3, 20);
+		textAreaDescription.setFont(new Font("Arial", Font.PLAIN, 12));
+		textAreaDescription.setEditable(true);
+		textAreaDescription.setLineWrap(true);
+		textAreaDescription.setWrapStyleWord(true);
+		textAreaDescription.setBackground(Color.WHITE);
 
+		spinnerQuantity = new JSpinner(new SpinnerNumberModel(model.getQuantity(), 0, 10000, 1));
+		spinnerQuantity.setPreferredSize(new Dimension(60, (int)spinnerQuantity.getPreferredSize().getHeight()));
+		spinnerQuantity.setMinimumSize(new Dimension(60, (int)spinnerQuantity.getPreferredSize().getHeight()));
+		spinnerQuantity.setMaximumSize(new Dimension(60, (int)spinnerQuantity.getPreferredSize().getHeight()));
+		spinnerQuantity.setBackground(Color.WHITE);
+
+		// put the textarea into a scrollpane
+		JScrollPane textDescScrollPane = new JScrollPane(textAreaDescription);
+		textDescScrollPane.getViewport().setBackground(Color.WHITE);
+		textDescScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		textDescScrollPane.setPreferredSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 50));
+		textDescScrollPane.setMinimumSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 50));
 
 		JPanel attributePanel = new JPanel(new GridBagLayout());
 		attributePanel.setBackground(Color.WHITE);
-		attributePanel.add(new JLabel("Society-Instance name:"), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(textName, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(new JLabel("Description:"), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(textDesc, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+
+		// prepare Main-Panel
+		attributePanel.add(iconLabel, new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(new JLabel("<html><h2>General Settings</h2>Here, you see all the main-settings for this SocietyInstance.</html>"), new GridBagConstraints(1, 0, 3, 1, 1, 0, GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+
+		attributePanel.add(new JLabel("Instance-Name:"), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(textFieldName, new GridBagConstraints(1, 1, 3, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+
+		attributePanel.add(new JLabel("Description:"), new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(textDescScrollPane, new GridBagConstraints(1, 2, 3, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+
+		attributePanel.add(new JLabel("Quantity:"), new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(spinnerQuantity, new GridBagConstraints(1, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(new JLabel("Naming-Scheme:"), new GridBagConstraints(2, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(textFieldScheme, new GridBagConstraints(3, 3, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
 
 		return attributePanel;
 	}
 
 	private JScrollPane createAgentInstanceTablePane()
 	{
-		String[] tableHeaderEntries = new String[] {"Agent-Name", "Agent-Type"};
+		String[] tableHeaderEntries = new String[] {"AgentInstance", "AgentType"};
 
 		IAgentInstance[] agentInstances = model.getAgentInstanceModels();
 		DefaultTableModel agentInstanceTableModel = new DefaultTableModel(tableHeaderEntries, 0);
@@ -100,7 +148,7 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 			String[] oneRow = new String[2];
 
 			oneRow[0] = agentInstances[i].getName();
-			oneRow[1] = ""+agentInstances[i].getType();
+			oneRow[1] = agentInstances[i].getType().getFullyQualifiedName();
 			agentInstanceTableModel.addRow(oneRow);
 		}
 
@@ -109,7 +157,7 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 		agentInstanceTable.setColumnSelectionAllowed(false);
 
 		JPanel agentInstancePanel = new JPanel(new BorderLayout());
-		agentInstancePanel.setBorder(BorderFactory.createTitledBorder(" Agent-Instances "));
+		agentInstancePanel.setBorder(BorderFactory.createTitledBorder(" AgentInstances "));
 		agentInstancePanel.setBackground(Color.WHITE);
 		agentInstancePanel.add(agentInstanceTable.getTableHeader(), BorderLayout.PAGE_START);
 		agentInstancePanel.add(agentInstanceTable, BorderLayout.CENTER);
@@ -123,7 +171,7 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 
 	private JScrollPane createSocietyInstanceReferenceTablePane()
 	{
-		String[] tableHeaderEntries = new String[] {"Type-Name", "Instance Name", "Launcher"};
+		String[] tableHeaderEntries = new String[] {"SocietyType", "SocietyInstance", "Launcher"};
 		ISocietyInstanceReference[] socInstRefs = model.getSocietyInstanceReferences();
 
 		DefaultTableModel societyRefTableModel = new DefaultTableModel(tableHeaderEntries, 0);
@@ -136,17 +184,25 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 			String typeName = oneSocInstRef.getTypeName();
 			String instanceName = oneSocInstRef.getInstanceName();
 			String launcherName = oneSocInstRef.getLauncher().getName();
-			String[] launcherAddresses = oneSocInstRef.getLauncher().getAddresses();
-			if (launcherAddresses.length > 0)
-				launcherName += "(";
-			for (int j=0; j < launcherAddresses.length-1; j++)
+
+			if (launcherName.equals(Launcher.NAME_UNKNOWN))
 			{
-				launcherName += launcherAddresses[j] + ",";
+				launcherName = "local ASCML";
 			}
-			if (launcherAddresses.length > 0)
+			else
 			{
-				launcherName += launcherAddresses[launcherAddresses.length-1];
-				launcherName += ")";
+				String[] launcherAddresses = oneSocInstRef.getLauncher().getAddresses();
+				if (launcherAddresses.length > 0)
+					launcherName += "(";
+				for (int j=0; j < launcherAddresses.length-1; j++)
+				{
+					launcherName += launcherAddresses[j] + ",";
+				}
+				if (launcherAddresses.length > 0)
+				{
+					launcherName += launcherAddresses[launcherAddresses.length-1];
+					launcherName += ")";
+				}
 			}
 			oneRow[0] = typeName;
 			oneRow[1] = instanceName;
@@ -159,7 +215,7 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 		societyRefTable.setColumnSelectionAllowed(false);
 
 		JPanel societyRefPanel = new JPanel(new BorderLayout());
-		societyRefPanel.setBorder(BorderFactory.createTitledBorder(" Society-Instance References "));
+		societyRefPanel.setBorder(BorderFactory.createTitledBorder(" SocietyInstance-References "));
 		societyRefPanel.setBackground(Color.WHITE);
 		societyRefPanel.add(societyRefTable.getTableHeader(), BorderLayout.PAGE_START);
 		societyRefPanel.add(societyRefTable, BorderLayout.CENTER);
@@ -174,9 +230,16 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 	// ---------- actionListener-methods --------------
 	public void actionPerformed(ActionEvent evt)
 	{
-		if (evt.getSource() == buttonStartInstance)
+		if (evt.getSource() == buttonStart)
 		{
             mainPanel.showDialog(new StartSocietyInstanceDialog(mainPanel, model));
+		}
+		else if (evt.getSource() == buttonApply)
+		{
+            model.setName(textFieldName.getText());
+			model.setDescription(textAreaDescription.getText());
+			model.setQuantity((String)spinnerQuantity.getValue());
+			model.setNamingScheme(textFieldScheme.getText());
 		}
 	}
 

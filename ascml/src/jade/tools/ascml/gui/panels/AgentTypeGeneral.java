@@ -36,6 +36,7 @@ import jade.tools.ascml.gui.dialogs.ExceptionDialog;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.repository.ModelIntegrityChecker;
 import jade.tools.ascml.absmodel.IAgentType;
+import jade.tools.ascml.absmodel.IDocument;
 
 public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 {
@@ -74,8 +75,6 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 		this.setBackground(Color.WHITE);
 		this.setLayout(new GridBagLayout());
 
-		// toDO: repository.addModelChangedListener(this);
-
 		buttonStart = new JButton("Start Instance", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_START, 16, 16));
 		buttonStart.addActionListener(this);
 		buttonStart.setPreferredSize(new Dimension(145,22));
@@ -112,7 +111,10 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 		textFieldSourcePath.setMinimumSize(new Dimension(320, (int)textFieldSourcePath.getPreferredSize().getHeight()));
 		textFieldSourcePath.setBackground(Color.WHITE);
 
-		textFieldSourceName = new JTextField(model.getDocument().getSourceName(), 30);
+		if (model.getDocument().getSourceName().equals(IDocument.SOURCE_UNKNOWN))
+			textFieldSourceName = new JTextField(model.getDocument().getSourceName() + ".agent.xml", 30);
+		else
+			textFieldSourceName = new JTextField(model.getDocument().getSourceName(), 30);
 		textFieldSourceName.setMinimumSize(new Dimension(320, (int)textFieldSourceName.getPreferredSize().getHeight()));
 		textFieldSourceName.setBackground(Color.WHITE);
 
