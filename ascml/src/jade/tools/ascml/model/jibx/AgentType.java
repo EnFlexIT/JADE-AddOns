@@ -68,7 +68,7 @@ public class AgentType implements IAgentType
 	 */
 	public void setName(String name)
 	{
-		if(name == null)
+		if ((name == null) || (name.trim().equals("")))
 			name = NAME_UNKNOWN;
 		if (name.equals(getName()))
 			return;
@@ -262,7 +262,13 @@ public class AgentType implements IAgentType
 	 */
 	public void setStatus(String newStatus)
 	{
+		if ((newStatus == null) || newStatus.equals(""))
+			newStatus = STATUS_ERROR;
+		if (newStatus.equals(getStatus()))
+			return;
+
 		this.status = newStatus;
+		throwModelChangedEvent(ModelChangedEvent.STATUS_CHANGED);
 	}
 
 	/**
