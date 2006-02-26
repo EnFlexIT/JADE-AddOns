@@ -5,12 +5,12 @@ package jade.tools.ascml.absmodel.dependency;
  */
 public interface IDependency
 {
-	String AGENTTYPE_DEPENDENCY			= "agenttype_dependency";
-	String AGENTINSTANCE_DEPENDENCY		= "agentinstance_dependency";
-	String SOCIETYTYPE_DEPENDENCY		= "societytype_dependency";
-	String SOCIETYINSTANCE_DEPENDENCY	= "societyinstance_dependency";
-	String SERVICE_DEPENDENCY			= "service_dependency";
-	String DELAY_DEPENDENCY				= "delay_dependency";
+	String AGENTTYPE_DEPENDENCY			= "AgentType Dependency";
+	String AGENTINSTANCE_DEPENDENCY		= "AgentInstance Dependency";
+	String SOCIETYTYPE_DEPENDENCY		= "SocietyType Dependency";
+	String SOCIETYINSTANCE_DEPENDENCY	= "SocietyInstance Dependency";
+	String SERVICE_DEPENDENCY			= "Service Dependency";
+	String DELAY_DEPENDENCY				= "Delay Dependency";
 	String ALL = "ALL";
 	String STATE_STARTING		= "STARTING";
 	String STATE_FUNCTIONAL		= "FUNCTIONAL";
