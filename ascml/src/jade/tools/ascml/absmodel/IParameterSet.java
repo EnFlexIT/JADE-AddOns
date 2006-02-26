@@ -2,6 +2,8 @@ package jade.tools.ascml.absmodel;
 
 import jade.tools.ascml.model.jibx.Constraint;
 
+import java.util.List;
+
 /**
  * 
  */
@@ -66,6 +68,12 @@ public interface IParameterSet
 	 *  @return The values of this parameterSet.
 	 */
 	String[] getValues();
+
+	/**
+	 *  Get all values of this parameterSet.
+	 *  @return The values of this parameterSet.
+	 */
+	List<String> getValueList();
 
 	/**
 	 *  Set whether this parameter is optional.
