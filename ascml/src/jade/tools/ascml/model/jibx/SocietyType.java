@@ -84,8 +84,11 @@ public class SocietyType implements ISocietyType
 	{
 		if ((name == null) || (name.trim().equals("")))
 			this.name = NAME_UNKNOWN;
-		else
-			this.name = name;
+		if (name.equals(getName()))
+			return;
+
+		this.name = name.trim();
+		throwModelChangedEvent(ModelChangedEvent.NAME_CHANGED);
 	}
 
 	/**
@@ -116,7 +119,13 @@ public class SocietyType implements ISocietyType
 	 */
 	public void setPackageName(String packageName)
 	{
+		if (packageName == null)
+			packageName = NAME_UNKNOWN;
+		if (packageName.equals(getPackageName()))
+			return;
+
 		this.packageName = packageName;
+		throwModelChangedEvent(ModelChangedEvent.PACKAGE_CHANGED);
 	}
 
 	/**
@@ -140,7 +149,13 @@ public class SocietyType implements ISocietyType
 	 */
 	public void setIconName(String iconName)
 	{
+		if (iconName == null)
+			iconName = ImageIconLoader.SOCIETYTYPE;
+		if (iconName.equals(getIconName()))
+			return;
+
 		this.iconName = iconName;
+		throwModelChangedEvent(ModelChangedEvent.ICON_CHANGED);
 	}
 
 	/**
@@ -190,7 +205,13 @@ public class SocietyType implements ISocietyType
 	 */
 	public void setStatus(String newStatus)
 	{
+		if ((newStatus == null) || newStatus.equals(""))
+			newStatus = STATUS_ERROR;
+		if (newStatus.equals(getStatus()))
+			return;
+
 		this.status = newStatus;
+		throwModelChangedEvent(ModelChangedEvent.STATUS_CHANGED);
 	}
 
 	/**
@@ -240,9 +261,12 @@ public class SocietyType implements ISocietyType
 	 */
 	public void setDescription(String description)
 	{
-		if(description == null)
+		if (description == null)
 			description = "";
-		this.description = description;
+		if (description.equals(getDescription()))
+			return;
+		this.description = description.trim();
+		throwModelChangedEvent(ModelChangedEvent.DESCRIPTION_CHANGED);
 	}
 
 	/**
@@ -407,9 +431,13 @@ public class SocietyType implements ISocietyType
 	 */
 	public void setDefaultSocietyInstanceName(String defaultSocietyInstance)
 	{
-		if(defaultSocietyInstance==null)
-			defaultSocietyInstance = "";
+		if ((defaultSocietyInstance==null) || defaultSocietyInstance.equals(""))
+			defaultSocietyInstance = NAME_UNKNOWN;
+		if (defaultSocietyInstance.equals(getDefaultSocietyInstanceName()))
+			return;
+
 		this.defaultSocietyInstance = defaultSocietyInstance;
+		throwModelChangedEvent(ModelChangedEvent.DEFAULT_INSTANCE_CHANGED);
 	}
 
 	/**
