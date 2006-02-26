@@ -61,7 +61,7 @@ public class ApplicationMainPanel extends AbstractMainPanel
 		JSplitPane splitPane =
 				new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(repositoryTree), paneManager);
 		splitPane.setOneTouchExpandable(false);
-		splitPane.setDividerLocation(300);
+		splitPane.setDividerLocation(200);
 		splitPane.setDividerSize(3);
 
 		this.add(splitPane, BorderLayout.CENTER);
