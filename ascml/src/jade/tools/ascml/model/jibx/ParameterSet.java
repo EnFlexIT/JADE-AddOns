@@ -29,11 +29,12 @@ import jade.tools.ascml.absmodel.IConstraint;
 import jade.tools.ascml.absmodel.IParameterSet;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *  This interface describes the properties of an agent startup parameter set.
  */
-public class ParameterSet implements IParameterSet
+public class ParameterSet implements IParameterSet, Cloneable
 {
 	//-------- attributes --------
 
@@ -47,7 +48,7 @@ public class ParameterSet implements IParameterSet
 	protected String description;
 
 	/** The values. */
-	protected ArrayList<String> valueList;
+	public ArrayList<String> valueList;
 
 	/** The optional flag. */
 	protected String optional;
@@ -171,6 +172,15 @@ public class ParameterSet implements IParameterSet
 	}
 
 	/**
+	 *  Get all values of this parameterSet.
+	 *  @return The values of this parameterSet.
+	 */
+	public List<String> getValueList()
+	{
+		return valueList;
+	}
+
+	/**
 	 *  Set whether this parameter is optional.
 	 *  @param optional  TRUE or FALSE represented as String.
 	 */
@@ -225,7 +235,18 @@ public class ParameterSet implements IParameterSet
 	 */
 	public Object clone()
 	{
-		return this.clone();
+		try
+		{
+			ParameterSet parameterSet = (ParameterSet)super.clone();
+			parameterSet.valueList = (ArrayList<String>)valueList.clone();
+			return parameterSet;
+		}
+		catch (CloneNotSupportedException e)
+		{
+			// not important
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public String toString()

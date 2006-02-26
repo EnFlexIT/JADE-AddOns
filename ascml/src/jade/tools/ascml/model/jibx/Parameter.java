@@ -33,7 +33,7 @@ import java.util.ArrayList;
 /**
  *  This interface describes the properties of an agent startup parameter.
  */
-public class Parameter implements IParameter
+public class Parameter implements IParameter, Cloneable
 {
 	//-------- attributes --------
 
@@ -202,9 +202,18 @@ public class Parameter implements IParameter
 	 */
 	public Object clone()
 	{
-		return this.clone();
+		try
+		{
+			return super.clone();
+		}
+		catch (CloneNotSupportedException e)
+		{
+			// not important
+			e.printStackTrace();
+		}
+		return null;
 	}
-	 
+
 	public String toString()
 	{
 		String str = "";
