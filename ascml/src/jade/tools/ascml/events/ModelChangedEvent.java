@@ -57,6 +57,9 @@ public class ModelChangedEvent
 	/** indicates, that the icon of the model has changed */
 	public static final String ICON_CHANGED = "platform_changed";
 
+	/** indicates, that the default-SocietyInstance of a SocietyType has changed */
+	public static final String DEFAULT_INSTANCE_CHANGED = "default_instance_changed";
+
 	private Object model;
 	private Object userObject;
 	private String eventCode;
