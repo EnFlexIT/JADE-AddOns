@@ -31,8 +31,16 @@ public class ProjectChangedEvent
 {
 	/** These constants are valid 'event-codes'. */
 	public static final String SOCIETYTYPE_ADDED			= "societytype_added";
+
+	/** This constant is used for selecting a SocietyType in the repository-tree **/
+	public static final String SOCIETYTYPE_SELECTED 		= "societytype_selected";
+
 	public static final String SOCIETYTYPE_REMOVED			= "societytype_removed";
 	public static final String AGENTTYPE_ADDED				= "agenttype_added";
+
+	/** This constant is used for selecting a AgentType in the repository-tree **/
+	public static final String AGENTTYPE_SELECTED 			= "agenttype_selected";
+
 	public static final String AGENTTYPE_REMOVED			= "agenttype_removed";
 	public static final String REMOTE_REPOSITORIES_CHANGED	= "remote_repositories_changed";
 	public static final String VIEW_CHANGED					= "view_changed";
