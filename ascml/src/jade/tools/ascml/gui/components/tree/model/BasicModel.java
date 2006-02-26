@@ -146,5 +146,13 @@ public class BasicModel extends AbstractRepositoryTreeModel
 			initSocietyTypeNodes();
 			// initAgentTypeNodes();
 		}
+		else if (event.getEventCode().equals(ProjectChangedEvent.SOCIETYTYPE_SELECTED))
+		{
+			rootTree.setSelectedModel(event.getModel());
+		}
+		else if (event.getEventCode().equals(ProjectChangedEvent.AGENTTYPE_SELECTED))
+		{
+			rootTree.setSelectedModel(event.getModel());
+		}
 	}
 }

@@ -129,5 +129,13 @@ public class ExpertModel extends AbstractRepositoryTreeModel
 		{
 			removeSocietyType((ISocietyType)event.getModel());
 		}
+		else if (event.getEventCode().equals(ProjectChangedEvent.SOCIETYTYPE_SELECTED))
+		{
+			rootTree.setSelectedModel(event.getModel());
+		}
+		else if (event.getEventCode().equals(ProjectChangedEvent.AGENTTYPE_SELECTED))
+		{
+			rootTree.setSelectedModel(event.getModel());
+		}
 	}
 }
