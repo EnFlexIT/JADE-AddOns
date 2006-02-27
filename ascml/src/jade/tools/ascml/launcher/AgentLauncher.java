@@ -69,22 +69,22 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
+ * This is the main class of the ASCML.
  * @author Sven Lilienthal (ascml@sven-lilienthal.de)
- *
  */
 public class AgentLauncher extends ToolAgent {
 
-	public final static String ASCML_VERSION = "0.7";
+	public final static String ASCML_VERSION = "0.9";
 
-    public final String introspectorPrefix = "ASCMLIntrospector";
-    public final String snifferPrefix = "ASCMLSniffer";
-    public final String benchmarkerSnifferPrefix = "ASCMLBencher";
+	protected final String introspectorPrefix = "ASCMLIntrospector";
+	protected final String snifferPrefix = "ASCMLSniffer";
+	protected final String benchmarkerSnifferPrefix = "ASCMLBencher";
     
-    public Codec codec = new SLCodec(2);
+	protected Codec codec = new SLCodec(2);
 
     protected Repository repository;
     protected GUI gui;
-    public LauncherInterface li;
+	protected LauncherInterface li;
 	
     private ToolRequester mySniffer = new ToolRequester(this, "jade.tools.sniffer.Sniffer", snifferPrefix, IToolOption.TOOLOPTION_SNIFF, true);
     private ToolRequester myIntrospector = new ToolRequester(this, "jade.tools.introspector.Introspector", introspectorPrefix, IToolOption.TOOLOPTION_DEBUG, false);
@@ -125,8 +125,9 @@ public class AgentLauncher extends ToolAgent {
     } // END of inner class plattformEventListener
 
     /**
-     * tries to get the status of the remote society
+     * Tries to get the status of the remote society
      * if it isn't starting or functional it will be started
+     * @param remoteSociety The IRunnableRemoteSocietyInstanceReference to test and start
      */
 	public void inquirerAndStartRemoteSociety(IRunnableRemoteSocietyInstanceReference remoteSociety) {
 		//First we create a new listener, which will check the status updates of the remote society
@@ -155,7 +156,7 @@ public class AgentLauncher extends ToolAgent {
 	/**
      * adds a Behaviour which attempts to start a society on a remote plattform
      */
-	public void startRemoteSociety(IRunnableRemoteSocietyInstanceReference remoteSociety) {
+	protected void startRemoteSociety(IRunnableRemoteSocietyInstanceReference remoteSociety) {
 		// If there are no adresses, then I just don't care.
 		// If there are multiple adresses, I don't know what to do
 		// What has to be done is yet to be defined
@@ -209,6 +210,7 @@ public class AgentLauncher extends ToolAgent {
 	
 	/**
      * adds a Behaviour which attempts to stop a society on a remote plattform
+     * @param remoteSociety The IRunnableRemoteSocietyInstanceReference to stop
      */	
 	public void stopRemoteSociety(IRunnableRemoteSocietyInstanceReference remoteSociety) {
 		// If there are no adresses, then I just don't care.
@@ -247,7 +249,7 @@ public class AgentLauncher extends ToolAgent {
 	}
 	
 	public void startRemoteDependency(IDependency remoteDep) {
-		
+		//FIXME: Start remote dependencies
 	}
 	
 
@@ -308,11 +310,11 @@ public class AgentLauncher extends ToolAgent {
      * @param aName
      *            identifier for the request
      */
-    public void addAMSBehaviour(ACLMessage msg, StringBuffer result, String aName) {
+    protected void addAMSBehaviour(ACLMessage msg, StringBuffer result, String aName) {
         addBehaviour(new AMSClientBehaviour(msg, result, aName));
     }
 
-    public void addAMSBehaviour(AchieveREInitiator initiator) {
+    protected void addAMSBehaviour(AchieveREInitiator initiator) {
         addBehaviour(initiator);
     }
 
@@ -542,11 +544,15 @@ public class AgentLauncher extends ToolAgent {
 
     }
 
-    public ListenerManagerInterface getlmi() {
+    /**
+     * Retrieve the ListenerManagerInterface of the ASMCL
+     * @return The ListenerManagerInterface of the ASCML
+     */
+    protected ListenerManagerInterface getlmi() {
         return lmi;
     }
 
-	public StatusSubscriptionManager getSubscriptionManager() {
+	protected StatusSubscriptionManager getSubscriptionManager() {
 		return subscriptionManager;
 	}
 	
@@ -633,26 +639,11 @@ public class AgentLauncher extends ToolAgent {
 		
 				
 	}
-	
-	/**
-	 * Adds a new Subscription at the given ascml for the given Model
-	 * @param ascml
-	 * 			The AID of the ascml to subscribe with
-	 * @param model
-	 * 			The model to subscribe for
-	 * @return  
-	 * 			The StatusSubscriptionInitiator to cancel the subscription if wanted 
-	 *//*
-	public StatusSubscriptionInitiator subscribeTo(AID ascml,AbsModel model) {
-		try {			 
-			StatusSubscriptionInitiator ssi = new StatusSubscriptionInitiator(this, createSubscription(ascml,model), model);
-			return ssi;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}		
-		return null;
-	}*/
 
+	/**
+	 * Retrive the DependencyManager of this ASMCL
+	 * @return The DependencyManager of this ASMCL
+	 */
 	public DependencyManager getDependencyManager() {
 		return myDependencyManager;
 	}
