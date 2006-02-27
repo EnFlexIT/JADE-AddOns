@@ -95,6 +95,11 @@ public class AgentLauncherThread implements Runnable {
 
 		// iterate through all arguments contained in the agentModel
 		IParameter[] params = theAgent.getParameters();
+		if (params.length==0) {
+			if (launcher.myLogger.isLoggable(Logger.INFO)) {
+				launcher.myLogger.info("No parameters for "+agentName);
+			}
+		}
 		for (int i = 0; i < params.length; i++) {
 			// get the argument-name and add the argument's value to the
 			// agent-to-start
@@ -104,15 +109,22 @@ public class AgentLauncherThread implements Runnable {
 			// are passed as key-value pairs (for JADE-platform-agents) or as value only (Jadex)
 			String platformType = theAgent.getPlatformType();
 			String arg;
-			if (platformType == IAgentType.PLATFORM_TYPE_JADE)
-				arg = argName + "=" + theAgent.getParameter(argName).getValue();
-			else
-				// Jadex
+			if (platformType == IAgentType.PLATFORM_TYPE_JADEX)
 				arg = (String) theAgent.getParameter(argName).getValue();
+			else
+				arg = argName + "=" + theAgent.getParameter(argName).getValue();
 
 			ca.addArguments(arg);
+			if (launcher.myLogger.isLoggable(Logger.INFO)) {
+				launcher.myLogger.info("Adding parameter: "+arg+" to "+agentName);
+			}
 		}
 		IParameterSet[] paramsets = theAgent.getParameterSets();
+		if (paramsets.length==0) {
+			if (launcher.myLogger.isLoggable(Logger.INFO)) {
+				launcher.myLogger.info("No parametersets for "+agentName);
+			}
+		}		
 		for (int i = 0; i < paramsets.length; i++) {
 			// get the argument-name and add the argument's value to the
 			// agent-to-start
@@ -123,6 +135,10 @@ public class AgentLauncherThread implements Runnable {
 				value.append((String) values[j] + " ");
 			}
 			ca.addArguments(value.toString());
+			if (launcher.myLogger.isLoggable(Logger.INFO)) {
+				launcher.myLogger.info("Adding parameters: "+value.toString()+" to agentName");
+			}
+			
 		}
 		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 		msg.setLanguage(launcher.codec.getName());
