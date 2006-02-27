@@ -130,24 +130,15 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 		finalizeOldTabs();
 		this.addTab("Main-Settings", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new SocietyInstanceGeneral(mainPanel, model), "View and edit the main settings of this SocietyInstance");
 		this.addTab("AgentInstances", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), new AgentInstanceGeneral(mainPanel, null, model), "View and edit all contained AgentInstances");
-		this.addTab("SocietyInstance-references", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), null, "View and edit the references to other SocietyInstances");
-		this.addTab("Functional", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), null, "View and edit the dependencies defining the functional-state");
+		this.addTab("SocietyInstance-references", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), new SocietyInstanceReferenceGeneral(mainPanel, null, model), "View and edit the references to other SocietyInstances");
+		// this.addTab("Functional", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), null, "View and edit the dependencies defining the functional-state");
 		this.setSelectedIndex(0);
 	}
 
 	private void setSocietyInstanceReferencePanes(ISocietyInstanceReference model)
 	{
 		finalizeOldTabs();
-		this.addTab("Referenced Instance", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new SocietyInstanceGeneral(mainPanel, model.getLocallyReferencedModel()), "General information about the referenced societyinstance");
-		this.addTab("Dependencies", null, new Dependencies(mainPanel, new Vector(model.getDependencyList())), "Shows all dependencies definded for this reference");
-
-		this.setSelectedIndex(0);
-	}
-
-	private void setRemoteSocietyInstanceReferencePanes(ISocietyInstanceReference model)
-	{
-		finalizeOldTabs();
-		this.addTab("Referenced Instance", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new ReferenceGeneral(mainPanel, model), "General information about the remotly referenced societyinstance");
+		this.addTab("SocietyInstance-reference", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new SocietyInstanceReferenceGeneral(mainPanel, model, model.getParentSocietyInstance()), "General information about the referenced societyinstance");
 		this.addTab("Dependencies", null, new Dependencies(mainPanel, new Vector(model.getDependencyList())), "Shows all dependencies definded for this reference");
 
 		this.setSelectedIndex(0);
@@ -202,10 +193,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 		}
 		else if(model instanceof ISocietyInstanceReference)
 		{
-			if (((ISocietyInstanceReference)model).isRemoteReference())
-				setRemoteSocietyInstanceReferencePanes((ISocietyInstanceReference)model);
-			else
-				setSocietyInstanceReferencePanes((ISocietyInstanceReference)model);
+			setSocietyInstanceReferencePanes((ISocietyInstanceReference)model);
 		}
 		else if (model instanceof String)
 		{
