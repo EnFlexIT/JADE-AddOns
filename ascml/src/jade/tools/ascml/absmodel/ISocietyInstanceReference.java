@@ -211,12 +211,6 @@ public interface ISocietyInstanceReference
 	void removeDependency(IDependency dependency);
 
 	/**
-	 * Get all the ModelChangedListener.
-	 * @return  A Vector containing ModelChangedListener
-	 */
-	Vector getModelChangedListener();
-
-	/**
 	 * Throw a ModelChangedEvent notifying all the listeners that this model has been changed
 	 * @param eventCode  The eventCode for the event (see ModelChangedEvent for possible codes)
 	 */
