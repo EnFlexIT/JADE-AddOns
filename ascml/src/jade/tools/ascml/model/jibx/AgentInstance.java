@@ -54,6 +54,16 @@ public class AgentInstance implements IAgentInstance
 
 	// ----------------------------------------------------------------------------
 
+	public AgentInstance()
+	{
+
+	}
+
+	public AgentInstance(ISocietyInstance parentSocietyInstance)
+	{
+		setParentSocietyInstance(parentSocietyInstance);
+	}
+
 	/**
 	 *  Get the SocietyInstance-model to which this AgentInstance belongs.
 	 *  @return SocietyInstance-model to which this AgentInstance belongs.
@@ -78,7 +88,13 @@ public class AgentInstance implements IAgentInstance
 	 */
 	public void setName(String name)
 	{
-		this.name = name;
+		if ((name == null) || (name.trim().equals("")))
+			name = NAME_UNKNOWN;
+		if (name.equals(getName()))
+			return;
+
+		this.name = name.trim();
+		throwModelChangedEvent(ModelChangedEvent.NAME_CHANGED);
 	}
 
 	/**
@@ -99,7 +115,13 @@ public class AgentInstance implements IAgentInstance
 	 */
 	public void setTypeName(String typeName)
 	{
-		this.typeName = typeName;
+		if ((typeName == null) || (typeName.trim().equals("")))
+			typeName = NAME_UNKNOWN;
+		if (typeName.equals(getTypeName()))
+			return;
+
+		this.typeName = typeName.trim();
+		throwModelChangedEvent(ModelChangedEvent.TYPENAME_CHANGED);
 	}
 
 	/**
@@ -129,7 +151,12 @@ public class AgentInstance implements IAgentInstance
 	 */
 	public void setType(IAgentType type)
 	{
+		if ((type == null) || (type == getType()))
+			return;
+
 		this.type = type;
+		this.typeName = type.getName();
+		throwModelChangedEvent(ModelChangedEvent.TYPE_CHANGED);
 	}
 
 	/**
@@ -664,12 +691,8 @@ public class AgentInstance implements IAgentInstance
 	 */
 	public void throwModelChangedEvent(String eventCode, Object userObject)
 	{
-		ModelChangedEvent event = new ModelChangedEvent(this, eventCode, userObject);
-		Vector modelChangedListener = getType().getModelChangedListener();
-		for (int i=0; i < modelChangedListener.size(); i++)
-		{
-			((ModelChangedListener)modelChangedListener.elementAt(i)).modelChanged(event);
-		}
+		getParentSocietyInstance().throwModelChangedEvent(eventCode, this);
+
 
 		/*if (eventThrownTimeStamp + EVENT_INTERVAL > System.currentTimeMillis() || (!lastThrownEventCode.equals(eventCode)))
 		{
