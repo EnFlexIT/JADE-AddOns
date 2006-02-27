@@ -27,7 +27,6 @@ package jade.tools.ascml.repository.loader;
 
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.repository.RunnableManager;
-import jade.tools.ascml.model.runnable.AbstractRunnable;
 import jade.tools.ascml.model.runnable.RunnableAgentInstance;
 import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
 import jade.tools.ascml.model.runnable.RunnableRemoteSocietyInstanceReference;
@@ -118,7 +117,7 @@ public class RunnableFactory
 				{
 					// create the remote runnable reference-object
 					RunnableRemoteSocietyInstanceReference oneRunnableReference =
-						new RunnableRemoteSocietyInstanceReference(oneReference.getName(), returnInstance, oneReference.getDependencies(), oneReference.getModelChangedListener(), oneReference.getTypeName(), oneReference.getInstanceName(), oneReference.getLauncher());
+						new RunnableRemoteSocietyInstanceReference(oneReference.getName(), returnInstance, oneReference.getDependencies(), oneReference.getParentSocietyInstance().getParentSocietyType().getModelChangedListener(), oneReference.getTypeName(), oneReference.getInstanceName(), oneReference.getLauncher());
 					returnInstance.addRemoteRunnableSocietyInstanceReference(oneRunnableReference);
 				}
 				else
