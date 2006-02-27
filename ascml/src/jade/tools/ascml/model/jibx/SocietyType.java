@@ -375,9 +375,14 @@ public class SocietyType implements ISocietyType
 	 * Add a SocietyInstance to this SocietyType.
 	 * @param societyInstance  The SocietyInstance to add.
 	 */
-	public void addSocietyInstance(SocietyInstance societyInstance)
+	public void addSocietyInstance(ISocietyInstance societyInstance)
 	{
-		societyInstanceList.add(societyInstance);
+		if (societyInstance != null)
+		{
+			societyInstance.setParentSocietyType(this);
+			societyInstanceList.add(societyInstance);
+			throwModelChangedEvent(ModelChangedEvent.SOCIETYINSTANCE_ADDED);
+		}
 	}
 
 	/**
@@ -422,7 +427,11 @@ public class SocietyType implements ISocietyType
 	 */
 	public void removeSocietyInstance(ISocietyInstance societyInstance)
 	{
-		societyInstanceList.remove(societyInstance);
+		if (societyInstanceList.contains(societyInstance))
+		{
+			societyInstanceList.remove(societyInstance);
+			throwModelChangedEvent(ModelChangedEvent.SOCIETYINSTANCE_REMOVED);
+		}
 	}
 
 	/**
