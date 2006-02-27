@@ -32,5 +32,5 @@ import jade.tools.ascml.absmodel.ILauncher;
  */
 public class Launcher extends AgentID implements ILauncher
 {
-
+	
 }
