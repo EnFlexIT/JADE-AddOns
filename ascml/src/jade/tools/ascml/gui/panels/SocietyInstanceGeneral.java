@@ -238,7 +238,7 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 		{
             model.setName(textFieldName.getText());
 			model.setDescription(textAreaDescription.getText());
-			model.setQuantity((String)spinnerQuantity.getValue());
+			model.setQuantity(((Double)spinnerQuantity.getValue()).intValue()+"");
 			model.setNamingScheme(textFieldScheme.getText());
 		}
 	}
