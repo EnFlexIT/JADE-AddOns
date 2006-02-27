@@ -31,17 +31,26 @@ public class ProjectChangedEvent
 {
 	/** These constants are valid 'event-codes'. */
 	public static final String SOCIETYTYPE_ADDED			= "societytype_added";
+    public static final String SOCIETYTYPE_REMOVED			= "societytype_removed";
+
+	public static final String AGENTTYPE_ADDED				= "agenttype_added";
+    public static final String AGENTTYPE_REMOVED			= "agenttype_removed";
 
 	/** This constant is used for selecting a SocietyType in the repository-tree **/
 	public static final String SOCIETYTYPE_SELECTED 		= "societytype_selected";
 
-	public static final String SOCIETYTYPE_REMOVED			= "societytype_removed";
-	public static final String AGENTTYPE_ADDED				= "agenttype_added";
-
-	/** This constant is used for selecting a AgentType in the repository-tree **/
+	/** This constant is used for selecting an AgentType in the repository-tree **/
 	public static final String AGENTTYPE_SELECTED 			= "agenttype_selected";
 
-	public static final String AGENTTYPE_REMOVED			= "agenttype_removed";
+	/** This constant is used for selecting a SocietyInstance in the repository-tree **/
+	public static final String SOCIETYINSTANCE_SELECTED 	= "societyinstance_selected";
+
+	/** This constant is used for selecting an AgentInstance in the repository-tree **/
+	public static final String AGENTINSTANCE_SELECTED 		= "agentinstance_selected";
+
+	/** This constant is used for selecting a SocietyInstance-reference in the repository-tree **/
+	public static final String SOCIETYINSTANCE_REFERENCE_SELECTED 	= "societyinstance_reference_selected";
+
 	public static final String REMOTE_REPOSITORIES_CHANGED	= "remote_repositories_changed";
 	public static final String VIEW_CHANGED					= "view_changed";
 	public static final String WORKING_DIRECTORY_CHANGED	= "working_directory_changed";

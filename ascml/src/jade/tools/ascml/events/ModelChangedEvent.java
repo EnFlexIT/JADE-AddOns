@@ -45,6 +45,12 @@ public class ModelChangedEvent
 	/** indicates, that an AgentInstance has been removed from a SocietyInstance */
 	public static final String AGENTINSTANCE_REMOVED = "agentinstance_removed";
 
+	/** indicates, that a SocietyInstance has been added to a SocietyType */
+	public static final String SOCIETYINSTANCE_ADDED = "societyinstance_added";
+
+	/** indicates, that a SocietyInstance has been removed from a SocietyType */
+	public static final String SOCIETYINSTANCE_REMOVED = "societyinstance_removed";
+
 	/** indicates, that a SocietyInstance-reference has been added to a SocietyInstance */
 	public static final String SOCIETYINSTANCE_REFERENCE_ADDED = "societyinstance_reference_added";
 
