@@ -26,7 +26,6 @@ package jade.tools.ascml.launcher;
 
 /**
  * @author dirk
- * @
  */
 public interface DebugableInterface {
 
