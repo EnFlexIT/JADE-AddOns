@@ -33,6 +33,10 @@ import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
 import jade.util.Logger;
 
+/**
+ * This class watches the startup dependencies for all models
+ * @author Sven Lilienthal (ascml@sven-lilienthal.de)
+ */
 public class DependencyStateController extends AbstractDependencyController{
 	
 	private AgentLauncher launcher;

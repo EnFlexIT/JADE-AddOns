@@ -41,6 +41,13 @@ import jade.tools.ascml.repository.Repository;
 import jade.util.Logger;
 //TODO: Can we use this here: jade.tools.ascml.events.ProgressUpdateEvent?
 
+/**
+ * This class is responsible for updating the status of all models.
+ * It has to main parts:
+ * The {@link jade.tools.ascml.dependencymanager.FunctionalStateController FunctionalStateController}
+ * and the {@link jade.tools.ascml.dependencymanager.DependencyStateController DependencyStateController}
+ * @author Sven Lilienthal (ascml@sven-lilienthal.de)
+ */
 public class DependencyManager implements ModelChangedListener {
 
 	private AgentLauncher launcher;
@@ -60,6 +67,10 @@ public class DependencyManager implements ModelChangedListener {
 		myDependencyStateController = new DependencyStateController(launcher);
 	}
 
+	/**
+	 * This method is called by the ListenerManager of the repository whenever a model changes.
+	 * We are only interested in STATUS_CHANGED messages
+	 */
 	public void modelChanged(ModelChangedEvent evt) {
 		if (evt.getEventCode() == ModelChangedEvent.STATUS_CHANGED) {
 			if (evt.getModel() instanceof IAbstractRunnable) {
@@ -90,7 +101,11 @@ public class DependencyManager implements ModelChangedListener {
 			}
 		}
 	}
-
+	
+	/**
+	 * This method is called by the AgentLauncher whenever a agent is born
+	 * @param agentAID The agent-AID of the new born agent
+	 */
 	public void agentBorn(AID agentAID) {
 		if (myLibrary.hasAgent(agentAID)) {
 			IRunnableAgentInstance agent = myLibrary.getAgent(agentAID);
@@ -99,6 +114,10 @@ public class DependencyManager implements ModelChangedListener {
 		myFunctionalController.agentBorn(agentAID);
 	}
 
+	/**
+	 * This method is called by the AgentLauncher whenever a agent dies
+	 * @param agentAID The agent-AID of the died agent
+	 */	
 	public void agentDied(AID agentAID) {
 		if (myLibrary.hasAgent(agentAID)) {
 			IRunnableAgentInstance agent = myLibrary.getAgent(agentAID);
@@ -112,6 +131,11 @@ public class DependencyManager implements ModelChangedListener {
 		myFunctionalController.agentDied(agentAID);
 	}
 
+	/**
+	 * Call this method to start a specific IRunnableAgentInstance
+	 * @param agentInstanceModel The IRunnableAgentInstance to be started
+	 * @throws ModelActionException Throws a ModelActionException if the IRunnableAgentInstance is already in the library, which means, we already started it
+	 */
 	public void startThisAgent(IRunnableAgentInstance agentInstanceModel) throws ModelActionException {
 		if (myLibrary.hasAgent(agentInstanceModel.getName())) {
 			throw new ModelActionException("Agent is already in library", agentInstanceModel);
@@ -120,6 +144,11 @@ public class DependencyManager implements ModelChangedListener {
 		myDependencyStateController.addModel(agentInstanceModel);
 	}
 
+	/**
+	 * Call this method to start a specific IRunnableSocietyInstance
+	 * @param societyInstanceModel The IRunnableSocietyInstance to be started
+	 * @throws ModelActionException Throws a ModelActionException if the IRunnableSocietyInstance is already in the library, which means, we already started it
+	 */
 	public void startThisSociety(IRunnableSocietyInstance societyInstanceModel) throws ModelActionException {
 		if (myLibrary.hasSociety(societyInstanceModel.getName())) {
 			throw new ModelActionException("Found society in library", societyInstanceModel);
@@ -133,10 +162,18 @@ public class DependencyManager implements ModelChangedListener {
 		myDependencyStateController.addModel(societyInstanceModel);
 	}
 
+	/**
+	 * Call this method to stop a specific IRunnableAgentInstance
+	 * @param agentInstance The IRunnableAgentInstance to be stopped
+	 */
 	public void stopThisAgent(IRunnableAgentInstance agentInstance) {
 		agentInstance.setStatus(new Stopping());
 	}
 	
+	/**
+	 * Call this method to stop a specific IRunnableSocietyInstance
+	 * @param agentInstance The IRunnableSocietyInstance to be stopped
+	 */
 	public void stopThisSociety(IRunnableSocietyInstance societyInstanceModel) {
 		societyInstanceModel.setStatus(new Stopping());
 	}

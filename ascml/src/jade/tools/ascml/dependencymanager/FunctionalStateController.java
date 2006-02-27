@@ -31,6 +31,10 @@ import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
 import jade.util.Logger;
 
+/**
+ * This class watches the functional dependencies for all models
+ * @author Sven Lilienthal (ascml@sven-lilienthal.de)
+ */
 public class FunctionalStateController extends AbstractDependencyController{
 
 	public FunctionalStateController(AgentLauncher launcher) {
