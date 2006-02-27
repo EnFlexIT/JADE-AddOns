@@ -37,12 +37,12 @@ import jade.tools.ascml.absmodel.*;
  */
 public class AgentInstance implements IAgentInstance
 {
-	protected String name;
-	protected String typeName;
-	protected String quantity;
-	protected String namingScheme;
+	protected String name = NAME_UNKNOWN;
+	protected String typeName = NAME_UNKNOWN;
+	protected String quantity = "1";
+	protected String namingScheme = "%N";
 
-	protected String status;
+	protected String status = "";
 
 	protected ArrayList<IToolOption> toolOptionList = new ArrayList<IToolOption>();
 
@@ -343,18 +343,22 @@ public class AgentInstance implements IAgentInstance
 	 * defined by the parameters of the AgentType.
 	 * @param parameter  The Parameter-object to add.
 	 */
-	public void addParameter(Parameter parameter)
+	public void addParameter(IParameter parameter)
 	{
 		parameterList.add(parameter);
 	}
 
 	/**
 	 * Remove a parameter from this agent.
-	 * @param parameter  The Parameter-object to remove.
+	 * @param parameterName  The name of the parameter to remove.
 	 */
-	public void removeParameter(IParameter parameter)
+	public void removeParameter(String parameterName)
 	{
-		parameterList.remove(parameter);
+		for (int i=0; i < parameterList.size();i++)
+		{
+			if (parameterList.get(i).getName().equals(parameterName))
+				parameterList.remove(i);
+		}
 	}
 
 	/**
@@ -377,7 +381,12 @@ public class AgentInstance implements IAgentInstance
 				// parameter and finally return the instance's parameter (with it's values)
 
 				IParameter typeParameter = getType().getParameter(name);
-				parameterArray[i].setType(typeParameter.getType());
+				if (typeParameter != null)
+				{
+					parameterArray[i].setType(typeParameter.getType());
+					parameterArray[i].setDescription(typeParameter.getDescription());
+					parameterArray[i].setOptional(typeParameter.isOptional()+"");
+				}
 				return parameterArray[i];
 			}
 		}
@@ -395,11 +404,13 @@ public class AgentInstance implements IAgentInstance
 	{
 	    ArrayList<IParameter> allParameters = new ArrayList<IParameter>();
 
-		// then, add the type-parameters. Parameters, whose values are overwritten
-		// by the instance's parameter-values are not added, instead only their variables
-		// are copied to the instance's parameter.
+		// add the type-parameters.
+        IParameter[] typeParameters;
+		if (type == null)
+			typeParameters = new IParameter[0];
+		else
+			typeParameters = type.getParameters();
 
-		IParameter[] typeParameters = type.getParameters();
 		for (int i=0; i < typeParameters.length; i++)
 		{
 			allParameters.add((IParameter)typeParameters[i].clone());
@@ -483,18 +494,22 @@ public class AgentInstance implements IAgentInstance
 	 * defined by the ParameterSets of the AgentType.
 	 * @param parameterSet  The ParameterSet-object.
 	 */
-	public void addParameterSet(ParameterSet parameterSet)
+	public void addParameterSet(IParameterSet parameterSet)
 	{
 		parameterSetList.add(parameterSet);
 	}
 
 	/**
 	 * Remove a parameterSet from this agent.
-	 * @param parameterSet  The ParameterSet-object to remove.
+	 * @param parameterSetName  The name of the parameterSet to remove.
 	 */
-	public void removeParameterSet(IParameterSet parameterSet)
+	public void removeParameterSet(String parameterSetName)
 	{
-		parameterSetList.remove(parameterSet);
+		for (int i=0; i < parameterSetList.size();i++)
+		{
+			if (parameterSetList.get(i).getName().equals(parameterSetName))
+				parameterSetList.remove(i);
+		}
 	}
 
 	/**
@@ -517,8 +532,12 @@ public class AgentInstance implements IAgentInstance
 				// parameter and finally return the instance's parameter (with it's values)
 
 				IParameterSet typeParameter = getType().getParameterSet(name);
-				parameterArray[i].setType(typeParameter.getType());
-				parameterArray[i].setValues(typeParameter.getValues());
+				if (typeParameter != null)
+				{
+					parameterArray[i].setType(typeParameter.getType());
+					parameterArray[i].setDescription(typeParameter.getDescription());
+					parameterArray[i].setOptional(typeParameter.isOptional()+"");
+				}
 				return parameterArray[i];
 			}
 		}
@@ -536,11 +555,13 @@ public class AgentInstance implements IAgentInstance
 	{
 	    ArrayList<IParameterSet> allParameterSets = new ArrayList<IParameterSet>();
 
-		// then, add the type-parameters. Parameters, whose values are overwritten
-		// by the instance's parameter-values are not added, instead only their variables
-		// are copied to the instance's parameter.
+		// add the type-parameters.
+        IParameterSet[] typeParameterSets;
+		if (type == null)
+			typeParameterSets = new IParameterSet[0];
+		else
+			typeParameterSets = type.getParameterSets();
 
-		IParameterSet[] typeParameterSets = type.getParameterSets();
 		for (int i=0; i < typeParameterSets.length; i++)
 		{
 			allParameterSets.add((IParameterSet)typeParameterSets[i].clone());
@@ -566,7 +587,7 @@ public class AgentInstance implements IAgentInstance
 			if (!parameterOverwritten)
 				allParameterSets.add(parameterSetList.get(i));
 		}
-		
+
 		ParameterSet[] returnArray = new ParameterSet[allParameterSets.size()];
 		allParameterSets.toArray(returnArray);
 		return returnArray;
