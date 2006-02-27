@@ -59,7 +59,7 @@ public class DependencyManangerLibrary {
 	 * Add a specific agent to the library, so that you can lookup the IRunnableAgentInstance belonging to an AID later on.
 	 * @param agentAID The AID of the agent
 	 * @param agentInstanceModel The IRunnableAgentInstance of the agent 
-	 * @return @see addAgent(String name, IRunnableAgentInstance agentInstanceModel)
+	 * @return false If the agent already is in the library, true if it was added successfully
 	 */
 	public boolean addAgent(AID agentAID, IRunnableAgentInstance agentInstanceModel) {
 		return addAgent(agentAID.getLocalName(),agentInstanceModel);
@@ -98,7 +98,7 @@ public class DependencyManangerLibrary {
 	/**
 	 * Remove an agent from the library
 	 * @param agentAID The AID of the agent to be removed
-	 * @return @see delAgent(String name)
+	 * @return true if the agent was found in the library
 	 */
 	public boolean delAgent(AID agentAID) {	
 		return delAgent(agentAID.getLocalName());
@@ -107,7 +107,7 @@ public class DependencyManangerLibrary {
 	/**
 	 * Remove an agent from the library 
 	 * @param name The local name of the agent to be removed
-	 * @return true If the agent was successfully removed, false otherwise
+	 * @return true if the agent was found in the library
 	 */
 	public boolean delAgent(String name) {
 		if (nameToAgentTypeMap.containsKey(name)) {
@@ -135,8 +135,8 @@ public class DependencyManangerLibrary {
 	/**
 	 * Lookup the full qualified name of the agent-type belonging to the AID
 	 * @param agentAID The AID to lookup in the library 
-	 * @return @see lookupAgentType (String name)
-	 * @throws NotFoundException @see lookupAgentType (String name)
+	 * @return The full qualified name of the agent-type the local name belongs to
+	 * @throws NotFoundException @see #lookupAgentType(String)
 	 */
 	public String lookupAgentType (AID agentAID) throws NotFoundException {
 		return lookupAgentType(agentAID.getLocalName());
@@ -171,9 +171,9 @@ public class DependencyManangerLibrary {
 	}
 
 	/**
-	 * @see hasAgent(String name)
+	 * @see #hasAgent(String)
 	 * @param agentAID The AID to check
-	 * @return @see hasAgent(String name) 
+	 * @return true if the local name is found, false otherwise
 	 */
 	public boolean hasAgent(AID agentAID) {
 		return hasAgent(agentAID.getLocalName());

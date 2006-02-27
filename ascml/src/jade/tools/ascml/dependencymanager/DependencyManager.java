@@ -172,7 +172,7 @@ public class DependencyManager implements ModelChangedListener {
 	
 	/**
 	 * Call this method to stop a specific IRunnableSocietyInstance
-	 * @param agentInstance The IRunnableSocietyInstance to be stopped
+	 * @param societyInstanceModel The IRunnableSocietyInstance to be stopped
 	 */
 	public void stopThisSociety(IRunnableSocietyInstance societyInstanceModel) {
 		societyInstanceModel.setStatus(new Stopping());
