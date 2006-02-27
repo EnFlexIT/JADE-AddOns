@@ -85,27 +85,7 @@ public class ChooseDirectoryDialog extends AbstractDialog
 		if(fileChooser.showDialog(parentFrame, "Choose Directory ...") == JFileChooser.APPROVE_OPTION)
 		{
 			File file = fileChooser.getSelectedFile();
-			String fileName = ""+file;
-
-			if (fileName != null)
-			{
-				/*
-				try
-				{
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(file.getAbsoluteFile()+""));
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(file.getCanonicalFile()+""));
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(""+file.toURI()));
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(""+file.toURL()));
-				System.err.println(ClassLoader.getSystemResource(""+file.getAbsoluteFile()));
-				System.err.println(ClassLoader.getSystemResource(""+file.getCanonicalFile()));
-				System.err.println(ClassLoader.getSystemResource(""+file.toURI()));
-				System.err.println(ClassLoader.getSystemResource(""+file.toURL()));
-				}
-				catch(Exception e)
-				{}
-                */
-				return fileName;
-			}
+			return file;
 		}
 		return null;
 	}

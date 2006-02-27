@@ -67,7 +67,7 @@ public class ChooseIconDialog extends AbstractDialog
 				String name = f.getName();
 				//return f.isDirectory() || name.endsWith(".properties") || name.endsWith(".xml") ||
 				//		(name.endsWith(".class") && name.indexOf("Model")!=-1);
-				return name.endsWith(".gif") ||  name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png");
+				return name.endsWith(".gif") ||  name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || f.isDirectory();
 			}
 		};
 		iconFileChooser.setFileFilter(filter);
@@ -85,27 +85,7 @@ public class ChooseIconDialog extends AbstractDialog
 		if(iconFileChooser.showDialog(parentFrame, "Select Icon ...") == JFileChooser.APPROVE_OPTION)
 		{
 			File file = iconFileChooser.getSelectedFile();
-			String fileName = ""+file;
-
-			if (fileName != null)
-			{
-				/*
-				try
-				{
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(file.getAbsoluteFile()+""));
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(file.getCanonicalFile()+""));
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(""+file.toURI()));
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(""+file.toURL()));
-				System.err.println(ClassLoader.getSystemResource(""+file.getAbsoluteFile()));
-				System.err.println(ClassLoader.getSystemResource(""+file.getCanonicalFile()));
-				System.err.println(ClassLoader.getSystemResource(""+file.toURI()));
-				System.err.println(ClassLoader.getSystemResource(""+file.toURL()));
-				}
-				catch(Exception e)
-				{}
-                */
-				return fileName;
-			}
+			return file;
 		}
 		return null;
 	}

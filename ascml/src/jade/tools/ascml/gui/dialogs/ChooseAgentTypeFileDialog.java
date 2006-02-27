@@ -67,7 +67,7 @@ public class ChooseAgentTypeFileDialog extends AbstractDialog
 				String name = f.getName();
 				//return f.isDirectory() || name.endsWith(".properties") || name.endsWith(".xml") ||
 				//		(name.endsWith(".class") && name.indexOf("Model")!=-1);
-				return name.endsWith(".agent.xml");
+				return (name.endsWith(".agent.xml") || f.isDirectory());
 			}
 		};
 		fileChooser.setFileFilter(filter);
@@ -85,27 +85,7 @@ public class ChooseAgentTypeFileDialog extends AbstractDialog
 		if(fileChooser.showDialog(parentFrame, "Choose AgentType ...") == JFileChooser.APPROVE_OPTION)
 		{
 			File file = fileChooser.getSelectedFile();
-			String fileName = file.getName();
-
-			if (fileName != null)
-			{
-				/*
-				try
-				{
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(file.getAbsoluteFile()+""));
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(file.getCanonicalFile()+""));
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(""+file.toURI()));
-				System.err.println(ClassLoader.getSystemClassLoader().getResource(""+file.toURL()));
-				System.err.println(ClassLoader.getSystemResource(""+file.getAbsoluteFile()));
-				System.err.println(ClassLoader.getSystemResource(""+file.getCanonicalFile()));
-				System.err.println(ClassLoader.getSystemResource(""+file.toURI()));
-				System.err.println(ClassLoader.getSystemResource(""+file.toURL()));
-				}
-				catch(Exception e)
-				{}
-                */
-				return fileName;
-			}
+            return file;
 		}
 		return null;
 	}
