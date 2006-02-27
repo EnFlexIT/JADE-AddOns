@@ -69,8 +69,13 @@ public abstract class AbstractDependencyController {
 			String societyType = ((ISocietyInstance)societyInstanceModel.getParentModel()).getFullyQualifiedName();
 			if (runningSocietyTypeCountMap.containsKey(societyType)) {
 				MutableInteger socCount = runningSocietyTypeCountMap.get(societyInstanceModel.getFullyQualifiedName());
+				System.err.println("ADC is going to increase socCount now for "+societyName+" of "+societyType);
 				socCount.value++;
-				socCount.notifyAll();
+				System.err.println("ADC is going to notify socCount now for "+societyName+" of "+societyType);
+				synchronized (socCount) {
+					socCount.notifyAll();
+				}
+				System.err.println("ADC did notify socCount now for "+societyName+" of "+societyType);				
 			} else if (societyNameMap.containsKey(societyName)) {
 				HashSet<AbstractDependencyRecord> socNameDependencySet = societyNameMap.get(societyName);
 				Iterator<AbstractDependencyRecord> sdrIt = socNameDependencySet.iterator();
@@ -84,8 +89,13 @@ public abstract class AbstractDependencyController {
 			String societyType = ((ISocietyInstance)societyInstanceModel.getParentModel()).getFullyQualifiedName();
 			if (runningSocietyTypeCountMap.containsKey(societyType)) {
 				MutableInteger socCount = runningSocietyTypeCountMap.get(societyInstanceModel.getFullyQualifiedName());
+				System.err.println("ADC is going to decrease socCount now for "+societyName+" of "+societyType);				
 				socCount.value--;
-				socCount.notifyAll();
+				System.err.println("ADC is going to notify socCount now for "+societyName+" of "+societyType);
+				synchronized (socCount) {
+					socCount.notifyAll();
+				}
+				System.err.println("ADC did notify socCount now for "+societyName+" of "+societyType);								
 			} else if (societyNameMap.containsKey(societyName)) {
 				HashSet<AbstractDependencyRecord> socNameDependencySet = societyNameMap.get(societyName);
 				Iterator<AbstractDependencyRecord> sdrIt = socNameDependencySet.iterator();
@@ -104,8 +114,13 @@ public abstract class AbstractDependencyController {
 			String agentType = agentInstanceModel.getType().getFullyQualifiedName();
 			if (runningAgentTypeCountMap.containsKey(agentType)) {
 				MutableInteger agentCount = runningAgentTypeCountMap.get(agentInstanceModel.getFullyQualifiedName());
+				System.err.println("ADC is going to increase agentCount now for "+agentName+" of "+agentType);
 				agentCount.value++;
-				agentCount.notifyAll();
+				System.err.println("ADC is going to notify agentCount now for "+agentName+" of "+agentType);
+				synchronized (agentCount) {
+					agentCount.notifyAll();
+				}
+				System.err.println("ADC  did notify agentCount now for "+agentName+" of "+agentType);
 			} else if (agentNameMap.containsKey(agentName)) {
 				HashSet<AbstractDependencyRecord> agentNameDependencySet = agentNameMap.get(agentName);
 				Iterator<AbstractDependencyRecord> sdrIt = agentNameDependencySet.iterator();
@@ -119,8 +134,13 @@ public abstract class AbstractDependencyController {
 			String agentType = agentInstanceModel.getType().getFullyQualifiedName();
 			if (runningAgentTypeCountMap.containsKey(agentType)) {
 				MutableInteger agentCount = runningAgentTypeCountMap.get(agentInstanceModel.getFullyQualifiedName());
+				System.err.println("ADC is going to decrease agentCount now for "+agentName+" of "+agentType);
 				agentCount.value--;
-				agentCount.notifyAll();
+				System.err.println("ADC is going to notify agentCount now for "+agentName+" of "+agentType);
+				synchronized (agentCount) {
+					agentCount.notifyAll();
+				}
+				System.err.println("ADC did notify agentCount now for "+agentName+" of "+agentType);
 			} else if (agentNameMap.containsKey(agentName)) {
 				HashSet<AbstractDependencyRecord> agentNameDependencySet = agentNameMap.get(agentName);
 				Iterator<AbstractDependencyRecord> sdrIt = agentNameDependencySet.iterator();

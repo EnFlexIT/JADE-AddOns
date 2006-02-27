@@ -75,9 +75,9 @@ public class DependencyStateController extends AbstractDependencyController{
 			}*/		
 		} else if (depType.equals(IDependency.AGENTTYPE_DEPENDENCY)) {
 			IAgentTypeDependency typeDep = ((IAgentTypeDependency)oneDep);
-			String fqRunnableName = typeDep.getName().concat(".").concat(((IAgentTypeDependency)oneDep).getName().concat(Long.toString(System.currentTimeMillis()))); 
+			String fqRunnableName = typeDep.getName().concat(".").concat((Long.toString(System.currentTimeMillis()))); 
 			try {
-				IRunnableAgentInstance[] runnableAgents = launcher.getRepository().createRunnableAgentInstance(fqRunnableName,Integer.parseInt(typeDep.getQuantity()));
+				IRunnableAgentInstance[] runnableAgents = launcher.getRepository().createRunnableAgentInstance(fqRunnableName,typeDep.getQuantityAsInt());
 				for (int i=0; i<runnableAgents.length; i++) {						
 					launcher.getDependencyManager().startThisAgent(runnableAgents[i]);
 				}

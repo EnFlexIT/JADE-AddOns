@@ -17,7 +17,7 @@ public class TypeCountWatcher extends AbstractDependencyWatcher{
 		this.needed = needed;
 		this.running = running;
 		currentStatus = false;
-		t.run();
+		t.start();
 	}
 	
 	private boolean isFulfilled() {
@@ -29,7 +29,11 @@ public class TypeCountWatcher extends AbstractDependencyWatcher{
 	public void run() {
 		while (!takeDown) {
 			try {
-				running.wait();
+				synchronized (running) {
+					System.err.println(agentType+" is now waiting on running");
+					running.wait();
+					System.err.println(agentType+" finished waiting on running");
+				}
 			}
 			catch (InterruptedException e) {
 			}
