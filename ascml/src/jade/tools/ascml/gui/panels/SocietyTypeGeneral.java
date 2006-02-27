@@ -37,6 +37,9 @@ import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.repository.ModelIntegrityChecker;
 import jade.tools.ascml.absmodel.ISocietyType;
 import jade.tools.ascml.absmodel.IDocument;
+import jade.tools.ascml.absmodel.ISocietyInstance;
+import jade.tools.ascml.model.jibx.SocietyInstance;
+import jade.tools.ascml.events.ProjectChangedEvent;
 
 public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 {
@@ -267,19 +270,33 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 	{
 		if (evt.getSource() == buttonChangeImage)
 		{
-			String fileName = (String)mainPanel.showDialog(AbstractMainPanel.CHOOSE_ICON_DIALOG);
-			iconName = fileName;
-			iconLabel.setIcon(ImageIconLoader.createImageIcon(iconName, 32, 32));
+			File file = (File)mainPanel.showDialog(AbstractMainPanel.CHOOSE_ICON_DIALOG);
+			if (file != null)
+			{
+				iconName = file+"";
+				getRepository().getProject().setWorkingDirectory(file+"");
+				iconLabel.setIcon(ImageIconLoader.createImageIcon(iconName, 32, 32));
+			}
 		}
 		else if (evt.getSource() == buttonChangeSourcePath)
 		{
-			String directoryName = (String)mainPanel.showDialog(AbstractMainPanel.CHOOSE_DIRECTORY_DIALOG) + File.separator;
-			textFieldSourcePath.setText(directoryName);
+			File directory = (File)mainPanel.showDialog(AbstractMainPanel.CHOOSE_DIRECTORY_DIALOG);
+			if (directory != null)
+			{
+				getRepository().getProject().setWorkingDirectory(directory+"");
+				String directoryName = directory + "" + File.separator;
+				textFieldSourcePath.setText(directoryName);
+			}
 		}
 		else if (evt.getSource() == buttonChangeSourceName)
 		{
-			String name = (String)mainPanel.showDialog(AbstractMainPanel.CHOOSE_SOCIETYTYPE_FILE_DIALOG);
-			textFieldSourceName.setText(name);
+			File file = (File)mainPanel.showDialog(AbstractMainPanel.CHOOSE_AGENTTYPE_FILE_DIALOG);
+			if (file != null)
+			{
+				String name = file+"";
+				textFieldSourceName.setText(name);
+				getRepository().getProject().setWorkingDirectory(file+"");
+			}
 		}
 		else if (evt.getSource() == buttonStart)
 		{
@@ -296,6 +313,12 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 
 			if (savingSuccessful)
 				JOptionPane.showMessageDialog(parentFrame, "<html><h3>SocietyType saved !</h3>The SocietyType has been saved to:<p>"+model.getDocument().getSource()+"</html>");
+		}
+		else if (evt.getSource() == buttonCreate)
+		{
+			ISocietyInstance newInstance = new SocietyInstance();
+			model.addSocietyInstance(newInstance);
+			getRepository().getProject().throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.SOCIETYINSTANCE_SELECTED, newInstance, getRepository().getProject()));
 		}
 	}
 }
