@@ -79,6 +79,16 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 
 	// -------------------------------------------------------------------------------------
 
+	public SocietyInstanceReference()
+	{
+
+	}
+
+	public SocietyInstanceReference(ISocietyInstance parentSocietyInstance)
+	{
+		setParentSocietyInstance(parentSocietyInstance);
+	}
+
 	/**
 	 *  Get the SocietyInstance to which this SocietyInstanceReference belongs.
 	 *  @return  SocietyInstance to which this SocietyInstanceReference belongs.
@@ -105,7 +115,10 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 	{
 		if ((name == null) || (name.trim().equals("")))
 			name = NAME_UNKNOWN;
+        if (name.equals(getName()))
+			return;
 		this.name = name;
+		throwModelChangedEvent(ModelChangedEvent.NAME_CHANGED);
 	}
 
 	/**
@@ -320,7 +333,13 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 	 */
 	public void setStatus(String newStatus)
 	{
+		if ((newStatus == null) || newStatus.equals(""))
+			newStatus = STATUS_ERROR;
+		if (newStatus.equals(getStatus()))
+			return;
+
 		this.status = newStatus;
+		throwModelChangedEvent(ModelChangedEvent.STATUS_CHANGED);
 	}
 
 	/**
