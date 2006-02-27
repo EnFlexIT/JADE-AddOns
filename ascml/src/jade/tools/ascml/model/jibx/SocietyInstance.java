@@ -26,7 +26,6 @@
 package jade.tools.ascml.model.jibx;
 
 import java.util.*;
-import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.events.ModelChangedEvent;
 import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.absmodel.*;
@@ -265,7 +264,7 @@ public class SocietyInstance implements ISocietyInstance
 	 *  Add an AgentInstanceModel to this SocietyInstance.
 	 *  @param agentInstance  The AgentInstance to add.
 	 */
-	public void addAgentInstance(AgentInstance agentInstance)
+	public void addAgentInstance(IAgentInstance agentInstance)
 	{
 		agentInstanceList.add(agentInstance);
 	}
@@ -305,7 +304,7 @@ public class SocietyInstance implements ISocietyInstance
 	 *  Add a  SocietyInstanceReference to this SocietyInstance.
 	 *  @param societyInstanceReference  The SocietyInstanceReference to add.
 	 */
-	public void addSocietyInstanceReference(SocietyInstanceReference societyInstanceReference)
+	public void addSocietyInstanceReference(ISocietyInstanceReference societyInstanceReference)
 	{		
 		societyInstanceReferenceList.add(societyInstanceReference);
 	}
