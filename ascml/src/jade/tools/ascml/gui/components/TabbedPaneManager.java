@@ -31,11 +31,8 @@ import java.awt.*;
 import java.util.Vector;
 
 import jade.tools.ascml.gui.panels.*;
-import jade.tools.ascml.gui.panels.Parameter;
-import jade.tools.ascml.gui.panels.ParameterSet;
 import jade.tools.ascml.gui.components.tree.RepositoryTree;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
-import jade.tools.ascml.model.jibx.*;
 import jade.tools.ascml.absmodel.*;
 
 public class TabbedPaneManager extends JTabbedPane implements ChangeListener
@@ -102,8 +99,8 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 	{
 		finalizeOldTabs();
 		this.addTab("General Settings", null, new AgentTypeGeneral(mainPanel, model), "General information about this agentType");
-		this.addTab("Parameter", null, new Parameter(mainPanel, model), "Parameters specified for this agentType");
-		this.addTab("Parameter-Sets", null, new ParameterSet(mainPanel, model), "Parameter-Sets specified for this agentType");
+		this.addTab("Parameter", null, new ParameterOverview(mainPanel, null, null, model.getParameters(), model.getParameterSets()), "Parameters specified for this agentType");
+		// this.addTab("Parameter-Sets", null, new ParameterSet(mainPanel, model), "Parameter-Sets specified for this agentType");
 		
 		this.setSelectedIndex(0);
 	}
@@ -112,8 +109,8 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 	{
 		finalizeOldTabs();
 		this.addTab("General Settings", null, new AgentInstanceGeneral(mainPanel, model.getParentSocietyInstance()), "General information about this agentType");
-		this.addTab("Parameter", null, new Parameter(mainPanel, model), "Parameters specified for this agentType");
-		this.addTab("Parameter-Sets", null, new ParameterSet(mainPanel, model), "Parameter-Sets specified for this agentType");
+		this.addTab("Parameter", null, new ParameterOverview(mainPanel, model.getParameters(), model.getParameterSets(), model.getType().getParameters(), model.getType().getParameterSets()), "Parameters specified for this agentType");
+		// this.addTab("Parameter-Sets", null, new ParameterSet(mainPanel, model), "Parameter-Sets specified for this agentType");
 		this.addTab("Dependencies", null, new Dependencies(mainPanel, new Vector(model.getDependencyList())), "Shows all dependencies definded for this reference");
 
 		this.setSelectedIndex(0);
