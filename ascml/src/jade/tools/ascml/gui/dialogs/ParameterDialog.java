@@ -45,7 +45,7 @@ public class ParameterDialog extends AbstractDialog
 
 	public Object showDialog(JFrame parentFrame)
 	{
-		ParameterDetails panel = new ParameterDetails();
+		ParameterDetails panel = new ParameterDetails(null);
 
 		if ((instanceParameter == null) && (typeParameter instanceof IParameter))
 			panel.setTypeParameter((IParameter)typeParameter);
