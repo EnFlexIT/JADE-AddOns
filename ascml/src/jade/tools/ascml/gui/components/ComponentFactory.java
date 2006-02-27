@@ -74,9 +74,9 @@ public class ComponentFactory
 	{
         JButton button = new JButton(buttonText, ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_ADD, 16, 16));
 		button.setMargin(new Insets(1,1,1,1));
-		button.setPreferredSize(new Dimension(110,20));
-		button.setMinimumSize(new Dimension(110,20));
-		button.setMaximumSize(new Dimension(110,20));
+		button.setPreferredSize(new Dimension(100,20));
+		button.setMinimumSize(new Dimension(100,20));
+		button.setMaximumSize(new Dimension(100,20));
 		return button;
 	}
 
@@ -84,9 +84,9 @@ public class ComponentFactory
 	{
         JButton button = new JButton(buttonText, ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_REMOVE, 16, 16));
 		button.setMargin(new Insets(1,1,1,1));
-		button.setPreferredSize(new Dimension(110,20));
-		button.setMinimumSize(new Dimension(110,20));
-		button.setMaximumSize(new Dimension(110,20));
+		button.setPreferredSize(new Dimension(100,20));
+		button.setMinimumSize(new Dimension(100,20));
+		button.setMaximumSize(new Dimension(100,20));
 		return button;
 	}
 
@@ -94,9 +94,9 @@ public class ComponentFactory
 	{
         JButton button = new JButton(buttonText, ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_EDIT, 16, 16));
 		button.setMargin(new Insets(1,1,1,1));
-		button.setPreferredSize(new Dimension(110,20));
-		button.setMinimumSize(new Dimension(110,20));
-		button.setMaximumSize(new Dimension(110,20));
+		button.setPreferredSize(new Dimension(100,20));
+		button.setMinimumSize(new Dimension(100,20));
+		button.setMaximumSize(new Dimension(100,20));
 		return button;
 	}
 
