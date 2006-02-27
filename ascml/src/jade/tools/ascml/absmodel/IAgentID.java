@@ -50,6 +50,12 @@ public interface IAgentID
 	void addAddress(String address);
 
 	/**
+	 * Remove an address.
+	 * @param address  A String representing the address to remove.
+	 */
+	void removeAddress(String address);
+
+	/**
 	 *  This methods returns a simple String-representation of this model.
 	 */
 	String toString();
