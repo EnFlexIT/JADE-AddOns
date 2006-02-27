@@ -45,7 +45,7 @@ public class ParameterSet implements IParameterSet, Cloneable
 	protected String type;
 
 	/** The description */
-	protected String description;
+	protected String description = "No description available";
 
 	/** The values. */
 	public ArrayList<String> valueList;
@@ -115,6 +115,8 @@ public class ParameterSet implements IParameterSet, Cloneable
 	 */
 	public void setDescription(String description)
 	{
+		if ((description == null) || description.equals(""))
+			description = "No description available";
 		this.description = description;
 	}
 
@@ -124,8 +126,8 @@ public class ParameterSet implements IParameterSet, Cloneable
 	 */
 	public String getDescription()
 	{
-		if (description == null)
-			description = "";
+		if ((description == null) || description.equals(""))
+			description = "No description available";
 		return description;
 	}
 

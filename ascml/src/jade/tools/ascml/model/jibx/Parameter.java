@@ -44,7 +44,7 @@ public class Parameter implements IParameter, Cloneable
 	protected String type;
 
 	/** The description */
-	protected String description;
+	protected String description = "No description available";
 
 	/** The value. */
 	protected String value;
@@ -113,6 +113,8 @@ public class Parameter implements IParameter, Cloneable
 	 */
 	public void setDescription(String description)
 	{
+		if ((description == null) || description.equals(""))
+			description = "No description available";
 		this.description = description;
 	}
 
@@ -122,8 +124,8 @@ public class Parameter implements IParameter, Cloneable
 	 */
 	public String getDescription()
 	{
-		if (description == null)
-			description = "";
+		if ((description == null) || description.equals(""))
+			description = "No description available";
 		return description;
 	}
 
