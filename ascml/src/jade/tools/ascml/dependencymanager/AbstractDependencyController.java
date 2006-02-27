@@ -34,8 +34,11 @@ import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.absmodel.dependency.IAgentInstanceDependency;
 import jade.tools.ascml.absmodel.dependency.IAgentTypeDependency;
+import jade.tools.ascml.absmodel.dependency.ISocietyInstanceDependency;
+import jade.tools.ascml.absmodel.dependency.ISocietyTypeDependency;
 import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
+import jade.tools.ascml.onto.Error;
 import jade.util.Logger;
 
 public abstract class AbstractDependencyController {
@@ -61,48 +64,72 @@ public abstract class AbstractDependencyController {
 
 	public void updateSociety(IRunnableSocietyInstance societyInstanceModel) {
 		Status socStatus = societyInstanceModel.getStatus();
-		if (socStatus.equals(new Starting())) {
-			//I don't care about starting societies
-			//If it will run, we get another update message
-			return;
-		}
-		String societyName = societyInstanceModel.getFullyQualifiedName();
-		String societyType = ((ISocietyInstance)societyInstanceModel.getParentModel()).getFullyQualifiedName();
-		if (runningSocietyTypeCountMap.containsKey(societyType)) {
-			MutableInteger socCount = runningSocietyTypeCountMap.get(societyInstanceModel.getFullyQualifiedName());
-			socCount.value++;
-			socCount.notifyAll();
-		} else if (societyNameMap.containsKey(societyName)) {
-			HashSet<AbstractDependencyRecord> socNameDependencySet = societyNameMap.get(societyName);
-			Iterator<AbstractDependencyRecord> sdrIt = socNameDependencySet.iterator();
-			while (sdrIt.hasNext()) {
-				AbstractDependencyRecord oneSdr = sdrIt.next();
-				oneSdr.updateModel(societyName,socStatus);
+		if (socStatus.equals(new Functional())) {
+			String societyName = societyInstanceModel.getFullyQualifiedName();
+			String societyType = ((ISocietyInstance)societyInstanceModel.getParentModel()).getFullyQualifiedName();
+			if (runningSocietyTypeCountMap.containsKey(societyType)) {
+				MutableInteger socCount = runningSocietyTypeCountMap.get(societyInstanceModel.getFullyQualifiedName());
+				socCount.value++;
+				socCount.notifyAll();
+			} else if (societyNameMap.containsKey(societyName)) {
+				HashSet<AbstractDependencyRecord> socNameDependencySet = societyNameMap.get(societyName);
+				Iterator<AbstractDependencyRecord> sdrIt = socNameDependencySet.iterator();
+				while (sdrIt.hasNext()) {
+					AbstractDependencyRecord oneSdr = sdrIt.next();
+					oneSdr.updateModel(societyName,socStatus);
+				}
 			}
+		} else if (socStatus.equals(new Dead()) || socStatus.equals(new Error()) || socStatus.equals(new NonFunctional()) ) {
+			String societyName = societyInstanceModel.getFullyQualifiedName();
+			String societyType = ((ISocietyInstance)societyInstanceModel.getParentModel()).getFullyQualifiedName();
+			if (runningSocietyTypeCountMap.containsKey(societyType)) {
+				MutableInteger socCount = runningSocietyTypeCountMap.get(societyInstanceModel.getFullyQualifiedName());
+				socCount.value--;
+				socCount.notifyAll();
+			} else if (societyNameMap.containsKey(societyName)) {
+				HashSet<AbstractDependencyRecord> socNameDependencySet = societyNameMap.get(societyName);
+				Iterator<AbstractDependencyRecord> sdrIt = socNameDependencySet.iterator();
+				while (sdrIt.hasNext()) {
+					AbstractDependencyRecord oneSdr = sdrIt.next();
+					oneSdr.updateModel(societyName,socStatus);
+				}
+			}			
 		}
 	}
 	
 	public void updateAgent(IRunnableAgentInstance agentInstanceModel) {
 		Status agentStatus = agentInstanceModel.getStatus();
-		if (agentStatus.equals(new Starting())) {
-			//I don't care about starting agents
-			//If it will run, we get another update message
-			return;
-		}
-		String agentName = agentInstanceModel.getFullyQualifiedName();
-		String agentType = agentInstanceModel.getType().getFullyQualifiedName();
-		if (runningAgentTypeCountMap.containsKey(agentType)) {
-			MutableInteger agentCount = runningAgentTypeCountMap.get(agentInstanceModel.getFullyQualifiedName());
-			agentCount.value++;
-			agentCount.notifyAll();
-		} else if (agentNameMap.containsKey(agentName)) {
-			HashSet<AbstractDependencyRecord> agentNameDependencySet = agentNameMap.get(agentName);
-			Iterator<AbstractDependencyRecord> sdrIt = agentNameDependencySet.iterator();
-			while (sdrIt.hasNext()) {
-				AbstractDependencyRecord oneSdr = sdrIt.next();
-				oneSdr.updateModel(agentName,agentStatus);
+		if (agentStatus.equals(new Running())) {
+			String agentName = agentInstanceModel.getFullyQualifiedName();
+			String agentType = agentInstanceModel.getType().getFullyQualifiedName();
+			if (runningAgentTypeCountMap.containsKey(agentType)) {
+				MutableInteger agentCount = runningAgentTypeCountMap.get(agentInstanceModel.getFullyQualifiedName());
+				agentCount.value++;
+				agentCount.notifyAll();
+			} else if (agentNameMap.containsKey(agentName)) {
+				HashSet<AbstractDependencyRecord> agentNameDependencySet = agentNameMap.get(agentName);
+				Iterator<AbstractDependencyRecord> sdrIt = agentNameDependencySet.iterator();
+				while (sdrIt.hasNext()) {
+					AbstractDependencyRecord oneSdr = sdrIt.next();
+					oneSdr.updateModel(agentName,agentStatus);
+				}
 			}
-		}		
+		} else if (agentStatus.equals(new Dead()) || agentStatus.equals(new Error())) {
+			String agentName = agentInstanceModel.getFullyQualifiedName();
+			String agentType = agentInstanceModel.getType().getFullyQualifiedName();
+			if (runningAgentTypeCountMap.containsKey(agentType)) {
+				MutableInteger agentCount = runningAgentTypeCountMap.get(agentInstanceModel.getFullyQualifiedName());
+				agentCount.value--;
+				agentCount.notifyAll();
+			} else if (agentNameMap.containsKey(agentName)) {
+				HashSet<AbstractDependencyRecord> agentNameDependencySet = agentNameMap.get(agentName);
+				Iterator<AbstractDependencyRecord> sdrIt = agentNameDependencySet.iterator();
+				while (sdrIt.hasNext()) {
+					AbstractDependencyRecord oneSdr = sdrIt.next();
+					oneSdr.updateModel(agentName,agentStatus);
+				}
+			}			
+		}
 	}
 
 	public void agentBorn(String agentType) {
@@ -196,8 +223,8 @@ public abstract class AbstractDependencyController {
 						RemoteInstanceWatcher remoteWatcher = new RemoteInstanceWatcher(societyDepRecord,launcher,instDep);
 						societyDepRecord.addWatcherDependency(remoteWatcher);
 					}
-				} else if (depType.equals(IDependency.AGENTTYPE_DEPENDENCY)) {
-					IAgentTypeDependency typeDep = (IAgentTypeDependency) oneDep;
+				} else if (depType.equals(IDependency.AGENTTYPE_DEPENDENCY)) {					
+					IAgentTypeDependency typeDep = (IAgentTypeDependency) oneDep;					
 					String agentType = typeDep.getName();
 					MutableInteger runningCount;
 					if (runningAgentTypeCountMap.containsKey(agentType)) {
@@ -205,16 +232,39 @@ public abstract class AbstractDependencyController {
 					} else {
 						runningCount = new MutableInteger(0);
 					}
-					String strCount =  typeDep.getQuantity();
-					int intCount = Integer.parseInt(strCount);
-					TypeCountWatcher tcw = new TypeCountWatcher(societyDepRecord,agentType, absRunnable, intCount, runningCount);
+					TypeCountWatcher tcw = new TypeCountWatcher(societyDepRecord,agentType, absRunnable, typeDep.getQuantityAsInt(), runningCount);
 					societyDepRecord.addWatcherDependency(tcw);
 				} else if (depType.equals(IDependency.SOCIETYINSTANCE_DEPENDENCY)) {
-					//FIXME: fill me
+					ISocietyInstanceDependency socInstDep = (ISocietyInstanceDependency) oneDep;
+					if (socInstDep.getProvider()==null) {
+						String societyName = socInstDep.getFullyQualifiedSocietyInstance();
+						societyDepRecord.addSocietyDependency(societyName);
+						HashSet<AbstractDependencyRecord> nameDependencySet;
+						if (societyNameMap.containsKey(societyName)) {
+							nameDependencySet = societyNameMap.get(societyName);
+						} else {
+							nameDependencySet = new HashSet<AbstractDependencyRecord>();
+							societyNameMap.put(societyName,nameDependencySet);
+						}
+						nameDependencySet.add(societyDepRecord);
+					} else {
+						//FIXME: Remote Society instance dependencies
+						RemoteInstanceWatcher remoteWatcher = new RemoteInstanceWatcher(societyDepRecord,launcher,socInstDep);
+						societyDepRecord.addWatcherDependency(remoteWatcher);						
+					}
 				} else if (depType.equals(IDependency.SOCIETYTYPE_DEPENDENCY)) {
-					//FIXME: fill me
+					ISocietyTypeDependency socTypeDep = (ISocietyTypeDependency) oneDep;					
+					String socType = socTypeDep.getName();					
+					MutableInteger runningCount;
+					if (runningSocietyTypeCountMap.containsKey(socType)) {
+						runningCount = runningSocietyTypeCountMap.get(socType);
+					} else {
+						runningCount = new MutableInteger(0);
+					}
+					TypeCountWatcher tcw = new TypeCountWatcher(societyDepRecord,socType, absRunnable, socTypeDep.getQuantityAsInt(), runningCount);
+					societyDepRecord.addWatcherDependency(tcw);
 				} else if (depType.equals(IDependency.DELAY_DEPENDENCY)) {
-					//FIXME: fill me
+					//FIXME: Insert the delay dependency
 				} else {
 					continue;
 				};

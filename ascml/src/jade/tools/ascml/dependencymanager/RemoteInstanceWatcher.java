@@ -1,6 +1,7 @@
 package jade.tools.ascml.dependencymanager;
 
 import jade.tools.ascml.absmodel.dependency.IAgentInstanceDependency;
+import jade.tools.ascml.absmodel.dependency.ISocietyInstanceDependency;
 import jade.tools.ascml.launcher.AgentLauncher;
 
 public class RemoteInstanceWatcher extends AbstractDependencyWatcher{
@@ -8,6 +9,12 @@ public class RemoteInstanceWatcher extends AbstractDependencyWatcher{
 	private AgentLauncher launcher;
 
 	public RemoteInstanceWatcher(AbstractDependencyRecord parentDeps, AgentLauncher launcher, IAgentInstanceDependency instDep) {
+		super(parentDeps);
+		this.launcher=launcher;
+		t.run();
+	}
+
+	public RemoteInstanceWatcher(AbstractDependencyRecord parentDeps, AgentLauncher launcher, ISocietyInstanceDependency socInstDep) {
 		super(parentDeps);
 		this.launcher=launcher;
 		t.run();

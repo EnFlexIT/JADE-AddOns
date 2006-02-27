@@ -80,7 +80,6 @@ public abstract class AbstractDependencyRecord {
 			neededAgentNames.add(agentName);
 			checkStatus();
 		}
-
 	}
 
 	public void updateModel(String societyName, Status socStatus) {

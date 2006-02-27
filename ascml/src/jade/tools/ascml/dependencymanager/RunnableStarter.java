@@ -66,12 +66,8 @@ public class RunnableStarter implements ModelChangedListener {
 			agentInstances[i].setStatus(new Stopping());
 		}
 		IRunnableRemoteSocietyInstanceReference[] remoteSocieties = societyInstance.getRemoteRunnableSocietyInstanceReferences();
-		//FIXME: Now, let's stop the remote references
 		for (int i=0;i<remoteSocieties.length;i++) {
-			//TODO: Add some mechanism to watch the status of remote societies
 			launcher.stopRemoteSociety(remoteSocieties[i]);
-//			RemoteStopperThread rst = new RemoteStopperThread(rsocs[i], al, 60000);
-//			rstVector.add(rst);
 		}		
 	}
 
@@ -94,7 +90,7 @@ public class RunnableStarter implements ModelChangedListener {
 			}
 			IRunnableRemoteSocietyInstanceReference[] remoteSocieties = societyInstance.getRemoteRunnableSocietyInstanceReferences();
 			for (int i=0;i<remoteSocieties.length;i++) {
-				//TODO: Add some mechanism to watch the status of remote societies
+				//TODO: Add some mechanism to watch the status of remote societies in the gui
 				launcher.inquirerAndStartRemoteSociety(remoteSocieties[i]);
 			}
 		}	
