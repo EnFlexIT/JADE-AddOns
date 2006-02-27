@@ -55,6 +55,11 @@ public class SocietyInstance implements ISocietyInstance
 
 	// ---------------------------------------------------------------------------------
 
+	public SocietyInstance()
+	{
+
+	}
+
 	/**
 	 *  Get the SocietyType in which this SocietyInstance is declared.
 	 *  @return SocietyType in which this SocietyInstance is declared.
@@ -81,7 +86,10 @@ public class SocietyInstance implements ISocietyInstance
 	{
 		if ((name == null) || (name.trim().equals("")))
 			name = NAME_UNKNOWN;
+        if (name.equals(getName()))
+			return;
 		this.name = name;
+		throwModelChangedEvent(ModelChangedEvent.NAME_CHANGED);
 	}
 	
 	/**
@@ -116,7 +124,10 @@ public class SocietyInstance implements ISocietyInstance
 	{
 		if (description == null)
 			description = "";
+		if (description.equals(getDescription()))
+			return;
 		this.description = description;
+		throwModelChangedEvent(ModelChangedEvent.DESCRIPTION_CHANGED);
 	}
 
 	/**
@@ -140,9 +151,13 @@ public class SocietyInstance implements ISocietyInstance
 	{
 		quantity = quantity.replace(".", "");
 		if ((quantity == null) || (quantity.trim().equals("")))
-			this.quantity = "1";
+			quantity = "1";
 		else
-			this.quantity = quantity.trim();
+			quantity = quantity.trim();
+		if (quantity.equals(getQuantity()))
+			return;
+
+		this.quantity = quantity;
 	}
 
 	/**
@@ -181,10 +196,11 @@ public class SocietyInstance implements ISocietyInstance
 	 */
 	public void setNamingScheme(String namingScheme)
 	{
-		if (namingScheme == null)
-            this.namingScheme = "";
-        else
-            this.namingScheme = namingScheme.trim();
+		if ((namingScheme == null) || (namingScheme.equals("")))
+            namingScheme = "%N";
+        if (namingScheme.equals(getNamingScheme()))
+			return;
+        this.namingScheme = namingScheme.trim();
 	}
 
 	/**
@@ -237,7 +253,13 @@ public class SocietyInstance implements ISocietyInstance
 	 */
 	public void setStatus(String newStatus)
 	{
+		if ((newStatus == null) || newStatus.equals(""))
+			newStatus = STATUS_ERROR;
+		if (newStatus.equals(getStatus()))
+			return;
+
 		this.status = newStatus;
+		throwModelChangedEvent(ModelChangedEvent.STATUS_CHANGED);
 	}
 	
 	/**
@@ -279,8 +301,11 @@ public class SocietyInstance implements ISocietyInstance
 	 */
 	public void removeAgentInstance(IAgentInstance model)
 	{
-		agentInstanceList.remove(model);
-		throwModelChangedEvent(ModelChangedEvent.AGENTINSTANCE_REMOVED);
+		if (agentInstanceList.contains(model))
+		{
+			agentInstanceList.remove(model);
+			throwModelChangedEvent(ModelChangedEvent.AGENTINSTANCE_REMOVED);
+		}
 	}
 
 	/**
@@ -324,8 +349,11 @@ public class SocietyInstance implements ISocietyInstance
 	 */
 	public void removeSocietyInstanceReference(ISocietyInstanceReference model)
 	{
-		societyInstanceReferenceList.remove(model);
-		throwModelChangedEvent(ModelChangedEvent.SOCIETYINSTANCE_REFERENCE_REMOVED);
+		if (societyInstanceReferenceList.contains(model))
+		{
+			societyInstanceReferenceList.remove(model);
+			throwModelChangedEvent(ModelChangedEvent.SOCIETYINSTANCE_REFERENCE_REMOVED);
+		}
 	}
 
 	/**
