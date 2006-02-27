@@ -326,7 +326,7 @@ public class AgentType implements IAgentType
 	 *  and used for registering and searching for agents at the directory facilitator for example.
 	 *  @param description  the AgentType's AgentDescriptionModel.
 	 */
-	public void addAgentDescription(AgentDescription description)
+	public void addAgentDescription(IAgentDescription description)
 	{
 		this.agentDescriptionList.add(description);
 	}
@@ -346,7 +346,7 @@ public class AgentType implements IAgentType
 	 * Add a parameter to this AgentType.
 	 * @param parameter  The ParameterSet-object to add.
 	 */
-	public void addParameter(Parameter parameter)
+	public void addParameter(IParameter parameter)
 	{
 		parameterList.add(parameter);
 	}
@@ -397,7 +397,7 @@ public class AgentType implements IAgentType
 	 * Get all of the AgentType's parameter.
 	 * @return  All of the agent's parameters as Parameter-array.
 	 */
-	public Parameter[] getParameters()
+	public IParameter[] getParameters()
 	{
 		Parameter[] returnArray = new Parameter[parameterList.size()];
 		parameterList.toArray(returnArray);
@@ -408,7 +408,7 @@ public class AgentType implements IAgentType
 	 * Add a parameterSet to this AgentType.
 	 * @param parameterSet  The ParameterSet-object to add.
 	 */
-	public void addParameterSet(ParameterSet parameterSet)
+	public void addParameterSet(IParameterSet parameterSet)
 	{
 		parameterSetList.add(parameterSet);
 	}
@@ -459,7 +459,7 @@ public class AgentType implements IAgentType
 	 * Get all of the AgentType's parameterSets.
 	 * @return  All of the agent's parameterSets as ParameterSet-array.
 	 */
-	public ParameterSet[] getParameterSets()
+	public IParameterSet[] getParameterSets()
 	{
 		ParameterSet[] returnArray = new ParameterSet[parameterSetList.size()];
 		parameterSetList.toArray(returnArray);
