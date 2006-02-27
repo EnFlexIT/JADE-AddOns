@@ -122,6 +122,16 @@ public class AgentID implements IAgentID
 	}
 
 	/**
+	 * Remove an address.
+	 * @param address  A String representing the address to remove.
+	 */
+	public void removeAddress(String address)
+	{
+		if ((address != null) && (addressList.contains(address)))
+			addressList.remove(address);
+	}
+
+	/**
 	 *  This methods returns a simple String-representation of this model.
 	 */
 	public String toString()
