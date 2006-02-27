@@ -35,6 +35,8 @@ import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.model.jibx.Launcher;
 import jade.tools.ascml.model.jibx.ParameterSet;
 import jade.tools.ascml.model.jibx.Parameter;
+import jade.tools.ascml.events.ParameterChangedListener;
+import jade.tools.ascml.events.ParameterChangedEvent;
 
 public class ParameterDetails extends JPanel implements ActionListener
 {
@@ -56,8 +58,12 @@ public class ParameterDetails extends JPanel implements ActionListener
 	private IParameter parameter;
 	private IParameterSet parameterSet;
 
-	public ParameterDetails()
+	private ParameterChangedListener parameterChangedListener;
+
+	public ParameterDetails(ParameterChangedListener parameterChangedListener)
 	{
+		this.parameterChangedListener = parameterChangedListener;
+
 		this.setLayout(new GridBagLayout());
 		this.setBackground(Color.WHITE);
 
@@ -96,8 +102,12 @@ public class ParameterDetails extends JPanel implements ActionListener
 		checkBoxOptional.setEnabled(false);
 
 		DefaultListModel listModel = (DefaultListModel)listValues.getModel();
-		listModel.addElement(instanceParameter.getValue());
-		listValues.setSelectedIndex(0);
+		listModel.removeAllElements();
+		if (!instanceParameter.getValue().equals(""))
+		{				
+			listModel.addElement(instanceParameter.getValue());
+			listValues.setSelectedIndex(0);
+		}
 	}
 
 	/**
@@ -126,6 +136,7 @@ public class ParameterDetails extends JPanel implements ActionListener
 		checkBoxOptional.setEnabled(false);
 
 		DefaultListModel listModel = (DefaultListModel)listValues.getModel();
+		listModel.removeAllElements();
 		String[] values = instanceParameter.getValues();
 		for (int i=0; i < values.length; i++)
 		{
@@ -144,8 +155,12 @@ public class ParameterDetails extends JPanel implements ActionListener
 		textAreaDescription.setText(typeParameter.getDescription());
 		checkBoxOptional.setSelected(typeParameter.isOptional());
 		DefaultListModel listModel = (DefaultListModel)listValues.getModel();
-		listModel.addElement(typeParameter.getValue());
-		listValues.setSelectedIndex(0);
+		listModel.removeAllElements();
+		if (!typeParameter.getValue().equals(""))
+		{
+			listModel.addElement(typeParameter.getValue());
+			listValues.setSelectedIndex(0);
+		}
 	}
 
 	/**
@@ -159,6 +174,7 @@ public class ParameterDetails extends JPanel implements ActionListener
 		checkBoxOptional.setSelected(typeParameterSet.isOptional());
 
 		DefaultListModel listModel = (DefaultListModel)listValues.getModel();
+		listModel.removeAllElements();
 		String[] values = typeParameterSet.getValues();
 		for (int i=0; i < values.length; i++)
 		{
@@ -187,15 +203,15 @@ public class ParameterDetails extends JPanel implements ActionListener
 	{
 		buttonAddValue = new JButton("Add Value", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_ADD, 16, 16));
 		buttonAddValue.addActionListener(this);
-		buttonAddValue.setPreferredSize(new Dimension(130,22));
-		buttonAddValue.setMinimumSize(new Dimension(130,22));
-		buttonAddValue.setMaximumSize(new Dimension(130,22));
+		buttonAddValue.setPreferredSize(new Dimension(140,22));
+		buttonAddValue.setMinimumSize(new Dimension(140,22));
+		buttonAddValue.setMaximumSize(new Dimension(140,22));
 
 		buttonRemoveValue = new JButton("Remove Value", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_REMOVE, 16, 16));
 		buttonRemoveValue.addActionListener(this);
-		buttonRemoveValue.setPreferredSize(new Dimension(130,22));
-		buttonRemoveValue.setMinimumSize(new Dimension(130,22));
-		buttonRemoveValue.setMaximumSize(new Dimension(130,22));
+		buttonRemoveValue.setPreferredSize(new Dimension(140,22));
+		buttonRemoveValue.setMinimumSize(new Dimension(140,22));
+		buttonRemoveValue.setMaximumSize(new Dimension(140,22));
 
 		textFieldName = new JTextField("", 30);
 		textFieldName.setMinimumSize(new Dimension(320, (int)textFieldName.getPreferredSize().getHeight()));
@@ -292,6 +308,9 @@ public class ParameterDetails extends JPanel implements ActionListener
 				{
 					parameterSet.addValue((String)listValues.getModel().getElementAt(i));
 				}
+
+				if (parameterChangedListener != null)
+					parameterChangedListener.parameterChanged(new ParameterChangedEvent(parameterSet));
 			}
 			else
 			{
@@ -304,6 +323,9 @@ public class ParameterDetails extends JPanel implements ActionListener
 				parameter.setType((String)comboBoxType.getSelectedItem());
 				if (listValues.getModel().getSize() > 0)
 					parameter.setValue((String)listValues.getModel().getElementAt(0));
+
+				if (parameterChangedListener != null)
+					parameterChangedListener.parameterChanged(new ParameterChangedEvent(parameter));
 			}
 		}
 		else if (evt.getSource() == buttonAddValue)

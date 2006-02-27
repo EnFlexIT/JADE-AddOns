@@ -26,192 +26,281 @@
 package jade.tools.ascml.gui.panels;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
 import jade.tools.ascml.gui.dialogs.StartSocietyInstanceDialog;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.model.jibx.Launcher;
+import jade.tools.ascml.model.jibx.Parameter;
+import jade.tools.ascml.events.ParameterChangedListener;
+import jade.tools.ascml.events.ParameterChangedEvent;
 
-public class ParameterOverview extends AbstractPanel implements ActionListener
+public class ParameterOverview extends AbstractPanel implements ActionListener, ParameterChangedListener
 {
-	private JButton buttonApply;
-    private JButton buttonAddValue;
-	private JButton buttonRemoveValue;
+	private JButton buttonAddParameter;
+	private JButton buttonRemoveParameter;
 
-	private JTextField textFieldName;
+	private JTable tableParameter;
+	private ParameterDetails panelParameterDetails;
 
-	private JComboBox comboBoxType;
-
-	private JTextArea textAreaDescription;
-
-	private JCheckBox checkBoxOptional;
-
-	private JList listValues;
+	private Object agentModel;
 
 	private Object parameter;
 
-	public ParameterOverview(AbstractMainPanel mainPanel, IParameter[] instanceParameters, IParameterSet[] instanceParameterSets, IParameter[] typeParameters, IParameterSet[] typeParameterSets)
+	public ParameterOverview(AbstractMainPanel mainPanel, Object agentTypeOrInstance)
 	{
 		super(mainPanel);
+		this.agentModel = agentTypeOrInstance;
+
 		this.setLayout(new GridBagLayout());
 		this.setBackground(Color.WHITE);
+        panelParameterDetails = new ParameterDetails(this);
 
-		buttonApply = new JButton("Apply Changes", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_APPLY, 16, 16));
-		buttonApply.addActionListener(this);
-		buttonApply.setPreferredSize(new Dimension(145,22));
-		buttonApply.setMinimumSize(new Dimension(145,22));
-		buttonApply.setMaximumSize(new Dimension(145,22));
-
-        this.add(createAttributePanel(), new GridBagConstraints(0, 0, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-		this.add(buttonApply, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+        this.add(createLeftSide(), new GridBagConstraints(0, 0, 1, 1, 0.5, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
+		this.add(panelParameterDetails, new GridBagConstraints(1, 0, 1, 1, 0.5, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 	}
 
-	/**
-	 * Set the instance-parameter to edit.
-	 * If this method is called, only the name and value-fields are editable and filled with the instance-parameter-values.
-	 * All other fields are filled with typeParameter-values.
-	 * @param instanceParameter  The instance-parameter to edit.
-	 * @param typeParameter  The type-parameter belonging to the instance-parameter
-	 */
-	public void setInstanceParameter(IParameter instanceParameter, IParameter typeParameter)
+	private JPanel createLeftSide()
 	{
-        textFieldName.setText(instanceParameter.getName());
-		comboBoxType.setEnabled(false);
-		textAreaDescription.setText(typeParameter.getDescription());
-		textAreaDescription.setEnabled(false);
-		checkBoxOptional.setSelected(typeParameter.isOptional());
-		checkBoxOptional.setEnabled(false);
+		buttonAddParameter = new JButton("Add New", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_ADD, 16, 16));
+		buttonAddParameter.addActionListener(this);
+		buttonAddParameter.setMargin(new Insets(1,1,1,1));
+		buttonAddParameter.setPreferredSize(new Dimension(80,20));
+		buttonAddParameter.setMinimumSize(new Dimension(80,20));
+		buttonAddParameter.setMaximumSize(new Dimension(80,20));
 
-		DefaultListModel listModel = (DefaultListModel)listValues.getModel();
-		listModel.addElement(instanceParameter.getValue());
-	}
+		buttonRemoveParameter = new JButton("Remove", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_REMOVE, 16, 16));
+		buttonRemoveParameter.addActionListener(this);
+		buttonRemoveParameter.setMargin(new Insets(1,1,1,1));
+		buttonRemoveParameter.setPreferredSize(new Dimension(80,20));
+		buttonRemoveParameter.setMinimumSize(new Dimension(80,20));
+		buttonRemoveParameter.setMaximumSize(new Dimension(80,20));
 
-	/**
-	 * Set the instance-parameter to edit.
-	 * If this method is called, only the name and value-fields are editable and filled with the instance-parameter-values.
-	 * All other fields are filled with typeParameter-values.
-	 * @param instanceParameter  The instance-parameter to edit.
-	 * @param typeParameter  The type-parameter belonging to the instance-parameter
-	 */
-	public void setInstanceParameterSet(IParameterSet instanceParameter, IParameterSet typeParameter)
-	{
-        textFieldName.setText(instanceParameter.getName());
-		comboBoxType.setEnabled(false);
-		textAreaDescription.setText(typeParameter.getDescription());
-		textAreaDescription.setEnabled(false);
-		checkBoxOptional.setSelected(typeParameter.isOptional());
-		checkBoxOptional.setEnabled(false);
-
-		DefaultListModel listModel = (DefaultListModel)listValues.getModel();
-		String[] values = instanceParameter.getValues();
-		for (int i=0; i < values.length; i++)
-		{
-			listModel.addElement(values[i]);
-		}
-	}
-
-	/**
-	 * Set the type-parameter to edit.
-	 * @param typeParameter  The type-parameter to edit.
-	 */
-	public void setTypeParameter(IParameter typeParameter)
-	{
-        textFieldName.setText(typeParameter.getName());
-		textAreaDescription.setText(typeParameter.getDescription());
-		checkBoxOptional.setSelected(typeParameter.isOptional());
-		DefaultListModel listModel = (DefaultListModel)listValues.getModel();
-		listModel.addElement(typeParameter.getValue());
-	}
-
-	/**
-	 * Set the type-parameterSet to edit.
-	 * @param typeParameterSet  The type-parameterSet to edit.
-	 */
-	public void setTypeParameterSet(IParameterSet typeParameterSet)
-	{
-        textFieldName.setText(typeParameterSet.getName());
-		textAreaDescription.setText(typeParameterSet.getDescription());
-		checkBoxOptional.setSelected(typeParameterSet.isOptional());
-
-		DefaultListModel listModel = (DefaultListModel)listValues.getModel();
-		String[] values = typeParameterSet.getValues();
-		for (int i=0; i < values.length; i++)
-		{
-			listModel.addElement(values[i]);
-		}
-	}
-
-	private JPanel createAttributePanel()
-	{
-		textFieldName = new JTextField("", 30);
-		textFieldName.setMinimumSize(new Dimension(320, (int)textFieldName.getPreferredSize().getHeight()));
-		textFieldName.setBackground(Color.WHITE);
-
-		comboBoxType = new JComboBox(new String[] { "String" });
-		comboBoxType.setBackground(Color.WHITE);
-
-		// prepare Description
-		textAreaDescription = new JTextArea("", 3, 20);
-		textAreaDescription.setFont(new Font("Arial", Font.PLAIN, 12));
-		textAreaDescription.setEditable(true);
-		textAreaDescription.setLineWrap(true);
-		textAreaDescription.setWrapStyleWord(true);
-		textAreaDescription.setBackground(Color.WHITE);
-
-		// put the textarea into a scrollpane
-		JScrollPane textDescScrollPane = new JScrollPane(textAreaDescription);
-		textDescScrollPane.getViewport().setBackground(Color.WHITE);
-		textDescScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		textDescScrollPane.setPreferredSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 50));
-		textDescScrollPane.setMinimumSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 50));
-
-		checkBoxOptional = new JCheckBox("optional");
-		// checkBoxOptional.setSelected(agentInstance.hasToolOption(IToolOption.TOOLOPTION_SNIFF));
-		checkBoxOptional.setBackground(Color.WHITE);
-
-		listValues = new JList();
-		listValues.setBackground(Color.WHITE);
-		listValues.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        listValues.setLayoutOrientation(JList.VERTICAL);
-        listValues.setVisibleRowCount(-1);
-
-		JScrollPane listScrollPane = new JScrollPane(listValues);
-		listScrollPane.getViewport().setBackground(Color.WHITE);
-		listScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		listScrollPane.setPreferredSize(new Dimension((int)listScrollPane.getPreferredSize().getWidth(), 50));
-		listScrollPane.setMinimumSize(new Dimension((int)listScrollPane.getPreferredSize().getWidth(), 50));
+		JPanel panelParameterButtons = new JPanel();
+		panelParameterButtons.setBackground(Color.WHITE);
+		panelParameterButtons.add(buttonRemoveParameter);
+		panelParameterButtons.add(buttonAddParameter);
 
 		JPanel attributePanel = new JPanel(new GridBagLayout());
 		attributePanel.setBackground(Color.WHITE);
 
-		// prepare Main-Panel
-		attributePanel.add(new JLabel("Parameter-Name:"), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(textFieldName, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-
-		attributePanel.add(new JLabel("Parameter-Type:"), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(comboBoxType, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-
-		attributePanel.add(checkBoxOptional, new GridBagConstraints(0, 2, 2, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-
-		attributePanel.add(new JLabel("Description:"), new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(textAreaDescription, new GridBagConstraints(1, 3, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-
-		attributePanel.add(new JLabel("Values:"), new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(listScrollPane, new GridBagConstraints(1, 4, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
-
-		attributePanel.add(buttonApply, new GridBagConstraints(1, 5, 0, 1, 0, 1, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(createParameterTablePane(), new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
+		attributePanel.add(panelParameterButtons, new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
 
 		return attributePanel;
 	}
 
-	// ---------- actionListener-methods --------------
+	private JScrollPane createParameterTablePane()
+	{
+		DefaultTableModel tableModel = createParameterTableModel();
+
+		tableParameter = new JTable(tableModel);
+		tableParameter.setRowSelectionAllowed(true);
+		tableParameter.setColumnSelectionAllowed(false);
+		tableParameter.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+		//Ask to be notified of selection changes.
+		ListSelectionModel rowSM = tableParameter.getSelectionModel();
+		rowSM.addListSelectionListener(new ListSelectionListener()
+		{
+			public void valueChanged(ListSelectionEvent e)
+			{
+				//Ignore extra messages.
+				if (e.getValueIsAdjusting()) return;
+
+				ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+				if (!lsm.isSelectionEmpty())
+				{
+					int selectedRow = lsm.getMinSelectionIndex();
+					String paramName = (String)tableParameter.getModel().getValueAt(selectedRow, 0);
+					if (agentModel instanceof IAgentType)
+					{
+						if (selectedRow < ((IAgentType)agentModel).getParameters().length)
+						{
+							IParameter parameter = ((IAgentType)agentModel).getParameter(paramName);
+							panelParameterDetails.setTypeParameter(parameter);
+						}
+						else
+						{
+							IParameterSet parameterSet = ((IAgentType)agentModel).getParameterSet(paramName);
+							panelParameterDetails.setTypeParameterSet(parameterSet);
+						}
+					}
+					else
+					{
+						if (selectedRow < ((IAgentInstance)agentModel).getParameters().length)
+						{
+							IParameter parameter = ((IAgentInstance)agentModel).getParameter(paramName);
+							panelParameterDetails.setInstanceParameter(parameter, ((IAgentInstance)agentModel).getType().getParameter(parameter.getName()));
+						}
+						else
+						{
+							IParameterSet parameterSet = ((IAgentInstance)agentModel).getParameterSet(paramName);
+							panelParameterDetails.setInstanceParameterSet(parameterSet, ((IAgentInstance)agentModel).getType().getParameterSet(parameterSet.getName()));
+						}
+					}
+				}
+			}
+		});
+
+		if (tableParameter.getModel().getRowCount() > 0)
+		{
+			tableParameter.getSelectionModel().setSelectionInterval(0,0);
+		}
+
+		JPanel tablePanel = new JPanel(new BorderLayout());
+		tablePanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		tablePanel.setBackground(Color.WHITE);
+		tablePanel.setPreferredSize(new Dimension(250, 100));
+		tablePanel.setMinimumSize(new Dimension(250, (int)tablePanel.getPreferredSize().getHeight()));
+		tablePanel.setMaximumSize(new Dimension(250, (int)tablePanel.getPreferredSize().getHeight()));
+		tablePanel.add(tableParameter.getTableHeader(), BorderLayout.PAGE_START);
+		tablePanel.add(tableParameter, BorderLayout.CENTER);
+
+		JScrollPane tableScrollPane = new JScrollPane(tablePanel);
+		tableScrollPane.setWheelScrollingEnabled(true);
+		// agentInstanceScrollPane.setBorder(BorderFactory.createEmptyBorder());
+		tableScrollPane.setPreferredSize(new Dimension(250, 100));
+		tableScrollPane.setMinimumSize(new Dimension(250, (int)tableScrollPane.getPreferredSize().getHeight()));
+		tableScrollPane.setMaximumSize(new Dimension(250, (int)tableScrollPane.getPreferredSize().getHeight()));
+
+		return tableScrollPane;
+	}
+
+	private DefaultTableModel createParameterTableModel()
+	{
+		String[] tableHeaderEntries = new String[] {"Name", "Value"};
+		DefaultTableModel tableModel = new DefaultTableModel(tableHeaderEntries, 0);
+
+		IParameter[] parameters;
+		if (agentModel instanceof IAgentType)
+			parameters = ((IAgentType)agentModel).getParameters();
+		else
+			parameters = ((IAgentInstance)agentModel).getParameters();
+
+		for(int i=0; i < parameters.length; i++)
+		{
+			String[] oneRow = new String[2];
+
+			oneRow[0] = parameters[i].getName();
+			oneRow[1] = parameters[i].getValue();
+			tableModel.addRow(oneRow);
+		}
+
+		IParameterSet[] parameterSets;
+		if (agentModel instanceof IAgentType)
+			parameterSets = ((IAgentType)agentModel).getParameterSets();
+		else
+			parameterSets = ((IAgentInstance)agentModel).getParameterSets();
+
+		for(int i=0; i < parameterSets.length; i++)
+		{
+			String[] oneRow = new String[2];
+
+			oneRow[0] = parameterSets[i].getName();
+			oneRow[1] = parameterSets[i].getValueList().toString();
+			tableModel.addRow(oneRow);
+		}
+
+		return tableModel;
+	}
+
+	public void parameterChanged(ParameterChangedEvent evt)
+	{
+		Object parameterObject = evt.getParameter();
+
+		// user pressed apply-button on the parameter-panel.
+		if (tableParameter.getSelectedRow() == -1)
+		{
+			// add the parameter to the agentModel, because this parameter has been newly created
+			if (agentModel instanceof IAgentType)
+			{
+				if (parameterObject instanceof IParameter)
+					((IAgentType)agentModel).addParameter((IParameter)parameterObject);
+				else
+					((IAgentType)agentModel).addParameterSet((IParameterSet)parameterObject);
+			}
+			else
+			{
+				if (parameterObject instanceof IParameter)
+					((IAgentInstance)agentModel).addParameter((IParameter)parameterObject);
+				else
+					((IAgentInstance)agentModel).addParameterSet((IParameterSet)parameterObject);
+			}
+		}
+		else
+		{
+			int selectedRow = tableParameter.getSelectedRow();
+			String paramName = (String)tableParameter.getModel().getValueAt(selectedRow, 0);
+
+			// remove the selected parameter from the agentModel, and add the new parameter
+			if (agentModel instanceof IAgentType)
+			{
+				if (selectedRow < ((IAgentType)agentModel).getParameters().length)
+					((IAgentType)agentModel).removeParameter(paramName);
+				else
+					((IAgentType)agentModel).removeParameterSet(paramName);
+
+				if (parameterObject instanceof IParameter)
+					((IAgentType)agentModel).addParameter((IParameter)parameterObject);
+				else
+					((IAgentType)agentModel).addParameterSet((IParameterSet)parameterObject);
+			}
+			else
+			{
+				if (selectedRow < ((IAgentInstance)agentModel).getParameters().length)
+					((IAgentInstance)agentModel).removeParameter(paramName);
+				else
+					((IAgentInstance)agentModel).removeParameterSet(paramName);
+
+				if (parameterObject instanceof IParameter)
+					((IAgentInstance)agentModel).addParameter((IParameter)parameterObject);
+				else
+					((IAgentInstance)agentModel).addParameterSet((IParameterSet)parameterObject);
+			}
+		}
+
+		tableParameter.setModel(createParameterTableModel());
+		tableParameter.getSelectionModel().setSelectionInterval(tableParameter.getRowCount()-1, tableParameter.getRowCount()-1);
+	}
+
 	public void actionPerformed(ActionEvent evt)
 	{
-		if (evt.getSource() == buttonApply)
+        if (evt.getSource() == buttonAddParameter)
 		{
-
+			tableParameter.getSelectionModel().removeSelectionInterval(tableParameter.getSelectedRow(), tableParameter.getSelectedRow());
+			if (agentModel instanceof IAgentType)
+				panelParameterDetails.setTypeParameter(new Parameter());
+			else
+				panelParameterDetails.setInstanceParameter(new Parameter(), null);
+		}
+		else if (evt.getSource() == buttonRemoveParameter)
+		{
+			int selectedRow = tableParameter.getSelectionModel().getMinSelectionIndex();
+			String paramName = (String)tableParameter.getModel().getValueAt(selectedRow, 0);
+			if (agentModel instanceof IAgentType)
+			{
+				if (selectedRow < ((IAgentType)agentModel).getParameters().length)
+					((IAgentType)agentModel).removeParameter(paramName);
+				else
+					((IAgentType)agentModel).removeParameterSet(paramName);
+			}
+			else
+			{
+				if (selectedRow < ((IAgentInstance)agentModel).getParameters().length)
+					((IAgentInstance)agentModel).removeParameter(paramName);
+				else
+					((IAgentInstance)agentModel).removeParameterSet(paramName);
+			}
+			tableParameter.setModel(createParameterTableModel());
+			if (tableParameter.getRowCount() > 0)
+				tableParameter.getSelectionModel().setSelectionInterval(0,0);
 		}
 	}
 
