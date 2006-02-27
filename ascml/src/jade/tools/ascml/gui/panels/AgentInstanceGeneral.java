@@ -39,6 +39,7 @@ import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.gui.dialogs.ParameterDialog;
 import jade.tools.ascml.model.jibx.AgentInstance;
+import jade.tools.ascml.events.ProjectChangedEvent;
 
 public class AgentInstanceGeneral extends AbstractPanel implements ActionListener
 {
@@ -585,8 +586,10 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 				// a new model has been created
 				agentInstance.setParentSocietyInstance(societyInstance);
 				societyInstance.addAgentInstance(agentInstance);
-				tableAgentInstances.setModel(createAgentInstanceTableModel());
-				tableAgentInstances.getSelectionModel().setSelectionInterval(tableAgentInstances.getRowCount()-1, tableAgentInstances.getRowCount()-1);
+				getRepository().getProject().throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.AGENTINSTANCE_SELECTED, agentInstance, getRepository().getProject()));
+
+				// tableAgentInstances.setModel(createAgentInstanceTableModel());
+				// tableAgentInstances.getSelectionModel().setSelectionInterval(tableAgentInstances.getRowCount()-1, tableAgentInstances.getRowCount()-1);
 			}
 			else
 			{
@@ -604,6 +607,9 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		else if (evt.getSource() == buttonRemoveAgentInstance)
 		{
 			societyInstance.removeAgentInstance(societyInstance.getAgentInstanceModel(tableAgentInstances.getSelectedRow()));
+			// maybe it's better to just throw a ProjectChangedEvent, AGENTINSTANCE_SELECTED,
+			// because this way the whole panel is newly instantiated.
+
 			if (societyInstance.getAgentInstanceModels().length > 0)
 			{
 				agentInstance = societyInstance.getAgentInstanceModel(0);
