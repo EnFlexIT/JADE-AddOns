@@ -27,7 +27,6 @@ package jade.tools.ascml.model.jibx;
 
 import java.util.*;
 import jade.tools.ascml.events.ModelChangedEvent;
-import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.model.jibx.dependency.AbstractDependency;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.absmodel.ISocietyInstance;
@@ -73,9 +72,6 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 	
 	/** The naming-scheme used to name the instances in case quantity is > 1. */
 	protected String namingScheme;
-
-	/** The Listeners to be informed when this model changes. */
-	protected Vector modelChangedListener;
 
 	// -------------------------------------------------------------------------------------
 
@@ -383,25 +379,13 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 	// --------------------------------------------------------------------------------
 
 	/**
-	 * Get all the ModelChangedListener.
-	 * @return  A Vector containing ModelChangedListener
-	 */
-	public Vector getModelChangedListener()
-	{
-		return modelChangedListener;
-	}
-
-	/**
 	 * Throw a ModelChangedEvent notifying all the listeners that this model has been changed
 	 * @param eventCode  The eventCode for the event (see ModelChangedEvent for possible codes)
 	 */
 	public void throwModelChangedEvent(String eventCode)
 	{
-		ModelChangedEvent event = new ModelChangedEvent(this, eventCode);
-		for (int i=0; i < modelChangedListener.size(); i++)
-		{
-			((ModelChangedListener)modelChangedListener.elementAt(i)).modelChanged(event);
-		}
+		if (parentSocietyInstance != null)
+			getParentSocietyInstance().throwModelChangedEvent(eventCode, this);
 	}
 
 	public String toString()
