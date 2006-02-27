@@ -1,8 +1,5 @@
 package jade.tools.ascml.absmodel;
 
-import jade.tools.ascml.model.jibx.AgentDescription;
-import jade.tools.ascml.model.jibx.Parameter;
-import jade.tools.ascml.model.jibx.ParameterSet;
 import jade.tools.ascml.exceptions.ModelException;
 
 import javax.swing.*;
@@ -176,7 +173,7 @@ public interface IAgentType
 	 *  and used for registering and searching for agents at the directory facilitator for example.
 	 *  @param description  the AgentType's AgentDescriptionModel.
 	 */
-	void addAgentDescription(AgentDescription description);
+	void addAgentDescription(IAgentDescription description);
 
 	/**
 	 *  Remove an AgentDescription from this AgentType.
@@ -188,7 +185,7 @@ public interface IAgentType
 	 * Add a parameter to this AgentType.
 	 * @param parameter  The ParameterSet-object to add.
 	 */
-	void addParameter(Parameter parameter);
+	void addParameter(IParameter parameter);
 
 	/**
 	 * Remove a parameter from this agent.
@@ -213,13 +210,13 @@ public interface IAgentType
 	 * Get all of the AgentType's parameter.
 	 * @return  All of the agent's parameters as Parameter-array.
 	 */
-	Parameter[] getParameters();
+	IParameter[] getParameters();
 
 	/**
 	 * Add a parameterSet to this AgentType.
 	 * @param parameterSet  The ParameterSet-object to add.
 	 */
-	void addParameterSet(ParameterSet parameterSet);
+	void addParameterSet(IParameterSet parameterSet);
 
 	/**
 	 * Remove a parameterSet from this agent.
@@ -244,7 +241,7 @@ public interface IAgentType
 	 * Get all of the AgentType's parameterSets.
 	 * @return  All of the agent's parameterSets as ParameterSet-array.
 	 */
-	ParameterSet[] getParameterSets();
+	IParameterSet[] getParameterSets();
 
 	/**
 	 * Get all the ModelChangedListener.
