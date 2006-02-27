@@ -347,7 +347,13 @@ public class AgentInstance implements IAgentInstance
 	 */
 	public void setStatus(String newStatus)
 	{
+		if ((newStatus == null) || newStatus.equals(""))
+			newStatus = STATUS_ERROR;
+		if (newStatus.equals(getStatus()))
+			return;
+
 		this.status = newStatus;
+		throwModelChangedEvent(ModelChangedEvent.STATUS_CHANGED);
 	}
 
 	/**
