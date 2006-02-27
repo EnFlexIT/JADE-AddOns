@@ -39,6 +39,18 @@ public class ModelChangedEvent
 	/** indicates, that a RunnableModel has been added */
 	public static final String RUNNABLE_REMOVED = "runnable_removed";
 
+	/** indicates, that an AgentInstance has been added to a SocietyInstance */
+	public static final String AGENTINSTANCE_ADDED = "agentinstance_added";
+
+	/** indicates, that a SocietyInstance-reference has been added to a SocietyInstance */
+	public static final String SOCIETYINSTANCE_REFERENCE_ADDED = "societyinstance_reference_added";
+
+	/** indicates, that the type-name (and therefore the type) of an agentinstance changed */
+	public static final String TYPENAME_CHANGED = "typename_changed";
+
+	/** indicates, that the type of an agentinstance changed */
+	public static final String TYPE_CHANGED = "type_changed";
+
 	/** indicates, that the name of the model has changed */
 	public static final String NAME_CHANGED = "name_changed";
 
