@@ -108,7 +108,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 	private void setAgentInstancePanes(IAgentInstance model)
 	{
 		finalizeOldTabs();
-		this.addTab("General Settings", null, new AgentInstanceGeneral(mainPanel, model.getParentSocietyInstance()), "General information about this agentType");
+		this.addTab("General Settings", null, new AgentInstanceGeneral(mainPanel, model, model.getParentSocietyInstance()), "General information about this agentType");
 		this.addTab("Parameter", null, new ParameterOverview(mainPanel, model), "Parameters specified for this agentType");
 		// this.addTab("Parameter-Sets", null, new ParameterSet(mainPanel, model), "Parameter-Sets specified for this agentType");
 		this.addTab("Dependencies", null, new Dependencies(mainPanel, new Vector(model.getDependencyList())), "Shows all dependencies definded for this reference");
@@ -135,7 +135,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 	{
 		finalizeOldTabs();
 		this.addTab("Main-Settings", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new SocietyInstanceGeneral(mainPanel, model), "View and edit the main settings of this SocietyInstance");
-		this.addTab("AgentInstances", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), new AgentInstanceGeneral(mainPanel, model), "View and edit all contained AgentInstances");
+		this.addTab("AgentInstances", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), new AgentInstanceGeneral(mainPanel, null, model), "View and edit all contained AgentInstances");
 		this.addTab("SocietyInstance-references", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), null, "View and edit the references to other SocietyInstances");
 		this.addTab("Functional", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), null, "View and edit the dependencies defining the functional-state");
 		this.setSelectedIndex(0);
