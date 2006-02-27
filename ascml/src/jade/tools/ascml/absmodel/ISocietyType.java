@@ -1,7 +1,6 @@
 package jade.tools.ascml.absmodel;
 
 import jade.tools.ascml.exceptions.ModelException;
-import jade.tools.ascml.model.jibx.SocietyInstance;
 
 import javax.swing.*;
 import java.util.Vector;
@@ -188,7 +187,7 @@ public interface ISocietyType
 	 * Add a SocietyInstance to this SocietyType.
 	 * @param societyInstance  The SocietyInstance to add.
 	 */
-	void addSocietyInstance(SocietyInstance societyInstance);
+	void addSocietyInstance(ISocietyInstance societyInstance);
 
 	/**
 	 * Get a SocietyInstance.
