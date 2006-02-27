@@ -259,25 +259,44 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 	{
 		if (evt.getSource() == buttonChangeImage)
 		{
-			String fileName = (String)mainPanel.showDialog(AbstractMainPanel.CHOOSE_ICON_DIALOG);
-			iconName = fileName;
-			iconLabel.setIcon(ImageIconLoader.createImageIcon(iconName, 32, 32));
+			File file = (File)mainPanel.showDialog(AbstractMainPanel.CHOOSE_ICON_DIALOG);
+			if (file != null)
+			{
+				iconName = file+"";
+				getRepository().getProject().setWorkingDirectory(file+"");
+				iconLabel.setIcon(ImageIconLoader.createImageIcon(iconName, 32, 32));
+			}
 		}
 		else if (evt.getSource() == buttonChangeSourcePath)
 		{
-			String directoryName = (String)mainPanel.showDialog(AbstractMainPanel.CHOOSE_DIRECTORY_DIALOG) + File.separator;
-			textFieldSourcePath.setText(directoryName);
+			File directory = (File)mainPanel.showDialog(AbstractMainPanel.CHOOSE_DIRECTORY_DIALOG);
+			if (directory != null)
+			{
+				getRepository().getProject().setWorkingDirectory(directory+"");
+				String directoryName = directory + "" + File.separator;
+				textFieldSourcePath.setText(directoryName);
+			}
 		}
 		else if (evt.getSource() == buttonChangeSourceName)
 		{
-			String name = (String)mainPanel.showDialog(AbstractMainPanel.CHOOSE_AGENTTYPE_FILE_DIALOG);
-			textFieldSourceName.setText(name);
+			File file = (File)mainPanel.showDialog(AbstractMainPanel.CHOOSE_AGENTTYPE_FILE_DIALOG);
+			if (file != null)
+			{
+				String name = file+"";
+				textFieldSourceName.setText(name);
+				getRepository().getProject().setWorkingDirectory(file+"");
+			}
 		}
 		else if (evt.getSource() == buttonChangeTypeClass)
 		{
-			String name = (String)mainPanel.showDialog(AbstractMainPanel.CHOOSE_JAVA_FILE_DIALOG);
-			name = name.substring(0, name.lastIndexOf("."));
-			textFieldTypeClass.setText(name);
+			File file = (File)mainPanel.showDialog(AbstractMainPanel.CHOOSE_JAVA_FILE_DIALOG);
+			if (file != null)
+			{
+				String name = file+"";
+				name = name.substring(0, name.lastIndexOf("."));
+				textFieldTypeClass.setText(name);
+				getRepository().getProject().setWorkingDirectory(file+"");
+			}
 		}
 		else if (evt.getSource() == buttonStart)
 		{
