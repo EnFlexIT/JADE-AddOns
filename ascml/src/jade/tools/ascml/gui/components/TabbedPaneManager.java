@@ -66,12 +66,6 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 		this.setOpaque(true);
 		
 		setRepositoryPanes();
-		JTabbedPane test = new JTabbedPane();
-		test.add(new JLabel("Test 1"));
-		test.add(new JLabel("Test 2"));
-		test.add(new JLabel("Test 3"));
-
-		this.add(test);
 	}
 	
 	private void addTab(String title, Icon icon, JPanel component, String tip)
