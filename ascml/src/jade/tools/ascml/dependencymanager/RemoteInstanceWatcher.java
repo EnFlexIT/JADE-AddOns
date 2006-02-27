@@ -9,13 +9,13 @@ public class RemoteInstanceWatcher extends AbstractDependencyWatcher{
 	private AgentLauncher launcher;
 
 	public RemoteInstanceWatcher(AbstractDependencyRecord parentDeps, AgentLauncher launcher, IAgentInstanceDependency instDep) {
-		super(parentDeps);
+		super(parentDeps,instDep.getName());
 		this.launcher=launcher;
 		t.run();
 	}
 
 	public RemoteInstanceWatcher(AbstractDependencyRecord parentDeps, AgentLauncher launcher, ISocietyInstanceDependency socInstDep) {
-		super(parentDeps);
+		super(parentDeps,socInstDep.getFullyQualifiedSocietyInstance());
 		this.launcher=launcher;
 		t.run();
 	}

@@ -11,12 +11,12 @@ public class TypeCountWatcher extends AbstractDependencyWatcher{
 	private boolean currentStatus;;
 	
 	public TypeCountWatcher(AbstractDependencyRecord parentDeps, String agentType,IAbstractRunnable absRunnable,int needed, MutableInteger running) {
-		super(parentDeps);
+		super(parentDeps,agentType);
 		this.agentType = agentType;
 		this.absRunnable = absRunnable;
 		this.needed = needed;
 		this.running = running;
-		currentStatus = false;
+		currentStatus = false;		
 		t.start();
 	}
 	

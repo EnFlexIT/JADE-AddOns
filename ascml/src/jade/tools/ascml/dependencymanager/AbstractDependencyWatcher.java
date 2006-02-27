@@ -6,10 +6,10 @@ public abstract class AbstractDependencyWatcher implements Runnable {
 	protected boolean takeDown;
 	protected Thread t;
 	
-	public AbstractDependencyWatcher (AbstractDependencyRecord parentDeps) {
+	public AbstractDependencyWatcher (AbstractDependencyRecord parentDeps, String threadName) {
 		this.parentDeps = parentDeps;
 		takeDown = false;	
-		t = new Thread(this);
+		t = new Thread(this,"ADW-Thread for "+threadName);
 	}
 	
 	
