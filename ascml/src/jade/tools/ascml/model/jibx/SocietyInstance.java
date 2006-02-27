@@ -266,7 +266,11 @@ public class SocietyInstance implements ISocietyInstance
 	 */
 	public void addAgentInstance(IAgentInstance agentInstance)
 	{
+		if (agentInstance == null)
+			return;
+
 		agentInstanceList.add(agentInstance);
+		throwModelChangedEvent(ModelChangedEvent.AGENTINSTANCE_ADDED);
 	}
 
 	/**
@@ -276,6 +280,7 @@ public class SocietyInstance implements ISocietyInstance
 	public void removeAgentInstance(IAgentInstance model)
 	{
 		agentInstanceList.remove(model);
+		throwModelChangedEvent(ModelChangedEvent.AGENTINSTANCE_REMOVED);
 	}
 
 	/**
@@ -305,8 +310,12 @@ public class SocietyInstance implements ISocietyInstance
 	 *  @param societyInstanceReference  The SocietyInstanceReference to add.
 	 */
 	public void addSocietyInstanceReference(ISocietyInstanceReference societyInstanceReference)
-	{		
+	{
+		if (societyInstanceReference == null)
+			return;
+
 		societyInstanceReferenceList.add(societyInstanceReference);
+		throwModelChangedEvent(ModelChangedEvent.SOCIETYINSTANCE_REFERENCE_ADDED);
 	}
 
 	/**
@@ -316,6 +325,7 @@ public class SocietyInstance implements ISocietyInstance
 	public void removeSocietyInstanceReference(ISocietyInstanceReference model)
 	{
 		societyInstanceReferenceList.remove(model);
+		throwModelChangedEvent(ModelChangedEvent.SOCIETYINSTANCE_REFERENCE_REMOVED);
 	}
 
 	/**
