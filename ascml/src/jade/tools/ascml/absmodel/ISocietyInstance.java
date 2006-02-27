@@ -1,8 +1,5 @@
 package jade.tools.ascml.absmodel;
 
-import jade.tools.ascml.model.jibx.AgentInstance;
-import jade.tools.ascml.model.jibx.SocietyInstanceReference;
-
 /**
  * 
  */
@@ -159,7 +156,7 @@ public interface ISocietyInstance
 	 *  Add an AgentInstanceModel to this SocietyInstance.
 	 *  @param agentInstance  The AgentInstance to add.
 	 */
-	void addAgentInstance(AgentInstance agentInstance);
+	void addAgentInstance(IAgentInstance agentInstance);
 
 	/**
 	 *  Remove an AgentInstance from this society.
@@ -185,7 +182,7 @@ public interface ISocietyInstance
 	 *  Add a  SocietyInstanceReference to this SocietyInstance.
 	 *  @param societyInstanceReference  The SocietyInstanceReference to add.
 	 */
-	void addSocietyInstanceReference(SocietyInstanceReference societyInstanceReference);
+	void addSocietyInstanceReference(ISocietyInstanceReference societyInstanceReference);
 
 	/**
 	 *  Remove a SocietyInstanceReference from this society.

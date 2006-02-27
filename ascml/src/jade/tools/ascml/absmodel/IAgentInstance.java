@@ -212,13 +212,13 @@ public interface IAgentInstance
 	 * defined by the parameters of the AgentType.
 	 * @param parameter  The Parameter-object to add.
 	 */
-	void addParameter(Parameter parameter);
+	void addParameter(IParameter parameter);
 
 	/**
 	 * Remove a parameter from this agent.
-	 * @param parameter  The Parameter-object to remove.
+	 * @param parameterName  The name of the parameter to remove.
 	 */
-	void removeParameter(IParameter parameter);
+	void removeParameter(String parameterName);
 
 	/**
 	 * Get an agent's parameter.
@@ -244,13 +244,13 @@ public interface IAgentInstance
 	 * defined by the ParameterSets of the AgentType.
 	 * @param parameterSet  The ParameterSet-object.
 	 */
-	void addParameterSet(ParameterSet parameterSet);
+	void addParameterSet(IParameterSet parameterSet);
 
 	/**
 	 * Remove a parameterSet from this agent.
-	 * @param parameterSet  The ParameterSet-object to remove.
+	 * @param parameterSetName  The name of the parameterSet to remove.
 	 */
-	void removeParameterSet(IParameterSet parameterSet);
+	void removeParameterSet(String parameterSetName);
 
 	/**
 	 * Get an agent's ParameterSet.
