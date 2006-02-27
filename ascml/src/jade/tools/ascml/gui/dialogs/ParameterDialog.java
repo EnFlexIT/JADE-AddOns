@@ -58,7 +58,7 @@ public class ParameterDialog extends AbstractDialog
 
 		JDialog dialog = new JDialog(parentFrame, "Edit Parameter ...", true);
 		dialog.getContentPane().add(panel);
-		dialog.setSize(350, 370);
+		dialog.setSize(350, 390);
 		dialog.setLocation((int)(Toolkit.getDefaultToolkit().getScreenSize().getWidth()/2-dialog.getWidth()/2),
  						   (int)(Toolkit.getDefaultToolkit().getScreenSize().getHeight()/2-dialog.getHeight()/2));
 		dialog.setVisible(true);
