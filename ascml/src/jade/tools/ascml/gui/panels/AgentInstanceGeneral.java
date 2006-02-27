@@ -577,7 +577,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		{
 			agentInstance.setName(textFieldInstanceName.getText());
 			agentInstance.setNamingScheme(textFieldScheme.getText());
-			agentInstance.setQuantity(spinnerQuantity.getValue()+"");
+			agentInstance.setQuantity(((Double)spinnerQuantity.getValue()).intValue()+"");
 			agentInstance.setTypeName(textFieldTypeName.getText());
 			agentInstance.setType((IAgentType)getRepository().getModelIndex().getModel(textFieldTypeName.getText()));
 
