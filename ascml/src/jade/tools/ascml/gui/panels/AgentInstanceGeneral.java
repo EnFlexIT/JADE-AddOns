@@ -211,8 +211,8 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 
 		attributePanel.add(createDependencyTablePane(), new GridBagConstraints(0, 8, 2, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
 
-		attributePanel.add(buttonRemoveDependency, new GridBagConstraints(0, 9, 1, 1, 0.5, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
-		attributePanel.add(buttonAddDependency, new GridBagConstraints(1, 9, 1, 1, 0.5, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
+		// attributePanel.add(buttonRemoveDependency, new GridBagConstraints(0, 9, 1, 1, 0.5, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
+		// attributePanel.add(buttonAddDependency, new GridBagConstraints(1, 9, 1, 1, 0.5, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
 
 		attributePanel.add(buttonApply, new GridBagConstraints(1, 10, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,2,5,2), 0, 0));
 
