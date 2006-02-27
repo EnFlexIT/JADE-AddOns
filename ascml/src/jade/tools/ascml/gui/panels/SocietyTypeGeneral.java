@@ -33,6 +33,7 @@ import java.io.File;
 
 import jade.tools.ascml.gui.dialogs.StartSocietyInstanceDialog;
 import jade.tools.ascml.gui.dialogs.ExceptionDialog;
+import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.repository.ModelIntegrityChecker;
 import jade.tools.ascml.absmodel.ISocietyType;
@@ -77,33 +78,17 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 		this.setBackground(Color.WHITE);
 		this.setLayout(new GridBagLayout());
 
-		buttonStart = new JButton("Start Default-Instance", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_START, 16, 16));
+		buttonStart = ComponentFactory.createStartButton("Start Default-Instance");
 		buttonStart.addActionListener(this);
-		buttonStart.setMargin(new Insets(1,1,1,1));
-		buttonStart.setPreferredSize(new Dimension(160,22));
-		buttonStart.setMinimumSize(new Dimension(160,22));
-		buttonStart.setMaximumSize(new Dimension(160,22));
 
-		buttonApply = new JButton("Apply Changes", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_APPLY, 16, 16));
+		buttonApply = ComponentFactory.createStartButton("Apply Changes");
 		buttonApply.addActionListener(this);
-		buttonApply.setMargin(new Insets(1,1,1,1));
-		buttonApply.setPreferredSize(new Dimension(145,22));
-		buttonApply.setMinimumSize(new Dimension(145,22));
-		buttonApply.setMaximumSize(new Dimension(145,22));
 
-		buttonSave = new JButton("Save SocietyType", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_SAVE, 16, 16));
+		buttonSave = ComponentFactory.createSaveButton("Save SocietyType");
 		buttonSave.addActionListener(this);
-		buttonSave.setMargin(new Insets(1,1,1,1));
-		buttonSave.setPreferredSize(new Dimension(145,22));
-		buttonSave.setMinimumSize(new Dimension(145,22));
-		buttonSave.setMaximumSize(new Dimension(145,22));
 
-		buttonCreate = new JButton("Create SocietyInstance", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_SAVE, 16, 16));
+		buttonCreate = ComponentFactory.createNewButton("Create SocietyInstance");
 		buttonCreate.addActionListener(this);
-		buttonCreate.setMargin(new Insets(1,1,1,1));
-		buttonCreate.setPreferredSize(new Dimension(160,22));
-		buttonCreate.setMinimumSize(new Dimension(160,22));
-		buttonCreate.setMaximumSize(new Dimension(160,22));
 
 		// ... and add the content step by step with special constraint-options
 		this.add(createAttributePanel(), new GridBagConstraints(0, 0, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
@@ -142,26 +127,14 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 		textFieldTypePackage.setBackground(Color.WHITE);
 		textFieldTypePackage.setMinimumSize(new Dimension(320, (int)textFieldTypePackage.getPreferredSize().getHeight()));
 
-		buttonChangeImage = new JButton("Change Icon");
+		buttonChangeImage = ComponentFactory.createChangeIconButton();
 		buttonChangeImage.addActionListener(this);
-		buttonChangeImage.setMargin(new Insets(1,1,1,1));
-		buttonChangeImage.setPreferredSize(new Dimension(80,18));
-		buttonChangeImage.setMinimumSize(new Dimension(80,18));
-		buttonChangeImage.setMaximumSize(new Dimension(80,18));
 
-		buttonChangeSourcePath = new JButton("...");
+		buttonChangeSourcePath = ComponentFactory.createThreePointButton();
 		buttonChangeSourcePath.addActionListener(this);
-		buttonChangeSourcePath.setMargin(new Insets(1,3,1,3));
-		buttonChangeSourcePath.setPreferredSize(new Dimension(30,20));
-		buttonChangeSourcePath.setMinimumSize(new Dimension(30,20));
-		buttonChangeSourcePath.setMaximumSize(new Dimension(30,20));
 
-		buttonChangeSourceName = new JButton("...");
+		buttonChangeSourceName = ComponentFactory.createThreePointButton();
 		buttonChangeSourceName.addActionListener(this);
-		buttonChangeSourceName.setMargin(new Insets(1,3,1,3));
-		buttonChangeSourceName.setPreferredSize(new Dimension(30,20));
-		buttonChangeSourceName.setMinimumSize(new Dimension(30,20));
-		buttonChangeSourceName.setMaximumSize(new Dimension(30,20));
 
 		String[] comboxBoxContent = new String[model.getSocietyInstances().length];
 		int indexOfDefaultInstance = -1;
@@ -178,20 +151,7 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 		comboBoxDefaultInstance.setBackground(Color.WHITE);
 
 		textAreaDescription = new JTextArea(model.getDescription(), 5, 20);
-		textAreaDescription.setFont(new Font("Arial", Font.PLAIN, 12));
-		// textAreaDescription.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-		textAreaDescription.setPreferredSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 100));
-		textAreaDescription.setMinimumSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 100));
-		textAreaDescription.setLineWrap(true);
-		textAreaDescription.setWrapStyleWord(true);
-		textAreaDescription.setBackground(Color.WHITE);
-
-		// put the textarea into a scrollpane
-		JScrollPane textDescScrollPane = new JScrollPane(textAreaDescription);
-		textDescScrollPane.getViewport().setBackground(Color.WHITE);
-		textDescScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		textDescScrollPane.setPreferredSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 100));
-		textDescScrollPane.setMinimumSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 100));
+		JScrollPane textDescScrollPane = ComponentFactory.createTextAreaScrollPane(textAreaDescription);
 
 		JPanel attributePanel = new JPanel(new GridBagLayout());
 		attributePanel.setBackground(Color.WHITE);

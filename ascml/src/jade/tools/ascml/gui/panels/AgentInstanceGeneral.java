@@ -29,15 +29,13 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
 import java.awt.event.*;
-import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.gui.dialogs.ParameterDialog;
+import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.model.jibx.AgentInstance;
 import jade.tools.ascml.events.ProjectChangedEvent;
 
@@ -50,6 +48,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 	private JButton buttonEditParameter;
 	private JButton buttonRemoveParameter;
     private JButton buttonAddDependency;
+	private JButton buttonEditDependency;
 	private JButton buttonRemoveDependency;
 
 	private JTextField textFieldInstanceName;
@@ -103,7 +102,6 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 			}
 			if (tableAgentInstances.getSelectedRow() == -1) // no row selected yet
 				tableAgentInstances.getSelectionModel().setSelectionInterval(0,0);
-			initColumnSizes(tableAgentInstances);
 		}
 
 		setAgentInstanceData();
@@ -111,19 +109,11 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 
 	private JPanel createLeftSide()
 	{
-		buttonAddAgentInstance = new JButton("Add New", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_ADD, 16, 16));
+		buttonAddAgentInstance = ComponentFactory.createAddButton("Add New");
 		buttonAddAgentInstance.addActionListener(this);
-		buttonAddAgentInstance.setMargin(new Insets(1,1,1,1));
-		buttonAddAgentInstance.setPreferredSize(new Dimension(80,20));
-		buttonAddAgentInstance.setMinimumSize(new Dimension(80,20));
-		buttonAddAgentInstance.setMaximumSize(new Dimension(80,20));
 
-		buttonRemoveAgentInstance = new JButton("Remove", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_REMOVE, 16, 16));
+		buttonRemoveAgentInstance = ComponentFactory.createRemoveButton("Remove");
 		buttonRemoveAgentInstance.addActionListener(this);
-		buttonRemoveAgentInstance.setMargin(new Insets(1,1,1,1));
-		buttonRemoveAgentInstance.setPreferredSize(new Dimension(80,20));
-		buttonRemoveAgentInstance.setMinimumSize(new Dimension(80,20));
-		buttonRemoveAgentInstance.setMaximumSize(new Dimension(80,20));
 
 		JPanel attributePanel = new JPanel(new GridBagLayout());
 		attributePanel.setBackground(Color.WHITE);
@@ -141,33 +131,17 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 	private JPanel createRightSide()
 	{
 		// first create all the components
-        buttonApply = new JButton("Apply Changes", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_APPLY, 16, 16));
+        buttonApply = ComponentFactory.createApplyButton("Apply Changes");
 		buttonApply.addActionListener(this);
-		buttonApply.setMargin(new Insets(1,1,1,1));
-		buttonApply.setPreferredSize(new Dimension(120,22));
-		buttonApply.setMinimumSize(new Dimension(120,22));
-		buttonApply.setMaximumSize(new Dimension(120,22));
 
-		buttonAddParameter = new JButton("Add New", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_ADD, 16, 16));
+		buttonAddParameter = ComponentFactory.createAddButton("Add New");
 		buttonAddParameter.addActionListener(this);
-		buttonAddParameter.setMargin(new Insets(1,1,1,1));
-		buttonAddParameter.setPreferredSize(new Dimension(80,20));
-		buttonAddParameter.setMinimumSize(new Dimension(80,20));
-		buttonAddParameter.setMaximumSize(new Dimension(80,20));
 
-		buttonEditParameter = new JButton("Edit", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_EDIT, 16, 16));
+		buttonEditParameter = ComponentFactory.createEditButton("Edit");
 		buttonEditParameter.addActionListener(this);
-		buttonEditParameter.setMargin(new Insets(1,1,1,1));
-		buttonEditParameter.setPreferredSize(new Dimension(80,20));
-		buttonEditParameter.setMinimumSize(new Dimension(80,20));
-		buttonEditParameter.setMaximumSize(new Dimension(80,20));
 
-		buttonRemoveParameter = new JButton("Remove", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_REMOVE, 16, 16));
+		buttonRemoveParameter = ComponentFactory.createRemoveButton("Remove");
 		buttonRemoveParameter.addActionListener(this);
-		buttonRemoveParameter.setMargin(new Insets(1,1,1,1));
-		buttonRemoveParameter.setPreferredSize(new Dimension(80,20));
-		buttonRemoveParameter.setMinimumSize(new Dimension(80,20));
-		buttonRemoveParameter.setMaximumSize(new Dimension(80,20));
 
 		JPanel panelParameterButtons = new JPanel();
 		panelParameterButtons.setBackground(Color.WHITE);
@@ -175,19 +149,14 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		panelParameterButtons.add(buttonEditParameter);
 		panelParameterButtons.add(buttonAddParameter);
 
-		buttonAddDependency = new JButton("Add New", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_ADD, 16, 16));
+		buttonAddDependency = ComponentFactory.createAddButton("Add New");
 		buttonAddDependency.addActionListener(this);
-		buttonAddDependency.setMargin(new Insets(1,1,1,1));
-		buttonAddDependency.setPreferredSize(new Dimension(80,20));
-		buttonAddDependency.setMinimumSize(new Dimension(80,20));
-		buttonAddDependency.setMaximumSize(new Dimension(80,20));
 
-		buttonRemoveDependency = new JButton("Remove", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_REMOVE, 16, 16));
+		buttonEditDependency = ComponentFactory.createEditButton("Edit");
+		buttonEditDependency.addActionListener(this);
+
+		buttonRemoveDependency = ComponentFactory.createRemoveButton("Remove");
 		buttonRemoveDependency.addActionListener(this);
-		buttonRemoveDependency.setMargin(new Insets(1,1,1,1));
-		buttonRemoveDependency.setPreferredSize(new Dimension(80,20));
-		buttonRemoveDependency.setMinimumSize(new Dimension(80,20));
-		buttonRemoveDependency.setMaximumSize(new Dimension(80,20));
 
 		textFieldInstanceName = new JTextField(20);
 		textFieldInstanceName.setMinimumSize(new Dimension(150, (int)textFieldInstanceName.getPreferredSize().getHeight()));
@@ -201,11 +170,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		textFieldScheme.setMinimumSize(new Dimension(100, (int)textFieldScheme.getPreferredSize().getHeight()));
 		textFieldScheme.setBackground(Color.WHITE);
 
-		spinnerQuantity = new JSpinner(new SpinnerNumberModel(1, 0, 10000, 1));
-		spinnerQuantity.setPreferredSize(new Dimension(60, (int)spinnerQuantity.getPreferredSize().getHeight()));
-		spinnerQuantity.setMinimumSize(new Dimension(60, (int)spinnerQuantity.getPreferredSize().getHeight()));
-		spinnerQuantity.setMaximumSize(new Dimension(60, (int)spinnerQuantity.getPreferredSize().getHeight()));
-		spinnerQuantity.setBackground(Color.WHITE);
+		spinnerQuantity = ComponentFactory.createQuantitySpinner(1);
 
 		toolOptionSniffer = new JCheckBox("Sniffer");
 		toolOptionSniffer.setBackground(Color.WHITE);
@@ -276,22 +241,15 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 			if (tableParameter.getModel().getRowCount() > 0)
 			{
 				tableParameter.getSelectionModel().setSelectionInterval(0,0);
-				initColumnSizes(tableParameter);
 			}
 		}
 	}
 
 	private JScrollPane createAgentInstanceTablePane()
 	{
-
 		tableAgentInstances = new JTable(createAgentInstanceTableModel());
-		tableAgentInstances.setPreferredSize(new Dimension(220, 200));
-		tableAgentInstances.setMinimumSize(new Dimension(220, (int)tableAgentInstances.getPreferredSize().getHeight()));
-		tableAgentInstances.setMaximumSize(new Dimension(220, (int)tableAgentInstances.getPreferredSize().getHeight()));
-		tableAgentInstances.setRowSelectionAllowed(true);
-		tableAgentInstances.setColumnSelectionAllowed(false);
-        tableAgentInstances.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tableAgentInstances.setToolTipText("Click on a row to edit the AgentInstance !");
+		tableAgentInstances.setToolTipText("Click on a row to edit the AgentInstance !");
+        JScrollPane agentInstanceScrollPane = ComponentFactory.createTableScrollPane(tableAgentInstances);
 
 		//Ask to be notified of selection changes.
 		ListSelectionModel rowSM = tableAgentInstances.getSelectionModel();
@@ -311,22 +269,6 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 				}
 			}
 		});
-
-		JPanel agentInstancePanel = new JPanel(new BorderLayout());
-		agentInstancePanel.setBackground(Color.WHITE);
-		agentInstancePanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		agentInstancePanel.setPreferredSize(new Dimension(220, 200));
-		agentInstancePanel.setMinimumSize(new Dimension(220, (int)agentInstancePanel.getPreferredSize().getHeight()));
-		agentInstancePanel.setMaximumSize(new Dimension(220, (int)agentInstancePanel.getPreferredSize().getHeight()));
-		agentInstancePanel.add(tableAgentInstances.getTableHeader(), BorderLayout.PAGE_START);
-		agentInstancePanel.add(tableAgentInstances, BorderLayout.CENTER);
-
-		JScrollPane agentInstanceScrollPane = new JScrollPane(agentInstancePanel);
-		agentInstanceScrollPane.setWheelScrollingEnabled(true);
-		// agentInstanceScrollPane.setBorder(BorderFactory.createEmptyBorder());
-        agentInstanceScrollPane.setPreferredSize(new Dimension(220, 200));
-		agentInstanceScrollPane.setMinimumSize(new Dimension(190, (int)agentInstanceScrollPane.getPreferredSize().getHeight()));
-		agentInstanceScrollPane.setMaximumSize(new Dimension(190, (int)agentInstanceScrollPane.getPreferredSize().getHeight()));
 
 		return agentInstanceScrollPane;
 	}
@@ -355,34 +297,11 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 
 	private JScrollPane createParameterTablePane()
 	{
-		DefaultTableModel tableModel = createParameterTableModel();
-
-		tableParameter = new JTable(tableModel);
-		tableParameter.setRowSelectionAllowed(true);
-		tableParameter.setColumnSelectionAllowed(false);
-        tableParameter.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableParameter = new JTable(createParameterTableModel());
+		JScrollPane tableScrollPane = ComponentFactory.createTableScrollPane(tableParameter);
 
 		if (tableParameter.getModel().getRowCount() > 0)
-		{
 			tableParameter.getSelectionModel().setSelectionInterval(0,0);
-			initColumnSizes(tableParameter);
-		}
-
-		JPanel tablePanel = new JPanel(new BorderLayout());
-		tablePanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		tablePanel.setBackground(Color.WHITE);
-		tablePanel.setPreferredSize(new Dimension(190, 100));
-		tablePanel.setMinimumSize(new Dimension(190, (int)tablePanel.getPreferredSize().getHeight()));
-		tablePanel.setMaximumSize(new Dimension(190, (int)tablePanel.getPreferredSize().getHeight()));
-		tablePanel.add(tableParameter.getTableHeader(), BorderLayout.PAGE_START);
-		tablePanel.add(tableParameter, BorderLayout.CENTER);
-
-		JScrollPane tableScrollPane = new JScrollPane(tablePanel);
-		tableScrollPane.setWheelScrollingEnabled(true);
-		// agentInstanceScrollPane.setBorder(BorderFactory.createEmptyBorder());
-        tableScrollPane.setPreferredSize(new Dimension(190, 100));
-		tableScrollPane.setMinimumSize(new Dimension(190, (int)tableScrollPane.getPreferredSize().getHeight()));
-		tableScrollPane.setMaximumSize(new Dimension(190, (int)tableScrollPane.getPreferredSize().getHeight()));
 
 		return tableScrollPane;
 	}
@@ -420,34 +339,11 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 
 	private JScrollPane createDependencyTablePane()
 	{
-		DefaultTableModel tableModel = createDependencyTableModel();
-
-		tableDependencies = new JTable(tableModel);
-		tableDependencies.setRowSelectionAllowed(true);
-		tableDependencies.setColumnSelectionAllowed(false);
-		tableDependencies.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableDependencies = new JTable(createDependencyTableModel());
+		JScrollPane tableScrollPane = ComponentFactory.createTableScrollPane(tableDependencies);
 
 		if (tableDependencies.getModel().getRowCount() > 0)
-		{
 			tableDependencies.getSelectionModel().setSelectionInterval(0,0);
-			initColumnSizes(tableDependencies);
-		}
-
-		JPanel tablePanel = new JPanel(new BorderLayout());
-		tablePanel.setBackground(Color.WHITE);
-		tablePanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		tablePanel.setPreferredSize(new Dimension(190, 100));
-		tablePanel.setMinimumSize(new Dimension(190, (int)tablePanel.getPreferredSize().getHeight()));
-		tablePanel.setMaximumSize(new Dimension(190, (int)tablePanel.getPreferredSize().getHeight()));
-		tablePanel.add(tableDependencies.getTableHeader(), BorderLayout.PAGE_START);
-		tablePanel.add(tableDependencies, BorderLayout.CENTER);
-
-		JScrollPane tableScrollPane = new JScrollPane(tablePanel);
-		tableScrollPane.setWheelScrollingEnabled(true);
-		// agentInstanceScrollPane.setBorder(BorderFactory.createEmptyBorder());
-		tableScrollPane.setPreferredSize(new Dimension(190, 100));
-		tableScrollPane.setMinimumSize(new Dimension(190, (int)tableScrollPane.getPreferredSize().getHeight()));
-		tableScrollPane.setMaximumSize(new Dimension(190, (int)tableScrollPane.getPreferredSize().getHeight()));
 
 		return tableScrollPane;
 	}
@@ -470,31 +366,6 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		}
 
 		return tableModel;
-	}
-
-	private void initColumnSizes(JTable table)
-	{
-		TableColumn column = null;
-		Component comp = null;
-		int headerWidth = 0;
-		int cellWidth = 0;
-
-		TableCellRenderer headerRenderer = table.getTableHeader().getDefaultRenderer();
-
-		for (int i = 0; i < table.getColumnCount(); i++)
-		{
-			column = table.getColumnModel().getColumn(i);
-
-			comp = headerRenderer.getTableCellRendererComponent(null, column.getHeaderValue(), false, false, 0, 0);
-			headerWidth = comp.getPreferredSize().width;
-
-			Class columnClass = table.getModel().getColumnClass(i);
-			TableCellRenderer tableRenderer = table.getDefaultRenderer(columnClass);
-			comp = tableRenderer.getTableCellRendererComponent(table, table.getModel().getValueAt(0, i), false, false, 0, i);
-			cellWidth = comp.getPreferredSize().width;
-
-			column.setPreferredWidth(Math.max(headerWidth, cellWidth));
-		}
 	}
 
 	public void actionPerformed(ActionEvent evt)

@@ -30,6 +30,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import jade.tools.ascml.gui.dialogs.StartSocietyInstanceDialog;
+import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.model.jibx.Launcher;
@@ -67,11 +68,8 @@ public class ParameterDetails extends JPanel implements ActionListener
 		this.setLayout(new GridBagLayout());
 		this.setBackground(Color.WHITE);
 
-		buttonApply = new JButton("Apply Changes", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_APPLY, 16, 16));
+		buttonApply = ComponentFactory.createApplyButton("Apply Changes");
 		buttonApply.addActionListener(this);
-		buttonApply.setPreferredSize(new Dimension(145,22));
-		buttonApply.setMinimumSize(new Dimension(145,22));
-		buttonApply.setMaximumSize(new Dimension(145,22));
 
         this.add(createAttributePanel(), new GridBagConstraints(0, 0, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 		this.add(buttonApply, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
@@ -104,7 +102,7 @@ public class ParameterDetails extends JPanel implements ActionListener
 		DefaultListModel listModel = (DefaultListModel)listValues.getModel();
 		listModel.removeAllElements();
 		if (!instanceParameter.getValue().equals(""))
-		{				
+		{
 			listModel.addElement(instanceParameter.getValue());
 			listValues.setSelectedIndex(0);
 		}
@@ -201,17 +199,11 @@ public class ParameterDetails extends JPanel implements ActionListener
 
 	private JPanel createAttributePanel()
 	{
-		buttonAddValue = new JButton("Add Value", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_ADD, 16, 16));
+		buttonAddValue = ComponentFactory.createAddButton("Add Value");
 		buttonAddValue.addActionListener(this);
-		buttonAddValue.setPreferredSize(new Dimension(140,22));
-		buttonAddValue.setMinimumSize(new Dimension(140,22));
-		buttonAddValue.setMaximumSize(new Dimension(140,22));
 
-		buttonRemoveValue = new JButton("Remove Value", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_REMOVE, 16, 16));
+		buttonRemoveValue = ComponentFactory.createAddButton("Remove Value");
 		buttonRemoveValue.addActionListener(this);
-		buttonRemoveValue.setPreferredSize(new Dimension(140,22));
-		buttonRemoveValue.setMinimumSize(new Dimension(140,22));
-		buttonRemoveValue.setMaximumSize(new Dimension(140,22));
 
 		textFieldName = new JTextField("", 30);
 		textFieldName.setMinimumSize(new Dimension(320, (int)textFieldName.getPreferredSize().getHeight()));
@@ -226,35 +218,14 @@ public class ParameterDetails extends JPanel implements ActionListener
 
 		// prepare Description
 		textAreaDescription = new JTextArea("", 3, 20);
-		textAreaDescription.setFont(new Font("Arial", Font.PLAIN, 12));
-		textAreaDescription.setEditable(true);
-		textAreaDescription.setLineWrap(true);
-		textAreaDescription.setWrapStyleWord(true);
-		textAreaDescription.setBackground(Color.WHITE);
-
-		// put the textarea into a scrollpane
-		JScrollPane textDescScrollPane = new JScrollPane(textAreaDescription);
-		textDescScrollPane.getViewport().setBackground(Color.WHITE);
-		textDescScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		textDescScrollPane.setPreferredSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 60));
-		textDescScrollPane.setMinimumSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 60));
-		textDescScrollPane.setMaximumSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 60));
+		JScrollPane textDescScrollPane = ComponentFactory.createTextAreaScrollPane(textAreaDescription);
 
 		checkBoxOptional = new JCheckBox("optional");
 		// checkBoxOptional.setSelected(agentInstance.hasToolOption(IToolOption.TOOLOPTION_SNIFF));
 		checkBoxOptional.setBackground(Color.WHITE);
 
 		listValues = new JList(new DefaultListModel());
-		listValues.setBackground(Color.WHITE);
-		listValues.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        listValues.setLayoutOrientation(JList.VERTICAL);
-        listValues.setVisibleRowCount(-1);
-
-		JScrollPane listScrollPane = new JScrollPane(listValues);
-		listScrollPane.getViewport().setBackground(Color.WHITE);
-		listScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		listScrollPane.setPreferredSize(new Dimension((int)listScrollPane.getPreferredSize().getWidth(), 60));
-		listScrollPane.setMinimumSize(new Dimension((int)listScrollPane.getPreferredSize().getWidth(), 60));
+		JScrollPane listScrollPane = ComponentFactory.createListScrollPane(listValues);
 
 		JPanel attributePanel = new JPanel(new GridBagLayout());
 		attributePanel.setBackground(Color.WHITE);

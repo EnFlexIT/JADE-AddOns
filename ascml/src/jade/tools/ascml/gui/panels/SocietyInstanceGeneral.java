@@ -30,6 +30,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 import jade.tools.ascml.gui.dialogs.StartSocietyInstanceDialog;
+import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.absmodel.IAgentInstance;
 import jade.tools.ascml.absmodel.ISocietyInstance;
 import jade.tools.ascml.absmodel.ISocietyInstanceReference;
@@ -60,17 +61,11 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 		this.setLayout(new GridBagLayout());
 		this.setBackground(Color.WHITE);
 
-		buttonStart = new JButton("Start Instance", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_START, 16, 16));
+		buttonStart = ComponentFactory.createStartButton("Start Instance");
 		buttonStart.addActionListener(this);
-		buttonStart.setPreferredSize(new Dimension(145,22));
-		buttonStart.setMinimumSize(new Dimension(145,22));
-		buttonStart.setMaximumSize(new Dimension(145,22));
 
-		buttonApply = new JButton("Apply Changes", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_APPLY, 16, 16));
+		buttonApply = ComponentFactory.createStartButton("Apply Changes");
 		buttonApply.addActionListener(this);
-		buttonApply.setPreferredSize(new Dimension(145,22));
-		buttonApply.setMinimumSize(new Dimension(145,22));
-		buttonApply.setMaximumSize(new Dimension(145,22));
 
         this.add(createAttributePanel(), new GridBagConstraints(0, 0, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 
@@ -94,27 +89,11 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 		textFieldScheme.setMinimumSize(new Dimension(100, (int)textFieldScheme.getPreferredSize().getHeight()));
 		textFieldScheme.setBackground(Color.WHITE);
 
-		// prepare Description
 		textAreaDescription = new JTextArea(model.getDescription(), 3, 20);
-		textAreaDescription.setFont(new Font("Arial", Font.PLAIN, 12));
-		textAreaDescription.setEditable(true);
-		textAreaDescription.setLineWrap(true);
-		textAreaDescription.setWrapStyleWord(true);
-		textAreaDescription.setBackground(Color.WHITE);
+		JScrollPane textDescScrollPane = ComponentFactory.createTextAreaScrollPane(textAreaDescription);
 
-		spinnerQuantity = new JSpinner(new SpinnerNumberModel(model.getQuantity(), 0, 10000, 1));
-		spinnerQuantity.setPreferredSize(new Dimension(60, (int)spinnerQuantity.getPreferredSize().getHeight()));
-		spinnerQuantity.setMinimumSize(new Dimension(60, (int)spinnerQuantity.getPreferredSize().getHeight()));
-		spinnerQuantity.setMaximumSize(new Dimension(60, (int)spinnerQuantity.getPreferredSize().getHeight()));
-		spinnerQuantity.setBackground(Color.WHITE);
-
-		// put the textarea into a scrollpane
-		JScrollPane textDescScrollPane = new JScrollPane(textAreaDescription);
-		textDescScrollPane.getViewport().setBackground(Color.WHITE);
-		textDescScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		textDescScrollPane.setPreferredSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 50));
-		textDescScrollPane.setMinimumSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 50));
-
+		spinnerQuantity = ComponentFactory.createQuantitySpinner(model.getQuantity());
+		
 		JPanel attributePanel = new JPanel(new GridBagLayout());
 		attributePanel.setBackground(Color.WHITE);
 

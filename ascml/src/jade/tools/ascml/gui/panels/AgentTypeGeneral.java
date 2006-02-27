@@ -33,6 +33,7 @@ import java.io.File;
 
 import jade.tools.ascml.gui.dialogs.StartAgentInstanceDialog;
 import jade.tools.ascml.gui.dialogs.ExceptionDialog;
+import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.repository.ModelIntegrityChecker;
 import jade.tools.ascml.absmodel.IAgentType;
@@ -75,23 +76,14 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 		this.setBackground(Color.WHITE);
 		this.setLayout(new GridBagLayout());
 
-		buttonStart = new JButton("Start Instance", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_START, 16, 16));
+		buttonStart = ComponentFactory.createStartButton("Start Instance");
 		buttonStart.addActionListener(this);
-		buttonStart.setPreferredSize(new Dimension(145,22));
-		buttonStart.setMinimumSize(new Dimension(145,22));
-		buttonStart.setMaximumSize(new Dimension(145,22));
 
-		buttonApply = new JButton("Apply Changes", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_APPLY, 16, 16));
+		buttonApply = ComponentFactory.createApplyButton("Apply Changes");
 		buttonApply.addActionListener(this);
-		buttonApply.setPreferredSize(new Dimension(145,22));
-		buttonApply.setMinimumSize(new Dimension(145,22));
-		buttonApply.setMaximumSize(new Dimension(145,22));
 
-		buttonSave = new JButton("Save AgentType", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_SAVE, 16, 16));
+        buttonSave = ComponentFactory.createSaveButton("Save AgentType");
 		buttonSave.addActionListener(this);
-		buttonSave.setPreferredSize(new Dimension(145,22));
-		buttonSave.setMinimumSize(new Dimension(145,22));
-		buttonSave.setMaximumSize(new Dimension(145,22));
 
 		// ... and add the content (content is layout out in it's own panel)
 		this.add(createAttributePanel(), new GridBagConstraints(0, 0, 3, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
@@ -130,53 +122,24 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 		textFieldTypeClass.setBackground(Color.WHITE);
 		textFieldTypeClass.setMinimumSize(new Dimension(320, (int)textFieldTypeClass.getPreferredSize().getHeight()));
 
-		buttonChangeImage = new JButton("Change Icon");
+		buttonChangeImage = ComponentFactory.createChangeIconButton();
 		buttonChangeImage.addActionListener(this);
-		buttonChangeImage.setMargin(new Insets(1,1,1,1));
-		buttonChangeImage.setPreferredSize(new Dimension(80,18));
-		buttonChangeImage.setMinimumSize(new Dimension(80,18));
-		buttonChangeImage.setMaximumSize(new Dimension(80,18));
 
-		buttonChangeSourcePath = new JButton("...");
+		buttonChangeSourcePath = ComponentFactory.createThreePointButton();
 		buttonChangeSourcePath.addActionListener(this);
-		buttonChangeSourcePath.setMargin(new Insets(1,3,1,3));
-		buttonChangeSourcePath.setPreferredSize(new Dimension(30,20));
-		buttonChangeSourcePath.setMinimumSize(new Dimension(30,20));
-		buttonChangeSourcePath.setMaximumSize(new Dimension(30,20));
 
-		buttonChangeSourceName = new JButton("...");
+		buttonChangeSourceName = ComponentFactory.createThreePointButton();
 		buttonChangeSourceName.addActionListener(this);
-		buttonChangeSourceName.setMargin(new Insets(1,3,1,3));
-		buttonChangeSourceName.setPreferredSize(new Dimension(30,20));
-		buttonChangeSourceName.setMinimumSize(new Dimension(30,20));
-		buttonChangeSourceName.setMaximumSize(new Dimension(30,20));
 
-		buttonChangeTypeClass = new JButton("...");
+		buttonChangeTypeClass = ComponentFactory.createThreePointButton();
 		buttonChangeTypeClass.addActionListener(this);
-		buttonChangeTypeClass.setMargin(new Insets(1,3,1,3));
-		buttonChangeTypeClass.setPreferredSize(new Dimension(30,20));
-		buttonChangeTypeClass.setMinimumSize(new Dimension(30,20));
-		buttonChangeTypeClass.setMaximumSize(new Dimension(30,20));
 
 		comboBoxPlatform = new JComboBox(new String[] { "JADE" });
 		comboBoxPlatform.setBackground(Color.WHITE);
 
 		textAreaDescription = new JTextArea(model.getDescription(), 5, 20);
-		textAreaDescription.setFont(new Font("Arial", Font.PLAIN, 12));
-		// textAreaDescription.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-		textAreaDescription.setPreferredSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 100));
-		textAreaDescription.setMinimumSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 100));
-		textAreaDescription.setLineWrap(true);
-		textAreaDescription.setWrapStyleWord(true);
-		textAreaDescription.setBackground(Color.WHITE);
-
-		// put the textarea into a scrollpane
-		JScrollPane textDescScrollPane = new JScrollPane(textAreaDescription);
-		textDescScrollPane.getViewport().setBackground(Color.WHITE);
-		textDescScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		textDescScrollPane.setPreferredSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 100));
-		textDescScrollPane.setMinimumSize(new Dimension((int)textAreaDescription.getPreferredSize().getWidth(), 100));
-
+		JScrollPane textDescScrollPane = ComponentFactory.createTextAreaScrollPane(textAreaDescription);
+		
 		JPanel attributePanel = new JPanel(new GridBagLayout());
 		attributePanel.setBackground(Color.WHITE);
 		

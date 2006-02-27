@@ -34,6 +34,7 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
 import jade.tools.ascml.gui.dialogs.StartSocietyInstanceDialog;
+import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.model.jibx.Launcher;
@@ -61,26 +62,21 @@ public class ParameterOverview extends AbstractPanel implements ActionListener, 
 		this.setLayout(new GridBagLayout());
 		this.setBackground(Color.WHITE);
         panelParameterDetails = new ParameterDetails(this);
+        panelParameterDetails.setPreferredSize(new Dimension(350, (int)panelParameterDetails.getPreferredSize().getHeight()));
+		panelParameterDetails.setMinimumSize(new Dimension(350, (int)panelParameterDetails.getPreferredSize().getHeight()));
+		panelParameterDetails.setMaximumSize(new Dimension(350, (int)panelParameterDetails.getPreferredSize().getHeight()));
 
         this.add(createLeftSide(), new GridBagConstraints(0, 0, 1, 1, 0.5, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
-		this.add(panelParameterDetails, new GridBagConstraints(1, 0, 1, 1, 0.5, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+		this.add(panelParameterDetails, new GridBagConstraints(1, 0, 1, 1, 0.5, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
 	}
 
 	private JPanel createLeftSide()
 	{
-		buttonAddParameter = new JButton("Add New", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_ADD, 16, 16));
+		buttonAddParameter = ComponentFactory.createAddButton("Add New");
 		buttonAddParameter.addActionListener(this);
-		buttonAddParameter.setMargin(new Insets(1,1,1,1));
-		buttonAddParameter.setPreferredSize(new Dimension(80,20));
-		buttonAddParameter.setMinimumSize(new Dimension(80,20));
-		buttonAddParameter.setMaximumSize(new Dimension(80,20));
 
-		buttonRemoveParameter = new JButton("Remove", ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_REMOVE, 16, 16));
+		buttonRemoveParameter = ComponentFactory.createAddButton("Remove");
 		buttonRemoveParameter.addActionListener(this);
-		buttonRemoveParameter.setMargin(new Insets(1,1,1,1));
-		buttonRemoveParameter.setPreferredSize(new Dimension(80,20));
-		buttonRemoveParameter.setMinimumSize(new Dimension(80,20));
-		buttonRemoveParameter.setMaximumSize(new Dimension(80,20));
 
 		JPanel panelParameterButtons = new JPanel();
 		panelParameterButtons.setBackground(Color.WHITE);
@@ -90,20 +86,17 @@ public class ParameterOverview extends AbstractPanel implements ActionListener, 
 		JPanel attributePanel = new JPanel(new GridBagLayout());
 		attributePanel.setBackground(Color.WHITE);
 
-		attributePanel.add(createParameterTablePane(), new GridBagConstraints(0, 0, 1, 1, 1, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
-		attributePanel.add(panelParameterButtons, new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
+		attributePanel.add(createParameterTablePane(), new GridBagConstraints(0, 0, 1, 1, 0.4, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
+		attributePanel.add(panelParameterButtons, new GridBagConstraints(0, 1, 1, 1, 0.6, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
 
 		return attributePanel;
 	}
 
 	private JScrollPane createParameterTablePane()
 	{
-		DefaultTableModel tableModel = createParameterTableModel();
 
-		tableParameter = new JTable(tableModel);
-		tableParameter.setRowSelectionAllowed(true);
-		tableParameter.setColumnSelectionAllowed(false);
-		tableParameter.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableParameter = new JTable(createParameterTableModel());
+		JScrollPane tableScrollPane = ComponentFactory.createTableScrollPane(tableParameter);
 
 		//Ask to be notified of selection changes.
 		ListSelectionModel rowSM = tableParameter.getSelectionModel();
@@ -153,22 +146,6 @@ public class ParameterOverview extends AbstractPanel implements ActionListener, 
 		{
 			tableParameter.getSelectionModel().setSelectionInterval(0,0);
 		}
-
-		JPanel tablePanel = new JPanel(new BorderLayout());
-		tablePanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-		tablePanel.setBackground(Color.WHITE);
-		tablePanel.setPreferredSize(new Dimension(250, 100));
-		tablePanel.setMinimumSize(new Dimension(250, (int)tablePanel.getPreferredSize().getHeight()));
-		tablePanel.setMaximumSize(new Dimension(250, (int)tablePanel.getPreferredSize().getHeight()));
-		tablePanel.add(tableParameter.getTableHeader(), BorderLayout.PAGE_START);
-		tablePanel.add(tableParameter, BorderLayout.CENTER);
-
-		JScrollPane tableScrollPane = new JScrollPane(tablePanel);
-		tableScrollPane.setWheelScrollingEnabled(true);
-		// agentInstanceScrollPane.setBorder(BorderFactory.createEmptyBorder());
-		tableScrollPane.setPreferredSize(new Dimension(250, 100));
-		tableScrollPane.setMinimumSize(new Dimension(250, (int)tableScrollPane.getPreferredSize().getHeight()));
-		tableScrollPane.setMaximumSize(new Dimension(250, (int)tableScrollPane.getPreferredSize().getHeight()));
 
 		return tableScrollPane;
 	}
