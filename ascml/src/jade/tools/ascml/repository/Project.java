@@ -291,6 +291,8 @@ public class Project
 				(societyType.getStatus() == ISocietyType.STATUS_REFERENCE_ERROR))
 				throw societyType.getIntegrityStatus();
 		}
+		else
+            throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.SOCIETYTYPE_SELECTED, societyTypesNameMap.get(societyTypeName), this));
 	}
 
 	/**
@@ -486,6 +488,8 @@ public class Project
 			if (agentType.getStatus() == IAgentType.STATUS_ERROR)
 				throw agentType.getIntegrityStatus();
 		}
+		else
+            throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.AGENTTYPE_SELECTED, agentTypesNameMap.get(agentTypeName), this));
 	}
 
 	/**
@@ -638,7 +642,7 @@ public class Project
 		return this.name;
 	}
 
-	private void throwProjectChangedEvent(ProjectChangedEvent event)
+	public void throwProjectChangedEvent(ProjectChangedEvent event)
 	{
         Vector projectListener = repository.getListenerManager().getProjectListener();
 		for (int i=0; i < projectListener.size(); i++)
