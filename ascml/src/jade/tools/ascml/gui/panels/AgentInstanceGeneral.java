@@ -260,6 +260,12 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 			toolOptionSniffer.setSelected(agentInstance.hasToolOption(IToolOption.TOOLOPTION_SNIFF));
 
 			tableParameter.setModel(createParameterTableModel());
+
+			if (tableParameter.getModel().getRowCount() > 0)
+			{
+				tableParameter.getSelectionModel().setSelectionInterval(0,0);
+				initColumnSizes(tableParameter);
+			}
 		}
 	}
 
