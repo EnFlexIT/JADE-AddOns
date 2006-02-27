@@ -73,14 +73,17 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 	 * @param model the AgentModel to show in the dialog, this may be an
 	 *              AgentInstanceModel or an AgentTypeModel
 	 */
-	public AgentInstanceGeneral(AbstractMainPanel parentPanel, ISocietyInstance model)
+	public AgentInstanceGeneral(AbstractMainPanel parentPanel, IAgentInstance model, ISocietyInstance societyInstance)
 	{
 		super(parentPanel);
-		this.societyInstance = model;
-		if (societyInstance.getAgentInstanceModels().length > 0)
-        	agentInstance = societyInstance.getAgentInstanceModels()[0];
-        else
-			agentInstance = new AgentInstance();
+		this.societyInstance = societyInstance;
+
+		if (model != null)
+        	agentInstance = model;
+        else if (societyInstance.getAgentInstanceModels().length > 0)
+			agentInstance = societyInstance.getAgentInstanceModels()[0];
+		else
+			agentInstance = new AgentInstance(societyInstance);
 
 		this.setBackground(Color.WHITE);
 		this.setLayout(new GridBagLayout());
@@ -88,9 +91,17 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		this.add(createLeftSide(), new GridBagConstraints(0, 0, 1, 1, 0, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.VERTICAL, new Insets(5,5,5,5), 0, 0));
 		this.add(createRightSide(), new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 
+		// initially select the model, to view
 		if (tableAgentInstances.getRowCount() > 0)
 		{
-			tableAgentInstances.getSelectionModel().setSelectionInterval(0,0);
+			for (int i=0; i < tableAgentInstances.getRowCount(); i++)
+			{
+				String agentInstanceName = (String)((DefaultTableModel)tableAgentInstances.getModel()).getValueAt(i, 0);
+				if (agentInstanceName.equals(agentInstance.getName()))
+					tableAgentInstances.getSelectionModel().setSelectionInterval(i,i);
+			}
+			if (tableAgentInstances.getSelectedRow() == -1) // no row selected yet
+				tableAgentInstances.getSelectionModel().setSelectionInterval(0,0);
 			initColumnSizes(tableAgentInstances);
 		}
 
@@ -586,7 +597,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		}
 		else if (evt.getSource() == buttonAddAgentInstance)
 		{
-			agentInstance = new AgentInstance();
+			agentInstance = new AgentInstance(societyInstance);
 			tableAgentInstances.getSelectionModel().removeSelectionInterval(0, tableAgentInstances.getSelectedRow());
 			setAgentInstanceData();
 		}
@@ -601,7 +612,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 			}
 			else
 			{
-				agentInstance = new AgentInstance();
+				agentInstance = new AgentInstance(societyInstance);
 				tableAgentInstances.setModel(createAgentInstanceTableModel());
 			}
 			setAgentInstanceData();
