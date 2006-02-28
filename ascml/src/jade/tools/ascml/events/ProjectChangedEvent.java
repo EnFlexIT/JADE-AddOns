@@ -48,6 +48,9 @@ public class ProjectChangedEvent
 	/** This constant is used for selecting an AgentInstance in the repository-tree **/
 	public static final String AGENTINSTANCE_SELECTED 		= "agentinstance_selected";
 
+	/** Runnable removed, QUICK AND DIRTY (caught by TreeModels) */
+	public static final String RUNNABLE_REMOVED = "runnable_removed";
+
 	/** This constant is used for selecting a SocietyInstance-reference in the repository-tree **/
 	public static final String SOCIETYINSTANCE_REFERENCE_SELECTED 	= "societyinstance_reference_selected";
 
