@@ -81,7 +81,7 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 		buttonStart = ComponentFactory.createStartButton("Start Default-Instance");
 		buttonStart.addActionListener(this);
 
-		buttonApply = ComponentFactory.createStartButton("Apply Changes");
+		buttonApply = ComponentFactory.createApplyButton("Apply Changes");
 		buttonApply.addActionListener(this);
 
 		buttonSave = ComponentFactory.createSaveButton("Save SocietyType");

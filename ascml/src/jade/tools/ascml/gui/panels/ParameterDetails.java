@@ -202,7 +202,7 @@ public class ParameterDetails extends JPanel implements ActionListener
 		buttonAddValue = ComponentFactory.createAddButton("Add Value");
 		buttonAddValue.addActionListener(this);
 
-		buttonRemoveValue = ComponentFactory.createAddButton("Remove Value");
+		buttonRemoveValue = ComponentFactory.createRemoveButton("Remove");
 		buttonRemoveValue.addActionListener(this);
 
 		textFieldName = new JTextField("", 30);
