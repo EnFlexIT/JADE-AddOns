@@ -487,9 +487,10 @@ public class SocietyInstance implements ISocietyInstance
 	 */
 	public String toString()
 	{		
-		String str = getName();
+		String str = "";
 		if (getQuantity() > 1)
-			str += " (" + getQuantity() + ")";
+			str += "(" + getQuantity() + ") ";
+		str += getName();
 		return str;
 	}
 	
