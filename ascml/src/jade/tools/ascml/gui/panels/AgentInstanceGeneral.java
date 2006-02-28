@@ -35,6 +35,7 @@ import java.awt.event.*;
 import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.gui.dialogs.ParameterDialog;
+import jade.tools.ascml.gui.dialogs.DependencyDialog;
 import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.model.jibx.AgentInstance;
 import jade.tools.ascml.events.ProjectChangedEvent;
@@ -150,7 +151,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		panelParameterButtons.add(buttonEditParameter);
 		panelParameterButtons.add(buttonAddParameter);
 
-		buttonAddDependency = ComponentFactory.createAddButton("Add New");
+		buttonAddDependency = ComponentFactory.createAddButton("Create");
 		buttonAddDependency.addActionListener(this);
 
 		buttonEditDependency = ComponentFactory.createEditButton("Edit");
@@ -158,6 +159,12 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 
 		buttonRemoveDependency = ComponentFactory.createRemoveButton("Remove");
 		buttonRemoveDependency.addActionListener(this);
+
+		JPanel panelDependencyButtons = new JPanel();
+		panelDependencyButtons.setBackground(Color.WHITE);
+		panelDependencyButtons.add(buttonRemoveDependency);
+		panelDependencyButtons.add(buttonEditDependency);
+		panelDependencyButtons.add(buttonAddDependency);
 
 		textFieldInstanceName = new JTextField(20);
 		textFieldInstanceName.setMinimumSize(new Dimension(150, (int)textFieldInstanceName.getPreferredSize().getHeight()));
@@ -211,9 +218,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		attributePanel.add(panelParameterButtons, new GridBagConstraints(0, 7, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
 
 		attributePanel.add(createDependencyTablePane(), new GridBagConstraints(0, 8, 2, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
-
-		// attributePanel.add(buttonRemoveDependency, new GridBagConstraints(0, 9, 1, 1, 0.5, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
-		// attributePanel.add(buttonAddDependency, new GridBagConstraints(1, 9, 1, 1, 0.5, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
+		attributePanel.add(panelDependencyButtons, new GridBagConstraints(0, 9, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
 
 		attributePanel.add(buttonApply, new GridBagConstraints(1, 10, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,2,5,2), 0, 0));
 
@@ -411,7 +416,10 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 				if (selectedRow <= agentInstance.getParameters().length-1)
 				{
 					IParameter instanceParameter = agentInstance.getParameters()[selectedRow];
-					IParameter typeParameter = agentInstance.getType().getParameter(instanceParameter.getName());
+					IParameter typeParameter = null;
+					if (agentInstance.getType() != null)
+						typeParameter = agentInstance.getType().getParameter(instanceParameter.getName());
+
 					ParameterDialog dialog = new ParameterDialog(instanceParameter, typeParameter);
 
 					Object result = dialog.showDialog(parentFrame);
@@ -429,7 +437,9 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 				else
 				{
 					IParameterSet instanceParameterSet = agentInstance.getParameterSets()[selectedRow-agentInstance.getParameters().length];
-					IParameterSet typeParameterSet = agentInstance.getType().getParameterSet(instanceParameterSet.getName());
+					IParameterSet typeParameterSet = null;
+					if (agentInstance.getType() != null)
+						typeParameterSet = agentInstance.getType().getParameterSet(instanceParameterSet.getName());
 					ParameterDialog dialog = new ParameterDialog(instanceParameterSet, typeParameterSet);
 
 					Object result = dialog.showDialog(parentFrame);
@@ -445,6 +455,48 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 				}
 			}
 		}
+		if (evt.getSource() == buttonAddDependency)
+		{
+			DependencyDialog dialog = new DependencyDialog(null);
+			IDependency result = (IDependency)dialog.showDialog(parentFrame);
+
+			if (result != null)
+			{
+				agentInstance.addDependency(result);
+			}
+			tableDependencies.setModel(createDependencyTableModel());
+			tableDependencies.getSelectionModel().setSelectionInterval(tableDependencies.getModel().getRowCount()-1,tableDependencies.getModel().getRowCount()-1);
+		}
+		else if (evt.getSource() == buttonRemoveDependency)
+		{
+			int selectedRow = tableDependencies.getSelectedRow();
+			if (tableDependencies.getModel().getRowCount() > 0)
+			{
+                agentInstance.removeDependency(selectedRow);
+
+				tableDependencies.setModel(createDependencyTableModel());
+				if (tableDependencies.getModel().getRowCount() > 0)
+					tableDependencies.getSelectionModel().setSelectionInterval(0,0);
+			}
+		}
+		else if (evt.getSource() == buttonEditDependency)
+		{
+			if (tableDependencies.getModel().getRowCount() > 0)
+			{
+				int selectedRow = tableDependencies.getSelectedRow();
+
+				DependencyDialog dialog = new DependencyDialog(agentInstance.getDependencies()[selectedRow]);
+
+				IDependency result = (IDependency)dialog.showDialog(parentFrame);
+				if (result != null)
+				{
+					agentInstance.removeDependency(selectedRow);
+					agentInstance.addDependency(result);
+				}
+				tableDependencies.setModel(createDependencyTableModel());
+				tableDependencies.getSelectionModel().setSelectionInterval(tableDependencies.getModel().getRowCount()-1,tableDependencies.getModel().getRowCount()-1);
+			}
+		}
 		else if (evt.getSource() == buttonApply)
 		{
 			agentInstance.setName(textFieldInstanceName.getText());
@@ -453,26 +505,33 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 			agentInstance.setTypeName(textFieldTypeName.getText());
 			agentInstance.setType((IAgentType)getRepository().getModelIndex().getModel(textFieldTypeName.getText()));
 
+			if (toolOptionBenchmark.isSelected())
+				agentInstance.addToolOption(IToolOption.TOOLOPTION_BENCHMARK);
+			else
+				agentInstance.removeToolOption(IToolOption.TOOLOPTION_BENCHMARK);
+			if (toolOptionIntrospector.isSelected())
+				agentInstance.addToolOption(IToolOption.TOOLOPTION_INTROSPECTOR);
+			else
+				agentInstance.removeToolOption(IToolOption.TOOLOPTION_INTROSPECTOR);
+			if (toolOptionLogger.isSelected())
+				agentInstance.addToolOption(IToolOption.TOOLOPTION_LOG);
+			else
+				agentInstance.removeToolOption(IToolOption.TOOLOPTION_LOG);
+			if (toolOptionSniffer.isSelected())
+				agentInstance.addToolOption(IToolOption.TOOLOPTION_SNIFF);
+			else
+				agentInstance.removeToolOption(IToolOption.TOOLOPTION_SNIFF);
+
 			if (tableAgentInstances.getSelectedRow() == -1)
 			{
 				// a new model has been created
 				agentInstance.setParentSocietyInstance(societyInstance);
 				societyInstance.addAgentInstance(agentInstance);
-
-				ModelIntegrityChecker checker = new ModelIntegrityChecker();
-				checker.checkIntegrity(societyInstance.getParentSocietyType());
-				
-				getRepository().getProject().throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.AGENTINSTANCE_SELECTED, agentInstance, getRepository().getProject()));
-
-				// tableAgentInstances.setModel(createAgentInstanceTableModel());
-				// tableAgentInstances.getSelectionModel().setSelectionInterval(tableAgentInstances.getRowCount()-1, tableAgentInstances.getRowCount()-1);
 			}
-			else
-			{
-				int selectedRow = tableAgentInstances.getSelectedRow();
-				tableAgentInstances.setModel(createAgentInstanceTableModel());
-				tableAgentInstances.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
-			}
+			ModelIntegrityChecker checker = new ModelIntegrityChecker();
+			checker.checkIntegrity(societyInstance.getParentSocietyType());
+
+			getRepository().getProject().throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.AGENTINSTANCE_SELECTED, agentInstance, getRepository().getProject()));
 		}
 		else if (evt.getSource() == buttonAddAgentInstance)
 		{
