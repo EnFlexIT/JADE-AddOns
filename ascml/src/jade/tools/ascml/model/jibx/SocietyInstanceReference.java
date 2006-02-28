@@ -374,6 +374,16 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 		dependencyList.remove(dependency);
 	}
 
+	/**
+	 * Remove a dependency from this reference's dependency-list.
+	 * @param dependencyIndex  The index of the Dependency-model
+	 *                         to remove within the inner dependency-list.
+	 */
+	public void removeDependency(int dependencyIndex)
+	{
+		dependencyList.remove(dependencyIndex);
+	}
+
 	// --------------------------------------------------------------------------------
 
 	/**
