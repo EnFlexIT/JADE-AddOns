@@ -130,12 +130,18 @@ public class ParameterOverview extends AbstractPanel implements ActionListener, 
 						if (selectedRow < ((IAgentInstance)agentModel).getParameters().length)
 						{
 							IParameter parameter = ((IAgentInstance)agentModel).getParameter(paramName);
-							panelParameterDetails.setInstanceParameter(parameter, ((IAgentInstance)agentModel).getType().getParameter(parameter.getName()));
+							if (((IAgentInstance)agentModel).getType() != null)
+								panelParameterDetails.setInstanceParameter(parameter, ((IAgentInstance)agentModel).getType().getParameter(parameter.getName()));
+							else
+								panelParameterDetails.setInstanceParameter(parameter, null);
 						}
 						else
 						{
 							IParameterSet parameterSet = ((IAgentInstance)agentModel).getParameterSet(paramName);
-							panelParameterDetails.setInstanceParameterSet(parameterSet, ((IAgentInstance)agentModel).getType().getParameterSet(parameterSet.getName()));
+							if (((IAgentInstance)agentModel).getType() != null)
+								panelParameterDetails.setInstanceParameterSet(parameterSet, ((IAgentInstance)agentModel).getType().getParameterSet(parameterSet.getName()));
+							else
+								panelParameterDetails.setInstanceParameterSet(parameterSet, null);
 						}
 					}
 				}
