@@ -360,7 +360,7 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 	 * Add a dependency to this SocietyInstanceReference's dependencies.
 	 * @param dependency  The Dependency to add.
 	 */
-	public void addDependency(AbstractDependency dependency)
+	public void addDependency(IDependency dependency)
 	{
 		dependencyList.add(dependency);
 	}
