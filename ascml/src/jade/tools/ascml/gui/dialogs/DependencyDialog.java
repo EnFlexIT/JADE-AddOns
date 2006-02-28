@@ -42,7 +42,7 @@ public class DependencyDialog extends AbstractDialog
 
 	public Object showDialog(JFrame parentFrame)
 	{
-		DependencyDetails panel = new DependencyDetails();
+		DependencyDetails panel = new DependencyDetails(null);
 
 		panel.setDependency(dependency);
 
