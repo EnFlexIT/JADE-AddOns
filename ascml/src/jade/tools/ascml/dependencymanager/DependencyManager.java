@@ -34,8 +34,7 @@ import jade.tools.ascml.exceptions.ModelActionException;
 import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.Dead;
 import jade.tools.ascml.onto.Error;
-import jade.tools.ascml.onto.Running;
-import jade.tools.ascml.onto.SocietyInstance;
+import jade.tools.ascml.onto.Functional;
 import jade.tools.ascml.onto.Stopping;
 import jade.tools.ascml.repository.Repository;
 import jade.util.Logger;
@@ -109,7 +108,7 @@ public class DependencyManager implements ModelChangedListener {
 	public void agentBorn(AID agentAID) {
 		if (myLibrary.hasAgent(agentAID)) {
 			IRunnableAgentInstance agent = myLibrary.getAgent(agentAID);
-			agent.setStatus(new Running());					
+			agent.setStatus(new Functional());					
 		}
 		myFunctionalController.agentBorn(agentAID);
 	}

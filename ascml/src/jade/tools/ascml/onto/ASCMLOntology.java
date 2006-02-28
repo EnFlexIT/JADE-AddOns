@@ -98,7 +98,6 @@ public class ASCMLOntology extends jade.content.onto.Ontology implements Protege
     public static final String FUNCTIONAL="Functional";
     public static final String STATUS_DETAILEDSTATUS="DetailedStatus";
     public static final String STATUS="Status";
-    public static final String RUNNING="Running";
     public static final String LOG="Log";
 
   /**
@@ -113,8 +112,6 @@ public class ASCMLOntology extends jade.content.onto.Ontology implements Protege
     // adding Concept(s)
     ConceptSchema logSchema = new ConceptSchema(LOG);
     add(logSchema, jade.tools.ascml.onto.Log.class);
-    ConceptSchema runningSchema = new ConceptSchema(RUNNING);
-    add(runningSchema, jade.tools.ascml.onto.Running.class);
     ConceptSchema statusSchema = new ConceptSchema(STATUS);
     add(statusSchema, jade.tools.ascml.onto.Status.class);
     ConceptSchema functionalSchema = new ConceptSchema(FUNCTIONAL);
@@ -191,7 +188,6 @@ public class ASCMLOntology extends jade.content.onto.Ontology implements Protege
 
     // adding inheritance
     logSchema.addSuperSchema(toolOptionSchema);
-    runningSchema.addSuperSchema(agentStatusSchema);
     functionalSchema.addSuperSchema(societyStatusSchema);
     knownSchema.addSuperSchema(societyStatusSchema);
     bornSchema.addSuperSchema(agentStatusSchema);

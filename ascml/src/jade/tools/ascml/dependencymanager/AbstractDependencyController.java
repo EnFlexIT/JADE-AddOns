@@ -115,7 +115,7 @@ public abstract class AbstractDependencyController {
 	 */
 	public void updateAgent(IRunnableAgentInstance agentInstanceModel) {
 		Status agentStatus = agentInstanceModel.getStatus();
-		if (agentStatus.equals(new Running())) {
+		if (agentStatus.equals(new Functional())) {
 			String agentName = agentInstanceModel.getFullyQualifiedName();
 			String agentType = agentInstanceModel.getType().getFullyQualifiedName();
 			if (runningAgentTypeCountMap.containsKey(agentType)) {

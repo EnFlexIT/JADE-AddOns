@@ -205,8 +205,6 @@ public class ImageIconLoader
 			return createImageIcon(STATUS_ERROR, width, height);
 		else if (status instanceof Born)
 			return createImageIcon(STATUS_CREATED, width, height);
-		else if (status instanceof Running)
-			return createImageIcon(STATUS_RUNNING, width, height);
 		else if (status instanceof Dead)
 			return createImageIcon(STATUS_NOT_RUNNING, width, height);
         return null;
