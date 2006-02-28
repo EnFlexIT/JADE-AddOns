@@ -64,7 +64,7 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 		buttonStart = ComponentFactory.createStartButton("Start Instance");
 		buttonStart.addActionListener(this);
 
-		buttonApply = ComponentFactory.createStartButton("Apply Changes");
+		buttonApply = ComponentFactory.createApplyButton("Apply Changes");
 		buttonApply.addActionListener(this);
 
         this.add(createAttributePanel(), new GridBagConstraints(0, 0, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
@@ -217,7 +217,7 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 		{
             model.setName(textFieldName.getText());
 			model.setDescription(textAreaDescription.getText());
-			model.setQuantity(((Double)spinnerQuantity.getValue()).intValue()+"");
+			model.setQuantity(((Number)spinnerQuantity.getValue()).intValue()+"");
 			model.setNamingScheme(textFieldScheme.getText());
 		}
 	}

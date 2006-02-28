@@ -62,9 +62,9 @@ public class ParameterOverview extends AbstractPanel implements ActionListener, 
 		this.setLayout(new GridBagLayout());
 		this.setBackground(Color.WHITE);
         panelParameterDetails = new ParameterDetails(this);
-        panelParameterDetails.setPreferredSize(new Dimension(350, (int)panelParameterDetails.getPreferredSize().getHeight()));
-		panelParameterDetails.setMinimumSize(new Dimension(350, (int)panelParameterDetails.getPreferredSize().getHeight()));
-		panelParameterDetails.setMaximumSize(new Dimension(350, (int)panelParameterDetails.getPreferredSize().getHeight()));
+        panelParameterDetails.setPreferredSize(new Dimension(330, (int)panelParameterDetails.getPreferredSize().getHeight()));
+		panelParameterDetails.setMinimumSize(new Dimension(330, (int)panelParameterDetails.getPreferredSize().getHeight()));
+		panelParameterDetails.setMaximumSize(new Dimension(330, (int)panelParameterDetails.getPreferredSize().getHeight()));
 
         this.add(createLeftSide(), new GridBagConstraints(0, 0, 1, 1, 0.5, 1, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,5,5,5), 0, 0));
 		this.add(panelParameterDetails, new GridBagConstraints(1, 0, 1, 1, 0.5, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
@@ -72,10 +72,10 @@ public class ParameterOverview extends AbstractPanel implements ActionListener, 
 
 	private JPanel createLeftSide()
 	{
-		buttonAddParameter = ComponentFactory.createAddButton("Add New");
+		buttonAddParameter = ComponentFactory.createAddButton("Create");
 		buttonAddParameter.addActionListener(this);
 
-		buttonRemoveParameter = ComponentFactory.createAddButton("Remove");
+		buttonRemoveParameter = ComponentFactory.createRemoveButton("Remove");
 		buttonRemoveParameter.addActionListener(this);
 
 		JPanel panelParameterButtons = new JPanel();

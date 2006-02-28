@@ -37,6 +37,8 @@ import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.gui.dialogs.LauncherDialog;
 import jade.tools.ascml.model.jibx.SocietyInstanceReference;
+import jade.tools.ascml.events.ProjectChangedEvent;
+import jade.tools.ascml.repository.ModelIntegrityChecker;
 
 public class SocietyInstanceReferenceGeneral extends AbstractPanel implements ActionListener
 {
@@ -101,7 +103,7 @@ public class SocietyInstanceReferenceGeneral extends AbstractPanel implements Ac
 
 	private JPanel createLeftSide()
 	{
-		buttonAddSocietyInstanceReference = ComponentFactory.createAddButton("Add New");
+		buttonAddSocietyInstanceReference = ComponentFactory.createAddButton("Create");
 		buttonAddSocietyInstanceReference.addActionListener(this);
 
 		buttonRemoveSocietyInstanceReference = ComponentFactory.createRemoveButton("Remove");
@@ -126,7 +128,7 @@ public class SocietyInstanceReferenceGeneral extends AbstractPanel implements Ac
         buttonApply = ComponentFactory.createApplyButton("Apply Changes");
 		buttonApply.addActionListener(this);
 
-		buttonAddLauncher = ComponentFactory.createAddButton("Add New");
+		buttonAddLauncher = ComponentFactory.createAddButton("Create");
 		buttonAddLauncher.addActionListener(this);
 
 		buttonEditLauncher = ComponentFactory.createEditButton("Edit");
@@ -141,7 +143,7 @@ public class SocietyInstanceReferenceGeneral extends AbstractPanel implements Ac
 		panelLauncherButtons.add(buttonEditLauncher);
 		panelLauncherButtons.add(buttonAddLauncher);
 
-		buttonAddDependency = ComponentFactory.createAddButton("Add New");
+		buttonAddDependency = ComponentFactory.createAddButton("Create");
 		buttonAddDependency.addActionListener(this);
 
 		buttonEditDependency = ComponentFactory.createEditButton("Edit");
@@ -400,10 +402,38 @@ public class SocietyInstanceReferenceGeneral extends AbstractPanel implements Ac
 		{
 			societyInstanceReference.setName(textFieldReferenceName.getText());
 			societyInstanceReference.setNamingScheme(textFieldScheme.getText());
-			societyInstanceReference.setQuantity(((Double)spinnerQuantity.getValue()).intValue()+"");
+			societyInstanceReference.setQuantity(((Number)spinnerQuantity.getValue()).intValue()+"");
 			societyInstanceReference.setTypeName(textFieldTypeName.getText());
 			societyInstanceReference.setInstanceName(textFieldInstanceName.getText());
             societyInstanceReference.getLauncher().setName(textFieldLauncherName.getText());
+
+			// try to set locally referenced SocietyInstance
+			if (!societyInstanceReference.isRemoteReference())
+			{
+				ISocietyType referencedTypeModel = (ISocietyType)getRepository().getModelIndex().getModel(societyInstanceReference.getTypeName());
+				if (referencedTypeModel != null)
+				{
+					ISocietyInstance referencedInstanceModel = referencedTypeModel.getSocietyInstance(societyInstanceReference.getInstanceName());
+					societyInstanceReference.setLocallyReferencedSocietyInstance(referencedInstanceModel);
+				}
+				else
+					societyInstanceReference.setLocallyReferencedSocietyInstance(null);
+			}
+
+			if (tableSocietyInstanceReferences.getSelectedRow() == -1)
+			{
+				// a new model has been created
+				societyInstanceReference.setParentSocietyInstance(societyInstance);
+				societyInstance.addSocietyInstanceReference(societyInstanceReference);
+
+				// tableAgentInstances.setModel(createAgentInstanceTableModel());
+				// tableAgentInstances.getSelectionModel().setSelectionInterval(tableAgentInstances.getRowCount()-1, tableAgentInstances.getRowCount()-1);
+			}
+
+			ModelIntegrityChecker checker = new ModelIntegrityChecker();
+			checker.checkIntegrity(societyInstance.getParentSocietyType());
+
+			getRepository().getProject().throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.SOCIETYINSTANCE_REFERENCE_SELECTED, societyInstanceReference, getRepository().getProject()));
 		}
 		else if (evt.getSource() == buttonAddSocietyInstanceReference)
 		{

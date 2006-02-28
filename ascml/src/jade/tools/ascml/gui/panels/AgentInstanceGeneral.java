@@ -38,6 +38,7 @@ import jade.tools.ascml.gui.dialogs.ParameterDialog;
 import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.model.jibx.AgentInstance;
 import jade.tools.ascml.events.ProjectChangedEvent;
+import jade.tools.ascml.repository.ModelIntegrityChecker;
 
 public class AgentInstanceGeneral extends AbstractPanel implements ActionListener
 {
@@ -109,7 +110,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 
 	private JPanel createLeftSide()
 	{
-		buttonAddAgentInstance = ComponentFactory.createAddButton("Add New");
+		buttonAddAgentInstance = ComponentFactory.createAddButton("Create");
 		buttonAddAgentInstance.addActionListener(this);
 
 		buttonRemoveAgentInstance = ComponentFactory.createRemoveButton("Remove");
@@ -134,7 +135,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
         buttonApply = ComponentFactory.createApplyButton("Apply Changes");
 		buttonApply.addActionListener(this);
 
-		buttonAddParameter = ComponentFactory.createAddButton("Add New");
+		buttonAddParameter = ComponentFactory.createAddButton("Create");
 		buttonAddParameter.addActionListener(this);
 
 		buttonEditParameter = ComponentFactory.createEditButton("Edit");
@@ -448,7 +449,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		{
 			agentInstance.setName(textFieldInstanceName.getText());
 			agentInstance.setNamingScheme(textFieldScheme.getText());
-			agentInstance.setQuantity(((Double)spinnerQuantity.getValue()).intValue()+"");
+			agentInstance.setQuantity(((Number)spinnerQuantity.getValue()).intValue()+"");
 			agentInstance.setTypeName(textFieldTypeName.getText());
 			agentInstance.setType((IAgentType)getRepository().getModelIndex().getModel(textFieldTypeName.getText()));
 
@@ -457,6 +458,10 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 				// a new model has been created
 				agentInstance.setParentSocietyInstance(societyInstance);
 				societyInstance.addAgentInstance(agentInstance);
+
+				ModelIntegrityChecker checker = new ModelIntegrityChecker();
+				checker.checkIntegrity(societyInstance.getParentSocietyType());
+				
 				getRepository().getProject().throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.AGENTINSTANCE_SELECTED, agentInstance, getRepository().getProject()));
 
 				// tableAgentInstances.setModel(createAgentInstanceTableModel());
