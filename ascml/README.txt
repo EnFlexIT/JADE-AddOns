@@ -51,6 +51,8 @@ To use all features of the ASCML you need:
   [java.sun.com]
 - JADE 3.2 or newer
   [jade.tilab.com]
+- JIBX
+  [jibx.sourceforge.net]
 
 To build the ASCML you need either eclipse or ANT.
 
