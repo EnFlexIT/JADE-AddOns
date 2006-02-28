@@ -42,7 +42,7 @@ public class ComponentFactory
 
 	public static JButton createNewButton(String buttonText)
 	{
-		JButton button = new JButton(buttonText, ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_SAVE, 16, 16));
+		JButton button = new JButton(buttonText, ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_ADD, 16, 16));
 		button.setMargin(new Insets(1,1,1,1));
 		button.setPreferredSize(new Dimension(170,22));
 		button.setMinimumSize(new Dimension(170,22));
