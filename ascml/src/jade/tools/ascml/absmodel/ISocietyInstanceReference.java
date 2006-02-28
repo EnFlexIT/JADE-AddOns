@@ -202,7 +202,7 @@ public interface ISocietyInstanceReference
 	 * Add a dependency to this SocietyInstanceReference's dependencies.
 	 * @param dependency  The Dependency to add.
 	 */
-	void addDependency(AbstractDependency dependency);
+	void addDependency(IDependency dependency);
 
 	/**
 	 * Remove a dependency from this SocietyInstanceReference's dependencies.
