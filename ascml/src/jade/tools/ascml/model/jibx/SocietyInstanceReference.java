@@ -244,13 +244,10 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 	 */
 	public String getNamingScheme()
 	{
-		if (namingScheme == null)
-			namingScheme = "";
+		if ((namingScheme == null) || (namingScheme.equals("")))
+			namingScheme = "%N";
 
-		if ((getQuantity() > 1) && (namingScheme.equals("")))
-			return "%N"; // default scheme
-		else
-			return this.namingScheme; // user-scheme
+		return this.namingScheme; // user-scheme
 	}
 
 	// -------------------------------------------------------------------------------
@@ -391,7 +388,9 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 
 	public String toString()
 	{
-		String str;
+		String str = "";
+        if (getQuantity() > 1)
+			str += "(" + getQuantity() + ") ";
 
 		String typeName = getTypeName();
 		if (isRemoteReference())
@@ -400,14 +399,11 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 		}
 		else
 		{
-			if (typeName.equals(this.getLocallyReferencedModel().getParentSocietyType().getName()))
+			if ((this.getLocallyReferencedModel() != null) && typeName.equals(this.getLocallyReferencedModel().getParentSocietyType().getName()))
 				str = getName() + " -> " + getInstanceName();
 			else
 				str = getName() + " -> " + typeName + "." + getInstanceName();
 		}
-
-		if (getQuantity() > 1)
-			str += " (" + getQuantity() + ")";
 		return str;
 	}
 }
