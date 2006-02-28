@@ -36,6 +36,7 @@ import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.gui.dialogs.LauncherDialog;
+import jade.tools.ascml.gui.dialogs.DependencyDialog;
 import jade.tools.ascml.model.jibx.SocietyInstanceReference;
 import jade.tools.ascml.events.ProjectChangedEvent;
 import jade.tools.ascml.repository.ModelIntegrityChecker;
@@ -206,7 +207,7 @@ public class SocietyInstanceReferenceGeneral extends AbstractPanel implements Ac
 		attributePanel.add(panelLauncherButtons, new GridBagConstraints(0, 7, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
 
 		attributePanel.add(createDependencyTablePane(), new GridBagConstraints(0, 8, 2, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
-        // attributePanel.add(panelDependencyButtons, new GridBagConstraints(0, 9, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
+        attributePanel.add(panelDependencyButtons, new GridBagConstraints(0, 9, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
 
 		attributePanel.add(buttonApply, new GridBagConstraints(1, 10, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,2,5,2), 0, 0));
 
@@ -396,6 +397,48 @@ public class SocietyInstanceReferenceGeneral extends AbstractPanel implements Ac
 				}
 				tableLauncher.setModel(createLauncherTableModel());
 				tableLauncher.getSelectionModel().setSelectionInterval(tableLauncher.getModel().getRowCount()-1,tableLauncher.getModel().getRowCount()-1);
+			}
+		}
+		else if (evt.getSource() == buttonAddDependency)
+		{
+			DependencyDialog dialog = new DependencyDialog(null);
+			IDependency result = (IDependency)dialog.showDialog(parentFrame);
+
+			if (result != null)
+			{
+				societyInstanceReference.addDependency(result);
+			}
+			tableDependencies.setModel(createDependencyTableModel());
+			tableDependencies.getSelectionModel().setSelectionInterval(tableDependencies.getModel().getRowCount()-1,tableDependencies.getModel().getRowCount()-1);
+		}
+		else if (evt.getSource() == buttonRemoveDependency)
+		{
+			int selectedRow = tableDependencies.getSelectedRow();
+			if (tableDependencies.getModel().getRowCount() > 0)
+			{
+                societyInstanceReference.removeDependency(selectedRow);
+
+				tableDependencies.setModel(createDependencyTableModel());
+				if (tableDependencies.getModel().getRowCount() > 0)
+					tableDependencies.getSelectionModel().setSelectionInterval(0,0);
+			}
+		}
+		else if (evt.getSource() == buttonEditDependency)
+		{
+			if (tableDependencies.getModel().getRowCount() > 0)
+			{
+				int selectedRow = tableDependencies.getSelectedRow();
+
+				DependencyDialog dialog = new DependencyDialog(societyInstanceReference.getDependencies()[selectedRow]);
+
+				IDependency result = (IDependency)dialog.showDialog(parentFrame);
+				if (result != null)
+				{
+					societyInstanceReference.removeDependency(selectedRow);
+					societyInstanceReference.addDependency(result);
+				}
+				tableDependencies.setModel(createDependencyTableModel());
+				tableDependencies.getSelectionModel().setSelectionInterval(tableDependencies.getModel().getRowCount()-1,tableDependencies.getModel().getRowCount()-1);
 			}
 		}
 		else if (evt.getSource() == buttonApply)
