@@ -96,7 +96,8 @@ public class AgentLauncher extends ToolAgent {
 	
 	//TODO: Use the logger
 	public Logger myLogger = Logger.getMyLogger(this.getClass().getName());
-	
+	public static String ASCML_NAME = "";
+
 	protected HashMap<IRunnableRemoteSocietyInstanceReference,StatusSubscriptionInitiator> remoteSocietySubscriptions;
 	
     /**
@@ -348,7 +349,8 @@ public class AgentLauncher extends ToolAgent {
 
         if (!propertyFileLocation.equals(""))
             System.out.println("ASCML properties: " + propertyFileLocation);
-        System.out.println("ASCML running as: " + this.getName());
+        ASCML_NAME = this.getName();
+		System.out.println("ASCML running as: " + ASCML_NAME);
         Iterator addr = this.getAMS().getAllAddresses();
         while (addr.hasNext()) {
             System.err.println("ASCML running on: " + addr.next());
