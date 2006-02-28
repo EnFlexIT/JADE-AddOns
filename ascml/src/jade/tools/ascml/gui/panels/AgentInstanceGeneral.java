@@ -455,7 +455,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 				}
 			}
 		}
-		if (evt.getSource() == buttonAddDependency)
+		else if (evt.getSource() == buttonAddDependency)
 		{
 			DependencyDialog dialog = new DependencyDialog(null);
 			IDependency result = (IDependency)dialog.showDialog(parentFrame);
