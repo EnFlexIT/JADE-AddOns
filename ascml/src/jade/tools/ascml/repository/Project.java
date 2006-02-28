@@ -77,7 +77,7 @@ public class Project
 
 		modelManager				= null; // set in init-method
 		this.repository				= repository;
-		view						= BASIC_VIEW;
+		view						= EXPERT_VIEW;
 		workingDirectory			= System.getProperty("user.dir");
 		temporarySocietyTypesCache	= new HashMap();
 		temporaryAgentTypesCache	= new HashMap();
