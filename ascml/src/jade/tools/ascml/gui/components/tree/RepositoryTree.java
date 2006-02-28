@@ -252,7 +252,7 @@ public class RepositoryTree extends JTree implements TreeSelectionListener, Proj
 
 	public void projectChanged(ProjectChangedEvent event)
 	{
-		System.err.println("RepositoryTree: Project changed, evt-code=" + event.getEventCode());
+		// System.err.println("RepositoryTree: Project changed, evt-code=" + event.getEventCode());
 		if (event.getEventCode().equals(ProjectChangedEvent.VIEW_CHANGED))
 		{
 			setView(event.getProject().getView());
