@@ -44,7 +44,9 @@ public class FunctionalStateController extends AbstractDependencyController{
 	protected Vector<IDependency> getDependenciesFromModel(IAbstractRunnable societyInstanceModel) {
 		ISocietyInstance parentSoc = (ISocietyInstance) societyInstanceModel.getParentModel();
 		IFunctional myFunctional = parentSoc.getFunctional();
-		return new Vector<IDependency>(myFunctional.getDependencyList());
+		Vector<IDependency> result = new Vector<IDependency>();
+		result.addAll(myFunctional.getDependencyList());
+		return result;
 	}
 
 	protected AbstractDependencyRecord getNewRecord(IAbstractRunnable absRunnable) {

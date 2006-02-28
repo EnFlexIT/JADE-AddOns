@@ -47,6 +47,10 @@ public class FunctionalRecord extends AbstractDependencyRecord {
 		} else {
 			if (absRunnable.getStatus().equals(new Functional())) {
 				absRunnable.setStatus(new NonFunctional());
+			} else if (absRunnable.getStatus().equals(new Stopping())) {
+				if (runningAgentNames.size() == 0 && runningSocietyNames.size() == 0 && runningWatcherTypes.size() == 0) {
+					absRunnable.setStatus(new Dead());
+				}
 			}
 		}
 	}
