@@ -1,6 +1,6 @@
 package jade.tools.ascml.absmodel.dependency;
 
-import jade.tools.ascml.model.jibx.Provider;
+import jade.tools.ascml.absmodel.IProvider;
 
 /**
  * 
@@ -53,11 +53,11 @@ public interface ISocietyInstanceDependency extends IDependency
 	 * Set the Provider responsible for the SocietyInstance.
 	 * @param provider  The Provider responsible for the SocietyInstance.
 	 */
-	void setProvider(Provider provider);
+	void setProvider(IProvider provider);
 
 	/**
 	 * Get the Provider responsible for the SocietyInstance.
 	 * @return  The Provider responsible for the SocietyInstance.
 	 */
-	Provider getProvider();
+	IProvider getProvider();
 }
