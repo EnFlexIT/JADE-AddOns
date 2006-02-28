@@ -67,6 +67,7 @@ import jade.util.Logger;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * This is the main class of the ASCML.
@@ -331,13 +332,17 @@ public class AgentLauncher extends ToolAgent {
 		boolean noGUI = false;
 		String propertyFileLocation = "";
 
-        // check if arguments habe been passed
+        // check if arguments have been passed
         Object[] args = this.getArguments();
 
 		for (int i=0; (args != null) && (i < args.length); i++)
 		{
 			if (((String)args[i]).equalsIgnoreCase("nogui"))
 				noGUI = true;
+			else if (((String)args[i]).equalsIgnoreCase("log-warning"))
+				myLogger.setLevel(Level.WARNING);
+			else if (((String)args[i]).equalsIgnoreCase("log-info"))
+				myLogger.setLevel(Level.INFO);
 			else
 				propertyFileLocation = ((String)args[i]).trim();
 		}
@@ -407,7 +412,7 @@ public class AgentLauncher extends ToolAgent {
 		repository.getListenerManager().addModelChangedListener(lmi); // AgentLauncher now has to implement modelChanged-method (see below)
         repository.getListenerManager().addModelActionListener(li);
         repository.getListenerManager().addLongTimeActionStartListener(lmi);
-		
+
 		myDependencyManager = new DependencyManager(this);
 		repository.getListenerManager().addModelChangedListener(myDependencyManager);		
 
