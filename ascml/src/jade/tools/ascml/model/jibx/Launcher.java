@@ -26,11 +26,15 @@
 package jade.tools.ascml.model.jibx;
 
 import jade.tools.ascml.absmodel.ILauncher;
+import jade.tools.ascml.launcher.AgentLauncher;
 
 /**
  *  Model-object containing all required information about a FIPA AgentDescription
  */
 public class Launcher extends AgentID implements ILauncher
 {
-	
+	public Launcher()
+	{
+		setName(AgentLauncher.ASCML_NAME);
+	}
 }
