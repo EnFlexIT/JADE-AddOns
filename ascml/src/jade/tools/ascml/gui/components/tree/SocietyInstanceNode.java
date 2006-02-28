@@ -178,7 +178,7 @@ public class SocietyInstanceNode extends DefaultMutableTreeNode implements IRepo
 			}
 			else
 			{
-				System.err.println("SocietyInstanceNode.modelChanged: complete re-init, eventCode=" + event.getEventCode());
+				// System.err.println("SocietyInstanceNode.modelChanged: complete re-init, eventCode=" + event.getEventCode());
 				init();
                 treeModel.nodeChanged(this);
 			}
