@@ -105,7 +105,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 		this.addTab("General Settings", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), new AgentInstanceGeneral(mainPanel, model, model.getParentSocietyInstance()), "General information about this agentType");
 		this.addTab("Parameter", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), new ParameterOverview(mainPanel, model), "Parameters specified for this agentType");
 		// this.addTab("Parameter-Sets", null, new ParameterSet(mainPanel, model), "Parameter-Sets specified for this agentType");
-		this.addTab("Dependencies", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), new Dependencies(mainPanel, new Vector(model.getDependencyList())), "Shows all dependencies definded for this reference");
+		this.addTab("Dependencies", ImageIconLoader.createImageIcon(ImageIconLoader.AGENTINSTANCE, 16, 16), new DependencyOverview(mainPanel, model), "Shows all dependencies definded for this reference");
 
 		this.setSelectedIndex(0);
 	}
@@ -139,7 +139,7 @@ public class TabbedPaneManager extends JTabbedPane implements ChangeListener
 	{
 		finalizeOldTabs();
 		this.addTab("SocietyInstance-reference", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new SocietyInstanceReferenceGeneral(mainPanel, model, model.getParentSocietyInstance()), "General information about the referenced societyinstance");
-		this.addTab("Dependencies", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new Dependencies(mainPanel, new Vector(model.getDependencyList())), "Shows all dependencies definded for this reference");
+		this.addTab("Dependencies", ImageIconLoader.createImageIcon(ImageIconLoader.SOCIETYINSTANCE, 16, 16), new DependencyOverview(mainPanel,model), "Shows all dependencies definded for this reference");
 
 		this.setSelectedIndex(0);
 	}
