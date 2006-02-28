@@ -34,6 +34,8 @@ import jade.tools.ascml.model.jibx.dependency.AgentTypeDependency;
 import jade.tools.ascml.model.jibx.dependency.AgentInstanceDependency;
 import jade.tools.ascml.model.jibx.dependency.SocietyInstanceDependency;
 import jade.tools.ascml.model.jibx.dependency.SocietyTypeDependency;
+import jade.tools.ascml.events.DependencyChangedEvent;
+import jade.tools.ascml.events.DependencyChangedListener;
 
 public class DependencyDetails extends JPanel implements ActionListener, ItemListener
 {
@@ -41,16 +43,19 @@ public class DependencyDetails extends JPanel implements ActionListener, ItemLis
 
 	private JComboBox comboBoxType;
 
+	private DependencyChangedListener dependencyChangedListener;
+
 	private IDependency dependency;
 	private JPanel specialDependencyPanel;
 
 	/**
 	 *
-	 * @param parameterChangedListener  Listener to be informed, when the user presses the
+	 * @param dependencyChangedListener  Listener to be informed, when the user presses the
 	 *                                  Apply-button.
 	 */
-	public DependencyDetails()
+	public DependencyDetails(DependencyChangedListener dependencyChangedListener)
 	{
+		this.dependencyChangedListener = dependencyChangedListener;
 		this.setLayout(new GridBagLayout());
 		this.setBackground(Color.WHITE);
 
@@ -63,8 +68,6 @@ public class DependencyDetails extends JPanel implements ActionListener, ItemLis
 
 		specialDependencyPanel = new JPanel();
 		specialDependencyPanel.setBackground(Color.WHITE);
-
-        init();
 	}
 
 	public void init()
@@ -91,6 +94,7 @@ public class DependencyDetails extends JPanel implements ActionListener, ItemLis
 		if (this.dependency == null)
 		{
 			// A new dependency shall be created, default to AgentInstanceDependency
+			comboBoxType.setEnabled(true);
 			this.dependency = new AgentInstanceDependency();
 			comboBoxType.setSelectedIndex(-1);
 			comboBoxType.setSelectedIndex(0);
@@ -108,8 +112,8 @@ public class DependencyDetails extends JPanel implements ActionListener, ItemLis
 				specialDependencyPanel = new DependencySocietyInstance((ISocietyInstanceDependency)dependency);
 			else if (dependencyType == IDependency.SOCIETYTYPE_DEPENDENCY)
 				specialDependencyPanel = new DependencySocietyType((ISocietyTypeDependency)dependency);
-			init();
 		}
+		init();
 	}
 
 	/**
@@ -163,6 +167,9 @@ public class DependencyDetails extends JPanel implements ActionListener, ItemLis
 				dependency = ((DependencySocietyType)specialDependencyPanel).getDependency();
 			if (specialDependencyPanel instanceof DependencySocietyInstance)
 				dependency = ((DependencySocietyInstance)specialDependencyPanel).getDependency();
+
+			if (dependencyChangedListener != null)
+					dependencyChangedListener.dependencyChanged(new DependencyChangedEvent(dependency));
 		}
 	}
 
