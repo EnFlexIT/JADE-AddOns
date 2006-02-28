@@ -34,6 +34,7 @@ import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.absmodel.IAgentInstance;
 import jade.tools.ascml.absmodel.ISocietyInstance;
 import jade.tools.ascml.absmodel.ISocietyInstanceReference;
+import jade.tools.ascml.absmodel.IAgentType;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.model.jibx.Launcher;
 
@@ -127,7 +128,11 @@ public class SocietyInstanceGeneral extends AbstractPanel implements ActionListe
 			String[] oneRow = new String[2];
 
 			oneRow[0] = agentInstances[i].getName();
-			oneRow[1] = agentInstances[i].getType().getFullyQualifiedName();
+			if (agentInstances[i].getType() != null)
+				oneRow[1] = agentInstances[i].getType().getFullyQualifiedName();
+			else
+				oneRow[1] = IAgentType.NAME_UNKNOWN;
+			
 			agentInstanceTableModel.addRow(oneRow);
 		}
 
