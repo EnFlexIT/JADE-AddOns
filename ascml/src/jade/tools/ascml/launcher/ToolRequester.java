@@ -329,6 +329,9 @@ public class ToolRequester {
     }
     
     public void toolReady(){
+		//FIXME: This is not working
+		return;
+		/*
         while (! (requestAgents.isEmpty() && waitingAgents.isEmpty())) {
             try {
                 Iterator<String> iterator = requestAgents.keySet().iterator();
@@ -344,6 +347,7 @@ public class ToolRequester {
             } catch (InterruptedException e) {
             }
         }
+        */
     }
     
     public void reset() {
@@ -395,7 +399,8 @@ public class ToolRequester {
             return;
         }
 		System.err.println("ACHTUNG, ToolRequester muss an neue ToolOption-Klasse angepasst werden !!!");
-        /* HashMap<String,Vector<String>> toolOptionProperties = agentModel.getToolOptionProperties(tooloptionConfigType);
+		/*
+        HashMap<String,Vector<String>> toolOptionProperties = agentModel.getToolOptionProperties(tooloptionConfigType);
         if ((toolOptionProperties != null) && (toolOptionProperties.size() > 0)) {
             agentTooloptionProperties.put(agentModel.getName(), toolOptionProperties);
         }
