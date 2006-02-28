@@ -29,13 +29,12 @@ import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.repository.loader.RunnableFactory;
 import jade.tools.ascml.events.ModelChangedEvent;
 import jade.tools.ascml.events.ModelChangedListener;
+import jade.tools.ascml.events.ProjectChangedEvent;
 import jade.tools.ascml.model.runnable.AbstractRunnable;
 import jade.tools.ascml.onto.Known;
 import jade.tools.ascml.onto.Status;
-import jade.tools.ascml.absmodel.IAgentInstance;
-import jade.tools.ascml.absmodel.ISocietyInstance;
-import jade.tools.ascml.absmodel.IAbstractRunnable;
-import jade.tools.ascml.absmodel.IRunnableRemoteSocietyInstanceReference;
+import jade.tools.ascml.onto.Dead;
+import jade.tools.ascml.absmodel.*;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -62,7 +61,7 @@ public class RunnableManager implements ModelChangedListener
 		runnableMapByName = new HashMap();
 	}
 
-    public IAbstractRunnable[] createRunnable(String name, Object model,int modelCount) throws ModelException
+    public IAbstractRunnable[] createRunnable(String name, Object model, int modelCount) throws ModelException
 	{
 		// modelCount is int (and not long) because it's needed for the array-sizes
 		//int modelCount = 1;
@@ -235,6 +234,11 @@ public class RunnableManager implements ModelChangedListener
 		{
 			((IAgentInstance)parentModel).throwModelChangedEvent(ModelChangedEvent.RUNNABLE_REMOVED, runnableModel);
 		}
+		else if (parentModel instanceof IAgentType)
+		{
+			((IAgentType)parentModel).throwModelChangedEvent(ModelChangedEvent.RUNNABLE_REMOVED, runnableModel);
+		}
+		// why is no event thrown when stopping single RunnableAgentInstance. Their parent is an AgentType
 	}
 
 	public void removeRunnable(String runnableModelName) throws ModelException
@@ -316,12 +320,18 @@ public class RunnableManager implements ModelChangedListener
 			//if ((status == AbstractRunnable.STATUS_NOT_RUNNING) && !(model instanceof IRunnableRemoteSocietyInstanceReference))
 			// I can not check for it being available here, Maybe we need to specify Stopped for this to work
 			// or: Every new Model gets flagged Starting immediatelly. I prefer that
-			if ((status instanceof Known) && !(model instanceof IRunnableRemoteSocietyInstanceReference))
+			if ((status instanceof Dead) && !(model instanceof IRunnableRemoteSocietyInstanceReference))
 			{
 				try
 				{
-					// System.err.println("RunnableManager.modelChanged: try to remove " + model.getName());
-					removeRunnable(model.getFullyQualifiedName());
+					String modelName = model.getFullyQualifiedName();
+
+					// quick and dirty post REMOVE_FROM_TREE-event, even if model can not be
+					// stopped correctly.
+					repository.getProject().throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.RUNNABLE_REMOVED, model, repository.getProject()));
+
+					System.err.println("RunnableManager.modelChanged: try to remove " + modelName);
+					removeRunnable(modelName);
 				}
 				catch(ModelException exc)
 				{
