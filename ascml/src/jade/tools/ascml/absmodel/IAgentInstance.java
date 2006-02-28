@@ -1,7 +1,5 @@
 package jade.tools.ascml.absmodel;
 
-import jade.tools.ascml.model.jibx.*;
-import jade.tools.ascml.model.jibx.dependency.AbstractDependency;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 
 import java.util.List;
@@ -185,13 +183,20 @@ public interface IAgentInstance
 	 * Add a dependency to this agent's dependencies.
 	 * @param dependency  The DependencyModel.
 	 */
-	void addDependency(AbstractDependency dependency);
+	void addDependency(IDependency dependency);
 
 	/**
 	 * Remove a dependency from this agent's dependency-list.
 	 * @param dependency  The Dependency-model to remove.
 	 */
 	void removeDependency(IDependency dependency);
+
+	/**
+	 * Remove a dependency from this agent's dependency-list.
+	 * @param dependencyIndex  The index of the Dependency-model
+	 *                         to remove within the inner dependency-list.
+	 */
+	void removeDependency(int dependencyIndex);
 
 	/**
 	 * Set the status of this model. The status indicates, whether loading was successful or not.
