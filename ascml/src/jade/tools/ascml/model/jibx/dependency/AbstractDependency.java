@@ -32,8 +32,6 @@ import jade.tools.ascml.absmodel.dependency.IDependency;
  */
 public abstract class AbstractDependency implements IDependency
 {
-
-
 	protected String dependencyType;
 	protected String active = "false";
 

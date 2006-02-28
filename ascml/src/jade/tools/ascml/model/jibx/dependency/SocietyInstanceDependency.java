@@ -28,6 +28,7 @@ package jade.tools.ascml.model.jibx.dependency;
 import jade.tools.ascml.model.jibx.AgentID;
 import jade.tools.ascml.model.jibx.Provider;
 import jade.tools.ascml.absmodel.dependency.ISocietyInstanceDependency;
+import jade.tools.ascml.absmodel.IProvider;
 
 /**
  * 
@@ -39,7 +40,7 @@ public class SocietyInstanceDependency extends AbstractDependency implements ISo
 	protected String societyInstance;
 
 	/** The name and address of the launcher, who shall launch this SocietyInstance. */
-	protected Provider provider;
+	protected IProvider provider;
 
 	public SocietyInstanceDependency()
 	{
@@ -60,6 +61,8 @@ public class SocietyInstanceDependency extends AbstractDependency implements ISo
 	 */
 	public String getSocietyType()
 	{
+		if ((societyType == null) || (societyType.equals("")))
+			societyType = NAME_UNKNOWN;
 		return societyType;
 	}
 
@@ -69,10 +72,10 @@ public class SocietyInstanceDependency extends AbstractDependency implements ISo
 	 */
 	public void setSocietyType(String societyType)
 	{
-		if (societyType == null)
-			this.societyType = "";
-		else
-			this.societyType = societyType;
+		if ((societyType == null) || (societyType.equals("")))
+			societyType = NAME_UNKNOWN;
+
+		this.societyType = societyType;
 	}
 
 	/**
@@ -81,6 +84,8 @@ public class SocietyInstanceDependency extends AbstractDependency implements ISo
 	 */
 	public String getSocietyInstance()
 	{
+		if ((societyInstance == null) || (societyInstance.equals("")))
+			societyInstance = NAME_UNKNOWN;
 		return societyInstance;
 	}
 
@@ -90,10 +95,10 @@ public class SocietyInstanceDependency extends AbstractDependency implements ISo
 	 */
 	public void setSocietyInstance(String societyInstance)
 	{
-		if (societyInstance == null)
-			this.societyInstance = "";
-		else
-			this.societyInstance = societyInstance;
+		if ((societyInstance == null) || (societyInstance.equals("")))
+			societyInstance = NAME_UNKNOWN;
+
+		this.societyInstance = societyInstance;
 	}
 
 	/**
@@ -111,6 +116,8 @@ public class SocietyInstanceDependency extends AbstractDependency implements ISo
 	 */
 	public String getStatus()
 	{
+		if ((status == null) || status.equals(""))
+			status = STATE_FUNCTIONAL;
 		return status;
 	}
 
@@ -138,7 +145,7 @@ public class SocietyInstanceDependency extends AbstractDependency implements ISo
 	 * Set the Provider responsible for the SocietyInstance.
 	 * @param provider  The Provider responsible for the SocietyInstance.
 	 */
-	public void setProvider(Provider provider)
+	public void setProvider(IProvider provider)
 	{
 		this.provider = provider;
 	}
@@ -147,8 +154,10 @@ public class SocietyInstanceDependency extends AbstractDependency implements ISo
 	 * Get the Provider responsible for the SocietyInstance.
 	 * @return  The Provider responsible for the SocietyInstance.
 	 */
-	public Provider getProvider()
+	public IProvider getProvider()
 	{
+		if (provider == null)
+			provider = new Provider();
 		return provider;
 	}
 

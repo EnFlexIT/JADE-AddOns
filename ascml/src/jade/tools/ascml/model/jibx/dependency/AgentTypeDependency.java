@@ -53,6 +53,8 @@ public class AgentTypeDependency extends AbstractDependency implements IAgentTyp
 	 */
 	public String getName()
 	{
+		if ((name == null) || name.equals(""))
+			name = NAME_UNKNOWN;
 		return name;
 	}
 
@@ -62,8 +64,8 @@ public class AgentTypeDependency extends AbstractDependency implements IAgentTyp
 	 */
 	public void setName(String name)
 	{
-		if (name == null)
-			this.name = "";
+		if ((name == null) || name.equals(""))
+			name = NAME_UNKNOWN;
 		this.name = name;
 	}
 
@@ -73,6 +75,8 @@ public class AgentTypeDependency extends AbstractDependency implements IAgentTyp
 	 */
 	public String getQuantity()
 	{
+		if ((quantity == null) || quantity.equals(""))
+			quantity = "1";
 		return quantity;
 	}
 
@@ -82,7 +86,7 @@ public class AgentTypeDependency extends AbstractDependency implements IAgentTyp
 	 */
 	public int getQuantityAsInt()
 	{
-		return Integer.parseInt(quantity);
+		return Integer.parseInt(getQuantity());
 	}
 
 	/**

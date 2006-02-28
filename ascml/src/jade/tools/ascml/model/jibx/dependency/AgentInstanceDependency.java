@@ -27,6 +27,8 @@ package jade.tools.ascml.model.jibx.dependency;
 
 import jade.tools.ascml.absmodel.dependency.IAgentInstanceDependency;
 import jade.tools.ascml.absmodel.IAgentID;
+import jade.tools.ascml.absmodel.IProvider;
+import jade.tools.ascml.model.jibx.Provider;
 
 /**
  * 
@@ -37,7 +39,7 @@ public class AgentInstanceDependency extends AbstractDependency implements IAgen
 	protected String name;
 
 	/** The name and address of the launcher, who shall launch this SocietyInstance. */
-	protected IAgentID provider;
+	protected IProvider provider;
 
 	public AgentInstanceDependency()
 	{
@@ -57,6 +59,8 @@ public class AgentInstanceDependency extends AbstractDependency implements IAgen
 	 */
 	public String getName()
 	{
+		if ((name == null) || name.equals(""))
+			name = NAME_UNKNOWN;
 		return name;
 	}
 
@@ -66,10 +70,9 @@ public class AgentInstanceDependency extends AbstractDependency implements IAgen
 	 */
 	public void setName(String name)
 	{
-		if (name == null)
-			this.name = "";
-		else
-			this.name = name;
+		if ((name == null) || name.equals(""))
+			name = NAME_UNKNOWN;		
+		this.name = name;
 	}
 
 	/**
@@ -78,6 +81,8 @@ public class AgentInstanceDependency extends AbstractDependency implements IAgen
 	 */
 	public String getStatus()
 	{
+		if ((status == null) || status.equals(""))
+			status = STATE_FUNCTIONAL;
 		return status;
 	}
 
@@ -105,7 +110,7 @@ public class AgentInstanceDependency extends AbstractDependency implements IAgen
 	 * Set the Provider responsible for the AgentInstance.
 	 * @param provider  The Provider responsible for the AgentInstance.
 	 */
-	public void setProvider(IAgentID provider)
+	public void setProvider(IProvider provider)
 	{
 		this.provider = provider;
 	}
@@ -114,8 +119,10 @@ public class AgentInstanceDependency extends AbstractDependency implements IAgen
 	 * Set the Provider responsible for the AgentInstance.
 	 * @return  The Provider responsible for the AgentInstance.
 	 */
-	public IAgentID getProvider()
+	public IProvider getProvider()
 	{
+		if (provider == null)
+			provider = new Provider();
 		return provider;
 	}
 

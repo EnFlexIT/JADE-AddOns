@@ -51,6 +51,8 @@ public class DelayDependency extends AbstractDependency implements IDelayDepende
 	 */
 	public String getQuantity()
 	{
+		if ((quantity == null) || quantity.equals(""))
+			quantity = "1";
 		return quantity;
 	}
 
@@ -60,7 +62,7 @@ public class DelayDependency extends AbstractDependency implements IDelayDepende
 	 */
 	public int getQuantityAsInt()
 	{
-		return Integer.parseInt(quantity);
+		return Integer.parseInt(getQuantity());
 	}
 
 	/**

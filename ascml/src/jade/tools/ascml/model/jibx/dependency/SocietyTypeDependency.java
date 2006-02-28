@@ -53,6 +53,8 @@ public class SocietyTypeDependency extends AbstractDependency implements ISociet
 	 */
 	public String getName()
 	{
+		if ((name == null) || name.equals(""))
+			name = NAME_UNKNOWN;
 		return name;
 	}
 
@@ -62,8 +64,9 @@ public class SocietyTypeDependency extends AbstractDependency implements ISociet
 	 */
 	public void setName(String name)
 	{
-		if (name == null)
-			this.name = "";
+		if ((name == null) || name.equals(""))
+			name = NAME_UNKNOWN;
+
 		this.name = name;
 	}
 
@@ -73,6 +76,8 @@ public class SocietyTypeDependency extends AbstractDependency implements ISociet
 	 */
 	public String getQuantity()
 	{
+		if ((quantity == null) || quantity.equals(""))
+			quantity = "1";
 		return quantity;
 	}
 
@@ -82,7 +87,7 @@ public class SocietyTypeDependency extends AbstractDependency implements ISociet
 	 */
 	public int getQuantityAsInt()
 	{
-		return Integer.parseInt(quantity);
+		return Integer.parseInt(getQuantity());
 	}
 
 	/**
