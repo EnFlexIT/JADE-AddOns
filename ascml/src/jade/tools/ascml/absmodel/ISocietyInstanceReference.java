@@ -211,6 +211,13 @@ public interface ISocietyInstanceReference
 	void removeDependency(IDependency dependency);
 
 	/**
+	 * Remove a dependency from this reference's dependency-list.
+	 * @param dependencyIndex  The index of the Dependency-model
+	 *                         to remove within the inner dependency-list.
+	 */
+	void removeDependency(int dependencyIndex);
+
+	/**
 	 * Throw a ModelChangedEvent notifying all the listeners that this model has been changed
 	 * @param eventCode  The eventCode for the event (see ModelChangedEvent for possible codes)
 	 */
