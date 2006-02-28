@@ -31,6 +31,7 @@ import jade.tools.ascml.model.jibx.dependency.AbstractDependency;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.absmodel.ISocietyInstance;
 import jade.tools.ascml.absmodel.ISocietyInstanceReference;
+import jade.tools.ascml.launcher.AgentLauncher;
 
 /**
  *  This class describes the properties of an societyInstance-reference.
@@ -283,7 +284,7 @@ public class SocietyInstanceReference implements ISocietyInstanceReference
 	{
 		if (launcher == null)
 			return false;
-		if ((launcher.getName().equals(Launcher.NAME_UNKNOWN) || launcher.getName().equals("")) && (launcher.getAddresses().length == 0))
+		if ((launcher.getName().equals(Launcher.NAME_UNKNOWN) || launcher.getName().equals("") || launcher.getName().equals(AgentLauncher.ASCML_NAME)) && (launcher.getAddresses().length == 0))
 			return false;
 		return true;
 	}
