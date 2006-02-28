@@ -1,6 +1,7 @@
 package jade.tools.ascml.absmodel.dependency;
 
 import jade.tools.ascml.absmodel.IAgentID;
+import jade.tools.ascml.absmodel.IProvider;
 
 /**
  * 
@@ -35,11 +36,11 @@ public interface IAgentInstanceDependency extends IDependency
 	 * Set the Provider responsible for the AgentInstance.
 	 * @param provider  The Provider responsible for the AgentInstance.
 	 */
-	void setProvider(IAgentID provider);
+	void setProvider(IProvider provider);
 
 	/**
 	 * Set the Provider responsible for the AgentInstance.
 	 * @return  The Provider responsible for the AgentInstance.
 	 */
-	IAgentID getProvider();
+	IProvider getProvider();
 }
