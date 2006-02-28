@@ -53,8 +53,8 @@ public class StartSocietyInstanceDialog extends AbstractDialog
 
 	public Object showDialog(JFrame parentFrame)
 	{
-		Object result = JOptionPane.showInputDialog(parentFrame, "<html>Please provide a name for the society-instance !<p>You may give the society a name of your choice, <br>but beware, names have to be unique !<br></html>",
-				"Start Society-Instance...", JOptionPane.QUESTION_MESSAGE);
+		Object result = JOptionPane.showInputDialog(parentFrame, "<html>Please provide a name for the SocietyInstance !<p>You may give the society a name of your choice, <br>but beware, names have to be unique !<br></html>",
+				"Start SocietyInstance...", JOptionPane.QUESTION_MESSAGE);
 
 		if ((result != null) && (!((String)result).trim().equals(""))) // start
 		{

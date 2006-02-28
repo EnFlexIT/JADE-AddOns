@@ -53,15 +53,15 @@ public class StartAgentInstanceDialog extends AbstractDialog
 
 	public Object showDialog(JFrame parentFrame)
 	{
-		Object result = JOptionPane.showInputDialog(parentFrame, "<html>Please provide a name for the agent-instance !<p>You may give the agent a name of your choice, <br>but beware, names have to be unique !<br></html>",
-				"Start Agent-Instance...", JOptionPane.QUESTION_MESSAGE);
+		Object result = JOptionPane.showInputDialog(parentFrame, "<html>Please provide a name for the AgentInstance !<p>You may give the agent a name of your choice, <br>but beware, names have to be unique !<br></html>",
+				"Start AgentInstance...", JOptionPane.QUESTION_MESSAGE);
 
 		if ((result != null) && (!((String)result).trim().equals("")))// start
 		{
 			String instanceName = ((String)result).trim();
 			try
 			{
-				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])super.repository.createRunnableAgentInstance(agentTypeModel.getFullyQualifiedName() + "." + instanceName, 1);
+				IAbstractRunnable[] runnableModels = (IAbstractRunnable[])repository.createRunnableAgentInstance(agentTypeModel.getFullyQualifiedName() + "." + instanceName, 1);
 
 				// and select the newly created instance
 				mainPanel.selectModel(runnableModels[0]);
