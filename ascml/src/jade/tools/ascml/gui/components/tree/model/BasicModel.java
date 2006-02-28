@@ -166,5 +166,10 @@ public class BasicModel extends AbstractRepositoryTreeModel
 		{
 			rootTree.setSelectedModel(event.getModel());
 		}
+		else if (event.getEventCode().equals(ProjectChangedEvent.RUNNABLE_REMOVED))
+		{
+			DefaultMutableTreeNode modelNode = rootTree.searchModelInTree(rootNode, event.getModel());
+			this.removeNodeFromParent(modelNode);
+		}
 	}
 }
