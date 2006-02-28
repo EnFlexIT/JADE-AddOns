@@ -19,6 +19,8 @@ public interface IDependency
 	String STATE_ERROR			= "ERROR";
 	String STATE_UNKNOWN		= "UNKNOWN";
 
+	String NAME_UNKNOWN	= "Name Unknown";
+	
 	/**
 	 * Get the type of the depenendency.
 	 * Possible values are AGENTTYPE_DEPENDENCY, AGENTINSTANCE_DEPENDENCY,
