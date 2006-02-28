@@ -28,7 +28,7 @@ public class ModelIntegrityChecker
 		{
 			statusException = new ModelException("The integrity of the AgentType '"+((IAgentType)model).getName()+"' is violated. For detailed information see further messages.");
 			checkAgentType((IAgentType)model);
-			System.err.println("ModelIntegrityChecker.check: " + ((IAgentType)model).getName() + " has status '"+((IAgentType)model).getStatus()+"'");
+			// System.err.println("ModelIntegrityChecker.check: " + ((IAgentType)model).getName() + " has status '"+((IAgentType)model).getStatus()+"'");
 		}
 
 		if (statusException.hasExceptionDetails())
