@@ -26,14 +26,10 @@
 package jade.tools.ascml.gui.panels;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
-import jade.tools.ascml.gui.dialogs.StartSocietyInstanceDialog;
 import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.absmodel.*;
-import jade.tools.ascml.repository.loader.ImageIconLoader;
-import jade.tools.ascml.model.jibx.Launcher;
 import jade.tools.ascml.model.jibx.ParameterSet;
 import jade.tools.ascml.model.jibx.Parameter;
 import jade.tools.ascml.events.ParameterChangedListener;
@@ -61,6 +57,11 @@ public class ParameterDetails extends JPanel implements ActionListener
 
 	private ParameterChangedListener parameterChangedListener;
 
+	/**
+	 *
+	 * @param parameterChangedListener  Listener to be informed, when the user presses the
+	 *                                  Apply-button.
+	 */
 	public ParameterDetails(ParameterChangedListener parameterChangedListener)
 	{
 		this.parameterChangedListener = parameterChangedListener;
@@ -91,6 +92,7 @@ public class ParameterDetails extends JPanel implements ActionListener
 			textAreaDescription.setText(typeParameter.getDescription());
 		else
 			textAreaDescription.setText("This parameter does not overwrite an AgentType-parameter");
+		textAreaDescription.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 		textAreaDescription.setEnabled(false);
 
 		if (typeParameter != null)
@@ -248,7 +250,7 @@ public class ParameterDetails extends JPanel implements ActionListener
 
 		attributePanel.add(buttonRemoveValue, new GridBagConstraints(1, 5, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(1,5,5,5), 0, 0));
 
-		attributePanel.add(new JLabel("Add new value:"), new GridBagConstraints(0, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,1,5), 0, 0));
+		attributePanel.add(new JLabel("Add new Value:"), new GridBagConstraints(0, 6, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,1,5), 0, 0));
 		attributePanel.add(textFieldValue, new GridBagConstraints(1, 6, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,1,5), 0, 0));
 
 		attributePanel.add(buttonAddValue, new GridBagConstraints(1, 7, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(1,5,5,5), 0, 0));
