@@ -40,7 +40,6 @@ import jade.tools.ascml.events.ModelActionEvent;
 import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.model.runnable.RunnableSocietyInstance;
 import jade.tools.ascml.model.runnable.RunnableAgentInstance;
-import jade.tools.ascml.model.jibx.*;
 import jade.tools.ascml.onto.Status;
 import jade.tools.ascml.onto.Stopping;
 import jade.tools.ascml.onto.Functional;
@@ -290,7 +289,7 @@ public class PopupHandler extends MouseAdapter implements ActionListener
 					mi.setActionCommand(CMD_STOP_RUNNABLESOCIETYINSTANCE);
 					popup.add(mi);
 				}
-				else if (status instanceof jade.tools.ascml.onto.Error)
+				else if ((status instanceof jade.tools.ascml.onto.Error) || (status instanceof Stopping))
 				{
 					JMenuItem mi = new JMenuItem("Remove Instance");
 					mi.addActionListener(this);
