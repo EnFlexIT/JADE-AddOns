@@ -221,7 +221,7 @@ public class SocietyType implements ISocietyType
 	 */
 	public ModelException getIntegrityStatus()
 	{
-		if (statusException.hasExceptionDetails() || statusException.hasNestedExceptions())
+		if ((statusException != null) && (statusException.hasExceptionDetails() || statusException.hasNestedExceptions()))
 			return statusException;
 		else
 			return null;
