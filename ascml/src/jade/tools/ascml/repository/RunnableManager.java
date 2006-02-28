@@ -34,6 +34,7 @@ import jade.tools.ascml.model.runnable.AbstractRunnable;
 import jade.tools.ascml.onto.Known;
 import jade.tools.ascml.onto.Status;
 import jade.tools.ascml.onto.Dead;
+import jade.tools.ascml.onto.Stopping;
 import jade.tools.ascml.absmodel.*;
 
 import java.util.HashMap;
@@ -213,9 +214,9 @@ public class RunnableManager implements ModelChangedListener
 		{
             Object parentModel = runnableModel.getParentModel();
 			Vector runnableModels = (Vector)runnableMapByModel.get(parentModel);
-			System.err.println("RunnableManager.removeRunnable: parentRunnable=" + parentModel);
-			System.err.println("RunnableManager.removeRunnable: parentModel=" + parentModel);
-			System.err.println("RunnableManager.removeRunnable: remove by parentModel=" + runnableModels);
+			// System.err.println("RunnableManager.removeRunnable: parentRunnable=" + parentModel);
+			// System.err.println("RunnableManager.removeRunnable: parentModel=" + parentModel);
+			// System.err.println("RunnableManager.removeRunnable: remove by parentModel=" + runnableModels);
 			runnableModels.remove(runnableModel);
 
 			runnableMapByName.remove(runnableModel.getFullyQualifiedName());
@@ -243,10 +244,10 @@ public class RunnableManager implements ModelChangedListener
 
 	public void removeRunnable(String runnableModelName) throws ModelException
 	{
-        System.err.println("RunnableManager.removeRunnable: " + runnableModelName);
-		System.err.println("Index vorher =");
-		System.err.println("RunnableMapByModel: " + runnableMapByModel);
-		System.err.println(this);
+        // System.err.println("RunnableManager.removeRunnable: " + runnableModelName);
+		// System.err.println("Index vorher =");
+		// System.err.println("RunnableMapByModel: " + runnableMapByModel);
+		// System.err.println(this);
 		if (runnableMapByName.containsKey(runnableModelName))
 		{
 			IAbstractRunnable runnableModel = (IAbstractRunnable)runnableMapByName.get(runnableModelName);
@@ -256,7 +257,7 @@ public class RunnableManager implements ModelChangedListener
 		{
 			throw new ModelException("RunnableModel named '" + runnableModelName + "' could not be found.", "The runnableModel you tried to remove could not be found.");
 		}
-		System.err.println("Index nachher =");
+		// System.err.println("Index nachher =");
 		System.err.println(this);
 	}
 
@@ -281,7 +282,7 @@ public class RunnableManager implements ModelChangedListener
 
 	public IAbstractRunnable getRunnable(String runnableModelName)
 	{
-		System.err.println("RunnableManager.getRunnable: modelName=" + runnableModelName);
+		// System.err.println("RunnableManager.getRunnable: modelName=" + runnableModelName);
 		return (IAbstractRunnable)runnableMapByName.get(runnableModelName);
 	}
 
@@ -316,21 +317,20 @@ public class RunnableManager implements ModelChangedListener
 		{
 			IAbstractRunnable model = (IAbstractRunnable)event.getModel();
 			Status status = model.getStatus();
-			// RunnableRemoteSocietyInstanceReference there exist no RunnableModel in the RunnabelIndex
-			//if ((status == AbstractRunnable.STATUS_NOT_RUNNING) && !(model instanceof IRunnableRemoteSocietyInstanceReference))
-			// I can not check for it being available here, Maybe we need to specify Stopped for this to work
-			// or: Every new Model gets flagged Starting immediatelly. I prefer that
+
+			// check if runnable is dead and if so remove it from the index.
+			// if ((status instanceof Dead) && !(model instanceof IRunnableRemoteSocietyInstanceReference))
+
+			// HACK, as long as RunnableSocietyInstance-status is nowhere set to Dead
+			if ((model instanceof IRunnableSocietyInstance) && (status instanceof Stopping))
+				status = new Dead();
 			if ((status instanceof Dead) && !(model instanceof IRunnableRemoteSocietyInstanceReference))
 			{
 				try
 				{
 					String modelName = model.getFullyQualifiedName();
 
-					// quick and dirty post REMOVE_FROM_TREE-event, even if model can not be
-					// stopped correctly.
-					repository.getProject().throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.RUNNABLE_REMOVED, model, repository.getProject()));
-
-					System.err.println("RunnableManager.modelChanged: try to remove " + modelName);
+					// System.err.println("RunnableManager.modelChanged: try to remove " + modelName);
 					removeRunnable(modelName);
 				}
 				catch(ModelException exc)
