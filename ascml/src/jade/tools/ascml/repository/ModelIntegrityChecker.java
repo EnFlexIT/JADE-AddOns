@@ -22,7 +22,7 @@ public class ModelIntegrityChecker
 		{
 			statusException = new ModelException("The integrity of the SocietyType '"+((ISocietyType)model).getName()+"' is violated. For detailed information see further messages.");
 			checkSocietyType((ISocietyType)model);
-			System.err.println("ModelIntegrityChecker.check: " + ((ISocietyType)model).getName() + " has status '"+((ISocietyType)model).getStatus()+"'");
+			// System.err.println("ModelIntegrityChecker.check: " + ((ISocietyType)model).getName() + " has status '"+((ISocietyType)model).getStatus()+"'");
 		}
 		else if (model instanceof IAgentType)
 		{
