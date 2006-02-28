@@ -28,7 +28,6 @@ package jade.tools.ascml.model.jibx;
 import java.util.*;
 import jade.tools.ascml.model.jibx.dependency.AbstractDependency;
 import jade.tools.ascml.events.ModelChangedEvent;
-import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.absmodel.*;
 
@@ -256,7 +255,8 @@ public class AgentInstance implements IAgentInstance
 	 */
 	public void addToolOption(String toolOptionType)
 	{
-		toolOptionList.add(new ToolOption(toolOptionType));
+		if (!hasToolOption(toolOptionType))
+			toolOptionList.add(new ToolOption(toolOptionType));
 	}
 
 	/**
@@ -265,7 +265,14 @@ public class AgentInstance implements IAgentInstance
 	 */
 	public void removeToolOption(String toolOptionType)
 	{
-		toolOptionList.remove(toolOptionType);
+		if (hasToolOption(toolOptionType))
+		{
+			for (int i=0; i < toolOptionList.size(); i++)
+			{
+				if (toolOptionList.get(i).getType().equals(toolOptionType))
+					toolOptionList.remove(i);
+			}
+		}
 	}
 
 	/**
@@ -278,6 +285,20 @@ public class AgentInstance implements IAgentInstance
 	}
 
 	/**
+	 * Returns wheter a specific ToolOption is specified for this instance.
+	 * @return true, if the ToolOption is specified, false otherwise.
+	 */
+	public boolean hasToolOption(String toolOptionType)
+	{
+		for (int i=0; i < toolOptionList.size(); i++)
+		{
+			if (toolOptionList.get(i).getType().equals(toolOptionType))
+				return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Get all ToolOptions.
 	 * @return An array containing all ToolOptions specified for this AgentInstance.
 	 */
@@ -286,21 +307,6 @@ public class AgentInstance implements IAgentInstance
 		ToolOption[] returnArray = new ToolOption[toolOptionList.size()];
 		toolOptionList.toArray(returnArray);
 		return returnArray;
-	}
-
-	/**
-	 *  Check if a toolOption is set.
-	 *  @param typeName  toolOption's type-name.
-	 *  @return  'true' if tooloption is set, 'false' otherwise.
-	 */
-	public boolean hasToolOption(String typeName)
-	{
-		for (int i=0; i < toolOptionList.size(); i++)
-		{
-			if (toolOptionList.get(i).getType().equals(typeName))
-				return true;
-		}
-		return false;
 	}
 
 	/**
@@ -327,7 +333,7 @@ public class AgentInstance implements IAgentInstance
 	 * Add a dependency to this agent's dependencies.
 	 * @param dependency  The DependencyModel.
 	 */
-	public void addDependency(AbstractDependency dependency)
+	public void addDependency(IDependency dependency)
 	{
 		dependencyList.add(dependency);
 	}
@@ -339,6 +345,16 @@ public class AgentInstance implements IAgentInstance
 	public void removeDependency(IDependency dependency)
 	{
 		dependencyList.remove(dependency);
+	}
+
+	/**
+	 * Remove a dependency from this agent's dependency-list.
+	 * @param dependencyIndex  The index of the Dependency-model
+	 *                         to remove within the inner dependency-list.
+	 */
+	public void removeDependency(int dependencyIndex)
+	{
+		dependencyList.remove(dependencyIndex);
 	}
 
 	/**
@@ -413,12 +429,15 @@ public class AgentInstance implements IAgentInstance
 				// get the type's parameter, copy the parameter-type into the instances's
 				// parameter and finally return the instance's parameter (with it's values)
 
-				IParameter typeParameter = getType().getParameter(name);
-				if (typeParameter != null)
+				if (getType() != null)
 				{
-					parameterArray[i].setType(typeParameter.getType());
-					parameterArray[i].setDescription(typeParameter.getDescription());
-					parameterArray[i].setOptional(typeParameter.isOptional()+"");
+					IParameter typeParameter = getType().getParameter(name);
+					if (typeParameter != null)
+					{
+						parameterArray[i].setType(typeParameter.getType());
+						parameterArray[i].setDescription(typeParameter.getDescription());
+						parameterArray[i].setOptional(typeParameter.isOptional()+"");
+					}
 				}
 				return parameterArray[i];
 			}
@@ -564,12 +583,15 @@ public class AgentInstance implements IAgentInstance
 				// get the type's parameterSet, copy the parameter-type into the instances's
 				// parameter and finally return the instance's parameter (with it's values)
 
-				IParameterSet typeParameter = getType().getParameterSet(name);
-				if (typeParameter != null)
+				if (type != null)
 				{
-					parameterArray[i].setType(typeParameter.getType());
-					parameterArray[i].setDescription(typeParameter.getDescription());
-					parameterArray[i].setOptional(typeParameter.isOptional()+"");
+					IParameterSet typeParameter = getType().getParameterSet(name);
+					if (typeParameter != null)
+					{
+						parameterArray[i].setType(typeParameter.getType());
+						parameterArray[i].setDescription(typeParameter.getDescription());
+						parameterArray[i].setOptional(typeParameter.isOptional()+"");
+					}
 				}
 				return parameterArray[i];
 			}
@@ -747,7 +769,11 @@ public class AgentInstance implements IAgentInstance
 		String str = "";
 		if (getQuantity() > 1)
 			str += "(" + getQuantity() + ") ";
-		 str += getName() + " : " + getType();
+		 str += getName() + " : ";
+		if (getType() != null)
+			str += getType();
+		else
+			str += IAgentType.NAME_UNKNOWN;
 		return str;
 	}
 
