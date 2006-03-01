@@ -1,6 +1,11 @@
 package jade.tools.ascml.gui.components;
 
 import jade.tools.ascml.repository.loader.ImageIconLoader;
+import jade.tools.ascml.repository.loader.ModelIndex;
+import jade.tools.ascml.gui.dialogs.JTreeDialog;
+import jade.tools.ascml.absmodel.ISocietyType;
+import jade.tools.ascml.absmodel.ISocietyInstance;
+import jade.tools.ascml.absmodel.IAgentType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -171,5 +176,54 @@ public class ComponentFactory
 		listScrollPane.setMinimumSize(new Dimension((int)listScrollPane.getPreferredSize().getWidth(), 60));
 
 		return listScrollPane;
+	}
+
+	public static JTreeDialog createAgentTypeTreeDialog(JFrame parentFrame, ModelIndex modelIndex)
+	{
+		IAgentType[] agentTypes = modelIndex.getAgentTypeObjects();
+		String[] agentTypeNames = new String[agentTypes.length];
+		for (int i=0; i < agentTypeNames.length; i++)
+		{
+			agentTypeNames[i] = agentTypes[i].getFullyQualifiedName();
+		}
+		JTreeDialog td = new JTreeDialog(parentFrame, "Select an AgentType ...", true,
+					"Select an AgentType from the Repository", agentTypeNames, agentTypeNames[0]);
+		return td;
+	}
+
+	public static JTreeDialog createSocietyTypeTreeDialog(JFrame parentFrame, ModelIndex modelIndex)
+	{
+		ISocietyType[] societyTypes = modelIndex.getSocietyTypeObjects();
+		String[] societyTypeNames = new String[societyTypes.length];
+		for (int i=0; i < societyTypeNames.length; i++)
+		{
+			societyTypeNames[i] = societyTypes[i].getFullyQualifiedName();
+		}
+		JTreeDialog td = new JTreeDialog(parentFrame, "Select a SocietyType ...", true,
+					"Select a SocietyType from the Repository", societyTypeNames, societyTypeNames[0]);
+		return td;
+	}
+
+	public static JTreeDialog createSocietyInstanceTreeDialog(JFrame parentFrame, ModelIndex modelIndex, String societyTypeName)
+	{
+		ISocietyType societyType = (ISocietyType)modelIndex.getModel(societyTypeName);
+		if (societyType != null)
+		{
+			ISocietyInstance[] societyInstances = societyType.getSocietyInstances();
+			String[] societyInstanceNames = new String[societyInstances.length];
+			for (int i=0; i < societyInstanceNames.length; i++)
+			{
+				societyInstanceNames[i] = societyInstances[i].getName();
+			}
+			JTreeDialog td = new JTreeDialog(parentFrame, "Select a SocietyInstance ...", true,
+					"Select a SocietyInstance from the SocietyType", societyInstanceNames, societyInstanceNames[0]);
+			return td;
+		}
+		else
+		{
+			JTreeDialog td = new JTreeDialog(parentFrame, "Select a SocietyInstance ...", true,
+					"The specified SocietyType contains no SocietyInstances", new String[] { ISocietyInstance.NAME_UNKNOWN }, ISocietyInstance.NAME_UNKNOWN);
+			return td;
+		}
 	}
 }
