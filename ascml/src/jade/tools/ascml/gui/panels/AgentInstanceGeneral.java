@@ -36,6 +36,7 @@ import jade.tools.ascml.absmodel.*;
 import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.gui.dialogs.ParameterDialog;
 import jade.tools.ascml.gui.dialogs.DependencyDialog;
+import jade.tools.ascml.gui.dialogs.JTreeDialog;
 import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.model.jibx.AgentInstance;
 import jade.tools.ascml.events.ProjectChangedEvent;
@@ -46,6 +47,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 	private JButton buttonApply;
 	private JButton buttonAddAgentInstance;
 	private JButton buttonRemoveAgentInstance;
+	private JButton buttonChooseAgentType;
     private JButton buttonAddParameter;
 	private JButton buttonEditParameter;
 	private JButton buttonRemoveParameter;
@@ -136,6 +138,9 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
         buttonApply = ComponentFactory.createApplyButton("Apply Changes");
 		buttonApply.addActionListener(this);
 
+		buttonChooseAgentType = ComponentFactory.createThreePointButton();
+		buttonChooseAgentType.addActionListener(this);
+
 		buttonAddParameter = ComponentFactory.createAddButton("Create");
 		buttonAddParameter.addActionListener(this);
 
@@ -166,16 +171,18 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		panelDependencyButtons.add(buttonEditDependency);
 		panelDependencyButtons.add(buttonAddDependency);
 
-		textFieldInstanceName = new JTextField(20);
+		textFieldInstanceName = new JTextField();
 		textFieldInstanceName.setMinimumSize(new Dimension(150, (int)textFieldInstanceName.getPreferredSize().getHeight()));
 		textFieldInstanceName.setBackground(Color.WHITE);
 
-		textFieldTypeName = new JTextField(20);
+		textFieldTypeName = new JTextField();
+		textFieldTypeName.setPreferredSize(new Dimension(150, (int)textFieldTypeName.getPreferredSize().getHeight()));
 		textFieldTypeName.setMinimumSize(new Dimension(150, (int)textFieldTypeName.getPreferredSize().getHeight()));
+		textFieldTypeName.setMaximumSize(new Dimension(150, (int)textFieldTypeName.getPreferredSize().getHeight()));
 		textFieldTypeName.setBackground(Color.WHITE);
 
-		textFieldScheme = new JTextField(10);
-		textFieldScheme.setMinimumSize(new Dimension(100, (int)textFieldScheme.getPreferredSize().getHeight()));
+		textFieldScheme = new JTextField();
+		textFieldScheme.setMinimumSize(new Dimension(150, (int)textFieldScheme.getPreferredSize().getHeight()));
 		textFieldScheme.setBackground(Color.WHITE);
 
 		spinnerQuantity = ComponentFactory.createQuantitySpinner(1);
@@ -196,31 +203,34 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		attributePanel.setBackground(Color.WHITE);
 		
 		// prepare Main-Panel
-		attributePanel.add(new JLabel("Instance-Name:"), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(textFieldInstanceName, new GridBagConstraints(1, 0, 3, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(new JLabel("Instance-Name:"), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
+		attributePanel.add(textFieldInstanceName, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,1,5,5), 0, 0));
 
-		attributePanel.add(new JLabel("AgentType:"), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(textFieldTypeName, new GridBagConstraints(1, 1, 3, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(new JLabel("AgentTest:"), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
+		attributePanel.add(textFieldTypeName, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,1,5,1), 0, 0));
+        attributePanel.add(buttonChooseAgentType, new GridBagConstraints(2, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
 
-		attributePanel.add(new JLabel("Quantity:"), new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(spinnerQuantity, new GridBagConstraints(1, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(new JLabel("Quantity:"), new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
+		attributePanel.add(spinnerQuantity, new GridBagConstraints(1, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
 
-		attributePanel.add(new JLabel("Naming-Scheme:"), new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(textFieldScheme, new GridBagConstraints(1, 3, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(new JLabel("Naming-Scheme:"), new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
+		attributePanel.add(textFieldScheme, new GridBagConstraints(1, 3, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
 
-		attributePanel.add(toolOptionBenchmark, new GridBagConstraints(0, 4, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,1,5), 0, 0));
-		attributePanel.add(toolOptionIntrospector, new GridBagConstraints(1, 4, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,1,5), 0, 0));
+		attributePanel.add(toolOptionBenchmark, new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,1,1,5), 0, 0));
+		attributePanel.add(toolOptionIntrospector, new GridBagConstraints(1, 4, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,1,1,5), 0, 0));
 
-		attributePanel.add(toolOptionSniffer, new GridBagConstraints(0, 5, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(1,5,5,5), 0, 0));
-		attributePanel.add(toolOptionLogger, new GridBagConstraints(1, 5, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(1,5,5,5), 0, 0));
+		attributePanel.add(toolOptionSniffer, new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(1,1,5,5), 0, 0));
+		attributePanel.add(toolOptionLogger, new GridBagConstraints(1, 5, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(1,1,5,5), 0, 0));
 
-		attributePanel.add(createParameterTablePane(), new GridBagConstraints(0, 6, 2, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
-		attributePanel.add(panelParameterButtons, new GridBagConstraints(0, 7, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
+		attributePanel.add(createParameterTablePane(), new GridBagConstraints(0, 6, 3, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,1,1,2), 0, 0));
 
-		attributePanel.add(createDependencyTablePane(), new GridBagConstraints(0, 8, 2, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
-		attributePanel.add(panelDependencyButtons, new GridBagConstraints(0, 9, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
+		attributePanel.add(panelParameterButtons, new GridBagConstraints(0, 7, 3, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,1,5,2), 0, 0));
 
-		attributePanel.add(buttonApply, new GridBagConstraints(1, 10, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,2,5,2), 0, 0));
+		attributePanel.add(createDependencyTablePane(), new GridBagConstraints(0, 8, 3, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,1,1,2), 0, 0));
+
+		attributePanel.add(panelDependencyButtons, new GridBagConstraints(0, 9, 3, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,1,5,2), 0, 0));
+
+		attributePanel.add(buttonApply, new GridBagConstraints(0, 10, 3, 1, 1, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,1,5,2), 0, 0));
 
 
 		return attributePanel;
@@ -496,6 +506,14 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 				tableDependencies.setModel(createDependencyTableModel());
 				tableDependencies.getSelectionModel().setSelectionInterval(tableDependencies.getModel().getRowCount()-1,tableDependencies.getModel().getRowCount()-1);
 			}
+		}
+		else if (evt.getSource() == buttonChooseAgentType)
+		{
+			JTreeDialog treeDialog = ComponentFactory.createAgentTypeTreeDialog(parentFrame, getRepository().getModelIndex());
+			treeDialog.setVisible(true);
+			String fullyQualifiedModelName = (String)treeDialog.getResult();
+			if ((fullyQualifiedModelName != null) && !fullyQualifiedModelName.equals(""))
+				textFieldTypeName.setText(fullyQualifiedModelName);
 		}
 		else if (evt.getSource() == buttonApply)
 		{

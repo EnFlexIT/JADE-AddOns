@@ -37,6 +37,7 @@ import jade.tools.ascml.absmodel.dependency.IDependency;
 import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.gui.dialogs.LauncherDialog;
 import jade.tools.ascml.gui.dialogs.DependencyDialog;
+import jade.tools.ascml.gui.dialogs.JTreeDialog;
 import jade.tools.ascml.model.jibx.SocietyInstanceReference;
 import jade.tools.ascml.events.ProjectChangedEvent;
 import jade.tools.ascml.repository.ModelIntegrityChecker;
@@ -52,6 +53,8 @@ public class SocietyInstanceReferenceGeneral extends AbstractPanel implements Ac
     private JButton buttonAddDependency;
 	private JButton buttonEditDependency;
 	private JButton buttonRemoveDependency;
+    private JButton buttonChooseSocietyType;
+	private JButton buttonChooseSocietyInstance;
 
 	private JTextField textFieldReferenceName;
 	private JTextField textFieldTypeName;
@@ -159,23 +162,33 @@ public class SocietyInstanceReferenceGeneral extends AbstractPanel implements Ac
 		panelDependencyButtons.add(buttonEditDependency);
 		panelDependencyButtons.add(buttonAddDependency);
 
-		textFieldReferenceName = new JTextField(20);
+		buttonChooseSocietyType = ComponentFactory.createThreePointButton();
+		buttonChooseSocietyType.addActionListener(this);
+
+		buttonChooseSocietyInstance = ComponentFactory.createThreePointButton();
+		buttonChooseSocietyInstance.addActionListener(this);
+
+		textFieldReferenceName = new JTextField();
 		textFieldReferenceName.setMinimumSize(new Dimension(150, (int)textFieldReferenceName.getPreferredSize().getHeight()));
 		textFieldReferenceName.setBackground(Color.WHITE);
 
-		textFieldTypeName = new JTextField(20);
+		textFieldTypeName = new JTextField();
+		textFieldTypeName.setPreferredSize(new Dimension(150, (int)textFieldTypeName.getPreferredSize().getHeight()));
 		textFieldTypeName.setMinimumSize(new Dimension(150, (int)textFieldTypeName.getPreferredSize().getHeight()));
+		textFieldTypeName.setMaximumSize(new Dimension(150, (int)textFieldTypeName.getPreferredSize().getHeight()));
 		textFieldTypeName.setBackground(Color.WHITE);
 
-		textFieldInstanceName = new JTextField(20);
-		textFieldInstanceName.setMinimumSize(new Dimension(150, (int)textFieldInstanceName.getPreferredSize().getHeight()));
+		textFieldInstanceName = new JTextField();
+		textFieldInstanceName.setPreferredSize(new Dimension(150, (int)textFieldInstanceName.getPreferredSize().getHeight()));
+		textFieldInstanceName.setMinimumSize(new Dimension(150, (int)textFieldTypeName.getPreferredSize().getHeight()));
+		textFieldInstanceName.setMaximumSize(new Dimension(150, (int)textFieldTypeName.getPreferredSize().getHeight()));
 		textFieldInstanceName.setBackground(Color.WHITE);
 
-		textFieldLauncherName = new JTextField(20);
+		textFieldLauncherName = new JTextField();
 		textFieldLauncherName.setMinimumSize(new Dimension(150, (int)textFieldLauncherName.getPreferredSize().getHeight()));
 		textFieldLauncherName.setBackground(Color.WHITE);
 
-		textFieldScheme = new JTextField(10);
+		textFieldScheme = new JTextField();
 		textFieldScheme.setMinimumSize(new Dimension(100, (int)textFieldScheme.getPreferredSize().getHeight()));
 		textFieldScheme.setBackground(Color.WHITE);
 
@@ -186,30 +199,34 @@ public class SocietyInstanceReferenceGeneral extends AbstractPanel implements Ac
 		
 		// prepare Main-Panel
 		attributePanel.add(new JLabel("Reference-Name:"), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(textFieldReferenceName, new GridBagConstraints(1, 0, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(textFieldReferenceName, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 
 		attributePanel.add(new JLabel("Type-Reference:"), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
 		attributePanel.add(textFieldTypeName, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+        attributePanel.add(buttonChooseSocietyType, new GridBagConstraints(2, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 
 		attributePanel.add(new JLabel("Instance-Reference:"), new GridBagConstraints(0, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
 		attributePanel.add(textFieldInstanceName, new GridBagConstraints(1, 2, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
+        attributePanel.add(buttonChooseSocietyInstance, new GridBagConstraints(2, 2, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,5,5,5), 0, 0));
 
 		attributePanel.add(new JLabel("Quantity:"), new GridBagConstraints(0, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(spinnerQuantity, new GridBagConstraints(1, 3, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(spinnerQuantity, new GridBagConstraints(1, 3, 2, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
 
 		attributePanel.add(new JLabel("Naming-Scheme:"), new GridBagConstraints(0, 4, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(textFieldScheme, new GridBagConstraints(1, 4, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(textFieldScheme, new GridBagConstraints(1, 4, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
 
 		attributePanel.add(new JLabel("Launcher-Name:"), new GridBagConstraints(0, 5, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
-		attributePanel.add(textFieldLauncherName, new GridBagConstraints(1, 5, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
+		attributePanel.add(textFieldLauncherName, new GridBagConstraints(1, 5, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,5,5,5), 0, 0));
 
-		attributePanel.add(createLauncherTablePane(), new GridBagConstraints(0, 6, 2, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
-		attributePanel.add(panelLauncherButtons, new GridBagConstraints(0, 7, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
+		attributePanel.add(createLauncherTablePane(), new GridBagConstraints(0, 6, 3, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
 
-		attributePanel.add(createDependencyTablePane(), new GridBagConstraints(0, 8, 2, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
-        attributePanel.add(panelDependencyButtons, new GridBagConstraints(0, 9, 2, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
+		attributePanel.add(panelLauncherButtons, new GridBagConstraints(0, 7, 3, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
 
-		attributePanel.add(buttonApply, new GridBagConstraints(1, 10, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,2,5,2), 0, 0));
+		attributePanel.add(createDependencyTablePane(), new GridBagConstraints(0, 8, 3, 1, 1, 0.5, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(5,2,1,2), 0, 0));
+
+		attributePanel.add(panelDependencyButtons, new GridBagConstraints(0, 9, 3, 1, 1, 0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,2,5,2), 0, 0));
+
+		attributePanel.add(buttonApply, new GridBagConstraints(1, 10, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_END, GridBagConstraints.NONE, new Insets(5,2,5,2), 0, 0));
 
 
 		return attributePanel;
@@ -440,6 +457,22 @@ public class SocietyInstanceReferenceGeneral extends AbstractPanel implements Ac
 				tableDependencies.setModel(createDependencyTableModel());
 				tableDependencies.getSelectionModel().setSelectionInterval(tableDependencies.getModel().getRowCount()-1,tableDependencies.getModel().getRowCount()-1);
 			}
+		}
+		else if (evt.getSource() == buttonChooseSocietyType)
+		{
+			JTreeDialog treeDialog = ComponentFactory.createSocietyTypeTreeDialog(parentFrame, getRepository().getModelIndex());
+			treeDialog.setVisible(true);
+			String fullyQualifiedModelName = (String)treeDialog.getResult();
+			if ((fullyQualifiedModelName != null) && !fullyQualifiedModelName.equals(""))
+				textFieldTypeName.setText(fullyQualifiedModelName);
+		}
+		else if (evt.getSource() == buttonChooseSocietyInstance)
+		{
+			JTreeDialog treeDialog = ComponentFactory.createSocietyInstanceTreeDialog(parentFrame, getRepository().getModelIndex(), textFieldTypeName.getText());
+			treeDialog.setVisible(true);
+			String fullyQualifiedModelName = (String)treeDialog.getResult();
+			if ((fullyQualifiedModelName != null) && !fullyQualifiedModelName.equals("") && !fullyQualifiedModelName.equals(ISocietyInstance.NAME_UNKNOWN))
+				textFieldInstanceName.setText(fullyQualifiedModelName);
 		}
 		else if (evt.getSource() == buttonApply)
 		{
