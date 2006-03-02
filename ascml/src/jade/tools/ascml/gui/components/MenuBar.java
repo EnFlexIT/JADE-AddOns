@@ -77,7 +77,7 @@ public class MenuBar extends JMenuBar implements ActionListener
 		changeProjectSubMenu = new ProjectMenu(parentPanel);
 		fileMenu.add(changeProjectSubMenu);
 
-		createProjectItem = new JMenuItem("Create New Project ...");
+		createProjectItem = new JMenuItem("Create new Project ...");
 		createProjectItem.addActionListener(this);
         fileMenu.add(createProjectItem);
 
@@ -92,15 +92,15 @@ public class MenuBar extends JMenuBar implements ActionListener
 		
 		changeOptionsItem = new JMenuItem("Change Options");
 		changeOptionsItem.addActionListener(this);
-		addAgentTypeItem = new JMenuItem("Load an Agent ...");
+		addAgentTypeItem = new JMenuItem("Load an AgentType ...");
 		addAgentTypeItem.addActionListener(this);
-		addSocietyItem = new JMenuItem("Load a Society ...");
+		addSocietyItem = new JMenuItem("Load a SocietyType ...");
 		addSocietyItem.addActionListener(this);
 		autoSearchItem = new JMenuItem("Auto-Search for Agents/Societies");
 		autoSearchItem.addActionListener(this);
-		createSocietyItem = new JMenuItem("Create a Society ...");
+		createSocietyItem = new JMenuItem("Create new SocietyType");
 		createSocietyItem.addActionListener(this);
-        createAgentItem = new JMenuItem("Create an Agent ...");
+        createAgentItem = new JMenuItem("Create new AgentType");
 		createAgentItem.addActionListener(this);
 
 		projectMenu = new JMenu("Project");
