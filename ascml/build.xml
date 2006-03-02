@@ -28,8 +28,13 @@
 	<path id="classpath">
 		<pathelement path="${classes.dir}"/>
 		<pathelement path="${classpath}"/>
-    	<pathelement path="${JADE_PATH}"/>
 		<fileset dir=".">
+			<include name="lib/**/*.jar"/>
+		</fileset>
+		<fileset dir="${JADE_HOME}">
+			<include name="lib/**/*.jar"/>
+		</fileset>
+		<fileset dir="${JIBX_HOME}">
 			<include name="lib/**/*.jar"/>
 		</fileset>
 	</path>

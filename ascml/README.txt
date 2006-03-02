@@ -63,25 +63,10 @@ To build the ASCML you need either eclipse or ANT.
 =====================
 1. Get the ASCML sources as mentioned above.
 
-2. Download JADE and JiBX
+2. Edit the ant.properties file setting the JADE home directory (if you unzipped the ASCML add on in the
+   jade directory this will be ../..) and the JIBX homne directory
 
-3. Extract JiBX-<version>.zip in the lib subdirectory so that you
-   will get e.g.:
-   ./lib/jibx/lib/jbcel.jar
-   ./lib/jibx/lib/jibx-bind.jar
-   ./lib/jibx/lib/jibx-extras.jar
-   ./lib/jibx/lib/jibx-run.jar
-   ./lib/jibx/lib/xpp3.jar
-
-4. Extract JADE into to lib subdirectory. You will get e.g.:
-   ./lib/jade/Base64.jar
-   ./lib/jade/examples.jar
-   ./lib/jade/http.jar
-   ./lib/jade/iiop.jar
-   ./lib/jade/jade.jar
-   ./lib/jade/jadeTools.jar
-   
-5. Use 'ant lib' to generate the ASCML jar.
+3. Use 'ant lib' to generate the ASCML jar.
    It will be called ASCML-bin-<version>.jar in the lib subdirectory
    e.g. ASCML-bin-0.9.jar.
 
