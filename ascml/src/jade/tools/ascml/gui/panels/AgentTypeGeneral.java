@@ -245,7 +245,7 @@ public class AgentTypeGeneral extends AbstractPanel implements ActionListener
 			File file = (File)mainPanel.showDialog(AbstractMainPanel.CHOOSE_AGENTTYPE_FILE_DIALOG);
 			if (file != null)
 			{
-				String name = file+"";
+				String name = file.getName();
 				textFieldSourceName.setText(name);
 				getRepository().getProject().setWorkingDirectory(file+"");
 			}
