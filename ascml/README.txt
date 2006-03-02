@@ -18,7 +18,7 @@ ascml@i4.informatik.rwth-aachen.de.
 
 SYSTEM REQUIREMENTS
 ===================
-The ASCML was developed using the Sun JDK version 1.5 and JADE 3.2.
+The ASCML was developed using the Sun JDK version 1.5 and JADE 3.3.
 It can be built using apache ant, using the supplied build.xml, or Eclipse.
 It should work with newer versions of JADE/JDK but is yet untested.
 If you experience problems with your setup, please consult the Wiki and if
@@ -33,6 +33,8 @@ CONTACT
 =======
 Karl-Heinz Krempels - I4 RWTH Aachen
 e-mail: krempels@i4.informatik.rwth-aachen.de
+or the ascml mailing list under:
+ascml@i4.informatik.rwth-aachen.de
 
 INSTALLATION and LAUNCH
 =======================
@@ -51,7 +53,7 @@ To use all features of the ASCML you need:
   [java.sun.com]
 - JADE 3.2 or newer
   [jade.tilab.com]
-- JIBX
+- JiBX
   [jibx.sourceforge.net]
 
 To build the ASCML you need either eclipse or ANT.
@@ -59,11 +61,29 @@ To build the ASCML you need either eclipse or ANT.
 
 2 Compiling the ASCML
 =====================
-Get the ASCML sources as mentioned above.
-Use 'ant lib' to generate the ASCML jar.
-It will be called ASCML-bin-<version>.jar in the lib subdirectory
+1. Get the ASCML sources as mentioned above.
 
-e.g. ASCML-bin-0.1.jar.
+2. Download JADE and JiBX
+
+3. Extract JiBX-<version>.zip in the lib subdirectory so that you
+   will get e.g.:
+   ./lib/jibx/lib/jbcel.jar
+   ./lib/jibx/lib/jibx-bind.jar
+   ./lib/jibx/lib/jibx-extras.jar
+   ./lib/jibx/lib/jibx-run.jar
+   ./lib/jibx/lib/xpp3.jar
+
+4. Extract JADE into to lib subdirectory. You will get e.g.:
+   ./lib/jade/Base64.jar
+   ./lib/jade/examples.jar
+   ./lib/jade/http.jar
+   ./lib/jade/iiop.jar
+   ./lib/jade/jade.jar
+   ./lib/jade/jadeTools.jar
+   
+5. Use 'ant lib' to generate the ASCML jar.
+   It will be called ASCML-bin-<version>.jar in the lib subdirectory
+   e.g. ASCML-bin-0.9.jar.
 
 other build targets are
 
@@ -78,13 +98,15 @@ other build targets are
 3 Launching and using the ASCML
 ===============================
 The most simple way to start an ASCML agent:
-     java -cp lib/jade/jade.jar;lib/jade/jadeTools.jar;ASCML-bin-0.1.jar
-          jade.Boot -nomtp -gui -name test
-          ascml:jade.tools.ascml.launcher.AgentLauncher
+     java -cp lib/jade/jade.jar:lib/jade/jadeTools.jar:lib/jibx/lib/jibix-run.jar:ASCML-bin-0.1.jar
+          jade.Boot -nomtp -gui 
+          ascml:jade.tools.ascml.ASCML
 
 You can now try to launch the example files in the src/examples
 subdirectory of the ASCML sources.
 There are scripts to facilitate the startup of JADE platform.
+
+If you had a previous version installed, please delete your ASCML properties file.
 
 MORE INFORMATION
 ================

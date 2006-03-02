@@ -15,7 +15,7 @@
 	
 	<property name="dist.dir" value="lib"/>
 	<property name="dist" value="../.."/>
-	<property name="version" value="1.0"/>
+	<property name="version" value="0.9"/>
 	<property name="name" value="ASCML"/>
 	<property name="dist.jar.dir" value="${name}-${version}"/>
 	<property name="jarfile.bin" value="${name}-bin-${version}.jar"/>
