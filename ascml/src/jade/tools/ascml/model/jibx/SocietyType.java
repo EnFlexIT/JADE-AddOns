@@ -52,7 +52,7 @@ public class SocietyType implements ISocietyType
     protected ArrayList<String> agentTypeNameList = new ArrayList<String>();
 	protected ArrayList<String> societyTypeNameList = new ArrayList<String>();
 
-	protected String defaultSocietyInstance = NAME_UNKNOWN;
+	protected String defaultSocietyInstance = SocietyInstance.NAME_UNKNOWN;
     protected ArrayList<ISocietyInstance> societyInstanceList = new ArrayList<ISocietyInstance>();
 
 	protected IDocument document = new Document();
@@ -382,6 +382,8 @@ public class SocietyType implements ISocietyType
 			societyInstance.setParentSocietyType(this);
 			societyInstanceList.add(societyInstance);
 			throwModelChangedEvent(ModelChangedEvent.SOCIETYINSTANCE_ADDED);
+			if (getDefaultSocietyInstanceName() == NAME_UNKNOWN)
+				setDefaultSocietyInstanceName(societyInstance.getName());
 		}
 	}
 
@@ -441,7 +443,7 @@ public class SocietyType implements ISocietyType
 	public void setDefaultSocietyInstanceName(String defaultSocietyInstance)
 	{
 		if ((defaultSocietyInstance==null) || defaultSocietyInstance.equals(""))
-			defaultSocietyInstance = NAME_UNKNOWN;
+			defaultSocietyInstance = SocietyInstance.NAME_UNKNOWN;
 		if (defaultSocietyInstance.equals(getDefaultSocietyInstanceName()))
 			return;
 
