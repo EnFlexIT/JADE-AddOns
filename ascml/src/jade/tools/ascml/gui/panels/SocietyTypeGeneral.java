@@ -144,8 +144,14 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 			if (model.getDefaultSocietyInstanceName().equals(model.getSocietyInstance(i).getName()))
 				indexOfDefaultInstance = i;
 		}
-
+        if (model.getSocietyInstances().length == 0)
+		{
+			comboxBoxContent = new String[] {ISocietyInstance.NAME_UNKNOWN};
+			indexOfDefaultInstance = 0;
+		}
+		
 		comboBoxDefaultInstance = new JComboBox(comboxBoxContent);
+
 		if (indexOfDefaultInstance >= 0)
 			comboBoxDefaultInstance.setSelectedIndex(indexOfDefaultInstance);
 		comboBoxDefaultInstance.setBackground(Color.WHITE);
