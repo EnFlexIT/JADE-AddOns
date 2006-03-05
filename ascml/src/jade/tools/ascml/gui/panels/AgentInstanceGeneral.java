@@ -206,7 +206,7 @@ public class AgentInstanceGeneral extends AbstractPanel implements ActionListene
 		attributePanel.add(new JLabel("Instance-Name:"), new GridBagConstraints(0, 0, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
 		attributePanel.add(textFieldInstanceName, new GridBagConstraints(1, 0, 2, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,1,5,5), 0, 0));
 
-		attributePanel.add(new JLabel("AgentTest:"), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
+		attributePanel.add(new JLabel("Agent-Type:"), new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
 		attributePanel.add(textFieldTypeName, new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.HORIZONTAL, new Insets(5,1,5,1), 0, 0));
         attributePanel.add(buttonChooseAgentType, new GridBagConstraints(2, 1, 1, 1, 0, 0, GridBagConstraints.FIRST_LINE_START, GridBagConstraints.NONE, new Insets(5,1,5,5), 0, 0));
 
