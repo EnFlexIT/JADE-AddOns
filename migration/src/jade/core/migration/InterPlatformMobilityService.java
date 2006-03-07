@@ -324,7 +324,7 @@ public class InterPlatformMobilityService extends BaseService {
 								.log(Logger.FINE,
 										"Source-Sink: handleInformMigrationResult removing agent from platform");
 					
-					_myContainer.getMain().deadAgent(name);
+					_myContainer.getMain().deadAgent(name, false);
 					
 				}
 			} catch (Exception e) {
