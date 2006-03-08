@@ -65,7 +65,7 @@
   <!-- delete ${build} and ${lib} directories -->
   <target name="clean" description="clean up">
     <!-- Delete the ${build} directory tree -->
-    <delete includeEmptyDirs="true" file="${lib}/${jarName}.jar">
+    <delete includeEmptyDirs="true" file="${lib}/${jarName}.jar" quiet="true">
       <fileset dir="${build}"/>
     </delete>
   </target>
