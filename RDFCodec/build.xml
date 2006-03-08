@@ -46,7 +46,7 @@
   <!-- delete ${build} and ${lib} directories -->
   <target name="clean" description="clean up">
     <!-- Delete the ${build} directory tree -->
-    <delete includeEmptyDirs="true" file="${lib}/rdf.jar">
+    <delete includeEmptyDirs="true" file="${lib}/rdf.jar" quiet="true">
       <fileset dir="${build}"/>
     </delete>
   </target>
