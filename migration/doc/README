@@ -199,11 +199,13 @@ command line using the -services parameter:
 
 In linux:
 
-java jade.Boot -services jade.core.mobility.AgentMobilityService\;jade.core.migration.InterPlatformMigrationService
+java jade.Boot -services
+jade.core.mobility.AgentMobilityService\;jade.core.migration.InterPlatformMobilityService
 
 In Windows:
 
-java jade.Boot -services jade.core.mobility.AgentMobilityService;jade.core.migration.InterPlatformMigrationService
+java jade.Boot -services
+jade.core.mobility.AgentMobilityService;jade.core.migration.InterPlatformMobilityService
 
 4.2 Programming mobile agents
 ------------------------------
