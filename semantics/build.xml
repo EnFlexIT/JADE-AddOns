@@ -87,9 +87,16 @@ It is created according a JADE's build.xml.
 	</target>	
 
 	<!-- DIST -->
-	<target name="dist" depends="init" description="generate the distribution">
-		<zip zipfile="../semanticsAddOn.zip" basedir="../../.."
-			includes="jade/add-ons/semantics/*,jade/add-ons/semantics/doc/**/*.pdf,jade/add-ons/semantics/src/demo/*,jade/add-ons/semantics/src/jade/**,jade/add-ons/semantics/demo/**" excludes="jade/add-ons/semantics/demo/.xvpics/**,**/APDescription.txt"/>
+	<target name="dist" depends="init">
+		<zip zipfile="../semanticsAddOn.zip" basedir="../..">
+			<include name="add-ons/semantics/*"/>
+			<include name="add-ons/semantics/doc/**/*.pdf"/>
+			<include name="add-ons/semantics/src/demo/*"/>
+			<include name="add-ons/semantics/src/jade/**"/>
+			<include name="add-ons/semantics/demo/**"/>
+			<exclude name="add-ons/semantics/demo/.xvpics/**"/>
+			<exclude name="**/APDescription.txt"/>
+		</zip>
 	</target>
 
 	<!-- JAVA -->
