@@ -358,10 +358,8 @@ public class IREFilter extends KBQueryFilter {
         		} else {
         			return true;
         		}
-        		believeFormulaPattern = SLPatternManip.fromFormula("(B "+ myKBase.getAgent().getSemanticCapabilities().getAgentName() +" ??Formula)");
         		getPattern();
-        		myKBase.getObserverTriggerPatterns((Formula)SLPatternManip.instantiate(believeFormulaPattern,
-        				"Formula", formulaPattern), set);
+        		myKBase.getObserverTriggerPatterns(formulaPattern, set);
         		return false;
         	}
         	catch (WrongTypeException wte) {
