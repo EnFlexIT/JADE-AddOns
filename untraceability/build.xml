@@ -81,7 +81,7 @@ It is created according a JADE's build.xml.
 
   <target name="clean" description="clean up">
   <!-- Delete the ${build} directory tree -->
-    <delete includeEmptyDirs="true">
+    <delete includeEmptyDirs="true" quiet="true">
       <fileset dir="${build}" excludes="**/*.mf"/>
       <fileset dir="${doc}"/>
       <fileset dir="${lib}" includes="*.jar"/>
