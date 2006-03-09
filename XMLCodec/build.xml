@@ -39,7 +39,7 @@
 
   <!-- Make distribution zip file and put in ${dist} -->
   <target name="dist" depends="lib">
-    <jar jarfile="../XMLCodec-${version}.zip" basedir="../..">
+    <jar jarfile="../XMLCodecAddOn.zip" basedir="../..">
       <include name="add-ons/XMLCodec/*"/>
       <include name="add-ons/XMLCodec/src/**"/>
       <include name="add-ons/XMLCodec/lib/**"/>
