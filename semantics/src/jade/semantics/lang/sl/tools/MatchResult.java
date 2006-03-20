@@ -1,5 +1,6 @@
 package jade.semantics.lang.sl.tools;
 
+import jade.semantics.lang.sl.grammar.ByteConstantNode;
 import jade.semantics.lang.sl.grammar.ContentExpression;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.ListOfNodes;
@@ -290,7 +291,16 @@ public class MatchResult extends ListOfNodes {
 			Node var = get(i);
 			result += (i == 0 ? "??"+SLPatternManip.getMetaReferenceName(var) + " = " 
 						      : "\n??"+SLPatternManip.getMetaReferenceName(var) + " = ");
-			result += SLPatternManip.getMetaReferenceValue(var).toString();
+			Node value = SLPatternManip.getMetaReferenceValue(var);
+			if (value instanceof ByteConstantNode) {
+				result += "ByteConstantNode(" + ((ByteConstantNode)value).lx_value().length + ")";
+			}
+			else if (value == null) {
+				result += "*not bound*";
+			}
+			else {
+				result += value.toString();
+			}
 		}
 		return result;
 	}

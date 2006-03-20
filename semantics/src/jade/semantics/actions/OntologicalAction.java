@@ -34,6 +34,7 @@ import jade.semantics.behaviours.SemanticBehaviour;
 import jade.semantics.behaviours.SemanticBehaviourBase;
 import jade.semantics.interpreter.SemanticInterpretationException;
 import jade.semantics.lang.sl.grammar.ActionExpression;
+import jade.semantics.lang.sl.grammar.ActionExpressionNode;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.ListOfNodes;
 import jade.semantics.lang.sl.grammar.MetaTermReferenceNode;
@@ -111,7 +112,7 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 	 *            to
 	 * @param actionPattern
 	 *            pattern used to recognize the SL functional term representing
-	 *            this action. For example, "<code>(CLOSE :what ??what)</code>"
+	 *            this action. Given as a jade.semantics.lang.sl.grammar.Term
 	 * @param postconditionPattern
 	 *            pattern used to both recognize SL formulae representing the
 	 *            rational effect of this action and instantiate the SL formula
@@ -121,13 +122,38 @@ public class OntologicalAction extends SemanticActionImpl implements Cloneable {
 	 *            precondition of this action.
 	 */
 	public OntologicalAction(SemanticActionTable table,
-							 String actionPattern, 
-							 Formula postconditionPattern,
-							 Formula preconditionPattern) {
+			 Term actionPattern, 
+			 Formula postconditionPattern,
+			 Formula preconditionPattern) {
 		super(table);
-		this.actionPattern = (ActionExpression) SLPatternManip.fromTerm("(action ??" + SENDER_REFERENCE + " " + actionPattern + ")");
+		this.actionPattern = new ActionExpressionNode(new MetaTermReferenceNode(SENDER_REFERENCE), actionPattern);
 		this.postconditionPattern = postconditionPattern;
 		this.preconditionPattern = preconditionPattern;
+	} // End of OntologicalAction/4
+
+	/**
+	 * The same as the previous constructor, except that the action
+	 * pattern is given as an SL String instead of a Term 
+	 * @param table
+	 * 			  the SemanticActionTable, which this action prototype belongs
+	 *            to
+	 * @param actionPattern
+	 * 			  pattern used to recognize the SL functional term representing
+	 *            this action. Given as an SL String, e.g.,
+	 *            "<code>(CLOSE :what ??what)</code>"
+	 * @param postconditionPattern
+	 *            pattern used to both recognize SL formulae representing the
+	 *            rational effect of this action and instantiate the SL formula
+	 *            representing the postcondition of this action.
+	 * @param preconditionPattern
+	 * 			  pattern used to instantiate the SL formula representing the
+	 *            precondition of this action.
+	 */
+	public OntologicalAction(SemanticActionTable table,
+			 String actionPattern, 
+			 Formula postconditionPattern,
+			 Formula preconditionPattern) {
+		this(table, SLPatternManip.fromTerm(actionPattern), postconditionPattern, preconditionPattern);
 	} // End of OntologicalAction/4
 
     /**

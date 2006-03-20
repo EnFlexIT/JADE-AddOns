@@ -57,6 +57,11 @@ public interface SemanticBehaviour {
     public static final int FEASIBILITY_FAILURE = 2;
 
     /**
+     * Is running
+     */
+    public static final int RUNNING = 3;
+    
+    /**
      * Returns the execution state of the behaviour
      * @return <code>SUCCESS</code>, <code>FEASIBILITY_FAILURE</code>, 
      * or <code>EXECUTION_FAILURE</code>

@@ -2,6 +2,7 @@ package jade.semantics.lang.sl.grammar.operations;
 
 import jade.semantics.lang.sl.grammar.AnyNode;
 import jade.semantics.lang.sl.grammar.EqualsNode;
+import jade.semantics.lang.sl.grammar.FalseNode;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.ListOfNodes;
 import jade.semantics.lang.sl.grammar.ListOfTerm;
@@ -41,13 +42,15 @@ public class EqualsNodeOperations
             try {
                 Formula formulaPrim = formulaPattern;
                 MatchResult termMatchResult = SLPatternManip.match(termPattern, right);
-                for (int j = 0; j < listOfNodes.size(); j++) {
-                    formulaPrim = (Formula)SLPatternManip.instantiate(formulaPrim, 
-                            ((VariableNode)listOfNodes.get(j)).lx_name(), termMatchResult.getTerm(((VariableNode)listOfNodes.get(j)).lx_name()));
-                }
-                formulaPrim.getSimplifiedFormula();
-                node.sm_simplified_formula(formulaPrim);
-                return;
+            	if (termMatchResult != null) { // added VL 14/03/2006
+            		for (int j = 0; j < listOfNodes.size(); j++) {
+            			formulaPrim = (Formula)SLPatternManip.instantiate(formulaPrim, 
+            					((VariableNode)listOfNodes.get(j)).lx_name(), termMatchResult.getTerm(((VariableNode)listOfNodes.get(j)).lx_name()));
+            		}
+            		formulaPrim.getSimplifiedFormula();
+            		node.sm_simplified_formula(formulaPrim.sm_simplified_formula()); // modified VL 14/03/2006
+                    return;
+            	} // added VL 14/03/2006
             }
             catch(Exception e) {e.printStackTrace();}
         } else if (left instanceof SomeNode && right instanceof TermSetNode) {
@@ -66,18 +69,26 @@ public class EqualsNodeOperations
                 for(int i = 0; i < list.size(); i++) {
                     Formula formulaPrim = formulaPattern;
                     MatchResult termMatchResult = SLPatternManip.match(termPattern, list.get(i));
-                    for (int j = 0; j < listOfNodes.size(); j++) {
-                        formulaPrim = (Formula)SLPatternManip.instantiate(formulaPrim, 
-                                ((VariableNode)listOfNodes.get(j)).lx_name(), termMatchResult.getTerm(((VariableNode)listOfNodes.get(j)).lx_name()));
-                    }
-                    result.add(formulaPrim);
+                    if (termMatchResult != null) { // added VL 14/03/2006
+                    	for (int j = 0; j < listOfNodes.size(); j++) {
+                    		formulaPrim = (Formula)SLPatternManip.instantiate(formulaPrim, 
+                    				((VariableNode)listOfNodes.get(j)).lx_name(), termMatchResult.getTerm(((VariableNode)listOfNodes.get(j)).lx_name()));
+                    	}
+                    	result.add(formulaPrim);
+                    } 					// added VL 14/03/2006
+                    else { 				// added VL 14/03/2006
+                    	result = null; 	// added VL 14/03/2006
+                    	break; 			// added VL 14/03/2006
+                    } 					// added VL 14/03/2006
                 }
-                Formula nodeResult = Util.buildAndNode(result);
-                if (nodeResult != null) {
-                    nodeResult.getSimplifiedFormula();
-                    node.sm_simplified_formula(nodeResult);
-                    return;
-                }
+                if (result != null) { // added VL 14/03/2006
+                	Formula nodeResult = Util.buildAndNode(result);
+                	if (nodeResult != null) {
+                		nodeResult.getSimplifiedFormula();
+                		node.sm_simplified_formula(nodeResult);
+                		return;
+                	}
+                } // added VL 14/03/2006
             } catch (Exception e) {
                 e.printStackTrace();
             }
