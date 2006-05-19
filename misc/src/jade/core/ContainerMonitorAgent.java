@@ -10,6 +10,10 @@ import jade.core.messaging.MessagingService;
 import jade.domain.introspection.IntrospectionServer;
 import jade.lang.acl.*;
 import java.util.StringTokenizer;
+import java.util.Vector;
+
+import jade.util.leap.Iterator;
+import jade.util.leap.Map;
 
 public class ContainerMonitorAgent extends Agent {
 	public static final String CONTAINER_MONITOR_ONTOLOGY = "container-monitor";
@@ -19,6 +23,7 @@ public class ContainerMonitorAgent extends Agent {
 	public static final String DUMP_MESSAGEQUEUE_ACTION = "DUMP-MESSAGEQUEUE";
 	public static final String DUMP_MESSAGEMANAGER_ACTION = "DUMP-MESSAGEMANAGER";
 	public static final String DUMP_LADT_ACTION = "DUMP-LADT";
+	public static final String DUMP_SERVICES_ACTION = "DUMP-SERVICES";
 	
 	private AgentContainerImpl myContainer;
 	private LADT myLADT;
@@ -43,8 +48,8 @@ public class ContainerMonitorAgent extends Agent {
 				if (msg != null) {
 					ACLMessage reply = msg.createReply();
 					String content = msg.getContent();
-					String contentUC = content.toUpperCase();
 					try {
+						String contentUC = content.toUpperCase();
 						if (contentUC.startsWith(DUMP_AGENTS_ACTION)) {
 							reply.setPerformative(ACLMessage.INFORM);
 							reply.setContent(getAgentsDump());
@@ -61,6 +66,10 @@ public class ContainerMonitorAgent extends Agent {
 						else if (contentUC.startsWith(DUMP_LADT_ACTION)) {
 							reply.setPerformative(ACLMessage.INFORM);
 							reply.setContent(getLADTDump());
+						}
+						else if (contentUC.startsWith(DUMP_SERVICES_ACTION)) {
+							reply.setPerformative(ACLMessage.INFORM);
+							reply.setContent(getServicesDump());
 						}
 						else if (contentUC.startsWith(HELP_ACTION)) {
 							reply.setPerformative(ACLMessage.INFORM);
@@ -343,5 +352,72 @@ public class ContainerMonitorAgent extends Agent {
 		}
 		sb.append("-------------------------------------------------------------\n");
 		return sb.toString();
+	}
+	
+	public String getServicesDump() {
+		StringBuffer sb = new StringBuffer();
+		try {
+			MainContainerImpl mc = (MainContainerImpl) myContainer.getMain();
+			if (mc != null) {
+				PlatformManagerImpl pm = (PlatformManagerImpl) mc.getPlatformManager();
+				sb.append("-------------------------------------------------------------\n");
+				sb.append("Platform services DUMP\n");
+				sb.append("-------------------------------------------------------------\n");
+				Map services = pm.getServicesMap();
+				Iterator it = services.keySet().iterator();
+				while (it.hasNext()) {
+					String serviceName = (String) it.next();
+					PlatformManagerImpl.ServiceEntry se = (PlatformManagerImpl.ServiceEntry) services.get(serviceName);
+					sb.append("Service entry "+serviceName+"\n");
+					dumpServiceEntry(se, sb);
+				}
+				sb.append("-------------------------------------------------------------\n");
+			}
+			else {
+				sb.append("Container "+myContainer.getID().getName()+" is not a Main!");
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			sb.append(e.toString());
+		}
+		return sb.toString();
+	}
+	
+	public void dumpServiceEntry(PlatformManagerImpl.ServiceEntry se, StringBuffer sb) {
+		sb.append("  - Name = "+se.getService().getName()+"\n");
+		sb.append("  - Class = "+se.getService().getClass().getName()+"\n");
+		sb.append("  - Slices:\n");
+		Map slices = se.getSlicesMap();
+		Iterator it = slices.keySet().iterator();
+		while (it.hasNext()) {
+			String sliceName = (String) it.next();
+			PlatformManagerImpl.SliceEntry sle = (PlatformManagerImpl.SliceEntry) slices.get(sliceName);
+			sb.append("    - Slice "+sliceName+"\n");
+			sb.append("      - Class = "+sle.getSlice().getClass().getName()+"\n");
+			try {
+				Node associatedNode = sle.getNode();
+				sb.append("      - Associated node = "+associatedNode);
+				sb.append("\n");
+				Node innerNode = sle.getSlice().getNode();
+				sb.append("      - Inner node      = "+innerNode);
+				sb.append("\n");
+				if (!checkConsistency(sliceName, associatedNode, innerNode)) {
+					sb.append("      WARNING!!!!!!!!!!! Slice is inconsistent\n");
+				}
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private boolean checkConsistency(String name, Node n1, Node n2) {
+		if (n1 != null && n2 != null) {
+			return name.equals(n1.getName()) && name.equals(n2.getName());
+		}
+		else {
+			return false;
+		}
 	}
 }
