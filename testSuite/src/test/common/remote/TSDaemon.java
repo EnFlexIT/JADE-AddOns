@@ -28,6 +28,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.*;
 import java.net.InetAddress;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import test.common.*;
 import jade.util.leap.List;
@@ -124,14 +125,6 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 		instanceCnt++;
 		jadeArgs = additionalArgs + jadeArgs;
 		JadeController jc = null;
-		/*if (mainClass.equals("jade.Boot")) {
-			// Stand alone mode
-			jc = TestUtility.launchJadeInstance(instanceName, classpath, jadeArgs, protoNames);
-		}
-		else {
-			// Split mode
-			jc = TestUtility.launchSplitJadeInstance(instanceName, classpath, jadeArgs);
-		}*/
 		jc = TestUtility.launch(null, instanceName, classpath, jvmArgs, mainClass, jadeArgs, protoNames, this);
 		controllers.put(new Integer(instanceCnt), jc);
 		return instanceCnt;
@@ -164,6 +157,20 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 		}
 		else {
 			throw new TestException("No JADE instance corresponding to ID "+id);
+		}
+	}
+	
+	public int getJadeInstanceId(String containerName) throws TestException, RemoteException {
+		synchronized (controllers) {
+			Iterator it = controllers.keySet().iterator();
+			while (it.hasNext()) {
+				Integer id = (Integer) it.next();
+				JadeController jc = (JadeController) controllers.get(id);
+				if (jc.getContainerName().equalsIgnoreCase(containerName)) {
+					return id.intValue();
+				}
+			}
+			return -1;
 		}
 	}
 	

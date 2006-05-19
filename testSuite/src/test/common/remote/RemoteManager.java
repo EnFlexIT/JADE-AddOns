@@ -37,4 +37,5 @@ public interface RemoteManager extends Remote {
 	List getJadeInstanceAddresses(int id) throws TestException, RemoteException;
 	String getJadeInstanceContainerName(int id) throws TestException, RemoteException;
 	void killJadeInstance(int id) throws TestException, RemoteException;
+	int getJadeInstanceId(String containerName) throws TestException, RemoteException;
 }
