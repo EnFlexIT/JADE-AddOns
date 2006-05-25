@@ -52,24 +52,34 @@ public class ContainerMonitorAgent extends Agent {
 						String contentUC = content.toUpperCase();
 						if (contentUC.startsWith(DUMP_AGENTS_ACTION)) {
 							reply.setPerformative(ACLMessage.INFORM);
-							reply.setContent(getAgentsDump());
+							String replyContent = getAgentsDump();
+							System.out.println(replyContent);
+							reply.setContent(replyContent);
 						}
 						else if (contentUC.startsWith(DUMP_MESSAGEQUEUE_ACTION)) {
 							String agentName = getParameter(content);
 							reply.setPerformative(ACLMessage.INFORM);
-							reply.setContent(getMessageQueueDump(agentName));
+							String replyContent = getMessageQueueDump(agentName);
+							System.out.println(replyContent);
+							reply.setContent(replyContent);
 						}
 						else if (contentUC.startsWith(DUMP_MESSAGEMANAGER_ACTION)) {
 							reply.setPerformative(ACLMessage.INFORM);
-							reply.setContent(getMessageManagerDump());
+							String replyContent = getMessageManagerDump();
+							System.out.println(replyContent);
+							reply.setContent(replyContent);
 						}
 						else if (contentUC.startsWith(DUMP_LADT_ACTION)) {
 							reply.setPerformative(ACLMessage.INFORM);
-							reply.setContent(getLADTDump());
+							String replyContent = getLADTDump();
+							System.out.println(replyContent);
+							reply.setContent(replyContent);
 						}
 						else if (contentUC.startsWith(DUMP_SERVICES_ACTION)) {
 							reply.setPerformative(ACLMessage.INFORM);
-							reply.setContent(getServicesDump());
+							String replyContent = getServicesDump();
+							System.out.println(replyContent);
+							reply.setContent(replyContent);
 						}
 						else if (contentUC.startsWith(HELP_ACTION)) {
 							reply.setPerformative(ACLMessage.INFORM);
@@ -182,12 +192,12 @@ public class ContainerMonitorAgent extends Agent {
 		else if (b instanceof ThreadedBehaviourFactory.ThreadedBehaviourWrapper) {
 			ThreadedBehaviourFactory.ThreadedBehaviourWrapper w = (ThreadedBehaviourFactory.ThreadedBehaviourWrapper) b;
 			sb.append(prefix+"- Type = Threaded\n");
+			sb.append(prefix+"- Thread-state = "+w.getThreadState()+"\n");
 			sb.append(prefix+"- Thread Information\n");
 			Thread t = w.getThread();
 			if (t != null) {
 				sb.append(prefix+"  - Alive = "+t.isAlive()+"\n");
 				sb.append(prefix+"  - Interrupted = "+t.isInterrupted()+"\n");
-				sb.append(prefix+"  - Thread-state = "+w.getThreadState()+"\n");
 			}
 			sb.append(prefix+"- Threaded Behaviour Information\n");
 			Behaviour tb = w.getBehaviour();
