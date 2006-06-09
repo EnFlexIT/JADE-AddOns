@@ -109,7 +109,7 @@ public class AgentLauncherThread implements Runnable {
 			// are passed as key-value pairs (for JADE-platform-agents) or as value only (Jadex)
 			String platformType = theAgent.getPlatformType();
 			String arg;
-			if (platformType == IAgentType.PLATFORM_TYPE_JADEX)
+			if ((platformType == IAgentType.PLATFORM_TYPE_JADEX) || argName.trim().equals(""))
 				arg = (String) theAgent.getParameter(argName).getValue();
 			else
 				arg = argName + "=" + theAgent.getParameter(argName).getValue();
