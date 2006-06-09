@@ -29,6 +29,8 @@ import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.exceptions.ResourceNotFoundException;
 import jade.tools.ascml.events.ProjectListener;
 import jade.tools.ascml.events.ProjectChangedEvent;
+import jade.tools.ascml.events.ModelChangedListener;
+import jade.tools.ascml.events.ModelChangedEvent;
 import jade.tools.ascml.absmodel.IAgentType;
 import jade.tools.ascml.absmodel.ISocietyInstance;
 import jade.tools.ascml.absmodel.ISocietyType;
@@ -39,7 +41,7 @@ import java.util.*;
 import java.io.File;
 import java.io.IOException;
 
-public class Project
+public class Project implements ModelChangedListener
 {
 	public final static String BASIC_VIEW	= "basic";
 	public final static String EXPERT_VIEW	= "expert";
@@ -77,6 +79,13 @@ public class Project
 
 		modelManager				= null; // set in init-method
 		this.repository				= repository;
+
+		// Project has to be registered as a ModelChangedListener in order to be informed once
+		// an AgentType's or a SocietyType's name changed, so the internal maps can be updated
+
+		this.repository.getListenerManager().addModelChangedListener(this);
+
+
 		view						= EXPERT_VIEW;
 		workingDirectory			= System.getProperty("user.dir");
 		temporarySocietyTypesCache	= new HashMap();
@@ -478,11 +487,12 @@ public class Project
 	public void addAgentType(IAgentType agentType) throws ModelException
 	{
 		String agentTypeName = agentType.getFullyQualifiedName();
-
+        System.out.println("Project: added new AgentType, name=" + agentTypeName);
+		System.out.println("Project: AgentTypesNameMap=" + agentTypesNameMap);
 		if (!agentTypesNameMap.containsKey(agentTypeName))
 		{
 			agentTypesNameMap.put(agentTypeName, agentType);
-
+            System.out.println("Project: throw ProjectChangedEvent");
 			throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.AGENTTYPE_ADDED, agentType, this));
 
 			if (agentType.getStatus() == IAgentType.STATUS_ERROR)
@@ -640,6 +650,56 @@ public class Project
 	public String getName()
 	{
 		return this.name;
+	}
+
+	/**
+	 * This method has to be implemented because the Project is also a ModelChangedListener.
+	 * It listens for name-changes in order to update the internal agent- and society-maps.
+	 * @param evt
+	 */
+	public void modelChanged(ModelChangedEvent evt)
+	{
+		if (evt.getEventCode().equals(ModelChangedEvent.NAME_CHANGED))
+		{
+			if ((evt.getModel() instanceof IAgentType) && agentTypesNameMap.containsValue(evt.getModel()))
+			{
+				// Search the changed model in the internal agenttype-map
+				IAgentType changedAgentType = (IAgentType)evt.getModel();
+				Iterator iter = agentTypesNameMap.keySet().iterator();
+				boolean mapUpdated = false;
+				while (!mapUpdated && iter.hasNext())
+				{
+					String fullyQualifiedName = (String)iter.next();
+					IAgentType oneType = (IAgentType)agentTypesNameMap.get(fullyQualifiedName);
+					// once the model has been found remove the old entry and add the new entry
+					if (oneType == changedAgentType)
+					{
+						agentTypesNameMap.remove(fullyQualifiedName);
+						agentTypesNameMap.put(changedAgentType.getFullyQualifiedName(), changedAgentType);
+						mapUpdated = true;
+					}
+				}
+			}
+			else if ((evt.getModel() instanceof ISocietyType) && societyTypesNameMap.containsValue(evt.getModel()))
+			{
+				// Search the changed model in the internal societytype-map
+				ISocietyType changedSocietyType = (ISocietyType)evt.getModel();
+				Iterator iter = societyTypesNameMap.keySet().iterator();
+				boolean mapUpdated = false;
+				while (!mapUpdated && iter.hasNext())
+				{
+					String fullyQualifiedName = (String)iter.next();
+					ISocietyType oneType = (ISocietyType)societyTypesNameMap.get(fullyQualifiedName);
+					// once the model has been found remove the old entry and add the new entry
+					if (oneType == changedSocietyType)
+					{
+						societyTypesNameMap.remove(fullyQualifiedName);
+						societyTypesNameMap.put(changedSocietyType.getFullyQualifiedName(), changedSocietyType);
+						mapUpdated = true;
+					}
+				}
+			}
+		}
 	}
 
 	public void throwProjectChangedEvent(ProjectChangedEvent event)
