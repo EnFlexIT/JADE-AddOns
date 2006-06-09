@@ -110,9 +110,9 @@ public class AgentLauncherThread implements Runnable {
 			String platformType = theAgent.getPlatformType();
 			String arg;
 			if ((platformType == IAgentType.PLATFORM_TYPE_JADEX) || argName.trim().equals(""))
-				arg = (String) theAgent.getParameter(argName).getValue();
+				arg = (String) params[i].getValue();
 			else
-				arg = argName + "=" + theAgent.getParameter(argName).getValue();
+				arg = argName + "=" + params[i].getValue();
 
 			ca.addArguments(arg);
 			if (launcher.myLogger.isLoggable(Logger.INFO)) {
