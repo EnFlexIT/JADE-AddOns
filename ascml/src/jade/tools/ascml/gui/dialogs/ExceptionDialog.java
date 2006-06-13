@@ -37,6 +37,13 @@ public class ExceptionDialog extends AbstractDialog
 {
     private ASCMLException exception;
 
+	/**
+	 * This public static variable may be used to prevent the ExceptionDialog to be shown.
+	 * Setting it to false prevents the dialog.
+	 */
+    public static boolean isVisible = true;
+
+
 	public ExceptionDialog(ASCMLException exception)
 	{
 		super();
@@ -54,7 +61,7 @@ public class ExceptionDialog extends AbstractDialog
 		dialog.setSize(680, 440);
 		dialog.setLocation((int)(Toolkit.getDefaultToolkit().getScreenSize().getWidth()/2-dialog.getWidth()/2),
  						   (int)(Toolkit.getDefaultToolkit().getScreenSize().getHeight()/2-dialog.getHeight()/2));
-		dialog.setVisible(true);
+		dialog.setVisible(isVisible);
         dialog.toFront();
 		return null;
 	}
