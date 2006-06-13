@@ -105,6 +105,16 @@ public class ComponentFactory
 		return button;
 	}
 
+	public static JButton createCloseButton(String buttonText)
+	{
+        JButton button = new JButton(buttonText, ImageIconLoader.createImageIcon(ImageIconLoader.BUTTON_CLOSE, 16, 16));
+		button.setMargin(new Insets(1,1,1,1));
+		button.setPreferredSize(new Dimension(120,22));
+		button.setMinimumSize(new Dimension(120,22));
+		button.setMaximumSize(new Dimension(120,22));
+		return button;
+	}
+
 	public static JScrollPane createTextAreaScrollPane(JTextArea textArea)
 	{
 		textArea.setFont(new Font("Arial", Font.PLAIN, 12));
