@@ -27,12 +27,17 @@ package jade.tools.ascml.gui.dialogs;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
 import jade.tools.ascml.gui.panels.ParameterDetails;
+import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.absmodel.IParameter;
 import jade.tools.ascml.absmodel.IParameterSet;
 
-public class ParameterDialog extends AbstractDialog
+public class ParameterDialog extends AbstractDialog implements ActionListener
 {
+	private JDialog dialog;
     private Object instanceParameter;
 	private Object typeParameter;
 
@@ -45,26 +50,38 @@ public class ParameterDialog extends AbstractDialog
 
 	public Object showDialog(JFrame parentFrame)
 	{
-		ParameterDetails panel = new ParameterDetails(null);
+		ParameterDetails parameterPanel = new ParameterDetails(null);
 
 		if ((instanceParameter == null) && (typeParameter instanceof IParameter))
-			panel.setTypeParameter((IParameter)typeParameter);
+			parameterPanel.setTypeParameter((IParameter)typeParameter);
 		else if ((instanceParameter == null) && (typeParameter instanceof IParameterSet))
-			panel.setTypeParameterSet((IParameterSet)typeParameter);
+			parameterPanel.setTypeParameterSet((IParameterSet)typeParameter);
 		else if (instanceParameter instanceof IParameter)
-			panel.setInstanceParameter((IParameter)instanceParameter, (IParameter)typeParameter);
+			parameterPanel.setInstanceParameter((IParameter)instanceParameter, (IParameter)typeParameter);
 		else if (instanceParameter instanceof IParameterSet)
-			panel.setInstanceParameterSet((IParameterSet)instanceParameter, (IParameterSet)typeParameter);
+			parameterPanel.setInstanceParameterSet((IParameterSet)instanceParameter, (IParameterSet)typeParameter);
 
-		JDialog dialog = new JDialog(parentFrame, "Edit Parameter ...", true);
-		dialog.getContentPane().add(panel);
-		dialog.setSize(350, 390);
+		JPanel mainPanel = new JPanel(new GridBagLayout());
+		mainPanel.setBackground(Color.WHITE);
+		JButton closeButton = ComponentFactory.createCloseButton("Close Dialog");
+		closeButton.addActionListener(this);
+		mainPanel.add(parameterPanel, new GridBagConstraints(0,0,1,1,1,1,GridBagConstraints.FIRST_LINE_START, GridBagConstraints.BOTH, new Insets(0,0,0,0), 0, 0));
+		mainPanel.add(closeButton, new GridBagConstraints(0,1,1,1,0,0,GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0,0,6,6), 0, 0));
+
+		dialog = new JDialog(parentFrame, "Edit Parameter ...", true);
+		dialog.getContentPane().add(mainPanel);
+		dialog.setSize(350, 420);
 		dialog.setLocation((int)(Toolkit.getDefaultToolkit().getScreenSize().getWidth()/2-dialog.getWidth()/2),
  						   (int)(Toolkit.getDefaultToolkit().getScreenSize().getHeight()/2-dialog.getHeight()/2));
 		dialog.setVisible(true);
         dialog.toFront();
 
 		// returns a NEW instance of either Parameter or ParameterSet
-		return panel.getResult();
+		return parameterPanel.getResult();
+	}
+
+	public void actionPerformed(ActionEvent evt)
+	{
+		dialog.setVisible(false);
 	}
 }
