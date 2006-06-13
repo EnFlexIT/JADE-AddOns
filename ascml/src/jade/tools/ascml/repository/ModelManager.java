@@ -145,15 +145,24 @@ public class ModelManager
 
 		// Resolve references of the SocietyType
 		// (AgentTypes need no reference-resolving, because they contain no references)
-		if (model instanceof ISocietyType)
+		try
 		{
-			ModelReferenceResolver resolver = new ModelReferenceResolver();
-			resolver.resolveReferences((ISocietyType)model, this);
+			if (model instanceof ISocietyType)
+			{
+				ModelReferenceResolver resolver = new ModelReferenceResolver();
+				resolver.resolveReferences((ISocietyType)model, this);
+			}
 		}
-
-		// check the integrity of the model
-		ModelIntegrityChecker checker = new ModelIntegrityChecker();
-        checker.checkIntegrity(model);
+		catch(Exception exc)
+		{
+			// may occur in case some references could not be resolved.
+		}
+		finally
+		{
+			// check the integrity of the model
+			ModelIntegrityChecker checker = new ModelIntegrityChecker();
+			checker.checkIntegrity(model);
+		}
 
 		return model;
 	}
