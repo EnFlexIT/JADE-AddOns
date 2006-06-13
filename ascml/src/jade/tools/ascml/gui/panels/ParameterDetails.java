@@ -260,46 +260,51 @@ public class ParameterDetails extends JPanel implements ActionListener
 		return attributePanel;
 	}
 
+	public void applyChanges()
+	{
+		if (listValues.getModel().getSize() > 1)
+		{
+			parameter = null; // set parameter to null, because we now deal with a new parameter-SET
+
+			parameterSet = new ParameterSet();
+			parameterSet.setName(textFieldName.getText());
+			parameterSet.setDescription(textAreaDescription.getText());
+			parameterSet.setOptional(checkBoxOptional.isSelected()+"");
+			parameterSet.setType((String)comboBoxType.getSelectedItem());
+
+			String[] values = new String[listValues.getModel().getSize()];
+
+			for (int i=0; i < values.length; i++)
+			{
+				parameterSet.addValue((String)listValues.getModel().getElementAt(i));
+			}
+
+			if (parameterChangedListener != null)
+				parameterChangedListener.parameterChanged(new ParameterChangedEvent(parameterSet));
+		}
+		else
+		{
+			parameterSet = null;
+
+			parameter = new Parameter();
+			parameter.setName(textFieldName.getText());
+			parameter.setDescription(textAreaDescription.getText());
+			parameter.setOptional(checkBoxOptional.isSelected()+"");
+			parameter.setType((String)comboBoxType.getSelectedItem());
+			if (listValues.getModel().getSize() > 0)
+				parameter.setValue((String)listValues.getModel().getElementAt(0));
+
+			if (parameterChangedListener != null)
+				parameterChangedListener.parameterChanged(new ParameterChangedEvent(parameter));
+		}
+	}
+
 	// ---------- actionListener-methods --------------
 	public void actionPerformed(ActionEvent evt)
 	{
 		if (evt.getSource() == buttonApply)
 		{
-            if (listValues.getModel().getSize() > 1)
-			{
-				parameter = null; // set parameter to null, because we now deal with a new parameter-SET
-
-				parameterSet = new ParameterSet();
-				parameterSet.setName(textFieldName.getText());
-				parameterSet.setDescription(textAreaDescription.getText());
-				parameterSet.setOptional(checkBoxOptional.isSelected()+"");
-				parameterSet.setType((String)comboBoxType.getSelectedItem());
-
-				String[] values = new String[listValues.getModel().getSize()];
-
-				for (int i=0; i < values.length; i++)
-				{
-					parameterSet.addValue((String)listValues.getModel().getElementAt(i));
-				}
-
-				if (parameterChangedListener != null)
-					parameterChangedListener.parameterChanged(new ParameterChangedEvent(parameterSet));
-			}
-			else
-			{
-				parameterSet = null;
-
-				parameter = new Parameter();
-				parameter.setName(textFieldName.getText());
-				parameter.setDescription(textAreaDescription.getText());
-				parameter.setOptional(checkBoxOptional.isSelected()+"");
-				parameter.setType((String)comboBoxType.getSelectedItem());
-				if (listValues.getModel().getSize() > 0)
-					parameter.setValue((String)listValues.getModel().getElementAt(0));
-
-				if (parameterChangedListener != null)
-					parameterChangedListener.parameterChanged(new ParameterChangedEvent(parameter));
-			}
+            applyChanges();
 		}
 		else if (evt.getSource() == buttonAddValue)
 		{
