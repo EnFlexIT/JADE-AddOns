@@ -50,7 +50,7 @@ public class Project implements ModelChangedListener
 
 	private String name;
 	private String view;
-	private String workingDirectory;
+	private static String workingDirectory;
 
     /** These two variables are only used at ASCML startup, while the model-locations
 	 * are read out of the property-file. Because the ModelManager is not ready at this
@@ -629,9 +629,9 @@ public class Project implements ModelChangedListener
 	 * Removes a remoteRepository from the local repository.
 	 * @return
 	 */
-	public String getWorkingDirectory()
+	public static String getWorkingDirectory()
 	{
-		return this.workingDirectory;
+		return workingDirectory;
 	}
 	
 	/**
