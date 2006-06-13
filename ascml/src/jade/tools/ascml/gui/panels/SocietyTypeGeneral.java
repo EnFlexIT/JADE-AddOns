@@ -36,6 +36,7 @@ import jade.tools.ascml.gui.dialogs.ExceptionDialog;
 import jade.tools.ascml.gui.components.ComponentFactory;
 import jade.tools.ascml.repository.loader.ImageIconLoader;
 import jade.tools.ascml.repository.ModelIntegrityChecker;
+import jade.tools.ascml.repository.Project;
 import jade.tools.ascml.absmodel.ISocietyType;
 import jade.tools.ascml.absmodel.IDocument;
 import jade.tools.ascml.absmodel.ISocietyInstance;
@@ -108,7 +109,10 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 		iconLabel = new JLabel(ImageIconLoader.scaleImageIcon(model.getIcon(), 32, 32));
         iconName = model.getIconName();
 
-		textFieldSourcePath = new JTextField(model.getDocument().getSourcePath(), 30);
+		String sourcePath = model.getDocument().getSourcePath();
+		if (sourcePath == IDocument.SOURCE_UNKNOWN)
+			sourcePath = Project.getWorkingDirectory();
+		textFieldSourcePath = new JTextField(sourcePath, 30);
 		textFieldSourcePath.setMinimumSize(new Dimension(320, (int)textFieldSourcePath.getPreferredSize().getHeight()));
 		textFieldSourcePath.setBackground(Color.WHITE);
 
@@ -274,7 +278,9 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 		}
 		else if (evt.getSource() == buttonSave)
 		{
-            applyChanges();
+            ExceptionDialog.isVisible = false;
+			applyChanges();
+			ExceptionDialog.isVisible = true;
 			boolean savingSuccessful = getRepository().getModelManager().saveModel(model);
 
 			if (savingSuccessful)
@@ -282,6 +288,9 @@ public class SocietyTypeGeneral extends AbstractPanel implements ActionListener
 		}
 		else if (evt.getSource() == buttonCreate)
 		{
+			ExceptionDialog.isVisible = false;
+			applyChanges();
+			ExceptionDialog.isVisible = true;
 			ISocietyInstance newInstance = new SocietyInstance();
 			model.addSocietyInstance(newInstance);
 			getRepository().getProject().throwProjectChangedEvent(new ProjectChangedEvent(ProjectChangedEvent.SOCIETYINSTANCE_SELECTED, newInstance, getRepository().getProject()));
