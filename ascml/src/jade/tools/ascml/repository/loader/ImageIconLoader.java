@@ -88,6 +88,7 @@ public class ImageIconLoader
     public static final String BUTTON_ADD		= "images/button/add.png";
 	public static final String BUTTON_EDIT		= "images/button/edit.png";
 	public static final String BUTTON_REMOVE	= "images/button/remove.png";
+	public static final String BUTTON_CLOSE		= "images/button/cancel.png";
 
 	private static HashMap imageCache = new HashMap();
 	private static HashMap scaledImageCache = new HashMap();
