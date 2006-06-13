@@ -88,6 +88,12 @@ public class SocietyInstance implements ISocietyInstance
 			name = NAME_UNKNOWN;
         if (name.equals(getName()))
 			return;
+
+		// check if this society-instance if the 'default' societyinstance of
+		// the parent societytype and if so, change the default-name of the type
+		if (getParentSocietyType().getDefaultSocietyInstanceName().equals(this.name))
+			getParentSocietyType().setDefaultSocietyInstanceName(name);
+
 		this.name = name;
 		throwModelChangedEvent(ModelChangedEvent.NAME_CHANGED);
 	}
