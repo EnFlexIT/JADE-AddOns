@@ -25,6 +25,7 @@
 package jade.tools.ascml.launcher;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Vector;
 
 import jade.content.ContentElement;
@@ -54,7 +55,7 @@ public class AgentLauncherThread implements Runnable {
 	private AgentLauncher launcher;
 	private ModelActionException mae;
 	private StringBuffer synchobject;
-	private HashMap<String, Vector<String>> socToolOptions;
+	private HashSet<IToolOption> socToolOptions;
 
 	/**
 	 * Starts a new AgentInstaceModel
@@ -63,13 +64,13 @@ public class AgentLauncherThread implements Runnable {
 	 * @param launcher          The AgentLauncher-agent
 	 * @param socToolOptions 
 	 */
-	public AgentLauncherThread(IRunnableAgentInstance aModel, AgentLauncher launcher, HashMap<String, Vector<String>> socToolOptions) {
+	public AgentLauncherThread(IRunnableAgentInstance aModel, AgentLauncher launcher, HashSet<IToolOption> socToolOptions) {
 		// System.out.println("Creating AgentLauncherThread for Agent "+ aModel);
 		this.aModel = aModel;
 		this.launcher = launcher;
 		this.socToolOptions = socToolOptions;
 		if (this.socToolOptions == null) {
-			this.socToolOptions = new HashMap<String, Vector<String>>();
+			this.socToolOptions = new HashSet<IToolOption>();
 		}
 		synchobject = new StringBuffer();
 		t = new Thread(this, "LaunchThread ASCML for " + aModel.getName());
@@ -195,8 +196,8 @@ public class AgentLauncherThread implements Runnable {
 		boolean startAgent = true;
 		int timeout = 15000;
 
-		if (aModel.hasToolOption(IToolOption.TOOLOPTION_SNIFF) || socToolOptions.containsKey(IToolOption.TOOLOPTION_SNIFF)) {
-			launcher.doSniff(aModel, synchobject);
+		for (IToolOption option : aModel.getToolOptions()) {
+			launcher.doToolOption(option, aModel, synchobject);
 			synchronized (synchobject) {
 				try {
 					synchobject.wait(timeout);
@@ -205,11 +206,10 @@ public class AgentLauncherThread implements Runnable {
 					e.printStackTrace();
 				}
 			}
-			launcher.snifferReady();
 		}
-		if (aModel.hasToolOption(IToolOption.TOOLOPTION_DEBUG) || aModel.hasToolOption(IToolOption.TOOLOPTION_INTROSPECTOR)
-				|| socToolOptions.containsKey(IToolOption.TOOLOPTION_DEBUG) || socToolOptions.containsKey(IToolOption.TOOLOPTION_INTROSPECTOR)) {
-			launcher.doIntrospect(aModel, synchobject);
+		
+		for (IToolOption option : socToolOptions) {
+			launcher.doToolOption(option, aModel, synchobject);
 			synchronized (synchobject) {
 				try {
 					synchobject.wait(timeout);
@@ -218,23 +218,8 @@ public class AgentLauncherThread implements Runnable {
 					e.printStackTrace();
 				}
 			}
-			launcher.introReady();
 		}
-		if (aModel.hasToolOption(IToolOption.TOOLOPTION_BENCHMARK) || socToolOptions.containsKey(IToolOption.TOOLOPTION_BENCHMARK)) {
-			launcher.doBenchmark(aModel, synchobject);
-			synchronized (synchobject) {
-				try {
-					synchobject.wait(timeout);
-				}
-				catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			launcher.benchmarkReady();
-		}
-		if (aModel.hasToolOption(IToolOption.TOOLOPTION_LOG) || socToolOptions.containsKey(IToolOption.TOOLOPTION_LOG)) {
-			System.err.println("AgentLauncherThread.run: Please implement JADE's log-tooloption !");
-		}
+		
 		if (startAgent) {
 			StringBuffer result = new StringBuffer(1024);
 			try {

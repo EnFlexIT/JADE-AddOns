@@ -29,7 +29,7 @@
  * TODO Copyright notice
  *
  */
-package jade.tools.ascml.launcher;
+package jade.tools.ascml.launcher.toolRequesters;
 
 import jade.content.AgentAction;
 import java.util.ConcurrentModificationException;
@@ -55,46 +55,47 @@ import jade.domain.toolagent.ToolAgentParameterSet;
 import jade.domain.toolagent.ToolAgentParameterSetOntology;
 import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
+import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.model.runnable.RunnableAgentInstance;
+import jade.tools.ascml.absmodel.IProperty;
 import jade.tools.ascml.absmodel.IRunnableAgentInstance;
+import jade.tools.ascml.absmodel.IToolOption;
 import jade.wrapper.ControllerException;
 import java.util.HashMap;
 import java.util.Vector;
+
+import javax.swing.SwingUtilities;
+
+import com.sun.java.swing.SwingUtilities2;
 
 
 /**
  * @author Tim Niemueller & Sven Lilienthal (ascml@sven-lilienthal.de)
  *
  */
-public class ToolRequester {
+public abstract class ToolRequester {
     
-    private String toolClass;
-    private String toolPrefix;
+	protected String ontologyName;
     private boolean waitForToolCreate = false;
     private Hashtable<String,StringBuffer> waitingAgents;
     private Hashtable<String,StringBuffer> requestAgents;
-    private Hashtable<String,HashMap<String,Vector<String>>> agentTooloptionProperties;
+    private Hashtable<String,IProperty[]> agentTooloptionProperties;
     private int toolCount = 0;
     private AgentLauncher launcher;
-    private boolean isSniffer;
-    private String tooloptionConfigType;
     
-    public ToolRequester(AgentLauncher launcher, String toolClass, String toolPrefix, String tooloptionConfigType, boolean isSniffer) {
-        this.toolClass=toolClass;
-        this.toolPrefix=toolPrefix;
+    public ToolRequester(AgentLauncher launcher) {
+		ontologyName = JADEManagementOntology.NAME;
         this.launcher=launcher;
-        this.isSniffer = isSniffer;
-        this.tooloptionConfigType = tooloptionConfigType;
         waitingAgents = new Hashtable<String,StringBuffer>();
         requestAgents = new Hashtable<String,StringBuffer>();
-        agentTooloptionProperties = new Hashtable<String,HashMap<String,Vector<String>>>();
+        agentTooloptionProperties = new Hashtable<String,IProperty[]>();
         launcher.getContentManager().registerOntology(ToolAgentParameterSetOntology.getInstance());
     }
     
     private void newToolAgent(String arg, StringBuffer result) throws jade.content.lang.Codec.CodecException, OntologyException {
         CreateAgent ca = new CreateAgent();
-        ca.setAgentName(toolPrefix+toolCount);
-        ca.setClassName(toolClass);
+        ca.setAgentName(getToolPrefix()+toolCount);
+        ca.setClassName(getToolClass());
         ca.addArguments(arg);
         try {
             ca.setContainer(new ContainerID(launcher.getContainerController().getContainerName(), null));
@@ -103,7 +104,7 @@ public class ToolRequester {
             e.printStackTrace();
         }
         ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-        msg.setLanguage(launcher.codec.getName());
+        msg.setLanguage(launcher.getCodec().getName());
         msg.setOntology(JADEManagementOntology.NAME);
         msg.addReceiver(launcher.getAMS());
         msg.setSender(launcher.getAID());
@@ -114,10 +115,20 @@ public class ToolRequester {
         ContentManager manager = launcher.getContentManager();
         manager.setValidationMode(false);
         manager.fillContent(msg, (ContentElement)contentAction);
-        launcher.addAMSBehaviour(new ToolCreateInitiator(msg, result, toolPrefix, launcher));
+        launcher.addAMSBehaviour(new ToolCreateInitiator(msg, result, getToolPrefix(), launcher));
     }
     
-    private class ToolCreateInitiator extends AchieveREInitiator {
+    /**
+	 * @return The String representation of the tool class
+	 */
+	protected abstract String getToolClass();
+
+	/**
+	 * @return The prefix every tool started through the ASCML should have
+	 */
+	protected abstract String getToolPrefix();
+
+	private class ToolCreateInitiator extends AchieveREInitiator {
         protected StringBuffer result;
         protected String aName;
         protected AgentLauncher launcher;
@@ -169,6 +180,11 @@ public class ToolRequester {
             }
             launcher.removeBehaviour(this);
             waitForToolCreate = false;
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run () {
+					toolReady();
+				}
+			});
         }
     }
     
@@ -254,12 +270,12 @@ public class ToolRequester {
         }
         
         protected void handleRefuse(ACLMessage reply) {
-            System.err.println("ToolAgent "+toolClass+" refused parameter set.");
+            System.err.println("ToolAgent "+getToolClass()+" refused parameter set.");
             launcher.removeBehaviour(this);
         }
         
         protected void handleFailure(ACLMessage reply) {
-            System.err.println("ToolAgent "+toolClass+" failed on parameter set.");
+            System.err.println("ToolAgent "+getToolClass()+" failed on parameter set.");
             launcher.removeBehaviour(this);
         }
         
@@ -289,25 +305,25 @@ public class ToolRequester {
     }
 
     private void sendToolAgentParameters(AID aid, StringBuffer o) {
-        HashMap<String,Vector<String>> toolOptionProperties = agentTooloptionProperties.get(aid.getLocalName());
+		IProperty[] toolOptionProperties = agentTooloptionProperties.get(aid.getLocalName());
         if (toolOptionProperties == null) {
             return;
         }
 
-        AID toolAID = new AID(toolPrefix+(toolCount-1), AID.ISLOCALNAME);
+        AID toolAID = new AID(getToolPrefix()+(toolCount-1), AID.ISLOCALNAME);
         Action a = new Action();
         ToolAgentParameterSet ps = new ToolAgentParameterSet();
         ps.setAgentID(aid);
-        for (String type: toolOptionProperties.keySet()) {
-            for (String value: toolOptionProperties.get(type)) {
-                ps.addParameter(new ToolAgentParameter(type, value));
-            }
+        for (IProperty oneProperty: toolOptionProperties) {
+			String type = oneProperty.getName();
+			String value = oneProperty.getProperty();
+            ps.addParameter(new ToolAgentParameter(type, value));
         }
         a.setAction(ps);
         a.setActor(toolAID);
         ACLMessage requestMsg = new ACLMessage(ACLMessage.REQUEST);
         requestMsg.setOntology(ToolAgentParameterSetOntology.ONTOLOGY_NAME);
-        requestMsg.setLanguage(launcher.codec.getName());
+        requestMsg.setLanguage(launcher.getCodec().getName());
         requestMsg.addReceiver(toolAID);
         requestMsg.setSender(launcher.getAID());
         try {
@@ -318,10 +334,7 @@ public class ToolRequester {
         }
     }
     
-    public void toolReady(){
-		//FIXME: This is not working
-		return;
-		/*
+    protected void toolReady(){
         while (! (requestAgents.isEmpty() && waitingAgents.isEmpty())) {
             try {
                 Iterator<String> iterator = requestAgents.keySet().iterator();
@@ -337,7 +350,6 @@ public class ToolRequester {
             } catch (InterruptedException e) {
             }
         }
-        */
     }
     
     public void reset() {
@@ -348,23 +360,14 @@ public class ToolRequester {
     }
     
     private void sendRequest(String agent, StringBuffer synchobject) {
-        AID toolAID = new AID(toolPrefix+(toolCount-1), AID.ISLOCALNAME);
+        AID toolAID = new AID(getToolPrefix()+(toolCount-1), AID.ISLOCALNAME);
         Action a = new Action();
-        Concept so;
-        if (isSniffer) {
-            so = new SniffOn();
-            ((SniffOn)so).setSniffer(toolAID);
-            ((SniffOn)so).addSniffedAgents(new AID(agent, AID.ISLOCALNAME));
-        } else {
-            so = new DebugOn();
-            ((DebugOn)so).setDebugger(toolAID);
-            ((DebugOn)so).addDebuggedAgents(new AID(agent,AID.ISLOCALNAME));
-        }
+        Concept so = getAction(toolAID,agent);
         a.setAction(so);
         a.setActor(toolAID);
         ACLMessage requestMsg = new ACLMessage(ACLMessage.REQUEST);
-        requestMsg.setOntology(JADEManagementOntology.NAME);
-        requestMsg.setLanguage(launcher.codec.getName());
+        requestMsg.setOntology(ontologyName);
+        requestMsg.setLanguage(launcher.getCodec().getName());
         requestMsg.addReceiver(toolAID);
         requestMsg.setSender(launcher.getAID());
         try {
@@ -388,13 +391,12 @@ public class ToolRequester {
         if (waitingAgents.containsKey(agentModel.getName())) {
             return;
         }
-		System.err.println("ACHTUNG, ToolRequester muss an neue ToolOption-Klasse angepasst werden !!!");
-		/*
-        HashMap<String,Vector<String>> toolOptionProperties = agentModel.getToolOptionProperties(tooloptionConfigType);
-        if ((toolOptionProperties != null) && (toolOptionProperties.size() > 0)) {
-            agentTooloptionProperties.put(agentModel.getName(), toolOptionProperties);
+		IToolOption toolOption = agentModel.getToolOption(getToolOptionName());
+		IProperty[] properties = toolOption.getProperties();
+        if ((properties != null) && (properties.length > 0)) {
+            agentTooloptionProperties.put(agentModel.getName(), properties);
         }
-		*/
+
         if( !waitForToolCreate ) {
             if(toolCount == 0) {
                 waitForToolCreate = true;
@@ -412,4 +414,18 @@ public class ToolRequester {
             requestAgents.put(agentModel.getName(), synchobject);
         }
     }
+	
+	/**
+	 * 
+	 * @param toolAID The AID of the toolagent
+	 * @param agent The agent the toolagent should use
+	 * @return The action for this toolagent
+	 */
+	public abstract Concept getAction(AID toolAID, String agent);
+	
+	/**
+	 * 
+	 * @return the String identifying the tool option used for this tool
+	 */
+	public abstract String getToolOptionName();
 }

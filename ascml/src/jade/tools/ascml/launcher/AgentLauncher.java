@@ -59,6 +59,7 @@ import jade.tools.ascml.events.ModelChangedListener;
 import jade.tools.ascml.gui.GUI;
 import jade.tools.ascml.launcher.remoteactions.*;
 import jade.tools.ascml.launcher.remotestatus.*;
+import jade.tools.ascml.launcher.toolRequesters.*;
 import jade.tools.ascml.onto.*;
 import jade.tools.ascml.onto.Error;
 import jade.tools.ascml.repository.Repository;
@@ -76,20 +77,14 @@ import java.util.logging.Level;
 public class AgentLauncher extends ToolAgent {
 
 	public final static String ASCML_VERSION = "0.9";
-
-	protected final String introspectorPrefix = "ASCMLIntrospector";
-	protected final String snifferPrefix = "ASCMLSniffer";
-	protected final String benchmarkerSnifferPrefix = "ASCMLBencher";
     
 	protected Codec codec = new SLCodec(2);
 
     protected Repository repository;
     protected GUI gui;
 	protected LauncherInterface li;
-	
-    private ToolRequester mySniffer = new ToolRequester(this, "jade.tools.sniffer.Sniffer", snifferPrefix, IToolOption.TOOLOPTION_SNIFF, true);
-    private ToolRequester myIntrospector = new ToolRequester(this, "jade.tools.introspector.Introspector", introspectorPrefix, IToolOption.TOOLOPTION_DEBUG, false);
-    private ToolRequester myBenchmarker = new ToolRequester(this, "jade.tools.benchmarking.BenchmarkSnifferAgent", benchmarkerSnifferPrefix,IToolOption.TOOLOPTION_BENCHMARK, true);
+
+	private HashMap<String, ToolRequester> toolMap;
     private ListenerManagerInterface lmi;
 
 	private StatusSubscriptionManager subscriptionManager = new StatusSubscriptionManager(this);
@@ -253,56 +248,22 @@ public class AgentLauncher extends ToolAgent {
 	public void startRemoteDependency(IDependency remoteDep) {
 		//FIXME: Start remote dependencies
 	}
-	
 
-    /**
-	 * Send a message to the Sniffer to sniff an agent
-	 * 
-	 * @param agentModel
-	 *            Name of the agent to be sniffed
-	 * @param synchobject
-	 *            Object to be notified when the Sniffer answers
-	 */
-    public void doSniff(IRunnableAgentInstance agentModel, StringBuffer synchobject) {
-        mySniffer.requestTool(agentModel, synchobject);
-    }
-
-    public void snifferReady() {
-        mySniffer.toolReady();
-    }
-
-    /**
-     * Send a message to the benchmarker to sniff an agent
-     * 
+	/**
+	 * @param option The tooloption, identfiing the tool
      * @param agentModel
-     *            Name of the agent to be benchmarked
-     * @param synchobject
-     *            Object to be notified when the Sniffer answers
-     */
-    public void doBenchmark(IRunnableAgentInstance agentModel, StringBuffer synchobject) {
-        myBenchmarker.requestTool(agentModel, synchobject);
-    }
-
-    public void benchmarkReady() {
-        myBenchmarker.toolReady();
-    }
-
-    /**
-     * Send a message to the Introspector to debug an agent
-     * 
-     * @param agentModel
-     *            Name of the agent to be debugged
+     *            Name of the agent the tool will be used with
      * @param synchobject
      *            Object to be notified when the Introspector answers
-     */
-    public void doIntrospect(IRunnableAgentInstance agentModel, StringBuffer synchobject) {
-        myIntrospector.requestTool(agentModel, synchobject);
-    }
-
-    public void introReady() {
-        myIntrospector.toolReady();
-    }
-
+	 */
+	public void doToolOption(IToolOption option, IRunnableAgentInstance model, StringBuffer synchobject) {
+		ToolRequester tool = toolMap.get(option.getType());
+		if (tool == null) {
+			System.err.println("Tooloption "+option.getType()+" not implemented!");			
+		} else {
+			tool.requestTool(model,synchobject);
+		}
+	}
     /**
      * @param msg
      *            The message sent to the AMS
@@ -316,14 +277,16 @@ public class AgentLauncher extends ToolAgent {
         addBehaviour(new AMSClientBehaviour(msg, result, aName));
     }
 
-    protected void addAMSBehaviour(AchieveREInitiator initiator) {
+    public void addAMSBehaviour(AchieveREInitiator initiator) {
         addBehaviour(initiator);
     }
 
     protected void clearMaps() {
         // Clean up:
-        mySniffer.reset();
-        myIntrospector.reset();
+		for (String key : toolMap.keySet()) {
+			ToolRequester tr = toolMap.get(key);
+			tr.reset();
+		}
     }
     
     protected void toolSetup() {
@@ -429,6 +392,11 @@ public class AgentLauncher extends ToolAgent {
 			System.err.println(repository.getModelIndex());
 		
 		remoteSocietySubscriptions = new HashMap<IRunnableRemoteSocietyInstanceReference,StatusSubscriptionInitiator>();
+		
+		toolMap = new HashMap<String, ToolRequester>();
+		toolMap.put(IToolOption.TOOLOPTION_BENCHMARK,new BenchmarkerRequester(this));
+		toolMap.put(IToolOption.TOOLOPTION_INTROSPECTOR,new IntrospectorRequester(this));
+		toolMap.put(IToolOption.TOOLOPTION_SNIFF,new SnifferRequester(this));
 		
 		/*try
 		{
@@ -653,6 +621,13 @@ public class AgentLauncher extends ToolAgent {
 	 */
 	public DependencyManager getDependencyManager() {
 		return myDependencyManager;
+	}
+
+	/**
+	 * @return the codec used by this ASCML
+	 */
+	public Codec getCodec() {
+		return codec;
 	}
 
 }
