@@ -38,6 +38,7 @@ public abstract class AbstractDependencyRecord {
 	protected HashSet<String> runningAgentNames;
 	protected HashSet<String> runningSocietyNames;
 	protected HashSet<String> neededSocietyNames;
+	protected HashSet<String> activeSocietyNames;
 	protected HashSet<AbstractDependencyWatcher> runningWatcherTypes;
 	protected HashSet<AbstractDependencyWatcher> neededWatcherTypes;	
 	protected IAbstractRunnable absRunnable;
@@ -48,6 +49,7 @@ public abstract class AbstractDependencyRecord {
 		runningAgentNames = new HashSet<String>();
 		neededSocietyNames = new HashSet<String>();
 		runningSocietyNames = new HashSet<String>();
+		activeSocietyNames = new HashSet<String>();
 		neededWatcherTypes = new HashSet<AbstractDependencyWatcher>();		
 		runningWatcherTypes = new HashSet<AbstractDependencyWatcher>();
 	}
@@ -68,8 +70,11 @@ public abstract class AbstractDependencyRecord {
 		}
 	}
 
-	public void addSocietyDependency(String name) {
+	public void addSocietyDependency(String name, boolean isActive) {
 		neededSocietyNames.add(name);
+		if (isActive) {
+			activeSocietyNames.add(name);
+		}
 		if (absRunnable.getStatus().equals(new Functional())) {
 			absRunnable.setStatus(new NonFunctional());
 		}

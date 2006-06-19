@@ -32,11 +32,18 @@ public abstract class AbstractDependencyWatcher implements Runnable {
 	protected AbstractDependencyRecord parentDeps;
 	protected boolean takeDown;
 	protected Thread t;
+	protected boolean isActive;
 	
 	public AbstractDependencyWatcher (AbstractDependencyRecord parentDeps, String threadName) {
+		this.isActive = false;
 		this.parentDeps = parentDeps;
 		takeDown = false;	
 		t = new Thread(this,"ADW-Thread for "+threadName);
+	}
+	
+	
+	public boolean isActive() {
+		return isActive;
 	}
 	
 	

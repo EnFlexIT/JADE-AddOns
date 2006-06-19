@@ -26,7 +26,12 @@ package jade.tools.ascml.dependencymanager;
 
 import java.util.Vector;
 import jade.tools.ascml.absmodel.*;
+import jade.tools.ascml.absmodel.dependency.IAgentTypeDependency;
 import jade.tools.ascml.absmodel.dependency.IDependency;
+import jade.tools.ascml.absmodel.dependency.ISocietyInstanceDependency;
+import jade.tools.ascml.absmodel.dependency.ISocietyTypeDependency;
+import jade.tools.ascml.exceptions.ModelActionException;
+import jade.tools.ascml.exceptions.ModelException;
 import jade.tools.ascml.launcher.AgentLauncher;
 import jade.tools.ascml.onto.*;
 import jade.util.Logger;
@@ -50,7 +55,7 @@ public class FunctionalStateController extends AbstractDependencyController{
 	}
 
 	protected AbstractDependencyRecord getNewRecord(IAbstractRunnable absRunnable) {
-		return new FunctionalRecord(absRunnable);
+		return new FunctionalRecord(absRunnable, launcher);
 	}
 
 	protected void noDependencies(IAbstractRunnable absRunnable) {
@@ -61,8 +66,8 @@ public class FunctionalStateController extends AbstractDependencyController{
 	}
 
 	protected void handleActiveDependency(IDependency oneDep) {
-		// TODO Now we've got a problem: What the heck is an active functional dependency?
-		// Perhaps this means: if the dependency fails, restart it	
+		//We don't take care of them at this point, active dependencies are handled 
+		// in FunctionalRecord.checkState();
 	}
 
 }

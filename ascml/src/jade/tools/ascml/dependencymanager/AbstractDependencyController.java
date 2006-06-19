@@ -47,9 +47,6 @@ import jade.util.Logger;
  */
 public abstract class AbstractDependencyController {
 	
-	//I heavily rely on Garbage Collection
-	//If the key of a HashMap entry is freed, the entry should be deleted (hopefully)
-	
 	protected HashMap <String, HashSet<AbstractDependencyRecord>> agentNameMap;
 	protected HashMap <String, MutableInteger> runningAgentTypeCountMap;
 	protected HashMap <String, HashSet<AbstractDependencyRecord>> societyNameMap;
@@ -254,19 +251,19 @@ public abstract class AbstractDependencyController {
 	 * @param absRunnable the IAbstractRunnable, the dependecy belongs to
 	 */
 	private void addOneDependecy(IDependency oneDep, IAbstractRunnable absRunnable) {
-		AbstractDependencyRecord societyDepRecord;
+		AbstractDependencyRecord dependencyRecord;
 		if (model2DependecyMap.containsKey(absRunnable)) {
-			societyDepRecord = model2DependecyMap.get(absRunnable);
+			dependencyRecord = model2DependecyMap.get(absRunnable);
 		} else {
-			societyDepRecord  = getNewRecord(absRunnable);
-			model2DependecyMap.put(absRunnable,societyDepRecord);
+			dependencyRecord  = getNewRecord(absRunnable);
+			model2DependecyMap.put(absRunnable,dependencyRecord);
 		}
 		String depType = oneDep.getType();
 		if (depType.equals(IDependency.AGENTINSTANCE_DEPENDENCY)) {
 			IAgentInstanceDependency instDep = (IAgentInstanceDependency) oneDep;
 			if (instDep.getProvider()==null) {
 				String agentName = instDep.getName();
-				societyDepRecord.addAgentDependency(agentName);
+				dependencyRecord.addAgentDependency(agentName);
 				HashSet<AbstractDependencyRecord> nameDependencySet;
 				if (agentNameMap.containsKey(agentName)) {
 					nameDependencySet = agentNameMap.get(agentName);
@@ -274,11 +271,11 @@ public abstract class AbstractDependencyController {
 					nameDependencySet = new HashSet<AbstractDependencyRecord>();
 					agentNameMap.put(agentName,nameDependencySet);
 				}
-				nameDependencySet.add(societyDepRecord);
+				nameDependencySet.add(dependencyRecord);
 			} else {
 				//We got a remote dependency
-				RemoteInstanceWatcher remoteWatcher = new RemoteInstanceWatcher(societyDepRecord,launcher,instDep);
-				societyDepRecord.addWatcherDependency(remoteWatcher);
+				RemoteInstanceWatcher remoteWatcher = new RemoteInstanceWatcher(dependencyRecord,launcher,instDep);
+				dependencyRecord.addWatcherDependency(remoteWatcher);
 			}
 		} else if (depType.equals(IDependency.AGENTTYPE_DEPENDENCY)) {					
 			IAgentTypeDependency typeDep = (IAgentTypeDependency) oneDep;					
@@ -289,13 +286,13 @@ public abstract class AbstractDependencyController {
 			} else {
 				runningCount = new MutableInteger(0);
 			}
-			TypeCountWatcher tcw = new TypeCountWatcher(societyDepRecord,agentType, absRunnable, typeDep.getQuantityAsInt(), runningCount);
-			societyDepRecord.addWatcherDependency(tcw);
+			TypeCountWatcher tcw = new TypeCountWatcher(dependencyRecord,agentType, absRunnable, typeDep.getQuantityAsInt(), runningCount, typeDep.isActive());
+			dependencyRecord.addWatcherDependency(tcw);
 		} else if (depType.equals(IDependency.SOCIETYINSTANCE_DEPENDENCY)) {
 			ISocietyInstanceDependency socInstDep = (ISocietyInstanceDependency) oneDep;
 			if (socInstDep.getProvider()==null) {
 				String societyName = socInstDep.getFullyQualifiedSocietyInstance();
-				societyDepRecord.addSocietyDependency(societyName);
+				dependencyRecord.addSocietyDependency(societyName, socInstDep.isActive());
 				HashSet<AbstractDependencyRecord> nameDependencySet;
 				if (societyNameMap.containsKey(societyName)) {
 					nameDependencySet = societyNameMap.get(societyName);
@@ -303,11 +300,11 @@ public abstract class AbstractDependencyController {
 					nameDependencySet = new HashSet<AbstractDependencyRecord>();
 					societyNameMap.put(societyName,nameDependencySet);
 				}
-				nameDependencySet.add(societyDepRecord);
+				nameDependencySet.add(dependencyRecord);
 			} else {
 				//FIXME: Remote Society instance dependencies
-				RemoteInstanceWatcher remoteWatcher = new RemoteInstanceWatcher(societyDepRecord,launcher,socInstDep);
-				societyDepRecord.addWatcherDependency(remoteWatcher);						
+				RemoteInstanceWatcher remoteWatcher = new RemoteInstanceWatcher(dependencyRecord,launcher,socInstDep);
+				dependencyRecord.addWatcherDependency(remoteWatcher);						
 			}
 		} else if (depType.equals(IDependency.SOCIETYTYPE_DEPENDENCY)) {
 			ISocietyTypeDependency socTypeDep = (ISocietyTypeDependency) oneDep;					
@@ -318,13 +315,17 @@ public abstract class AbstractDependencyController {
 			} else {
 				runningCount = new MutableInteger(0);
 			}
-			TypeCountWatcher tcw = new TypeCountWatcher(societyDepRecord,socType, absRunnable, socTypeDep.getQuantityAsInt(), runningCount);
-			societyDepRecord.addWatcherDependency(tcw);
+			TypeCountWatcher tcw = new TypeCountWatcher(dependencyRecord,socType, absRunnable, socTypeDep.getQuantityAsInt(), runningCount, socTypeDep.isActive());
+			dependencyRecord.addWatcherDependency(tcw);
 		} else if (depType.equals(IDependency.DELAY_DEPENDENCY)) {
 			//FIXME: Insert the delay dependency
+		} else if (depType.equals(IDependency.SERVICE_DEPENDENCY)) {
+			//First: Query the XYZ if there is a known service running
+			// - Answer is no: wait until it is
+			// - Answer is yes: start
 		} else {
 			return;
-		};
+		}
 		if (oneDep.isActive()) {
 			handleActiveDependency(oneDep);
 		}		

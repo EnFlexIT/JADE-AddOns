@@ -126,6 +126,9 @@ public class DependencyStateController extends AbstractDependencyController{
 		} else if (depType.equals(IDependency.DELAY_DEPENDENCY)) {
 			//What is an active delay dependency?
 			//Shoud we change system time ;-)
+		} else if (depType.equals(IDependency.SERVICE_DEPENDENCY)) {
+			//Active Service dependecy are not possible at the moment, as we can't search
+			// the repository for a service
 		}
 	}
 }
