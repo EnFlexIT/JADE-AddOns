@@ -90,6 +90,20 @@
 		tofile="/opt/projects/agentcities/main/agents/ASCML/ASCML-CVS-snapshot.zip">
 		</copy>	
 	</target>
+
+        <target name="examples.jar" depends="compile">
+                <javac srcdir="${src.dir}/examples"
+                        destdir="${classes.dir}"
+                        classpathref="classpath"
+                        debug="true">
+                </javac>
+                <copy
+                        verbose="true"
+                        todir="${classes.dir}/examples">
+                        <fileset dir="${src.dir}/examples" includes="*"/>
+                </copy>
+                <jar destfile="${dist.dir}/examples.jar" basedir="${classes.dir}/examples"/>
+        </target>
         
         <target name="debug" depends="dist-bin" if="netbeans.home" description="Debug Project">
             <nbjpdastart name="ASCML" addressproperty="jpda.address" transport="dt_socket">
