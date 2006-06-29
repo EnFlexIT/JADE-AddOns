@@ -34,6 +34,7 @@ import jade.core.HorizontalCommand;
 import jade.core.LifeCycle;
 import jade.core.MainContainer;
 import jade.core.PlatformID;
+import jade.core.UnreachableException;
 import jade.core.VerticalCommand;
 import jade.core.GenericCommand;
 import jade.core.Node;
@@ -73,6 +74,9 @@ import jade.core.NodeDescriptor;
 import jade.core.migration.analysis.ClassAnalysisLibrary;
 import jade.core.migration.ontology.MigrationOntology;
 
+import jade.security.Credentials;
+import jade.security.JADEPrincipal;
+import jade.security.JADESecurityException;
 import jade.util.Logger;
 
 import java.util.HashMap;
@@ -98,12 +102,15 @@ public class InterPlatformMobilityService extends BaseService {
 
 	public static final String MAIN_CONTAINER = "Main-Container";
 
-	public static final int MESSAGE_RESPONSE_TIMEOUT = 5000;
+	public static final String MESSAGE_RESPONSE_TIMEOUT = "5000";
+	
+	public static final String MESSAGE_RESPONSE_TIMEOUT_RESPONDER = "10000";
 
 	private static final String[] OWNED_COMMANDS = new String[] {
 			InterPlatformMobilityHelper.INFORM_MIGRATION_RESULT,
 			InterPlatformMobilityHelper.INFORM_MIGRATED,
-			InterPlatformMobilityHelper.LAUNCH_AGENT };
+			InterPlatformMobilityHelper.LAUNCH_AGENT,
+			InterPlatformMobilityHelper.REMOVE_PREPOWERUP_AGENT};
 	
 	public static final String JAVA_SYSTEM_PROPERTY_CLASS_VERSION = "java.class.version";
 	public static final String LANGUAGE_PROPERTY_NAME = "java";
@@ -120,6 +127,10 @@ public class InterPlatformMobilityService extends BaseService {
 	public static final int MAX_SUPPORTED_PROTOCOL_MINOR_VERSION = 65536;
 	public static final int MIN_SUPPORTED_PROTOCOL_MAJOR_VERSION = 0;
 	public static final int MIN_SUPPORTED_PROTOCOL_MINOR_VERSION = 0;
+	
+	public static final String MIGRATION_TIMEOUT = "jade_core_migration_IPMS_migration_timeout";
+	
+	public static final String MIGRATION_TIMEOUT_RESPONDER = "jade_core_migration_IPMS_migration_timeout_responder";
 
 	public void init(AgentContainer ac, Profile p) throws ProfileException {
 		super.init(ac, p);
@@ -127,6 +138,30 @@ public class InterPlatformMobilityService extends BaseService {
 		_myContainer = ac;
 		_profile = p;
 		try {
+			
+			try {
+				_migrationTimeout = Integer.parseInt(p.getParameter(MIGRATION_TIMEOUT, MESSAGE_RESPONSE_TIMEOUT));
+			} catch (NumberFormatException nte) {
+				_migrationTimeout = Integer.parseInt(MESSAGE_RESPONSE_TIMEOUT);
+				if (logger.isLoggable(Logger.WARNING))
+					logger.log(Logger.WARNING, "Incorrect passed timeout value, setting to default value: "+ MESSAGE_RESPONSE_TIMEOUT);
+			}
+			
+			try {
+				_migrationTimeoutResponder = Integer.parseInt(p.getParameter(MIGRATION_TIMEOUT_RESPONDER, MESSAGE_RESPONSE_TIMEOUT_RESPONDER));
+			} catch (NumberFormatException nte) {
+				_migrationTimeoutResponder = Integer.parseInt(MESSAGE_RESPONSE_TIMEOUT_RESPONDER);
+				if (logger.isLoggable(Logger.WARNING))
+					logger.log(Logger.WARNING, "Incorrect passed timeout value, setting to default value: "+ MESSAGE_RESPONSE_TIMEOUT_RESPONDER);
+			}
+			if (_migrationTimeout!=Integer.parseInt(MESSAGE_RESPONSE_TIMEOUT)) {
+				if (logger.isLoggable(Logger.WARNING))
+					logger.log(Logger.WARNING, "Migration timeout redefined to: "+ _migrationTimeout);		
+			}
+			if (_migrationTimeoutResponder!=Integer.parseInt(MESSAGE_RESPONSE_TIMEOUT_RESPONDER)) {
+				if (logger.isLoggable(Logger.WARNING))
+					logger.log(Logger.WARNING, "Migration timeout responder redefined to: "+ _migrationTimeoutResponder);		
+			}
 
 			if (p.getParameter(AgentManagementService.AGENTS_PATH, "").equals(
 					"")) {
@@ -204,6 +239,9 @@ public class InterPlatformMobilityService extends BaseService {
 			else if (cmd.getName().equals(
 					InterPlatformMobilityHelper.LAUNCH_AGENT))
 				launchAgent(cmd);
+			else if (cmd.getName().equals(
+						InterPlatformMobilityHelper.REMOVE_PREPOWERUP_AGENT))
+					removePrePoweredUpAgent(cmd);
 		}
 
 		//Serializes the agent and transfers its instance to Main-Container
@@ -283,10 +321,43 @@ public class InterPlatformMobilityService extends BaseService {
 				if (logger.isLoggable(Logger.WARNING))
 					logger.log(Logger.WARNING,
 							"Source-Sink: launchAgent: Error launching agent: "+e);
+				
+				//Remove agent if the migration cannot be completed.
+				getLocator().removeAgentRef(name);
+				
+				//Return error result.
 				cmd.setReturnValue(e);
 			}
 		}
 
+		// Remove an agent that is not powered up.
+		private void removePrePoweredUpAgent(VerticalCommand cmd) {
+			if (logger.isLoggable(Logger.FINE))
+				logger.log(Logger.FINE, "Source-Sink: removePrePoweredUpAgent invoked");
+			Object[] params = cmd.getParams();
+			AID name = (AID) params[0];
+
+			try {
+				
+				AID agentID = new AID(name.getName(), AID.ISGUID);
+				
+				//Remove agent from the platform
+				_myContainer.getMain().deadAgent(agentID, false);
+
+				//Remove agent references.
+				getLocator().removeAgentRef(agentID);
+				
+				if (logger.isLoggable(Logger.FINE))
+					logger.log(Logger.FINE,
+							"Source-Sink: removePrePoweredUpAgent: Agent removed");
+			} catch (Exception e) {
+				if (logger.isLoggable(Logger.WARNING))
+					logger.log(Logger.WARNING,
+							"Source-Sink: removePrePoweredUpAgent: Error removing agent: "+e);
+				cmd.setReturnValue(e);
+			}
+		}
+		
 		private void handleInformMigrationResult(VerticalCommand cmd) {
 			if (logger.isLoggable(Logger.FINE))
 				logger.log(Logger.FINE,
@@ -419,7 +490,7 @@ public class InterPlatformMobilityService extends BaseService {
 							MessageTemplate mt = MessageTemplate.and(MessageTemplate
 									.MatchOntology(MigrationOntology.NAME), MessageTemplate
 									.MatchPerformative(ACLMessage.REQUEST));
-							ams.addBehaviour(new AMSResponder(ams, mt));
+							ams.addBehaviour(new AMSResponder(ams, mt, _migrationTimeoutResponder));
 							_myContainer.releaseLocalAgent(amsAID);
 						}
 					}
@@ -625,7 +696,7 @@ public class InterPlatformMobilityService extends BaseService {
 					//Create the message and establish a timeout.
 					ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 					msg.setReplyByDate(new Date(System.currentTimeMillis()
-							+ MESSAGE_RESPONSE_TIMEOUT));
+							+ _migrationTimeout));
 
 					AMSInitiator b = new AMSInitiator(ams, msg, instance,
 							rawJar, where, name);
@@ -778,7 +849,7 @@ public class InterPlatformMobilityService extends BaseService {
 						"Error accessing Agent Management Service Code locator. "
 								+ e);
 			return null;
-			//FIXME: Excepció dedicada.
+			//FIXME: Excepciï¿½ dedicada.
 		}
 	}
 
@@ -801,6 +872,9 @@ public class InterPlatformMobilityService extends BaseService {
 	private AgentContainer _myContainer;
 
 	private CodeLocator _locator;
+	
+	protected int _migrationTimeout;
+	protected int _migrationTimeoutResponder;
 
 	// The helper for this service (entry point for agents).
 	private class InterPlatformMigrationHelperImpl implements
@@ -858,6 +932,15 @@ public class InterPlatformMobilityService extends BaseService {
 			}
 		}
 
+		public void removePrePowerUpAgent(AID name) throws ServiceException {
+			GenericCommand cmd = new GenericCommand(
+					InterPlatformMobilityHelper.REMOVE_PREPOWERUP_AGENT,
+					InterPlatformMobilityHelper.NAME, null);
+			cmd.addParam(name);
+			
+			submit(cmd);
+		}
+		
 		//This method is currently not used
 		public void informMigrated(PlatformID where, AID name)
 				throws ServiceException {

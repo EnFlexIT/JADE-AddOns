@@ -25,6 +25,12 @@ Boston, MA  02111-1307, USA.
  
 package jade.core.migration;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Vector;
+
 import jade.content.ContentManager;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
@@ -68,7 +74,7 @@ public class AMSResponder extends SimpleAchieveREResponder {
 	public static final String ERR_MSG_WITHOUT_AID = "Received message without agent identification.";
 	public static final String ERR_MSG_BAD_FORMED = "Received malformed message.";
 	
-  public AMSResponder(Agent a,MessageTemplate mt){
+  public AMSResponder(Agent a,MessageTemplate mt,int timeout){
 	super(a,mt);
 	
 	a.getContentManager().registerLanguage(new SLCodec(),
@@ -82,6 +88,9 @@ public class AMSResponder extends SimpleAchieveREResponder {
 
     languageMajorVersion = (new Integer(majorMinorVersion[0])).intValue();
     languageMinorVersion = (new Integer(majorMinorVersion[1])).intValue();
+    
+    _agentsPrePowerUp = new HashMap();
+    _prePowerUpTimeout = timeout;
   }
 
   private boolean isLanguageSupportedVersion(String major, String minor) {
@@ -232,70 +241,127 @@ public class AMSResponder extends SimpleAchieveREResponder {
   	
   	Action action = null;
     ACLMessage reply = request.createReply();
-    try{
-      action = (Action)_cm.extractContent(request);
-    } catch(Exception e){
-      if (logger.isLoggable(Logger.WARNING))
-			logger.log(Logger.WARNING,
-							"AMSResponder: Error extracting message content. Can't report error to source platform.");
-      return null;
-    }
-    if(action != null){
-      Concept act = action.getAction();
-      if(act instanceof MoveAction){
-        MobileAgentDescription mad = ((MoveAction)act).getMobileAgentDescription();
-        //Check for mobile agent compatibility.
-        //TODO: Use Ontology to send AID.
-        reply.setOntology(null);
-        if (checkMAD(mad, reply)) {
-	        byte[] jar = Base64.decodeBase64(mad.getCode().getBytes());
-	        byte[] instance = Base64.decodeBase64(mad.getData().getBytes());
-	        AID aid = mad.getName();
-	        reply.setPerformative(ACLMessage.INFORM);
-
-	        mad = null;
-	        request = null;
+    
+    try{	
+    InterPlatformMobilityHelper helper = 
+        (InterPlatformMobilityHelper)myAgent.getHelper(
+        InterPlatformMobilityHelper.NAME);
+    
+	    try{
+	      action = (Action)_cm.extractContent(request);
+	    } catch(Exception e){
+	      if (logger.isLoggable(Logger.WARNING))
+				logger.log(Logger.WARNING,
+								"AMSResponder: Error extracting message content. Can't report error to source platform.");
+	      return null;
+	    }
+	    if(action != null){
+	      Concept act = action.getAction();
+	      if(act instanceof MoveAction){
+	    	  
+	    	//remove incomming agents registered in the platform not initiated
+	    	//through a determined period of time.
+	    	removeAgentsNotPoweredUp(helper);
+	    	  
+	        MobileAgentDescription mad = ((MoveAction)act).getMobileAgentDescription();
+	        //Check for mobile agent compatibility.
+	        //TODO: Use Ontology to send AID.
+	        reply.setOntology(null);
+	        if (checkMAD(mad, reply)) {
+		        byte[] jar = Base64.decodeBase64(mad.getCode().getBytes());
+		        byte[] instance = Base64.decodeBase64(mad.getData().getBytes());
+		        AID aid = mad.getName();
+		        reply.setPerformative(ACLMessage.INFORM);
 	
+		        mad = null;
+		        request = null;
+		
+		        try{
+		          
+		          
+		          //create agent without powering it up
+		          String result = helper.launchIncommingAgent(jar,instance,aid);
+		          
+		          //add agent in the table which control for PrePowerUp agents.
+		          _agentsPrePowerUp.put(aid,new Long(System.currentTimeMillis()));
+		          
+		          //return result
+		          String msg = aid.getName() + "#" + result; //solucio temporal per passar l'AID
+		          reply.setContent(msg);
+		          
+		        }
+		        catch(ServiceException se){
+		          reply.setContent(se.getMessage());
+		        }
+	        }
+	      } else if(act instanceof PowerupAction){
+	        AID agent = ((PowerupAction)act).getPowerUpAid();
+	        reply.setPerformative(ACLMessage.INFORM);
 	        try{
+	          //Power up agent
+	          helper.powerUpAgent(agent);
 	          
-	          InterPlatformMobilityHelper help = 
-	            (InterPlatformMobilityHelper)myAgent.getHelper(
-	            InterPlatformMobilityHelper.NAME);
-	          //create agent without powering it up
-	          String result = help.launchIncommingAgent(jar,instance,aid);
+	          //remove the agent of the table which control for PrePowerUp agents.
+	          _agentsPrePowerUp.remove(agent);
 	          
-	          //return result
-	          String msg = aid.getName() + "#" + result; //solucio temporal per passar l'AID
-	          reply.setContent(msg);
+	          reply.setContent("Agent powered up");
 	        }
 	        catch(ServiceException se){
 	          reply.setContent(se.getMessage());
 	        }
-        }
-      } else if(act instanceof PowerupAction){
-        AID agent = ((PowerupAction)act).getPowerUpAid();
-        reply.setPerformative(ACLMessage.INFORM);
-        try{
-          //Power up agent
-          InterPlatformMobilityHelper help =
-            (InterPlatformMobilityHelper)myAgent.getHelper(
-            InterPlatformMobilityHelper.NAME);
-          help.powerUpAgent(agent);
-          
-          reply.setContent("Agent powered up");
-        }
-        catch(ServiceException se){
-          reply.setContent(se.getMessage());
-        }
-      }
+	      }
+	      return reply;
+	    }
+	    else return null;
+  
+  } catch (ServiceException se){
+	  request = null;
+      reply.setContent(se.getMessage());
       return reply;
-    }
-    else return null;
+  }
+  
   }
 
+  /**
+   * Method to remove incomming agents registered into the platform
+   * but not powered up during a fixed period of time.
+   *
+   */
+  private void removeAgentsNotPoweredUp(InterPlatformMobilityHelper helper) {
+
+	  AID agent;
+	  LinkedList agentsToRemove = new LinkedList();
+	  Map.Entry me;
+	  long time;
+	  Iterator it = _agentsPrePowerUp.entrySet().iterator();
+	  while (it.hasNext()) {
+		  me = (Map.Entry) it.next();
+		  time = System.currentTimeMillis() - ((Long) me.getValue()).longValue();
+		  if (time>_prePowerUpTimeout) agentsToRemove.add(me.getKey());
+	  }
+	  
+	  try{
+          
+		  it = agentsToRemove.iterator();
+		  while (it.hasNext()) {
+			  agent = (AID) it.next();
+			  helper.removePrePowerUpAgent(agent);
+			  _agentsPrePowerUp.remove(agent);
+			  
+		  }
+		  
+        }
+        catch(ServiceException se){
+          System.out.println(se);
+        }
+	  
+  }
+  
   private Logger logger = Logger.getMyLogger(getClass().getName());
   private ContentManager _cm;
   private int languageMajorVersion;
   private int languageMinorVersion;
+  private HashMap _agentsPrePowerUp;
+  private int _prePowerUpTimeout;
   
 }

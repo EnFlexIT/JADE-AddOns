@@ -48,6 +48,8 @@ public interface InterPlatformMobilityHelper extends ServiceHelper {
   
   static final String LAUNCH_AGENT = "Launch-Incomming-Agent";
   
+  static final String REMOVE_PREPOWERUP_AGENT = "Remove-PrePowerUp-Agent";
+  
   static final String DELETE_AGENT_REFERENCES = "Delete-Agent-References";
 
   void powerUpAgent(AID name) throws ServiceException;
@@ -56,4 +58,5 @@ public interface InterPlatformMobilityHelper extends ServiceHelper {
     throws ServiceException;
   String launchIncommingAgent(byte[] jar, byte[] instance, AID name)
     throws ServiceException;
+  void removePrePowerUpAgent(AID name) throws ServiceException;
 }

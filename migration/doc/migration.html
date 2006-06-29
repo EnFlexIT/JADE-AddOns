@@ -8,7 +8,7 @@ Inter-Platform Mobility Service Documentation<br>
 for the JADE Platform  <br>
 Joan Ametller-Esquerra & <br>
 Jordi Cucurull-Juan <br>
-Version 1.0<br>
+Version 1.1<br>
 </CENTER>
 <br><br>
 
@@ -201,15 +201,41 @@ In order to use the service, it is necessary to specify it from the
 command line using the -services parameter:</p>
 <br>
 In linux:
-<br><br>
+<br><br><code>
 java jade.Boot -services
 jade.core.mobility.AgentMobilityService\;jade.core.migration.InterPlatformMobilityService
-<br><br>
+</code><br><br>
 In Windows:
-<br><br>
+<br><br><code>
 java jade.Boot -services
 jade.core.mobility.AgentMobilityService;jade.core.migration.InterPlatformMobilityService
+</code><br>
+
+<p>
+Since IPMS version 1.1 it is possible to define through parameters the
+timeout associated to each agent to do a migration. The default used
+value is 5000 ms. Moreover, in order to detect trucated migration on
+the destination platforms, a new timeout is associated to the agents
+installed in them but not initiated. This should have a value of two
+times the first timeout, then the default value is 10000 ms. It can be
+redefined through a parameter too. For example, if we want to define
+them to 15 seconds of timeout and 30 of timeout to initiate the agent
+we should start the service as we can see in the following lines:
+</p>
+
+<code>
+java jade.Boot 
+-jade_core_migration_IPMS_migration_timeout 15000
+-jade_core_migration_IPMS_migration_timeout_responder 30000
+-services
+jade.core.mobility.AgentMobilityService;jade.core.migration.InterPlatformMobilityService
+</code>
 <br>
+
+<p>
+If the default values are changed a message can be seen on the screen
+warning about that.
+</p>
 
 <h3>4.2 Programming mobile agents</h3>
 <p>
@@ -220,9 +246,9 @@ Guide).</p>
 <p>
 JADE Agents own the method doMove inherited from jade.core.Agent with
 the following signature:</p>
-<br>
+<br><code>
 public void doMove(Location l)
-<br><br>
+</code><br><br>
 <p>
 Actually, in the JADE platform there are two implementations of the
 Location interface which are the jade.core.ContainerID and
@@ -245,7 +271,7 @@ remote platform. Below, we can see sample code invocating migration to
 a remote platform.</p>
 <br>
 Sample code:
-<br><br>
+<br><br><code>
 // We build the AID corresponding to remote platform's AID <br>
 // Specified MTP is HTTP in this case, but does not matter which is used<br>
 <br>
@@ -257,7 +283,7 @@ PlatformID destination = new PlatformID(remoteAMS); <br>
 // We are supposing that we exectue this code from a behaviour<br>
 <br>
 myAgent.doMove(destination);<br>
-<br>
+</code><br>
 
 <h3>4.3 Class Analysis and JAR Agents</h3>
 
@@ -305,9 +331,9 @@ org_example_MyAgent.jar.</p>
  2. Define a folder to place all your jar packed
 agents. You can specify it with the following parameter when launching 
 JADE from the command line:</p><br>
-
+<code>
 java jade.Boot -jade_core_management_AgentManagementService_agentspath=folder
-<br><br>
+</code><br><br>
 <p>   Of course, a config file can be used for specifying this parameter
 instead of using the command line. If we ommit this step, the present
 directory when the platform is started is taken for this propose.</p>

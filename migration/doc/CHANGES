@@ -1,0 +1,10 @@
+Changes in 1.1
+
+* Fixed JAR removing to destination platform in error cases
+
+* Added method to completely remove agents installed in a destination
+platform but not initiated (avoids the class clash problem in future
+migrations of the same agent).
+
+* Added timeout parametrization.
+
