@@ -59,6 +59,8 @@
     <zip zipfile="../migrationAddOn.zip" basedir="../..">
       <include name="add-ons/migration/*"/>
       <include name="add-ons/migration/src/**"/>
+      <include name="add-ons/migration/doc/README"/>
+      <include name="add-ons/migration/doc/CHANGES"/>
       <exclude name="add-ons/migration/src/test/**"/>
       <include name="add-ons/migration/lib/migration.jar"/>
       <include name="doc/tutorials/migration.html"/>
