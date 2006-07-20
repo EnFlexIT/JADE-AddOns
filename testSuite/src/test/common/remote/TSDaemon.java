@@ -49,9 +49,12 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 	public TSDaemon() throws RemoteException {
 		super();
 	}
-	
-	protected void printWelcomeMessage() {
-		System.out.println("Test Suite Daemon ready...");
+	/**
+	@param port the port where the TSDaemon started
+	@param name the name used for name binding
+	**/
+	protected void printWelcomeMessage(String port, String name) {
+		System.out.println("Test Suite Daemon ready on port " + port + " using name: " + name);
 	}
 	
 	public static void main(String args[]) {
@@ -85,7 +88,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 			// Bind to the registry
 			additionalArgs = sb.toString();
 			Naming.bind(new String(registryID+"//"+name), this);
-			printWelcomeMessage();
+			printWelcomeMessage(port, name);
 		}
 		catch(Exception e) {
 			System.out.println("ERROR starting Test Suite Daemon");
