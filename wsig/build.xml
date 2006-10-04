@@ -3,7 +3,7 @@
 <!--
 WSIG ant build file
 
-Created according a JADE's build.xml.
+Created according to JADE's build.xml.
 -->
 
 <project name="Web Service Integration Gateway" default="compile" basedir=".">
