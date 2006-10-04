@@ -1,8 +1,3 @@
-/*
- * Created on Aug 15, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -42,6 +37,7 @@ package com.whitestein.wsig.test;
 
 import java.net.*;
 import java.io.*;
+import java.util.Vector;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
@@ -49,10 +45,21 @@ import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPMessage;
 
 import org.apache.axis.Message;
-import org.apache.log4j.Category;
+import org.apache.log4j.Logger;
+
+import org.uddi4j.UDDIException;
+import org.uddi4j.transport.TransportException;
+import org.uddi4j.client.UDDIProxy;
+import org.uddi4j.util.*;
+import org.uddi4j.response.*;
+import org.uddi4j.datatype.*;
+import org.uddi4j.datatype.service.*;
+import org.uddi4j.datatype.binding.*;
+import org.uddi4j.datatype.tmodel.*;
 
 import com.whitestein.wsig.struct.*;
 import com.whitestein.wsig.ws.*;
+import com.whitestein.wsig.Configuration;
 
 /**
  * @author jna
@@ -62,142 +69,352 @@ import com.whitestein.wsig.ws.*;
  */
 public class TestSOAPClient implements Runnable {
 
-	private static int port = 2222;  // go through a watcher
-	// private static int port = 2222;
-	public static String ACCESS_POINT = "http://localhost:2222/wsig/";
-	//public static String ACCESS_POINT = "http://t20java:2222/wsig/";
-	public static String OPERATION = "operation0"; 
-	public static String OPERATION_2 = "operation1"; 
-	public static String requestStr = "";
+  private final static String fipaServiceName = "plus";
 
-	private boolean isRunning =  true;
-	private static Category cat = Category.getInstance(TestSOAPClient.class.getName());
-	private static MessageFactory mf;
-	private static SOAPFactory soapFactory;
-	private CalledMessage returnedMessage;
+  private boolean isRunning =  true;
+  private static Logger log =
+    Logger.getLogger( TestSOAPClient.class.getName());
+  private static MessageFactory mf;
+  private static SOAPFactory soapFactory;
+  private CalledMessage returnedMessage;
 
-	static {
-		try {
-			mf = MessageFactory.newInstance();
-			soapFactory = SOAPFactory.newInstance();
-		}catch (SOAPException e) {
-			e.printStackTrace();
-		}
-	}
+  private String uddiQueryManagerURL =
+    Configuration.getInstance().getHostURI()
+    +  Configuration.getInstance().getQueryManagerPath();
+  private String uddiLifeCycleManagerURL =
+    Configuration.getInstance().getHostURI()
+    +  Configuration.getInstance().getLifeCycleManagerPath();
+  private UDDIProxy uddiProxy;
 
-	public static String generateSOAP( String op_name ) {
-		String str = 
-			"<?xml version=\"1.0\" encoding=\"UTF-8\"?> " +
-			"	<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">  " +
-			"	 <soapenv:Body> " +
-			"	  <tns:" + op_name + " xmlns:tns=\"uri://localhost:2222/test/mywsdl.wsdl\" >   " +
-			"	   <tns:name >  " +
-			"	    <tns:BO_String>a string</tns:BO_String>   " +
-			"	   </tns:name>   " +
-			"	  </tns:" + op_name + ">  " +
-			"	 </soapenv:Body>   " +
-			"	</soapenv:Envelope>\r\n";
-		return str;
-	}
-	
-	private void test1(){
-		URL serverURL = null;
-		HttpURLConnection c = null;
+  // a message factory setup
+  static {
+    try {
+      mf = MessageFactory.newInstance();
+      soapFactory = SOAPFactory.newInstance();
+    }catch (SOAPException e) {
+      e.printStackTrace();
+      log.error(e);
+    }
+  }
 
-		SOAPMessage retSOAP = null;
+  /**
+   * sets up the uddi4j. It starts components required.
+   *
+   */
+  private void setupUDDI4j() {
+    // to register into UDDI
+    // structures used for a communication with UDDI is retrieved
+    Configuration c = Configuration.getInstance();
+
+    uddiProxy = new UDDIProxy();
+    synchronized ( c ) {
+      // synchronized on main Configuration instance
+      // to prevent changes in configuration
+
+      System.setProperty( Configuration.KEY_UDDI4J_LOG_ENABLED,
+        c.getUDDI4jLogEnabled());
+      System.setProperty( Configuration.KEY_UDDI4J_TRANSPORT_CLASS,
+        c.getUDDI4jTransportClass());
+
+      // Select the desired UDDI server node
+      try {
+        // contact a back end UDDI repository
+        uddiProxy.setInquiryURL(c.getQueryManagerURL());
+        uddiProxy.setPublishURL(c.getLifeCycleManagerURL());
+
+        // it is possible to contact the gateway
+        //uddiProxy.setInquiryURL(uddiQueryManagerURL);
+        //uddiProxy.setPublishURL(uddiLifeCycleManagerURL);
+      }catch( Exception e ) {
+        log.error(e);
+      }
+    }
+  }
+
+  /**
+   * finds services wanted
+   * @return a list of services
+   */
+  private ServiceList findServices() {
+    ServiceList sl = new ServiceList(); // default is an empty list
+    try {
+      String businessKey = "";   // all business
+      Vector names = new Vector(1);
+      names.add( new Name("%WSIG%") );  // substring is WSIG
+
+      CategoryBag cb = new CategoryBag();
+      KeyedReference kr = new KeyedReference();
+      kr.setTModelKey("uuid:A035A07C-F362-44dd-8F95-E2B134BF43B4"); // uddi-org:general_keywords
+      kr.setKeyName("fipaServiceName");
+      kr.setKeyValue( fipaServiceName );
+      cb.add( kr );
+      TModelBag tmb = new TModelBag();  //empty
+      FindQualifiers fq = new FindQualifiers();  //empty
+
+      sl = uddiProxy.find_service(
+        businessKey,
+        names,
+        cb,
+        tmb,
+        fq,
+        10 );
+
+    } catch ( UDDIException ue ) {
+      log.debug( ue );
+    } catch ( TransportException te ) {
+      log.debug( te );
+    }
+    return sl;
+  }
+
+  /**
+   * writes out a list of services into a log
+   *
+   */
+  private void writeToLog( ServiceList list ) {
+    ServiceInfo info;
+    ServiceInfos infos = list.getServiceInfos();
+    String s;
+    int k;
+    for ( k = 0; k < infos.size(); k ++ ) {
+      info = infos.get( k );
+      s = info.getDefaultNameString();
+      log.debug(" a service found: " + s );
+    }
+  }
+
+  /**
+   * performs a test
+   */
+  private void test(){
+    setupUDDI4j();
+
+    // find Services
+    ServiceList sList = findServices();
+    if ( log.isDebugEnabled() ) {
+      writeToLog( sList );
+    }
+
+    ServiceInfo info;
+    ServiceInfos infos = sList.getServiceInfos();
+
+    if ( infos.size() < 1 ) {
+      log.info(" No service is available.");
+      return;
+    }
+
+    info = infos.get( 0 );
+    ServiceDetail sd = null;
+    try {
+      sd = uddiProxy.get_serviceDetail( info.getServiceKey() );
+    }catch ( UDDIException ue ) {
+      log.debug( ue );
+    }catch ( TransportException te ) {
+      log.debug( te );
+    }
+    if ( null == sd ) {
+      log.info(" No service is available in the 2nd step.");
+      return;
+    }
+
+    Vector sv = sd.getBusinessServiceVector();
+    if ( sv.size() < 1 ) {
+      log.info(" No service is available in the 2nd step.");
+      return;
+    }
+
+    // take the first service
+    BusinessService bs = (BusinessService) sv.elementAt( 0 );
+
+    // get an accessPoint
+    BindingTemplates bts = bs.getBindingTemplates();
+    if ( bts.size() < 1 ) {
+      log.info(" No bindingTemplate is available. ");
+      return;
+    }
+    BindingTemplate bt = bts.get(0);
+    AccessPoint aPoint = bt.getAccessPoint();
+    URL ap = null;
+    try {
+      log.info(" An accessPoint is " + aPoint.getText()
+        + " and type is " + aPoint.getURLType() );
+      ap = new URL( aPoint.getText() );
+    }catch (MalformedURLException mfe) {
+      log.error( mfe );
+      return;
+    }
+
+    // get TModel, only one is expected
+    TModelInstanceDetails tmids = bt.getTModelInstanceDetails();
+    if ( tmids.size() < 1 ) {
+      log.info(" No TModelInstanceInfo is available. ");
+      return;
+    }
+    TModelInstanceInfo tmii = tmids.get(0);
+    String tmk = tmii.getTModelKey();
+    TModelDetail tmd = null;
+    try {
+      tmd = uddiProxy.get_tModelDetail( tmk );
+    }catch ( UDDIException ue ) {
+      log.debug( ue );
+    }catch ( TransportException te ) {
+      log.debug( te );
+    }
+
+    if ( null == tmd ) {
+      log.info(" No TModelDetail is available.");
+      return;
+    }
+
+    Vector tmdv = tmd.getTModelVector();
+
+    if ( tmdv.size() < 1 ) {
+      log.info(" No TModel is available.");
+      return;
+    }
+    TModel tm = (TModel) tmdv.get(0);
+
+    // get wsdl url from TModel, only one is expected
+    OverviewDoc ovd = tm.getOverviewDoc();
+    if ( null == ovd ) {
+      log.info(" No OverviewDoc is available in TModel.");
+      return;
+    }
+    String wsdlURL = ovd.getOverviewURLString();
+    if ( null == wsdlURL ) {
+      log.info(" OverviewDoc's URL is null.");
+      return;
+    }
+    log.info(" TModel refers to wsdl: " + wsdlURL );
+
+    // get an operation for fipaServiceName
+    CategoryBag cb = bs.getCategoryBag();
+    KeyedReference kr;
+    int k;
+    for ( k = 0; k < cb.size(); k ++ ) {
+      kr = cb.get( k );
+
+      if ( fipaServiceName.equalsIgnoreCase( kr.getKeyName() )) {
+
+        // it is found, call it
+        callOperation( ap, kr.getKeyValue(), wsdlURL );
+          // it is better to extract nameSpace from the wsdl in the future
+        return;
+      }
+    }
+  }
+
+  /**
+   * calls an operation
+   *
+   * @param accessPoint access point of a WS
+   * @param opName an operation's name
+   * @param wsdlNS a wsdl name space
+   */
+  private void callOperation( URL accessPoint, String opName, String wsdlNS ){
+    URL serverURL = accessPoint;
+    HttpURLConnection c = null;
+
+    SOAPMessage retSOAP = null;
 		
-		// generate a test's message
-		String str;
-		str = generateSOAP( OPERATION_2 );
-		//str = generateSOAP( OPERATION );
+    // generate a test's message
+    String str;
+    int[] values = { 3, 5, 7 };
+    str = generatePlus( opName, values, wsdlNS );
 
-		SOAPMessage soap;
-		soap = new Message( str, false, "application/soap+xml; charset=\"utf-8\"", "" );
+    SOAPMessage soap;
+    soap = new Message( str, false,
+      "application/soap+xml; charset=\"utf-8\"", "" );
 
-		// debug to write down
-		ByteArrayOutputStream baos;
-		try {
-			baos = new ByteArrayOutputStream();
-			soap.writeTo(baos);
-			cat.info("A SOAP sent: \n  " + baos.toString());
-		} catch (SOAPException e) {
-			cat.error(e);
-		} catch (IOException ioe) {
-			cat.error(ioe);
-		}
+    // debug to write down
+    ByteArrayOutputStream baos;
+    try {
+      baos = new ByteArrayOutputStream();
+      soap.writeTo(baos);
+      log.info("A SOAP sent: \n  " + baos.toString());
+    } catch (SOAPException e) {
+      log.error(e);
+    } catch (IOException ioe) {
+      log.error(ioe);
+    }
 
-		try {
-			serverURL = new URL(
-					"http",
-					"localhost",
-					port,
-					"/wsig");
-
-			// send a request
-			c = WSEndPoint.sendHTTPRequest( serverURL, soap );
-			
-			// read a response
-			// receive a response
-			retSOAP = WSEndPoint.receiveHTTPResponse( c );
-			
-			// debug to write down
-			if ( retSOAP != null ) {
-				try {
-					baos = new ByteArrayOutputStream();
-					retSOAP.writeTo(baos);
-					cat.info("A SOAP received: \n  " + baos.toString());
-				} catch (SOAPException e) {
-					cat.error(e);
-				} catch (IOException ioe) {
-					cat.error(ioe);
-				}
-			}else {
-				cat.info("A SOAP received: null.");
-			}
+    try {
+      // send a request
+      c = WSEndPoint.sendHTTPRequest( serverURL, soap );
+      
+      // read a response
+      retSOAP = WSEndPoint.receiveHTTPResponse( c );
+      
+      // debug to write down
+      if ( retSOAP != null ) {
+        try {
+          baos = new ByteArrayOutputStream();
+          retSOAP.writeTo(baos);
+          log.info("A SOAP received: \n  " + baos.toString());
+        } catch (SOAPException e) {
+          log.error(e);
+        } catch (IOException ioe) {
+          log.error(ioe);
+        }
+      }else {
+        log.info("A SOAP received: null.");
+      }
 
 
-			// release resources
-			/*
-			 * problems with java.net.ProtocolException
-			if ( c.getDoOutput() ) {
-				//c.getOutputStream().close();
-			}
-			if ( c.getDoInput() ) {
-				//c.getInputStream().close();
-			}
-			*/
-			c.disconnect();
-	
-		}catch (MalformedURLException mfe) {
-			cat.error( mfe );
-		}catch (SOAPException se) {
-			cat.error(se);
-		}catch (IOException ioe) {
-			cat.error(ioe);
-		}finally{
-			if (c != null) {
-				c.disconnect();
-			}
-			isRunning = false;
-			//return;
-		}
-	
-	}
-	
-	public void run() {
-		cat.debug(" Test SOAP Client starts. ");
+      // release resources
+      c.disconnect();
+  
+    }catch (SOAPException se) {
+      log.error(se);
+    }catch (IOException ioe) {
+      log.error(ioe);
+    }finally{
+      if (c != null) {
+        c.disconnect();
+      }
+      isRunning = false;
+      //return;
+    }
+  
+  }
 
-		int count = 0;
-		while ( isRunning ) {
-			test1();
-			count ++;
-			isRunning = isRunning && count < 1;  // in case >1 is set, then request is mallformed by duplicit bytes
-		}
-		cat.debug(" SOAP test client ends. ");
-		
-	}
-	
-	public static void main(String[] args) {
-		new Thread( new TestSOAPClient()).start();
-	}
+  /**
+   * generates a SOAP message.
+   *
+   * @param op_name a name of a operation
+   * @param nums an array of integers as arguments
+   * @param wsdlNS a wsdl namespace
+   * @return a message in string
+   */
+  public static String generatePlus( String op_name, int[] nums, String wsdlNS ) {
+    String str = 
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?> " +
+      " <soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">  " +
+      "  <soapenv:Body>\r\n" +
+      "   <tns:" + op_name + " xmlns:tns=\"" + wsdlNS + "\" >   ";
+    for ( int k = 0; k < nums.length; k ++ ) {
+      str += "    <tns:BO_Integer>" + nums[k] + "</tns:BO_Integer>\r\n";
+    }
+    str +=
+      "	  </tns:" + op_name + ">  " +
+      "	 </soapenv:Body>   " +
+      "	</soapenv:Envelope>\r\n";
+    return str;
+  }
+
+  /**
+   * implements a runnable interface
+   */
+  public void run() {
+    log.info(" Test SOAP Client starts. ");
+
+    while ( isRunning ) {
+      test();
+    }
+    log.info(" Test SOAP Client ends. ");
+  }
+  
+  public static void main(String[] args) {
+    new Thread( new TestSOAPClient()).start();
+  }
 }

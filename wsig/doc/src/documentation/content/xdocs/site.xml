@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of the JADE WSIG add-on are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the Web Service Integration Gateway (WSIG).
+ *
+ * The Initial Developer of the Original Code is
+ * Whitestein Technologies AG.
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s): Jozef Nagy (jna at whitestein.com), 
+ *                 Dominic Greenwood (dgr at whitestein.com)
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+-->
+<site label="WSIG" href="" xmlns="http://apache.org/forrest/linkmap/1.0" tab="">
+
+  <installation label="Installation" href="installation/" tab="installation">
+    <index label="here" href="installation.html" />
+  </installation>
+  
+  <tutorial label="Tutorial" href="tutorial/" tab="tutorial">
+    <index label="here" href="index.html" />
+  </tutorial>
+
+  <pdfs label="PDFs">
+<!--
+    <whole_site_html label="Whole site HTML" href="wholesite.html"/>
+-->
+    <whole_site_pdf label="Whole site PDF" href="wholesite.pdf"/>
+  </pdfs>
+
+
+  <external-refs>
+    <java href="http://java.sun.com/j2se/1.4.2/install.html" />
+    <apache-ant href="http://ant.apache.org/" />
+    <apache-forrest href="http://forrest.apache.org/" />
+    <jade href="http://jade.tilab.com/" />
+    <axis-1.1 href="http://ws.apache.org/axis/" />
+    <xerces-2.6.2 href="http://xerces.apache.org/" />
+    <wsdl4j-1.4 href="http://sourceforge.net/projects/wsdl4j/" />
+    <log4j href="http://logging.apache.org/log4j/" />
+    <uddi4j href="http://www-128.ibm.com/developerworks/webservices/library/ws-uddi4j.html" />
+    <uddi4jNote href="http://www.oasis-open.org/committees/uddi-spec/doc/tn/uddi-spec-tc-tn-jax-rpc-20050126.htm" />
+    <juddi-0.9rc3 href="http://ws.apache.org/juddi/" />
+  </external-refs>
+
+</site>

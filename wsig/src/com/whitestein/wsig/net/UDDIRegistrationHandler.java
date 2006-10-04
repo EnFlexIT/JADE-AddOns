@@ -1,8 +1,3 @@
-/*
- * Created on Nov 24, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -160,7 +155,7 @@ public class UDDIRegistrationHandler extends Redirector {
 	 * gives a wsdl for a tModelKey
 	 * 
 	 * @param tModelKey
-	 * @return a WSDL Definition
+	 * @return a WSDL Definition or a null
 	 */
 	public static synchronized WSDLDefinition getWsdlForTModelKey( String tModelKey ) {
 	    WSDLDefinition wsdl = (WSDLDefinition) tModelKeyToWSDL.get( tModelKey );
@@ -375,6 +370,9 @@ public class UDDIRegistrationHandler extends Redirector {
 		while ( it.hasNext()) {
 			tModelKey = (String) it.next();
 			wsdl = getWsdlForTModelKey( tModelKey );
+			if ( null == wsdl ) {
+				continue;
+			}
 			itOps = wsdl.getAllOperations().iterator();
 			while ( itOps.hasNext()) {
 				opName = (String) itOps.next();

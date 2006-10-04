@@ -1,8 +1,3 @@
-/*
- * Created on Aug 19, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -390,5 +385,24 @@ public class SL0Helper {
 	public static void fillAbsPredicateToContent( ACLMessage acl, AbsPredicate ap )
 	throws CodecException {
 		acl.setContent(codecSL0.encode( ap ));
+	}
+
+	/**
+	 * fills a reply as NOT_UNDERSTOOD.
+	 * If any one argument is null, nothing is done.
+	 * 
+	 * @param original an original message
+	 * @param reply    a reply message, which will be modified
+	 * @param description a description of a reason in SL0 format
+	 */
+	public static void fillAsNotUnderstood( ACLMessage original, ACLMessage reply, String description ) {
+		if ( null == original || null == reply
+		  || null == description ) {
+			return;
+		}
+		reply.setPerformative( ACLMessage.NOT_UNDERSTOOD );
+		reply.setContent(
+			"( " + SL0Helper.toStringAclAsAction(original) + "\n" +
+			description + " )" );
 	}
 }

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of the JADE WSIG add-on are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the Web Service Integration Gateway (WSIG).
+ *
+ * The Initial Developer of the Original Code is
+ * Whitestein Technologies AG.
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s): Jozef Nagy (jna at whitestein.com), 
+ *                 Dominic Greenwood (dgr at whitestein.com)
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+-->
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>Web Service Integration Gateway</title> 
+  </header> 
+  <body> 
+    <section id="descr">
+      <title>A Description of the WSIG</title>
+      <p>
+The Web Service Integration Gateway is add-on to the JADE.
+It provides bidirectional communication between an agent's platform and Web Service's side.
+A Web Service may be registered into the WSIG and agents may search and invoke it then.
+Agent's services may be used by Web Service's clients after they are registered into the WSIG.
+      </p>
+    </section>
+
+    <section id="license">
+      <title>License of the WSIG</title>
+<p>
+The WSIG is distributed under MPL 3 License: MPL, GPL, and LGPL.
+The license is placed in main directory in file "mpl-3-license.wsig.txt"
+</p>
+    </section>
+
+    <section id="todo">
+      <title>To do</title>
+      <p>
+The gateway is not full finished yet.
+There are some open parts to future developing.
+      </p>
+      <p>
+There is a list of not implemented parts:
+      </p>
+<ul>
+<li>
+UDDI v3.0 API to communicate with a new repository,
+</li>
+<li>
+UDDI v3.0 watching mechanism,
+</li>
+<li>
+Jetty HTTP server inclussion to replace a proprietary HTTP server,
+</li>
+<li>
+a categorization and an identification in DF and UDDI repositories (to help searching operations/services desired),
+</li>
+<li>
+an ontology and a WSDL generation.
+</li>
+</ul>
+
+	<p>
+Some notes to WS and JADE up today (2005-08):
+	</p>
+<ul>
+<li>
+JADE and ontology representation: an ontology sharing is only through a file system's directory; there must be some way how to dentify a link between an ontology name and a jar file,
+</li>
+<li>
+two cases to communicate in the JADE architecture: an ACL messaging and JAVA methods calls; the WSIG uses FIPA ACL's messages,
+</li>
+<li>
+a categorization is over whole WSDL structure in the UDDI; it is hard to distinguish an operation desired from other ones in the WSDL in other way then by name,
+</li>
+<li>
+some WS servers do not register itself into UDDI, they provides only WSDL's files; they must be registered by another program,
+</li>
+<li>
+some WS are only described theirs interfaces in a natural language, WSDL is missing; the WSIG can not serve in this situation,
+</li>
+<li>
+some WS do not use a SOAP format, (an example: parameters through URL); the WSIG can not serve up to now.
+</li>
+</ul>
+    </section>
+
+  </body>
+</document>

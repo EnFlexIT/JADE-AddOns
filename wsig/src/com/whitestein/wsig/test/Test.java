@@ -1,8 +1,3 @@
-/*
- * Created on Aug 9, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -82,6 +77,7 @@ import com.whitestein.wsig.ws.*;
  */
 public class Test {
 
+	private static final String ACCESS_POINT = "";
 	private static MessageFactory mf;
 	private static SOAPFactory soapFactory;
 
@@ -105,7 +101,7 @@ public class Test {
 				new AID("testAgent001@T20java:1099/JADE",AID.ISGUID), "service01");
 			//	new AID("da0",AID.ISLOCALNAME), "service01");
 		UDDIOperationIdentificator uddi = new UDDIOperationIdentificator(
-				TestSOAPClient.ACCESS_POINT, TestAgent001.OPERATION );
+				ACCESS_POINT, TestAgent002.OPERATION );
 		OperationID id = new OperationID( fipa, uddi );
 		FIPAEndPoint ep = new FIPAEndPoint(fipa);//,Gateway.getInstance());
 		ServedOperation test = new ServedOperation( id, ep, false );
@@ -137,7 +133,7 @@ public class Test {
 			"	(action                                                       \n" +
 			"		(agent-identifier                                         \n" +
 			"			:name wsigs@T20java:1099/JADE )                       \n" +
-			"		(" + TestAgent001.OPERATION + "                         \n" +
+			"		(" + TestAgent002.OPERATION + "                         \n" +
             "  (sometype :age 10 :place \"here\")  )) ))"
 	/*		
 			"			(df-agent-description                                 \n" +
@@ -181,7 +177,7 @@ public class Test {
 			"	(action                                                       \n" +
 			"		(agent-identifier                                         \n" +
 			"			:name wsigs@T20java:1099/JADE )                       \n" +
-			"		(" + TestAgent001.OPERATION + "                         \n" +
+			"		(" + TestAgent002.OPERATION + "                         \n" +
             "  (sometype :age 10 :place (town 20 40 TOWER 3 4 5 6 7 8 9 10))  \n" +
 			"  (set 0 1 2 3 4 5 6 7 8 9 10)  (sequence 0 1 2 3 4 5 6 7 8 9 10)     )) ))"
 		);
@@ -202,7 +198,7 @@ public class Test {
 			"	(action                                                       \n" +
 			"		(agent-identifier                                         \n" +
 			"			:name wsigs@T20java:1099/JADE )                       \n" +
-			"		(" + TestAgent001.OPERATION + "                         \n" +
+			"		(" + TestAgent002.OPERATION + "                         \n" +
             "  :x1 (sometype :age 10 :place (town 20 40 TOWER 3 4 5 6 7 8 9 10))  \n" +
 			"  :x2 (set 0 1 2 3 4 5 6 7 8 9 10) \n" +
 			"  :x3 (sequence 0 1 2 3 4 5 6 7 8 9 10) \n" +
@@ -227,7 +223,7 @@ public class Test {
 			"	(action                                                       \n" +
 			"		(agent-identifier                                         \n" +
 			"			:name wsigs@T20java:1099/JADE )                       \n" +
-			"		(" + TestAgent001.OPERATION + "                         \n" +
+			"		(" + TestAgent002.OPERATION + "                         \n" +
 			"			\"test\"						                     \n" +
 			"			1002						          \n" +
 			"		) \n" +
@@ -252,7 +248,7 @@ public class Test {
 			"		(action                                                       \n" +
 			"			(agent-identifier                                         \n" +
 			"				:name wsigs@T20java:1099/JADE )                       \n" +
-			"			(" + TestAgent001.OPERATION + "                         \n" +
+			"			(" + TestAgent002.OPERATION + "                         \n" +
 			"				\"test\"				   		                     \n" +
 			"				1002										          \n" +
 			"			)							 \n" +
@@ -277,7 +273,7 @@ public class Test {
 			"		(action                                                       \n" +
 			"			(agent-identifier                                         \n" +
 			"				:name wsigs@T20java:1099/JADE )                       \n" +
-			"			(" + TestAgent001.OPERATION + "                         \n" +
+			"			(" + TestAgent002.OPERATION + "                         \n" +
 			"				\"test\"				   		                     \n" +
 			"				1002										          \n" +
 			"			)							 \n" +
@@ -304,7 +300,7 @@ public class Test {
 			
 			// the root AbsObject is SOAP body element 
 			String uri = "http://t20java:2222/WSDL/001";
-			PrefixedQName n = new PrefixedQName( uri, TestAgent001.OPERATION, prefix);
+			PrefixedQName n = new PrefixedQName( uri, TestAgent002.OPERATION, prefix);
 			SOAPBodyElement sbe = sb.addBodyElement(n);
 			n = new PrefixedQName( uri, "color", prefix);
 			sbe.addAttribute( n, "blue");
@@ -332,7 +328,7 @@ public class Test {
 		}
 
 		WSMessage wsMsg = new WSMessage( soap );
-		wsMsg.setAccessPoint(TestSOAPClient.ACCESS_POINT);
+		wsMsg.setAccessPoint(ACCESS_POINT);
 		return wsMsg;
 	}
 
@@ -469,7 +465,7 @@ public class Test {
 		FIPAServiceIdentificator fipa = new FIPAServiceIdentificator(
 				new AID("agent01@T20JAVA:1099/JADE",AID.ISGUID), "service01");
 		UDDIOperationIdentificator uddi = new UDDIOperationIdentificator(
-				TestSOAPClient.ACCESS_POINT, TestAgent001.OPERATION );
+				ACCESS_POINT, TestAgent002.OPERATION );
 		OperationID id = new OperationID( fipa, uddi );
 		FIPAEndPoint ep = new FIPAEndPoint(fipa);//,Gateway.getInstance());
 		ServedOperation test = new ServedOperation( id, ep, false );
@@ -570,7 +566,7 @@ public class Test {
 			soap = (WSMessage) fipa2soap.translate( fipa ).iterator().next();
 			System.out.println(" -> SOAP: ");
 			soap.getSOAPMessage().writeTo(System.out);
-			soap.setAccessPoint( TestSOAPClient.ACCESS_POINT );
+			soap.setAccessPoint( ACCESS_POINT );
 			fipa2 = (FIPAMessage) soap2fipa.translate( soap ).iterator().next();
 			System.out.println("");
 			System.out.println(" -> FIPA: ");

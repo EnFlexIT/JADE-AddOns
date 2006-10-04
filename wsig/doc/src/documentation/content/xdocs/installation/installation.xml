@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of the JADE WSIG add-on are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is the Web Service Integration Gateway (WSIG).
+ *
+ * The Initial Developer of the Original Code is
+ * Whitestein Technologies AG.
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s): Jozef Nagy (jna at whitestein.com), 
+ *                 Dominic Greenwood (dgr at whitestein.com)
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+-->
+<!DOCTYPE document PUBLIC "-//APACHE//DTD Documentation V2.0//EN" "http://forrest.apache.org/dtd/document-v20.dtd">
+<document> 
+  <header> 
+    <title>Web Service Integration Gateway's Installation</title> 
+  </header> 
+  <body> 
+    <section id="introduction">
+      <title>Introduction</title>
+      <p>
+This document describes steps how is the project installed.
+The external third party software installation is described in the first sections.
+The WSIG's installation is described in the section <a href="#wsig">Installation</a>.
+      </p>
+    </section>
+
+    <section id="required">
+      <title>Products Required</title>
+      <p>
+The project requires the following products to be installed:
+      </p>
+<ul>
+<li><a href="#java">JAVA 1.4</a>,</li>
+<li><a href="#ant">Apache ANT</a>,</li>
+<li><a href="#forrest">Apache FORREST</a>,</li>
+<li><a href="#jade">JADE 3.3</a>,</li>
+<li><a href="#axis">AXIS</a>,</li>
+<li>an <a href="#xml_parser">XML's parser</a> for AXIS,</li>
+<li><a href="#wsdl">WSDL's library</a>,</li>
+<li><a href="#log4j">log4j,</a>,</li>
+<li><a href="#uddi4j">uddi4j,</a>,</li>
+<li>access into a UDDI registry.</li>
+<li></li>
+</ul>
+      <p>
+The list item is bound with corresponding section, where an installation is described.
+Information is included about reasons in sections, what is the purpose of a specific product.
+      </p>
+
+    <section id="java">
+      <title>JAVA's Installation</title>
+      <p>
+The Java installation notes are available at <a href="ext:java">JAVA-1.4</a> home page.
+The installation steps are described in links per an architecture on the page.
+      </p>
+      <p>
+The required version of the JAVA is 1.4 for the WSIG.
+A new JAVA version 1.5 has a problem with <a href="#axis-1.1_JAVA-1.4">AXIS 1.1</a>.
+      </p>
+    </section>
+
+    <section id="ant">
+      <title>Apache Ant's Installation</title>
+      <p>
+The Apache <a href="ext:apache-ant">Ant</a> is needed to build the WSIG project.
+The Ant's documentation describes installation's steps.
+      </p>
+    </section>
+
+    <section id="forrest">
+      <title>Apache Forrest's Installation</title>
+      <p>
+The documentation is managed by the Apache Forrest.
+The project Apache Forrest may be downloaded from <a href="ext:apache-forrest">Forrest home page</a>.
+An installation are provided with the package.
+      </p>
+    </section>
+
+    <section id="jade">
+      <title>JADE's Installation</title>
+      <p>
+The JADE's package is located at <a href="ext:jade">JADE's site</a>.
+Installation's details are packaged in the JADE.
+The WSIG is add on software for the JADE.
+The JADE 3.3 is tested for this release of the WSIG.
+      </p>
+    </section>
+
+    <section id="axis">
+      <title>AXIS's Installation</title>
+      <p>
+SOAP's messages are handled by the soap manipulation interface.
+The AXIS project provides the implementation of the interface.
+The <a href="ext:axis-1.1">AXIS-1.1</a> is used currently.
+After downloading, .jar files are placed into lib/axis-1.1 directory.
+      </p>
+      <p id="axis-1.1_JAVA-1.4">
+The version 1.1 requieres the JAVA in version 1.4.
+A new AXIS version may be runnable in JAVA &gt;1.4.
+      </p>
+      <p id="xml_parser">
+An XML's parser is needed for the AXIS.
+The <a href="ext:xerces-2.6.2">Xerces-2.6.2</a> is one of the free available.
+Xerces .jar's files are placed into lib/xerces-2_6_2 directory.
+      </p>
+    </section>
+
+    <section id="wsdl">
+      <title>WSDL Library's Installation</title>
+      <p>
+The WSDL's files describe a Web Service.
+The <a href="ext:wsdl4j-1.4">WSDL4j-1.4</a> is used to manipulate with this format from JAVA programms.
+After downlading, the .jar file is placed into lib/wsdl4j-1.4 directory.
+      </p>
+    </section>
+
+    <section id="log4j">
+      <title>Log4j's Installation</title>
+      <p>
+The logging is done by <a href="ext:log4j">log4j</a> project.
+Actually, the .jar file is provided by the AXIS and is located in directory lib/axis-1_1/lib.
+      </p>
+    </section>
+
+    <section id="uddi4j">
+      <title>The uddi4j's Installation</title>
+      <p>
+An access into a UDDI's registry is done by <a href="ext:uddi4j">uddi4j</a> project.
+The project provides a JAVA access into a UDDI registry.
+After downlading, the .jar file is placed into lib/uddi4j-2_0_2 directory.
+      </p>
+      <p>
+Note: up to now (2005 Nov) the uddi4j is not accessible.
+It seems a new acces method into UDDI is established.
+See technical not <a href="ext:uddi4jNote">Generating a JAX-RPC Client for UDDI 3.0.2</a> for details.
+A local copy of <a href="uddi4j-bin-2_0_2.zip">uddi4j-bin-2_0_2.zip</a>.
+      </p>
+    </section>
+
+    <section id="uddi">
+      <title>The UDDI Registry</title>
+      <p>
+An access into a UDDI v2.0 registry is required to provide information about JADE's services registered into the WSIG.
+The external Web Service client and server does requests for an access information.
+The Web Service side contacts the UDDI at first.
+      </p>
+      <p>
+The jUDDI implementation with the mysql database may be used as a UDDI registry.
+These products are available free.
+The <a href="ext:juddi-0.9rc3">juddi-0.9rc3</a> is tested.
+The installation instructions are provided with jUDDI package.
+They are more complex and there is small text document <a href="jUDDI_install.txt">jUDDI_install.txt</a> related to WSIG's requirements only.
+(Please, create your publisher information and create your business records.
+Odervice, a connection will be rejected.)
+      </p>
+    </section>
+</section>
+
+    <section id="wsig">
+      <title>Installation</title>
+      <p>
+The product is extracted into JADE directory add-on.
+Relevant products have been installed as is mentioned in section&nbsp;<a href="#required">Products Required</a>.
+The package comes with a .jar library precompiled.
+A new recompilation may be initiate by running <code>ant jar</code> in WSIG's directory.
+A documentation is able to be recompiled by typing <code>forrest</code> in doc directory.
+A result is stored into doc/build directory.
+      </p>
+
+<section id="wsig_configuration">
+<title>WSIG's Configuration</title>
+<p>
+The configuration file wsig.properties is lacated in directory, where the WSIG runs typically.
+The original one is placed in misc directory.
+The correct values are edited in this file.
+It is suitable to change lines with properties followed:
+</p>
+
+<dl>
+
+<dt>
+wsig.host.name
+</dt>
+<dd>
+the host name of the machine, where the WSIG runs,
+( <code>wsig.host.name=pc7</code> )
+</dd>
+
+<dt>
+wsig.host.port
+</dt>
+<dd>
+       a port number, where a gateway will be worked at
+( <code>wsig.host.port=2222</code> )
+</dd>
+     
+<dt>
+wsig.agent_id
+</dt>
+<dd>
+       agent ID of a gateway, the host name part must be changed according
+       machine's host name.
+       To leave a host name as localhost brings identification problems.
+( <code>wsig.agent_id=wsigs@pc7\:1099/JADE</code> )
+</dd>
+                                                                                
+<dt>
+    uddi.wsig_businessKey
+</dt>
+<dd>
+       a business key of your business entity in a UDDI repository
+    ( <code>uddi.wsig_businessKey=8C983E50-E09B-11D8-BE50-DA8FBF3BDC61</code> )
+</dd>
+                                                                                
+<dt>
+        uddi.userName, uddi.userPassword
+</dt>
+<dd>
+           a user name and a password into the UDDI repository
+        ( <code>uddi.userName=jna</code>
+        and <code>uddi.userPassword=somepasword</code> )
+</dd>
+                                                                                
+<dt>
+        uddi.lifeCycleManagerURL
+</dt>
+<dd>
+          access point into the UDDI repository
+        ( <code>uddi.lifeCycleManagerURL=http\://localhost\:8080/jUDDI/publish</code> )
+</dd>
+
+<dt>
+        uddi.queryManagerURL
+</dt>
+<dd>
+          access point into the UDDI repository
+        ( <code>uddi.queryManagerURL=http\://localhost\:8080/jUDDI/inquiry</code> )
+</dd>
+</dl>
+                                                                                
+<p>
+Startup files require a change, when they are running outside a localhost.
+Please, change host name in wsig.bat, run_TestAgentClient.bat, and run_TestAgentServer.bat.
+The script's name ends with the extension .sh under the UNIX.
+</p>
+<p>
+A level of debug messages are set in log4j.properties file.
+The misc/log4j.properties.txt may be copied into running directory.
+The extension .txt must be cut off.
+It may be changed then.
+</p>
+    </section>
+
+<section id="wsig_runs">
+<title>WSIG's Running</title>
+<p>
+ Scripts must be run in the following order:
+</p>
+<ol>
+<li>
+      <code>run_jade_main.bat</code> 
+</li>
+<li>
+      <code>wsig.bat</code>
+</li>
+</ol>
+<p>
+or under the UNIX:
+</p>
+<ol>
+<li>
+      <code>run_jade_main.sh</code> 
+</li>
+<li>
+      <code>wsig.sh</code>
+</li>
+</ol>
+
+<p>
+It is possible to start WSIG's GUI.
+Please, edit wsig.bat or wsig.sh script to append "-gui" parameter after last command in the script.
+There are some examples available by menu selection.
+They are provided as tuples: a registration and an invocation.
+At first, the registration one must be run and then invocation is possible to perform.
+The google search example requires to enter your google's ID into the wsig.properties.
+</p>
+
+</section>
+
+<section id="wsig_examples">
+<title>WSIG's Examples</title>
+<p>
+Examples for testing purpose are placed in misc directory.
+Unix versions have extension .sh insted of .bat.
+After running TestSOAPServer the TestAgentClient invokes a service.
+</p>
+
+<ol>
+<li>
+run_TestSOAPServer.bat
+</li>
+<li>
+run_TestAgentClient.bat
+</li>
+</ol>
+
+<p>
+The second examples demonstrate an agent service, which is invoked by Web Service client.
+</p>
+
+<ol>
+<li>
+run_TestAgentServer.bat
+</li>
+<li>
+run_TestSOAPClient.bat
+</li>
+</ol>
+
+</section>
+
+    </section>
+
+  </body>
+</document>

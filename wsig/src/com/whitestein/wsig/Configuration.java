@@ -1,8 +1,3 @@
-/*
- * Created on Jul 19, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -72,7 +67,7 @@ public class Configuration extends Properties {
 	private static Configuration anInstance;
 	private static Category cat = Category.getInstance(Configuration.class.getName());
 	private final static boolean isDeveloping = false; //true;
-	private final static String VERSION = "beta.0.1";
+	private final static String VERSION = "beta.0.6";
 	public static final String WEB_SERVICE = "web-service";
 	public final static String GATEWAY_NAME = "wsig";
 	private final static String GATEWAY_UPPER = "WSIG";
@@ -106,6 +101,7 @@ public class Configuration extends Properties {
 	public final static String KEY_USER_PASSWORD = "uddi.userPassword";
 	public final static String KEY_UDDI4J_LOG_ENABLED = "org.uddi4j.logEnabled";
 	public final static String KEY_UDDI4J_TRANSPORT_CLASS = "org.uddi4j.TransportClassName";
+	public final static String KEY_TEST_GOOGLE_ACCESS_KEY = "test.Google.accessKey";
 	//public final static String KEY_xyz = "xYz";
 	//public final static String KEY_xyz = "xYz";
 	//public final static String KEY_xyz = "xYz";
@@ -113,6 +109,10 @@ public class Configuration extends Properties {
 	private AID gatewayAID;
 	
 
+	public synchronized String getTestAmazonAccessKey(){
+		return getProperty( KEY_TEST_GOOGLE_ACCESS_KEY );
+	}
+	
 	public synchronized String getQueryManagerURL(){
 		return getProperty( KEY_QUERY_MANAGER_URL );
 	}
@@ -153,6 +153,14 @@ public class Configuration extends Properties {
 			cat.debug(e);
 			return 0;
 		}
+	}
+	
+	public synchronized String getAccessPoint() {
+		return getHostURI() + getAccessPointPath();
+	}
+
+	public synchronized String getURIPathForWSDLs() {
+		return getHostURI() + "/WSDLs/";
 	}
 	
 	public synchronized String getAccessPointPath() {
@@ -258,6 +266,7 @@ public class Configuration extends Properties {
 		addEmptyProperty( Configuration.KEY_QUERY_MANAGER_PATH, "/" + GATEWAY_NAME + "/inquiry" );
 		addEmptyProperty( Configuration.KEY_LIFE_CYCLE_MANAGER_PATH, "/" + GATEWAY_NAME + "/publish" );
 		addEmptyProperty( Configuration.KEY_ACCESS_POINT_PATH, "/" + GATEWAY_NAME + "" );
+		addEmptyProperty( Configuration.KEY_TEST_GOOGLE_ACCESS_KEY, "" );
 	}
 	
 	/**

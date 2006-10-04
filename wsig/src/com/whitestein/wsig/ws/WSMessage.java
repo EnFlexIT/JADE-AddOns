@@ -1,8 +1,3 @@
-/*
- * Created on Aug 4, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -48,6 +43,7 @@ import javax.xml.soap.SOAPBodyElement;
 
 import org.apache.log4j.Category;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 
 /**
@@ -126,6 +122,20 @@ public class WSMessage extends CalledMessageImpl {
 		}
 		// cat.debug(" The first identifier is: " + id.getAccessPoint() + ", " + id.getWSDLOperation());
 		return id;
+	}
+
+        /**
+         * gives a string's representation of the message
+         */
+        public String toString() {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			myMsg.writeTo(baos);
+			return baos.toString();
+		}catch (Exception e ){
+			cat.error(e);
+		}
+		return null;
 	}
 
 }

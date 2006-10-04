@@ -1,8 +1,3 @@
-/*
- * Created on Nov 8, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -87,7 +82,14 @@ public class FIPAReturnMessageListener implements ReturnMessageListener {
 	 */
 	public void setReturnedMessage( CalledMessage retMsg ) {
 		// a response is composed by a retMsg and by original message's fields
-		ACLMessage retACL = ((FIPAMessage)retMsg).getACLMessage();
+
+		ACLMessage retACL;
+		if ( null == retMsg ) {
+			retACL = new ACLMessage( ACLMessage.FAILURE );
+			retACL.setContent( "(" + SOAPToFIPASL0.NONE + " (error-message \"An invocation fails.\")))" );
+		} else {
+			retACL = ((FIPAMessage)retMsg).getACLMessage();
+		}
 		ACLMessage response = originalRequest.createReply();
 		String action = SL0Helper.removeOneOutermostParanteses(
 				originalRequest.getContent());
@@ -180,6 +182,14 @@ public class FIPAReturnMessageListener implements ReturnMessageListener {
 		// send a response by the GatewayAgent
 		GatewayAgent.getInstance().sendACL(response);
 		// cat.debug(" response is " + SL0Helper.toString(response));
+
+		// inform also a GatewayAgent GUI's logger
+		FIPAMessage fipa = new FIPAMessage( response );
+		fipa.setServedOperation( retMsg.getServedOperation() );
+		fipa.setResponse( retMsg.isResponse() );
+		GatewayAgent.getInstance().addMessageToLog(
+			retMsg.getServedOperation(), fipa );
+
 		//  then a call is removed
 		GatewayAgent.getInstance().removeFromCallStore(
 				originalRequest.getSender(),

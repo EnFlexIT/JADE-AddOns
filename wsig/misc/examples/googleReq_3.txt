@@ -1,0 +1,15 @@
+
+ ../misc/runjade.sh -container -host localhost test04:com.whitestein.wsig.test.TestAgentWithArgs\(doGoogleSearch \"\(xml-tag-key :xml-element \(key d1EbfDpQFHKrV0dq13wf56XLgMsvVvxe\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\) \(xml-tag-q :xml-element \(q Foo\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\) \(xml-tag-start :xml-element \(start 0\) :xml-attributes \(set \( property :name xsi:type :value xsd:int \)\)\) \(xml-tag-maxResults :xml-element \(maxResults 4\) :xml-attributes \(set \( property :name xsi:type :value xsd:int \)\)\) \(xml-tag-filter :xml-element \(filter true\) :xml-attributes \(set \( property :name xsi:type :value xsd:boolean\)\)\) \(xml-tag-restrict :xml-element \(restrict\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\) \(xml-tag-safeSearch :xml-element \(safeSearch false\) :xml-attributes \(set \( property :name xsi:type :value xsd:boolean \)\)\) \(xml-tag-lr :xml-element \(lr\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\) \(xml-tag-ie :xml-element \(ie latin1\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\) \(xml-tag-oe :xml-element \(oe latin1\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\) \"\)
+
+ ../misc/runjade.sh -container -host localhost test04:com.whitestein.wsig.test.TestAgentWithArgs\(doGoogleSearch 
+\"\(xml-tag-key :xml-element \(key d1EbfDpQFHKrV0dq13wf56XLgMsvVvxe\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\)
+\(xml-tag-q :xml-element \(q Foo\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\)
+\(xml-tag-start :xml-element \(start 0\) :xml-attributes \(set \( property :name xsi:type :value xsd:int \)\)\)
+\(xml-tag-maxResults :xml-element \(maxResults 4\) :xml-attributes \(set \( property :name xsi:type :value xsd:int \)\)\)
+\(xml-tag-filter :xml-element \(filter true\) :xml-attributes \(set \( property :name xsi:type :value xsd:boolean\)\)\)
+\(xml-tag-restrict :xml-element \(restrict\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\)
+\(xml-tag-safeSearch :xml-element \(safeSearch false\) :xml-attributes \(set \( property :name xsi:type :value xsd:boolean \)\)\)
+\(xml-tag-lr :xml-element \(lr\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\)
+\(xml-tag-ie :xml-element \(ie latin1\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\)
+\(xml-tag-oe :xml-element \(oe latin1\) :xml-attributes \(set \( property :name xsi:type :value xsd:string \)\)\)
+\"\)

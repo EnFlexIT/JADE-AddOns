@@ -1,8 +1,3 @@
-/*
- * Created on Jul 1, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -53,6 +48,9 @@ import jade.content.onto.basic.Done;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.Agent;
+import jade.core.Runtime;
+import jade.core.Profile;
+import jade.core.ProfileImpl;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
@@ -72,9 +70,19 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.gui.GuiEvent;
+import jade.gui.GuiAgent;
+import jade.wrapper.ContainerController;
+import jade.wrapper.AgentController;
+import jade.wrapper.ControllerException;
+import jade.wrapper.StaleProxyException;
 
 import com.whitestein.wsig.Configuration;
-import com.whitestein.wsig.Gateway;
+//import com.whitestein.wsig.Gateway;
+import com.whitestein.wsig.net.HTTPServer;
+import com.whitestein.wsig.ws.WSEndPoint;
+import com.whitestein.wsig.ws.UDDIOperationIdentificator;
+import com.whitestein.wsig.fipa.FIPAEndPoint;
 import com.whitestein.wsig.fipa.FIPAMessage;
 import com.whitestein.wsig.fipa.FIPAReturnMessageListener;
 import com.whitestein.wsig.fipa.FIPAServiceIdentificator;
@@ -83,13 +91,35 @@ import com.whitestein.wsig.struct.Call;
 import com.whitestein.wsig.struct.ReturnMessageListener;
 import com.whitestein.wsig.struct.ServedOperation;
 import com.whitestein.wsig.struct.ServedOperationStore;
+import com.whitestein.wsig.struct.EndPoint;
+import com.whitestein.wsig.struct.CalledMessage;
 import com.whitestein.wsig.translator.FIPASL0ToSOAP;
 
 import java.util.Hashtable;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.HashSet;
+import java.io.IOException;
+import java.io.File;
+import java.lang.Thread;
+import java.lang.Boolean;
+import java.lang.ClassLoader;
+import java.lang.Class;
+import java.lang.reflect.Method;
+import java.lang.NullPointerException;
+import java.lang.SecurityException;
+import java.lang.IllegalStateException;
+import java.lang.ClassNotFoundException;
+import java.lang.NoSuchMethodException;
+import java.lang.IllegalAccessException;
+import java.lang.IllegalArgumentException;
+import java.lang.reflect.InvocationTargetException;
+import java.net.ServerSocket;
 
-import org.apache.log4j.Category;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.PatternLayout;
 
 
 /**
@@ -101,14 +131,20 @@ import org.apache.log4j.Category;
  * Remark: its functional and used version is placed in jade.domain package.
  *   Must be implemented in near future.
  */
-public class GatewayAgent extends Agent {
+public class GatewayAgent extends GuiAgent {
 	
 	private static final Object synchObject = new Object();
 	private static GatewayAgent instance;
 	private static int conversationId = 0;
 	private Hashtable conversationId2listener = new Hashtable();
 	private Hashtable listener2fipaMessage = new Hashtable();
-	private static Category cat = Category.getInstance( GatewayAgent.class.getName());
+
+	private static Logger log = Logger.getLogger( GatewayAgent.class.getName());
+	private String logFileName = "a.log.txt";
+	private FileAppender logFile;
+	private boolean isLogFileOn = false;
+	private Logger mainLog = log.getLogger("com.whitestein.wsig");
+
 	private static SLCodec codecSL0 = new SLCodec(0);
 	private Hashtable callStore = new Hashtable();
 	private static final String DF_LOCAL_NAME = "df";
@@ -118,7 +154,42 @@ public class GatewayAgent extends Agent {
 	private DFAgentDescription dfad = new DFAgentDescription();
 	private AID dfAID = new AID( DF_LOCAL_NAME, AID.ISLOCALNAME );
 	
+	private GatewayAgentGui gui;
+	public static final int EXIT_EVENT = 1001;
+	public static final int CLOSE_GUI_EVENT = 1002;
+	public static final int RESET_EVENT = 1003;
+	public static final int SET_LOG_FILE_EVENT = 1004;
+	public static final int SET_LOGGING_EVENT = 1005;
+	public static final int START_AGENT_SERVER001_EVENT = 1006;
+	public static final int START_AGENT_CLIENT033_EVENT = 1007;
+	public static final int START_WS_SERVER01_EVENT = 1008;
+	public static final int START_WS_CLIENT01_EVENT = 1009;
+	public static final int WS_SELECTION_EVENT = 1010;
+	public static final int AGENT_SELECTION_EVENT = 1011;
+	public static final int START_AGENT_CLIENT_WITH_ARGUMENTS_EVENT = 1012;
+	public static final int START_WS_REGISTRATION_FOR_FIND_PLACE_EVENT = 1013;
+	public static final int START_WS_REGISTRATION_FOR_GOOGLE_EVENT = 1014;
 
+	public static final String AGENT_NAME_GET_VERSION = "testAgentForGetVersion";
+	public static final String SERVICE_GET_VERSION = "getVersion";
+	public static final String SERVICE_EMPTY_ARGS = "";
+	public static final String SERVICE_GOOGLE_SEARCH = "doGoogleSearch";
+	public static final String AGENT_NAME_GOOGLE_SEARCH = "testAgentForGoogle";
+	public static final String SERVICE_GOOGLE_S_ARGS =
+"(xml-tag-key :xml-element (key " +
+ Configuration.getInstance().getTestAmazonAccessKey() +
+") :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-q :xml-element (q Foo) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-start :xml-element (start 0) :xml-attributes (set ( property :name xsi:type :value xsd:int ))) (xml-tag-maxResults :xml-element (maxResults 4) :xml-attributes (set ( property :name xsi:type :value xsd:int ))) (xml-tag-filter :xml-element (filter true) :xml-attributes (set ( property :name xsi:type :value xsd:boolean))) (xml-tag-restrict :xml-element (restrict) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-safeSearch :xml-element (safeSearch false) :xml-attributes (set ( property :name xsi:type :value xsd:boolean ))) (xml-tag-lr :xml-element (lr) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-ie :xml-element (ie latin1) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-oe :xml-element (oe latin1) :xml-attributes (set ( property :name xsi:type :value xsd:string )))";
+
+	private Thread wsServer01 = null;
+	private Thread wsClient01 = null;
+	private Thread wsReg02FP = null;
+	private Thread wsReg04G = null;
+
+	private HashSet wsSelection = null;
+	private HashSet agentSelection = null;
+	private final Object syncObjectSel = new Object();
+
+        private HTTPServer server;
 	
 	/**
 	 * creates new GatewayAgent
@@ -126,7 +197,16 @@ public class GatewayAgent extends Agent {
 	 */
 	public GatewayAgent() {
 		super();
-		Gateway.getInstance();  // start also Gateway
+		//Gateway.getInstance();  // start also Gateway
+ 
+        	// creates a HTTPServer for a WS accessPoint
+                try {
+                        int port = Configuration.getInstance().getHostPort();
+                        server = new HTTPServer( new ServerSocket(port));
+                }catch (Exception e) {
+                        e.printStackTrace();
+                }
+
 	}
 	
 	/**
@@ -139,7 +219,7 @@ public class GatewayAgent extends Agent {
 		synchronized ( synchObject ) {
 			while ( null == instance ) {
 				// wait for setup() method invocation for this
-				cat.debug( " instance is null, waiting" );
+				log.debug( " instance is null, waiting" );
 				try {
 					synchObject.wait(1000);
 					//Thread.sleep(1000);
@@ -171,7 +251,7 @@ public class GatewayAgent extends Agent {
 				msg);
 		}
 		// testing print out
-		cat.debug(" WSIGS: ACL message created. " + SL0Helper.toString(acl));
+		log.debug(" WSIGS: ACL message created. " + SL0Helper.toString(acl));
 		send( acl );
 	}
 	
@@ -179,7 +259,7 @@ public class GatewayAgent extends Agent {
 		// used by FIPAReturnMessageListener
 		// create reply does not fill a sender
 		acl.setSender( Configuration.getInstance().getGatewayAID() );
-		cat.debug(" a response is " + SL0Helper.toString(acl));
+		log.debug(" a response is " + SL0Helper.toString(acl));
 		send(acl);
 	}
 	/**
@@ -236,16 +316,17 @@ public class GatewayAgent extends Agent {
 	 */
 	protected void setup() {
 		super.setup();
+
 		// initialize an instance
 		try {
 			synchronized ( synchObject ) {
 				instance = this;
 				dfMethodListener = Configuration.getInstance().getDFMethodListener();
 				synchObject.notifyAll();
-				cat.info("WSIG's GatewayAgent is set up.   " + (null != instance) );
+				log.info("WSIG's GatewayAgent is set up.   " + (null != instance) );
 			}
 		}catch (Exception e) {
-			cat.debug( e );
+			log.debug( e );
 		}
 
 
@@ -272,9 +353,9 @@ public class GatewayAgent extends Agent {
 				ACLMessage msg = myAgent.receive(); // template );
 				if ( msg != null ) {
 					try {
-						cat.debug("A request for WSIG:" + SL0Helper.toString(msg));
+						log.debug("A request for WSIG:" + SL0Helper.toString(msg));
 					}catch ( Exception e ) {
-						cat.error(e);
+						log.error(e);
 					}
 					
 					switch ( msg.getPerformative() ) {
@@ -307,6 +388,32 @@ public class GatewayAgent extends Agent {
 
 		// register into a df
 		registerMe();
+
+		//
+		// create GUI, when -gui switch is presented
+		//
+		if ( isGuiSwitchOn() ) {
+			gui = new GatewayAgentGui( this );
+			gui.showMeTheFirstTime();
+		}
+	}
+
+	/**
+	 * tests a presence of gui switch
+	 *
+	 * @return true if "-gui" switch is occured
+	 */
+	private boolean isGuiSwitchOn() {
+		Object[] args = getArguments();
+		if ( args != null ) {
+			int i = 0;
+			int len = args.length;
+			while ( i < len && ! "-gui".equalsIgnoreCase( args[i].toString() )) {
+				i ++ ;
+			}
+			return i < len;
+		}
+		return false;
 	}
 
 	/**
@@ -349,7 +456,7 @@ public class GatewayAgent extends Agent {
 			e.printStackTrace();
 		}
 		
-		//cat.debug( SL0Helper.toString(msg));
+		//log.debug( SL0Helper.toString(msg));
 
 	}
 	
@@ -358,6 +465,12 @@ public class GatewayAgent extends Agent {
 	 * A configuration used is stored.
 	 */
 	protected void takeDown() {
+		if ( gui != null ) {
+			gui.exit();
+			gui = null;
+			shutDownAgents();
+		}
+
 		Configuration.store();
 
 		//deregister itself from a DF
@@ -380,8 +493,8 @@ public class GatewayAgent extends Agent {
 			e.printStackTrace();
 		}
 		
-		cat.debug( SL0Helper.toString(msg));
-		cat.debug("A gateway is taken down now.");
+		log.debug( SL0Helper.toString(msg));
+		log.debug("A gateway is taken down now.");
 	}
 
 
@@ -429,11 +542,24 @@ public class GatewayAgent extends Agent {
 		ServedOperation so = ServedOperationStore.getInstance().find(
 				getFIPAServiceId(msg) );
 
+		if ( null == so ) {
+			// I can not serve
+			log.debug( "Operation is not served." );
+			ACLMessage r = acl.createReply();
+			r.setPerformative( ACLMessage.NOT_UNDERSTOOD );
+			r.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+			r.setContent(
+				"( " + SL0Helper.toStringAclAsAction(acl) + "\n"
+				+ "  (error-message \"The service is not provided.\")) )" );
+			send( r );
+			return;
+		}
+
 		// create connection into a Web Service
 		//  perform call
 		Call call = so.createCall();
 		try {
-			cat.debug(" WSIG is called by an agent now.");
+			log.debug(" WSIG is called by an agent now.");
 			call.setMessage( msg );
 			ReturnMessageListener listener = new FIPAReturnMessageListener( acl );
 			call.setReturnMessageListener( listener );
@@ -441,7 +567,7 @@ public class GatewayAgent extends Agent {
 			storeACall( acl.getSender(), acl.getConversationId(), call );
 			call.invoke();
 		}catch (Exception e) {
-			cat.error(e);
+			log.error(e);
 		}
 	}
 	
@@ -489,7 +615,7 @@ public class GatewayAgent extends Agent {
 				return;
 			}else {
 				// is a response related to a WSIG's request 
-				cat.debug( "A df's inform message received for WSIG DF's management: " + SL0Helper.toString( acl ));
+				log.debug( "A df's inform message received for WSIG DF's management: " + SL0Helper.toString( acl ));
 				return;  // only as a quick hack, do a propper registration latter
 			}
 		}
@@ -506,9 +632,9 @@ public class GatewayAgent extends Agent {
 			FIPAMessage fipa = new FIPAMessage( acl );
 			fipa.setResponse( true );
 			listener.setReturnedMessage( fipa );
-			cat.debug("listener invoked for conversationId " + convId );
+			log.debug("listener invoked for conversationId " + convId );
 		}else {
-			cat.debug("listener is null for conversationId " + convId );
+			log.debug("listener is null for conversationId " + convId );
 		}
 	}
 
@@ -528,7 +654,7 @@ public class GatewayAgent extends Agent {
 	    Action slAction = null;
 	    Done slDone = null;
 		try {
-			cat.debug( "A df's inform message received from another agent: " + SL0Helper.toString( acl ));
+			log.debug( "A df's inform message received from another agent: " + SL0Helper.toString( acl ));
 		    slDone = (Done) getContentManager().extractContent(acl);
 		    slAction = (Action) slDone.getAction();
 		    Concept action = slAction.getAction();
@@ -612,7 +738,7 @@ public class GatewayAgent extends Agent {
 				service = action.getTypeName();
 			}	
 		}catch (Exception e) {
-			cat.error(e);
+			log.error(e);
 		}
 		return new FIPAServiceIdentificator(
 				(AID) msg.getACLMessage().getAllReceiver().next(),
@@ -729,8 +855,405 @@ public class GatewayAgent extends Agent {
 			
 			//DFService.modify( this, dfad );
 		}catch (Exception e) {
-			cat.error(e);
+			log.error(e);
+		}
+	}
+
+	/**
+	 * processes events from GUI
+	 *
+	 * @param event an GUI event
+	 */
+	protected void onGuiEvent( GuiEvent event ) {
+		switch( event.getType() ) {
+			case EXIT_EVENT:
+				doDelete();
+				break;
+			case CLOSE_GUI_EVENT:
+				if ( gui != null ) {
+					gui.exit();
+					gui = null;
+				}
+				break;
+			case RESET_EVENT:
+				resetGateway();
+				break;
+			case SET_LOG_FILE_EVENT:
+				setLogFileName( (File) event.getParameter(0) );
+				break;
+			case SET_LOGGING_EVENT:
+				Boolean val =
+					(Boolean) event.getParameter(0);
+				setLogging( val.booleanValue() );
+				break;
+			case START_AGENT_SERVER001_EVENT:
+				startAgent( "agentServer",
+					"com.whitestein.wsig.test.TestAgentServer",
+					new Object[0]);
+				break;
+			case START_AGENT_CLIENT033_EVENT:
+				startAgent( "agentClient033",
+					"com.whitestein.wsig.test.TestAgent033",
+					new Object[0]);
+				break;
+			case START_WS_SERVER01_EVENT:
+				if ( null != wsServer01 && wsServer01.isAlive() ) {
+					break;
+				}
+				wsServer01 = startClassMain(
+				  "com.whitestein.wsig.test.TestSOAPServer",
+					new String[0] );
+				break;
+			case START_WS_CLIENT01_EVENT:
+				if ( null != wsClient01 && wsClient01.isAlive() ) {
+					break;
+				}
+				wsClient01 = startClassMain(
+				  "com.whitestein.wsig.test.TestSOAPClient",
+					new String[0] );
+				break;
+			case WS_SELECTION_EVENT:
+				wsSelectionEvent( (Object[]) event.getParameter(0) );
+				break;
+			case AGENT_SELECTION_EVENT:
+				agentSelectionEvent( (Object[]) event.getParameter(0) );
+				break;
+			case START_AGENT_CLIENT_WITH_ARGUMENTS_EVENT:
+				startAgent( (String) event.getParameter(0),
+					"com.whitestein.wsig.test.TestAgentWithArgs",
+					(Object[]) event.getParameter(1) );
+				break;
+			case START_WS_REGISTRATION_FOR_FIND_PLACE_EVENT:
+				if ( null != wsReg02FP && wsReg02FP.isAlive() ) {
+					break;
+				}
+				wsReg02FP = startClassMain(
+				  "com.whitestein.wsig.test.TestFindPlaceRegistration",
+					new String[0] );
+				break;
+			case START_WS_REGISTRATION_FOR_GOOGLE_EVENT:
+				if ( null != wsReg04G && wsReg04G.isAlive() ) {
+					break;
+				}
+				wsReg04G = startClassMain(
+				  "com.whitestein.wsig.test.TestGoogleRegistration",
+					new String[0] );
+				break;
+		}
+	}
+
+	/**
+	 * sets logging on/off.
+	 * If a log file is not set, then the method does nothing.
+	 *
+	 * @param turnOn true, if log's informations are sent into a log file
+	 */
+	private void setLogging( boolean turnOn ) {
+		isLogFileOn = turnOn;
+		if ( null == logFile ) {
+			log.debug("Value of logFile is null.");
+			return;
+		}
+		if ( turnOn ) {
+			mainLog.addAppender( logFile );
+		} else {
+			mainLog.removeAppender( logFile );
 		}
 	}
 	
+	/**
+	 * sets a log file
+	 *
+	 * @param aFile a new log file
+	 */
+	private void setLogFileName( File aFile ) {
+		if ( null == aFile ) {
+			log.debug(" Log file posted by GUI is null.");
+			return;
+		}
+		logFileName = aFile.getAbsolutePath();
+		log.debug(" A new file for a log is : " + logFileName );
+		if ( null != logFile && mainLog.isAttached( logFile ) ) {
+			mainLog.removeAppender( logFile );
+		}
+		try {
+			logFile = new FileAppender(
+				new PatternLayout("%-5p: %c : %m%n"),
+				logFileName );
+		} catch ( IOException ioe ) {
+			log.debug(" A problem is occured during a logFile's creation ");
+			logFile = null;
+		}
+		if ( null != logFile && isLogFileOn ) {
+			mainLog.addAppender( logFile );
+		}
+	}
+
+	/**
+	 * resets the gateway
+	 */
+	private void resetGateway() {
+		// todo:
+		// deregister all services from DF
+		// deregister all operations from UDDI
+		// clear ServedOperationStore
+
+		shutDownAgents();
+	}
+
+	private void shutDownAgents() {
+		// code is not in LEAP, MIDP
+		Runtime rt = Runtime.instance();
+		Profile profile = new ProfileImpl( false );
+		ContainerController cc = rt.createAgentContainer( profile );
+		AgentController agentContr = null;
+		try {
+			// test if one exists
+			agentContr = cc.getAgent( "agentServer" );
+			agentContr.kill();
+		} catch ( ControllerException ce ) {
+			// does not exist
+		}
+
+		try {
+			// test if one exists
+			agentContr = cc.getAgent( "agentClient033" );
+			agentContr.kill();
+		} catch ( ControllerException ce ) {
+			// does not exist
+		}
+	}
+
+	/**
+	 * starts an agent
+	 *
+	 * @param name a name of the agent
+	 * @param className a class of the agent
+	 * @param args arguments, which are passed to agent
+	 *
+	 */
+	private void startAgent( String name, String className, Object[] args ) {
+		// code is not in LEAP, MIDP
+		Runtime rt = Runtime.instance();
+		Profile profile = new ProfileImpl( false );
+		ContainerController cc = rt.createAgentContainer( profile );
+		AgentController agentContr = null;
+		try {
+			// test if one exists
+			agentContr = cc.getAgent( name );
+			return;
+		} catch ( ControllerException ce ) {
+			// does not exist
+		}
+		try {
+			// create a new agent
+			agentContr = cc.createNewAgent( name, className, args );
+			agentContr.start();
+		} catch ( StaleProxyException spe ) {
+			log.debug( spe );
+		}
+	}
+
+
+	/**
+	 * starts an application
+	 *
+	 * @param className a class of the application
+	 * @param args arguments, which are passed
+	 *
+	 */
+	private Thread startClassMain( String className, final String[] args ) {
+		Thread spirit = null;
+		Class[] argsClass = { String[].class };
+		ClassLoader cl = null;
+		try {
+			cl = ClassLoader.getSystemClassLoader();
+		} catch ( SecurityException se ) {
+			log.debug("Problems to get the ClassLoader." + se );
+			return spirit;
+		} catch ( IllegalStateException ise ) {
+			log.debug("Problems to get the ClassLoader." + ise );
+			return spirit;
+		}
+		Class aClass = null;
+		try {
+			aClass = cl.loadClass( className );
+		} catch ( ClassNotFoundException cnfe ) {
+			log.debug("Problems to load a class.");
+			return spirit;
+		}
+		try {
+			final Method m =
+				aClass.getMethod("main", argsClass );
+		spirit = new Thread() {
+			private Method met2 = m;
+			private Object[] args2 = { args };
+			public void run() {
+				try {
+					this.met2.invoke( null, args2 );
+				} catch ( IllegalAccessException iae ) {
+					log.debug("Problems to invoke a method." + iae );
+				} catch ( IllegalArgumentException ige ) {
+					log.debug("Problems to invoke a method." + ige );
+				} catch ( InvocationTargetException ite ) {
+					log.debug("Problems to invoke a method." + ite );
+				} catch ( NullPointerException npe ) {
+					log.debug("Problems to invoke a method." + npe );
+				}}};
+		} catch ( NoSuchMethodException nsme ) {
+			log.debug("Problems to get a method." + nsme );
+			return spirit;
+		} catch ( NullPointerException npe ) {
+			log.debug("Problems to get a method." + npe );
+			return spirit;
+		} catch ( SecurityException se ) {
+			log.debug("Problems to get a method." + se );
+			return spirit;
+		}
+		if ( null != spirit ) {
+			spirit.start();
+		}
+		return spirit;
+	}
+
+	/**
+	 * processes a WS selection's event
+	 */
+	private void wsSelectionEvent( Object[] sel ) {
+		ComboBoxItem item;
+		ServedOperation so;
+		synchronized( syncObjectSel ) {
+			wsSelection = new HashSet();
+			for ( int k = 0; k < sel.length; k ++ ) {
+				item = (ComboBoxItem) sel[ k ];
+				so = item.getServedOperation();
+				if ( null == so ) {
+					wsSelection = null;
+					return;
+				}
+				wsSelection.add( so );
+			}
+		}
+	}
+
+	/**
+	 * processes an agents selection's event
+	 */
+	private void agentSelectionEvent( Object[] sel ) {
+		ComboBoxItem item;
+		ServedOperation so;
+		synchronized( syncObjectSel ) {
+			agentSelection = new HashSet();
+			for ( int k = 0; k < sel.length; k ++ ) {
+				item = (ComboBoxItem) sel[ k ];
+				so = item.getServedOperation();
+				if ( null == so ) {
+					agentSelection = null;
+					return;
+				}
+				agentSelection.add( so );
+			}
+		}
+	}
+
+	/**
+	 * tests, if an operation is selected
+	 */
+	private boolean isWsSelected( ServedOperation so ) {
+		synchronized( syncObjectSel ) {
+			if ( null == wsSelection ) {
+				return true;
+			}
+			return wsSelection.contains( so );
+		}
+	}
+
+	/**
+	 * tests, if an operation is selected
+	 */
+	private boolean isAgentSelected( ServedOperation so ) {
+		synchronized( syncObjectSel ) {
+			if ( null == agentSelection ) {
+				return true;
+			}
+			return agentSelection.contains( so );
+		}
+	}
+
+	/**
+	 * appends a text's message into log
+	 * It is for a GUI's manipulation only.
+	 */
+	public void addMessageToLog( ServedOperation so, CalledMessage msg ) {
+		synchronized( syncObjectSel ) {
+			if ( null == gui || null == so || null == msg ) {
+				log.debug("A null is appeared in addMessageToLog()");
+				return;
+			}
+			String text = msg.toString();
+
+			EndPoint ep = so.getEndPoint();
+			if ( WSEndPoint.TYPE == ep.getType() ) {
+				if ( isWsSelected( so )) {
+					gui.addWsLog( text );
+					log.debug(" Into WS log: " + text );
+				}
+			}
+			if ( FIPAEndPoint.TYPE == ep.getType() ) {
+				if ( isAgentSelected( so )) {
+					gui.addAgentLog( text );
+					log.debug(" Into agents' log: " + text );
+				}
+			}
+		}
+	}
+
+	/**
+	 * adds an operation to a list of ones logged
+	 * It is for a GUI's manipulation only.
+	 */
+	public void addOperationForLog( ServedOperation so ) {
+		synchronized( syncObjectSel ) {
+			if ( null == gui || null == so ) {
+				return;
+			}
+			EndPoint ep = so.getEndPoint();
+			if ( WSEndPoint.TYPE == ep.getType() ) {
+				UDDIOperationIdentificator uddiId =
+			  	so.getOperationID().getUDDIOperationIdentificator();
+				gui.addOperationToWsLog( new ComboBoxItem(
+				     "" + uddiId.getWSDLOperation()
+				     + " at " + uddiId.getAccessPoint(),
+				  so ));
+			}
+			if ( FIPAEndPoint.TYPE == ep.getType() ) {
+				FIPAServiceIdentificator fId =
+				  so.getOperationID().getFIPAServiceIdentificator();
+				gui.addOperationToAgentsLog( new ComboBoxItem(
+				    "" + fId.getServiceName()
+				    + " at " + fId.getAgentID(),
+				  so ));
+			}
+		}
+	}
+
+	/**
+	 * removes an operation from a list of ones logged.
+	 * It is for a GUI's manipulation only.
+	 */
+	public void removeOperationForLog( ServedOperation so ) {
+		synchronized( syncObjectSel ) {
+			if ( null == gui || null == so ) {
+				return;
+			}
+			EndPoint ep = so.getEndPoint();
+			if ( WSEndPoint.TYPE == ep.getType() ) {
+				gui.removeOperationFromWsLog( so );
+			}
+			if ( FIPAEndPoint.TYPE == ep.getType() ) {
+				gui.removeOperationFromAgentsLog( so );
+			}
+		}
+	}
+
 }

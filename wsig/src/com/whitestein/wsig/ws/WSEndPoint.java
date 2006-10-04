@@ -1,8 +1,3 @@
-/*
- * Created on Aug 4, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -47,6 +42,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Iterator;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -56,6 +52,7 @@ import javax.xml.soap.SOAPMessage;
 import org.apache.axis.Message;
 import org.apache.log4j.Category;
 
+import com.whitestein.wsig.fipa.GatewayAgent;
 import com.whitestein.wsig.net.Connection;
 import com.whitestein.wsig.struct.CalledMessage;
 import com.whitestein.wsig.struct.EndPoint;
@@ -96,6 +93,11 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 	 */
 	protected void nativeSend( CalledMessage cMsg, ReturnMessageListener listener ) {
 		cat.debug(" WS sending.");
+
+		// inform also GatewayAgent's GUI
+		GatewayAgent myGateway = GatewayAgent.getInstance();
+		myGateway.addMessageToLog( cMsg.getServedOperation(), cMsg );
+
 		if ( null == cMsg || ! (cMsg instanceof WSMessage )) {
 			// is not native message, never will be happen
 			// checking for type is done in send method
@@ -208,7 +210,8 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 			cat.error( mfe );
 			// inform the listener
 		}catch  (IOException ioe) {
-			cat.error( ioe );
+			cat.info( "An end point's call has been broken.");
+			cat.debug( ioe );
 			// try to check UDDI for updates, try to use them again
 			// in a failure inform the listener then
 		}catch (SOAPException se) {
@@ -246,6 +249,16 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 		httpConn.setAllowUserInteraction(false);
 		httpConn.setDoOutput(true);
 		httpConn.setDoInput(true); // check a wsdl
+
+		// debug
+		Iterator it = httpConn.getRequestProperties().keySet().iterator();
+		Object key, value;
+		while( it.hasNext() ) {
+			key = it.next();
+			value = httpConn.getRequestProperties().get( key );
+			cat.debug(" key: " + key + " value: " + value );
+		}
+
 		httpConn.connect();
 		
 		// send a SOAP

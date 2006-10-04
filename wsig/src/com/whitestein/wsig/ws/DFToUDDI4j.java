@@ -1,8 +1,3 @@
-/*
- * Created on Jun 9, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -61,6 +56,7 @@ import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.HashSet;
+import java.lang.Integer;
 
 import org.uddi4j.client.UDDIProxy;
 //import org.uddi4j.response.BusinessInfo;
@@ -76,7 +72,7 @@ import org.uddi4j.response.*;
 //import org.uddi4j.datatype.business.*;
 import org.uddi4j.datatype.service.*;
 
-import org.apache.log4j.Category;
+import org.apache.log4j.Logger;
 
 /**
  * This class provides a UDDI connection for an agent.
@@ -88,7 +84,7 @@ import org.apache.log4j.Category;
 public class DFToUDDI4j implements DFMethodListener {
 
 	private static DFToUDDI4j anInstance;
-	private Category cat = Category.getInstance(DFToUDDI4j.class.getName());
+	private Logger log = Logger.getLogger(DFToUDDI4j.class.getName());
 	
 	private Hashtable aidToService = new Hashtable(); 
 	private Hashtable aidToConcept = new Hashtable();
@@ -174,7 +170,7 @@ public class DFToUDDI4j implements DFMethodListener {
 					p = (Property) it.next();
 					if ( "type".equalsIgnoreCase(p.getName()) ) {
 						strValue = p.getValue().toString();  // the value is a String
-						// cat.debug( " property Object is an instance of " + p.getValue().getClass().getName() );
+						// log.debug( " property Object is an instance of " + p.getValue().getClass().getName() );
 						break;
 					}
 				}
@@ -196,14 +192,13 @@ public class DFToUDDI4j implements DFMethodListener {
 		// input data:  sd, uddiOId
 		WSDLDefinition wsdl = new WSDLDefinition();
 		try {
-			wsdl.setURL( new URL( Configuration.getInstance().getHostURI()
-					+ "/mywsdl/" + uddiOId.getWSDLOperation() + ".wsdl"));
+			wsdl.setURL( new URL( Configuration.getInstance().getURIPathForWSDLs() + uddiOId.getWSDLOperation() + ".wsdl"));
 			op.setWSDL( wsdl );
 		}catch (Exception e) {
-			cat.debug(e); // a url does not exist
+			log.debug(e); // a url does not exist
 		}
 		
-		cat.debug("   -> new operation: fipa_service=" + fipaSId.getServiceName()
+		log.debug("   -> new operation: fipa_service=" + fipaSId.getServiceName()
 				+ ", WSoperation=" + uddiOId.getWSDLOperation() );
 		return op;
 	}
@@ -224,6 +219,10 @@ public class DFToUDDI4j implements DFMethodListener {
 			sd = (ServiceDescription) it.next();
 			fipaSId = new FIPAServiceIdentificator( dfad.getName(), sd );
 			op = operationStore.find( fipaSId );
+			if ( null == op ) {
+				// an op has not been registered
+				continue;
+			}
 			operationStore.remove(op);
 			op.close();
 		}
@@ -239,13 +238,13 @@ public class DFToUDDI4j implements DFMethodListener {
 	 */
 	public synchronized void registerAction( Register register, AID aid ) throws FIPAException {
 		DFAgentDescription dfad = (DFAgentDescription) register.getDescription();
-		cat.debug("A wsigs's registration from an agent: " + dfad.getName() + ".");
+		log.debug("A wsigs's registration from an agent: " + dfad.getName() + ".");
 		
 		// test an existence
 		if (aidToService.containsKey(dfad.getName()) ) {
 			//already registered
 			//original registerAction gives a responce
-			cat.debug("Already registered " + dfad.getName());
+			log.debug("Already registered " + dfad.getName());
 			return;
 		}
 			
@@ -253,7 +252,7 @@ public class DFToUDDI4j implements DFMethodListener {
 		Collection col = createServedOperations( dfad );
 		if ( col.isEmpty() ) {
 			// nothing to do
-			cat.debug("No operations are created.");
+			log.debug("No operations are created.");
 			return;
 		}
 		// store a ServedOperation generated
@@ -261,8 +260,8 @@ public class DFToUDDI4j implements DFMethodListener {
 		
 		try {
 			// create identification names
-			String tName = "WSIGS's tModel for " + dfad.getName().getLocalName();
-			String sName = "WSIGS's businessService for " + dfad.getName().getLocalName();
+			String tName = "WSIG's tModel for " + dfad.getName().getLocalName();
+			String sName = "WSIG's businessService for " + dfad.getName().getLocalName();
 			
 			// create a new tModel
 			TModel tModel;
@@ -272,10 +271,37 @@ public class DFToUDDI4j implements DFMethodListener {
 			// This is only functional in UDDI v3.0 by accessPoint's useType attribute.
 			// It is left on hostingRedirector in UDDI v2.0.
 
+			// generate a category bag with service's names
+			CategoryBag cb = new CategoryBag();
+			Iterator it = col.iterator();//dfad.getAllServices();
+			KeyedReference kr;
+			ServedOperation so;
+			OperationID id;
+			while ( it.hasNext() ) {
+				so = (ServedOperation) it.next();
+				if ( null == so ) {
+					continue;
+				}
+				id = so.getOperationID();
+				kr = new KeyedReference();
+				kr.setTModelKey("uuid:A035A07C-F362-44dd-8F95-E2B134BF43B4"); // uddi-org:general_keywords  in UDDI v2.0
+				kr.setKeyName("fipaServiceName");
+				kr.setKeyValue( id.getFIPAServiceIdentificator().getServiceName() );
+				cb.add( kr );
+
+				kr = new KeyedReference();
+				kr.setTModelKey("uuid:A035A07C-F362-44dd-8F95-E2B134BF43B4"); // uddi-org:general_keywords  in UDDI v2.0
+				kr.setKeyName( id.getFIPAServiceIdentificator()
+.getServiceName() );
+				kr.setKeyValue( id.getUDDIOperationIdentificator().getWSDLOperation() );
+				cb.add( kr );
+			}
+
 			// create a new businessService
 			BusinessService businessService = new BusinessService("");
 			businessService.setDefaultNameString(sName,null);
 			businessService.setBusinessKey(businessKey);
+			businessService.setCategoryBag( cb );
 			
 			// save the Service
 			Vector services = new Vector();
@@ -295,12 +321,12 @@ public class DFToUDDI4j implements DFMethodListener {
 
 			//store reference for AID and new service for removing the service
 			aidToService.put( dfad.getName(), new ServiceKey(serviceKey));
-			cat.debug("An agent services registration done.");
+			log.debug("An agent services registration done.");
 
 		}catch ( UDDIException e ) {
-			cat.error(e);
+			log.error(e);
 		}catch ( TransportException e ) {
-			cat.error(e);
+			log.error(e);
 		}
 		
 	}
@@ -315,7 +341,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 */
 	public synchronized void deregisterAction( Deregister deregister, AID aid ) throws FIPAException {
 		DFAgentDescription dfad = (DFAgentDescription) deregister.getDescription();
-		cat.debug("A wsigs's deregistration from an agent: " + dfad + ".");
+		log.debug("A wsigs's deregistration from an agent: " + dfad + ".");
 		
 		// test an existence
 		if (!aidToService.containsKey(dfad.getName()) ) {
@@ -330,7 +356,7 @@ public class DFToUDDI4j implements DFMethodListener {
 		//delete service identified by the Key stored
 		ServiceKey k = (ServiceKey) aidToService.get( dfad.getName());
 		aidToService.remove( dfad.getName());
-		cat.debug("A serviceKey removed " + k.getText());
+		log.debug("A serviceKey removed " + k.getText());
 
 		DispositionReport dr;
 		try {
@@ -341,7 +367,7 @@ public class DFToUDDI4j implements DFMethodListener {
 				bt.getTModelInstanceDetails().get(0).getTModelKey() );
 			dr = uddiProxy.delete_tModel(getAuthToken().getAuthInfoString(), tModelKey.getText() );
 			if( ! dr.success() ) {
-				cat.error("Error during deletion of TModel\n"+
+				log.error("Error during deletion of TModel\n"+
 						"\n operator:" + dr.getOperator() +
 						"\n generic:"  + dr.getGeneric() );
 			}
@@ -349,7 +375,7 @@ public class DFToUDDI4j implements DFMethodListener {
 			// delete a service
 			dr = uddiProxy.delete_service(getAuthToken().getAuthInfoString(), k.getText());
 			if( ! dr.success() ) {
-				cat.error("Error during deletion of Service\n"+
+				log.error("Error during deletion of Service\n"+
 						"\n operator:" + dr.getOperator() +
 						"\n generic:"  + dr.getGeneric() );
 
@@ -357,18 +383,18 @@ public class DFToUDDI4j implements DFMethodListener {
 				for( int j=0; j<results.size(); j++ )
 				{
 					Result r = (Result)results.elementAt(j);
-					cat.error(" errno:"    + r.getErrno() );
+					log.error(" errno:"    + r.getErrno() );
 					if( r.getErrInfo()!=null )
 					{
-						cat.error("\n errCode:"  + r.getErrInfo().getErrCode() +
+						log.error("\n errCode:"  + r.getErrInfo().getErrCode() +
 								"\n errInfoText:" + r.getErrInfo().getText());
 					}
 				}
 			}
 		}catch ( UDDIException e ) {
-			cat.error(" Deregistration " + e);
+			log.error(" Deregistration " + e);
 		}catch ( TransportException e ) {
-			cat.error(" Deregistration " + e);
+			log.error(" Deregistration " + e);
 		}
 	}
 	
@@ -382,7 +408,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 */
 	public synchronized void modifyAction( Modify modify, AID aid ) throws FIPAException {
 		DFAgentDescription dfad = (DFAgentDescription) modify.getDescription();
-		cat.debug("A wsigs's modification from an agent: " + dfad + ".");
+		log.debug("A wsigs's modification from an agent: " + dfad + ".");
 		// modification of the agent's tModel
 		//  - a coresponding wsdl structure may be afected
 		//  - identificators and categories may be changed
@@ -442,6 +468,56 @@ public class DFToUDDI4j implements DFMethodListener {
 	
 
 	/**
+	 * removes old records in UDDI
+	 */
+	private void resetUDDI4j() {
+		ServiceList sl = new ServiceList(); // default is an empty list
+		try {
+			Vector names = new Vector(1);
+			names.add( new Name("%WSIG%") );
+			CategoryBag cb = new CategoryBag();
+			TModelBag tmb = new TModelBag();
+			FindQualifiers fq = new FindQualifiers();
+			int maxRows = Integer.MAX_VALUE;  // unlimited
+
+			sl = uddiProxy.find_service(
+				businessKey,
+				names,
+				cb,
+				tmb,
+				fq,
+				maxRows );
+
+			ServiceInfo info;
+			ServiceInfos infos = sl.getServiceInfos();
+			String s;
+			Vector sKeys = new Vector();
+			int k;
+
+			if ( infos.size() < 1 ) {
+				log.debug("Old records do not exist in UDDI.");
+				return;
+			}
+
+			for ( k = 0; k < infos.size(); k ++ ) {
+				info = infos.get( k );
+				s = info.getServiceKey();
+				log.debug(" service to delete: " + s );
+				sKeys.add( s );
+			}
+
+			DispositionReport dr;
+			dr = uddiProxy.delete_service(
+				getAuthToken().getAuthInfoString(), sKeys);
+
+		} catch ( UDDIException ue ) {
+			log.debug( ue );
+		} catch ( TransportException te ) {
+			log.debug( te );
+		}
+	}
+
+	/**
 	 * sets up the DFToUDDI4j. It starts components required.
 	 * Class fields authToken and uddiProxy are set properly as main result.  
 	 *
@@ -473,9 +549,11 @@ public class DFToUDDI4j implements DFMethodListener {
 				uddiProxy.setInquiryURL(c.getQueryManagerURL());
 				uddiProxy.setPublishURL(c.getLifeCycleManagerURL());
 			}catch( Exception e ) {
-				cat.error(e);
+				log.error(e);
 			}
 		}
+
+		resetUDDI4j();
 	}
 	
 	/**
@@ -488,11 +566,11 @@ public class DFToUDDI4j implements DFMethodListener {
 	 */
 	private AuthToken getAuthToken() throws TransportException, UDDIException{
 		// Get an authorization token
-		cat.debug("Ask for authToken.");
+		log.debug("Ask for authToken.");
 
 		// Pass in userid and password registered at the UDDI site
 		AuthToken authToken = uddiProxy.get_authToken( userName,password);
-		cat.debug("Returned authToken from a UDDI:" + authToken.getAuthInfoString());
+		log.debug("Returned authToken from a UDDI:" + authToken.getAuthInfoString());
 		return authToken;
 	}
 	
@@ -505,7 +583,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @return a new bindingTemplate registered in a UDDI
 	 */
 	public BindingTemplate createBindingTemplate( AccessPoint accessPoint, ServiceKey serviceKey, TModelKey tModelKey ) {
-		cat.debug("A bindingTemplate is going to be created.");
+		log.debug("A bindingTemplate is going to be created.");
 		BindingTemplate bindingTemplateReturned = null;
 		try {
 			// create TModelInstanceDetails
@@ -534,12 +612,12 @@ public class DFToUDDI4j implements DFMethodListener {
 			bindingTemplateReturned = (BindingTemplate)(bindingTemplateVector.elementAt(0));
 			
 		}catch ( UDDIException e ) {
-			cat.error(e);
+			log.error(e);
 		}catch ( TransportException e ) {
-			cat.error(e);
+			log.error(e);
 		}
 
-		cat.debug("New BindingKey: " + bindingTemplateReturned.getBindingKey());
+		log.debug("New BindingKey: " + bindingTemplateReturned.getBindingKey());
 		return bindingTemplateReturned;
 	}
 	
@@ -552,7 +630,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @return tModel created
 	 */
 	public TModel createTModel( String wsdlURL, String name ) {
-		cat.debug("A tModel is going to be created.");
+		log.debug("A tModel is going to be created.");
 		TModel tModelReturned = null;
 		try {
 			// to point into a WSDL
@@ -576,12 +654,12 @@ public class DFToUDDI4j implements DFMethodListener {
 			tModelReturned = (TModel)(tModelsVector.elementAt(0));
 			
 		}catch ( UDDIException e ) {
-			cat.error(e);
+			log.error(e);
 		}catch ( TransportException e ) {
-			cat.error(e);
+			log.error(e);
 		}
 
-		cat.debug("New tModelKey: " + tModelReturned.getTModelKey());
+		log.debug("New tModelKey: " + tModelReturned.getTModelKey());
 		return tModelReturned;
 	}
 	

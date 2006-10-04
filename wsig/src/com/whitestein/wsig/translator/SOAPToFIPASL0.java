@@ -1,8 +1,3 @@
-/*
- * Created on Aug 4, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -46,7 +41,7 @@ import jade.domain.FIPAAgentManagement.FIPAManagementVocabulary;
 import jade.content.lang.sl.SLCodec;
 import jade.lang.acl.ACLMessage;
 //import jade.content.lang.xml.XMLCodec;
-//import jade.content.lang.Codec.CodecException;
+import jade.content.lang.Codec.CodecException;
 import jade.content.onto.BasicOntology;
 import jade.content.onto.basic.Action;
 import jade.content.abs.AbsConcept;
@@ -83,6 +78,7 @@ import java.util.Iterator;
 import java.util.ArrayList;
 import org.apache.axis.message.PrefixedQName;
 import org.apache.log4j.Category;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -99,6 +95,7 @@ public class SOAPToFIPASL0 implements Translator {
 	public static String XML_CONTENT = Configuration.getInstance().getFIPAAttrForXMLContent();
 	public static String XML_TAG_ = Configuration.getInstance().getFIPAPrefixForXMLTag();
 	private static Category cat = Category.getInstance(SOAPToFIPASL0.class.getName());
+	private static Logger log = Logger.getLogger(SOAPToFIPASL0.class.getName());
 	public static String NONE = "none";
 
 	/**
@@ -215,10 +212,15 @@ public class SOAPToFIPASL0 implements Translator {
 		// fill an action's field, but only as null
 		ap.set( SL0Vocabulary.RESULT_ACTION, NONE );
 		
-		acl.setContent(
-				codecSL0.encode( ap ));
+		try {
+			acl.setContent( codecSL0.encode( ap ));
 		
-		cat.debug( "translated response is " + codecSL0.encode(ap) );
+			cat.debug( "translated response is " + codecSL0.encode(ap) );
+		} catch ( CodecException ce ) {
+			log.debug( ce );
+			acl.setContent( "( " + NONE + " (error-message \"A translation fails.\"))");
+			acl.setPerformative( ACLMessage.FAILURE );
+		}
 		
 		FIPAMessage fipa = new FIPAMessage( acl );
 		fipa.setResponse( true );
@@ -250,7 +252,7 @@ public class SOAPToFIPASL0 implements Translator {
 				op = ServedOperationStore.getInstance().find( uddiOpId );
 				if ( null == op ) {
 					// failure may be sent back
-					System.out.println(" ap: " + uddiOpId.getAccessPoint() +
+					log.debug(" no operation for  ap: " + uddiOpId.getAccessPoint() +
 						" op: " + uddiOpId.getWSDLOperation());
 					continue;
 				}
@@ -448,12 +450,22 @@ public class SOAPToFIPASL0 implements Translator {
 		xml.set( XML_ELEMENT, a );
 		return xml;
 	}
+	private AbsTerm generateAbsXMLAttributed( String name, SOAPElement soap, AbsTerm a ) {
+		AbsConcept xml = new AbsConcept( XML_TAG_ + name );
+		xml.set( XML_ATTRIBUTES, generateAbsXMLAttributes(soap));
+		AbsAggregate agg = new AbsAggregate( name );
+		agg.add( a );
+		xml.set( XML_ELEMENT, agg );
+		return xml;
+	}
 	
 	private AbsTerm generateTypedAbs( SOAPElement soap ) {
 		AbsConcept a;
 		AbsTerm absRet;
+		AbsTerm absRet2;
 		
 		if ( soap == null ) {
+			log.debug(" soap is null " );
 			return null;
 		}
 
@@ -464,22 +476,41 @@ public class SOAPToFIPASL0 implements Translator {
 		SOAPElement te;
 		while ( it.hasNext()) {
 			te = (SOAPElement) it.next();
-			System.out.println("   child: " + te.getElementName().getLocalName() + " value: " + te.getValue());
+			log.debug("   child: " + te.getElementName().getLocalName() + " value: " + te.getValue());
 		}
 		*/
 		
 		String name = soap.getElementName().getLocalName();
+		log.debug(" generateTypedAbs for: " + name );
+
+		//AbsPredicate ap = new AbsPredicate( SL0Vocabulary.RESULT );
+		//ap.set( SL0Vocabulary.RESULT_ACTION, NONE );
 		
 		// primitive type
 		if ( isLeaf(soap) ) {
+			log.debug(" " + name + " is leaf");
 			absRet = createPrimitive( soap );
 			if ( isWithXMLAttributes(soap) ) {
-				return generateAbsXMLAttributed(
+				absRet2 = generateAbsXMLAttributed( name,
 						soap,
 						absRet );
 			}else {
-				return absRet;
+				absRet2 = absRet;
 			}
+			if ( null == absRet2 ) {
+				log.debug(" null is at primitive : " + name );
+			}
+			/*
+			try {
+				ap.set( SL0Vocabulary.RESULT_VALUE, absRet2 );
+				codecSL0.encode( ap );
+				log.debug( "translated part is " + codecSL0.encode(ap));
+			} catch ( CodecException ce ) {
+				log.debug( ce );
+			}
+			 */
+		
+			return absRet2;
 		}
 
 		// System.out.println("  " + name + "    " + soap.getElementName() );
@@ -520,14 +551,26 @@ public class SOAPToFIPASL0 implements Translator {
 		}
 		// check for XML attributes
 		if ( isWithXMLAttributes(soap) ) {
-			absRet = generateAbsXMLAttributed(
+			absRet = generateAbsXMLAttributed( name,
 					soap,
 					absRet );
 		}
+		if ( null == absRet ) {
+			log.debug(" null is at name: " + name );
+		}
+		/*
+		try {
+			ap.set( SL0Vocabulary.RESULT_VALUE, absRet );
+			codecSL0.encode( ap );
+			cat.debug( "translated part is " + codecSL0.encode(ap));
+		} catch ( CodecException ce ) {
+			log.debug( ce );
+		}
+		 */
 		return absRet;
 	}
 
-	private String[] TYPE = {
+	private String[] JADE_TYPE = {
 			BasicOntology.STRING,
 			BasicOntology.FLOAT,
 			BasicOntology.INTEGER,
@@ -539,7 +582,7 @@ public class SOAPToFIPASL0 implements Translator {
 	private AbsTerm createPrimitive( SOAPElement soap ) {
 		AbsPrimitive a = AbsPrimitive.wrap("");
 		if ( soap == null ) {
-			//cat.debug( "createPrimitive == null" );
+			log.debug( "createPrimitive == null" );
 			return a;
 		}
 		String type = soap.getElementName().getLocalName();
@@ -550,21 +593,69 @@ public class SOAPToFIPASL0 implements Translator {
 				a = AbsPrimitive.wrap(BasicOntology.STRING);
 				a.set( soap.getValue());
 			}
-			//cat.debug( "createPrimitive as string" );
+			log.debug( "createPrimitive as string" );
 			return a;
+		} else {
+			log.debug( "createPrimitive for type = " + type );
 		}
-		for ( int i = 0; i < TYPE.length; i ++ ) {
-			if ( type.compareToIgnoreCase(TYPE[i]) == 0 ) {
-				a = new AbsPrimitive( TYPE[i]);
-				a.set(soap.getValue());
-				//cat.debug( "createPrimitive as type " + TYPE[i] );
+
+
+// FIXME: type must be correctly translated
+//        now only JADE_TYPE: BO_Integer, BO_Float, BO_Boolean, BO_String
+//        add also default xsd types
+/*
+		for ( int i = 0; i < JADE_TYPE.length; i ++ ) {
+			if ( type.equalsIgnoreCase(JADE_TYPE[i]) ) {
+				// a = new AbsPrimitive( JADE_TYPE[i]);
+				a = AbsPrimitive.wrap( JADE_TYPE[i] );
+				if ( null != soap.getValue() ) {
+					a.set(String.trim(soap.getValue()));
+				} else {
+					a.set("");
+				}
+				log.debug( "createPrimitive as type " + JADE_TYPE[i] );
 				return a;
 			}
 		}
+ */
+		String str = soap.getValue();
+		if ( null != str ) {
+			str = str.trim();
+		} else {
+			str = "";
+		}
+		// if ( str.length() > 0 ) {
+		  try {
+			  a = AbsPrimitive.wrap( Long.parseLong( str ));
+			  log.debug( "createPrimitive as BO_Integer " );
+			  return a;
+		  }catch (NumberFormatException nfe) {
+		  }
+		  try {
+			  a = AbsPrimitive.wrap( Double.parseDouble( str ));
+			  log.debug( "createPrimitive as BO_Float" );
+			  return a;
+		  }catch (NumberFormatException nfe) {
+		  }
+		  if( "true".equalsIgnoreCase( str )) {
+			  log.debug( "createPrimitive as BO_Boolean true" );
+			  a = AbsPrimitive.wrap( true );
+			  return a;
+		  } else if ( "false".equalsIgnoreCase( str )){
+			  log.debug( "createPrimitive as BO_Boolean false" );
+			  a = AbsPrimitive.wrap( false );
+			  return a;
+		  }
+		// }
+		  
 		// type not known
 		a = AbsPrimitive.wrap(BasicOntology.STRING);
-		a.set( soap.getValue());
-		//cat.debug( "createPrimitive as default string" );
+		if ( null != soap.getValue() ) {
+			a.set( soap.getValue());
+		} else {
+			a.set("");
+		}
+		log.debug( "createPrimitive as default string" );
 		return a;
 		//AbsAggregate agg = new AbsAggregate( type );
 		//agg.add( AbsPrimitive.wrap( soap.getValue()));
@@ -579,8 +670,8 @@ public class SOAPToFIPASL0 implements Translator {
 	 * @return
 	 */
 	private boolean isPrimitive( String type ) {
-		for ( int i = 0; i < TYPE.length; i ++ ) {
-			if ( type.compareToIgnoreCase(TYPE[i]) == 0 ) {
+		for ( int i = 0; i < JADE_TYPE.length; i ++ ) {
+			if ( type.equalsIgnoreCase(JADE_TYPE[i]) ) {
 				return true;
 			}
 		}
@@ -599,7 +690,7 @@ public class SOAPToFIPASL0 implements Translator {
 		//   has got childs, which are all a text node
 		boolean res = soap != null &&
 			isAllChildsText(soap);
-		cat.debug(" isLeaf method for: " + soap.getElementName().getLocalName() + " value: " + soap.getValue() + " is " + res);
+		cat.debug(" isLeaf method for: " + soap.getElementName().getLocalName() + " value: " + soap.getValue() + " is leaf: " + res);
 		return res;
 		//
 		//	( ! soap.getChildElements().hasNext()
@@ -686,6 +777,7 @@ public class SOAPToFIPASL0 implements Translator {
 			n = (Name) i.next();
 			if ( n.getLocalName() != null
 				&& ! isXMLAttributeIgnored(n) ) {
+				log.debug(" is with XML attributes, localName = " + n.getLocalName());
 				return true;
 			}
 		}

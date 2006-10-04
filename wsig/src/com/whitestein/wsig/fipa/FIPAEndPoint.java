@@ -1,8 +1,3 @@
-/*
- * Created on Jul 2, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -40,7 +35,7 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.fipa;
 
-import com.whitestein.wsig.Gateway;
+// import com.whitestein.wsig.Gateway;
 import com.whitestein.wsig.fipa.GatewayAgent;
 import com.whitestein.wsig.struct.CalledMessage;
 import com.whitestein.wsig.struct.EndPointImpl;
@@ -48,6 +43,8 @@ import com.whitestein.wsig.struct.ReturnMessageListener;
 
 import java.lang.Error;
 import jade.lang.acl.ACLMessage;
+
+import org.apache.log4j.Logger;
 
 
 /**
@@ -66,6 +63,7 @@ public class FIPAEndPoint extends EndPointImpl {
 
 	private FIPAServiceIdentificator fipaSId;
 	private ACLMessage aclSent;
+	private static Logger log = Logger.getLogger( FIPAEndPoint.class.getName());
 	
 	public FIPAEndPoint( FIPAServiceIdentificator fipaSId ) { //, Gateway gw ) {
 		super(FIPAEndPoint.TYPE);
@@ -84,7 +82,12 @@ public class FIPAEndPoint extends EndPointImpl {
 	 */
 	protected void nativeSend( CalledMessage cMsg, ReturnMessageListener listener ) {
 		// to send FIPA ACL message
-		System.out.println(" FIPA sending.");
+		log.debug(" FIPA sending.");
+
+		// inform also GatewayAgent
+		GatewayAgent myGateway = GatewayAgent.getInstance();
+		myGateway.addMessageToLog( cMsg.getServedOperation(), cMsg );
+
 		if ( null == cMsg || ! (cMsg instanceof FIPAMessage )) {
 			// is not native message, never will be happen
 			// checking for type is done in send method

@@ -1,0 +1,68 @@
+
+There is a brief installation guide. (updated on 2005-02-27)
+
+1. A UDDI repository is needed.
+	Access informations must be filled in a wsig.properties file according step 2.
+	If a UDDI repository does not exist,
+	then please install a jUDDI according a jUDDI_install.txt file.
+
+2.1. Then set properly wsig.properties.
+	A host name may be a localhost, if a running stays locally on one machine.
+    
+    wsig.host.name=localhost
+       your host name
+    
+    wsig.host.port=2222
+       a port number, where a gateway will be worked at
+    
+    wsig.agent_id=wsigs@localhost\:1099/JADE
+       agent ID of a gateway, the host name part must be changed according
+       machine's host name
+       To leave a host name as localhost brings identification problems.
+	
+    uddi.wsig_businessKey=8C983E50-E09B-11D8-BE50-DA8FBF3BDC61
+       a business key of your business entity in a UDDI repository
+    
+	uddi.userName=jna
+	uddi.userPassword=somepasword
+	   a user name and a password into the UDDI repository
+	
+	uddi.lifeCycleManagerURL=http\://localhost\:8080/jUDDI/publish
+	uddi.queryManagerURL=http\://localhost\:8080/jUDDI/inquiry
+	  access point into the UDDI repository
+ 
+ 2.2. Startup files require a change, when they are running outside a localhost.
+	Please, change host name in wsig.bat, run_TestAgent033.bat, and run_TestAgent001.bat.
+ 
+ 2.3. A JADE libraries are required in a lib/jade directory.
+ 	Please, use a new JADE v3.3 or copy libraries from JADE-extension,
+ 	where JADE v3.2 modified is stored locally.
+ 
+ 3. Run in the following order:
+      run_jade_main.bat
+      wsig.bat
+ 
+ 4. The testing examples are runnable by:
+      1.
+      	run_TestSOAPServer.bat
+      	run_TestAgent033.bat
+      	
+      2.
+        run_TestAgent001.bat
+        run_TestSOAPClient.bat
+        
+    Unfortunately, the search abbility of these testing examles is missed to find
+    proper operation's names.
+    The test examples 4.1 and 4.2 must be run in the sequence to assign good order
+     of operation's names.
+
+ Note 5:
+   To see massages, please, use a tcpmon from the AXIS project.
+      run_tcpmon_jUDDI.bat
+    The port's numbers must be changed in the wsig.properties file properly.
+    Example 5:
+	uddi.lifeCycleManagerURL=http\://localhost\:1233/jUDDI/publish
+	uddi.queryManagerURL=http\://localhost\:1233/jUDDI/inquiry
+	  access point into the UDDI repository through a run_tcpmon_jUDDI
+    
+    

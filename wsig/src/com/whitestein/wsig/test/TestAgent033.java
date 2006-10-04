@@ -1,8 +1,3 @@
-/*
- * Created on Aug 19, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -42,8 +37,9 @@ package com.whitestein.wsig.test;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.TickerBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
@@ -51,6 +47,15 @@ import jade.lang.acl.MessageTemplate;
 import com.whitestein.wsig.Configuration;
 import com.whitestein.wsig.fipa.SL0Helper;
 import com.whitestein.wsig.translator.SOAPToFIPASL0;
+
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.Property;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+
+import java.lang.String;
+import java.util.Iterator;
 
 import org.apache.log4j.Category;
 
@@ -71,6 +76,8 @@ public class TestAgent033 extends Agent {
 	//public static final String FIPA_SERVICE = "getTestVersion";
 	//public static final String OPERATION = "getVersion";
 
+	public static final String wsdlOperation = "echo";
+
 	public static String getNickName() {
 		return nickName;
 	}
@@ -84,56 +91,102 @@ public class TestAgent033 extends Agent {
 
 		// add behaviours of this Agent
 		
-		this.addBehaviour( new TickerBehaviour( this, 5000 ) {
-			private int d = 1;
-			public void onTick() {
-				ACLMessage request;
-				switch(d) {
-					case 1:
-						//d = 2;
-						d = 1;
-						request = createRequest();
-						break;
-					case 2:
-					default:
-						d = 1;
-						request = createRequestXMLtagged();
-						break;
-				}
-				cat.debug( SL0Helper.toString(request));
-				send(request);
+		this.addBehaviour( new OneShotBehaviour( this ) {
+			public void action() {
+				doSearch();
 			}
 		});
 
-		this.addBehaviour( new CyclicBehaviour( this ) {
-			private MessageTemplate template =
-					MessageTemplate.and(
-							MessageTemplate.MatchProtocol(
-									FIPANames.InteractionProtocol.FIPA_REQUEST),
-							MessageTemplate.MatchLanguage(
-									FIPANames.ContentLanguage.FIPA_SL0 ));
-			public void action() {
-				ACLMessage msg = myAgent.receive(); //( template );
-				if ( msg != null ) {
-					try {
-						cat.debug("A " + nickName + " receives: " + SL0Helper.toString(msg));
-					}catch ( Exception e ) {
-						cat.error(e);
-					}
-				}else {
-					block();
-				}
-			}
-		});
-		
 		// make an external class to access AID
 		cat.debug("A " + nickName + " is started.");
 	}
+
+	private void doSearch() {
+		DFAgentDescription template = new DFAgentDescription();
+		ServiceDescription sd = new ServiceDescription();
+		Property p = new Property(
+			Configuration.WEB_SERVICE + ".operation",
+			wsdlOperation );
+		sd.addProperties( p );
+		template.addServices( sd );
+		try {
+			DFAgentDescription[] res = DFService.search( this, template);
+			if ( res.length < 1 ) {
+				doDelete();
+				return;
+			} else {
+				AID aid;
+				String serviceName;
+
+				aid = res[0].getName();
+
+				serviceName = findServiceName( res[0] );
+				if ( null == serviceName ) {
+					cat.info( "No service is found." );
+					doDelete();
+					return;
+				}
+
+
+				this.addBehaviour( new CyclicBehaviour( this ) {
+					public void action() {
+						ACLMessage msg = myAgent.receive();
+						if ( msg != null ) {
+							processResponse( msg );
+						}else {
+							block();
+						}
+					}
+				});
+
+				final ACLMessage m = createRequest( aid, serviceName );
+				this.addBehaviour( new OneShotBehaviour( this ) {
+					public void action() {
+						send( m );
+					}
+				});
+			}
 		
-	private synchronized ACLMessage createRequest() {
+		} catch ( FIPAException fe ) {
+			cat.debug( fe );
+		}
+	}
+
+	private String findServiceName( DFAgentDescription dfad ) {
+		String res = null;
+		ServiceDescription sd;
+		Iterator it = dfad.getAllServices();
+		while( it.hasNext() ) {
+			sd = (ServiceDescription) it.next();
+			res = findServiceName( sd ); 
+			if ( null != res ) {
+				break;
+			}
+		}
+		return res;
+	}
+
+	private String findServiceName( ServiceDescription sd ) {
+		Property p;
+		Iterator it = sd.getAllProperties();
+		while( it.hasNext() ) {
+			p = (Property) it.next();
+			if ( wsdlOperation.equalsIgnoreCase( (String) p.getValue()) ) {
+				return sd.getName();
+			}
+		}
+		return null;
+	}
+
+	private void processResponse( ACLMessage msg ) {
+		cat.debug(" response is: " + SL0Helper.toString(msg) );
+		doDelete();
+	}
+
+	private synchronized ACLMessage createRequest( AID aid, String service ) {
 		//register itself to the gateway
 		ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
-		msg.addReceiver( Configuration.getInstance().getGatewayAID());
+		msg.addReceiver( aid );
 		msg.setSender( this.getAID());
 		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		msg.setConversationId( "conv_" + convId ++ );
@@ -143,14 +196,47 @@ public class TestAgent033 extends Agent {
 				"((action                                                       \n" +
 				"		(agent-identifier                                         \n" +
 				"			:name " + Configuration.getInstance().getGatewayAID() + " )                       \n" +
-				"		(" + FIPA_SERVICE + "                         \n" +
+				"		(" + service + "                         \n" +
 	            "   ) ))");
+		
+		cat.debug(" request is: " + SL0Helper.toString(msg) );
+		return msg;
+	}
+	
+	private synchronized ACLMessage createSearch() {
+		ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
+		msg.addReceiver( Configuration.getInstance().getGatewayAID());
+		msg.setSender( this.getAID());
+		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+		msg.setConversationId( "conv_" + convId ++ );
+		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		msg.setOntology("FIPA-Agent-Management");
+		msg.setContent(
+				"((action " +
+
+				"(agent-identifier " +
+				":name " +
+				Configuration.getInstance().getGatewayAID() +
+				") " +
+
+				"(search " +
+				" (df-agent-description " +
+				"  :services (set " +
+				"     (service-description :properties (set " +
+				"       (property :name web-service.operation :value echo )" +
+				" " +
+
+				"     )) " +
+				" ) ) " +
+				" (search-constraint) " +
+
+				") ))");
 		
 		return msg;
 	}
 	
 	private ACLMessage createRequestXMLtagged() {
-		ACLMessage msg = createRequest();
+		ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
 		msg.setContent(
 				"((action                                                       \n" +
 				"		(agent-identifier                                         \n" +

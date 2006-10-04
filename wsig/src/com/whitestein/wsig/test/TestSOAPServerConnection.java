@@ -1,8 +1,3 @@
-/*
- * Created on Jan 4, 2005
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -145,7 +140,7 @@ public class TestSOAPServerConnection extends Connection {
 					socket.getInputStream() );
 				Properties prop = readHeader( is );
 				String path = createAbsolutePath(prop);
-				cat.debug( "A request for path: " + path + "." );
+				cat.info( "A request for path: " + path + "." );
 				if ( WSDL_LOCATION.equalsIgnoreCase( path )) {
 					// request for a WSDL
 					try {
@@ -160,7 +155,7 @@ public class TestSOAPServerConnection extends Connection {
 						socket.close();
 						
 						// print out
-						cat.debug( "A response is: " + baos.toString("UTF-8"));
+						cat.info( "A response is: " + baos.toString("UTF-8"));
 					}catch (IOException ioe) {
 						ioe.printStackTrace();
 						setIsRunning(false);
@@ -199,9 +194,9 @@ public class TestSOAPServerConnection extends Connection {
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?> " +
 				"	<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">  " +
 				"	 <soapenv:Body> " +
-				"<tns:answer xmlns:tns=\""+ wsdlTargetNamespace +"\" >" +
+				"<tns:String xmlns:tns=\""+ wsdlTargetNamespace +"\" >" +
 				"Echo string" +
-				"</tns:answer>   " +
+				"</tns:String>   " +
 				"	 </soapenv:Body>   " +
 				"	</soapenv:Envelope>\r\n";
 		}else {
@@ -227,7 +222,7 @@ public class TestSOAPServerConnection extends Connection {
 		Connection.sendBackSOAPContent( content, os );
 		
 		// print out
-		cat.debug( "A response is: " + answer );
+		cat.info( "A response is: " + answer );
 	}
 	
 	public WSDLDefinition createWSDLDefinition() {
@@ -350,58 +345,5 @@ public class TestSOAPServerConnection extends Connection {
 		
 		return wsdlDef;
 	}
-	/*	
-	<?xml version="1.0" encoding="UTF-8"?>
-			<definitions name="MyWSDL" 
-			targetNamespace="http://T20java:8080/test/mywsdl"
-			xmlns="http://schemas.xmlsoap.org/wsdl/" 
-			xmlns:tns="http://T20java:8080/test/mywsdl"
-			xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
-			xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-			>
-
-			  <message name="InMessageRequest">
-			    <part name="numberToConvert" type="xsd:string"/>
-			    <part name="encodedlocale" type="xsd:string"/>
-			  </message>
-
-			  <message name="OutMessageResponse">
-			    <part name="outMsgText" type="xsd:string"/>
-			  </message>
-
-			  <portType name="NumberSpeller">
-			    <operation name="getSpelledForm">
-			      <input message="tns:InMessageRequest"/>
-			      <output message="tns:OutMessageResponse"/>
-			    </operation>
-			  </portType>
-
-			  <binding name="NumberSpellerBinding" type="tns:NumberSpeller">
-			    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
-			    <operation name="getSpelledForm">
-			      <soap:operation soapAction="http://www.NumberSpeller.com/getSpelledForm"/>
-			      <input>
-			        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:numberspeller" use="encoded"/>
-			      </input>
-			      <output>
-			        <soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:numberspeller" use="encoded"/>
-			      </output>
-			    </operation>
-			  </binding>
-
-			  <service name="NumberSpeller">
-			    <documentation>The NumberSpeller web service can be used to transform an integer number to a text string containing its spelled form (for example, "1" is transformed to "one"). </documentation>
-
-			    <port name="WebSphere" binding="tns:NumberSpellerBinding">
-			      <soap:address location="http://dwdemos.alphaworks.ibm.com/numspell/servlet/rpcrouter"/>
-			<documentation>SOAP Port for the NumberSpeller web service</documentation>
-			    </port>
-			    
-			  </service>
-			</definitions>
-	
-*/	
-	
-
 
 }

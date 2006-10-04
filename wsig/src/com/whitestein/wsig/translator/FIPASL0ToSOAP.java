@@ -1,8 +1,3 @@
-/*
- * Created on Aug 4, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -72,6 +67,7 @@ import jade.core.AID;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 
 /**
@@ -255,6 +251,10 @@ public class FIPASL0ToSOAP implements Translator {
 		String nsURI = extractNamespaceURI( fipa ); // from a wsdl
 		String prefix = Configuration.getInstance().getLocalNamespacePrefix();
 		SOAPBody sb = msg.getSOAPPart().getEnvelope().getBody();
+		SOAPElement env = msg.getSOAPPart().getEnvelope();
+		env.addNamespaceDeclaration("xsi","http://www.w3.org/1999/XMLSchema-instance");
+		env.addNamespaceDeclaration("xsd","http://www.w3.org/1999/XMLSchema");
+
 		String wsOperationName = a.getTypeName();
 		try {
 			wsOperationName = fipa.getServedOperation().getOperationID(
@@ -314,6 +314,10 @@ public class FIPASL0ToSOAP implements Translator {
 	 * @return XML document
 	 */
 	private SOAPElement generateXML( SOAPBody body, AbsObject ao, String prefix, String xmlURI ) throws SOAPException {
+		return generateXML( body, ao, prefix, xmlURI, null );
+	}
+
+	private SOAPElement generateXML( SOAPBody body, AbsObject ao, String prefix, String xmlURI, SOAPElement prevElement ) throws SOAPException {
 		cat.debug(this.getClass().getName() + ".generateXML(...) enters.");
 		SOAPElement el, el2;
 		if ( ao == null ) {
@@ -321,6 +325,8 @@ public class FIPASL0ToSOAP implements Translator {
 		}
 
 		String typeName = ao.getTypeName();
+		cat.debug(" for type " + typeName );
+
 		// to treat with XML attributes
 		AbsObject absAttributes = null;
 		if ( typeName.startsWith(SOAPToFIPASL0.XML_TAG_) ) {
@@ -363,8 +369,25 @@ public class FIPASL0ToSOAP implements Translator {
 		if ( isLeaf( ao )) {
 			try {
 				if ( ! operationLevel ) {
-					//	System.out.println( " leaf ao:" + ao.toString());
-					el.addTextNode( ao.toString());  // xml string check is needed
+					if( ao instanceof AbsPrimitive ) {
+						cat.debug( "" + ao.getTypeName() + " is AbsPrimitive. " );
+						String str = asString( (AbsPrimitive) ao );
+						// String str = ((AbsPrimitive) ao ).getObject().toString();
+						if ( null != prevElement ) {
+							// primitive value is a text node of parent's element
+							prevElement.addTextNode( str );
+							return null;
+						} else {
+							// not happened
+							el.addTextNode( str );
+							cat.debug( " previous element is null for AbsPrimitive " );
+						}
+					} else {
+						cat.debug( "" + ao.getTypeName() + " is not AbsPrimitive. " );
+
+						// none args to add
+						// el is already created
+					}
 				}
 			}catch ( SOAPException e ) {
 				cat.error(e);
@@ -386,7 +409,7 @@ public class FIPASL0ToSOAP implements Translator {
 							new PrefixedQName(xmlURI, name[i], prefix) );
 					//el2 = soapFactory.createElement( name[i], prefix, xmlURI );
 					el2.addAttribute( n, "true");
-					gen = generateXML( null, ao.getAbsObject( name[i] ), prefix, xmlURI );
+					gen = generateXML( null, ao.getAbsObject( name[i] ), prefix, xmlURI, el2 );
 					if ( gen != null ) {
 						el2.addChildElement(gen);
 					}
@@ -394,7 +417,7 @@ public class FIPASL0ToSOAP implements Translator {
 					// unnamed slot is left in aggregate case
 					//el2 = generateXML( null, ao.getAbsObject( name[i] ), prefix, xmlURI );
 					// ordering information is in a number appended
-					el2 = generateXML( null, ao.getAbsObject( UNNAMED+i ), prefix, xmlURI );
+					el2 = generateXML( null, ao.getAbsObject( UNNAMED+i ), prefix, xmlURI, el );
 				}
 				if ( el2 != null ) {
 					el.addChildElement( el2 );
@@ -464,6 +487,48 @@ public class FIPASL0ToSOAP implements Translator {
 	}
 
 
+	private String[] TYPE = {
+		BasicOntology.STRING,
+		BasicOntology.FLOAT,
+		BasicOntology.INTEGER,
+		BasicOntology.BOOLEAN,
+		BasicOntology.DATE,
+		BasicOntology.BYTE_SEQUENCE
+	};
+
+	/**
+	 * converts primitive types in FIPA into a java's string.
+	 * The JADE's basic ontology is taken as a refference.
+	 *
+	 * @param ap an abstract primitive
+	 * @return a string java representation
+	 */
+	private String asString( AbsPrimitive ap ) {
+		String type = ap.getTypeName();
+		if( BasicOntology.STRING.equals( type ) ) {
+			return ap.getString();
+		}
+		if( BasicOntology.FLOAT.equals( type ) ) {
+			return (new Double( ap.getDouble())).toString();  // wider type
+		}
+		if( BasicOntology.INTEGER.equals( type ) ) {
+			return (new Long(ap.getLong())).toString();  // wider type
+		}
+		if( BasicOntology.BOOLEAN.equals( type ) ) {
+			return (new Boolean(ap.getBoolean())).toString();
+		}
+		if( BasicOntology.DATE.equals( type ) ) {
+			SimpleDateFormat df = new SimpleDateFormat("YYYY-MM-ddTHH:mm:ssZ");
+			return df.format( ap.getDate());
+		}
+
+		// FIXME: correctness of byte sequence's encoding must be checked
+		if( BasicOntology.BYTE_SEQUENCE.equals( type ) ) {
+			return new String(ap.getByteSequence() );
+		}
+		return ap.toString();
+	}
+
 	/**
 	 * tells if AbsObject is Leaf in a tree structure
 	 *  
@@ -471,6 +536,7 @@ public class FIPASL0ToSOAP implements Translator {
 	 * @return true if it is a leaf
 	 */
 	private boolean isLeaf( AbsObject ao ) {
+		// cat.debug( "isLeaf( " + ao.getTypeName() + " ) -> 0 == " + ao.getCount() );
 		return ao.getCount() == 0;
 	}
 	

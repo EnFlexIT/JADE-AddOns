@@ -1,8 +1,3 @@
-/*
- * Created on Aug 12, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -49,6 +44,7 @@ import org.apache.log4j.Category;
 
 import com.whitestein.wsig.*;
 import com.whitestein.wsig.fipa.FIPAServiceIdentificator;
+import com.whitestein.wsig.fipa.GatewayAgent;
 import com.whitestein.wsig.ws.UDDIOperationIdentificator;
 //import com.whitestein.wsigs.ws.DFToUDDI4j;
 import jade.core.AID;
@@ -177,6 +173,10 @@ public class ServedOperationStore {
 			agentIdToServedOperations.put( agentId, col );
 		}
 		col.add(so);
+
+		// inform also GatewayAgent
+		GatewayAgent myGateway = GatewayAgent.getInstance();
+		myGateway.addOperationForLog( so );
 	}
 	
 	/**
@@ -213,6 +213,10 @@ public class ServedOperationStore {
 		if ( null != col ) {
 			col.remove( so );
 		}
+
+		// inform also GatewayAgent
+		GatewayAgent myGateway = GatewayAgent.getInstance();
+		myGateway.removeOperationForLog( so );
 	}
 
 }

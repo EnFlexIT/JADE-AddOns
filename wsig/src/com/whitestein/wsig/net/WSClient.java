@@ -1,8 +1,3 @@
-/*
- * Created on Nov 17, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -51,6 +46,7 @@ import com.whitestein.wsig.struct.ReturnMessageListener;
 import com.whitestein.wsig.struct.ServedOperation;
 import com.whitestein.wsig.struct.ServedOperationStore;
 import com.whitestein.wsig.ws.WSMessage;
+import com.whitestein.wsig.fipa.GatewayAgent;
 
 /**
  * @author jna
@@ -153,6 +149,11 @@ public class WSClient implements SOAPHandler, ReturnMessageListener {
 		cat.debug(" A WSClient's listener is invoked.");
 		returnedMessage = (WSMessage) retMsg;
 		//isListenerInformed = true;
+
+		// inform also a GUI's logger
+		GatewayAgent.getInstance().addMessageToLog(
+			retMsg.getServedOperation(), retMsg );
+
 		call = null;  //is not needed anymore
 		this.notifyAll(); // weak up waiters
 	}

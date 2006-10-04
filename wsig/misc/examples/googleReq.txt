@@ -1,0 +1,25 @@
+POST /search/beta2 HTTP/1.1
+SOAPAction: ""
+Connection: close
+Content-Type: text/xml; charset=utf-8
+Host: api.google.com
+Content-Length: 1020
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:doGoogleSearch xmlns:tns="urn:GoogleSearch">
+   <tns:key xsi:type="xsd:string" xmlns:tns="urn:GoogleSearch">d1EbfDpQFHKrV0dq13wf56XLgMsvVvxe</tns:key>
+   <tns:q xsi:type="xsd:string" xmlns:tns="urn:GoogleSearch">Foo</tns:q>
+   <tns:start xmlns:tns="urn:GoogleSearch">0</tns:start>
+   <tns:maxResults xmlns:tns="urn:GoogleSearch">10</tns:maxResults>
+   <tns:filter xmlns:tns="urn:GoogleSearch">true</tns:filter>
+   <tns:restrict xmlns:tns="urn:GoogleSearch">(restrict)</tns:restrict>
+   <tns:safeSearch xmlns:tns="urn:GoogleSearch">false</tns:safeSearch>
+   <tns:lr xmlns:tns="urn:GoogleSearch">(lr)</tns:lr>
+   <tns:ie xmlns:tns="urn:GoogleSearch">latin1</tns:ie>
+   <tns:oe xmlns:tns="urn:GoogleSearch">latin1</tns:oe>
+  </tns:doGoogleSearch>
+ </soapenv:Body>
+</soapenv:Envelope>
+

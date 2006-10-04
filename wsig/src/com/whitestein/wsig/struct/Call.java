@@ -1,8 +1,3 @@
-/*
- * Created on Jun 24, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -41,6 +36,7 @@
 package com.whitestein.wsig.struct;
 
 import com.whitestein.wsig.translator.*;
+import com.whitestein.wsig.fipa.GatewayAgent;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -95,12 +91,17 @@ public class Call implements ReturnMessageListener, Runnable{
 		}
 		try {
 			if ( translator != null ) {
+				// inform also GatewayAgent
+				GatewayAgent myGateway = GatewayAgent.getInstance();
+				myGateway.addMessageToLog( so, message );
+
 				messages = translator.translate(message);
 				Iterator it;
+				CalledMessage m = null;
 				
 				// count the messages as the first to avoid misunderstanding
 				//  the end of messages received
-				for( it = messages.iterator(); it.hasNext(); it.next()) {
+				for( it = messages.iterator(); it.hasNext(); m = (CalledMessage) it.next()) {
 					messagesCount ++ ;
 				}
 			}else {
@@ -128,6 +129,7 @@ public class Call implements ReturnMessageListener, Runnable{
 				Iterator it = messages.iterator();
 				while ( it.hasNext() ) {
 					msg = (CalledMessage) it.next();
+					msg.setServedOperation( so );
 					endPoint.send( msg, this );
 				}
 			}else {
@@ -191,6 +193,11 @@ public class Call implements ReturnMessageListener, Runnable{
 		if ( backTranslator != null 
 			&& retMsg != null
 			&& ( backTranslator.getInputType().compareTo( retMsg.getType()) == 0 ) ) {
+
+			// inform also GatewayAgent
+			GatewayAgent myGateway = GatewayAgent.getInstance();
+			myGateway.addMessageToLog( so, retMsg );
+
 			try {
 				Iterator it = backTranslator.translate(retMsg).iterator();
 				this.retMsg = null;
@@ -199,6 +206,9 @@ public class Call implements ReturnMessageListener, Runnable{
 					
 					// collect messages in a future version,
 					// today only the first is returned
+
+					// must be moved into a translator
+					this.retMsg.setServedOperation( so );
 				}
 			}catch (Exception e ) {
 				// this.retMsg = TRANSLATION_ERROR;
@@ -207,6 +217,7 @@ public class Call implements ReturnMessageListener, Runnable{
 			// else simply store
 			this.retMsg = retMsg;
 		}
+
 		if ( returnedCount == messagesCount ) {
 			// whole answer is received
 			isReceived = true;

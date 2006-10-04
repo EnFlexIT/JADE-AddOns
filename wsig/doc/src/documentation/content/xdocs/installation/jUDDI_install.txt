@@ -1,0 +1,145 @@
+
+Small Installation Guide For jUDDI Into Tomcat
+
+Date: 2004-06-26
+Author: jna@whitestein.com
+Updated: 2005-02-25
+
+Resources:
+ jUDDI version 'ws-juddi_20040607163616.tar.gz'
+ Tomcat version 5.0
+ documentation from http://jakarta.apache.org/tomcat/tomcat-5.0-doc/jndi-datasource-examples-howto.html
+ MySQL version 'mysql_4.0.15_win.zip'
+ libraries:
+  mm.mysql-2.0.14-bin.jar (or Connector/J from MySQL) for JDBC
+  mysql-connector-java-3.1.7.tar.gz  Connector/J for JDBC
+  saaj.jar for javax.xml.soap.SOAPMessage                       (ws-juddi\lib)
+  jaxrpc.jar for javax.xml.rpc.Service                          (ws-juddi\lib)
+  juddi.jar          (ws-juddi\build)
+  juddi-proxy.jar    (ws-juddi\build) 
+
+Guide lines:
+ 
+ 1. Tomcat Installation
+
+The file jakarta-tomcat-5.0.19.exe is executed.
+
+ 2. MySQL Installation
+
+Setup.exe must be run after unzip mysql's archive.
+After successfull of the installation the mysql\bin\winmysqladmin.exe is started
+and the user account informations are entered.
+The 'my.ini' is created in the c:\windows directory with basedir and datadir property configured.
+It is possible to run the mysql as a service under WinNT/XP then.
+
+ 3. The jUDDI Installation
+
+Zipped ws-juddi file contains the 'webapp' directory with servlet files.
+The directory must be copied into servlet directory 'webapps' on Tomcat with a description name like 'jUDDI'.
+Then the configuration of the MySQL database and Tomcat server must be performed.
+The script ws-juddi\sql\mysql\create_database.sql is fetch with the commandline mysql program as follows:
+  mysql\bin\mysql.exe --user=root < create_database.sql
+The new publisher required for UDDI queries is created with modified script ws-juddi\sql\mysql\insert_publishers.sql.
+The configuration of the Tomcat server consists of two steps, copying libraries
+and creating a Context element in the Tomcat\conf\server.xml file.
+The libraries are coppied into following destinations:
+  mm.mysql-2.0.14-bin.jar from mm.mysql-2.0.14-you-must-unjar-me.zip into Tomcat\common\lib directory,
+  saaj.jar, jaxrpc.jar, juddi.jar, juddi-proxy.jar into Tomcat\webapps\jUDDI\WEB-INF\lib directory.
+A Context element is got from jndi-datasource-examples-howto.html, MySQL DBCP Example.
+It is inserted into Host element and is modified as the following text:
+-----------------------------------------------------------------------------
+<Context path="/jUDDI" docBase="jUDDI"
+        debug="5" reloadable="true" crossContext="true">
+
+  <Logger className="org.apache.catalina.logger.FileLogger"
+             prefix="localhost_jUDDI_log." suffix=".txt"
+             timestamp="true"/>
+
+  <Resource name="jdbc/juddiDB"
+               auth="Container"
+               type="javax.sql.DataSource"/>
+
+  <ResourceParams name="jdbc/juddiDB">
+    <parameter>
+      <name>factory</name>
+      <value>org.apache.commons.dbcp.BasicDataSourceFactory</value>
+    </parameter>
+
+    <!-- Maximum number of dB connections in pool. Make sure you
+         configure your mysqld max_connections large enough to handle
+         all of your db connections. Set to 0 for no limit.
+         -->
+    <parameter>
+      <name>maxActive</name>
+      <value>100</value>
+    </parameter>
+
+    <!-- Maximum number of idle dB connections to retain in pool.
+         Set to 0 for no limit.
+         -->
+    <parameter>
+      <name>maxIdle</name>
+      <value>30</value>
+    </parameter>
+
+    <!-- Maximum time to wait for a dB connection to become available
+         in ms, in this example 10 seconds. An Exception is thrown if
+         this timeout is exceeded.  Set to -1 to wait indefinitely.
+         -->
+    <parameter>
+      <name>maxWait</name>
+      <value>10000</value>
+    </parameter>
+
+    <!-- MySQL dB username and password for dB connections  -->
+    <parameter>
+     <name>username</name>
+     <value>juddi</value>
+    </parameter>
+    <parameter>
+     <name>password</name>
+     <value>juddi</value>
+    </parameter>
+
+    <!-- Class name for the old mm.mysql JDBC driver - uncomment this entry and comment next
+         if you want to use this driver - we recommend using Connector/J though
+      -->
+    <parameter>
+       <name>driverClassName</name>
+       <value>org.gjt.mm.mysql.Driver</value>
+    </parameter>
+     
+    
+    <!-- Class name for the official MySQL Connector/J driver
+    <parameter>
+       <name>driverClassName</name>
+       <value>com.mysql.jdbc.Driver</value>
+    </parameter>
+     -->
+    
+    <!-- The JDBC connection url for connecting to your MySQL dB.
+         The autoReconnect=true argument to the url makes sure that the
+         mm.mysql JDBC Driver will automatically reconnect if mysqld closed the
+         connection.  mysqld by default closes idle connections after 8 hours.
+         -->
+    <parameter>
+      <name>url</name>
+      <value>jdbc:mysql://localhost:3306/juddi?autoReconnect=true</value>
+    </parameter>
+  </ResourceParams>
+</Context>
+-----------------------------------------------------------------------------
+After restarting Tomcat it is posssible to check jUDDI installation by view
+the http://localhost:8080/jUDDI/happyjuddi.jsp.
+
+4. Please, insert a busines key and structures related into database.
+A full name and a publisher ID are required to be changed according your publisher information previously stored by the sql script.
+	An example:
+use juddi;
+insert into business_name values ("8C983E50-E09B-11D8-BE50-DA8FBF3BDC61",
+  0, NULL , "Sample WSIG Provider");
+insert into business_descr values ("8C983E50-E09B-11D8-BE50-DA8FBF3BDC61",
+  0, NULL, "Sample WSIG testing provider");
+ insert into business_entity values ("8C983E50-E09B-11D8-BE50-DA8FBF3BDC61",
+   "your full name", "your publisher ID",          "jUDDI.org", 20050225150000);
+

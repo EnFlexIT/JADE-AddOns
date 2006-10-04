@@ -1,0 +1,47 @@
+
+juddi installation.
+ juddi-0.9rc3-src is used partialy.
+ The tomcat/common/lib/servlet-api.jar is required to be placed
+  in juddi-ws/webapp/WEB-INF/lib directory.
+ The mysql is left configured as an old version.
+  (my be problem, when new scripts/tables are differed)
+   mysql> insert into BUSINESS_NAME values ("8C983E50-E09B-11D8-BE50-DA8FBF3BDC61",   0, NULL , "Sample WSIG Provider");
+   mysql> insert into BUSINESS_DESCR values ("8C983E50-E09B-11D8-BE50-DA8FBF3BDC61",   0, NULL, "Sample WSIG testing provider");
+   mysql> insert into BUSINESS_ENTITY values ("8C983E50-E09B-11D8-BE50-DA8FBF3BDC61",    "your full name", "short name",          "jUDDI.org", 20050225150000);
+
+ The mysql.user table is changed by a command
+  update mysql.user set max_updates=1000, max_connections=1000,
+   max_questions=1000 where user='juddi';
+ The tomcat jUDDI webapp directory is replaced by new one.
+ The build/juddi.jar is copied into the jUDDI/WEB-INF/lib directory.
+
+
+ Example TestAgent001:
+
+DEBUG: com.whitestein.wsig.ws.DFToUDDI4j :    -> new operation: fipa_service=get_true, WSoperation=operation0
+DEBUG: com.whitestein.wsig.struct.ServedOperationStore :  operation is added : ( agent-identifier :name TestAgent001@t20java:1099/JADE  :addresses (sequence http://t20java:7778/acc )) get_true,   http://t20java:2222/wsig operation0
+DEBUG: com.whitestein.wsig.ws.DFToUDDI4j : A tModel is going to be created.
+DEBUG: com.whitestein.wsig.ws.DFToUDDI4j : Ask for authToken.
+DEBUG: com.whitestein.wsig.ws.DFToUDDI4j : Returned authToken from a UDDI:authToken:FA0A0340-DD2C-11D9-AAEB-84943C32B77C
+DEBUG: com.whitestein.wsig.ws.DFToUDDI4j : New tModelKey: uuid:FA5A4620-DD2C-11D9-AAEB-AB501C7CC493
+DEBUG: com.whitestein.wsig.ws.DFToUDDI4j : Ask for authToken.
+DEBUG: com.whitestein.wsig.ws.DFToUDDI4j : Returned authToken from a UDDI:authToken:FA872280-DD2C-11D9-AAEB-F07BD8C15096
+ERROR: com.whitestein.wsig.ws.DFToUDDI4j : An attempt was made to use the publishing API to change data that is controlled by another party.
+
+ a request:
+<soapenv:Body><save_service generic="2.0" xmlns="urn:uddi-org:api_v2"><authInfo>authToken:FA872280-DD2C-11D9-AAEB-F07BD8C15096</authInfo><businessService serviceKey="" businessKey="8C983E50-E09B-11D8-BE50-DA8FBF3BDC61"><name>WSIGS&apos;s businessService for TestAgent001</name></businessService></save_service> </soapenv:Body>
+
+ a responce:
+<soapenv:Body><Fault><faultcode>Client</faultcode><faultstring>Client Error</faultstring><faultactor/><detail><dispositionReport generic="2.0" operator="jUDDI.org" xmlns="urn:uddi-org:api_v2"><result errno="10140"><errInfo errCode="E_userMismatch">An attempt was made to use the publishing API to change data that is controlled by another party.</errInfo></result></dispositionReport></detail></Fault> </soapenv:Body>
+
+    an idea:  try to close every open connections
+            or not to ask for a new auth_token
+
+
+-------------------------------------
+2005-09-29
+forrest:
+  installation:
+    execute: "forrest run" to obtain plugins, an internet connection is required.
+    or copy directory main/plugins/org.apache.forrest.plugin.output.pdf
+                into  build/plugins

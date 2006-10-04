@@ -1,0 +1,75 @@
+POST /search/beta2 HTTP/1.1
+
+SOAPAction: ""
+
+Connection: close
+
+Content-Type: text/xml; charset="utf-8"
+
+Host: api.google.com
+
+User-Agent: Java/1.4.2_01
+
+Accept: text/html, image/gif, image/jpeg, *; q=.2, */*; q=.2
+
+Content-Length: 1018
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/1999/XMLSchema" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance">
+ <soapenv:Body>
+  <tns:doGoogleSearch xmlns:tns="urn:GoogleSearch">
+   <tns:key xsi:type="xsd:string" xmlns:tns="urn:GoogleSearch">d1EbfDpQFHKrV0dq13wf56XLgMsvVvxe</tns:key>
+   <tns:q xsi:type="xsd:string" xmlns:tns="urn:GoogleSearch">Foo</tns:q>
+   <tns:start xmlns:tns="urn:GoogleSearch">0</tns:start>
+   <tns:maxResults xmlns:tns="urn:GoogleSearch">10</tns:maxResults>
+   <tns:filter xmlns:tns="urn:GoogleSearch">true</tns:filter>
+   <tns:restrict xmlns:tns="urn:GoogleSearch">(restrict)</tns:restrict>
+   <tns:safeSearch xmlns:tns="urn:GoogleSearch">false</tns:safeSearch>
+   <tns:lr xmlns:tns="urn:GoogleSearch">(lr)</tns:lr>
+   <tns:ie xmlns:tns="urn:GoogleSearch">latin1</tns:ie>
+   <tns:oe xmlns:tns="urn:GoogleSearch">latin1</tns:oe>
+  </tns:doGoogleSearch>
+ </soapenv:Body>
+</soapenv:Envelope>
+
+
+--------------------------------- RESPONSE ----------------------
+
+HTTP/1.1 500 Internal Server Error
+
+Content-Type: text/xml; charset=utf-8
+
+Cache-control: private
+
+Transfer-Encoding: chunked
+
+Date: Thu, 28 Jul 2005 15:25:15 GMT
+
+Server: GFE/1.3
+
+Connection: Close
+
+
+
+223   
+
+<?xml version='1.0' encoding='UTF-8'?>
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/1999/XMLSchema-instance" xmlns:xsd="http://www.w3.org/1999/XMLSchema">
+<SOAP-ENV:Body>
+<SOAP-ENV:Fault>
+<faultcode>SOAP-ENV:Client</faultcode>
+<faultstring>No Deserializer found to deserialize a 'urn:GoogleSearch:tns:start' using encoding style 'http://schemas.xmlsoap.org/soap/encoding/'.</faultstring>
+<faultactor>/search/beta2</faultactor>
+</SOAP-ENV:Fault>
+
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+
+0
+
+
+

@@ -1,8 +1,3 @@
-/*
- * Created on Jul 2, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -20,7 +15,7 @@
  *
  * The Initial Developer of the Original Code is
  * Whitestein Technologies AG.
- * Portions created by the Initial Developer are Copyright (C) 2004
+ * Portions created by the Initial Developer are Copyright (C) 2004, 2005
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s): Jozef Nagy (jna at whitestein.com)
@@ -102,6 +97,13 @@ public class FIPAMessage extends CalledMessageImpl {
 	 */
 	public ACLMessage getACLMessage() {
 		return aclMessage;
+	}
+
+	/**
+	 * gives a string's representation of the message
+	 */
+	public String toString() {
+		return SL0Helper.toString( this.aclMessage );
 	}
 	
 }

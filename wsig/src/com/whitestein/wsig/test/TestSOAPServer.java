@@ -1,8 +1,3 @@
-/*
- * Created on Dec 22, 2004
- *
- */
-
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
@@ -440,10 +435,9 @@ public class TestSOAPServer extends HTTPServer{
 		t.setupUDDI4j();
 		t.register();
 		try {
-			int m = 5;
-		    Thread.sleep( m * 60000 ); // 5 minutes
-		    cat.warn( "A TestSOAPServer will be terminated after " +
-		    		m + "minutes");
+			int m = 10 * 24 * 60 * 60000;  // 10 days
+		    cat.warn( "A TestSOAPServer will be terminated after 10 days." );
+		    Thread.sleep( m );
 		}catch (InterruptedException ie) {
 		    cat.debug( "an interruption, " + ie);
 			t.deregister();
