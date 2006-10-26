@@ -162,7 +162,7 @@ public class Gateway {
 		}
 	}
 	
-	private void test() {
+	/*private void test() {
 		FIPAServiceIdentificator fipa = new FIPAServiceIdentificator(
 				new AID("testAgent001@T20java:1099/JADE",AID.ISGUID), TestAgent001.OPERATION);
 			//	new AID("da0",AID.ISLOCALNAME), "service01");
@@ -221,19 +221,19 @@ public class Gateway {
 		id = new OperationID( fipa, uddi );
 		//wsep = new WSEndPoint(uddi);//,this);
 		test = new ServedOperation( id, wsep, true );
-		/*
-		wsdl = new WSDLDefinition();
-		try {
-			wsdl.setURL( new URL("http://localhost:8080/axis/services/Version?wsdl"));
-			wsdl.setDefinition( WSDLFactory.newInstance().newWSDLReader(
-				).readWSDL( "file:///C:/Program%20Files/Apache%20Software%20Foundation/Tomcat%205.0/webapps/axis/Version.xml.wsdl" ) );
-		}catch ( Exception e ) {
-			e.printStackTrace();
-		}
-		*/
+
+		//wsdl = new WSDLDefinition();
+		//try {
+		//	wsdl.setURL( new URL("http://localhost:8080/axis/services/Version?wsdl"));
+		//	wsdl.setDefinition( WSDLFactory.newInstance().newWSDLReader(
+		//		).readWSDL( "file:///C:/Program%20Files/Apache%20Software%20Foundation/Tomcat%205.0/webapps/axis/Version.xml.wsdl" ) );
+		//}catch ( Exception e ) {
+		//	e.printStackTrace();
+		//}
+
 		test.setWSDL( wsdl );
 		operationStore.put(test);
-	}
+	}*/
 
 	public void addServedOperation() {
 		FIPAServiceIdentificator fipa;

@@ -29,7 +29,9 @@ package jade.core.persistence;
    This interface provides callback methods that will be invoked
    during saving, loading, reloading, freezing and thawing operations
    of an agent that had previously registered this 
-   <code>Movable</code> object.
+   <code>Savable</code> object to the agent's Persistence Helper.
+   If no Savable object is registered a default one is used that implements all callback
+   methods invoking (if present) methods with the same signature in the agent instance.
    @see jade.core.persistence.PersistenceHelper#registerSavable(Savable s)
    @author Giovanni Caire - TILAB.
  */

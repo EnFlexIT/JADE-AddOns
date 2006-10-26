@@ -58,8 +58,8 @@ import java.rmi.*;
 public class TestUtility {
 	private static boolean verbose = true;
 	
-	public static String HTTP_MTP_CLASSPATH;
-	public static String HTTP_MTP_ARG;
+	public static String HTTP_MTP_CLASSPATH = "";
+	public static String HTTP_MTP_ARG = "";
 	
 	public static final String CONFIGURABLE_AGENT = "test.common.ConfigurableAgent";
 	
@@ -73,7 +73,7 @@ public class TestUtility {
 	private static test.common.remote.RemoteManager defaultRm = null;
 	
 	static {
-		String version = System.getProperty("java.version");
+		/*String version = System.getProperty("java.version");
 		if (version.startsWith("1.4")) {
 			HTTP_MTP_CLASSPATH = "";
 			HTTP_MTP_ARG = "";
@@ -81,7 +81,7 @@ public class TestUtility {
 		else {
 			HTTP_MTP_CLASSPATH = "../../tools/xercesImpl.jar";
 			HTTP_MTP_ARG = "-jade_mtp_http_parser org.apache.xerces.parsers.SAXParser";
-		}
+		}*/
 		
 		cm.registerLanguage(codec);
 		cm.registerOntology(onto);
@@ -207,9 +207,9 @@ public class TestUtility {
 	 Request an AMS agent to perform a given action of a given ontology.
 	 */
 	public static Object requestAMSAction(Agent a, AID amsAID, AgentAction action, String ontologyName) throws TestException {
-		return requestAMSAction(a, amsAID, action, ontologyName, 10000);
+		return requestAMSAction(a, amsAID, action, ontologyName, 30000);
 	}
-	
+	 
 	/**
 	 Request an AMS agent to perform a given action of a given ontology specifying a given timeout.
 	 */

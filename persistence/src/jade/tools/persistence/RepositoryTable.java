@@ -85,9 +85,9 @@ class RepositoryTable {
     private static Map icons;
     static {
         icons = new HashMap();
-        icons.put(RepositoryTable.ModelItem.FROZEN_AGENT, new ImageIcon(RepositoryTable.class.getResource("/jade/tools/persistence/images/freezeAgent.gif")));
-        icons.put(RepositoryTable.ModelItem.SAVED_AGENT, new ImageIcon(RepositoryTable.class.getResource("/jade/tools/persistence/images/saveAgent.gif")));
-        icons.put(RepositoryTable.ModelItem.SAVED_CONTAINER, new ImageIcon(RepositoryTable.class.getResource("/jade/tools/persistence/images/saveContainer.gif")));
+        icons.put(RepositoryTable.ModelItem.FROZEN_AGENT, new ImageIcon(RepositoryTable.class.getResource("/jade/tools/persistence/images/freezeagent.gif")));
+        icons.put(RepositoryTable.ModelItem.SAVED_AGENT, new ImageIcon(RepositoryTable.class.getResource("/jade/tools/persistence/images/saveagent.gif")));
+        icons.put(RepositoryTable.ModelItem.SAVED_CONTAINER, new ImageIcon(RepositoryTable.class.getResource("/jade/tools/persistence/images/savecontainer.gif")));
     }
 
     /** Creates a new instance of RepositoryTable */

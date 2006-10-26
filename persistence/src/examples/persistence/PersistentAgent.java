@@ -54,7 +54,7 @@ public class PersistentAgent extends Agent implements Savable {
 							System.out.println("Agent "+myAgent.getName()+" freezing...");
 							try {
 								PersistenceHelper helper = (PersistenceHelper) myAgent.getHelper(PersistenceHelper.NAME);
-								helper.freezeMyself(getAID(), PersistenceManager.DEFAULT_REPOSITORY, null);
+								helper.freeze(PersistenceManager.DEFAULT_REPOSITORY, null);
 							}
 							catch (Exception e) {
 								e.printStackTrace();
@@ -64,7 +64,7 @@ public class PersistentAgent extends Agent implements Savable {
 							System.out.println("Agent "+myAgent.getName()+" saving...");
 							try {
 								PersistenceHelper helper = (PersistenceHelper) myAgent.getHelper(PersistenceHelper.NAME);
-								helper.saveMyself(getAID(), PersistenceManager.DEFAULT_REPOSITORY);
+								helper.save(PersistenceManager.DEFAULT_REPOSITORY);
 							}
 							catch (Exception e) {
 								e.printStackTrace();
@@ -74,7 +74,7 @@ public class PersistentAgent extends Agent implements Savable {
 							System.out.println("Agent "+myAgent.getName()+" reloading...");
 							try {
 								PersistenceHelper helper = (PersistenceHelper) myAgent.getHelper(PersistenceHelper.NAME);
-								helper.reloadMyself(getAID(), PersistenceManager.DEFAULT_REPOSITORY);
+								helper.reload(PersistenceManager.DEFAULT_REPOSITORY);
 							}
 							catch (Exception e) {
 								e.printStackTrace();

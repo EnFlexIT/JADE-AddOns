@@ -77,7 +77,7 @@ public class PermissionFilter extends Filter {
       this.service = service;
       this.myContainer = myContainer;
       this.myProfile = myProfile;
-      setPreferredPosition( FIRST );  // first filter
+      setPreferredPosition( 5 );  // Soon, but not necessarily the first
       this.direction=direction;
 
       // Load rows into the checkerTable 

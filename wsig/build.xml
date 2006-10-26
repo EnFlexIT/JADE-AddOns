@@ -71,15 +71,15 @@ It is created according a JADE's build.xml.
 	
 	<target name="clean" description="clean up">
 		<!-- Delete directories, which may be created automatic -->
-		<delete includeEmptyDirs="true" failonerror="false" quiet="true">
+		<delete includeEmptyDirs="true" failonerror="false">
 			<fileset dir="${build}" excludes="**/*.mf"/>
 			<fileset dir="${lib}" includes="*.jar"/>
 			<fileset dir="${doc}/api"/>
 <!-- ${doc}/build must be generate by the apache-forrest outside the ant,
      cd ${doc}
      forrest
- -->
 			<fileset dir="${doc}/build"/>
+ -->
 		</delete>
 	</target>
 

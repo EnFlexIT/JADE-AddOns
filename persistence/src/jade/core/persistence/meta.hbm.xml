@@ -8,7 +8,7 @@
         Hibernate mapping for the meta-database of the JADE Persistence Service
 -->
 
-<!DOCTYPE hibernate-mapping PUBLIC '-//Hibernate/Hibernate Mapping DTD//EN' 'http://hibernate.sourceforge.net/hibernate-mapping-2.0.dtd'>
+<!DOCTYPE hibernate-mapping PUBLIC '-//Hibernate/Hibernate Mapping DTD//EN' 'http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd'>
 <hibernate-mapping>
 
     <!-- The description of a JADE Repository -->
@@ -20,13 +20,13 @@
 
         <property name="name"/>
 
-        <list name="mappings" cascade="all">
+        <list name="mappings" cascade="all" lazy="false">
             <key column="owner"/>
             <index column="idx"/>
             <element column="elem" type="string"/>
         </list>
 
-        <many-to-one name="properties" cascade="all"/>
+        <many-to-one name="properties" cascade="all" lazy="false"/>
 
     </class>
 
@@ -42,7 +42,7 @@
         <!-- Key-value pairs, directly stored within the DB -->
         <subclass name="jade.core.persistence.Repository$StoredProperties">
 
-            <map name="values" table="storedproperties_data" cascade="all">
+            <map name="values" table="storedproperties_data" cascade="all" lazy="false">
                 <key column="owner"/>
                 <index column="prop_name" type="string"/>
                 <element column="prop_value" type="string"/>

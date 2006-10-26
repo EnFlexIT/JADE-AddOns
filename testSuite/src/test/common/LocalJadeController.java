@@ -62,6 +62,7 @@ class LocalJadeController implements JadeController, OutputHandler {
 		}
 		
 		if (!ready) {
+			System.out.println("JADE startup timeout expired");
 			proc.destroy();
 			throw new TestException("Remote JADE startup was not completed successfully"); 
 		}
@@ -71,13 +72,13 @@ class LocalJadeController implements JadeController, OutputHandler {
 		// Two cases are possible:
 		// 1) JADE startup completed succesffully --> 
 		//    we exit lock.wait() with ready == true
-		// 2) JADE startup failed or stuck (we wait at most 10 sec) -->
+		// 2) JADE startup failed or stuck (we wait at most 60 sec) -->
 		//    we exit lock.wait() with ready == false 
 		
 		synchronized (lock) {
 			while (!ready) {
 				try {
-					lock.wait(20000); // Wait for 20 sec at most
+					lock.wait(60000); // Wait for 60 sec at most
 					break;
 				}
 				catch (InterruptedException ie) {

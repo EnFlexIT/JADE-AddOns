@@ -56,6 +56,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import java.util.Map;
+import javax.swing.JOptionPane;
 
 
 /**
@@ -134,105 +135,130 @@ public class PersistenceManagerAgent extends ToolAgent {
 
     // External method, called from the GUI
     public void reloadAgent(AID agentID, String repository) {
-        ReloadAgent reloadAct = new ReloadAgent();
-        reloadAct.setAgent(agentID);
-        reloadAct.setRepository(repository);
-
-        try {
-            Action a = new Action();
-            a.setActor(getAMS());
-            a.setAction(reloadAct);
-
-            ACLMessage requestMsg = getRequest();
-            requestMsg.setOntology(PersistenceVocabulary.NAME);
-            getContentManager().fillContent(requestMsg, a);
-            addBehaviour(new AMSClientBehaviour("ReloadAgent", requestMsg));
-        } catch (Exception fe) {
-            fe.printStackTrace();
-        }
+    	if (getAID().equals(agentID)) {
+    		JOptionPane.showMessageDialog(myGUI, "The PersistenceManagerAgent cannot be reloaded");
+    	}
+    	else {
+	        ReloadAgent reloadAct = new ReloadAgent();
+	        reloadAct.setAgent(agentID);
+	        reloadAct.setRepository(repository);
+	
+	        try {
+	            Action a = new Action();
+	            a.setActor(getAMS());
+	            a.setAction(reloadAct);
+	
+	            ACLMessage requestMsg = getRequest();
+	            requestMsg.setOntology(PersistenceVocabulary.NAME);
+	            getContentManager().fillContent(requestMsg, a);
+	            addBehaviour(new AMSClientBehaviour("ReloadAgent", requestMsg));
+	        } catch (Exception fe) {
+	            fe.printStackTrace();
+	        }
+    	}
     }
 
     // External method, called from the GUI
     public void saveAgent(AID agentID, String repository) {
-        SaveAgent saveAct = new SaveAgent();
-        saveAct.setAgent(agentID);
-        saveAct.setRepository(repository);
-
-        try {
-            Action a = new Action();
-            a.setActor(getAMS());
-            a.setAction(saveAct);
-
-            ACLMessage requestMsg = getRequest();
-            requestMsg.setOntology(PersistenceVocabulary.NAME);
-            getContentManager().fillContent(requestMsg, a);
-            addBehaviour(new AMSClientBehaviour("SaveAgent", requestMsg));
-        } catch (Exception fe) {
-            fe.printStackTrace();
-        }
+    	if (getAID().equals(agentID)) {
+    		JOptionPane.showMessageDialog(myGUI, "The PersistenceManagerAgent cannot be saved");
+    	}
+    	else {
+	        SaveAgent saveAct = new SaveAgent();
+	        saveAct.setAgent(agentID);
+	        saveAct.setRepository(repository);
+	
+	        try {
+	            Action a = new Action();
+	            a.setActor(getAMS());
+	            a.setAction(saveAct);
+	
+	            ACLMessage requestMsg = getRequest();
+	            requestMsg.setOntology(PersistenceVocabulary.NAME);
+	            getContentManager().fillContent(requestMsg, a);
+	            addBehaviour(new AMSClientBehaviour("SaveAgent", requestMsg));
+	        } catch (Exception fe) {
+	            fe.printStackTrace();
+	        }
+    	}
     }
 
     // External method, called from the GUI
     public void saveContainer(String containerName, String repository) {
-        SaveContainer saveAct = new SaveContainer();
-        saveAct.setContainer(new ContainerID(containerName, null));
-        saveAct.setRepository(repository);
-
-        try {
-            Action a = new Action();
-            a.setActor(getAMS());
-            a.setAction(saveAct);
-
-            ACLMessage requestMsg = getRequest();
-            requestMsg.setOntology(PersistenceVocabulary.NAME);
-            getContentManager().fillContent(requestMsg, a);
-            addBehaviour(new AMSClientBehaviour("SaveContainer", requestMsg));
-        } catch (Exception fe) {
-            fe.printStackTrace();
-        }
+    	if (here().getName().equals(containerName)) {
+    		JOptionPane.showMessageDialog(myGUI, "The PersistenceManagerAgent container cannot be saved");
+    	}
+    	else {
+	        SaveContainer saveAct = new SaveContainer();
+	        saveAct.setContainer(new ContainerID(containerName, null));
+	        saveAct.setRepository(repository);
+	
+	        try {
+	            Action a = new Action();
+	            a.setActor(getAMS());
+	            a.setAction(saveAct);
+	
+	            ACLMessage requestMsg = getRequest();
+	            requestMsg.setOntology(PersistenceVocabulary.NAME);
+	            getContentManager().fillContent(requestMsg, a);
+	            addBehaviour(new AMSClientBehaviour("SaveContainer", requestMsg));
+	        } catch (Exception fe) {
+	            fe.printStackTrace();
+	        }
+    	}
     }
 
     // External method, called from the GUI
     public void loadAgent(AID agentID, String repository, String containerName) {
-        LoadAgent loadAct = new LoadAgent();
-        loadAct.setAgent(agentID);
-        loadAct.setRepository(repository);
-
-        ContainerID where = new ContainerID(containerName, null);
-        loadAct.setWhere(where);
-
-        try {
-            Action a = new Action();
-            a.setActor(getAMS());
-            a.setAction(loadAct);
-
-            ACLMessage requestMsg = getRequest();
-            requestMsg.setOntology(PersistenceVocabulary.NAME);
-            getContentManager().fillContent(requestMsg, a);
-            addBehaviour(new AMSClientBehaviour("LoadAgent", requestMsg));
-        } catch (Exception fe) {
-            fe.printStackTrace();
-        }
+    	if (getAID().equals(agentID)) {
+    		JOptionPane.showMessageDialog(myGUI, "The PersistenceManagerAgent cannot be loaded");
+    	}
+    	else {
+	        LoadAgent loadAct = new LoadAgent();
+	        loadAct.setAgent(agentID);
+	        loadAct.setRepository(repository);
+	
+	        ContainerID where = new ContainerID(containerName, null);
+	        loadAct.setWhere(where);
+	
+	        try {
+	            Action a = new Action();
+	            a.setActor(getAMS());
+	            a.setAction(loadAct);
+	
+	            ACLMessage requestMsg = getRequest();
+	            requestMsg.setOntology(PersistenceVocabulary.NAME);
+	            getContentManager().fillContent(requestMsg, a);
+	            addBehaviour(new AMSClientBehaviour("LoadAgent", requestMsg));
+	        } catch (Exception fe) {
+	            fe.printStackTrace();
+	        }
+    	}
     }
 
     // External method, called from the GUI
     public void loadContainer(String containerName, String repository) {
-        LoadContainer loadAct = new LoadContainer();
-        loadAct.setContainer(new ContainerID(containerName, null));
-        loadAct.setRepository(repository);
-
-        try {
-            Action a = new Action();
-            a.setActor(getAMS());
-            a.setAction(loadAct);
-
-            ACLMessage requestMsg = getRequest();
-            requestMsg.setOntology(PersistenceVocabulary.NAME);
-            getContentManager().fillContent(requestMsg, a);
-            addBehaviour(new AMSClientBehaviour("LoadContainer", requestMsg));
-        } catch (Exception fe) {
-            fe.printStackTrace();
-        }
+    	if (here().getName().equals(containerName)) {
+    		JOptionPane.showMessageDialog(myGUI, "The PersistenceManagerAgent container cannot be loaded");
+    	}
+    	else {
+	        LoadContainer loadAct = new LoadContainer();
+	        loadAct.setContainer(new ContainerID(containerName, null));
+	        loadAct.setRepository(repository);
+	
+	        try {
+	            Action a = new Action();
+	            a.setActor(getAMS());
+	            a.setAction(loadAct);
+	
+	            ACLMessage requestMsg = getRequest();
+	            requestMsg.setOntology(PersistenceVocabulary.NAME);
+	            getContentManager().fillContent(requestMsg, a);
+	            addBehaviour(new AMSClientBehaviour("LoadContainer", requestMsg));
+	        } catch (Exception fe) {
+	            fe.printStackTrace();
+	        }
+    	}
     }
 
     // External method, called from the GUI
@@ -258,8 +284,7 @@ public class PersistenceManagerAgent extends ToolAgent {
     }
 
     // External method, called from the GUI
-    public void deleteContainer(String containerName, String whereName,
-        String repository) {
+    public void deleteContainer(String containerName, String whereName, String repository) {
         ContainerID cid = new ContainerID(containerName, null);
         ContainerID where = new ContainerID(whereName, null);
         DeleteContainer deleteAct = new DeleteContainer();
@@ -283,48 +308,58 @@ public class PersistenceManagerAgent extends ToolAgent {
 
     // External method, called from the GUI
     public void freezeAgent(AID agentID, String whereName, String repository) {
-        ContainerID where = new ContainerID(whereName, null);
-
-        FreezeAgent freezeAct = new FreezeAgent();
-        freezeAct.setAgent(agentID);
-        freezeAct.setBufferContainer(where);
-        freezeAct.setRepository(repository);
-
-        try {
-            Action a = new Action();
-            a.setActor(getAMS());
-            a.setAction(freezeAct);
-
-            ACLMessage requestMsg = getRequest();
-            requestMsg.setOntology(PersistenceVocabulary.NAME);
-            getContentManager().fillContent(requestMsg, a);
-            addBehaviour(new AMSClientBehaviour("FreezeAgent", requestMsg));
-        } catch (Exception fe) {
-            fe.printStackTrace();
-        }
+    	if (getAID().equals(agentID)) {
+    		JOptionPane.showMessageDialog(myGUI, "The PersistenceManagerAgent cannot be freezed");
+    	}
+    	else {
+	        ContainerID where = new ContainerID(whereName, null);
+	
+	        FreezeAgent freezeAct = new FreezeAgent();
+	        freezeAct.setAgent(agentID);
+	        freezeAct.setBufferContainer(where);
+	        freezeAct.setRepository(repository);
+	
+	        try {
+	            Action a = new Action();
+	            a.setActor(getAMS());
+	            a.setAction(freezeAct);
+	
+	            ACLMessage requestMsg = getRequest();
+	            requestMsg.setOntology(PersistenceVocabulary.NAME);
+	            getContentManager().fillContent(requestMsg, a);
+	            addBehaviour(new AMSClientBehaviour("FreezeAgent", requestMsg));
+	        } catch (Exception fe) {
+	            fe.printStackTrace();
+	        }
+    	}
     }
 
     // External method, called from the GUI
     public void thawAgent(AID agentID, String whereName, String repository) {
-        ContainerID where = new ContainerID(whereName, null);
-
-        ThawAgent thawAct = new ThawAgent();
-        thawAct.setAgent(agentID);
-        thawAct.setRepository(repository);
-        thawAct.setNewContainer(where);
-
-        try {
-            Action a = new Action();
-            a.setActor(getAMS());
-            a.setAction(thawAct);
-
-            ACLMessage requestMsg = getRequest();
-            requestMsg.setOntology(PersistenceVocabulary.NAME);
-            getContentManager().fillContent(requestMsg, a);
-            addBehaviour(new AMSClientBehaviour("ThawAgent", requestMsg));
-        } catch (Exception fe) {
-            fe.printStackTrace();
-        }
+    	if (getAID().equals(agentID)) {
+    		JOptionPane.showMessageDialog(myGUI, "The PersistenceManagerAgent cannot be thawn");
+    	}
+    	else {
+	        ContainerID where = new ContainerID(whereName, null);
+	
+	        ThawAgent thawAct = new ThawAgent();
+	        thawAct.setAgent(agentID);
+	        thawAct.setRepository(repository);
+	        thawAct.setNewContainer(where);
+	
+	        try {
+	            Action a = new Action();
+	            a.setActor(getAMS());
+	            a.setAction(thawAct);
+	
+	            ACLMessage requestMsg = getRequest();
+	            requestMsg.setOntology(PersistenceVocabulary.NAME);
+	            getContentManager().fillContent(requestMsg, a);
+	            addBehaviour(new AMSClientBehaviour("ThawAgent", requestMsg));
+	        } catch (Exception fe) {
+	            fe.printStackTrace();
+	        }
+    	}
     }
 
     /**
