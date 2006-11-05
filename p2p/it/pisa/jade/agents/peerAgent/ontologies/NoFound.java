@@ -1,1 +1,0 @@
-package it.pisa.jade.agents.peerAgent.ontologies;import jade.content.Concept;/** *  * @author Fabrizio Marozzo * */@SuppressWarnings("serial")public class NoFound implements Concept {	private String searchKey;	public String getSearchKey() {		return searchKey;	}	public void setSearchKey(String searchKey) {		this.searchKey = searchKey;	}		}
