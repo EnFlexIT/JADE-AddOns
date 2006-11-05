@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment></comment>
+<entry key="peerAddressPort">63250</entry>
+<entry key="federatorTimeSleep">5000</entry>
+<entry key="multicastPort">6030</entry>
+<entry key="sharedDirectory">C:\Documents and Settings\All Users\Documenti\Immagini\Immagini campione</entry>
+<entry key="promptConsoleMessage">no</entry>
+<entry key="jadePortNumber">1099</entry>
+<entry key="multicastTTL">127</entry>
+<entry key="peerAgentPeriod">10000</entry>
+<entry key="timeRefreshPlatformMin">5000</entry>
+<entry key="mobileInterplatformPath">C:\</entry>
+<entry key="reducedMessageSending">yes</entry>
+<entry key="ttlPlatformRecord">2</entry>
+<entry key="multicastIP">127.0.0.1</entry>
+<entry key="mobileInterplatformService">no</entry>
+<entry key="timeRefreshPlatformMax">20000</entry>
+</properties>
