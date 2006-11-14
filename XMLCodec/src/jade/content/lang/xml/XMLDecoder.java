@@ -138,7 +138,7 @@ public class XMLDecoder {
 	}
 
 	/**
-	 * Event if the frame was encoded by order some slots may have been encoded by name in any way. These are:
+	 * Even if the frame was encoded by order some slots may have been encoded by name in any way. These are:
 	 * - slots with non-string primitive values. These are encoded as XML attributes 
 	 * - slots with string primitive values. These are encoded as <slot-name>string</slot-name>
 	 * - slots with aggregate values. These are encoded as <slot-name><item1..><item2..>..</slot-name>
