@@ -26,6 +26,7 @@ package jade.core.persistence;
 
 //#MIDP_EXCLUDE_FILE
 
+import jade.core.ContainerID;
 import jade.core.ServiceNotActiveException;
 
 import jade.content.onto.Ontology;
@@ -93,6 +94,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 			}
 			catch(Exception e) {
 				// Some other error occurred. Throw a FIPA Failure exception.
+				e.printStackTrace();
 				throw new FailureException("load-agent failed [" + e.getMessage() + "]");
 			}
 		}
@@ -112,6 +114,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 				}
 				catch(Exception e) {
 					// some other error occurred. Throws a FIPA Failure exception.
+					e.printStackTrace();
 					throw new FailureException("reload-agent failed [" + e.getMessage() + "]");
 				}
 			}
@@ -132,6 +135,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 				}
 				catch(Exception e) {
 					// Some other error occurred. Throw a FIPA Failure exception.
+					e.printStackTrace();
 					throw new FailureException("save-agent failed [" + e.getMessage() + "]");
 				}
 			}
@@ -148,6 +152,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 			}
 			catch(Exception e) {
 				// Some other error occurred. Throw a FIPA Failure exception.
+				e.printStackTrace();
 				throw new FailureException("delete-agent failed [" + e.getMessage() + "]");
 			}
 		}
@@ -167,6 +172,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 				}
 				catch(Exception e) {
 					// Some other error occurred. Throw a FIPA Failure exception.
+					e.printStackTrace();
 					throw new FailureException("freeze-agent failed [" + e.getClass().getName() + ": " + e.getMessage() + "]");
 				}
 			}
@@ -183,6 +189,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 			}
 			catch(Exception e) {
 				// Some other error occurred. Throw a FIPA Failure exception.
+				e.printStackTrace();
 				throw new FailureException("thaw-agent failed [" + e.getClass().getName() + ": " + e.getMessage() + "]");
 			}
 		}
@@ -202,6 +209,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 				}
 				catch(Exception e) {
 					// Some other error occurred. Throw a FIPA Failure exception.
+					e.printStackTrace();
 					throw new FailureException("save-container failed [" + e.getClass().getName() + ": " + e.getMessage() + "]");
 				}
 			}
@@ -222,6 +230,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 				}
 				catch(Exception e) {
 					// Some other error occurred. Throw a FIPA Failure exception.
+					e.printStackTrace();
 					throw new FailureException("load-container failed [" + e.getClass().getName() + ": " + e.getMessage() + "]");
 				}
 			}
@@ -239,6 +248,7 @@ public class PersistenceManagementBehaviour extends RequestManagementBehaviour {
 			}
 			catch(Exception e) {
 				// Some other error occurred. Throw a FIPA Failure exception.
+				e.printStackTrace();
 				throw new FailureException("delete-container failed [" + e.getClass().getName() + ": " + e.getMessage() + "]");
 			}
 		}

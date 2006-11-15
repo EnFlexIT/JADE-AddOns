@@ -532,21 +532,26 @@ public class PersistenceService extends BaseService {
 
 			MainContainer impl = myContainer.getMain();
 			if(impl != null) {
-				// On a main container, one is able to save an agent
+				// On a main container, one is able to reload an agent
 				// running on a different container
 				ContainerID cid = impl.getContainerID(agentID);
 				PersistenceSlice targetSlice = (PersistenceSlice)getSlice(cid.getName());
-				try {
-					targetSlice.reloadAgent(agentID, repository);
+				if (targetSlice != null) {
+					try {
+						targetSlice.reloadAgent(agentID, repository);
+					}
+					catch(IMTPException imtpe) {
+						// Try to get a newer slice and repeat...
+						targetSlice = (PersistenceSlice)getFreshSlice(cid.getName());
+						targetSlice.reloadAgent(agentID, repository);
+					}
 				}
-				catch(IMTPException imtpe) {
-					// Try to get a newer slice and repeat...
-					targetSlice = (PersistenceSlice)getFreshSlice(cid.getName());
-					targetSlice.reloadAgent(agentID, repository);
-				}
+				else {
+					throw new NotFoundException("Target container does not exist or does not support persistence");
+				}				
 			}
 			else {
-				// On a peripheral container, one can directly save
+				// On a peripheral container, one can directly reload
 				// only an agent deployed on the local container
 				PersistenceSlice targetSlice = (PersistenceSlice)getSlice(localSlice.getNode().getName());
 				targetSlice.reloadAgent(agentID, repository);
@@ -560,19 +565,19 @@ public class PersistenceService extends BaseService {
 			ContainerID where = (ContainerID)params[2];
 
 			PersistenceSlice targetSlice = (PersistenceSlice)getSlice(where.getName());
-			try {
-				if(targetSlice != null) {
+			if(targetSlice != null) {
+				try {
 					targetSlice.deleteAgent(agentID, repository);
 				}
-				else {
-					throw new NotFoundException("Node <" + where.getName() + "> not found");
+				catch(IMTPException imtpe) {
+					// Try to get a newer slice and repeat...
+					targetSlice = (PersistenceSlice)getFreshSlice(where.getName());
+					targetSlice.deleteAgent(agentID, repository);
 				}
 			}
-			catch(IMTPException imtpe) {
-				// Try to get a newer slice and repeat...
-				targetSlice = (PersistenceSlice)getFreshSlice(where.getName());
-				targetSlice.deleteAgent(agentID, repository);
-			}
+			else {
+				throw new NotFoundException("Target container does not exist or does not support persistence");
+			}				
 		}
 
 		private void handleFreezeAgent(VerticalCommand cmd) throws IMTPException, ServiceException, NotFoundException {
@@ -587,17 +592,22 @@ public class PersistenceService extends BaseService {
 				// running on a different container
 				ContainerID cid = impl.getContainerID(agentID);
 				PersistenceSlice targetSlice = (PersistenceSlice)getSlice(cid.getName());
-				try {
-					targetSlice.freezeAgent(agentID, repository, bufferContainer);
+				if (targetSlice != null) {
+					try {
+						targetSlice.freezeAgent(agentID, repository, bufferContainer);
+					}
+					catch(IMTPException imtpe) {
+						// Try to get a newer slice and repeat...
+						targetSlice = (PersistenceSlice)getFreshSlice(cid.getName());
+						targetSlice.freezeAgent(agentID, repository, bufferContainer);
+					}
 				}
-				catch(IMTPException imtpe) {
-					// Try to get a newer slice and repeat...
-					targetSlice = (PersistenceSlice)getFreshSlice(cid.getName());
-					targetSlice.freezeAgent(agentID, repository, bufferContainer);
-				}
+				else {
+					throw new NotFoundException("Message-buffering container does not exist or does not support persistence");
+				}				
 			}
 			else {
-				// On a peripheral container, one can directly save
+				// On a peripheral container, one can directly freeze
 				// only an agent deployed on the local container
 				PersistenceSlice targetSlice = (PersistenceSlice)getSlice(localSlice.getNode().getName());
 				targetSlice.freezeAgent(agentID, repository, bufferContainer);
@@ -612,21 +622,26 @@ public class PersistenceService extends BaseService {
 
 			MainContainer impl = myContainer.getMain();
 			if(impl != null) {
-				// On a main container, one is able to freeze an agent
-				// running on a different container
+				// On a main container, one is able to thaw an agent
+				// on a different container
 				ContainerID cid = impl.getContainerID(agentID);
 				PersistenceSlice targetSlice = (PersistenceSlice)getSlice(cid.getName());
-				try {
-					targetSlice.thawAgent(agentID, repository, newContainer);
+				if (targetSlice != null) {
+					try {
+						targetSlice.thawAgent(agentID, repository, newContainer);
+					}
+					catch(IMTPException imtpe) {
+						// Try to get a newer slice and repeat...
+						targetSlice = (PersistenceSlice)getFreshSlice(cid.getName());
+						targetSlice.thawAgent(agentID, repository, newContainer);
+					}
 				}
-				catch(IMTPException imtpe) {
-					// Try to get a newer slice and repeat...
-					targetSlice = (PersistenceSlice)getFreshSlice(cid.getName());
-					targetSlice.thawAgent(agentID, repository, newContainer);
+				else {
+					throw new NotFoundException("Target container does not exist or does not support persistence");
 				}
 			}
 			else {
-				// On a peripheral container, one can directly save
+				// On a peripheral container, one can directly thaw
 				// only an agent deployed on the local container
 				PersistenceSlice targetSlice = (PersistenceSlice)getSlice(localSlice.getNode().getName());
 				targetSlice.thawAgent(agentID, repository, newContainer);
@@ -1010,23 +1025,29 @@ public class PersistenceService extends BaseService {
 				Long agentFK = myPersistenceManager.readFrozenMessageQueue(messageQueueID, repository, bufferedMessages);
 				// Activate message buffering for the frozen agent on the buffer container
 				PersistenceSlice targetSlice = (PersistenceSlice)getSlice(newContainer.getName());
-				try {
+				if (targetSlice != null) {
 					try {
-						targetSlice.setupThawedAgent(agentID, agentFK, newContainer, repository, bufferedMessages);
+						try {
+							targetSlice.setupThawedAgent(agentID, agentFK, newContainer, repository, bufferedMessages);
+						}
+						catch(IMTPException imtpe) {
+							// Try again with a newer slice
+							targetSlice = (PersistenceSlice)getFreshSlice(newContainer.getName());
+							targetSlice.setupThawedAgent(agentID, agentFK, newContainer, repository, bufferedMessages);
+						}
+	
+						// Actually remove the frozen message queue from the DB, without retrieving the buffered messages list
+						myPersistenceManager.evictFrozenMessageQueue(messageQueueID, repository);
 					}
-					catch(IMTPException imtpe) {
-						// Try again with a newer slice
-						targetSlice = (PersistenceSlice)getFreshSlice(newContainer.getName());
-						targetSlice.setupThawedAgent(agentID, agentFK, newContainer, repository, bufferedMessages);
+					catch(ServiceException se) {
+						// Some kind of DB-related error. Abort the operation.
+						frozenAgents.put(agentID, e);
+						throw se;
 					}
-
-					// Actually remove the frozen message queue from the DB, without retrieving the buffered messages list
-					myPersistenceManager.evictFrozenMessageQueue(messageQueueID, repository);
 				}
-				catch(ServiceException se) {
-					// Some kind of DB-related error. Abort the operation.
+				else {
 					frozenAgents.put(agentID, e);
-					throw se;
+					throw new NotFoundException("Desctination container does not exist or does not support persistence.");
 				}
 			}
 			else {
