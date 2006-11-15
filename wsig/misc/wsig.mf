@@ -1,14 +1,12 @@
 Manifest-Version: 1.0
-Ant-Version: Apache Ant 1.5.3 
-Created-By: 1.4.1_01-b01 (Sun Microsystems Inc.)
 
-Name: javax/xml/rpc
-Specification-Title: JAX-RPC
-Specification-Version: 1.1
-Specification-Vendor: JCP
+Name: com/whitestein/wsig
+Specification-Title: WSIG
+Specification-Version: 0.7
+Specification-Vendor: Whitestein Technologies AG
 Bundle-Name: WebService Integration Gateway
 Bundle-Vendor: Whitestein Technologies AG, whitestein.com
 Bundle-SymbolicName: project.WSIG.beta.0
-Bundle-Version: beta.0.4
-Bundle-ClassPath: lib/xerces-2_6_2/resolver.jar,lib/axis-1_1/lib/axis.jar,lib/axis-1_1/lib/commons-discovery.jar,lib/axis-1_1/lib/commons-logging.jar,lib/axis-1_1/lib/jaxrpc.jar,lib/axis-1_1/lib/log4j-1.2.8.jar,lib/axis-1_1/lib/saaj.jar,lib/uddi4j-2_0_2/lib/uddi4j.jar,lib/wsdl4j-1_4/lib/qname.jar,lib/wsdl4j-1_4/lib/wsdl4j.jar,lib/xerces-2_6_2/xercesImpl.jar,lib/xerces-2_6_2/xml-apis.jar,lib/xerces-2_6_2/xmlParserAPIs.jar,bin/
+Bundle-Version: 0.7beta
+
 

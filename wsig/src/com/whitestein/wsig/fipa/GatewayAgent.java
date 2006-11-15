@@ -198,7 +198,7 @@ public class GatewayAgent extends GuiAgent {
 	public GatewayAgent() {
 		super();
 		//Gateway.getInstance();  // start also Gateway
- 
+
         	// creates a HTTPServer for a WS accessPoint
                 try {
                         int port = Configuration.getInstance().getHostPort();

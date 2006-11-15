@@ -35,21 +35,10 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.test;
 
-import jade.core.AID;
-import jade.domain.FIPAException;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.Deregister;
-import jade.domain.FIPAAgentManagement.Register;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Collection;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -75,18 +64,10 @@ import org.uddi4j.response.TModelDetail;
 import org.uddi4j.transport.TransportException;
 import org.uddi4j.util.ServiceKey;
 import org.uddi4j.util.TModelKey;
-import org.uddi4j.datatype.binding.AccessPoint;
-
 
 import com.whitestein.wsig.Configuration;
-import com.whitestein.wsig.net.Connection;
 import com.whitestein.wsig.net.HTTPServer;
-import com.whitestein.wsig.net.Redirector;
 import com.whitestein.wsig.net.SOAPHandler;
-import com.whitestein.wsig.net.UDDIRegistrationHandler;
-import com.whitestein.wsig.net.WSClient;
-import com.whitestein.wsig.ws.DFToUDDI4j;
-import com.whitestein.wsig.ws.WSMessage;
 
 /**
  * @author jna
@@ -160,7 +141,6 @@ public class TestGoogleRegistration extends HTTPServer {
 		//System.setProperty("hpsoap.logDirectory","/tmp");
 		//System.setProperty("hpsoap.logFileName","uddi4j.log");
 		
-		uddiProxy = new UDDIProxy();
 		synchronized ( c ) {
 			// synchronized on main Configuration instance
 			// to prevent changes in configuration
@@ -174,6 +154,7 @@ public class TestGoogleRegistration extends HTTPServer {
 			userName = c.getUserName();
 			password = c.getUserPassword();
 			
+			uddiProxy = new UDDIProxy();
 			// log.debug(" bk="+ businessKey + ", user=" + userName + ", p=" + password );
 
 			// Select the desired UDDI server node

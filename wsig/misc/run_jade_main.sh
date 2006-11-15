@@ -1,3 +1,3 @@
 #!/bin/sh
 
-../misc/runjade.sh -gui $*
+./runjade.sh -gui $*

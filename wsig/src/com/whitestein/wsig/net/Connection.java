@@ -266,7 +266,7 @@ public class Connection implements Runnable, ReturnMessageListener {
 	 * @throws IOException if an input stream reading error is occured
 	 */
 	public SOAPMessage readBody( InputStream is, Properties prop ) throws IOException {
-		String contentType = prop.getProperty("Content-Type","application/soap+xml; charset=\"utf-8\"");
+		String contentType = prop.getProperty("Content-Type","application/soap+xml; charset=utf-8");
 		String contentLocation = prop.getProperty(HTTP_LOCATION, "/");
 		//BufferedReader r = new BufferedReader( new InputStreamReader( is )); 
 
@@ -491,7 +491,7 @@ public class Connection implements Runnable, ReturnMessageListener {
 		os.write(new String("Content-Length: "+ content.length +"\r\n\r\n").getBytes());
 		os.write( content );
 		*/
-		sendBackContent( content, "application/soap+xml; charset=\"utf-8\"", os );
+		sendBackContent( content, "application/soap+xml; charset=utf-8", os );
 	}
 
 	public static void sendBackContent( byte[] content, String type, OutputStream os ) throws IOException {

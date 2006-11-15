@@ -1,3 +1,3 @@
 #!/bin/sh
 
-../misc/runjade.sh -container -host localhost TestAgentClient:com.whitestein.wsig.test.TestAgentClient
+./runjade.sh -container TestAgentClient:com.whitestein.wsig.test.TestAgentClient

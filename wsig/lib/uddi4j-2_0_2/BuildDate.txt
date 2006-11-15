@@ -1,1 +1,0 @@
-UDDI4J OpenSource BuildDate : 04-Sep-2003

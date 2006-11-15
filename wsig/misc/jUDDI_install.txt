@@ -1,18 +1,15 @@
 
 Small Installation Guide For jUDDI Into Tomcat
 
-Date: 2004-06-26
-Author: jna@whitestein.com
-Updated: 2005-02-25
+Date: 2006-11-15
+Updated: 2006-11-15
 
 Resources:
- jUDDI version 'ws-juddi_20040607163616.tar.gz'
- Tomcat version 5.0
- documentation from http://jakarta.apache.org/tomcat/tomcat-5.0-doc/jndi-datasource-examples-howto.html
- MySQL version 'mysql_4.0.15_win.zip'
+ jUDDI version 0.9.0rc4
+ Tomcat version 5.5.15
+ MySQL version 5.0
  libraries:
-  mm.mysql-2.0.14-bin.jar (or Connector/J from MySQL) for JDBC
-  mysql-connector-java-3.1.7.tar.gz  Connector/J for JDBC
+  mysql-connector-java-5.0.4.tar.gz  Connector/J for JDBC
   saaj.jar for javax.xml.soap.SOAPMessage                       (ws-juddi\lib)
   jaxrpc.jar for javax.xml.rpc.Service                          (ws-juddi\lib)
   juddi.jar          (ws-juddi\build)
@@ -22,7 +19,6 @@ Guide lines:
  
  1. Tomcat Installation
 
-The file jakarta-tomcat-5.0.19.exe is executed.
 
  2. MySQL Installation
 
@@ -43,8 +39,8 @@ The new publisher required for UDDI queries is created with modified script ws-j
 The configuration of the Tomcat server consists of two steps, copying libraries
 and creating a Context element in the Tomcat\conf\server.xml file.
 The libraries are coppied into following destinations:
-  mm.mysql-2.0.14-bin.jar from mm.mysql-2.0.14-you-must-unjar-me.zip into Tomcat\common\lib directory,
-  saaj.jar, jaxrpc.jar, juddi.jar, juddi-proxy.jar into Tomcat\webapps\jUDDI\WEB-INF\lib directory.
+  mysql-connector-java-5.0.4-bin.jar from mysql-connector-java-5.0.4.zip into %TOMCAT_HOME%\common\lib directory,
+  saaj.jar, jaxrpc.jar, juddi.jar, juddi-proxy.jar into %TOMCAT_HOME%\webapps\jUDDI\WEB-INF\lib directory.
 A Context element is got from jndi-datasource-examples-howto.html, MySQL DBCP Example.
 It is inserted into Host element and is modified as the following text:
 -----------------------------------------------------------------------------
@@ -141,5 +137,5 @@ insert into business_name values ("8C983E50-E09B-11D8-BE50-DA8FBF3BDC61",
 insert into business_descr values ("8C983E50-E09B-11D8-BE50-DA8FBF3BDC61",
   0, NULL, "Sample WSIG testing provider");
  insert into business_entity values ("8C983E50-E09B-11D8-BE50-DA8FBF3BDC61",
-   "your full name", "your publisher ID",          "jUDDI.org", 20050225150000);
+   "John Doe", "jdoe","jUDDI.org", 20050225150000);
 

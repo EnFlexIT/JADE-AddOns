@@ -242,7 +242,7 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 		httpConn.setRequestMethod("POST");
 		httpConn.setRequestProperty("SOAPAction", "\"\"");
 		httpConn.setRequestProperty("Connection", "close");
-		httpConn.setRequestProperty("Content-Type","text/xml; charset=\"utf-8\"");
+		httpConn.setRequestProperty("Content-Type","text/xml; charset=utf-8");
 		String portPart = (url.getPort()!=-1) ? (":"+url.getPort()) : "";
 		httpConn.setRequestProperty("Host",url.getHost() + portPart);
 		cat.debug(" host sets to " + url.getHost() );
@@ -328,17 +328,32 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 			}
 		}
 				
-		String contentType;
+		String contentType  = "";
 		String contentLocation;
 		
 		try {
-			contentType = responseHeader.get("Content-Type").toString();
-	    	// "application/soap+xml; charset=\"utf-8\""
+			Object obj = responseHeader.get("Content-Type");
+			if (obj instanceof String){
+				contentType = (String)obj;
+			}
+			else {
+				if ( obj instanceof Collection && !((Collection) obj).isEmpty() ){
+					for (Iterator iter = ((Collection)obj).iterator(); iter.hasNext();) {
+						String element = (String) iter.next();
+						contentType += element;
+					}
+				}
+				else {
+					contentType = "";
+				}
+			}
+			cat.debug(" Content-Type = " + contentType);
+			// "application/soap+xml; charset=\"utf-8\""
 		}catch (NullPointerException e) {
 			contentType = "";
 		}
 		contentLocation = "";
-		
+
 		// use AXIS's implementation of a SOAPMessage
 		Message soap = null;
 		if ( retStr.length() > 0 ) {

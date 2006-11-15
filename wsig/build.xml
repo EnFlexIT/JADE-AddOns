@@ -8,7 +8,7 @@ It is created according a JADE's build.xml.
 
 <project name="Web Service Integration Gateway" default="lib" basedir=".">
 	<description>WSIG build file</description>
-	<property name="version" value="beta.0.6"/>
+	<property name="version" value="0.7beta"/>
 	<property name="build.compiler" value="modern"/>
 	<property name="javac.optimize" value="on"/>
 	<property name="javac.debug" value="on"/>
@@ -17,7 +17,7 @@ It is created according a JADE's build.xml.
 	<property name="root" location="."/>
 	<property name="lib" location="lib"/>
 	<property name="src" location="src"/>
-	<property name="dist" location=".."/>
+	<property name="dist" location="dist"/>
 	<property name="doc" location="doc"/>
 	<property name="build" location="classes"/>
 	<property name="demo" location="demo"/>
@@ -29,29 +29,25 @@ It is created according a JADE's build.xml.
 		<!-- Create the time stamp -->
 		<tstamp/>
 		<!-- Create the directory structure -->
-		<!-- <mkdir dir="${doc}"/> -->
 		<mkdir dir="${lib}"/>
 		<mkdir dir="${build}"/>
 		<mkdir dir="${test}"/>
 	</target>
 
 	<target name="compile" depends="init" description="compile the source">
-	    <javac srcdir="${src}" destdir="${build}" nowarn="off" target="1.4" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="on">
+	    <javac srcdir="${src}" destdir="${build}" nowarn="off" target="1.4" source="1.4" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="on">
 	      <classpath>
 	        <fileset dir="${libJADEDir}" includes="*.jar"/>
-	        <fileset dir="${lib}" includes="**/*.jar"/>
+	        <fileset dir="${lib}" includes="*.jar"/>
 	      </classpath>
 	    </javac>
-		<!--
-	    <copy file="${misc}/wsig.mf" todir="${build}"/>
-		-->
 	    <copy file="${src}/com/whitestein/wsig/test/GoogleSearch.wsdl" todir="${build}/com/whitestein/wsig/test/"/>
 	</target>
 
 	<target name="lib" depends="compile" description="generate the jar file">
 		<!-- Create the wsig.jar file -->
-		<delete file="${lib}/wsig.jar" quiet="true"/>
-		<jar jarfile="${lib}/wsig.jar" manifest="${misc}/wsig.mf">
+		<delete file="${dist}/wsig.jar" quiet="true"/>
+		<jar jarfile="${dist}/wsig.jar" manifest="${misc}/wsig.mf">
 			<fileset dir="${build}"/>
 		</jar>
 	</target>
@@ -60,7 +56,7 @@ It is created according a JADE's build.xml.
 		<javadoc destdir="${doc}/api" author="true" windowtitle="WSIG ${version} API Reference" sourcepath="${src}" use="true" packagenames="com.whitestein.wsig">
 			<classpath>
 				<fileset dir="${libJADEDir}" includes="*.jar"/>
-				<fileset dir="${lib}" includes="**/*.jar"/>
+				<fileset dir="${lib}" includes="*.jar"/>
 			</classpath>
 		</javadoc>
 	</target>
@@ -73,13 +69,8 @@ It is created according a JADE's build.xml.
 		<!-- Delete directories, which may be created automatic -->
 		<delete includeEmptyDirs="true" failonerror="false">
 			<fileset dir="${build}" excludes="**/*.mf"/>
-			<fileset dir="${lib}" includes="*.jar"/>
+			<fileset dir="${dist}" includes="wsig.jar"/>
 			<fileset dir="${doc}/api"/>
-<!-- ${doc}/build must be generate by the apache-forrest outside the ant,
-     cd ${doc}
-     forrest
-			<fileset dir="${doc}/build"/>
- -->
 		</delete>
 	</target>
 

@@ -615,7 +615,6 @@ public class Gateway {
 		System.setProperty("hpsoap.logFileName","uddi4j.log");
 		System.setProperty("org.uddi4j.logEnabled","false");
 		System.setProperty("org.uddi4j.TransportClassName","org.uddi4j.transport.ApacheAxisTransport");
-		uddiProxy = new UDDIProxy ();
 		synchronized ( c ) {
 			// synchronized on main Configuration instance
 			// to prevent changes in configuration
@@ -630,6 +629,7 @@ public class Gateway {
 			userName = c.getUserName();
 			password = c.getUserPassword();
 
+			uddiProxy = new UDDIProxy ();
 			// Select the desired UDDI server node
 			try {
 //				uddiProxy.setInquiryURL(c.getQueryManagerURL());

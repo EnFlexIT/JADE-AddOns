@@ -115,16 +115,16 @@ public class TestAgent001 extends Agent {
     // ------------------------------
     // register the agent into the DF
 
-    // pripare a message
+    // prepare a message
     ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
     AID  dfAID = new AID( "df", AID.ISLOCALNAME );
-    msg.addReceiver( dfAID );
-    msg.setSender( this.getAID());
-    msg.setConversationId( "conv_" + convId ++ );
+    msg.addReceiver(dfAID);
+    msg.setSender(this.getAID());
+    msg.setConversationId("conv_" + convId ++ );
     msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
     msg.setOntology(FIPAManagementVocabulary.NAME);
                                                                               
-    // pripare a DFAgentDescription
+    // prepare a DFAgentDescription
     dfad.setName( this.getAID());
     dfad.addLanguages( FIPANames.ContentLanguage.FIPA_SL0 );
     dfad.addProtocols( FIPANames.InteractionProtocol.FIPA_REQUEST );

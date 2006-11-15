@@ -37,27 +37,23 @@ package com.whitestein.wsig.test;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
 import jade.domain.FIPANames;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.Property;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
+
+import java.util.Iterator;
+
+import org.apache.log4j.Logger;
 
 import com.whitestein.wsig.Configuration;
 import com.whitestein.wsig.fipa.SL0Helper;
 import com.whitestein.wsig.translator.SOAPToFIPASL0;
-
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.Property;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
-
-import java.lang.String;
-import java.util.Iterator;
-
-import org.apache.log4j.Logger;
 
 
 /**

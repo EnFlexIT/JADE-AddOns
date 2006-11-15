@@ -530,7 +530,6 @@ public class DFToUDDI4j implements DFMethodListener {
 		//System.setProperty("hpsoap.logDirectory","/tmp");
 		//System.setProperty("hpsoap.logFileName","uddi4j.log");
 		
-		uddiProxy = new UDDIProxy();
 		synchronized ( c ) {
 			// synchronized on main Configuration instance
 			// to prevent changes in configuration
@@ -544,6 +543,8 @@ public class DFToUDDI4j implements DFMethodListener {
 			userName = c.getUserName();
 			password = c.getUserPassword();
 
+			//Moved after setting System Properties
+			uddiProxy = new UDDIProxy();
 			// Select the desired UDDI server node
 			try {
 				uddiProxy.setInquiryURL(c.getQueryManagerURL());

@@ -61,7 +61,7 @@ import com.whitestein.wsig.Configuration;
 public class TestUDDI4j {
 
 	private Category cat = Category.getInstance(TestUDDI4j.class.getName());
-	private UDDIProxy uddiProxy= new UDDIProxy();
+	private UDDIProxy uddiProxy;
 	private AuthToken authToken;
 
 	/**
@@ -69,6 +69,9 @@ public class TestUDDI4j {
 	 *
 	 */
 	public void saveBusiness() {
+		if (uddiProxy == null) {
+			throw new RuntimeException("uddiProxy not initialized");
+		}
 		cat.debug("Enter into a saveBusines method.");
 		cat.info(" debug is : " + cat.isDebugEnabled());
 		BusinessDetail busDetail = null;
@@ -105,6 +108,9 @@ public class TestUDDI4j {
 	 *
 	 */
 	public void searchTest() {
+		if (uddiProxy == null) {
+			throw new RuntimeException("uddiProxy not initialized");
+		}
 		//creating vector of Name Object
 		Vector names = new Vector();
 		names.add(new Name("S"));
@@ -150,6 +156,7 @@ public class TestUDDI4j {
 			userName = c.getUserName();
 			password = c.getUserPassword();
 
+			uddiProxy = new UDDIProxy();
 			// Select the desired UDDI server node
 			try {
 				uddiProxy.setInquiryURL(c.getQueryManagerURL());
@@ -175,6 +182,9 @@ public class TestUDDI4j {
 	 *
 	 */
 	public void createNewBusiness() {
+		if (uddiProxy == null) {
+			throw new RuntimeException("uddiProxy not initialized");
+		}
 		// new business for gateway is created
 		//BusinessEntity be = new BusinessEntity("", Configuration.getInstance().getGatewayName());
 		BusinessEntity be = new BusinessEntity("","WSIGS");
