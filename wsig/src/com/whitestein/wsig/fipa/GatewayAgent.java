@@ -258,7 +258,6 @@ public class GatewayAgent extends GuiAgent {
 	public void sendACL( ACLMessage acl ) {
 		// used by FIPAReturnMessageListener
 		// create reply does not fill a sender
-		acl.setSender( Configuration.getInstance().getGatewayAID() );
 		log.debug(" a response is " + SL0Helper.toString(acl));
 		send(acl);
 	}
@@ -294,7 +293,6 @@ public class GatewayAgent extends GuiAgent {
 	 * @param acl message to fill
 	 */
 	private void fillACLParameters( ACLMessage acl ) {
-		acl.setSender( Configuration.getInstance().getGatewayAID() );
 		acl.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
 		acl.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		acl.setConversationId( getConversationId() );
@@ -307,8 +305,7 @@ public class GatewayAgent extends GuiAgent {
 	 */
 	private synchronized String getConversationId() {
 		// return Integer.toString( conversationId ++ );
-		// return Configuration.getInstance().getGatewayAID() + Integer.toString( conversationId ++ );
-		return "Query" + Configuration.getInstance().getGatewayAID() + (new Date()).getTime();
+		return "Query" + getName() + (new Date()).getTime();
 	}
 
 	/**
@@ -423,7 +420,7 @@ public class GatewayAgent extends GuiAgent {
 	private void registerMe() {
 		//register itself to a DF
 		ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
-		msg.addReceiver( dfAID ); // Configuration.getInstance().getGatewayAID());
+		msg.addReceiver( dfAID ); 
 		/*
 		msg.setSender( this.getAID());
 		msg.setConversationId( getConversationId() );
@@ -475,7 +472,7 @@ public class GatewayAgent extends GuiAgent {
 
 		//deregister itself from a DF
 		ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
-		msg.addReceiver( dfAID ); // Configuration.getInstance().getGatewayAID());
+		msg.addReceiver( dfAID ); 
 		fillACLParameters( msg );
 		msg.setOntology(FIPAManagementVocabulary.NAME);
 
@@ -484,7 +481,7 @@ public class GatewayAgent extends GuiAgent {
 		dereg.setDescription(dfad);
 		
 		// create registration's action
-		Action action = new Action( this.getAID(), dereg );
+		Action action = new Action( dfAID, dereg );
 
 		try {
 			getContentManager().fillContent(msg, action);
@@ -840,14 +837,14 @@ public class GatewayAgent extends GuiAgent {
 	private void sendModifyDF( DFAgentDescription dfad ) {
 		//prepare an ACL
 		ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
-		msg.addReceiver( dfAID ); // Configuration.getInstance().getGatewayAID());
+		msg.addReceiver( dfAID ); 
 		fillACLParameters( msg );
 		msg.setOntology(FIPAManagementVocabulary.NAME);
 		
 		// create modification's action
 		Modify modify = new Modify();
 		modify.setDescription(dfad);
-		Action action = new Action( this.getAID(), modify );
+		Action action = new Action( dfAID, modify );
 
 		try {
 			getContentManager().fillContent(msg, action);
