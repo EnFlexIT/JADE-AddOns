@@ -185,7 +185,7 @@ public class TestAgentForFindPlace extends Agent {
 		msg.setSender( this.getAID());
 		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		msg.setConversationId( "conv_" + convId ++ );
-		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		msg.setOntology("AnOntology");
 		msg.setContent(
 				"((action \n" +
@@ -208,7 +208,7 @@ public class TestAgentForFindPlace extends Agent {
 		msg.setSender( this.getAID());
 		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		msg.setConversationId( "conv_" + convId ++ );
-		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		msg.setOntology("FIPA-Agent-Management");
 		msg.setContent(
 				"((action " +
@@ -240,7 +240,7 @@ public class TestAgentForFindPlace extends Agent {
 		msg.setSender( this.getAID());
 		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		msg.setConversationId( "conv_" + convId ++ );
-		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		msg.setOntology("AnOntology");
 		msg.setContent(
 				"((action                                                       \n" +

@@ -35,11 +35,6 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.fipa;
 
-import org.apache.log4j.Category;
-import java.util.*;
-//import com.whitestein.wsigs.struct.Call;
-import com.whitestein.wsig.translator.FIPASL0ToSOAP;
-
 import jade.content.abs.AbsAgentAction;
 import jade.content.abs.AbsConcept;
 import jade.content.abs.AbsContentElement;
@@ -51,10 +46,18 @@ import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SL0Vocabulary;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.BasicOntology;
-import jade.content.onto.basic.Action;
 import jade.content.onto.OntologyException;
+import jade.content.onto.basic.Action;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
+import org.apache.log4j.Logger;
+
+import com.whitestein.wsig.translator.FIPASL0ToSOAP;
 
 /**
  * @author jna
@@ -64,7 +67,7 @@ import jade.lang.acl.ACLMessage;
 public class SL0Helper {
 
 	private static SLCodec codecSL0 = new SLCodec(0);
-	private static Category cat = Category.getInstance(SL0Helper.class.getName());
+	private static Logger logger = Logger.getLogger(SL0Helper.class.getName());
 	
 	/**
 	 * removes one couple of paranteses.
@@ -120,7 +123,7 @@ public class SL0Helper {
 				str += c;
 				continue;
 			}
-			switch( c ) {
+			switch(c) {
 				case '(' :
 					if( 0 == level ) {
 						// a new token starts, old one is terminated
@@ -169,9 +172,7 @@ public class SL0Helper {
 					isBackslashed = false;
 					str += c;
 			}
-			// cat.debug("   str = " + str);
-			// cat.debug(" token = " + token);
-			
+
 			if ( null != token && token.length() > 0 ) {
 				// it is not an empty substring
 				col.add( token );
@@ -203,7 +204,7 @@ public class SL0Helper {
 		ACLMessage resp = msg.createReply();
 		AbsContentElement ac = null;
 		String innerContent = removeOneOutermostParanteses( msg.getContent());
-		resp.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		resp.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		try {
 			ac = codecSL0.decode(
 					BasicOntology.getInstance(),
@@ -221,7 +222,7 @@ public class SL0Helper {
 				// action only is expected
 				resp.setPerformative( ACLMessage.NOT_UNDERSTOOD );
 				if ( msg.getLanguage().compareToIgnoreCase(
-						FIPANames.ContentLanguage.FIPA_SL0 ) != 0 ) {
+						FIPANames.ContentLanguage.FIPA_SL ) != 0 ) {
 					resp.setContent(
 						"( " + SL0Helper.toStringAclAsAction(msg) + "\n" +
 						"  (unknown (language \"" + msg.getLanguage() + "\")) )" );
@@ -233,7 +234,6 @@ public class SL0Helper {
 
 			}
 		}catch ( CodecException e ) {
-			//e.printStackTrace();
 			resp.setPerformative( ACLMessage.NOT_UNDERSTOOD );
 			resp.setContent(
 					"( " + SL0Helper.toStringAclAsAction(msg) + "\n" +
@@ -256,7 +256,7 @@ public class SL0Helper {
 		ACLMessage resp = msg.createReply();
 		AbsContentElement ac = null;
 		String innerContent = removeOneOutermostParanteses( msg.getContent());
-		resp.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		resp.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		try {
 			ac = codecSL0.decode(
 					BasicOntology.getInstance(),
@@ -274,7 +274,7 @@ public class SL0Helper {
 				// action only is expected
 				resp.setPerformative( ACLMessage.NOT_UNDERSTOOD );
 				if ( msg.getLanguage().compareToIgnoreCase(
-						FIPANames.ContentLanguage.FIPA_SL0 ) != 0 ) {
+						FIPANames.ContentLanguage.FIPA_SL ) != 0 ) {
 					resp.setContent(
 						"( " + SL0Helper.toStringAclAsAction(msg) + "\n" +
 						"  (unknown (language \"" + msg.getLanguage() + "\")) )" );
@@ -286,7 +286,6 @@ public class SL0Helper {
 
 			}
 		}catch ( CodecException e ) {
-			//e.printStackTrace();
 			resp.setPerformative( ACLMessage.NOT_UNDERSTOOD );
 			resp.setContent(
 					"( " + SL0Helper.toStringAclAsAction(msg) + "\n" +
@@ -310,7 +309,7 @@ public class SL0Helper {
 			absAction.set( SL0Vocabulary.ACTION_ACTOR, absAID );
 			absAction.set( SL0Vocabulary.ACTION_ACTION, absAcl );
 		}catch (OntologyException oe) {
-			cat.error(oe);
+			logger.error(oe);
 		}
 		return absAction;
 	}
@@ -358,9 +357,8 @@ public class SL0Helper {
 				//ac.getAbsObject( SL0Vocabulary.RESULT_ACTION );
 				AbsObject result = ap.getAbsObject( SL0Vocabulary.RESULT_VALUE );
 			}else {
-				cat.debug("A content is not RESULT.");
+				logger.debug("A content is not RESULT.");
 			}
-		//}catch (OntologyException oe) {
 		}catch (CodecException oe) {
 		}
 		return ap;
@@ -372,11 +370,9 @@ public class SL0Helper {
 			action = (AbsAgentAction) codecSL0.decode(
 					BasicOntology.getInstance(),
 					acl.getContent() );
-			if ( SL0Vocabulary.ACTION.compareToIgnoreCase( action.getTypeName()) == 0 ) {
-			}else {
-				cat.debug("A content is not ACTION.");
+			if ( SL0Vocabulary.ACTION.compareToIgnoreCase( action.getTypeName()) != 0 ) {
+				logger.debug("A content is not ACTION.");
 			}
-		//}catch (OntologyException oe) {
 		}catch (CodecException oe) {
 		}
 		return action;

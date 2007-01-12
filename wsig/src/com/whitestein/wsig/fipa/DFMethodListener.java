@@ -38,10 +38,12 @@ package com.whitestein.wsig.fipa;
 import jade.util.leap.List;
 import jade.core.AID;
 import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.Register;
 import jade.domain.FIPAAgentManagement.Deregister;
 import jade.domain.FIPAAgentManagement.Modify;
 import jade.domain.FIPAAgentManagement.Search;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 /**
  *
@@ -52,28 +54,24 @@ import jade.domain.FIPAAgentManagement.Search;
  */
 public interface DFMethodListener {
 	
-	/*
-	public final static boolean DO_ORIGINAL = true;
-	public final static boolean SKIP_ORIGINAL = false;
-	 */
 	
 	/**
 	 * performs registration
 	 * 
-	 * @param register
+	 * @param description
 	 * @param aid
 	 * @throws FIPAException
 	 */
-	public void registerAction( Register register, AID aid ) throws FIPAException;
+	public void registerAction(DFAgentDescription dfad, AID aid ) throws FIPAException;
 	
 	/**
 	 * performs deregistration
 	 * 
-	 * @param deregister
+	 * @param description
 	 * @param aid
 	 * @throws FIPAException
 	 */
-	public void deregisterAction( Deregister deregister, AID aid ) throws FIPAException;
+	public void deregisterAction(DFAgentDescription dfad, AID aid ) throws FIPAException;
 	
 	/**
 	 * performs modification

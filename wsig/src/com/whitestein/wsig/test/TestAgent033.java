@@ -37,27 +37,23 @@ package com.whitestein.wsig.test;
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
 import jade.domain.FIPANames;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.Property;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
+
+import java.util.Iterator;
+
+import org.apache.log4j.Logger;
 
 import com.whitestein.wsig.Configuration;
 import com.whitestein.wsig.fipa.SL0Helper;
 import com.whitestein.wsig.translator.SOAPToFIPASL0;
-
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.Property;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.DFService;
-import jade.domain.FIPAException;
-
-import java.lang.String;
-import java.util.Iterator;
-
-import org.apache.log4j.Category;
 
 
 /**
@@ -70,7 +66,7 @@ public class TestAgent033 extends Agent {
 
 	private static String nickName = "TestAgent033";
 	private int convId = 0;
-	private Category cat = Category.getInstance(TestAgent033.class.getName());
+	private Logger log = Logger.getLogger(TestAgent033.class.getName());
 	public static final String FIPA_SERVICE = "operation0";
 	public static final String OPERATION = "getVersion";
 	//public static final String FIPA_SERVICE = "getTestVersion";
@@ -87,10 +83,9 @@ public class TestAgent033 extends Agent {
 		// set a nick name by informations registered
 		nickName = getAID().getLocalName();
 		
-		cat.info("A " + nickName + " is starting.");
+		log.info("A " + nickName + " is starting.");
 
-		// add behaviours of this Agent
-		
+		// add behaviours of this Agent	
 		this.addBehaviour( new OneShotBehaviour( this ) {
 			public void action() {
 				doSearch();
@@ -98,7 +93,7 @@ public class TestAgent033 extends Agent {
 		});
 
 		// make an external class to access AID
-		cat.debug("A " + nickName + " is started.");
+		log.debug("A " + nickName + " is started.");
 	}
 
 	private void doSearch() {
@@ -122,7 +117,7 @@ public class TestAgent033 extends Agent {
 
 				serviceName = findServiceName( res[0] );
 				if ( null == serviceName ) {
-					cat.info( "No service is found." );
+					log.info( "No service is found." );
 					doDelete();
 					return;
 				}
@@ -148,7 +143,7 @@ public class TestAgent033 extends Agent {
 			}
 		
 		} catch ( FIPAException fe ) {
-			cat.debug( fe );
+			log.debug( fe );
 		}
 	}
 
@@ -179,7 +174,7 @@ public class TestAgent033 extends Agent {
 	}
 
 	private void processResponse( ACLMessage msg ) {
-		cat.debug(" response is: " + SL0Helper.toString(msg) );
+		log.debug(" response is: " + SL0Helper.toString(msg) );
 		doDelete();
 	}
 
@@ -190,7 +185,7 @@ public class TestAgent033 extends Agent {
 		msg.setSender( this.getAID());
 		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		msg.setConversationId( "conv_" + convId ++ );
-		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		msg.setOntology("AnOntology");
 		msg.setContent(
 				"((action                                                       \n" +
@@ -199,7 +194,7 @@ public class TestAgent033 extends Agent {
 				"		(" + service + "                         \n" +
 	            "   ) ))");
 		
-		cat.debug(" request is: " + SL0Helper.toString(msg) );
+		log.debug(" request is: " + SL0Helper.toString(msg) );
 		return msg;
 	}
 	
@@ -209,7 +204,7 @@ public class TestAgent033 extends Agent {
 		msg.setSender( this.getAID());
 		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		msg.setConversationId( "conv_" + convId ++ );
-		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		msg.setOntology("FIPA-Agent-Management");
 		msg.setContent(
 				"((action " +
@@ -250,7 +245,7 @@ public class TestAgent033 extends Agent {
 	}
 	
 	protected void takeDown() {
-		cat.debug("A " + nickName + " is taken down now.");
+		log.debug("A " + nickName + " is taken down now.");
 	}
 
 }

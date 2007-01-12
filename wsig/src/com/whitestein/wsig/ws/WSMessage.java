@@ -36,12 +36,10 @@
 package com.whitestein.wsig.ws;
 
 import com.whitestein.wsig.struct.CalledMessageImpl;
-import com.whitestein.wsig.test.TestSOAPClient;
-
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPBodyElement;
 
-import org.apache.log4j.Category;
+import org.apache.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
@@ -60,7 +58,7 @@ public class WSMessage extends CalledMessageImpl {
 	private SOAPMessage myMsg;
 	private UDDIOperationIdentificator id;
 	private String accessPoint = "";
-	private static Category cat = Category.getInstance(WSMessage.class.getName());
+	private static Logger log = Logger.getLogger(WSMessage.class.getName());
 
 	/**
 	 * creates a message
@@ -118,7 +116,7 @@ public class WSMessage extends CalledMessageImpl {
 			}
 			id = new UDDIOperationIdentificator( getAccessPoint(), operation );
 		} catch ( Exception e ) {
-			cat.error(e);
+			log.error(e);
 		}
 		// cat.debug(" The first identifier is: " + id.getAccessPoint() + ", " + id.getWSDLOperation());
 		return id;
@@ -133,7 +131,7 @@ public class WSMessage extends CalledMessageImpl {
 			myMsg.writeTo(baos);
 			return baos.toString();
 		}catch (Exception e ){
-			cat.error(e);
+			log.error(e);
 		}
 		return null;
 	}

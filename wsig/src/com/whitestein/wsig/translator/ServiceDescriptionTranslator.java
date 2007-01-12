@@ -45,14 +45,9 @@ import jade.content.onto.Ontology;
 import jade.content.schema.ObjectSchema;
 import jade.domain.FIPAAgentManagement.FIPAManagementOntology;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-
 import javax.wsdl.*;
 import javax.wsdl.factory.*;
-//import javax.wsdl.xml.*;
 
-//import javax.xml.registry.infomodel.Concept;
-
-import com.whitestein.wsig.Gateway;
 
 /**
  * Translates description of services between ACL and WSDL.
@@ -64,16 +59,6 @@ import com.whitestein.wsig.Gateway;
  */
 public class ServiceDescriptionTranslator {
 	
-	private Gateway gateway;
-	
-	/**
-	 * creates translator referred into a gateway
-	 * @param gateway reference into gateway
-	 */
-	public ServiceDescriptionTranslator( Gateway gateway ) {
-		this.gateway = gateway;
-	}
-
 	/**
 	 * Translates ACL description into WSDL description.
 	 * Object classes must be chnged to proper types.
@@ -83,7 +68,6 @@ public class ServiceDescriptionTranslator {
 	 * @throws WSDLException for WSDL document parsing
 	 */
 	public static Definition produceWSDLfromACL( Object acl ) throws WSDLException {
-		// new WSDL definition is created and then used
 		WSDLFactory wsdlFactory = WSDLFactory.newInstance();
 		Definition wsdlDef = wsdlFactory.newDefinition();
 		return wsdlDef;
@@ -124,7 +108,7 @@ public class ServiceDescriptionTranslator {
 		/*
 		 * Test1: read a WSDL file, translate it
 		 */
-		ServiceDescriptionTranslator sdTranslator = new ServiceDescriptionTranslator( Gateway.getInstance() );
+		ServiceDescriptionTranslator sdTranslator = new ServiceDescriptionTranslator();
 		/*
 		try{
 			WSDLFactory wsdlFactory = WSDLFactory.newInstance();

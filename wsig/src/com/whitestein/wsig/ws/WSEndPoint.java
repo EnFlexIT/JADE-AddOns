@@ -48,9 +48,8 @@ import java.net.URL;
 import java.net.MalformedURLException;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-
 import org.apache.axis.Message;
-import org.apache.log4j.Category;
+import org.apache.log4j.Logger;
 
 import com.whitestein.wsig.fipa.GatewayAgent;
 import com.whitestein.wsig.net.Connection;
@@ -75,7 +74,7 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 	
 	//private Gateway gw;
 	private UDDIOperationIdentificator uddiId;
-	private static Category cat = Category.getInstance(WSEndPoint.class.getName());
+	private static Logger log = Logger.getLogger(WSEndPoint.class.getName());
 
 	public WSEndPoint( UDDIOperationIdentificator uddiId ) {
 		super(WSEndPoint.TYPE);
@@ -92,7 +91,7 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 	 * @param cMsg a sending message
 	 */
 	protected void nativeSend( CalledMessage cMsg, ReturnMessageListener listener ) {
-		cat.debug(" WS sending.");
+		log.debug(" WS sending.");
 
 		// inform also GatewayAgent's GUI
 		GatewayAgent myGateway = GatewayAgent.getInstance();
@@ -207,15 +206,15 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 			httpConn.disconnect();
 			
 		}catch (MalformedURLException mfe) {
-			cat.error( mfe );
+			log.error( mfe );
 			// inform the listener
 		}catch  (IOException ioe) {
-			cat.info( "An end point's call has been broken.");
-			cat.debug( ioe );
+			log.info( "An end point's call has been broken.");
+			log.debug( ioe );
 			// try to check UDDI for updates, try to use them again
 			// in a failure inform the listener then
 		}catch (SOAPException se) {
-			cat.error(se);
+			log.error(se);
 			// inform the listener
 		}
 		
@@ -245,7 +244,7 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 		httpConn.setRequestProperty("Content-Type","text/xml; charset=utf-8");
 		String portPart = (url.getPort()!=-1) ? (":"+url.getPort()) : "";
 		httpConn.setRequestProperty("Host",url.getHost() + portPart);
-		cat.debug(" host sets to " + url.getHost() );
+		log.debug(" host sets to " + url.getHost() );
 		httpConn.setAllowUserInteraction(false);
 		httpConn.setDoOutput(true);
 		httpConn.setDoInput(true); // check a wsdl
@@ -256,7 +255,7 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 		while( it.hasNext() ) {
 			key = it.next();
 			value = httpConn.getRequestProperties().get( key );
-			cat.debug(" key: " + key + " value: " + value );
+			log.debug(" key: " + key + " value: " + value );
 		}
 
 		httpConn.connect();
@@ -296,7 +295,7 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 				}else {
 					length = 0;
 				}
-				cat.debug(" Content-Length = " + length);
+				log.debug(" Content-Length = " + length);
 			}else {
 				String code = httpConn.getHeaderField(0);
 				String[] part = Connection.split( code );
@@ -324,7 +323,7 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 			String line;
 			while ( (line = r.readLine()) != null ) {
 				retStr += line;
-				cat.debug( " a line received: " + line );
+				log.debug( " a line received: " + line );
 			}
 		}
 				
@@ -347,7 +346,7 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 					contentType = "";
 				}
 			}
-			cat.debug(" Content-Type = " + contentType);
+			log.debug(" Content-Type = " + contentType);
 			// "application/soap+xml; charset=\"utf-8\""
 		}catch (NullPointerException e) {
 			contentType = "";
@@ -369,14 +368,14 @@ public class WSEndPoint extends EndPointImpl implements EndPoint {
 			if ( null != soap ) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				soap.writeTo(baos);
-				cat.debug("A SOAP received: " + baos.toString());
+				log.debug("A SOAP received: " + baos.toString());
 			}else {
-				cat.debug("A SOAP received: null ");
+				log.debug("A SOAP received: null ");
 			}
 		} catch (SOAPException e) {
-			cat.error(e);
+			log.error(e);
 		} catch (IOException ioe) {
-			cat.error(ioe);
+			log.error(ioe);
 		}
 
 		return (SOAPMessage) soap;

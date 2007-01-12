@@ -35,18 +35,28 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.net;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import javax.xml.soap.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.Properties;
+
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+
 import org.apache.axis.Message;
-import org.apache.log4j.Category;
+import org.apache.log4j.Logger;
 
 import com.whitestein.wsig.Configuration;
-import com.whitestein.wsig.struct.*;
-import com.whitestein.wsig.test.TestAgent001;
-import com.whitestein.wsig.ws.*;
-//import com.whitestein.wsigs.*;
+import com.whitestein.wsig.fipa.SL0Helper;
+import com.whitestein.wsig.struct.Call;
+import com.whitestein.wsig.struct.CalledMessage;
+import com.whitestein.wsig.struct.ReturnMessageListener;
+import com.whitestein.wsig.struct.ServedOperation;
+import com.whitestein.wsig.struct.ServedOperationStore;
+import com.whitestein.wsig.ws.WSMessage;
 
 //import org.apache.axis.transport.http.HTTPConstants;
 
@@ -59,10 +69,9 @@ public class Connection implements Runnable, ReturnMessageListener {
 	
 	protected boolean isRunning = false;
 	protected Socket socket;
-	private Writer writer;
 	private CalledMessage returnedMessage;
 	private int timeOut = 0;
-	private Category cat = Category.getInstance(Connection.class.getName());
+	private Logger logger = Logger.getLogger(Connection.class.getName());
 	private int buff_size = 255;
 	//private boolean isListenerInformed = false;
 	private Call call;
@@ -131,9 +140,9 @@ public class Connection implements Runnable, ReturnMessageListener {
 		try {
 			msg.getSOAPMessage().writeTo(baos);
 		}catch (Exception e) {
-			cat.error(e);
+			logger.error(e);
 		}
-		cat.debug("A SOAP returned to a client: " + baos.toString());
+		logger.debug("A SOAP returned to a client: " + baos.toString());
 
 	}
 	
@@ -221,7 +230,7 @@ public class Connection implements Runnable, ReturnMessageListener {
 				try {
 					res += new String( buff, 0, 1, "US-ASCII");
 				}catch ( Exception e ) {
-					cat.error(e);
+					logger.error(e);
 				}
 			}else {
 				// an end of line
@@ -270,7 +279,7 @@ public class Connection implements Runnable, ReturnMessageListener {
 		String contentLocation = prop.getProperty(HTTP_LOCATION, "/");
 		//BufferedReader r = new BufferedReader( new InputStreamReader( is )); 
 
-		cat.debug("A HTTP SOAP is receiving ... ");
+		logger.debug("A HTTP SOAP is receiving ... ");
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		Message msg = null;
@@ -282,11 +291,11 @@ public class Connection implements Runnable, ReturnMessageListener {
 		try {
 			baos = new ByteArrayOutputStream();
 			msg.writeTo(baos);
-			cat.debug("A SOAP received: " + baos.toString());
+			logger.debug("A SOAP received: " + baos.toString());
 		} catch (SOAPException e) {
-			cat.error(e);
+			logger.error(e);
 		}
-		cat.debug("The end of the HTTP SOAP's receiving.");
+		logger.debug("The end of the HTTP SOAP's receiving.");
 		return msg;
 	}
 
@@ -313,7 +322,7 @@ public class Connection implements Runnable, ReturnMessageListener {
 				// a proper character's encoding must be choosen
 			}
 		}catch (IOException ioe) {
-			cat.error(ioe);
+			logger.error(ioe);
 		}
 		//cat.debug(str);
 		return str;
@@ -333,12 +342,12 @@ public class Connection implements Runnable, ReturnMessageListener {
 		//isAnswering = so.isAnswering();
 		call = so.createCall();
 		try {
-			cat.debug(" WSIGS is called by a http access point now.");
+			logger.debug(" WSIGS is called by a http access point now.");
 			call.setMessage( msg );
 			call.setReturnMessageListener( listener );
 			call.invoke();
 		}catch (Exception e) {
-			cat.error(e);
+			logger.error(e);
 		}
 	}
 	
@@ -451,9 +460,9 @@ public class Connection implements Runnable, ReturnMessageListener {
 						os.write( content );
 						*/
 						sendBackSOAPContent( content, os );
-						cat.debug("A SOAP returned to a client: " + baos.toString());
+						logger.debug("A SOAP returned to a client: " + baos.toString());
 					} catch (SOAPException e) {
-						cat.error(e);
+						logger.error(e);
 					}
 				}else {
 					// no SOAP's content is generated

@@ -35,39 +35,36 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.translator;
 
-import jade.content.lang.sl.SLCodec;
-import jade.content.lang.Codec.CodecException;
-import jade.lang.acl.ACLMessage;
 import jade.content.abs.AbsContentElement;
-//import jade.content.abs.AbsContentElementList;
 import jade.content.abs.AbsObject;
 import jade.content.abs.AbsPrimitive;
-import jade.content.abs.AbsAggregate;
+import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SL0Vocabulary;
+import jade.content.lang.sl.SLCodec;
 import jade.content.onto.BasicOntology;
+import jade.core.AID;
+import jade.lang.acl.ACLMessage;
+import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFactory;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPMessage;
+
+import org.apache.axis.message.PrefixedQName;
+import org.apache.log4j.Logger;
 
 import com.whitestein.wsig.Configuration;
 import com.whitestein.wsig.fipa.FIPAMessage;
 import com.whitestein.wsig.fipa.SL0Helper;
 import com.whitestein.wsig.struct.CalledMessage;
 import com.whitestein.wsig.ws.WSMessage;
-
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPFactory;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPFault;
-import javax.xml.soap.SOAPBodyElement;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPElement;
-import org.apache.axis.message.PrefixedQName;
-import org.apache.log4j.Category;
-
-import jade.core.AID;
-
-import java.io.ByteArrayOutputStream;
-import java.util.*;
-import java.text.SimpleDateFormat;
 
 
 /**
@@ -89,14 +86,14 @@ public class FIPASL0ToSOAP implements Translator {
 	private static SLCodec codecSL0 = new SLCodec(0);
 	private static MessageFactory mf; // SOAP v1.1
 	private static SOAPFactory soapFactory;
-	private static Category cat = Category.getInstance(FIPASL0ToSOAP.class.getName());
+	private static Logger log = Logger.getLogger(FIPASL0ToSOAP.class.getName());
 
 	static {
 		try {
 			mf = MessageFactory.newInstance();
 			soapFactory = SOAPFactory.newInstance();
 		}catch (SOAPException e) {
-			cat.error(e);
+			log.error(e);
 		}
 	}
 	
@@ -142,7 +139,7 @@ public class FIPASL0ToSOAP implements Translator {
 	 * @return SOAP translation
 	 */
 	public Collection translate( FIPAMessage fipa ) throws Exception {
-		cat.debug(" a translator's input: " + SL0Helper.toString( fipa.getACLMessage()));
+		log.debug(" a translator's input: " + SL0Helper.toString( fipa.getACLMessage()));
 		AbsContentElement ac = null;
 		AbsObject action = null;
 		//String uri = "http://T20java:8080/myWSDL";
@@ -203,7 +200,7 @@ public class FIPASL0ToSOAP implements Translator {
 					break;
 			}
 		}catch ( CodecException ce ) {
-			cat.error(ce);
+			log.error(ce);
 		}catch (SOAPException se ) {
 			throw new Exception( se );
 		}catch (Exception e ) {
@@ -219,12 +216,12 @@ public class FIPASL0ToSOAP implements Translator {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {
 				soap.writeTo(baos);
-				cat.debug(" a translator's output: " + baos.toString());
+				log.debug(" a translator's output: " + baos.toString());
 			}catch (Exception e ){
-				cat.error(e);
+				log.error(e);
 			}
 		}else {
-			cat.debug(" a translator's output: null");
+			log.debug(" a translator's output: null");
 		}
 		
 		return col;
@@ -260,7 +257,7 @@ public class FIPASL0ToSOAP implements Translator {
 			wsOperationName = fipa.getServedOperation().getOperationID(
 					).getUDDIOperationIdentificator().getWSDLOperation();
 		}catch (NullPointerException npe) {
-			cat.debug(npe);
+			log.debug(npe);
 			throw new Exception("An operation " + a.getTypeName() + " is not registered.");
 		}
 		// prepare an operation in a SOAP's body
@@ -318,14 +315,14 @@ public class FIPASL0ToSOAP implements Translator {
 	}
 
 	private SOAPElement generateXML( SOAPBody body, AbsObject ao, String prefix, String xmlURI, SOAPElement prevElement ) throws SOAPException {
-		cat.debug(this.getClass().getName() + ".generateXML(...) enters.");
+		log.debug(this.getClass().getName() + ".generateXML(...) enters.");
 		SOAPElement el, el2;
 		if ( ao == null ) {
 			return null;
 		}
 
 		String typeName = ao.getTypeName();
-		cat.debug(" for type " + typeName );
+		log.debug(" for type " + typeName );
 
 		// to treat with XML attributes
 		AbsObject absAttributes = null;
@@ -370,7 +367,7 @@ public class FIPASL0ToSOAP implements Translator {
 			try {
 				if ( ! operationLevel ) {
 					if( ao instanceof AbsPrimitive ) {
-						cat.debug( "" + ao.getTypeName() + " is AbsPrimitive. " );
+						log.debug( "" + ao.getTypeName() + " is AbsPrimitive. " );
 						String str = asString( (AbsPrimitive) ao );
 						// String str = ((AbsPrimitive) ao ).getObject().toString();
 						if ( null != prevElement ) {
@@ -380,17 +377,17 @@ public class FIPASL0ToSOAP implements Translator {
 						} else {
 							// not happened
 							el.addTextNode( str );
-							cat.debug( " previous element is null for AbsPrimitive " );
+							log.debug( " previous element is null for AbsPrimitive " );
 						}
 					} else {
-						cat.debug( "" + ao.getTypeName() + " is not AbsPrimitive. " );
+						log.debug( "" + ao.getTypeName() + " is not AbsPrimitive. " );
 
 						// none args to add
 						// el is already created
 					}
 				}
 			}catch ( SOAPException e ) {
-				cat.error(e);
+				log.error(e);
 			}
 			return el;
 		}
@@ -424,7 +421,7 @@ public class FIPASL0ToSOAP implements Translator {
 				}
 			}catch (SOAPException e) {
 				// some problems are in element
-				cat.error(e);
+				log.error(e);
 			}
 		}
 		

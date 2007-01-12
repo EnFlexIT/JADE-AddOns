@@ -35,126 +35,99 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.fipa;
 
-import jade.content.Concept;
 import jade.content.abs.AbsContentElement;
 import jade.content.abs.AbsObject;
-import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SL0Vocabulary;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.BasicOntology;
-import jade.content.onto.OntologyException;
 import jade.content.onto.basic.Action;
-import jade.content.onto.basic.Done;
 import jade.core.AID;
-import jade.core.behaviours.CyclicBehaviour;
-import jade.core.Agent;
-import jade.core.Runtime;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
+import jade.core.Runtime;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
-import jade.domain.FIPAException;
 import jade.domain.FIPANames;
-import jade.domain.df;
 import jade.domain.DFGUIManagement.DFAppletOntology;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.Deregister;
-import jade.domain.FIPAAgentManagement.ExceptionVocabulary;
 import jade.domain.FIPAAgentManagement.FIPAManagementOntology;
 import jade.domain.FIPAAgentManagement.FIPAManagementVocabulary;
-import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.Modify;
 import jade.domain.FIPAAgentManagement.Property;
-import jade.domain.FIPAAgentManagement.RefuseException;
-import jade.domain.FIPAAgentManagement.Register;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
+import jade.gui.GuiAgent;
+import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import jade.gui.GuiEvent;
-import jade.gui.GuiAgent;
-import jade.wrapper.ContainerController;
+import jade.proto.SubscriptionInitiator;
 import jade.wrapper.AgentController;
+import jade.wrapper.ContainerController;
 import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.ServerSocket;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+
 import com.whitestein.wsig.Configuration;
-//import com.whitestein.wsig.Gateway;
 import com.whitestein.wsig.net.HTTPServer;
-import com.whitestein.wsig.ws.WSEndPoint;
-import com.whitestein.wsig.ws.UDDIOperationIdentificator;
-import com.whitestein.wsig.fipa.FIPAEndPoint;
-import com.whitestein.wsig.fipa.FIPAMessage;
-import com.whitestein.wsig.fipa.FIPAReturnMessageListener;
-import com.whitestein.wsig.fipa.FIPAServiceIdentificator;
-import com.whitestein.wsig.fipa.SL0Helper;
 import com.whitestein.wsig.struct.Call;
+import com.whitestein.wsig.struct.CalledMessage;
+import com.whitestein.wsig.struct.EndPoint;
 import com.whitestein.wsig.struct.ReturnMessageListener;
 import com.whitestein.wsig.struct.ServedOperation;
 import com.whitestein.wsig.struct.ServedOperationStore;
-import com.whitestein.wsig.struct.EndPoint;
-import com.whitestein.wsig.struct.CalledMessage;
 import com.whitestein.wsig.translator.FIPASL0ToSOAP;
-
-import java.util.Hashtable;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.HashSet;
-import java.io.IOException;
-import java.io.File;
-import java.lang.Thread;
-import java.lang.Boolean;
-import java.lang.ClassLoader;
-import java.lang.Class;
-import java.lang.reflect.Method;
-import java.lang.NullPointerException;
-import java.lang.SecurityException;
-import java.lang.IllegalStateException;
-import java.lang.ClassNotFoundException;
-import java.lang.NoSuchMethodException;
-import java.lang.IllegalAccessException;
-import java.lang.IllegalArgumentException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.ServerSocket;
-
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.PatternLayout;
+import com.whitestein.wsig.ws.UDDIOperationIdentificator;
+import com.whitestein.wsig.ws.WSEndPoint;
 
 
 /**
  * @author jna
- *
- * is gateway agent running in FIPA container.
+ *         <p/>
+ *         is gateway agent running in FIPA container.
  */
 /* It extends df as the JADE implementation of DF to manage agents.
  * Remark: its functional and used version is placed in jade.domain package.
  *   Must be implemented in near future.
  */
 public class GatewayAgent extends GuiAgent {
-	
+
 	private static final Object synchObject = new Object();
 	private static GatewayAgent instance;
+	
 	private static int conversationId = 0;
 	private Hashtable conversationId2listener = new Hashtable();
 	private Hashtable listener2fipaMessage = new Hashtable();
 
-	private static Logger log = Logger.getLogger( GatewayAgent.class.getName());
+	private static Logger log = Logger.getLogger(GatewayAgent.class.getName());
 	private String logFileName = "a.log.txt";
 	private FileAppender logFile;
 	private boolean isLogFileOn = false;
 	private Logger mainLog = log.getLogger("com.whitestein.wsig");
 
-	private static SLCodec codecSL0 = new SLCodec(0);
+	private static SLCodec codecSL = new SLCodec();
 	private Hashtable callStore = new Hashtable();
 	private static final String DF_LOCAL_NAME = "df";
-	// public static final String WEB_SERVICE = "web-service";
-	
+
 	private DFMethodListener dfMethodListener = null;
-	private DFAgentDescription dfad = new DFAgentDescription();
-	private AID dfAID = new AID( DF_LOCAL_NAME, AID.ISLOCALNAME );
-	
+
+	private AID dfAID = new AID(DF_LOCAL_NAME, AID.ISLOCALNAME);
+
 	private GatewayAgentGui gui;
+	
+	
 	public static final int EXIT_EVENT = 1001;
 	public static final int CLOSE_GUI_EVENT = 1002;
 	public static final int RESET_EVENT = 1003;
@@ -169,17 +142,15 @@ public class GatewayAgent extends GuiAgent {
 	public static final int START_AGENT_CLIENT_WITH_ARGUMENTS_EVENT = 1012;
 	public static final int START_WS_REGISTRATION_FOR_FIND_PLACE_EVENT = 1013;
 	public static final int START_WS_REGISTRATION_FOR_GOOGLE_EVENT = 1014;
-
 	public static final String AGENT_NAME_GET_VERSION = "testAgentForGetVersion";
 	public static final String SERVICE_GET_VERSION = "getVersion";
 	public static final String SERVICE_EMPTY_ARGS = "";
 	public static final String SERVICE_GOOGLE_SEARCH = "doGoogleSearch";
 	public static final String AGENT_NAME_GOOGLE_SEARCH = "testAgentForGoogle";
 	public static final String SERVICE_GOOGLE_S_ARGS =
-"(xml-tag-key :xml-element (key " +
- Configuration.getInstance().getTestAmazonAccessKey() +
-") :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-q :xml-element (q Foo) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-start :xml-element (start 0) :xml-attributes (set ( property :name xsi:type :value xsd:int ))) (xml-tag-maxResults :xml-element (maxResults 4) :xml-attributes (set ( property :name xsi:type :value xsd:int ))) (xml-tag-filter :xml-element (filter true) :xml-attributes (set ( property :name xsi:type :value xsd:boolean))) (xml-tag-restrict :xml-element (restrict) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-safeSearch :xml-element (safeSearch false) :xml-attributes (set ( property :name xsi:type :value xsd:boolean ))) (xml-tag-lr :xml-element (lr) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-ie :xml-element (ie latin1) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-oe :xml-element (oe latin1) :xml-attributes (set ( property :name xsi:type :value xsd:string )))";
-
+		"(xml-tag-key :xml-element (key " +
+			Configuration.getInstance().getTestAmazonAccessKey() +
+			") :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-q :xml-element (q Foo) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-start :xml-element (start 0) :xml-attributes (set ( property :name xsi:type :value xsd:int ))) (xml-tag-maxResults :xml-element (maxResults 4) :xml-attributes (set ( property :name xsi:type :value xsd:int ))) (xml-tag-filter :xml-element (filter true) :xml-attributes (set ( property :name xsi:type :value xsd:boolean))) (xml-tag-restrict :xml-element (restrict) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-safeSearch :xml-element (safeSearch false) :xml-attributes (set ( property :name xsi:type :value xsd:boolean ))) (xml-tag-lr :xml-element (lr) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-ie :xml-element (ie latin1) :xml-attributes (set ( property :name xsi:type :value xsd:string ))) (xml-tag-oe :xml-element (oe latin1) :xml-attributes (set ( property :name xsi:type :value xsd:string )))";
 	private Thread wsServer01 = null;
 	private Thread wsClient01 = null;
 	private Thread wsReg02FP = null;
@@ -188,123 +159,120 @@ public class GatewayAgent extends GuiAgent {
 	private HashSet wsSelection = null;
 	private HashSet agentSelection = null;
 	private final Object syncObjectSel = new Object();
+	private HTTPServer server;
 
-        private HTTPServer server;
-	
 	/**
 	 * creates new GatewayAgent
-	 *
 	 */
 	public GatewayAgent() {
 		super();
-		//Gateway.getInstance();  // start also Gateway
 
-        	// creates a HTTPServer for a WS accessPoint
-                try {
-                        int port = Configuration.getInstance().getHostPort();
-                        server = new HTTPServer( new ServerSocket(port));
-                }catch (Exception e) {
-                        e.printStackTrace();
-                }
+		// creates a HTTPServer for a WS accessPoint
+		try {
+			int port = Configuration.getInstance().getHostPort();
+			server = new HTTPServer(new ServerSocket(port));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 
 	}
-	
+
 	/**
 	 * returns singleton instance.
 	 * Running instance is returned.
-	 * 
+	 *
 	 * @return an instance
 	 */
 	public static GatewayAgent getInstance() {
-		synchronized ( synchObject ) {
-			while ( null == instance ) {
-				// wait for setup() method invocation for this
-				log.debug( " instance is null, waiting" );
+		synchronized (synchObject) {
+			while (null == instance) {
+				log.debug(" instance is null, waiting");
 				try {
 					synchObject.wait(1000);
-					//Thread.sleep(1000);
-				}catch (Exception e) {
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}
 		return instance;
 	}
-	
+
 	/**
 	 * sends a FIPA message.
 	 * The message is going to be changed.
-	 * 
-	 * @param msg message to be sent
+	 *
+	 * @param msg	  message to be sent
 	 * @param listener listener for returned message
 	 */
-	public void send( FIPAMessage msg, ReturnMessageListener listener ) {
+	public void send(FIPAMessage msg, ReturnMessageListener listener) {
 		ACLMessage acl = msg.getACLMessage();
-		fillACLParameters( acl );
-		synchronized( conversationId2listener ) {
+		fillACLParameters(acl);
+		synchronized (conversationId2listener) {
 			conversationId2listener.put(
 				msg.getACLMessage().getConversationId(),
-				listener );
+				listener);
 		}
-		synchronized ( listener2fipaMessage ) {
+		synchronized (listener2fipaMessage) {
 			listener2fipaMessage.put(
 				listener,
 				msg);
 		}
 		// testing print out
 		log.debug(" WSIGS: ACL message created. " + SL0Helper.toString(acl));
-		send( acl );
+		send(acl);
 	}
-	
-	public void sendACL( ACLMessage acl ) {
+
+	public void sendACL(ACLMessage acl) {
 		// used by FIPAReturnMessageListener
 		// create reply does not fill a sender
 		log.debug(" a response is " + SL0Helper.toString(acl));
 		send(acl);
 	}
+
 	/**
 	 * removes a listener registered
-	 * 
+	 *
 	 * @param listener a listener registered
 	 */
-	public void removeReturnMessageListener( ReturnMessageListener listener ) {
+	public void removeReturnMessageListener(ReturnMessageListener listener) {
 		FIPAMessage msg;
-		synchronized( listener2fipaMessage ) {
+		synchronized (listener2fipaMessage) {
 			msg = (FIPAMessage)
-				listener2fipaMessage.get( listener );
-			listener2fipaMessage.remove( listener );
+				listener2fipaMessage.get(listener);
+			listener2fipaMessage.remove(listener);
 		}
 		ACLMessage cancel = msg.getACLMessage();
-		cancel.setPerformative( ACLMessage.CANCEL );
+		cancel.setPerformative(ACLMessage.CANCEL);
 
 		// waiting for cancel's response may produce a long time out
 		// remove the listener now, then send the cancel
 		String convId = cancel.getConversationId();
-		synchronized( conversationId2listener ) {
+		synchronized (conversationId2listener) {
 			listener = (ReturnMessageListener)
-				conversationId2listener.get( convId );
-			conversationId2listener.remove( convId );
+				conversationId2listener.get(convId);
+			conversationId2listener.remove(convId);
 		}
-		send( cancel );
+		send(cancel);
 	}
-	
+
 	/**
 	 * fills ACL mandatory parameters
-	 * 
+	 *
 	 * @param acl message to fill
 	 */
-	private void fillACLParameters( ACLMessage acl ) {
-		acl.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+	private void fillACLParameters(ACLMessage acl) {
+		acl.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		acl.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-		acl.setConversationId( getConversationId() );
+		acl.setConversationId(getConversationId());
 	}
-	
+
 	/**
 	 * creates an unique conversation Id
-	 * 
+	 *
 	 * @return conversation Id
 	 */
 	private synchronized String getConversationId() {
-		// return Integer.toString( conversationId ++ );
 		return "Query" + getName() + (new Date()).getTime();
 	}
 
@@ -313,64 +281,91 @@ public class GatewayAgent extends GuiAgent {
 	 */
 	protected void setup() {
 		super.setup();
+		getContentManager().registerLanguage(codecSL);
+		getContentManager().registerOntology(FIPAManagementOntology.getInstance());
+		getContentManager().registerOntology(JADEManagementOntology.getInstance());
+		getContentManager().registerOntology(DFAppletOntology.getInstance());
+
 
 		// initialize an instance
 		try {
-			synchronized ( synchObject ) {
+			synchronized (synchObject) {
 				instance = this;
 				dfMethodListener = Configuration.getInstance().getDFMethodListener();
 				synchObject.notifyAll();
-				log.info("WSIG's GatewayAgent is set up.   " + (null != instance) );
+				log.info("WSIG's GatewayAgent is set up.   " + (null != instance));
 			}
-		}catch (Exception e) {
-			log.debug( e );
+		} catch (Exception e) {
+			log.debug(e);
 		}
 
+		// register into a df
+		registerMe();
 
-		try {
-			getContentManager().registerLanguage( codecSL0 );
-			getContentManager().registerOntology(FIPAManagementOntology.getInstance());
-		}catch (Exception e ) {
-			
-		}
+		// Subscribe to the DF
+		DFAgentDescription template = new DFAgentDescription();
+		ServiceDescription sd = new ServiceDescription();
+		sd.addProperties(new Property("WSIG","true"));
+		template.addServices(sd);
+		ACLMessage subscriptionMsg = DFService.createSubscriptionMessage(this, getDefaultDF(), template, null);
+		addBehaviour(new SubscriptionInitiator(this, subscriptionMsg) {
 
-		// add behaviour of the GatewayAgent
-		this.addBehaviour( new CyclicBehaviour( this ) {
-			private MessageTemplate template = MessageTemplate.and(
-					constructNoDFMessageTemplate(),
-					//MessageTemplate.and(
-							MessageTemplate.MatchProtocol(
-									FIPANames.InteractionProtocol.FIPA_REQUEST) ); //,
-					//		MessageTemplate.or(
-					//		MessageTemplate.MatchLanguage(
-					//				FIPANames.ContentLanguage.FIPA_SL0 )));
-					// all SL family must be tested
+			protected void handleInform(ACLMessage inform) {
+				log.debug("Agent " + myAgent.getLocalName() + " - Notification received from DF."+ inform.getContent());
+				try {
+					DFAgentDescription[] dfds = DFService.decodeNotification(inform.getContent());
+					for (int i = 0; i < dfds.length; ++i) {
+						AID agent = dfds[i].getName();
+						Iterator services = dfds[i].getAllServices();
+						if(services.hasNext()){
+							//Registration of an agent
+							dfMethodListener.registerAction(dfds[i], inform.getSender());	
+							manageListener(inform);
+						} else {
+							//Deregistration of an agent
+							dfMethodListener.deregisterAction(dfds[i], inform.getSender());	
+						}
+					}
+				}
+				catch (Exception e) {
+					log.warn("Agent " + myAgent.getLocalName() + " - Error decoding DF notification. " + e);
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		//add behaviour of the GatewayAgent
+		this.addBehaviour(new CyclicBehaviour(this) {
+			//NOT FIPA MANAGEMENT ONTOLOGY
+			private MessageTemplate template = MessageTemplate.not(MessageTemplate.MatchOntology(FIPAManagementOntology.getInstance().getName()));		
+			//private MessageTemplate template = MessageTemplate.and(
+			//		MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.not(MessageTemplate.MatchSender(getDefaultDF())));
 			public void action() {
 				// receive all messages, do not ignore DFMessageTemplate
-				ACLMessage msg = myAgent.receive(); // template );
-				if ( msg != null ) {
-					try {
-						log.debug("A request for WSIG:" + SL0Helper.toString(msg));
-					}catch ( Exception e ) {
-						log.error(e);
-					}
-					
-					switch ( msg.getPerformative() ) {
+				
+				ACLMessage msg = myAgent.receive(template); 
+				if (msg != null) {
+					switch(msg.getPerformative()){
 						case ACLMessage.REQUEST:
-							doFIPARequest( msg );
+							doFIPARequest(msg);
 							break;
 						case ACLMessage.CANCEL:
-							doFIPACancel( msg );
+							doFIPACancel(msg);
+							break;
+						case ACLMessage.INFORM:
+							try {
+								log.debug("A request for WSIG:" + SL0Helper.toString(msg));
+								manageListener(msg);
+							}catch ( Exception e ) {
+								log.error(e);
+							}
 							break;
 						case ACLMessage.REFUSE:
 						case ACLMessage.FAILURE:
-						case ACLMessage.INFORM:
-						case ACLMessage.NOT_UNDERSTOOD:
-							informListener( msg );
-							break;
 						case ACLMessage.AGREE:
-							// agreement is expected as default
-							// gateway is waiting for an inform or a failure message
+						case ACLMessage.NOT_UNDERSTOOD:
+							// TODO
+							log.warn("Unexpected message");
 							break;
 						default:
 							// not in fipa-request protocol
@@ -383,18 +378,32 @@ public class GatewayAgent extends GuiAgent {
 			}
 		});
 
-		// register into a df
-		registerMe();
-
 		//
 		// create GUI, when -gui switch is presented
 		//
-		if ( isGuiSwitchOn() ) {
-			gui = new GatewayAgentGui( this );
+		if (isGuiSwitchOn()) {
+			gui = new GatewayAgentGui(this);
 			gui.showMeTheFirstTime();
 		}
 	}
 
+	private void manageListener(ACLMessage inform){
+		ReturnMessageListener listener;
+		String convId = inform.getConversationId();
+		synchronized (conversationId2listener) {
+			listener = (ReturnMessageListener)
+				conversationId2listener.get(convId);
+			conversationId2listener.remove(convId);
+		}
+		if (listener != null) {
+			FIPAMessage fipa = new FIPAMessage(inform);
+			fipa.setResponse(true);
+			listener.setReturnedMessage(fipa);
+			log.debug("listener invoked for conversationId " + convId);
+		} else {
+			log.debug("listener is null for conversationId " + convId);
+		}
+	}
 	/**
 	 * tests a presence of gui switch
 	 *
@@ -402,11 +411,11 @@ public class GatewayAgent extends GuiAgent {
 	 */
 	private boolean isGuiSwitchOn() {
 		Object[] args = getArguments();
-		if ( args != null ) {
+		if (args != null) {
 			int i = 0;
 			int len = args.length;
-			while ( i < len && ! "-gui".equalsIgnoreCase( args[i].toString() )) {
-				i ++ ;
+			while (i < len && ! "-gui".equalsIgnoreCase(args[i].toString())) {
+				i ++;
 			}
 			return i < len;
 		}
@@ -414,55 +423,29 @@ public class GatewayAgent extends GuiAgent {
 	}
 
 	/**
-	 *  registers a WSIG into a DF
-	 *
+	 * registers a WSIG into a DF
 	 */
 	private void registerMe() {
 		//register itself to a DF
-		ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
-		msg.addReceiver( dfAID ); 
-		/*
-		msg.setSender( this.getAID());
-		msg.setConversationId( getConversationId() );
-		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
-		msg.setOntology(FIPAManagementVocabulary.NAME);
-		*/
-		fillACLParameters( msg );
-		msg.setOntology(FIPAManagementVocabulary.NAME);
-		
-		dfad.setName( this.getAID());
-		dfad.addLanguages( FIPANames.ContentLanguage.FIPA_SL0 );
-		dfad.addProtocols( FIPANames.InteractionProtocol.FIPA_REQUEST );
-
-		//set register's argument
-		Register reg = new Register();
-		reg.setDescription(dfad);
-		
-		// create registration's action
-		Action action = new Action( this.getAID(), reg );
+		DFAgentDescription dfad = new DFAgentDescription();
+		dfad.setName(this.getAID());
+		dfad.addLanguages(FIPANames.ContentLanguage.FIPA_SL);
+		dfad.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST);
 
 		try {
-			//getContentManager().registerLanguage( codec );
-			//getContentManager().registerOntology(FIPAManagementOntology.getInstance());
-
-			getContentManager().fillContent(msg, action);
-			send(msg);
-			
-			//DFService.register( this, dfad );
-		}catch (Exception e) {
+			DFService.register(this, dfad);
+		} catch (Exception e) {
+			log.error("Error during DF registration");
 			e.printStackTrace();
 		}
-		
-		//log.debug( SL0Helper.toString(msg));
-
 	}
-	
+
 	/**
 	 * takes down this agent.
 	 * A configuration used is stored.
 	 */
 	protected void takeDown() {
-		if ( gui != null ) {
+		if (gui != null) {
 			gui.exit();
 			gui = null;
 			shutDownAgents();
@@ -470,66 +453,48 @@ public class GatewayAgent extends GuiAgent {
 
 		Configuration.store();
 
-		//deregister itself from a DF
-		ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
-		msg.addReceiver( dfAID ); 
-		fillACLParameters( msg );
-		msg.setOntology(FIPAManagementVocabulary.NAME);
-
-		//set deregister's argument
-		Deregister dereg = new Deregister();
-		dereg.setDescription(dfad);
-		
-		// create registration's action
-		Action action = new Action( dfAID, dereg );
-
 		try {
-			getContentManager().fillContent(msg, action);
-			send(msg);
-		}catch (Exception e) {
+			DFService.deregister(this, getDefaultDF());
+		} catch (Exception e) {
+			log.error("Error during DF registration");
 			e.printStackTrace();
 		}
-		
-		log.debug( SL0Helper.toString(msg));
+
 		log.debug("A gateway is taken down now.");
 	}
 
 
-	
 	/**
 	 * sends inform-done for a cancel operation.
 	 * Nothing special is performed, only a requester is informed.
-	 * 
+	 *
 	 * @param acl a request for a cancel
 	 */
-	private void doFIPACancel( ACLMessage acl ) {
+	private void doFIPACancel(ACLMessage acl) {
 		// cancel a connection into a Web Service
-		
-		// find a call
+
 		// remove a call from a structure
-		Call call = removeFromCallStore( acl.getSender(), acl.getConversationId());
-		if ( null != call ) {
-			// close a call
+		Call call = removeFromCallStore(acl.getSender(), acl.getConversationId());
+		if (null != call) {
 			call.close();
-		}else {
+		} else {
 			return;
 		}
-		
+
 		// send an acl
-		if ( ! call.isReceived() ) {
-			send( SL0Helper.createInformDoneForCancel(acl));
-		}else {
+		if (! call.isReceived()) {
+			send(SL0Helper.createInformDoneForCancel(acl));
+		} else {
 			// an answer is already communicated
 		}
 	}
-	
+
 	/**
 	 * serves a request for a service.
-	 * It has not been implemented yet.
-	 * 
+	 *
 	 * @param acl a request message
 	 */
-	private void doFIPARequest( ACLMessage acl ) {
+	private void doFIPARequest(ACLMessage acl) {
 		FIPAMessage msg = new FIPAMessage(acl);
 		// a message is a request, not a response
 		msg.setResponse(false);
@@ -537,18 +502,18 @@ public class GatewayAgent extends GuiAgent {
 		//  extract FIPAServiceIdentificator
 		//  find a ServedOperation
 		ServedOperation so = ServedOperationStore.getInstance().find(
-				getFIPAServiceId(msg) );
+			getFIPAServiceId(msg));
 
-		if ( null == so ) {
+		if (null == so) {
 			// I can not serve
-			log.debug( "Operation is not served." );
+			log.debug("Operation is not served.");
 			ACLMessage r = acl.createReply();
-			r.setPerformative( ACLMessage.NOT_UNDERSTOOD );
-			r.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+			r.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+			r.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 			r.setContent(
 				"( " + SL0Helper.toStringAclAsAction(acl) + "\n"
-				+ "  (error-message \"The service is not provided.\")) )" );
-			send( r );
+					+ "  (error-message \"The service is not provided.\")) )");
+			send(r);
 			return;
 		}
 
@@ -557,220 +522,92 @@ public class GatewayAgent extends GuiAgent {
 		Call call = so.createCall();
 		try {
 			log.debug(" WSIG is called by an agent now.");
-			call.setMessage( msg );
-			ReturnMessageListener listener = new FIPAReturnMessageListener( acl );
-			call.setReturnMessageListener( listener );
+			call.setMessage(msg);
+			ReturnMessageListener listener = new FIPAReturnMessageListener(acl);
+			call.setReturnMessageListener(listener);
 			// store a call for a cancel
-			storeACall( acl.getSender(), acl.getConversationId(), call );
+			storeACall(acl.getSender(), acl.getConversationId(), call);
 			call.invoke();
-		}catch (Exception e) {
+		} catch (Exception e) {
 			log.error(e);
 		}
 	}
-	
+
 	/**
 	 * creates and sends not understood for bad performative.
 	 * A good performative is in the fipa-request protocol [FIPA SC00026H].
 	 * They are: request, refuse, agree, failure, inform, cancel and not-understood.
-	 * 
+	 *
 	 * @param acl message received
 	 */
-	private void doNoFipaRequest( ACLMessage acl ) {
+	private void doNoFipaRequest(ACLMessage acl) {
 		ACLMessage r = acl.createReply();
-		r.setPerformative( ACLMessage.NOT_UNDERSTOOD );
-		r.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		r.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+		r.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		r.setContent(
-				"( " + SL0Helper.toStringAclAsAction(acl) + "\n" +
-				"  (error-message \"Performative is not in the fipa-request protocol.\")) )" );
-		send( r );
-	}
-	
-	/**
-	 * performs actions on a ACL message returned.
-	 * A listener registered is informed.
-	 * The method is invoked for messages, which does not have got a continuation.
-	 * ( refuse, failure, inform, not-understood ).
-	 * 
-	 * @param acl message received
-	 */
-	private void informListener( ACLMessage acl ) {
-		if( acl.getPerformative() == ACLMessage.INFORM
-			&& DF_LOCAL_NAME.equalsIgnoreCase( acl.getSender().getLocalName()) ) {
-			// the acl is inform from a df
-			
-			// check, if a WSIG is an only receiver
-			Iterator it = acl.getAllReceiver();
-			int count = 0;
-			while ( count < 2 && it.hasNext() ) {
-				count ++;
-				it.next();
-			}
-			
-			if( count > 1){
-				// the acl is a response from other then a WSIG's registration 
-				informFromDFManagement( acl );
-				return;
-			}else {
-				// is a response related to a WSIG's request 
-				log.debug( "A df's inform message received for WSIG DF's management: " + SL0Helper.toString( acl ));
-				return;  // only as a quick hack, do a propper registration latter
-			}
-		}
-		
-		// other messages
-		ReturnMessageListener listener;
-		String convId = acl.getConversationId();
-		synchronized( conversationId2listener ) {
-			listener = (ReturnMessageListener)
-				conversationId2listener.get( convId );
-			conversationId2listener.remove( convId );
-		}
-		if ( listener != null ) {
-			FIPAMessage fipa = new FIPAMessage( acl );
-			fipa.setResponse( true );
-			listener.setReturnedMessage( fipa );
-			log.debug("listener invoked for conversationId " + convId );
-		}else {
-			log.debug("listener is null for conversationId " + convId );
-		}
+			"( " + SL0Helper.toStringAclAsAction(acl) + "\n" +
+				"  (error-message \"Performative is not in the fipa-request protocol.\")) )");
+		send(r);
 	}
 
-	/**
-	 * proceses an inform-done message from DF's management.
-	 * Management's requests from another agents to DF is also redirected
-	 * into a WSIG, when they are successfull.
-	 * A search response is not redirected.
-	 * 
-	 * @param acl message from DF
-	 */
-	private void informFromDFManagement( ACLMessage acl ) {
-		if( null == dfMethodListener ) {
-			// no listener
-			return;
-		}
-	    Action slAction = null;
-	    Done slDone = null;
-		try {
-			log.debug( "A df's inform message received from another agent: " + SL0Helper.toString( acl ));
-		    slDone = (Done) getContentManager().extractContent(acl);
-		    slAction = (Action) slDone.getAction();
-		    Concept action = slAction.getAction();
-
-		    // REGISTER
-		  	if (action instanceof Register) {
-		  		dfMethodListener.registerAction((Register) action, acl.getSender());
-		  	}
-		  	// DEREGISTER
-		  	else if (action instanceof Deregister) {
-		  		dfMethodListener.deregisterAction((Deregister) action, acl.getSender());
-		  	}
-		  	// MODIFY
-		  	else if (action instanceof Modify) {
-		  		dfMethodListener.modifyAction((Modify) action, acl.getSender());
-		  	}
-
-		// nothing bad is expected
-		}catch (OntologyException oe) {
-		}catch (CodecException ce) {
-		}catch (FIPAException fe) {
-		}
-	}
-	
-	/**
-	 * construct message template for not DF.
-	 * A MessageTemplate is created for no DF communication.
-	 * The JADE DF implementation is taken as MessageTemplate refference.
-	 *  
-	 * @return message template fo no DF communication
-	 */
-	private MessageTemplate constructNoDFMessageTemplate() {
-		// Create template for receiving messages
-		MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
-
-		// Behaviour dealing with FIPA management actions
-		MessageTemplate	mtFIPA = MessageTemplate.and(mt, MessageTemplate.MatchOntology(FIPAManagementOntology.getInstance().getName()));
-
-	    // Behaviour dealing with JADE management actions
-	    MessageTemplate mtJADE = MessageTemplate.and(mt, MessageTemplate.MatchOntology(JADEManagementOntology.getInstance().getName()));
-
-	    // Behaviour dealing with DFApplet management actions
-	    MessageTemplate mtDFApplet = MessageTemplate.and(mt, MessageTemplate.MatchOntology(DFAppletOntology.getInstance().getName()));
-
-		// Behaviour dealing with subscriptions
-		MessageTemplate mtSub = MessageTemplate.and(
-			MessageTemplate.MatchOntology(FIPAManagementOntology.getInstance().getName()),
-			MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.SUBSCRIBE), MessageTemplate.MatchPerformative(ACLMessage.CANCEL)));
-		
-		// JADE DF messages
-		MessageTemplate mtDFServices =
-			MessageTemplate.or(
-				MessageTemplate.or(mtFIPA,mtJADE),
-				MessageTemplate.or(mtDFApplet,mtSub) );
-
-		// Ignore JADE df specified templates
-		MessageTemplate mtNoDFServices = MessageTemplate.not(mtDFServices);
-
-		return mtNoDFServices;
-	}
-	
 	
 	/**
 	 * gives a FIPA service's identificator
-	 *  
+	 *
 	 * @param msg a message to identify
 	 * @return an identificator
 	 */
-	private FIPAServiceIdentificator getFIPAServiceId( FIPAMessage msg ) {
+	private FIPAServiceIdentificator getFIPAServiceId(FIPAMessage msg) {
 		// has a meaning in a request's message
 
 		AbsContentElement ac;
 		AbsObject action;
 		String service = "";
 		try {
-			ac = codecSL0.decode(
-					BasicOntology.getInstance(),
-					msg.getACLMessage().getContent() );
-			if ( SL0Vocabulary.ACTION.compareToIgnoreCase( ac.getTypeName()) == 0 ) {
-				action = FIPASL0ToSOAP.getActionSlot( ac );
+			ac = codecSL.decode(
+				BasicOntology.getInstance(),
+				msg.getACLMessage().getContent());
+			if (SL0Vocabulary.ACTION.compareToIgnoreCase(ac.getTypeName()) == 0) {
+				action = FIPASL0ToSOAP.getActionSlot(ac);
 				service = action.getTypeName();
-			}	
-		}catch (Exception e) {
+			}
+		} catch (Exception e) {
 			log.error(e);
 		}
 		return new FIPAServiceIdentificator(
-				(AID) msg.getACLMessage().getAllReceiver().next(),
-				service);
+			(AID) msg.getACLMessage().getAllReceiver().next(),
+			service);
 	}
 
 	/**
 	 * stores a call into a storage
-	 * 
-	 * @param originator an originator of the call
+	 *
+	 * @param originator	 an originator of the call
 	 * @param conversationId a conversation identificator of the call
-	 * @param call the call to be stored
+	 * @param call		   the call to be stored
 	 */
-	private void storeACall( AID originator, String conversationId, Call call ) {
-		synchronized ( callStore ) {
-			Hashtable convIds = (Hashtable) callStore.get( originator );
-			if( null == convIds ) {
+	private void storeACall(AID originator, String conversationId, Call call) {
+		synchronized (callStore) {
+			Hashtable convIds = (Hashtable) callStore.get(originator);
+			if (null == convIds) {
 				convIds = new Hashtable();
 				callStore.put(originator, convIds);
 			}
-			convIds.put( conversationId, call );
+			convIds.put(conversationId, call);
 		}
 	}
-	
+
 	/**
 	 * removes and gives a call identified by a originator and a conversation identificator
-	 *  
-	 * @param originator an originator of the call
+	 *
+	 * @param originator	 an originator of the call
 	 * @param conversationId a conversation identificator of the call
 	 * @return the call to be erased
 	 */
-	Call removeFromCallStore( AID originator, String conversationId ) {
+	Call removeFromCallStore(AID originator, String conversationId) {
 		synchronized (callStore) {
-			Hashtable convIds = (Hashtable) callStore.get( originator );
-			if( null != convIds ) {
+			Hashtable convIds = (Hashtable) callStore.get(originator);
+			if (null != convIds) {
 				Call call = (Call) convIds.get(conversationId);
 				convIds.remove(conversationId);
 				return call;
@@ -778,80 +615,84 @@ public class GatewayAgent extends GuiAgent {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * adds an operation into an DF agent description's structure.
 	 * The operation is offered by gateway.
-	 * 
+	 *
 	 * @param op operation added
 	 */
-	public synchronized void addToDFAgentDescription( ServedOperation op ) {
+	public synchronized void addToDFAgentDescription(ServedOperation op) {
 		//add a service
-		dfad.addServices( createSDforOperation(op));
-		sendModifyDF( dfad);
+		DFAgentDescription dfad = new DFAgentDescription();
+		dfad.addServices(createSDforOperation(op));
+		sendModifyDF(dfad);
 	}
-	
+
 	/**
 	 * removes an operation from an DF agent description's structure.
 	 * The operation is not offered by gateway anymore.
-	 * 
+	 *
 	 * @param op operation removed
 	 */
-	public synchronized void removeFromDFAgentDescription( ServedOperation op ) {
+	public synchronized void removeFromDFAgentDescription(ServedOperation op) {
 		// remove a service
-		dfad.removeServices( createSDforOperation( op ) );
-		sendModifyDF( dfad);
+		DFAgentDescription dfad = new DFAgentDescription();
+		dfad.removeServices(createSDforOperation(op));
+		sendModifyDF(dfad);
 	}
 
 	/**
 	 * creates a ServiceDescription for an operation
+	 *
 	 * @param op operation
 	 * @return description created
 	 */
-	private ServiceDescription createSDforOperation( ServedOperation op ) {
+	private ServiceDescription createSDforOperation(ServedOperation op) {
 		//prepare a FIPA's service
 		ServiceDescription sd;
 		sd = new ServiceDescription();
-		sd.setName( op.getOperationID().getFIPAServiceIdentificator().getServiceName() );
-		sd.addLanguages( FIPANames.ContentLanguage.FIPA_SL0 );
-		sd.addProtocols( FIPANames.InteractionProtocol.FIPA_REQUEST );
-		sd.setType( Configuration.WEB_SERVICE );
-		
+		sd.setName(op.getOperationID().getFIPAServiceIdentificator().getServiceName());
+		sd.addLanguages(FIPANames.ContentLanguage.FIPA_SL);
+		sd.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST);
+		sd.setType(Configuration.VOID_TYPE);
+
 		Property p = new Property(Configuration.WEB_SERVICE + ".operation",
-				op.getOperationID().getUDDIOperationIdentificator().getWSDLOperation());
-		sd.addProperties( p );
+			op.getOperationID().getUDDIOperationIdentificator().getWSDLOperation());
+		sd.addProperties(p);
 		p = new Property(Configuration.WEB_SERVICE + ".accessPoint",
-				op.getOperationID().getUDDIOperationIdentificator().getAccessPoint());
-		sd.addProperties( p );
-		p = new Property("type", "(set " + Configuration.WEB_SERVICE + ")");
-		sd.addProperties( p );
+			op.getOperationID().getUDDIOperationIdentificator().getAccessPoint());
+		sd.addProperties(p);
 		
+		//TO DO... verify for deletion
+		/*p = new Property("type", "(set " + Configuration.WEB_SERVICE + ")");
+		sd.addProperties(p);*/
+
 		return sd;
 	}
-	
+
 	/**
 	 * sends a modify request into a DF
-	 * 
+	 *
 	 * @param dfad agent description
 	 */
-	private void sendModifyDF( DFAgentDescription dfad ) {
+	private void sendModifyDF(DFAgentDescription dfad) {
 		//prepare an ACL
-		ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
-		msg.addReceiver( dfAID ); 
-		fillACLParameters( msg );
-		msg.setOntology(FIPAManagementVocabulary.NAME);
-		
+		/*ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+		msg.addReceiver(dfAID);
+		fillACLParameters(msg);
+		msg.setOntology(FIPAManagementVocabulary.NAME);*/
+
 		// create modification's action
-		Modify modify = new Modify();
+		/*Modify modify = new Modify();
 		modify.setDescription(dfad);
-		Action action = new Action( dfAID, modify );
+		Action action = new Action(dfAID, modify);*/
 
 		try {
-			getContentManager().fillContent(msg, action);
-			send(msg);
-			
-			//DFService.modify( this, dfad );
-		}catch (Exception e) {
+			//getContentManager().fillContent(msg, action);
+			//send(msg);
+			DFService.modify(this,dfad);
+		} catch (Exception e) {
 			log.error(e);
 		}
 	}
@@ -861,13 +702,13 @@ public class GatewayAgent extends GuiAgent {
 	 *
 	 * @param event an GUI event
 	 */
-	protected void onGuiEvent( GuiEvent event ) {
-		switch( event.getType() ) {
+	protected void onGuiEvent(GuiEvent event) {
+		switch (event.getType()) {
 			case EXIT_EVENT:
 				doDelete();
 				break;
 			case CLOSE_GUI_EVENT:
-				if ( gui != null ) {
+				if (gui != null) {
 					gui.exit();
 					gui = null;
 				}
@@ -876,65 +717,65 @@ public class GatewayAgent extends GuiAgent {
 				resetGateway();
 				break;
 			case SET_LOG_FILE_EVENT:
-				setLogFileName( (File) event.getParameter(0) );
+				setLogFileName((File) event.getParameter(0));
 				break;
 			case SET_LOGGING_EVENT:
 				Boolean val =
 					(Boolean) event.getParameter(0);
-				setLogging( val.booleanValue() );
+				setLogging(val.booleanValue());
 				break;
 			case START_AGENT_SERVER001_EVENT:
-				startAgent( "agentServer",
+				startAgent("agentServer",
 					"com.whitestein.wsig.test.TestAgentServer",
 					new Object[0]);
 				break;
 			case START_AGENT_CLIENT033_EVENT:
-				startAgent( "agentClient033",
+				startAgent("agentClient033",
 					"com.whitestein.wsig.test.TestAgent033",
 					new Object[0]);
 				break;
 			case START_WS_SERVER01_EVENT:
-				if ( null != wsServer01 && wsServer01.isAlive() ) {
+				if (null != wsServer01 && wsServer01.isAlive()) {
 					break;
 				}
 				wsServer01 = startClassMain(
-				  "com.whitestein.wsig.test.TestSOAPServer",
-					new String[0] );
+					"com.whitestein.wsig.test.TestSOAPServer",
+					new String[0]);
 				break;
 			case START_WS_CLIENT01_EVENT:
-				if ( null != wsClient01 && wsClient01.isAlive() ) {
+				if (null != wsClient01 && wsClient01.isAlive()) {
 					break;
 				}
 				wsClient01 = startClassMain(
-				  "com.whitestein.wsig.test.TestSOAPClient",
-					new String[0] );
+					"com.whitestein.wsig.test.TestSOAPClient",
+					new String[0]);
 				break;
 			case WS_SELECTION_EVENT:
-				wsSelectionEvent( (Object[]) event.getParameter(0) );
+				wsSelectionEvent((Object[]) event.getParameter(0));
 				break;
 			case AGENT_SELECTION_EVENT:
-				agentSelectionEvent( (Object[]) event.getParameter(0) );
+				agentSelectionEvent((Object[]) event.getParameter(0));
 				break;
 			case START_AGENT_CLIENT_WITH_ARGUMENTS_EVENT:
-				startAgent( (String) event.getParameter(0),
+				startAgent((String) event.getParameter(0),
 					"com.whitestein.wsig.test.TestAgentWithArgs",
-					(Object[]) event.getParameter(1) );
+					(Object[]) event.getParameter(1));
 				break;
 			case START_WS_REGISTRATION_FOR_FIND_PLACE_EVENT:
-				if ( null != wsReg02FP && wsReg02FP.isAlive() ) {
+				if (null != wsReg02FP && wsReg02FP.isAlive()) {
 					break;
 				}
 				wsReg02FP = startClassMain(
-				  "com.whitestein.wsig.test.TestFindPlaceRegistration",
-					new String[0] );
+					"com.whitestein.wsig.test.TestFindPlaceRegistration",
+					new String[0]);
 				break;
 			case START_WS_REGISTRATION_FOR_GOOGLE_EVENT:
-				if ( null != wsReg04G && wsReg04G.isAlive() ) {
+				if (null != wsReg04G && wsReg04G.isAlive()) {
 					break;
 				}
 				wsReg04G = startClassMain(
-				  "com.whitestein.wsig.test.TestGoogleRegistration",
-					new String[0] );
+					"com.whitestein.wsig.test.TestGoogleRegistration",
+					new String[0]);
 				break;
 		}
 	}
@@ -945,44 +786,44 @@ public class GatewayAgent extends GuiAgent {
 	 *
 	 * @param turnOn true, if log's informations are sent into a log file
 	 */
-	private void setLogging( boolean turnOn ) {
+	private void setLogging(boolean turnOn) {
 		isLogFileOn = turnOn;
-		if ( null == logFile ) {
+		if (null == logFile) {
 			log.debug("Value of logFile is null.");
 			return;
 		}
-		if ( turnOn ) {
-			mainLog.addAppender( logFile );
+		if (turnOn) {
+			mainLog.addAppender(logFile);
 		} else {
-			mainLog.removeAppender( logFile );
+			mainLog.removeAppender(logFile);
 		}
 	}
-	
+
 	/**
 	 * sets a log file
 	 *
 	 * @param aFile a new log file
 	 */
-	private void setLogFileName( File aFile ) {
-		if ( null == aFile ) {
+	private void setLogFileName(File aFile) {
+		if (null == aFile) {
 			log.debug(" Log file posted by GUI is null.");
 			return;
 		}
 		logFileName = aFile.getAbsolutePath();
-		log.debug(" A new file for a log is : " + logFileName );
-		if ( null != logFile && mainLog.isAttached( logFile ) ) {
-			mainLog.removeAppender( logFile );
+		log.debug(" A new file for a log is : " + logFileName);
+		if (null != logFile && mainLog.isAttached(logFile)) {
+			mainLog.removeAppender(logFile);
 		}
 		try {
 			logFile = new FileAppender(
 				new PatternLayout("%-5p: %c : %m%n"),
-				logFileName );
-		} catch ( IOException ioe ) {
+				logFileName);
+		} catch (IOException ioe) {
 			log.debug(" A problem is occured during a logFile's creation ");
 			logFile = null;
 		}
-		if ( null != logFile && isLogFileOn ) {
-			mainLog.addAppender( logFile );
+		if (null != logFile && isLogFileOn) {
+			mainLog.addAppender(logFile);
 		}
 	}
 
@@ -990,33 +831,33 @@ public class GatewayAgent extends GuiAgent {
 	 * resets the gateway
 	 */
 	private void resetGateway() {
-		// todo:
+		// TODO
 		// deregister all services from DF
 		// deregister all operations from UDDI
 		// clear ServedOperationStore
-
 		shutDownAgents();
 	}
 
+	//TO VERIFY
 	private void shutDownAgents() {
 		// code is not in LEAP, MIDP
 		Runtime rt = Runtime.instance();
-		Profile profile = new ProfileImpl( false );
-		ContainerController cc = rt.createAgentContainer( profile );
+		Profile profile = new ProfileImpl(false);
+		ContainerController cc = rt.createAgentContainer(profile);
 		AgentController agentContr = null;
 		try {
 			// test if one exists
-			agentContr = cc.getAgent( "agentServer" );
+			agentContr = cc.getAgent("agentServer");
 			agentContr.kill();
-		} catch ( ControllerException ce ) {
+		} catch (ControllerException ce) {
 			// does not exist
 		}
 
 		try {
 			// test if one exists
-			agentContr = cc.getAgent( "agentClient033" );
+			agentContr = cc.getAgent("agentClient033");
 			agentContr.kill();
-		} catch ( ControllerException ce ) {
+		} catch (ControllerException ce) {
 			// does not exist
 		}
 	}
@@ -1024,30 +865,29 @@ public class GatewayAgent extends GuiAgent {
 	/**
 	 * starts an agent
 	 *
-	 * @param name a name of the agent
+	 * @param name	  a name of the agent
 	 * @param className a class of the agent
-	 * @param args arguments, which are passed to agent
-	 *
+	 * @param args	  arguments, which are passed to agent
 	 */
-	private void startAgent( String name, String className, Object[] args ) {
+	private void startAgent(String name, String className, Object[] args) {
 		// code is not in LEAP, MIDP
 		Runtime rt = Runtime.instance();
-		Profile profile = new ProfileImpl( false );
-		ContainerController cc = rt.createAgentContainer( profile );
+		Profile profile = new ProfileImpl(false);
+		ContainerController cc = rt.createAgentContainer(profile);
 		AgentController agentContr = null;
 		try {
 			// test if one exists
-			agentContr = cc.getAgent( name );
+			agentContr = cc.getAgent(name);
 			return;
-		} catch ( ControllerException ce ) {
+		} catch (ControllerException ce) {
 			// does not exist
 		}
 		try {
 			// create a new agent
-			agentContr = cc.createNewAgent( name, className, args );
+			agentContr = cc.createNewAgent(name, className, args);
 			agentContr.start();
-		} catch ( StaleProxyException spe ) {
-			log.debug( spe );
+		} catch (StaleProxyException spe) {
+			log.debug(spe);
 		}
 	}
 
@@ -1056,58 +896,60 @@ public class GatewayAgent extends GuiAgent {
 	 * starts an application
 	 *
 	 * @param className a class of the application
-	 * @param args arguments, which are passed
-	 *
+	 * @param args	  arguments, which are passed
 	 */
-	private Thread startClassMain( String className, final String[] args ) {
+	private Thread startClassMain(String className, final String[] args) {
 		Thread spirit = null;
-		Class[] argsClass = { String[].class };
+		Class[] argsClass = {String[].class};
 		ClassLoader cl = null;
 		try {
 			cl = ClassLoader.getSystemClassLoader();
-		} catch ( SecurityException se ) {
-			log.debug("Problems to get the ClassLoader." + se );
+		} catch (SecurityException se) {
+			log.debug("Problems to get the ClassLoader." + se);
 			return spirit;
-		} catch ( IllegalStateException ise ) {
-			log.debug("Problems to get the ClassLoader." + ise );
+		} catch (IllegalStateException ise) {
+			log.debug("Problems to get the ClassLoader." + ise);
 			return spirit;
 		}
 		Class aClass = null;
 		try {
-			aClass = cl.loadClass( className );
-		} catch ( ClassNotFoundException cnfe ) {
+			aClass = cl.loadClass(className);
+		} catch (ClassNotFoundException cnfe) {
 			log.debug("Problems to load a class.");
 			return spirit;
 		}
 		try {
 			final Method m =
-				aClass.getMethod("main", argsClass );
-		spirit = new Thread() {
-			private Method met2 = m;
-			private Object[] args2 = { args };
-			public void run() {
-				try {
-					this.met2.invoke( null, args2 );
-				} catch ( IllegalAccessException iae ) {
-					log.debug("Problems to invoke a method." + iae );
-				} catch ( IllegalArgumentException ige ) {
-					log.debug("Problems to invoke a method." + ige );
-				} catch ( InvocationTargetException ite ) {
-					log.debug("Problems to invoke a method." + ite );
-				} catch ( NullPointerException npe ) {
-					log.debug("Problems to invoke a method." + npe );
-				}}};
-		} catch ( NoSuchMethodException nsme ) {
-			log.debug("Problems to get a method." + nsme );
+				aClass.getMethod("main", argsClass);
+				spirit = new Thread() {
+				private Method met2 = m;
+				private Object[] args2 = {args};
+
+				public void run() {
+					try {
+						this.met2.invoke(null, args2);
+					} catch (IllegalAccessException iae) {
+						log.debug("Problems to invoke a method." + iae);
+					} catch (IllegalArgumentException ige) {
+						log.debug("Problems to invoke a method." + ige);
+					} catch (InvocationTargetException ite) {
+						log.debug("Problems to invoke a method." + ite);
+					} catch (NullPointerException npe) {
+						log.debug("Problems to invoke a method." + npe);
+					}
+				}
+			};
+		} catch (NoSuchMethodException nsme) {
+			log.debug("Problems to get a method." + nsme);
 			return spirit;
-		} catch ( NullPointerException npe ) {
-			log.debug("Problems to get a method." + npe );
+		} catch (NullPointerException npe) {
+			log.debug("Problems to get a method." + npe);
 			return spirit;
-		} catch ( SecurityException se ) {
-			log.debug("Problems to get a method." + se );
+		} catch (SecurityException se) {
+			log.debug("Problems to get a method." + se);
 			return spirit;
 		}
-		if ( null != spirit ) {
+		if (null != spirit) {
 			spirit.start();
 		}
 		return spirit;
@@ -1116,19 +958,19 @@ public class GatewayAgent extends GuiAgent {
 	/**
 	 * processes a WS selection's event
 	 */
-	private void wsSelectionEvent( Object[] sel ) {
+	private void wsSelectionEvent(Object[] sel) {
 		ComboBoxItem item;
 		ServedOperation so;
-		synchronized( syncObjectSel ) {
+		synchronized (syncObjectSel) {
 			wsSelection = new HashSet();
-			for ( int k = 0; k < sel.length; k ++ ) {
-				item = (ComboBoxItem) sel[ k ];
+			for (int k = 0; k < sel.length; k ++) {
+				item = (ComboBoxItem) sel[k];
 				so = item.getServedOperation();
-				if ( null == so ) {
+				if (null == so) {
 					wsSelection = null;
 					return;
 				}
-				wsSelection.add( so );
+				wsSelection.add(so);
 			}
 		}
 	}
@@ -1136,19 +978,19 @@ public class GatewayAgent extends GuiAgent {
 	/**
 	 * processes an agents selection's event
 	 */
-	private void agentSelectionEvent( Object[] sel ) {
+	private void agentSelectionEvent(Object[] sel) {
 		ComboBoxItem item;
 		ServedOperation so;
-		synchronized( syncObjectSel ) {
+		synchronized (syncObjectSel) {
 			agentSelection = new HashSet();
-			for ( int k = 0; k < sel.length; k ++ ) {
-				item = (ComboBoxItem) sel[ k ];
+			for (int k = 0; k < sel.length; k ++) {
+				item = (ComboBoxItem) sel[k];
 				so = item.getServedOperation();
-				if ( null == so ) {
+				if (null == so) {
 					agentSelection = null;
 					return;
 				}
-				agentSelection.add( so );
+				agentSelection.add(so);
 			}
 		}
 	}
@@ -1156,24 +998,24 @@ public class GatewayAgent extends GuiAgent {
 	/**
 	 * tests, if an operation is selected
 	 */
-	private boolean isWsSelected( ServedOperation so ) {
-		synchronized( syncObjectSel ) {
-			if ( null == wsSelection ) {
+	private boolean isWsSelected(ServedOperation so) {
+		synchronized (syncObjectSel) {
+			if (null == wsSelection) {
 				return true;
 			}
-			return wsSelection.contains( so );
+			return wsSelection.contains(so);
 		}
 	}
 
 	/**
 	 * tests, if an operation is selected
 	 */
-	private boolean isAgentSelected( ServedOperation so ) {
-		synchronized( syncObjectSel ) {
-			if ( null == agentSelection ) {
+	private boolean isAgentSelected(ServedOperation so) {
+		synchronized (syncObjectSel) {
+			if (null == agentSelection) {
 				return true;
 			}
-			return agentSelection.contains( so );
+			return agentSelection.contains(so);
 		}
 	}
 
@@ -1181,25 +1023,25 @@ public class GatewayAgent extends GuiAgent {
 	 * appends a text's message into log
 	 * It is for a GUI's manipulation only.
 	 */
-	public void addMessageToLog( ServedOperation so, CalledMessage msg ) {
-		synchronized( syncObjectSel ) {
-			if ( null == gui || null == so || null == msg ) {
+	public void addMessageToLog(ServedOperation so, CalledMessage msg) {
+		synchronized (syncObjectSel) {
+			if (null == gui || null == so || null == msg) {
 				log.debug("A null is appeared in addMessageToLog()");
 				return;
 			}
 			String text = msg.toString();
 
 			EndPoint ep = so.getEndPoint();
-			if ( WSEndPoint.TYPE == ep.getType() ) {
-				if ( isWsSelected( so )) {
-					gui.addWsLog( text );
-					log.debug(" Into WS log: " + text );
+			if (WSEndPoint.TYPE == ep.getType()) {
+				if (isWsSelected(so)) {
+					gui.addWsLog(text);
+					log.debug(" Into WS log: " + text);
 				}
 			}
-			if ( FIPAEndPoint.TYPE == ep.getType() ) {
-				if ( isAgentSelected( so )) {
-					gui.addAgentLog( text );
-					log.debug(" Into agents' log: " + text );
+			if (FIPAEndPoint.TYPE == ep.getType()) {
+				if (isAgentSelected(so)) {
+					gui.addAgentLog(text);
+					log.debug(" Into agents' log: " + text);
 				}
 			}
 		}
@@ -1209,27 +1051,27 @@ public class GatewayAgent extends GuiAgent {
 	 * adds an operation to a list of ones logged
 	 * It is for a GUI's manipulation only.
 	 */
-	public void addOperationForLog( ServedOperation so ) {
-		synchronized( syncObjectSel ) {
-			if ( null == gui || null == so ) {
+	public void addOperationForLog(ServedOperation so) {
+		synchronized (syncObjectSel) {
+			if (null == gui || null == so) {
 				return;
 			}
 			EndPoint ep = so.getEndPoint();
-			if ( WSEndPoint.TYPE == ep.getType() ) {
+			if (WSEndPoint.TYPE == ep.getType()) {
 				UDDIOperationIdentificator uddiId =
-			  	so.getOperationID().getUDDIOperationIdentificator();
-				gui.addOperationToWsLog( new ComboBoxItem(
-				     "" + uddiId.getWSDLOperation()
-				     + " at " + uddiId.getAccessPoint(),
-				  so ));
+					so.getOperationID().getUDDIOperationIdentificator();
+				gui.addOperationToWsLog(new ComboBoxItem(
+					"" + uddiId.getWSDLOperation()
+						+ " at " + uddiId.getAccessPoint(),
+					so));
 			}
-			if ( FIPAEndPoint.TYPE == ep.getType() ) {
+			if (FIPAEndPoint.TYPE == ep.getType()) {
 				FIPAServiceIdentificator fId =
-				  so.getOperationID().getFIPAServiceIdentificator();
-				gui.addOperationToAgentsLog( new ComboBoxItem(
-				    "" + fId.getServiceName()
-				    + " at " + fId.getAgentID(),
-				  so ));
+					so.getOperationID().getFIPAServiceIdentificator();
+				gui.addOperationToAgentsLog(new ComboBoxItem(
+					"" + fId.getServiceName()
+						+ " at " + fId.getAgentID(),
+					so));
 			}
 		}
 	}
@@ -1238,17 +1080,17 @@ public class GatewayAgent extends GuiAgent {
 	 * removes an operation from a list of ones logged.
 	 * It is for a GUI's manipulation only.
 	 */
-	public void removeOperationForLog( ServedOperation so ) {
-		synchronized( syncObjectSel ) {
-			if ( null == gui || null == so ) {
+	public void removeOperationForLog(ServedOperation so) {
+		synchronized (syncObjectSel) {
+			if (null == gui || null == so) {
 				return;
 			}
 			EndPoint ep = so.getEndPoint();
-			if ( WSEndPoint.TYPE == ep.getType() ) {
-				gui.removeOperationFromWsLog( so );
+			if (WSEndPoint.TYPE == ep.getType()) {
+				gui.removeOperationFromWsLog(so);
 			}
-			if ( FIPAEndPoint.TYPE == ep.getType() ) {
-				gui.removeOperationFromAgentsLog( so );
+			if (FIPAEndPoint.TYPE == ep.getType()) {
+				gui.removeOperationFromAgentsLog(so);
 			}
 		}
 	}

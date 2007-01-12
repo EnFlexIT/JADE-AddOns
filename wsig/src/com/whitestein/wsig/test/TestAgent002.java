@@ -108,7 +108,7 @@ public class TestAgent002 extends Agent {
 							MessageTemplate.MatchProtocol(
 									FIPANames.InteractionProtocol.FIPA_REQUEST),
 							MessageTemplate.MatchLanguage(
-									FIPANames.ContentLanguage.FIPA_SL0 ));
+									FIPANames.ContentLanguage.FIPA_SL ));
 			public void action() {
 				ACLMessage msg = myAgent.receive(); //( template );
 				if ( msg != null ) {
@@ -158,16 +158,16 @@ public class TestAgent002 extends Agent {
 		msg.addReceiver( dfAID ); // Configuration.getInstance().getGatewayAID());
 		msg.setSender( this.getAID());
 		msg.setConversationId( "conv_" + convId ++ );
-		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		msg.setOntology(FIPAManagementVocabulary.NAME);
 		
 		dfad.setName( this.getAID());
-		dfad.addLanguages( FIPANames.ContentLanguage.FIPA_SL0 );
+		dfad.addLanguages( FIPANames.ContentLanguage.FIPA_SL );
 		dfad.addProtocols( FIPANames.InteractionProtocol.FIPA_REQUEST );
 		ServiceDescription sd;
 		sd = new ServiceDescription();
 		sd.setName( OPERATION );
-		sd.addLanguages( FIPANames.ContentLanguage.FIPA_SL0 );
+		sd.addLanguages( FIPANames.ContentLanguage.FIPA_SL );
 		sd.addProtocols( FIPANames.InteractionProtocol.FIPA_REQUEST );
 		sd.setType("web-service");
 		Property p = new Property("type","(set web-service)");
@@ -175,7 +175,7 @@ public class TestAgent002 extends Agent {
 		dfad.addServices(sd);
 		sd = new ServiceDescription();
 		sd.setName( OPERATION_2 );
-		sd.addLanguages( FIPANames.ContentLanguage.FIPA_SL0 );
+		sd.addLanguages( FIPANames.ContentLanguage.FIPA_SL );
 		sd.addProtocols( FIPANames.InteractionProtocol.FIPA_REQUEST );
 		sd.setType("web-service");
 		dfad.addServices(sd);
@@ -214,7 +214,7 @@ public class TestAgent002 extends Agent {
 				msg.addReceiver( Configuration.getInstance().getGatewayAID());
 				msg.setSender( myAgent.getAID());
 				msg.setConversationId( "conv_" + convId ++ );
-				msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+				msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 				msg.setOntology(FIPAManagementVocabulary.NAME);
 				try {
 					getContentManager().fillContent(msg, action);
@@ -238,7 +238,7 @@ public class TestAgent002 extends Agent {
 		msg.addReceiver( dfAID ); // Configuration.getInstance().getGatewayAID());
 		msg.setSender( this.getAID());
 		msg.setConversationId( "conv_" + convId ++ );
-		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
+		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
 		msg.setOntology(FIPAManagementVocabulary.NAME);
 
 		//set deregister's argument

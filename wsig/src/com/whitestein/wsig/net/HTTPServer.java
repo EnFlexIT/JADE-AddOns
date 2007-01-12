@@ -44,10 +44,9 @@ import java.net.MalformedURLException;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-
-import org.apache.log4j.Category;
-
+import org.apache.log4j.Logger;
 import com.whitestein.wsig.Configuration;
+import com.whitestein.wsig.fipa.SL0Helper;
 
 /**
  * Provides simple HTTP server for SOAP messages.
@@ -62,7 +61,7 @@ public class HTTPServer extends Thread{
 	private int timeout = 10000;
 	private ThreadGroup group = null;
 	private String connectionClass = "com.whitestein.wsig.net.Connection";
-	private Category cat = Category.getInstance( HTTPServer.class.getName());
+	private Logger logger = Logger.getLogger(HTTPServer.class.getName());
 	private String hostName = null;
 	private String queryPath = null;
 	private String publishPath = null;
@@ -178,7 +177,7 @@ public class HTTPServer extends Thread{
 	 * @param socket connection to serve
 	 */
 	private void serveConnection( Socket socket ) {
-		cat.debug("A new HTTP request is going to serve.");
+		logger.debug("A new HTTP request is going to serve.");
 		Connection c;
 		try {
 			c = (Connection) Class.forName(connectionClass).newInstance();
@@ -188,7 +187,7 @@ public class HTTPServer extends Thread{
 			(new Thread( c )).start();
 			//(new Thread( group, new Connection(socket))).start();
 		}catch (Exception e) {
-			cat.error(e);
+			logger.error(e);
 		}
 	}
 	
@@ -196,19 +195,19 @@ public class HTTPServer extends Thread{
 	 * makes the server to serve in a thread
 	 */
 	public void run(){
-		cat.debug("HTTP server is started.");
+		logger.debug("HTTP server is started.");
 		Socket socket;
 		isRunning = server != null;
 		try {
 			server.setSoTimeout( timeout );
 		}catch ( SocketException e ) {
-			cat.error(e);
+			logger.error(e);
 			isRunning = false;
 		}
 		try {
 			group = new ThreadGroup("Connections");
 		}catch (SecurityException e) {
-			cat.error(e);
+			logger.error(e);
 			isRunning = false;
 		}
 		while (isRunning) {
@@ -218,13 +217,13 @@ public class HTTPServer extends Thread{
 			}catch (SocketTimeoutException ste){
 				// nothing bad is done, only test isRunning variable
 			}catch (Exception e) {
-				cat.error(e);
+				logger.error(e);
 			}
 		}
 		try {
 			server.close();
 		} catch ( IOException ioe ) {
-			cat.error(ioe);
+			logger.error(ioe);
 		}
 			
 	}
@@ -239,7 +238,7 @@ public class HTTPServer extends Thread{
 	public SOAPHandler findHandler( String absolutePath ) {
 		SOAPHandler h = null;
 		
-		cat.debug("A HTTPServer is finding a handler for an absolute path " + absolutePath );
+		logger.debug("A HTTPServer is finding a handler for an absolute path " + absolutePath );
 		
 		// find a handler according a request's path
 		//   do also startWith() search in the future

@@ -38,15 +38,15 @@ package com.whitestein.wsig.net;
 import java.io.ByteArrayOutputStream;
 import java.util.Properties;
 import javax.xml.soap.SOAPMessage;
-import org.apache.log4j.Category;
-
+import org.apache.log4j.Logger;
+import com.whitestein.wsig.fipa.GatewayAgent;
 import com.whitestein.wsig.struct.Call;
 import com.whitestein.wsig.struct.CalledMessage;
 import com.whitestein.wsig.struct.ReturnMessageListener;
 import com.whitestein.wsig.struct.ServedOperation;
 import com.whitestein.wsig.struct.ServedOperationStore;
+import com.whitestein.wsig.test.TestAgent001;
 import com.whitestein.wsig.ws.WSMessage;
-import com.whitestein.wsig.fipa.GatewayAgent;
 
 /**
  * @author jna
@@ -57,7 +57,7 @@ public class WSClient implements SOAPHandler, ReturnMessageListener {
 
 	private WSMessage returnedMessage;
 	private Call call;
-	private Category cat = Category.getInstance(SOAPHandler.class.getName());
+	private Logger logger = Logger.getLogger(WSClient.class.getName());
 
 	/**
 	 * performs a request.
@@ -80,20 +80,20 @@ public class WSClient implements SOAPHandler, ReturnMessageListener {
 					this.wait(5000);
 				}
 			}catch (InterruptedException ie) {
-				cat.error(ie);
+				logger.error(ie);
 			}
 		}
 		if ( returnedMessage != null ) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {
 				returnedMessage.getSOAPMessage().writeTo(baos);
-				cat.debug("A SOAP returned to a client: " + baos.toString());
+				logger.debug("A SOAP returned to a client: " + baos.toString());
 			}catch (Exception e ){
-				cat.error(e);
+				logger.error(e);
 			}
 			return returnedMessage.getSOAPMessage();
 		}else {
-			cat.debug("A SOAP returned to a client: NULL");
+			logger.debug("A SOAP returned to a client: NULL");
 			return null;
 		}
 	}
@@ -123,7 +123,7 @@ public class WSClient implements SOAPHandler, ReturnMessageListener {
 				msg.getTheFirstUDDIOperationId() );
 		//isAnswering = so.isAnswering();
 		if ( null == so ) {
-			cat.debug( "Operation is not found for "
+			logger.debug( "Operation is not found for "
 					+ msg.getTheFirstUDDIOperationId().getAccessPoint() + " -> "
 					+ msg.getTheFirstUDDIOperationId().getWSDLOperation() );
 			listener.setReturnedMessage( null );
@@ -131,12 +131,12 @@ public class WSClient implements SOAPHandler, ReturnMessageListener {
 		}
 		call = so.createCall();
 		try {
-			cat.debug(" WSIGS is called by a http access point now.");
+			logger.debug(" WSIGS is called by a http access point now.");
 			call.setMessage( msg );
 			call.setReturnMessageListener( listener );
 			call.invoke();
 		}catch (Exception e) {
-			cat.error(e);
+			logger.error(e);
 		}
 	}
 	
@@ -146,9 +146,8 @@ public class WSClient implements SOAPHandler, ReturnMessageListener {
 	 * @param retMsg message returned
 	 */
 	public synchronized void setReturnedMessage( CalledMessage retMsg ) {
-		cat.debug(" A WSClient's listener is invoked.");
+		logger.debug(" A WSClient's listener is invoked.");
 		returnedMessage = (WSMessage) retMsg;
-		//isListenerInformed = true;
 
 		// inform also a GUI's logger
 		GatewayAgent.getInstance().addMessageToLog(

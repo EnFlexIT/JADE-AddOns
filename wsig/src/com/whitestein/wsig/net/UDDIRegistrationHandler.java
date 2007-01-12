@@ -35,35 +35,30 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.net;
 
-import jade.core.AID;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Properties;
-import java.util.Iterator;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Hashtable;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Properties;
 
-import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.Definition;
 import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLReader;
+import javax.xml.soap.Name;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPBodyElement;
+import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPBodyElement;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.Name;
 
-import org.apache.log4j.Category;
+import org.apache.log4j.Logger;
 
 import com.whitestein.wsig.fipa.FIPAServiceIdentificator;
 import com.whitestein.wsig.fipa.GatewayAgent;
@@ -102,31 +97,12 @@ import com.whitestein.wsig.ws.WSEndPoint;
  */
 public class UDDIRegistrationHandler extends Redirector {
 	
-	private static Category cat = Category.getInstance(UDDIRegistrationHandler.class.getName());
+	private Logger logger = Logger.getLogger(UDDIRegistrationHandler.class.getName());
 	private static final HashSet saveOperations = new HashSet();
 	private static final HashSet deleteOperations = new HashSet();
 	
 	private static Hashtable tModelKeyToWSDL = new Hashtable();
 	
-	// according a operation name do actions
-	// actions as a publish (from jUDDI, UDDIProxy.java):
-	//   add_publisherAssertions
-	//   get_assertionStatusReport
-	//   get_publisherAssertions
-	//   delete_binding  
-	//   delete_business 
-	//   delete_service  
-	//   delete_tModel   
-	//   delete_publisherAssertions
-	//   discard_authToken 
-	//   get_authToken 
-	//   get_registeredInfo
-	//   save_binding
-	//   save_business
-	//   save_service
-	//   save_tModel
-	//   set_publisherAssertions 
-	//   ============================
 
 	static {
 		deleteOperations.add( "delete_binding" );
@@ -148,7 +124,6 @@ public class UDDIRegistrationHandler extends Redirector {
 	 */
 	public static synchronized void putTModelKeyAndWSDL( String tModelKey, WSDLDefinition wsdl ) {
 		tModelKeyToWSDL.put( tModelKey, wsdl );
-		//cat.debug("A tModel: " + tModelKey + " uses a wsdl " + wsdl.getURL());
 	}
 	
 	/**
@@ -159,7 +134,6 @@ public class UDDIRegistrationHandler extends Redirector {
 	 */
 	public static synchronized WSDLDefinition getWsdlForTModelKey( String tModelKey ) {
 	    WSDLDefinition wsdl = (WSDLDefinition) tModelKeyToWSDL.get( tModelKey );
-		// cat.debug("A tModel: " + tModelKey + " reffers into wsdl " + wsdl.getURL());
 		return wsdl;
 	}
 	
@@ -220,24 +194,10 @@ public class UDDIRegistrationHandler extends Redirector {
 			//c.getOutputStream().close(); // exception: Cannot write output after reading input
 			c.getInputStream().close();
 			c.disconnect();
-	
-			// also send a request into a gateway's DF
-			//cat.debug(" A request is sending into gateway's DF too.");
 			
 			try {
 			    if ( ! isDelete ) {
 			        informDF( soap, retSOAP );
-			// construct anACL from a SOAP UDDI's request
-			//   operations names are needed
-			//   otologies' names are needed
-			//   an UDDI businessKey as an owner
-			//   some informations may be presented by properties
-			//   languages = SL0
-			//   protocols = fipa-request
-			
-			// send the request by GatewayAgent
-			//GatewayAgent.getInstance().send(
-			//		anACL, listener);
 			    }else {
 					SOAPBody body = retSOAP.getSOAPPart().getEnvelope().getBody();
 					if ( body.getFault() != null ) {
@@ -249,16 +209,14 @@ public class UDDIRegistrationHandler extends Redirector {
 					}
 			    }
 			}catch ( Exception e ) {
-				// if something goes wrong then undo a request in UDDI
-				// roll back
 			}
 			
 		}catch (MalformedURLException mfe) {
-			cat.error( mfe );
+			logger.error( mfe );
 		}catch (SOAPException se) {
-			cat.error(se);
+			logger.error(se);
 		}catch (IOException ioe) {
-			cat.error(ioe);
+			logger.error(ioe);
 		}
 
 		return retSOAP;
@@ -284,7 +242,7 @@ public class UDDIRegistrationHandler extends Redirector {
 			return saveOperations.contains( name );
 		}
 		}catch (SOAPException se) {
-			cat.error( se );
+			logger.error( se );
 		}
 		return false;
 	}
@@ -309,7 +267,7 @@ public class UDDIRegistrationHandler extends Redirector {
 			return deleteOperations.contains( name );
 		}
 		}catch (SOAPException se) {
-			cat.error( se );
+			logger.error( se );
 		}
 		return false;
 	}
@@ -338,7 +296,7 @@ public class UDDIRegistrationHandler extends Redirector {
 			//				! wsdl.isOneWayOperation( wsId.getWSDLOperation()) );
 			op.setWSDL( wsdl );
 			ServedOperationStore.getInstance().put( op );
-			cat.debug("   -> new operation: fipa_service=" + fipaSId.getServiceName()
+			logger.debug("   -> new operation: fipa_service=" + fipaSId.getServiceName()
 					+ ", WSoperation=" + wsId.getWSDLOperation() );
 			GatewayAgent.getInstance().addToDFAgentDescription( op );
 		}else {
@@ -357,7 +315,7 @@ public class UDDIRegistrationHandler extends Redirector {
 	 * @return a collection of new operations created
 	 */
 	private synchronized Collection createServedOperations( String accessPoint, Collection tModelKeys ) {
-	    cat.debug("Enter into createServedOperations.");
+	    logger.debug("Enter into createServedOperations.");
 		Iterator it;
 		Iterator itOps;
 		Collection col = new ArrayList();
@@ -380,7 +338,7 @@ public class UDDIRegistrationHandler extends Redirector {
 				so = createServedOperation( uddiId, wsdl);
 				if ( so != null ) {
 					col.add( so );
-					cat.debug("A new operation added." );
+					logger.debug("A new operation added." );
 				}
 			}
 		}
@@ -422,7 +380,7 @@ public class UDDIRegistrationHandler extends Redirector {
 	}
 	
 	private Collection findOperationsDeleted( SOAPMessage request ) throws Exception {
-	    cat.debug("Enter into findOperationsDeleted.");
+	    logger.debug("Enter into findOperationsDeleted.");
 		SOAPBody body = request.getSOAPPart().getEnvelope().getBody();
 		SOAPElement el;
 		Iterator it = body.getChildElements();
@@ -443,7 +401,7 @@ public class UDDIRegistrationHandler extends Redirector {
 	}
 	
 	private Collection findTModelsDeleted( SOAPMessage request ) throws Exception {
-	    cat.debug("Enter into findTModelsDeleted.");
+	    logger.debug("Enter into findTModelsDeleted.");
 		SOAPBody body = request.getSOAPPart().getEnvelope().getBody();
 		SOAPElement el, subEl;
 		Collection col = new ArrayList();
@@ -469,7 +427,7 @@ public class UDDIRegistrationHandler extends Redirector {
 	
 	
 	private void informDF( SOAPMessage request, SOAPMessage response ) throws Exception {
-	    cat.debug("Enter into informDF.");
+	    logger.debug("Enter into informDF.");
 		SOAPBody body = response.getSOAPPart().getEnvelope().getBody();
 		if ( body.getFault() != null ) {
 			// soap is a fault
@@ -730,7 +688,7 @@ public class UDDIRegistrationHandler extends Redirector {
 					// use the new bindingKey to get bindingTemplate
 					// a bindingTemplate redirected is already served by gateway,
 					//   it may be a usable information
-					cat.debug( "A hostingRedirector has a new bindingKey " + bindingKey );
+					logger.debug( "A hostingRedirector has a new bindingKey " + bindingKey );
 					//return;
 					accessPointContent = bindingKey;
 					accessPointUseType = "bidingTemplate"; // a UDDI v3.0 equivalent
@@ -900,10 +858,10 @@ public class UDDIRegistrationHandler extends Redirector {
 			try {
 				uri = new URI( actual.getValue());
 			}catch ( NullPointerException ne ) {
-				cat.debug( "No content." );
+				logger.debug( "No content." );
 				return null;
 			}catch ( URISyntaxException uriEx ) {
-				cat.debug( "A bad URI : " + uri.toString());
+				logger.debug( "A bad URI : " + uri.toString());
 				return null;
 			}
 		}
@@ -916,7 +874,7 @@ public class UDDIRegistrationHandler extends Redirector {
 			wsdl.setURL( uri.toURL());
 			wsdl.setDefinition( definition );
 		}catch ( WSDLException wsdlEx ) {
-			cat.debug( "No WSDL file at " + uri.toString() );
+			logger.debug( "No WSDL file at " + uri.toString() );
 			if ( isWSDLinterface ) {
 				// there must be a good WSDL file at the URI
 				throw new Exception("It is not a WSDL file.");

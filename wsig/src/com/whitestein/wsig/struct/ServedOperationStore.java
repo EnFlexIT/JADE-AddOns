@@ -35,19 +35,16 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.struct;
 
-import java.util.Hashtable;
-import java.util.HashSet;
+import jade.core.AID;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
-
-import org.apache.log4j.Category;
-
-import com.whitestein.wsig.*;
+import org.apache.log4j.Logger;
+import com.whitestein.wsig.Configuration;
 import com.whitestein.wsig.fipa.FIPAServiceIdentificator;
 import com.whitestein.wsig.fipa.GatewayAgent;
 import com.whitestein.wsig.ws.UDDIOperationIdentificator;
-//import com.whitestein.wsigs.ws.DFToUDDI4j;
-import jade.core.AID;
 
 /**
  * @author jna
@@ -68,7 +65,7 @@ public class ServedOperationStore {
 	
 	private static final String BASE = "operation";
 	private static int count = 0;
-	private static Category cat = Category.getInstance(ServedOperationStore.class.getName());
+	private static Logger log = Logger.getLogger(ServedOperationStore.class.getName());;
 	
 	public static synchronized ServedOperationStore getInstance() {
 		if ( null == instance ) {
@@ -142,7 +139,7 @@ public class ServedOperationStore {
 	 */
 	private synchronized static String generateName() {
 		if ( Integer.MAX_VALUE == count ) {
-			cat.error(" Operation's count is overflowed.");
+			log.error(" Operation's count is overflowed.");
 			// termination is needed to avoid a misfunctionality
 		}
 		return BASE + (count++);
@@ -160,7 +157,7 @@ public class ServedOperationStore {
 		OperationID oid = so.getOperationID();
 		fipaSIdToServedOperation.put( oid.getFIPAServiceIdentificator(), so);
 		uddiOIdToServedOperation.put(oid.getUDDIOperationIdentificator(), so);
-		cat.debug(" operation is added : " + oid.getFIPAServiceIdentificator().getAgentID()
+		log.debug(" operation is added : " + oid.getFIPAServiceIdentificator().getAgentID()
 				+ " " + oid.getFIPAServiceIdentificator().getServiceName()
 				+ ",   " + oid.getUDDIOperationIdentificator().getAccessPoint()
 				+ " " + oid.getUDDIOperationIdentificator().getWSDLOperation()

@@ -35,10 +35,9 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.fipa;
 
-import com.whitestein.wsig.struct.CalledMessageImpl;
-
 import jade.lang.acl.ACLMessage;
-import org.apache.log4j.Category;
+
+import com.whitestein.wsig.struct.CalledMessageImpl;
 
 
 /**
@@ -58,11 +57,6 @@ public class FIPAMessage extends CalledMessageImpl {
 	 * this acl message stored
 	 */
 	private ACLMessage aclMessage;
-
-	/**
-	 * to log messages
-	 */
-	private static Category cat = Category.getInstance(FIPAMessage.class.getName());
 
 	/**
 	 * creates an empty message

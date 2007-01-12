@@ -109,7 +109,7 @@ public class TestSOAPServer extends HTTPServer{
 	 * @param absolutePath a searching criteria
 	 * @return a new instance of the handler
 	 */
-	public SOAPHandler findHandler( String absolutePath ) {
+	/*public SOAPHandler findHandler( String absolutePath ) {
 		SOAPHandler h = null;
 		
 		// an empty handler is provided
@@ -121,7 +121,7 @@ public class TestSOAPServer extends HTTPServer{
 			}
 		};
 		return h;
-	}
+	}*/
 	
 	/**
 	 * sets up the UDDI4j. It starts components required.
@@ -349,7 +349,15 @@ public class TestSOAPServer extends HTTPServer{
 			tModelsVector.addElement( tModel );
 
 			// save bindingTemplate
-			AuthToken authToken = uddiProxy.get_authToken( userName,password);
+			AuthToken authToken = null;
+			//try{
+			//AuthToken authToken = uddiProxy.get_authToken( userName,password);
+			authToken = uddiProxy.get_authToken( userName,password);
+			/*}catch(UDDIException e){
+				System.out.println("EXCUDDI "+e);
+			}catch(TransportException te){
+				System.out.println("EXCTE "+te);
+			}*/
 			TModelDetail tModelDetail = uddiProxy.save_tModel(
 					authToken.getAuthInfoString(),
 					tModelsVector);

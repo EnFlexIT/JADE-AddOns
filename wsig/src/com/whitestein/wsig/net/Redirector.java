@@ -35,17 +35,14 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.net;
 
-import java.util.Properties;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.io.IOException;
-
-import javax.xml.soap.SOAPMessage;
+import java.util.Properties;
 import javax.xml.soap.SOAPException;
-
-import org.apache.log4j.Category;
-
+import javax.xml.soap.SOAPMessage;
+import org.apache.log4j.Logger;
 import com.whitestein.wsig.ws.WSEndPoint;
 
 /**
@@ -58,11 +55,11 @@ import com.whitestein.wsig.ws.WSEndPoint;
 public class Redirector implements SOAPHandler {
 
 	protected URL target = null;
-	private Category cat = Category.getInstance(Redirector.class.getName());
+	private Logger logger = Logger.getLogger(Redirector.class.getName());
 	
 	public void setEndPoint( URL target ) {
 		this.target = target;
-		cat.debug("An end point is set to " + target );
+		logger.debug("An end point is set to " + target );
 	}
 	
 	/**
@@ -74,7 +71,7 @@ public class Redirector implements SOAPHandler {
 	 * @return a response
 	 */
 	public SOAPMessage doRequest( Properties header, SOAPMessage soap ) {
-	    cat.debug("A redirector does a request on a target: " + target + ".");
+	    logger.debug("A redirector does a request on a target: " + target + ".");
 		SOAPMessage retSOAP = null;
 		HttpURLConnection c = null;
 		try {
@@ -86,16 +83,15 @@ public class Redirector implements SOAPHandler {
 			retSOAP = WSEndPoint.receiveHTTPResponse( c );
 			
 			// release resources
-			//c.getOutputStream().close();  // exception: Cannot write output after reading input
 			c.getInputStream().close();
 			c.disconnect();
 	
 		}catch (MalformedURLException mfe) {
-			cat.error( mfe );
+			logger.error( mfe );
 		}catch (SOAPException se) {
-			cat.error(se);
+			logger.error(se);
 		}catch (IOException ioe) {
-			cat.error(ioe);
+			logger.error(ioe);
 		}
 
 		return retSOAP;

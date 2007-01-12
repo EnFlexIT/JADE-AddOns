@@ -35,44 +35,57 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.ws;
 
-import com.whitestein.wsig.*;
-import com.whitestein.wsig.fipa.*;
-import com.whitestein.wsig.struct.*;
-
+import jade.content.onto.Ontology;
 import jade.core.AID;
+import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.Modify;
+import jade.domain.FIPAAgentManagement.Property;
+import jade.domain.FIPAAgentManagement.Search;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.util.leap.List;
-import jade.domain.FIPAException;
-import jade.domain.FIPAAgentManagement.Property;
-import jade.domain.FIPAAgentManagement.Register;
-import jade.domain.FIPAAgentManagement.Deregister;
-import jade.domain.FIPAAgentManagement.Modify;
-import jade.domain.FIPAAgentManagement.Search;
-
 import java.net.URL;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Collection;
 import java.util.HashSet;
-import java.lang.Integer;
-
-import org.uddi4j.client.UDDIProxy;
-//import org.uddi4j.response.BusinessInfo;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
-//import org.uddi4j.datatype.Name;
-import org.uddi4j.util.*;
-import org.uddi4j.*;
-import org.uddi4j.datatype.*;
-import org.uddi4j.datatype.binding.*;
-import org.uddi4j.datatype.tmodel.*;
-import org.uddi4j.transport.*;
-import org.uddi4j.response.*;
-//import org.uddi4j.datatype.business.*;
-import org.uddi4j.datatype.service.*;
-
 import org.apache.log4j.Logger;
+import org.uddi4j.UDDIException;
+import org.uddi4j.client.UDDIProxy;
+import org.uddi4j.datatype.Name;
+import org.uddi4j.datatype.OverviewDoc;
+import org.uddi4j.datatype.OverviewURL;
+import org.uddi4j.datatype.binding.AccessPoint;
+import org.uddi4j.datatype.binding.BindingTemplate;
+import org.uddi4j.datatype.binding.TModelInstanceDetails;
+import org.uddi4j.datatype.binding.TModelInstanceInfo;
+import org.uddi4j.datatype.service.BusinessService;
+import org.uddi4j.datatype.tmodel.TModel;
+import org.uddi4j.response.AuthToken;
+import org.uddi4j.response.BindingDetail;
+import org.uddi4j.response.DispositionReport;
+import org.uddi4j.response.Result;
+import org.uddi4j.response.ServiceDetail;
+import org.uddi4j.response.ServiceInfo;
+import org.uddi4j.response.ServiceInfos;
+import org.uddi4j.response.ServiceList;
+import org.uddi4j.response.TModelDetail;
+import org.uddi4j.transport.TransportException;
+import org.uddi4j.util.CategoryBag;
+import org.uddi4j.util.FindQualifiers;
+import org.uddi4j.util.KeyedReference;
+import org.uddi4j.util.ServiceKey;
+import org.uddi4j.util.TModelBag;
+import org.uddi4j.util.TModelKey;
+import com.whitestein.wsig.Configuration;
+import com.whitestein.wsig.fipa.DFMethodListener;
+import com.whitestein.wsig.fipa.FIPAEndPoint;
+import com.whitestein.wsig.fipa.FIPAServiceIdentificator;
+import com.whitestein.wsig.struct.OperationID;
+import com.whitestein.wsig.struct.ServedOperation;
+import com.whitestein.wsig.struct.ServedOperationStore;
 
 /**
  * This class provides a UDDI connection for an agent.
@@ -87,7 +100,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	private Logger log = Logger.getLogger(DFToUDDI4j.class.getName());
 	
 	private Hashtable aidToService = new Hashtable(); 
-	private Hashtable aidToConcept = new Hashtable();
+	//private Hashtable aidToConcept = new Hashtable();
 	private ServedOperationStore operationStore = ServedOperationStore.getInstance();
 	private UDDIProxy uddiProxy;
 	private String businessKey;
@@ -139,7 +152,7 @@ public class DFToUDDI4j implements DFMethodListener {
 		FIPAEndPoint fipaEP;
 		while( it.hasNext()) {
 			sd = (ServiceDescription) it.next();
-			op = createServedOperation( agentId, sd );
+			op = createServedOperation(agentId, sd);
 			if ( null != op ) {
 				coll.add( op );
 			}
@@ -161,27 +174,23 @@ public class DFToUDDI4j implements DFMethodListener {
 		FIPAEndPoint fipaEP;
 		ServedOperation op;
 		
-		if( ! Configuration.WEB_SERVICE.equalsIgnoreCase(sd.getType()) ) {
-				// test for web service type in properties
-				String strValue = null;
-				Property p = null;
-				Iterator it = sd.getAllProperties();
-				while( it.hasNext() ) {
-					p = (Property) it.next();
-					if ( "type".equalsIgnoreCase(p.getName()) ) {
-						strValue = p.getValue().toString();  // the value is a String
-						// log.debug( " property Object is an instance of " + p.getValue().getClass().getName() );
-						break;
-					}
-				}
-				
-				if ( null == strValue
-							|| strValue.indexOf( Configuration.WEB_SERVICE ) == -1 ) {
-					// a FIPA service is not a web service
-					return null;
-				}
+		Property p = null;
+		Iterator it = sd.getAllProperties();
+		boolean found =  false;
+		while(it.hasNext() && !found ) {
+			p = (Property) it.next();
+			if ("WSIG".equalsIgnoreCase(p.getName()) && p.getValue().toString().equals("true") ) {
+				found = true;
+			}
 		}
 
+		if (!found){
+			return null;
+		}
+
+		//manageAgentOntologies(sd);
+		
+		
 		fipaSId = new FIPAServiceIdentificator( agentId, sd );
 		fipaEP = new FIPAEndPoint( fipaSId );
 		uddiOId = ServedOperationStore.generateUDDIOperationId();
@@ -203,6 +212,17 @@ public class DFToUDDI4j implements DFMethodListener {
 		return op;
 	}
 	
+	private void manageAgentOntologies(ServiceDescription sd) {
+		Iterator ontologies = sd.getAllOntologies();
+		while (ontologies.hasNext())
+		{
+			Ontology onto = (Ontology)ontologies.next();
+			//onto
+			
+		}
+		
+	}
+
 	/**
 	 * removes served operations.
 	 * For each FIPA service a corresponding ServedOperation instance
@@ -236,8 +256,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param aid
 	 * @throws FIPAException
 	 */
-	public synchronized void registerAction( Register register, AID aid ) throws FIPAException {
-		DFAgentDescription dfad = (DFAgentDescription) register.getDescription();
+	public synchronized void registerAction( DFAgentDescription dfad , AID aid ) throws FIPAException {
 		log.debug("A wsigs's registration from an agent: " + dfad.getName() + ".");
 		
 		// test an existence
@@ -339,8 +358,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param aid
 	 * @throws FIPAException
 	 */
-	public synchronized void deregisterAction( Deregister deregister, AID aid ) throws FIPAException {
-		DFAgentDescription dfad = (DFAgentDescription) deregister.getDescription();
+	public synchronized void deregisterAction(DFAgentDescription dfad , AID aid ) throws FIPAException {
 		log.debug("A wsigs's deregistration from an agent: " + dfad + ".");
 		
 		// test an existence

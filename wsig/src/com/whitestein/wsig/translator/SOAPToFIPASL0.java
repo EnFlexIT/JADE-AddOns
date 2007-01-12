@@ -40,7 +40,6 @@ import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.FIPAManagementVocabulary;
 import jade.content.lang.sl.SLCodec;
 import jade.lang.acl.ACLMessage;
-//import jade.content.lang.xml.XMLCodec;
 import jade.content.lang.Codec.CodecException;
 import jade.content.onto.BasicOntology;
 import jade.content.onto.basic.Action;
@@ -53,7 +52,6 @@ import jade.content.abs.AbsPrimitive;
 import jade.content.abs.AbsAgentAction;
 import jade.content.abs.AbsAggregate;
 import jade.core.AID;
-
 import com.whitestein.wsig.Configuration;
 import com.whitestein.wsig.fipa.FIPAMessage;
 import com.whitestein.wsig.fipa.FIPAServiceIdentificator;
@@ -62,10 +60,7 @@ import com.whitestein.wsig.struct.ServedOperation;
 import com.whitestein.wsig.struct.ServedOperationStore;
 import com.whitestein.wsig.ws.UDDIOperationIdentificator;
 import com.whitestein.wsig.ws.WSMessage;
-//import com.whitestein.wsigs.struct.OperationID;
-//import com.whitestein.wsigs.test.TestSOAPClient;
 import javax.xml.soap.SOAPMessage;
-//import javax.xml.soap.SOAPFactory;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPBodyElement;
@@ -77,7 +72,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.ArrayList;
 import org.apache.axis.message.PrefixedQName;
-import org.apache.log4j.Category;
 import org.apache.log4j.Logger;
 
 
@@ -94,7 +88,6 @@ public class SOAPToFIPASL0 implements Translator {
 	public static String XML_ELEMENT = Configuration.getInstance().getFIPAAttrForXMLElement();
 	public static String XML_CONTENT = Configuration.getInstance().getFIPAAttrForXMLContent();
 	public static String XML_TAG_ = Configuration.getInstance().getFIPAPrefixForXMLTag();
-	private static Category cat = Category.getInstance(SOAPToFIPASL0.class.getName());
 	private static Logger log = Logger.getLogger(SOAPToFIPASL0.class.getName());
 	public static String NONE = "none";
 
@@ -132,7 +125,7 @@ public class SOAPToFIPASL0 implements Translator {
 				// empty response, treat it as inform-done
 				ACLMessage acl = new ACLMessage( ACLMessage.INFORM );
 				acl.setContent("((DONE " + SOAPToFIPASL0.NONE + "))");
-				acl.setLanguage( FIPANames.ContentLanguage.FIPA_SL0 );
+				acl.setLanguage( FIPANames.ContentLanguage.FIPA_SL );
 				fipa = new FIPAMessage(acl);
 				fipa.setResponse( soap.isResponse());
 				c.add( fipa );
@@ -199,7 +192,7 @@ public class SOAPToFIPASL0 implements Translator {
 		// to construct a part of the RESULT
 		AbsPredicate ap = new AbsPredicate( SL0Vocabulary.RESULT );
 		if ( 0 == count || (1 == count && null == gen) ) {
-			cat.debug(" translated response is null");
+			log.debug(" translated response is null");
 			return null;
 		}else if ( 1 == count ) {
 			// one XML element is not converted into a SEQUENCE
@@ -215,7 +208,7 @@ public class SOAPToFIPASL0 implements Translator {
 		try {
 			acl.setContent( codecSL0.encode( ap ));
 		
-			cat.debug( "translated response is " + codecSL0.encode(ap) );
+			log.debug( "translated response is " + codecSL0.encode(ap) );
 		} catch ( CodecException ce ) {
 			log.debug( ce );
 			acl.setContent( "( " + NONE + " (error-message \"A translation fails.\"))");
@@ -432,7 +425,7 @@ public class SOAPToFIPASL0 implements Translator {
 			try {
 				el.addAttribute(n,attr_value);
 			}catch( SOAPException se ) {
-				cat.debug("An XML's attribute is not set.");
+				log.debug("An XML's attribute is not set.");
 			}
 		}
 	}
@@ -469,16 +462,6 @@ public class SOAPToFIPASL0 implements Translator {
 			return null;
 		}
 
-		//print out childs
-		/*
-		Iterator it = soap.getChildElements();
-		System.out.println(" " + soap.getElementName().getLocalName() + " value: " + soap.getValue());
-		SOAPElement te;
-		while ( it.hasNext()) {
-			te = (SOAPElement) it.next();
-			log.debug("   child: " + te.getElementName().getLocalName() + " value: " + te.getValue());
-		}
-		*/
 		
 		String name = soap.getElementName().getLocalName();
 		log.debug(" generateTypedAbs for: " + name );
@@ -500,20 +483,10 @@ public class SOAPToFIPASL0 implements Translator {
 			if ( null == absRet2 ) {
 				log.debug(" null is at primitive : " + name );
 			}
-			/*
-			try {
-				ap.set( SL0Vocabulary.RESULT_VALUE, absRet2 );
-				codecSL0.encode( ap );
-				log.debug( "translated part is " + codecSL0.encode(ap));
-			} catch ( CodecException ce ) {
-				log.debug( ce );
-			}
-			 */
 		
 			return absRet2;
 		}
 
-		// System.out.println("  " + name + "    " + soap.getElementName() );
 		SOAPElement s, s2;
 		AbsTerm gen;
 		Iterator i = soap.getChildElements();
@@ -558,15 +531,6 @@ public class SOAPToFIPASL0 implements Translator {
 		if ( null == absRet ) {
 			log.debug(" null is at name: " + name );
 		}
-		/*
-		try {
-			ap.set( SL0Vocabulary.RESULT_VALUE, absRet );
-			codecSL0.encode( ap );
-			cat.debug( "translated part is " + codecSL0.encode(ap));
-		} catch ( CodecException ce ) {
-			log.debug( ce );
-		}
-		 */
 		return absRet;
 	}
 
@@ -690,7 +654,7 @@ public class SOAPToFIPASL0 implements Translator {
 		//   has got childs, which are all a text node
 		boolean res = soap != null &&
 			isAllChildsText(soap);
-		cat.debug(" isLeaf method for: " + soap.getElementName().getLocalName() + " value: " + soap.getValue() + " is leaf: " + res);
+		log.debug(" isLeaf method for: " + soap.getElementName().getLocalName() + " value: " + soap.getValue() + " is leaf: " + res);
 		return res;
 		//
 		//	( ! soap.getChildElements().hasNext()

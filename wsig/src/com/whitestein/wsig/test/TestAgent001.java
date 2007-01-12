@@ -35,33 +35,27 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.test;
 
-import jade.content.abs.AbsPrimitive;
 import jade.content.abs.AbsContentElement;
 import jade.content.abs.AbsObject;
+import jade.content.abs.AbsPrimitive;
+import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SL0Vocabulary;
 import jade.content.lang.sl.SLCodec;
-import jade.content.lang.Codec.CodecException;
 import jade.content.onto.BasicOntology;
-import jade.content.onto.OntologyException;
-import jade.content.onto.basic.Action;
-import jade.core.Agent;
 import jade.core.AID;
+import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.domain.DFService;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.FIPAManagementVocabulary;
 import jade.domain.FIPAAgentManagement.FIPAManagementOntology;
 import jade.domain.FIPAAgentManagement.Property;
-import jade.domain.FIPAAgentManagement.Register;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.domain.FIPAAgentManagement.Deregister;
 import jade.lang.acl.ACLMessage;
-
+import org.apache.log4j.Logger;
 import com.whitestein.wsig.Configuration;
 import com.whitestein.wsig.fipa.SL0Helper;
 import com.whitestein.wsig.translator.FIPASL0ToSOAP;
-
-import org.apache.log4j.Logger;
 
 
 /**
@@ -76,8 +70,8 @@ public class TestAgent001 extends Agent {
   private Logger log = Logger.getLogger(TestAgent001.class.getName());
   public static AID myAID = null;
 
-  private SLCodec codec = new SLCodec(0);
-  private DFAgentDescription dfad = new DFAgentDescription();
+  private SLCodec codec = new SLCodec();
+
   public static final String SERVICE_PLUS = "plus";
   private int convId = 0;
                                                                                 
@@ -85,7 +79,13 @@ public class TestAgent001 extends Agent {
   protected void setup() {
     log.info("A TestAgent001 is starting.");
 
-    // add behaviour of the Agent
+
+	getContentManager().registerLanguage( codec );
+      getContentManager().registerOntology(
+        FIPAManagementOntology.getInstance());
+
+
+	// add behaviour of the Agent
     this.addBehaviour( new CyclicBehaviour( this ) {
       public void action() {
         ACLMessage msg = myAgent.receive();
@@ -98,7 +98,6 @@ public class TestAgent001 extends Agent {
               // other messages are ignored
               break;
           }
-
           try {
             log.debug("A testAgent001 receives: "
               + SL0Helper.toString(msg) );
@@ -115,45 +114,30 @@ public class TestAgent001 extends Agent {
     // ------------------------------
     // register the agent into the DF
 
-    // prepare a message
-    ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
-    AID  dfAID = new AID( "df", AID.ISLOCALNAME );
-    msg.addReceiver(dfAID);
-    msg.setSender(this.getAID());
-    msg.setConversationId("conv_" + convId ++ );
-    msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
-    msg.setOntology(FIPAManagementVocabulary.NAME);
-                                                                              
+
     // prepare a DFAgentDescription
-    dfad.setName( this.getAID());
-    dfad.addLanguages( FIPANames.ContentLanguage.FIPA_SL0 );
+    DFAgentDescription dfad = new DFAgentDescription();
+	dfad.setName( this.getAID());
+    dfad.addLanguages( codec.getName() );
     dfad.addProtocols( FIPANames.InteractionProtocol.FIPA_REQUEST );
     ServiceDescription sd;
     sd = new ServiceDescription();
     sd.setName( SERVICE_PLUS ); // here is the service name
-    sd.addLanguages( FIPANames.ContentLanguage.FIPA_SL0 );
+    sd.addLanguages( codec.getName());
     sd.addProtocols( FIPANames.InteractionProtocol.FIPA_REQUEST );
-    sd.setType("web-service");
+    sd.addProperties(new Property("WSIG","true"));
+    sd.setType(Configuration.WEB_SERVICE);
     // or set properties
-    Property p = new Property("type","(set web-service)");
-    sd.addProperties( p );
+
     dfad.addServices(sd);
 
-    //set register's argument
-    Register reg = new Register();
-    reg.setDescription(dfad);
-                                                                              
-    // create registration's action
-    Action action = new Action( this.getAID(), reg );
-                                                                              
+
     // send the request for registration
     try {
-      getContentManager().registerLanguage( codec );
-      getContentManager().registerOntology(
-        FIPAManagementOntology.getInstance());
-      getContentManager().fillContent(msg, action);
-      send(msg);
-    }catch (Exception e) {
+
+
+		DFService.register(this, dfad);
+	}catch (Exception e) {
       // something is wrong
       e.printStackTrace();
     }
@@ -166,27 +150,11 @@ public class TestAgent001 extends Agent {
 	
   protected void takeDown() {
     //deregister itself from the DF 
-    AID  dfAID = new AID( "df", AID.ISLOCALNAME );
-    ACLMessage msg = new ACLMessage( ACLMessage.REQUEST );
-    msg.addReceiver( dfAID ); // Configuration.getInstance().getGatewayAID());
-    msg.setSender( this.getAID());
-    msg.setConversationId( "conv_" + convId ++ );
-    msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL0);
-    msg.setOntology(FIPAManagementVocabulary.NAME);
-
-    //set deregister's argument
-    Deregister dereg = new Deregister();
-    dereg.setDescription(dfad);
-		
-    // create registration's action
-    Action action = new Action( this.getAID(), dereg );
 
     try {
-      getContentManager().registerLanguage( codec );
-      getContentManager().registerOntology(FIPAManagementOntology.getInstance());
-      getContentManager().fillContent(msg, action);
-      send(msg);
-    }catch (Exception e) {
+
+		DFService.deregister(this);
+	}catch (Exception e) {
       log.error( e );
     }
 		

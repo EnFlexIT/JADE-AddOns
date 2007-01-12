@@ -92,12 +92,6 @@ public class TestSOAPClient implements Runnable {
   private static SOAPFactory soapFactory;
   private CalledMessage returnedMessage;
 
-  private String uddiQueryManagerURL =
-    Configuration.getInstance().getHostURI()
-    +  Configuration.getInstance().getQueryManagerPath();
-  private String uddiLifeCycleManagerURL =
-    Configuration.getInstance().getHostURI()
-    +  Configuration.getInstance().getLifeCycleManagerPath();
   private UDDIProxy uddiProxy;
 
   // a message factory setup

@@ -35,12 +35,12 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.struct;
 
-import com.whitestein.wsig.translator.*;
-import com.whitestein.wsig.fipa.GatewayAgent;
-
 import java.util.Collection;
 import java.util.Iterator;
-import org.apache.log4j.Category;
+import org.apache.log4j.Logger;
+import com.whitestein.wsig.fipa.GatewayAgent;
+import com.whitestein.wsig.translator.Translator;
+import com.whitestein.wsig.translator.TranslatorStore;
 
 /**
  * @author jna
@@ -60,7 +60,7 @@ public class Call implements ReturnMessageListener, Runnable{
 	private int messagesCount = 0;
 	private int returnedCount = 0;
 	private boolean isReceived = false;
-	private static Category cat = Category.getInstance(Call.class.getName());
+	private static Logger log = Logger.getLogger(Call.class.getName());
 
 	/**
 	 * creates new call to the served operation
@@ -111,9 +111,9 @@ public class Call implements ReturnMessageListener, Runnable{
 			// proces message(s) in a thread
 			new Thread(this).start();
 		} catch ( MessageIsNotNativeException e ) {
-			cat.error(e);
+			log.error(e);
 		} catch ( Exception e ) {
-			cat.error(e);
+			log.error(e);
 		}
 	}
 	
@@ -138,7 +138,7 @@ public class Call implements ReturnMessageListener, Runnable{
 			}
 			
 		}catch (MessageIsNotNativeException e) {
-			cat.error(e);
+			log.error(e);
 		}
 	}
 

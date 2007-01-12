@@ -35,26 +35,9 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.fipa;
 
-//import java.util.ArrayList;
-//import java.util.Collection;
-//import java.util.Iterator;
-
-//import javax.xml.soap.SOAPElement;
-//import javax.xml.soap.SOAPMessage;
-
-import org.apache.log4j.Category;
-
-import jade.content.abs.AbsAgentAction;
-//import jade.content.abs.AbsAggregate;
-import jade.content.abs.AbsConcept;
-//import jade.content.abs.AbsContentElement;
-import jade.content.abs.AbsObject;
-import jade.content.abs.AbsPredicate;
-import jade.content.abs.AbsPrimitive;
-import jade.content.lang.sl.SL0Vocabulary;
-import jade.content.onto.BasicOntology;
-import jade.content.onto.basic.Action;
 import jade.lang.acl.ACLMessage;
+
+import org.apache.log4j.Logger;
 
 import com.whitestein.wsig.struct.CalledMessage;
 import com.whitestein.wsig.struct.ReturnMessageListener;
@@ -68,7 +51,7 @@ import com.whitestein.wsig.translator.SOAPToFIPASL0;
 public class FIPAReturnMessageListener implements ReturnMessageListener {
 
 	private ACLMessage originalRequest;
-	private Category cat = Category.getInstance( FIPAReturnMessageListener.class.getName());
+	private Logger logger = Logger.getLogger(FIPAReturnMessageListener.class.getName());
 
 	
 	public FIPAReturnMessageListener ( ACLMessage originalRequest ) {
@@ -95,8 +78,6 @@ public class FIPAReturnMessageListener implements ReturnMessageListener {
 				originalRequest.getContent());
 		String[] p;
 
-		//cat.debug( " response is " + SL0Helper.toString( retACL ) );
-		//cat.debug( " content is " + retACL.getContent()  );
 		int actionIndex = -1;
 		switch ( retACL.getPerformative() ) {
 			case ACLMessage.FAILURE:
@@ -120,14 +101,13 @@ public class FIPAReturnMessageListener implements ReturnMessageListener {
 					response.setContent( "(" + p[0] + " " + p[1] + ")" );
 	
 				}catch (Exception e) {
-					cat.error(e);
+					logger.error(e);
 				}
 	
 				break;
 			case ACLMessage.INFORM:
 				// a proposition of following forms:
-				//   ( result action value )
-				//  or  ( done action )
+				// ( result action value ) or  ( done action )
 				actionIndex = 1;
 				try {
 					// a content's level of paranteses
@@ -139,7 +119,7 @@ public class FIPAReturnMessageListener implements ReturnMessageListener {
 					if ( SOAPToFIPASL0.NONE.equalsIgnoreCase(p[actionIndex]) ) {
 						p[actionIndex] = action;
 					}else {
-						cat.debug("An action translated is expeted in a form \""
+						logger.debug("An action translated is expeted in a form \""
 							+ SOAPToFIPASL0.NONE + "\" in a response from a translator.");
 					}
 	
@@ -151,9 +131,8 @@ public class FIPAReturnMessageListener implements ReturnMessageListener {
 					resp += "))";
 					response.setContent( resp );
 					
-					//cat.debug( " response updated: " + resp);
 				}catch (Exception e) {
-					cat.error(e);
+					logger.error(e);
 				}
 
 				break;
@@ -164,24 +143,9 @@ public class FIPAReturnMessageListener implements ReturnMessageListener {
 				break;
 		}
 
-		//AbsPredicate ap = SL0Helper.extractResult(retACL);
-		// fill an action's field
-		//ap.set( SL0Vocabulary.RESULT_ACTION, SL0Helper.extractAction(originalRequest));
-		//SL0Helper.fillAbsPredicateToContent( response, ap );
-		//
-		//  problems are arrised with :_JADE.UNNAMEDnn attributes,
-		//    which are generated but are unwandted
-				
-		// performative is set the same as a retACL's one
 		response.setPerformative( retACL.getPerformative());
 
-		//  a debug message
-		// cat.debug(" response is " + SL0Helper.toString(response));
-		// cat.debug(" response is " + response.getContent());
-
-		// send a response by the GatewayAgent
 		GatewayAgent.getInstance().sendACL(response);
-		// cat.debug(" response is " + SL0Helper.toString(response));
 
 		// inform also a GatewayAgent GUI's logger
 		FIPAMessage fipa = new FIPAMessage( response );

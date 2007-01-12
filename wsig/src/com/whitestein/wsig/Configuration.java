@@ -35,22 +35,19 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig;
 
-import java.util.Properties;
-import java.io.File;
-import java.io.InputStream;
+import jade.core.AID;
 import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.OutputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
-
-import org.apache.log4j.Category;
-
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Properties;
+import org.apache.log4j.Logger;
 import com.whitestein.wsig.fipa.DFMethodListener;
-
-import jade.core.AID;
 
 /**
  * @author jna
@@ -65,9 +62,9 @@ import jade.core.AID;
 public class Configuration extends Properties {
 
 	private static Configuration anInstance;
-	private static Category cat = Category.getInstance(Configuration.class.getName());
+	private static Logger log = Logger.getLogger(Configuration.class.getName());
 	private final static boolean isDeveloping = false; //true;
-	private final static String VERSION = "beta.0.6";
+	private final static String VERSION = "0.7beta";
 	public static final String WEB_SERVICE = "web-service";
 	public final static String GATEWAY_NAME = "wsig";
 	private final static String GATEWAY_UPPER = "WSIG";
@@ -100,11 +97,11 @@ public class Configuration extends Properties {
 	public final static String KEY_USER_NAME = "uddi.userName";
 	public final static String KEY_USER_PASSWORD = "uddi.userPassword";
 	public final static String KEY_UDDI4J_LOG_ENABLED = "org.uddi4j.logEnabled";
+	//public final static String KEY_UDDI4J_TRANSPORT_CLASS = "org.uddi4j.transport.ApacheAxisTransport";
 	public final static String KEY_UDDI4J_TRANSPORT_CLASS = "org.uddi4j.TransportClassName";
 	public final static String KEY_TEST_GOOGLE_ACCESS_KEY = "test.Google.accessKey";
-	//public final static String KEY_xyz = "xYz";
-	//public final static String KEY_xyz = "xYz";
-	//public final static String KEY_xyz = "xYz";
+	public static final String VOID_TYPE = "";
+
 
 	private AID gatewayAID;
 	
@@ -150,7 +147,7 @@ public class Configuration extends Properties {
 		try {
 			return Integer.parseInt( getProperty( KEY_HOST_PORT ));
 		} catch ( NumberFormatException e ) {
-			cat.debug(e);
+			log.debug(e);
 			return 0;
 		}
 	}
@@ -203,6 +200,7 @@ public class Configuration extends Properties {
 	}
 	
 	public synchronized String getUDDI4jTransportClass() {
+		log.info("In getUDDI4j... "+KEY_UDDI4J_TRANSPORT_CLASS);
 		return getProperty( KEY_UDDI4J_TRANSPORT_CLASS );
 	}
 	
@@ -300,15 +298,15 @@ public class Configuration extends Properties {
 				}
 				is = new BufferedInputStream( new FileInputStream( CONFIG_FILE ));
 			}catch (FileNotFoundException e) {
-				cat.error(e);
+				log.error(e);
 				return;
 			}
 			try {
 				c.load( is );
 				is.close();
-				cat.debug("WSIG configuration is loaded from a file: " +  CONFIG_FILE.getCanonicalPath() +  " .");
+				log.debug("WSIG configuration is loaded from a file: " +  CONFIG_FILE.getCanonicalPath() +  " .");
 			}catch (IOException ioe) {
-				cat.error(ioe);
+				log.error(ioe);
 			}
 			c.addEmptyProperties();
 		}
