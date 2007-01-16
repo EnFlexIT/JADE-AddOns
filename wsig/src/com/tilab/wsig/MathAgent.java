@@ -20,91 +20,94 @@ import jade.lang.acl.MessageTemplate;
 import jade.util.leap.ArrayList;
 
 import org.apache.log4j.Logger;
+import com.whitestein.wsig.WSIGConstants;
 
-public class MathAgent extends Agent {
-
-	  private Logger log = Logger.getLogger(MathAgent.class.getName());
-	  public static AID myAID = null;
-	  private SLCodec codec = new SLCodec();
-	                                                                                
-		
-	  protected void setup() {
-	    log.info("A MathAgent is starting.");
-
-		getContentManager().registerLanguage(codec);
-	    getContentManager().registerOntology(FIPAManagementOntology.getInstance());
-	    getContentManager().registerOntology(MathOntology.getInstance());
-
-	    // ------------------------------
-	    // register the agent into the DF
-
-	    // prepare a DFAgentDescription
-	    DFAgentDescription dfad = new DFAgentDescription();
-		dfad.setName(this.getAID());
-	    dfad.addLanguages(codec.getName() );
-	    dfad.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST );
-	    ServiceDescription sd;
-	    sd = new ServiceDescription();
-	    sd.setName("TrialService"); //Nome WSDL
-	    sd.addLanguages(codec.getName());
-	    // Eventuale Verifica language su wsig
-	    // Aggiunta in wsig.properties delle ontologie ke deve conoscere per parlare con gli agenti
-	    // Pero ora ci limitiamo alla FIPA_REQUEST
-	    sd.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST);
-	    sd.setType("MathAgent"); //Eventuale type del wsdl
-	    sd.setOwnership("MathOwner"); // Eventuale owner del wsdl
-	    sd.addProperties(new Property("WSIG","true"));
-	    sd.addOntologies(MathOntology.getInstance().getName());
-	    sd.addProperties(new Property("wsig-mapper","com.tilab.wsig.MathOntologyMapper"));
-	    dfad.addServices(sd);
-	    
-	    try {
-			DFService.register(this, dfad);
-		}catch (Exception e) {
-	      //something is wrong
-	      e.printStackTrace();
-	    }
-	    log.debug("A MathAgent is started.");
-	    
-	    this.addBehaviour( new CyclicBehaviour( this ) {
-	    	private MessageTemplate template = MessageTemplate.MatchOntology(FIPAManagementOntology.getInstance().getName());
-	        public void action() {	          
-	          ACLMessage msg = myAgent.receive(template);
-	          if (msg != null) {
-	        	  	Action actExpr;
-	        	  	try {
-	        	  		actExpr = (Action) myAgent.getContentManager().extractContent(msg);
-	        	  		AgentAction action = (AgentAction) actExpr.getAction();
-	        	  		if (action instanceof Sum) {
-	        	  			serveSumAction((Sum) action, actExpr, msg);
-	        	  		}
-	        	  		else if (action instanceof Diff) {
-	        	  			serveDiffAction((Diff) action, actExpr, msg);
-	        	  		}
-	        	  		else if (action instanceof Abs) {
-	        	  			serveAbsAction((Abs) action, actExpr, msg);
-	        	  		}
-	        	  	} catch (Exception e) {
-	        	  		// TODO Auto-generated catch block
-	        	  		log.error("Exception: "+e.getMessage());
-	        	  		e.printStackTrace();
-	        	  	} 
-	          }else{
-	            block();
-	          }
-	        }
-			
-	      } );
-	  }
+public class MathAgent extends Agent implements WSIGConstants {
 
 	  
+	private Logger log = Logger.getLogger(MathAgent.class.getName());
+	  public static AID myAID = null;
+	  private SLCodec codec = new SLCodec();
+
+
+	  protected void setup() {
+		log.info("A MathAgent is starting.");
+
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(FIPAManagementOntology.getInstance());
+		getContentManager().registerOntology(MathOntology.getInstance());
+
+		// ------------------------------
+		// register the agent into the DF
+
+		// prepare a DFAgentDescription
+		DFAgentDescription dfad = new DFAgentDescription();
+		dfad.setName(this.getAID());
+		dfad.addLanguages(codec.getName() );
+		dfad.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST );
+		ServiceDescription sd;
+		sd = new ServiceDescription();
+		sd.setName("TrialService"); //Nome WSDL
+		sd.addLanguages(codec.getName());
+		// Eventuale Verifica language su wsig
+		// Aggiunta in wsig.properties delle ontologie ke deve conoscere per parlare con gli agenti
+		// Pero ora ci limitiamo alla FIPA_REQUEST
+		sd.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST);
+		sd.setType("MathAgent"); //Eventuale type del wsdl
+		sd.setOwnership("MathOwner"); // Eventuale owner del wsdl
+		sd.addProperties(new Property(WSIG_FLAG,"true"));
+		sd.addOntologies(MathOntology.getInstance().getName());
+
+		sd.addProperties(new Property(WSIG_MAPPER,"com.tilab.wsig.MathOntologyMapper"));
+		dfad.addServices(sd);
+
+		try {
+			DFService.register(this, dfad);
+		}catch (Exception e) {
+		  //something is wrong
+		  e.printStackTrace();
+		}
+		log.debug("A MathAgent is started.");
+
+		this.addBehaviour( new CyclicBehaviour( this ) {
+			private MessageTemplate template = MessageTemplate.MatchOntology(MathOntology.getInstance().getName());
+			public void action() {
+			  ACLMessage msg = myAgent.receive(template);
+			  if (msg != null) {
+					  Action actExpr;
+					  try {
+						  actExpr = (Action) myAgent.getContentManager().extractContent(msg);
+						  AgentAction action = (AgentAction) actExpr.getAction();
+						  if (action instanceof Sum) {
+							  serveSumAction((Sum) action, actExpr, msg);
+						  }
+						  else if (action instanceof Diff) {
+							  serveDiffAction((Diff) action, actExpr, msg);
+						  }
+						  else if (action instanceof Abs) {
+							  serveAbsAction((Abs) action, actExpr, msg);
+						  }
+					  } catch (Exception e) {
+						  // TODO Auto-generated catch block
+						  log.error("Exception: "+e.getMessage());
+						  e.printStackTrace();
+					  }
+			  }else{
+				block();
+			  }
+			}
+
+		  } );
+	  }
+
+
 	  private void serveAbsAction(Abs abs, Action actExpr, ACLMessage msg) {
 		  float real = abs.getComplex().getReal();
 		  float immaginary = abs.getComplex().getImmaginary();
 		  float result = Float.parseFloat(Double.toString(Math.sqrt(Math.pow(real, 2) + Math.pow(immaginary, 2))));
 		  sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	  }
-	  
+
 	  private void serveDiffAction(Diff diff, Action actExpr, ACLMessage msg) {
 		  float result = diff.getFirstElement() - diff.getSecondElement();
 		  sendNotification(actExpr, msg, ACLMessage.INFORM, result);
@@ -113,7 +116,7 @@ public class MathAgent extends Agent {
 		  float result = sum.getFirstElement() + sum.getSecondElement();
 		  sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	  }
-	  
+
 	  private void sendNotification(Action actExpr, ACLMessage request, int performative, Object result) {
 			// Send back a proper reply to the requester
 			ACLMessage reply = request.createReply();
@@ -142,21 +145,21 @@ public class MathAgent extends Agent {
 			}
 			else {
 				reply.setPerformative(performative);
-				
+
 			}
 			reply.addUserDefinedParameter(ACLMessage.IGNORE_FAILURE, "true");
 			send(reply);
 		}
-		
-	  protected void takeDown() {
-	    //deregister itself from the DF 
 
-	    try {
+	  protected void takeDown() {
+		//deregister itself from the DF
+
+		try {
 			DFService.deregister(this);
 		}catch (Exception e) {
-	      log.error( e );
-	    }
-			
-	    log.debug("A MathAgent is taken down now.");
+		  log.error( e );
+		}
+
+		log.debug("A MathAgent is taken down now.");
 	  }
 }

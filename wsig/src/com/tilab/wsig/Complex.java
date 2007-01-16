@@ -1,9 +1,13 @@
 package com.tilab.wsig;
 
-public class Complex {
-	float real;
-	float immaginary;
-	
+import jade.content.Concept;
+
+public class Complex implements Concept {
+	private float real;
+	private float immaginary;
+
+	public Complex(){}
+
 	public float getReal() {
 		return real;
 	}
