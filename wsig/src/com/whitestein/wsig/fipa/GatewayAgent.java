@@ -81,6 +81,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import com.whitestein.wsig.Configuration;
+import com.whitestein.wsig.WSIGConstants;
 import com.whitestein.wsig.net.HTTPServer;
 import com.whitestein.wsig.struct.Call;
 import com.whitestein.wsig.struct.CalledMessage;
@@ -102,8 +103,10 @@ import com.whitestein.wsig.ws.WSEndPoint;
  * Remark: its functional and used version is placed in jade.domain package.
  *   Must be implemented in near future.
  */
-public class GatewayAgent extends GuiAgent {
+public class GatewayAgent extends GuiAgent implements WSIGConstants {
 
+
+	public static final String AGENT_TYPE = "WSIG Agent";
 	private static final Object synchObject = new Object();
 	private static GatewayAgent instance;
 	
@@ -305,7 +308,7 @@ public class GatewayAgent extends GuiAgent {
 		// Subscribe to the DF
 		DFAgentDescription template = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
-		sd.addProperties(new Property("WSIG","true"));
+		sd.addProperties(new Property(WSIG_FLAG,"true"));
 		template.addServices(sd);
 		ACLMessage subscriptionMsg = DFService.createSubscriptionMessage(this, getDefaultDF(), template, null);
 		addBehaviour(new SubscriptionInitiator(this, subscriptionMsg) {
@@ -429,9 +432,13 @@ public class GatewayAgent extends GuiAgent {
 		//register itself to a DF
 		DFAgentDescription dfad = new DFAgentDescription();
 		dfad.setName(this.getAID());
+
 		dfad.addLanguages(FIPANames.ContentLanguage.FIPA_SL);
 		dfad.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST);
-
+		ServiceDescription sd = new ServiceDescription();
+		sd.setType(AGENT_TYPE);
+		sd.setName(getLocalName());
+		dfad.addServices(sd);
 		try {
 			DFService.register(this, dfad);
 		} catch (Exception e) {
