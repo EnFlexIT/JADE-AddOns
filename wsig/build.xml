@@ -35,7 +35,7 @@ It is created according a JADE's build.xml.
 	</target>
 
 	<target name="compile" depends="init" description="compile the source">
-	    <javac srcdir="${src}" destdir="${build}" nowarn="off" target="1.4" source="1.4" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="on">
+	    <javac srcdir="${src}" destdir="${build}" nowarn="off" target="1.5" source="1.5" optimize="${javac.optimize}" debug="${javac.debug}" deprecation="on">
 	      <classpath>
 	        <fileset dir="${libJADEDir}" includes="*.jar"/>
 	        <fileset dir="${lib}" includes="*.jar"/>

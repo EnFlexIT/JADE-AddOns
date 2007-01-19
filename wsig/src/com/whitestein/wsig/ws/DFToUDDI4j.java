@@ -291,7 +291,7 @@ public class DFToUDDI4j implements DFMethodListener {
 		while (ontologies.hasNext()) {
 			String ontoName = (String) ontologies.next();
 			Ontology onto = cntManager.lookupOntology(ontoName);
-			List actionNames = onto.getActionNames();
+			java.util.List actionNames = onto.getActionNames();
 			//if (actionNames.size() > 0) portType.setUndefined(false);
 			//definition.addPortType(portType);
 
