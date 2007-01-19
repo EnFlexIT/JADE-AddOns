@@ -7,6 +7,6 @@ set AXIS=..\lib\axis-1.4.jar;..\lib\saaj-1.2.jar;..\lib\jaxrpc-1.1.jar
 set AC=..\lib\commons-logging-1.1.jar;..\lib\commons-discovery-0.2.jar
 set GW=..\dist\wsig.jar
 set XI=..\lib\xercesImpl-2.8.1.jar
-
-set WSIGCP=%XI%;%GW%;%LOG4J%;%AC%;%AXIS%;%UDDI4j%;%WSDL%
+set XSD=..\lib\org.eclipse.emf.common_2.3.0.v200612211251.jar;..\lib\org.eclipse.emf.ecore.xmi_2.3.0.v200612211251.jar;..\lib\org.eclipse.emf.ecore_2.3.0.v200612211251.jar;..\lib\org.eclipse.emf_2.2.0.v200612211251.jar;..\lib\org.eclipse.xsd_2.3.0.v200612211251.jar;
+set WSIGCP=%XI%;%GW%;%LOG4J%;%AC%;%AXIS%;%UDDI4j%;%WSDL%;%XSD%
 
