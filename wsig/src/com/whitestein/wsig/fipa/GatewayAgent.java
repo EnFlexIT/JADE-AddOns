@@ -39,7 +39,9 @@ import jade.content.abs.AbsContentElement;
 import jade.content.abs.AbsObject;
 import jade.content.lang.sl.SL0Vocabulary;
 import jade.content.lang.sl.SLCodec;
+import jade.content.lang.Codec;
 import jade.content.onto.BasicOntology;
+import jade.content.onto.Ontology;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Profile;
@@ -109,7 +111,7 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 	public static final String AGENT_TYPE = "WSIG Agent";
 	private static final Object synchObject = new Object();
 	private static GatewayAgent instance;
-	
+
 	private static int conversationId = 0;
 	private Hashtable conversationId2listener = new Hashtable();
 	private Hashtable listener2fipaMessage = new Hashtable();
@@ -129,8 +131,8 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 	private AID dfAID = new AID(DF_LOCAL_NAME, AID.ISLOCALNAME);
 
 	private GatewayAgentGui gui;
-	
-	
+
+
 	public static final int EXIT_EVENT = 1001;
 	public static final int CLOSE_GUI_EVENT = 1002;
 	public static final int RESET_EVENT = 1003;
@@ -284,11 +286,8 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 	 */
 	protected void setup() {
 		super.setup();
-		getContentManager().registerLanguage(codecSL);
-		getContentManager().registerOntology(FIPAManagementOntology.getInstance());
-		getContentManager().registerOntology(JADEManagementOntology.getInstance());
-		getContentManager().registerOntology(DFAppletOntology.getInstance());
-
+		registerOntologies();
+		registerLanguagees();
 
 		// initialize an instance
 		try {
@@ -308,25 +307,25 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 		// Subscribe to the DF
 		DFAgentDescription template = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
-		sd.addProperties(new Property(WSIG_FLAG,"true"));
+		sd.addProperties(new Property(WSIG_FLAG, "true"));
 		template.addServices(sd);
 		ACLMessage subscriptionMsg = DFService.createSubscriptionMessage(this, getDefaultDF(), template, null);
 		addBehaviour(new SubscriptionInitiator(this, subscriptionMsg) {
 
 			protected void handleInform(ACLMessage inform) {
-				log.debug("Agent " + myAgent.getLocalName() + " - Notification received from DF."+ inform.getContent());
+				log.debug("Agent " + myAgent.getLocalName() + " - Notification received from DF." + inform.getContent());
 				try {
 					DFAgentDescription[] dfds = DFService.decodeNotification(inform.getContent());
 					for (int i = 0; i < dfds.length; ++i) {
 						AID agent = dfds[i].getName();
 						Iterator services = dfds[i].getAllServices();
-						if(services.hasNext()){
+						if (services.hasNext()) {
 							//Registration of an agent
-							dfMethodListener.registerAction(dfds[i], inform.getSender());	
+							dfMethodListener.registerAction(myAgent, dfds[i], inform.getSender());
 							manageListener(inform);
 						} else {
 							//Deregistration of an agent
-							dfMethodListener.deregisterAction(dfds[i], inform.getSender());	
+							dfMethodListener.deregisterAction(dfds[i], inform.getSender());
 						}
 					}
 				}
@@ -336,19 +335,20 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 				}
 			}
 		});
-		
+
 		//add behaviour of the GatewayAgent
 		this.addBehaviour(new CyclicBehaviour(this) {
 			//NOT FIPA MANAGEMENT ONTOLOGY
-			private MessageTemplate template = MessageTemplate.not(MessageTemplate.MatchOntology(FIPAManagementOntology.getInstance().getName()));		
+			private MessageTemplate template = MessageTemplate.not(MessageTemplate.MatchOntology(FIPAManagementOntology.getInstance().getName()));
+
 			//private MessageTemplate template = MessageTemplate.and(
 			//		MessageTemplate.MatchPerformative(ACLMessage.INFORM),MessageTemplate.not(MessageTemplate.MatchSender(getDefaultDF())));
 			public void action() {
 				// receive all messages, do not ignore DFMessageTemplate
-				
-				ACLMessage msg = myAgent.receive(template); 
+
+				ACLMessage msg = myAgent.receive(template);
 				if (msg != null) {
-					switch(msg.getPerformative()){
+					switch (msg.getPerformative()) {
 						case ACLMessage.REQUEST:
 							doFIPARequest(msg);
 							break;
@@ -359,7 +359,7 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 							try {
 								log.debug("A request for WSIG:" + SL0Helper.toString(msg));
 								manageListener(msg);
-							}catch ( Exception e ) {
+							} catch (Exception e) {
 								log.error(e);
 							}
 							break;
@@ -372,10 +372,10 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 							break;
 						default:
 							// not in fipa-request protocol
-							doNoFipaRequest( msg );
+							doNoFipaRequest(msg);
 					}
-					
-				}else {
+
+				} else {
 					block();
 				}
 			}
@@ -390,7 +390,52 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 		}
 	}
 
-	private void manageListener(ACLMessage inform){
+
+	private void registerOntologies() {
+
+		//register at least all necessary ontologies
+		getContentManager().registerOntology(FIPAManagementOntology.getInstance());
+		getContentManager().registerOntology(JADEManagementOntology.getInstance());      //????
+	//	getContentManager().registerOntology(DFAppletOntology.getInstance());
+
+		String[] ontologies = Configuration.getInstance().getOntologies();
+		for (String ontology : ontologies) {
+			try {
+				Class ontoClass = Class.forName(ontology);
+				Method method  = ontoClass.getMethod("getInstance", new Class[0]);
+				Ontology onto =  (Ontology)method.invoke(null,null);
+
+				getContentManager().registerOntology(onto);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+
+
+		}
+
+	}
+
+	private void registerLanguagees() {
+		getContentManager().registerLanguage(codecSL);
+		String[] languages = Configuration.getInstance().getLanguages();
+		for (String language : languages) {
+			try {
+				Class languageClass = Class.forName(language);
+				Codec codec  = (Codec)languageClass.newInstance();
+				getContentManager().registerLanguage(codec);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+
+
+		}
+
+	}
+
+
+
+
+	private void manageListener(ACLMessage inform) {
 		ReturnMessageListener listener;
 		String convId = inform.getConversationId();
 		synchronized (conversationId2listener) {
@@ -407,6 +452,7 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 			log.debug("listener is null for conversationId " + convId);
 		}
 	}
+
 	/**
 	 * tests a presence of gui switch
 	 *
@@ -557,7 +603,7 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 		send(r);
 	}
 
-	
+
 	/**
 	 * gives a FIPA service's identificator
 	 *
@@ -670,7 +716,7 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 		p = new Property(Configuration.WEB_SERVICE + ".accessPoint",
 			op.getOperationID().getUDDIOperationIdentificator().getAccessPoint());
 		sd.addProperties(p);
-		
+
 		//TO DO... verify for deletion
 		/*p = new Property("type", "(set " + Configuration.WEB_SERVICE + ")");
 		sd.addProperties(p);*/
@@ -698,7 +744,7 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 		try {
 			//getContentManager().fillContent(msg, action);
 			//send(msg);
-			DFService.modify(this,dfad);
+			DFService.modify(this, dfad);
 		} catch (Exception e) {
 			log.error(e);
 		}
@@ -928,7 +974,7 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 		try {
 			final Method m =
 				aClass.getMethod("main", argsClass);
-				spirit = new Thread() {
+			spirit = new Thread() {
 				private Method met2 = m;
 				private Object[] args2 = {args};
 

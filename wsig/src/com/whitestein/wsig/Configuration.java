@@ -36,6 +36,7 @@
 package com.whitestein.wsig;
 
 import jade.core.AID;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -46,18 +47,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import com.whitestein.wsig.fipa.DFMethodListener;
 
 /**
  * @author jna
- *
- * keeps and makes accessible configuration for gateway.
- * Only one instance is reasonable and is accessible by getInstance() method.
- * The properties are loaded and stored from the CONFIG_FILE_NAME;
- * 
- * To prevent accidential changes in configuration's properties the synchronization
- * on getInstance() returned object must be used in your code.
+ *         <p/>
+ *         keeps and makes accessible configuration for gateway.
+ *         Only one instance is reasonable and is accessible by getInstance() method.
+ *         The properties are loaded and stored from the CONFIG_FILE_NAME;
+ *         <p/>
+ *         To prevent accidential changes in configuration's properties the synchronization
+ *         on getInstance() returned object must be used in your code.
  */
 public class Configuration extends Properties {
 
@@ -74,7 +77,7 @@ public class Configuration extends Properties {
 	 */
 	public final static String CONFIG_FILE_NAME = GATEWAY_NAME + ".properties";
 	private final static File CONFIG_FILE = new File(CONFIG_FILE_NAME);
-	
+
 	//there are configuration properties
 	public final static String KEY_GATEWAY_AID = GATEWAY_NAME + ".agent_id";
 	//public final static String KEY_HOST_URI = "host_uri";
@@ -97,61 +100,69 @@ public class Configuration extends Properties {
 	public final static String KEY_USER_NAME = "uddi.userName";
 	public final static String KEY_USER_PASSWORD = "uddi.userPassword";
 	public final static String KEY_UDDI4J_LOG_ENABLED = "org.uddi4j.logEnabled";
+	public final static String KEY_UDDI_TMODEL = "uddi.tmodel.key";
+
 	//public final static String KEY_UDDI4J_TRANSPORT_CLASS = "org.uddi4j.transport.ApacheAxisTransport";
 	public final static String KEY_UDDI4J_TRANSPORT_CLASS = "org.uddi4j.TransportClassName";
-	public final static String KEY_TEST_GOOGLE_ACCESS_KEY = "test.Google.accessKey";
+
+
+	public final static String KEY_ONTOLOGIES = "ontologies";
+	public final static String KEY_LANGUAGES = "languages";
+	public final static String KEY_WSDL_DIRECTORY = "wsdl.directory";
+
 	public static final String VOID_TYPE = "";
 
 
 	private AID gatewayAID;
-	
 
-	public synchronized String getTestAmazonAccessKey(){
-		return getProperty( KEY_TEST_GOOGLE_ACCESS_KEY );
+
+	public synchronized String getTestAmazonAccessKey() {
+		return "";
 	}
-	
-	public synchronized String getQueryManagerURL(){
-		return getProperty( KEY_QUERY_MANAGER_URL );
+
+	public synchronized String getQueryManagerURL() {
+		return getProperty(KEY_QUERY_MANAGER_URL);
 	}
-	
-	public synchronized String getLifeCycleManagerURL(){
-		return getProperty( KEY_LIFE_CYCLE_MANAGER_URL );
+
+	public synchronized String getLifeCycleManagerURL() {
+		return getProperty(KEY_LIFE_CYCLE_MANAGER_URL);
 	}
 
 /*
 	public synchronized String getFactoryClass(){
 		return getProperty( KEY_FACTORY_CLASS );
 	}
-*/	
+*/
+
 	public synchronized String getUserName() {
-		return getProperty( KEY_USER_NAME );
+		return getProperty(KEY_USER_NAME);
 	}
-	
+
 	public synchronized String getUserPassword() {
-		return getProperty( KEY_USER_PASSWORD );
+		return getProperty(KEY_USER_PASSWORD);
 	}
 
 	public synchronized String getBusinessKey() {
-		return getProperty( KEY_BUSINESS_KEY );
+		return getProperty(KEY_BUSINESS_KEY);
 	}
-	
-	public synchronized void setBusinessKey( String businessKey ) {
-		setProperty( Configuration.KEY_BUSINESS_KEY, businessKey );
+
+	public synchronized void setBusinessKey(String businessKey) {
+		setProperty(Configuration.KEY_BUSINESS_KEY, businessKey);
 	}
 
 	public synchronized String getLocalNamespacePrefix() {
-		return getProperty( KEY_LOCAL_NAMESPACE_PREFIX );
+		return getProperty(KEY_LOCAL_NAMESPACE_PREFIX);
 	}
-	
+
 	public synchronized int getHostPort() {
 		try {
-			return Integer.parseInt( getProperty( KEY_HOST_PORT ));
-		} catch ( NumberFormatException e ) {
+			return Integer.parseInt(getProperty(KEY_HOST_PORT));
+		} catch (NumberFormatException e) {
 			log.debug(e);
 			return 0;
 		}
 	}
-	
+
 	public synchronized String getAccessPoint() {
 		return getHostURI() + getAccessPointPath();
 	}
@@ -159,184 +170,199 @@ public class Configuration extends Properties {
 	public synchronized String getURIPathForWSDLs() {
 		return getHostURI() + "/WSDLs/";
 	}
-	
+
 	public synchronized String getAccessPointPath() {
-		return getProperty( KEY_ACCESS_POINT_PATH );
+		return getProperty(KEY_ACCESS_POINT_PATH);
 	}
-	
+
 	public synchronized String getHostURI() {
-		return "http://" + getProperty( KEY_HOST_NAME ).toLowerCase() + ":" + getProperty( KEY_HOST_PORT );
+		return "http://" + getProperty(KEY_HOST_NAME).toLowerCase() + ":" + getProperty(KEY_HOST_PORT);
 	}
-	
+
 	public synchronized String getFIPAAttrForXMLAttributes() {
-		return getProperty( KEY_XML_ATTRIBUTES );
+		return getProperty(KEY_XML_ATTRIBUTES);
 	}
-	
+
 	public synchronized String getFIPAAttrForXMLElement() {
-		return getProperty( KEY_XML_ELEMENT );
+		return getProperty(KEY_XML_ELEMENT);
 	}
-	
+
 	public synchronized String getFIPAAttrForXMLContent() {
-		return getProperty( KEY_XML_CONTENT );
+		return getProperty(KEY_XML_CONTENT);
 	}
-	
+
 	public synchronized String getFIPAPrefixForXMLTag() {
-		return getProperty( KEY_XML_TAG );
+		return getProperty(KEY_XML_TAG);
 	}
-	
+
 	public synchronized AID getGatewayAID() {
-		if ( null == gatewayAID ) {
-			if ( "".equals(getProperty( KEY_GATEWAY_AID, "" )) ) {
-				gatewayAID = new AID(GATEWAY_NAME, AID.ISLOCALNAME );
-			}else {
-				gatewayAID = new AID( getProperty( KEY_GATEWAY_AID ), AID.ISGUID );
+		if (null == gatewayAID) {
+			if ("".equals(getProperty(KEY_GATEWAY_AID, ""))) {
+				gatewayAID = new AID(GATEWAY_NAME, AID.ISLOCALNAME);
+			} else {
+				gatewayAID = new AID(getProperty(KEY_GATEWAY_AID), AID.ISGUID);
 			}
 		}
 		return gatewayAID;
 	}
-	
+
 	public synchronized String getUDDI4jLogEnabled() {
-		return getProperty( KEY_UDDI4J_LOG_ENABLED );
+		return getProperty(KEY_UDDI4J_LOG_ENABLED);
 	}
-	
+
 	public synchronized String getUDDI4jTransportClass() {
-		log.info("In getUDDI4j... "+KEY_UDDI4J_TRANSPORT_CLASS);
-		return getProperty( KEY_UDDI4J_TRANSPORT_CLASS );
+		log.info("In getUDDI4j... " + KEY_UDDI4J_TRANSPORT_CLASS);
+		return getProperty(KEY_UDDI4J_TRANSPORT_CLASS);
 	}
-	
-	public synchronized String getQueryManagerPath(){
-		return getProperty( KEY_QUERY_MANAGER_PATH );
+
+	public synchronized String getQueryManagerPath() {
+		return getProperty(KEY_QUERY_MANAGER_PATH);
 	}
-	
-	public synchronized String getLifeCycleManagerPath(){
-		return getProperty( KEY_LIFE_CYCLE_MANAGER_PATH );
+
+	public synchronized String getLifeCycleManagerPath() {
+		return getProperty(KEY_LIFE_CYCLE_MANAGER_PATH);
 	}
-	
+
 
 	/**
 	 * gives an instance of jade.domain.GatewayAgentMethodListener.
 	 * The instance translates and sends DF management messages into UDDI messages.
+	 *
 	 * @return an instance
 	 */
 	public synchronized DFMethodListener getDFMethodListener() {
 		try {
-			return (DFMethodListener) Class.forName( getProperty( KEY_DF_TO_UDDI_CLASS )).newInstance();
-		}catch (Exception e) {
+			return (DFMethodListener) Class.forName(getProperty(KEY_DF_TO_UDDI_CLASS)).newInstance();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
-	
-	/**
-	 *  adds a property missed.
-	 *  It creates a property not already stored in this configuration.
-	 */
-	private void addEmptyProperty( String key, String value ) {
-		if ( getProperty( key ) == null ) {
-			setProperty( key, value );
+
+
+	public String[] getOntologies() {
+		String onto = getProperty(KEY_ONTOLOGIES).trim();
+		if (onto.equals("")) {
+			return new String[0];
 		}
+		return onto.split(",");
+
+
 	}
+
+	public String[] getLanguages() {
+		String languages = getProperty(KEY_LANGUAGES).trim();
+
+		if (languages.equals("")) {
+			return new String[0];
+		}
+		return languages.split(",");
+	}
+
+	public String getWsdlDirectory() {
+		return getProperty(KEY_WSDL_DIRECTORY);
+	}
+
 
 	/**
 	 * adds properties missed.
-	 *
 	 */
-	private void addEmptyProperties() {
-//		addEmptyProperty( Configuration.KEY_FACTORY_CLASS, "" );
-		addEmptyProperty( Configuration.KEY_LIFE_CYCLE_MANAGER_URL, "" );
-		addEmptyProperty( Configuration.KEY_QUERY_MANAGER_URL, "" );
-		addEmptyProperty( Configuration.KEY_USER_NAME, "" );
-		addEmptyProperty( Configuration.KEY_USER_PASSWORD, "" );
-		addEmptyProperty( Configuration.KEY_BUSINESS_KEY, "" );
-		addEmptyProperty( Configuration.KEY_LOCAL_NAMESPACE_PREFIX, "tns" );
-		addEmptyProperty( Configuration.KEY_GATEWAY_AID, GATEWAY_NAME + "@localhost:1099/JADE" );
-		//addEmptyProperty( Configuration.KEY_HOST_URI, "http://localhost:1233" );
-		addEmptyProperty( Configuration.KEY_HOST_NAME, "localhost" );
-		addEmptyProperty( Configuration.KEY_HOST_PORT, "2222" );
-		addEmptyProperty( Configuration.KEY_XML_ATTRIBUTES, "xml-attributes" );
-		addEmptyProperty( Configuration.KEY_XML_ELEMENT, "xml-element" );
-		addEmptyProperty( Configuration.KEY_XML_CONTENT, "xml-content" );
-		addEmptyProperty( Configuration.KEY_XML_TAG, "xml-tag-" );
-		addEmptyProperty( Configuration.KEY_DF_TO_UDDI_CLASS, "com.whitestein.wsig.ws.DFToUDDI4j" );
-		addEmptyProperty( Configuration.KEY_UDDI4J_LOG_ENABLED, "false" );
-		addEmptyProperty( Configuration.KEY_UDDI4J_TRANSPORT_CLASS, "org.uddi4j.transport.ApacheAxisTransport" );
-		addEmptyProperty( Configuration.KEY_QUERY_MANAGER_PATH, "/" + GATEWAY_NAME + "/inquiry" );
-		addEmptyProperty( Configuration.KEY_LIFE_CYCLE_MANAGER_PATH, "/" + GATEWAY_NAME + "/publish" );
-		addEmptyProperty( Configuration.KEY_ACCESS_POINT_PATH, "/" + GATEWAY_NAME + "" );
-		addEmptyProperty( Configuration.KEY_TEST_GOOGLE_ACCESS_KEY, "" );
+	private void setDefaultProperties() {
+//		setProperty( Configuration.KEY_FACTORY_CLASS, "" );
+		setProperty(Configuration.KEY_LIFE_CYCLE_MANAGER_URL, "");
+		setProperty(Configuration.KEY_QUERY_MANAGER_URL, "");
+		setProperty(Configuration.KEY_USER_NAME, "");
+		setProperty(Configuration.KEY_USER_PASSWORD, "");
+		setProperty(Configuration.KEY_BUSINESS_KEY, "");
+		setProperty(Configuration.KEY_LOCAL_NAMESPACE_PREFIX, "tns");
+		setProperty(Configuration.KEY_GATEWAY_AID, GATEWAY_NAME + "@localhost:1099/JADE");
+		//setProperty( Configuration.KEY_HOST_URI, "http://localhost:1233" );
+		setProperty(Configuration.KEY_HOST_NAME, "localhost");
+		setProperty(Configuration.KEY_HOST_PORT, "2222");
+		setProperty(Configuration.KEY_XML_ATTRIBUTES, "xml-attributes");
+		setProperty(Configuration.KEY_XML_ELEMENT, "xml-element");
+		setProperty(Configuration.KEY_XML_CONTENT, "xml-content");
+		setProperty(Configuration.KEY_XML_TAG, "xml-tag-");
+		setProperty(Configuration.KEY_DF_TO_UDDI_CLASS, "com.whitestein.wsig.ws.DFToUDDI4j");
+		setProperty(Configuration.KEY_UDDI4J_LOG_ENABLED, "false");
+		setProperty(Configuration.KEY_UDDI4J_TRANSPORT_CLASS, "org.uddi4j.transport.ApacheAxisTransport");
+		setProperty(Configuration.KEY_UDDI_TMODEL, "uuid:A035A07C-F362-44dd-8F95-E2B134BF43B4");
+		setProperty(Configuration.KEY_QUERY_MANAGER_PATH, "/" + GATEWAY_NAME + "/inquiry");
+		setProperty(Configuration.KEY_LIFE_CYCLE_MANAGER_PATH, "/" + GATEWAY_NAME + "/publish");
+		setProperty(Configuration.KEY_ACCESS_POINT_PATH, "/" + GATEWAY_NAME + "");
+		setProperty(Configuration.KEY_ONTOLOGIES, "");
+		setProperty(Configuration.KEY_LANGUAGES, "");
+		setProperty(Configuration.KEY_WSDL_DIRECTORY, ".");
+
 	}
-	
+
 	/**
 	 * returns an instance of the Configuration class.
 	 * Only one instance is reasonable to use.
-	 * 
+	 *
 	 * @return a configuration instance
 	 */
 	public static synchronized Configuration getInstance() {
-		if( anInstance == null ) {
+		if (anInstance == null) {
 			anInstance = new Configuration();
 			load();
 		}
 		return anInstance;
 	}
-	
+
 	/**
 	 * retrieves configuration.
 	 * An internal instance is loaded.
-	 *
 	 */
 	public static void load() {
 		Configuration c = getInstance();
 		InputStream is;
-		synchronized( c ) {
+		synchronized (c) {
+			c.setDefaultProperties();
+			InputStream input = ClassLoader.getSystemResourceAsStream(CONFIG_FILE_NAME);
 			try {
-				if ( ! CONFIG_FILE.exists() ) {
-					// empty configuration
-					c.addEmptyProperties();
-					return;
+				if (input != null) {
+					is = new BufferedInputStream(input);
+					c.load(is);
+					is.close();
+					log.debug("WSIG configuration is loaded from a file: " + CONFIG_FILE.getCanonicalPath() + " .");
 				}
-				is = new BufferedInputStream( new FileInputStream( CONFIG_FILE ));
-			}catch (FileNotFoundException e) {
-				log.error(e);
-				return;
-			}
-			try {
-				c.load( is );
-				is.close();
-				log.debug("WSIG configuration is loaded from a file: " +  CONFIG_FILE.getCanonicalPath() +  " .");
-			}catch (IOException ioe) {
+			} catch (IOException ioe) {
 				log.error(ioe);
 			}
-			c.addEmptyProperties();
+
 		}
 	}
-	
+
 	/**
 	 * saves configuration.
 	 * An internal instance is stored.
-	 *
 	 */
 	public static void store() {
-		if ( ! isDeveloping ) {
+		if (! isDeveloping) {
 			// avoid comments' changing when not in developing proccess
 			return;
 		}
 		Configuration c = getInstance();
 		OutputStream os;
-		synchronized( c ) {
+		synchronized (c) {
 			try {
-				os = new BufferedOutputStream( new FileOutputStream( CONFIG_FILE ));
-			}catch (FileNotFoundException e) {
+				os = new BufferedOutputStream(new FileOutputStream(CONFIG_FILE));
+			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 				return;
 			}
 			try {
-				c.store( os, CONFIG_HEADER );
+				c.store(os, CONFIG_HEADER);
 				os.close();
-			}catch (IOException ioe) {
+			} catch (IOException ioe) {
 				ioe.printStackTrace();
 			}
 		}
+	}
+
+	public static void main(String[] args) {
+		Configuration conf = Configuration.getInstance();
+		System.out.println(conf.toString());
 	}
 }

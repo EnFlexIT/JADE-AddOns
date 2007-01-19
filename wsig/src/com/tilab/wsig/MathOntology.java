@@ -23,7 +23,7 @@ public class MathOntology extends Ontology implements MathVocabulary{
 	/**
 	 * Constructor
 	 */
-	private MathOntology() {
+	public MathOntology() {
 		super(ONTOLOGY_NAME, BasicOntology.getInstance());
 
 		try {
@@ -36,6 +36,7 @@ public class MathOntology extends Ontology implements MathVocabulary{
 
 			AgentActionSchema as = (AgentActionSchema) getSchema(ABS);
 			as.add(COMPLEX, (ConceptSchema) getSchema(COMPLEX));
+			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT));                                                              			
 
 			ConceptSchema cs = (ConceptSchema) getSchema(COMPLEX);
 			cs.add(REAL, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
@@ -45,11 +46,13 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			as = (AgentActionSchema) getSchema(SUM);
 			as.add(FIRST_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
 			as.add(SECOND_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
+			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT));
+
 
 			as = (AgentActionSchema) getSchema(DIFF);
 			as.add(FIRST_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
 			as.add(SECOND_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
-
+			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT));
 
 			
 			System.out.println("Action list --> " + getActionNames().toString());

@@ -12,4 +12,6 @@ public interface WSIGConstants {
 	public static String WSIG_FLAG = "wsig";
 	public static String WSIG_MAPPER = "wsig-mapper";
 
+	
+
 }

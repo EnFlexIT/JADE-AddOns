@@ -2,7 +2,7 @@ package com.tilab.wsig;
 
 import jade.content.AgentAction;
 
-@Result(success=float.class,refuse=String.class,failure=String.class)
+
 public class Sum implements AgentAction {
 	private float firstElement;
 	private float secondElement;

@@ -37,6 +37,7 @@ package com.whitestein.wsig.fipa;
 
 import jade.util.leap.List;
 import jade.core.AID;
+import jade.core.Agent;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.Register;
@@ -62,7 +63,7 @@ public interface DFMethodListener {
 	 * @param aid
 	 * @throws FIPAException
 	 */
-	public void registerAction(DFAgentDescription dfad, AID aid ) throws FIPAException;
+	public void registerAction(Agent agent, DFAgentDescription dfad, AID aid ) throws FIPAException;
 	
 	/**
 	 * performs deregistration

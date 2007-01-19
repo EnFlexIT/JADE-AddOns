@@ -47,7 +47,7 @@ public class MathAgent extends Agent implements WSIGConstants {
 		dfad.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST );
 		ServiceDescription sd;
 		sd = new ServiceDescription();
-		sd.setName("TrialService"); //Nome WSDL
+		sd.setName("MathService"); //Nome WSDL
 		sd.addLanguages(codec.getName());
 		// Eventuale Verifica language su wsig
 		// Aggiunta in wsig.properties delle ontologie ke deve conoscere per parlare con gli agenti

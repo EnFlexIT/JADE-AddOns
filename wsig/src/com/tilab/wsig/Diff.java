@@ -2,7 +2,7 @@ package com.tilab.wsig;
 
 import jade.content.AgentAction;
 
-@Result(success=int.class,refuse=String.class,failure=String.class)
+
 public class Diff implements AgentAction {
 	
 	private float firstElement;

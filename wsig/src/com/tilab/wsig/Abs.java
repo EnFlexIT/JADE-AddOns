@@ -2,7 +2,7 @@ package com.tilab.wsig;
 
 import jade.content.AgentAction;
 
-@Result(success=int.class,refuse=String.class,failure=String.class)
+
 public class Abs implements AgentAction {
 	private Complex complex;
 
