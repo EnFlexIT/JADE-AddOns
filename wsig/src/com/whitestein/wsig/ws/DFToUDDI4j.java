@@ -35,12 +35,17 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.ws;
 
-import jade.content.onto.Ontology;
+import jade.content.ContentManager;
 import jade.content.onto.BasicOntology;
-import jade.content.schema.*;
+import jade.content.onto.Ontology;
+import jade.content.schema.AgentActionSchema;
+import jade.content.schema.AggregateSchema;
+import jade.content.schema.ConceptSchema;
+import jade.content.schema.Facet;
+import jade.content.schema.ObjectSchema;
+import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.facets.CardinalityFacet;
 import jade.content.schema.facets.TypedAggregateFacet;
-import jade.content.ContentManager;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.domain.FIPAException;
@@ -51,6 +56,8 @@ import jade.domain.FIPAAgentManagement.Search;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.util.leap.List;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,11 +65,36 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
-import java.io.FileInputStream;
-import java.io.PrintWriter;
-import java.io.File;
+
+import javax.wsdl.Binding;
+import javax.wsdl.BindingInput;
+import javax.wsdl.BindingOperation;
+import javax.wsdl.BindingOutput;
+import javax.wsdl.Definition;
+import javax.wsdl.Input;
+import javax.wsdl.Message;
+import javax.wsdl.Operation;
+import javax.wsdl.Output;
+import javax.wsdl.Part;
+import javax.wsdl.Port;
+import javax.wsdl.PortType;
+import javax.wsdl.Service;
+import javax.wsdl.Types;
+import javax.wsdl.WSDLException;
+import javax.wsdl.extensions.ExtensionRegistry;
+import javax.wsdl.extensions.schema.Schema;
+import javax.wsdl.extensions.soap.SOAPAddress;
+import javax.wsdl.extensions.soap.SOAPBinding;
+import javax.wsdl.extensions.soap.SOAPBody;
+import javax.wsdl.extensions.soap.SOAPOperation;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLWriter;
+import javax.xml.namespace.QName;
 
 import org.apache.log4j.Logger;
+import org.eclipse.xsd.XSDComplexTypeDefinition;
+import org.eclipse.xsd.XSDModelGroup;
+import org.eclipse.xsd.XSDSchema;
 import org.uddi4j.UDDIException;
 import org.uddi4j.client.UDDIProxy;
 import org.uddi4j.datatype.Name;
@@ -90,10 +122,20 @@ import org.uddi4j.util.KeyedReference;
 import org.uddi4j.util.ServiceKey;
 import org.uddi4j.util.TModelBag;
 import org.uddi4j.util.TModelKey;
-import org.xml.sax.InputSource;
-import org.eclipse.xsd.XSDSchema;
-import org.eclipse.xsd.XSDComplexTypeDefinition;
-import org.eclipse.xsd.XSDModelGroup;
+
+import com.ibm.wsdl.BindingImpl;
+import com.ibm.wsdl.BindingInputImpl;
+import com.ibm.wsdl.BindingOperationImpl;
+import com.ibm.wsdl.BindingOutputImpl;
+import com.ibm.wsdl.DefinitionImpl;
+import com.ibm.wsdl.InputImpl;
+import com.ibm.wsdl.MessageImpl;
+import com.ibm.wsdl.OperationImpl;
+import com.ibm.wsdl.OutputImpl;
+import com.ibm.wsdl.PartImpl;
+import com.ibm.wsdl.PortImpl;
+import com.ibm.wsdl.PortTypeImpl;
+import com.ibm.wsdl.ServiceImpl;
 import com.whitestein.wsig.Configuration;
 import com.whitestein.wsig.WSIGConstants;
 import com.whitestein.wsig.fipa.DFMethodListener;
@@ -102,14 +144,6 @@ import com.whitestein.wsig.fipa.FIPAServiceIdentificator;
 import com.whitestein.wsig.struct.OperationID;
 import com.whitestein.wsig.struct.ServedOperation;
 import com.whitestein.wsig.struct.ServedOperationStore;
-import com.ibm.wsdl.*;
-
-
-import javax.wsdl.*;
-import javax.wsdl.xml.WSDLWriter;
-import javax.wsdl.xml.WSDLReader;
-import javax.wsdl.factory.WSDLFactory;
-import javax.xml.namespace.QName;
 
 
 /**
@@ -131,8 +165,12 @@ public class DFToUDDI4j implements DFMethodListener {
 	private String userName;
 	private String password;
 	private static Hashtable types = new Hashtable();
+	private WSDLFactory factory = null;
 
 	public static final String xsd = "http://www.w3.org/2001/XMLSchema";
+	public static final String wsdlsoap = "http://schemas.xmlsoap.org/wsdl/soap/";
+	public static final String bodyEncodingStyle = "http://schemas.xmlsoap.org/soap/encoding/";
+	
 
 
 	static {
@@ -142,8 +180,6 @@ public class DFToUDDI4j implements DFMethodListener {
 		types.put(BasicOntology.BOOLEAN, "boolean");
 		types.put(BasicOntology.DATE, "dateTime");
 		types.put(BasicOntology.BYTE_SEQUENCE, "byte");//verify it!!!
-
-
 	}
 
 
@@ -229,7 +265,8 @@ public class DFToUDDI4j implements DFMethodListener {
 		}
 
 		//manageAgentOntologies(sd);
-
+		
+		
 		Definition definition = createDefinitionFromOntologies(agent, sd);
 		fipaSId = new FIPAServiceIdentificator(agentId, sd);
 		fipaEP = new FIPAEndPoint(fipaSId);
@@ -252,7 +289,7 @@ public class DFToUDDI4j implements DFMethodListener {
 		return op;
 	}
 
-	private Definition createDefinitionFromOntologies(Agent agent, ServiceDescription sd) {
+	private Definition createDefinitionFromOntologies(Agent agent, ServiceDescription sd){
 		boolean toAdd = false;
 		XSDSchema xsdSchema = null;
 
@@ -260,34 +297,89 @@ public class DFToUDDI4j implements DFMethodListener {
 		Iterator ontologies = sd.getAllOntologies();
 		ContentManager cntManager = agent.getContentManager();
 
-		Definition definition = new DefinitionImpl();
-		String tns = "urn:" + sd.getName();
-		definition.setQName(new QName(tns, sd.getName()));
-		definition.setTargetNamespace(tns);
-		definition.addNamespace("tns", tns);
-		definition.addNamespace("xsd", xsd);
+		//Definition definition = new DefinitionImpl();
+		Definition definition = null;
+		ExtensionRegistry registry = null;
+		String tns = "";
+		try {
+			factory = WSDLFactory.newInstance();
+			registry = factory.newPopulatedExtensionRegistry();
+			definition = factory.newDefinition();
+			definition.setExtensionRegistry(registry);
+			
+			tns = "urn:" + sd.getName();
+			definition.setQName(new QName(tns, sd.getName()));
+			definition.setTargetNamespace(tns);
+			definition.addNamespace("tns", tns);
+			definition.addNamespace("xsd", xsd);
+			definition.addNamespace("wsdlsoap", wsdlsoap);
+		}  catch (WSDLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 
 		PortType portType = new PortTypeImpl();
 		portType.setUndefined(false);
+		portType.setQName(new QName(sd.getName()));
 		definition.addPortType(portType);
 
-		/*
-				// TO DO Binding-Service Node of WSDL
-				definition.addNamespace("impl", "urn:Trail");
-				Binding binding = new BindingImpl();
 
-				binding.setPortType(portType);
-				binding.setQName(new QName("urn:Trail","impl"));
-				binding.setUndefined(false);
-				definition.addBinding(binding);
-				Service service = new ServiceImpl();
-				service.setQName(new QName(sd.getName()));
-				Port port = new PortImpl();
-				port.setName(sd.getName());
-				port.setBinding(binding);
-				service.addPort(port);
-				definition.addService(service);
-				 */
+		//Binding
+		Binding binding = new BindingImpl();
+		PortType portTypeB = new PortTypeImpl();
+		portTypeB.setUndefined(false);
+		portTypeB.setQName(new QName(tns, sd.getName()));
+		binding.setPortType(portTypeB);
+		binding.setUndefined(false);
+		binding.setQName(new QName("publishSoapBinding"));
+
+		try {
+			SOAPBinding soapBinding = 
+				(SOAPBinding)registry.createExtension(Binding.class,new QName(wsdlsoap,"binding"));
+			soapBinding.setStyle("rpc");
+			soapBinding.setTransportURI("http://schemas.xmlsoap.org/soap/http");
+			binding.addExtensibilityElement(soapBinding);
+			
+		} catch (WSDLException e1) {
+			// TODO Correct handling of exceptions
+			System.out.println("Error in SOAPBinding Handling "+
+					e1.getMessage());
+			e1.printStackTrace();
+		}		
+		definition.addBinding(binding);
+		
+		//Binding for port in service
+		Binding bindingP = new BindingImpl();
+		bindingP.setQName(new QName(tns, "publishSoapBinding"));
+		bindingP.setUndefined(false);
+		
+				
+		//Port
+		Port port = new PortImpl();
+		//port.setName(sd.getName());
+		port.setName("publish");
+		
+		// Aggiungere Address
+		port.setBinding(bindingP);
+		//SOAP Address
+		SOAPAddress soapAddress = null;
+		try {
+			soapAddress = (SOAPAddress)registry.createExtension(Port.class,new QName(wsdlsoap,"address"));
+		} catch (WSDLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		soapAddress.setLocationURI("http://localhost:8080/wsig/publish");
+		port.addExtensibilityElement(soapAddress);
+		
+		//Service
+		Service service = new ServiceImpl();
+		service.setQName(new QName(sd.getName()));
+		service.addPort(port);
+		
+		definition.addService(service);
+				 
 		while (ontologies.hasNext()) {
 			String ontoName = (String) ontologies.next();
 			Ontology onto = cntManager.lookupOntology(ontoName);
@@ -299,6 +391,7 @@ public class DFToUDDI4j implements DFMethodListener {
 				try {
 					String actionName = (String) actionNames.get(i);
 					Operation op = new OperationImpl();
+					
 					portType.addOperation(op);
 					op.setName(actionName);
 					op.setUndefined(false);
@@ -314,6 +407,46 @@ public class DFToUDDI4j implements DFMethodListener {
 					op.setOutput(output);
 					definition.addMessage(messageOut);
 					ObjectSchema resultSchema = actionSchema.getResultSchema();
+					
+					//Operation for binding
+					BindingOperation operationB =  new BindingOperationImpl();
+					operationB.setName(actionName);
+					//SOAP Operation
+					SOAPOperation soapOperation = 
+						(SOAPOperation)registry.createExtension(BindingOperation.class,new QName(wsdlsoap,"operation"));
+					soapOperation.setSoapActionURI("soapActionURI");
+					operationB.addExtensibilityElement(soapOperation);
+					binding.addBindingOperation(operationB);
+					
+					BindingInput inputB = new BindingInputImpl();
+					inputB.setName(actionName + "Input");
+					
+					//SOAP BODY INPUT			
+					SOAPBody soapBodyInput = 
+						(SOAPBody)registry.createExtension(BindingInput.class,new QName(wsdlsoap,"body"));
+					soapBodyInput.setUse("encoded");
+					ArrayList encodingStylesInput = new ArrayList();
+					encodingStylesInput.add(bodyEncodingStyle);
+					soapBodyInput.setEncodingStyles(encodingStylesInput);
+					soapBodyInput.setNamespaceURI(tns);
+					inputB.addExtensibilityElement(soapBodyInput);
+					
+					operationB.setBindingInput(inputB);
+					
+					BindingOutput outputB = new BindingOutputImpl();
+					outputB.setName(actionName + "Output");
+					
+					//SOAP BODY OUTPUT
+					SOAPBody soapBodyOutput = 
+						(SOAPBody)registry.createExtension(BindingOutput.class,new QName(wsdlsoap,"body"));
+					soapBodyOutput.setUse("encoded");
+					ArrayList encodingStylesOutput = new ArrayList();
+					encodingStylesOutput.add(bodyEncodingStyle);
+					soapBodyOutput.setEncodingStyles(encodingStylesOutput);
+					soapBodyOutput.setNamespaceURI(tns);
+					outputB.addExtensibilityElement(soapBodyOutput);
+					operationB.setBindingOutput(outputB);									
+					
 					if (resultSchema instanceof PrimitiveSchema) {
 						PrimitiveSchema resultPrimitive = (PrimitiveSchema) resultSchema;
 						String wsdlType = (String) types.get(resultPrimitive.getTypeName());
@@ -323,10 +456,9 @@ public class DFToUDDI4j implements DFMethodListener {
 						part.setName("out");
 						messageOut.addPart(part);
 					} else if (resultSchema instanceof AggregateSchema) {
-						throw new Exception("Not yet handled");
+						throw new Exception("Case of Result of Aggreagate Type not yet handled");
 					} else if (resultSchema instanceof ConceptSchema) {
-
-
+						throw new Exception("Case of Result of Complex Type Not yet handled");
 					}
 					//Input Parameters: retrieve all slot of action
 					String[] slotNames = actionSchema.getNames();
@@ -351,6 +483,8 @@ public class DFToUDDI4j implements DFMethodListener {
 							part.setTypeName(qNameType);
 							part.setName(slotName);
 							messageIn.addPart(part);
+							
+							
 
 						} else if (slotSchema instanceof AggregateSchema) {
 							AggregateSchema schema = (AggregateSchema) slotSchema;
@@ -388,7 +522,7 @@ public class DFToUDDI4j implements DFMethodListener {
 								ObjectSchema objSchema = slotSchema.getSchema(conceptSlotName);
 								if (objSchema instanceof PrimitiveSchema) {
 									String slotType = (String) types.get(objSchema.getTypeName());
-									SchemaGeneratorUtils.addElementToSequence(xsdSchema, slotName, slotType, sequence);
+									SchemaGeneratorUtils.addElementToSequence(xsdSchema, conceptSlotName, slotType, sequence);
 								} else {
 									throw new Exception("Not yet handled");
 								}
@@ -399,7 +533,6 @@ public class DFToUDDI4j implements DFMethodListener {
 							part.setTypeName(qNameType);
 							part.setName(slotName);
 							messageIn.addPart(part);
-
 						}
 
 					}
@@ -414,15 +547,13 @@ public class DFToUDDI4j implements DFMethodListener {
 
 			//onto
 			try {
-				WSDLFactory factory = WSDLFactory.newInstance();
+								
 				WSDLWriter writer = factory.newWSDLWriter();
 				String wsdlDir = Configuration.getInstance().getWsdlDirectory();
 				File file = new File(wsdlDir + File.separator + sd.getName() + ".wsdl");
 				PrintWriter output = new PrintWriter(file);
 				//writer.writeWSDL(definition, System.out);
 				writer.writeWSDL(definition, output);
-
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
