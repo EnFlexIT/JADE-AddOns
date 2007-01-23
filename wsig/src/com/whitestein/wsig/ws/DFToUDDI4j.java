@@ -58,6 +58,8 @@ import jade.util.leap.List;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -293,7 +295,32 @@ public class DFToUDDI4j implements DFMethodListener {
 		boolean toAdd = false;
 		XSDSchema xsdSchema = null;
 
+		Property p = null;
+		Iterator it = sd.getAllProperties();
+		boolean mapperFound = false;
+		String mapperClassName = null;
+		while (it.hasNext() && !mapperFound) {
+			p = (Property) it.next();
+			if (WSIGConstants.WSIG_MAPPER.equalsIgnoreCase(p.getName())) {
+				mapperClassName = (String)p.getValue();
+				mapperFound = true;
+			}
+		}
+		
+		Class mapperClass = null;
+		try {
+			mapperClass = Class.forName(mapperClassName);
+		} catch (ClassNotFoundException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		Method[] methods = null;
+		if(mapperFound && mapperClassName!=null){
+			methods = mapperClass.getDeclaredMethods();
+		}
 
+			
+		
 		Iterator ontologies = sd.getAllOntologies();
 		ContentManager cntManager = agent.getContentManager();
 
@@ -357,10 +384,7 @@ public class DFToUDDI4j implements DFMethodListener {
 				
 		//Port
 		Port port = new PortImpl();
-		//port.setName(sd.getName());
-		port.setName("publish");
-		
-		// Aggiungere Address
+		port.setName("publish"); // BOH!!
 		port.setBinding(bindingP);
 		//SOAP Address
 		SOAPAddress soapAddress = null;
@@ -386,157 +410,331 @@ public class DFToUDDI4j implements DFMethodListener {
 			java.util.List actionNames = onto.getActionNames();
 			//if (actionNames.size() > 0) portType.setUndefined(false);
 			//definition.addPortType(portType);
-
+			Operation op = null;
+			Message messageOut = null;
+			AgentActionSchema actionSchema = null;
+			ObjectSchema resultSchema = null;
 			for (int i = 0; i < actionNames.size(); i++) {
 				try {
 					String actionName = (String) actionNames.get(i);
-					Operation op = new OperationImpl();
-					
-					portType.addOperation(op);
-					op.setName(actionName);
-					op.setUndefined(false);
-					AgentActionSchema actionSchema = (AgentActionSchema) onto.getSchema(actionName);
 
-					//Output Params
-					Output output = new OutputImpl();
-					Message messageOut = new MessageImpl();
-					messageOut.setQName(new QName(tns, actionName + "Output"));
-					messageOut.setUndefined(false);
-					output.setMessage(messageOut);
-					output.setName(actionName + "Output");
-					op.setOutput(output);
-					definition.addMessage(messageOut);
-					ObjectSchema resultSchema = actionSchema.getResultSchema();
-					
-					//Operation for binding
-					BindingOperation operationB =  new BindingOperationImpl();
-					operationB.setName(actionName);
-					//SOAP Operation
-					SOAPOperation soapOperation = 
-						(SOAPOperation)registry.createExtension(BindingOperation.class,new QName(wsdlsoap,"operation"));
-					soapOperation.setSoapActionURI("soapActionURI");
-					operationB.addExtensibilityElement(soapOperation);
-					binding.addBindingOperation(operationB);
-					
-					BindingInput inputB = new BindingInputImpl();
-					inputB.setName(actionName + "Input");
-					
-					//SOAP BODY INPUT			
-					SOAPBody soapBodyInput = 
-						(SOAPBody)registry.createExtension(BindingInput.class,new QName(wsdlsoap,"body"));
-					soapBodyInput.setUse("encoded");
-					ArrayList encodingStylesInput = new ArrayList();
-					encodingStylesInput.add(bodyEncodingStyle);
-					soapBodyInput.setEncodingStyles(encodingStylesInput);
-					soapBodyInput.setNamespaceURI(tns);
-					inputB.addExtensibilityElement(soapBodyInput);
-					
-					operationB.setBindingInput(inputB);
-					
-					BindingOutput outputB = new BindingOutputImpl();
-					outputB.setName(actionName + "Output");
-					
-					//SOAP BODY OUTPUT
-					SOAPBody soapBodyOutput = 
-						(SOAPBody)registry.createExtension(BindingOutput.class,new QName(wsdlsoap,"body"));
-					soapBodyOutput.setUse("encoded");
-					ArrayList encodingStylesOutput = new ArrayList();
-					encodingStylesOutput.add(bodyEncodingStyle);
-					soapBodyOutput.setEncodingStyles(encodingStylesOutput);
-					soapBodyOutput.setNamespaceURI(tns);
-					outputB.addExtensibilityElement(soapBodyOutput);
-					operationB.setBindingOutput(outputB);									
-					
-					if (resultSchema instanceof PrimitiveSchema) {
-						PrimitiveSchema resultPrimitive = (PrimitiveSchema) resultSchema;
-						String wsdlType = (String) types.get(resultPrimitive.getTypeName());
-						Part part = new PartImpl();
-						QName qNameType = new QName(xsd, wsdlType);
-						part.setTypeName(qNameType);
-						part.setName("out");
-						messageOut.addPart(part);
-					} else if (resultSchema instanceof AggregateSchema) {
-						throw new Exception("Case of Result of Aggreagate Type not yet handled");
-					} else if (resultSchema instanceof ConceptSchema) {
-						throw new Exception("Case of Result of Complex Type Not yet handled");
+					// Operation
+					int methodNumber = 0;
+					if (mapperFound) {
+						methodNumber = checkForMethodAndCount(methods,
+								actionName);
 					}
-					//Input Parameters: retrieve all slot of action
-					String[] slotNames = actionSchema.getNames();
+					if (mapperFound && methodNumber > 0) {
+						for (int j = 0; j < methodNumber; j++) {
+							op = new OperationImpl();
+							portType.addOperation(op);
+							op.setName(actionName);
+							op.setUndefined(false);
 
-					Message messageIn = new MessageImpl();
-					messageIn.setQName(new QName(tns, actionName + "Input"));
-					messageIn.setUndefined(false);
-					definition.addMessage(messageIn);
-					Input input = new InputImpl();
-					input.setMessage(messageIn);
-					input.setName(actionName + "Input");
-					op.setInput(input);
+							// Output Params
+							Output output = new OutputImpl();
+							messageOut = new MessageImpl();
+							messageOut.setQName(new QName(tns, actionName
+									+ "Output" + j));
+							messageOut.setUndefined(false);
+							output.setMessage(messageOut);
+							output.setName(actionName + "Output" + j);
+							op.setOutput(output);
+							definition.addMessage(messageOut);
 
-					for (String slotName : slotNames) {
-						ObjectSchema slotSchema = actionSchema.getSchema(slotName);
-						String typeName = slotSchema.getTypeName();
-						if (slotSchema instanceof PrimitiveSchema) {
-							PrimitiveSchema schema = (PrimitiveSchema) slotSchema;
-							String wsdlType = (String) types.get(schema.getTypeName());
+							// Operation for binding
+							BindingOperation operationB = new BindingOperationImpl();
+							operationB.setName(actionName);
+							// SOAP Operation
+							SOAPOperation soapOperation = (SOAPOperation) registry
+									.createExtension(BindingOperation.class,
+											new QName(wsdlsoap, "operation"));
+							soapOperation.setSoapActionURI("soapActionURI");
+							operationB.addExtensibilityElement(soapOperation);
+							binding.addBindingOperation(operationB);
+
+							BindingInput inputB = new BindingInputImpl();
+							inputB.setName(actionName + "Input" + j);
+							// SOAP BODY INPUT
+							SOAPBody soapBodyInput = (SOAPBody) registry
+									.createExtension(BindingInput.class,
+											new QName(wsdlsoap, "body"));
+							soapBodyInput.setUse("encoded");
+							ArrayList encodingStylesInput = new ArrayList();
+							encodingStylesInput.add(bodyEncodingStyle);
+							soapBodyInput
+									.setEncodingStyles(encodingStylesInput);
+							soapBodyInput.setNamespaceURI(tns);
+							inputB.addExtensibilityElement(soapBodyInput);
+
+							operationB.setBindingInput(inputB);
+
+							BindingOutput outputB = new BindingOutputImpl();
+							outputB.setName(actionName + "Output" + j);
+
+							// SOAP BODY OUTPUT
+							SOAPBody soapBodyOutput = (SOAPBody) registry
+									.createExtension(BindingOutput.class,
+											new QName(wsdlsoap, "body"));
+							soapBodyOutput.setUse("encoded");
+							ArrayList encodingStylesOutput = new ArrayList();
+							encodingStylesOutput.add(bodyEncodingStyle);
+							soapBodyOutput
+									.setEncodingStyles(encodingStylesOutput);
+							soapBodyOutput.setNamespaceURI(tns);
+							outputB.addExtensibilityElement(soapBodyOutput);
+							operationB.setBindingOutput(outputB);
+
+							actionSchema = (AgentActionSchema) onto
+									.getSchema(actionName);
+							resultSchema = actionSchema.getResultSchema();
+
+							if (resultSchema instanceof PrimitiveSchema) {
+								PrimitiveSchema resultPrimitive = (PrimitiveSchema) resultSchema;
+								String wsdlType = (String) types
+										.get(resultPrimitive.getTypeName());
+								Part part = new PartImpl();
+								QName qNameType = new QName(xsd, wsdlType);
+								part.setTypeName(qNameType);
+								part.setName("out");
+								messageOut.addPart(part);
+							} else if (resultSchema instanceof AggregateSchema) {
+								throw new Exception(
+										"Case of Result of Aggreagate Type not yet handled");
+							} else if (resultSchema instanceof ConceptSchema) {
+								throw new Exception(
+										"Case of Result of Complex Type Not yet handled");
+							}
+
+							// Input Parameters
+							Message messageIn = new MessageImpl();
+							messageIn.setQName(new QName(tns, actionName
+									+ "Input" + j));
+							messageIn.setUndefined(false);
+							definition.addMessage(messageIn);
+							Input input = new InputImpl();
+							input.setMessage(messageIn);
+							input.setName(actionName + "Input" + j);
+							op.setInput(input);
+							
+							Class[] parameterTypes = methods[j].getParameterTypes();
+							for (int k = 0; k < parameterTypes.length; k++) {								
+								if (parameterTypes[k].isPrimitive()) {									
+									Part part = new PartImpl();
+									QName qNameType = new QName(xsd, parameterTypes[k].getName());
+									part.setTypeName(qNameType);
+									part.setName("par" + k);
+									messageIn.addPart(part);
+								} else if (parameterTypes[k].isArray()) {
+									throw new Exception ("Not yet handled");
+								} else  {
+									toAdd = true;
+									String[] names = actionSchema.getNames();
+									String slot = null;
+									for (String name : names) {
+										Class type = parameterTypes[k];
+										if (onto.getClassForElement(name)
+												.getName().equals(
+														parameterTypes[k]
+																.getName())) {
+											slot = name;
+											break;
+										}
+									}
+									ObjectSchema slotSchema = actionSchema
+											.getSchema(slot);
+									toAdd = true;
+									String[] conceptSlotNames = slotSchema
+											.getNames();
+									xsdSchema = SchemaGeneratorUtils
+											.createSchema();
+									XSDComplexTypeDefinition complexType = SchemaGeneratorUtils
+											.addComplexTypeToSchema(xsdSchema,
+													slot);
+									XSDModelGroup sequence = SchemaGeneratorUtils
+											.addSequenceToComplexType(complexType);
+									for (String conceptSlotName : conceptSlotNames) {
+										ObjectSchema objSchema = slotSchema
+												.getSchema(conceptSlotName);
+										if (objSchema instanceof PrimitiveSchema) {
+											String slotType = (String) types
+													.get(objSchema
+															.getTypeName());
+											SchemaGeneratorUtils
+													.addElementToSequence(
+															xsdSchema,
+															conceptSlotName,
+															slotType, sequence);
+										} else {
+											throw new Exception(
+													"Not yet handled");
+										}
+									}
+									String wsdlType = complexType.getName();
+									Part part = new PartImpl();
+									QName qNameType = new QName(xsd, wsdlType);
+									part.setTypeName(qNameType);
+									part.setName(slot);
+									messageIn.addPart(part);
+								}
+							}
+
+							}
+					} else {
+						op = new OperationImpl();
+						portType.addOperation(op);
+						op.setName(actionName);
+						op.setUndefined(false);
+
+						// Output Params
+						Output output = new OutputImpl();
+						messageOut = new MessageImpl();
+						messageOut.setQName(new QName(tns, actionName
+								+ "Output"));
+						messageOut.setUndefined(false);
+						output.setMessage(messageOut);
+						output.setName(actionName + "Output");
+						op.setOutput(output);
+						definition.addMessage(messageOut);
+
+						// Operation for binding
+						BindingOperation operationB = new BindingOperationImpl();
+						operationB.setName(actionName);
+						// SOAP Operation
+						SOAPOperation soapOperation = (SOAPOperation) registry
+								.createExtension(BindingOperation.class,
+										new QName(wsdlsoap, "operation"));
+						soapOperation.setSoapActionURI("soapActionURI");
+						operationB.addExtensibilityElement(soapOperation);
+						binding.addBindingOperation(operationB);
+
+						BindingInput inputB = new BindingInputImpl();
+						inputB.setName(actionName + "Input");
+						// SOAP BODY INPUT
+						SOAPBody soapBodyInput = (SOAPBody) registry
+								.createExtension(BindingInput.class, new QName(
+										wsdlsoap, "body"));
+						soapBodyInput.setUse("encoded");
+						ArrayList encodingStylesInput = new ArrayList();
+						encodingStylesInput.add(bodyEncodingStyle);
+						soapBodyInput.setEncodingStyles(encodingStylesInput);
+						soapBodyInput.setNamespaceURI(tns);
+						inputB.addExtensibilityElement(soapBodyInput);
+
+						operationB.setBindingInput(inputB);
+
+						BindingOutput outputB = new BindingOutputImpl();
+						outputB.setName(actionName + "Output");
+
+						// SOAP BODY OUTPUT
+						SOAPBody soapBodyOutput = (SOAPBody) registry
+								.createExtension(BindingOutput.class,
+										new QName(wsdlsoap, "body"));
+						soapBodyOutput.setUse("encoded");
+						ArrayList encodingStylesOutput = new ArrayList();
+						encodingStylesOutput.add(bodyEncodingStyle);
+						soapBodyOutput.setEncodingStyles(encodingStylesOutput);
+						soapBodyOutput.setNamespaceURI(tns);
+						outputB.addExtensibilityElement(soapBodyOutput);
+						operationB.setBindingOutput(outputB);
+
+						actionSchema = (AgentActionSchema) onto
+								.getSchema(actionName);
+						resultSchema = actionSchema.getResultSchema();
+
+						if (resultSchema instanceof PrimitiveSchema) {
+							PrimitiveSchema resultPrimitive = (PrimitiveSchema) resultSchema;
+							String wsdlType = (String) types
+									.get(resultPrimitive.getTypeName());
 							Part part = new PartImpl();
 							QName qNameType = new QName(xsd, wsdlType);
 							part.setTypeName(qNameType);
-							part.setName(slotName);
-							messageIn.addPart(part);
-							
-							
-
-						} else if (slotSchema instanceof AggregateSchema) {
-							AggregateSchema schema = (AggregateSchema) slotSchema;
-							Facet[] facets = schema.getFacets(slotName);
-							int cardMax;
-							int cardMin;
-							for (Facet facet : facets) {
-								if (facet instanceof CardinalityFacet) {
-									cardMax = ((CardinalityFacet) facet).getCardMax();
-									cardMin = ((CardinalityFacet) facet).getCardMin();
-
-								} else if (facet instanceof TypedAggregateFacet) {
-
-								} else {
-									System.out.println("Facet is unknown");
-								}
-							}
-							//create Type
-							Types ts = definition.createTypes();
-
-							//ts.setDocumentationElement();
-
-							/*Types t = new TypesImpl();
-							Element element = new Element()
-							t.setDocumentationElement();
-*/
-
-						} else if (slotSchema instanceof ConceptSchema) {
-							toAdd = true;
-							String[] conceptSlotNames = slotSchema.getNames();
-							xsdSchema = SchemaGeneratorUtils.createSchema();
-							XSDComplexTypeDefinition complexType = SchemaGeneratorUtils.addComplexTypeToSchema(xsdSchema, slotName);
-							XSDModelGroup sequence = SchemaGeneratorUtils.addSequenceToComplexType(complexType);
-							for (String conceptSlotName : conceptSlotNames) {
-								ObjectSchema objSchema = slotSchema.getSchema(conceptSlotName);
-								if (objSchema instanceof PrimitiveSchema) {
-									String slotType = (String) types.get(objSchema.getTypeName());
-									SchemaGeneratorUtils.addElementToSequence(xsdSchema, conceptSlotName, slotType, sequence);
-								} else {
-									throw new Exception("Not yet handled");
-								}
-							}
-							String wsdlType = complexType.getName();
-							Part part = new PartImpl();
-							QName qNameType = new QName(xsd, wsdlType);
-							part.setTypeName(qNameType);
-							part.setName(slotName);
-							messageIn.addPart(part);
+							part.setName("out");
+							messageOut.addPart(part);
+						} else if (resultSchema instanceof AggregateSchema) {
+							throw new Exception(
+									"Case of Result of Aggreagate Type not yet handled");
+						} else if (resultSchema instanceof ConceptSchema) {
+							throw new Exception(
+									"Case of Result of Complex Type Not yet handled");
 						}
+						
+						//Input Parameters: retrieve all slot of action
+						String[] slotNames = actionSchema.getNames();
 
-					}
+						Message messageIn = new MessageImpl();
+						messageIn.setQName(new QName(tns, actionName + "Input"));
+						messageIn.setUndefined(false);
+						definition.addMessage(messageIn);
+						Input input = new InputImpl();
+						input.setMessage(messageIn);
+						input.setName(actionName + "Input");
+						op.setInput(input);
 
+						for (String slotName : slotNames) {
+							ObjectSchema slotSchema = actionSchema.getSchema(slotName);
+							String typeName = slotSchema.getTypeName();
+							if (slotSchema instanceof PrimitiveSchema) {
+								PrimitiveSchema schema = (PrimitiveSchema) slotSchema;
+								String wsdlType = (String) types.get(schema.getTypeName());
+								Part part = new PartImpl();
+								QName qNameType = new QName(xsd, wsdlType);
+								part.setTypeName(qNameType);
+								part.setName(slotName);
+								messageIn.addPart(part);
+								
+								
+
+							} else if (slotSchema instanceof AggregateSchema) {
+								AggregateSchema schema = (AggregateSchema) slotSchema;
+								Facet[] facets = schema.getFacets(slotName);
+								int cardMax;
+								int cardMin;
+								for (Facet facet : facets) {
+									if (facet instanceof CardinalityFacet) {
+										cardMax = ((CardinalityFacet) facet).getCardMax();
+										cardMin = ((CardinalityFacet) facet).getCardMin();
+
+									} else if (facet instanceof TypedAggregateFacet) {
+
+									} else {
+										System.out.println("Facet is unknown");
+									}
+								}
+								//create Type
+								Types ts = definition.createTypes();
+
+								//ts.setDocumentationElement();
+
+								/*Types t = new TypesImpl();
+								Element element = new Element()
+								t.setDocumentationElement();
+	*/
+
+							} else if (slotSchema instanceof ConceptSchema) {
+								toAdd = true;
+								String[] conceptSlotNames = slotSchema.getNames();
+								xsdSchema = SchemaGeneratorUtils.createSchema();
+								XSDComplexTypeDefinition complexType = SchemaGeneratorUtils.addComplexTypeToSchema(xsdSchema, slotName);
+								XSDModelGroup sequence = SchemaGeneratorUtils.addSequenceToComplexType(complexType);
+								for (String conceptSlotName : conceptSlotNames) {
+									ObjectSchema objSchema = slotSchema.getSchema(conceptSlotName);
+									if (objSchema instanceof PrimitiveSchema) {
+										String slotType = (String) types.get(objSchema.getTypeName());
+										SchemaGeneratorUtils.addElementToSequence(xsdSchema, conceptSlotName, slotType, sequence);
+									} else {
+										throw new Exception("Not yet handled");
+									}
+								}
+								String wsdlType = complexType.getName();
+								Part part = new PartImpl();
+								QName qNameType = new QName(xsd, wsdlType);
+								part.setTypeName(qNameType);
+								part.setName(slotName);
+								messageIn.addPart(part);
+							}
+						}
+					}			
 				} catch (Exception e) {
 
 				}
@@ -561,6 +759,17 @@ public class DFToUDDI4j implements DFMethodListener {
 		}
 		return definition;
 
+	}
+
+	private int checkForMethodAndCount(Method[] methods, String actionName) {
+		int counter = 0;
+		String methodToCheck = String.valueOf(Character.toUpperCase
+				(actionName.charAt(0)))+actionName.substring(1);
+		for (int j = 0; j < methods.length; j++) {			
+			if (methods[j].getName().equals("to" + methodToCheck))
+				counter ++;
+		}
+		return counter;
 	}
 
 	/**
