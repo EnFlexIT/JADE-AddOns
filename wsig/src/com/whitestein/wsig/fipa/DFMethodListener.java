@@ -61,27 +61,27 @@ public interface DFMethodListener {
 	 * 
 	 * @param description
 	 * @param aid
-	 * @throws FIPAException
+	 * @throws Exception
 	 */
-	public void registerAction(Agent agent, DFAgentDescription dfad, AID aid ) throws FIPAException;
+	public void registerAction(Agent agent, DFAgentDescription dfad, AID aid ) throws Exception;
 	
 	/**
 	 * performs deregistration
 	 * 
 	 * @param description
 	 * @param aid
-	 * @throws FIPAException
+	 * @throws Exception
 	 */
-	public void deregisterAction(DFAgentDescription dfad, AID aid ) throws FIPAException;
+	public void deregisterAction(DFAgentDescription dfad, AID aid ) throws Exception;
 	
 	/**
 	 * performs modification
 	 * 
 	 * @param modify
 	 * @param aid
-	 * @throws FIPAException
+	 * @throws Exception
 	 */
-	public void modifyAction( Modify modify, AID aid ) throws FIPAException;
+	public void modifyAction( Modify modify, AID aid ) throws Exception;
 	
 	/**
 	 * performs searching.
@@ -91,8 +91,8 @@ public interface DFMethodListener {
 	 * @param aid requester
 	 * @param generatedList already generated list by suprclass
 	 * @return
-	 * @throws FIPAException
+	 * @throws Exception
 	 */
-	public List searchAction( Search search, AID aid, List generatedList ) throws FIPAException;
+	public List searchAction( Search search, AID aid, List generatedList ) throws Exception;
 	
 }

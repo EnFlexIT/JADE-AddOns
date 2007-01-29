@@ -167,11 +167,6 @@ public class DFToUDDI4j implements DFMethodListener {
 	private String userName;
 	private String password;
 	private static Hashtable types = new Hashtable();
-	private WSDLFactory factory = null;
-
-	public static final String xsd = "http://www.w3.org/2001/XMLSchema";
-	public static final String wsdlsoap = "http://schemas.xmlsoap.org/wsdl/soap/";
-	public static final String bodyEncodingStyle = "http://schemas.xmlsoap.org/soap/encoding/";
 	
 
 
@@ -216,8 +211,9 @@ public class DFToUDDI4j implements DFMethodListener {
 	 *
 	 * @param dfad agent's registration structure
 	 * @return collection of served operations
+	 * @throws Exception 
 	 */
-	private synchronized Collection createServedOperations(Agent agent, DFAgentDescription dfad) {
+	private synchronized Collection createServedOperations(Agent agent, DFAgentDescription dfad) throws Exception {
 		Collection coll = new ArrayList();
 		ServiceDescription sd;
 		FIPAServiceIdentificator fipaSId;
@@ -244,8 +240,9 @@ public class DFToUDDI4j implements DFMethodListener {
 	 *
 	 * @param fipaSId an end point identification
 	 * @return servedOperation created or null
+	 * @throws Exception 
 	 */
-	private ServedOperation createServedOperation(Agent agent, AID agentId, ServiceDescription sd) {
+	private ServedOperation createServedOperation(Agent agent, AID agentId, ServiceDescription sd) throws Exception {
 		UDDIOperationIdentificator uddiOId;
 		OperationID opId;
 		FIPAServiceIdentificator fipaSId;
@@ -291,365 +288,121 @@ public class DFToUDDI4j implements DFMethodListener {
 		return op;
 	}
 
-	private Definition createDefinitionFromOntologies(Agent agent, ServiceDescription sd){
-		boolean toAdd = false;
+	private Definition createDefinitionFromOntologies(Agent agent, ServiceDescription sd) throws Exception{
 		XSDSchema xsdSchema = null;
-
-		Property p = null;
-		Iterator it = sd.getAllProperties();
-		boolean mapperFound = false;
-		String mapperClassName = null;
-		while (it.hasNext() && !mapperFound) {
-			p = (Property) it.next();
-			if (WSIGConstants.WSIG_MAPPER.equalsIgnoreCase(p.getName())) {
-				mapperClassName = (String)p.getValue();
-				mapperFound = true;
-			}
-		}
+	
+		boolean toAdd = false;
 		
-		Class mapperClass = null;
-		try {
-			mapperClass = Class.forName(mapperClassName);
-		} catch (ClassNotFoundException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
+		//Checking for Ontology Mapper
+		boolean mapperFound = false;
+		Class mapperClass = WSDLGeneratorUtils.getMapperClass(sd);
+		if(mapperClass != null)
+			mapperFound = true;
+		
 		Method[] methods = null;
-		if(mapperFound && mapperClassName!=null){
+		if(mapperFound){
 			methods = mapperClass.getDeclaredMethods();
 		}
 
-			
+		WSDLFactory factory = WSDLFactory.newInstance();
+		String tns = "urn:" + sd.getName();
 		
-		Iterator ontologies = sd.getAllOntologies();
-		ContentManager cntManager = agent.getContentManager();
-
-		//Definition definition = new DefinitionImpl();
-		Definition definition = null;
+		//Definition
+		Definition definition = WSDLGeneratorUtils.createWSDLDefinition(factory,tns);
+		
+		//Extension Registry
 		ExtensionRegistry registry = null;
-		String tns = "";
-		try {
-			factory = WSDLFactory.newInstance();
-			registry = factory.newPopulatedExtensionRegistry();
-			definition = factory.newDefinition();
-			definition.setExtensionRegistry(registry);
-			
-			tns = "urn:" + sd.getName();
-			definition.setQName(new QName(tns, sd.getName()));
-			definition.setTargetNamespace(tns);
-			definition.addNamespace("tns", tns);
-			definition.addNamespace("xsd", xsd);
-			definition.addNamespace("wsdlsoap", wsdlsoap);
-		}  catch (WSDLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		
-
-		PortType portType = new PortTypeImpl();
-		portType.setUndefined(false);
-		portType.setQName(new QName(sd.getName()));
+		registry = factory.newPopulatedExtensionRegistry();
+		definition.setExtensionRegistry(registry);
+				
+		//Port Type
+		PortType portType = WSDLGeneratorUtils.createPortType(sd);
 		definition.addPortType(portType);
 
-
+		
 		//Binding
-		Binding binding = new BindingImpl();
-		PortType portTypeB = new PortTypeImpl();
-		portTypeB.setUndefined(false);
-		portTypeB.setQName(new QName(tns, sd.getName()));
-		binding.setPortType(portTypeB);
-		binding.setUndefined(false);
-		binding.setQName(new QName("publishSoapBinding"));
-
+		Binding binding = WSDLGeneratorUtils.createBinding(tns);
 		try {
-			SOAPBinding soapBinding = 
-				(SOAPBinding)registry.createExtension(Binding.class,new QName(wsdlsoap,"binding"));
-			soapBinding.setStyle("rpc");
-			soapBinding.setTransportURI("http://schemas.xmlsoap.org/soap/http");
-			binding.addExtensibilityElement(soapBinding);
-			
+			binding.addExtensibilityElement(WSDLGeneratorUtils.createSOAPBinding(registry));			
 		} catch (WSDLException e1) {
-			// TODO Correct handling of exceptions
-			System.out.println("Error in SOAPBinding Handling "+
-					e1.getMessage());
-			e1.printStackTrace();
+			throw new Exception("Error in SOAPBinding Handling "+e1.getMessage());
 		}		
 		definition.addBinding(binding);
 		
-		//Binding for port in service
-		Binding bindingP = new BindingImpl();
-		bindingP.setQName(new QName(tns, "publishSoapBinding"));
-		bindingP.setUndefined(false);
-		
-				
-		//Port
-		Port port = new PortImpl();
-		port.setName("publish"); // BOH!!
-		port.setBinding(bindingP);
-		//SOAP Address
-		SOAPAddress soapAddress = null;
+		Port port = WSDLGeneratorUtils.createPort(tns);
 		try {
-			soapAddress = (SOAPAddress)registry.createExtension(Port.class,new QName(wsdlsoap,"address"));
+			port.addExtensibilityElement(WSDLGeneratorUtils.createSOAPAddress(registry));
 		} catch (WSDLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			throw new Exception("Error in SOAPAddress Handling "+e1.getMessage());
 		}
-		soapAddress.setLocationURI("http://localhost:8080/wsig/publish");
-		port.addExtensibilityElement(soapAddress);
+		
 		
 		//Service
-		Service service = new ServiceImpl();
-		service.setQName(new QName(sd.getName()));
+		Service service = WSDLGeneratorUtils.createService(sd.getName());
 		service.addPort(port);
-		
 		definition.addService(service);
-				 
+		
+		
+		// Managing Ontologies
+		Iterator ontologies = sd.getAllOntologies();
+		ContentManager cntManager = agent.getContentManager();
 		while (ontologies.hasNext()) {
 			String ontoName = (String) ontologies.next();
 			Ontology onto = cntManager.lookupOntology(ontoName);
 			java.util.List actionNames = onto.getActionNames();
+
 			//if (actionNames.size() > 0) portType.setUndefined(false);
 			//definition.addPortType(portType);
-			Operation op = null;
-			Message messageOut = null;
+			//Operation op = null;
+			//Message messageOut = null;
 			AgentActionSchema actionSchema = null;
 			ObjectSchema resultSchema = null;
 			for (int i = 0; i < actionNames.size(); i++) {
 				try {
 					String actionName = (String) actionNames.get(i);
 
-					// Operation
 					int methodNumber = 0;
+					
 					if (mapperFound) {
-						methodNumber = checkForMethodAndCount(methods,
-								actionName);
+						methodNumber = checkForMethodAndCount(methods,actionName);
+						if(methodNumber == 0) //mapperFound but not for this action
+							methodNumber = 1;  //number of for cycles if no mapper is found
 					}
-					if (mapperFound && methodNumber > 0) {
-						for (int j = 0; j < methodNumber; j++) {
-							op = new OperationImpl();
-							portType.addOperation(op);
-							op.setName(actionName);
-							op.setUndefined(false);
 
-							// Output Params
-							Output output = new OutputImpl();
-							messageOut = new MessageImpl();
-							messageOut.setQName(new QName(tns, actionName
-									+ "Output" + j));
-							messageOut.setUndefined(false);
-							output.setMessage(messageOut);
-							output.setName(actionName + "Output" + j);
-							op.setOutput(output);
-							definition.addMessage(messageOut);
 
-							// Operation for binding
-							BindingOperation operationB = new BindingOperationImpl();
-							operationB.setName(actionName);
-							// SOAP Operation
-							SOAPOperation soapOperation = (SOAPOperation) registry
-									.createExtension(BindingOperation.class,
-											new QName(wsdlsoap, "operation"));
-							soapOperation.setSoapActionURI("soapActionURI");
-							operationB.addExtensibilityElement(soapOperation);
-							binding.addBindingOperation(operationB);
+					for (int j = 0; j < methodNumber; j++) {
+						String outputName = actionName + "Output";
+						String inputName = actionName + "Input";
+						if(mapperFound && methodNumber > 1){
+							outputName=outputName+j;
+							inputName=inputName+j;
+						}
+						Operation operation = WSDLGeneratorUtils.createOperation(actionName);
+						portType.addOperation(operation);
 
-							BindingInput inputB = new BindingInputImpl();
-							inputB.setName(actionName + "Input" + j);
-							// SOAP BODY INPUT
-							SOAPBody soapBodyInput = (SOAPBody) registry
-									.createExtension(BindingInput.class,
-											new QName(wsdlsoap, "body"));
-							soapBodyInput.setUse("encoded");
-							ArrayList encodingStylesInput = new ArrayList();
-							encodingStylesInput.add(bodyEncodingStyle);
-							soapBodyInput
-									.setEncodingStyles(encodingStylesInput);
-							soapBodyInput.setNamespaceURI(tns);
-							inputB.addExtensibilityElement(soapBodyInput);
-
-							operationB.setBindingInput(inputB);
-
-							BindingOutput outputB = new BindingOutputImpl();
-							outputB.setName(actionName + "Output" + j);
-
-							// SOAP BODY OUTPUT
-							SOAPBody soapBodyOutput = (SOAPBody) registry
-									.createExtension(BindingOutput.class,
-											new QName(wsdlsoap, "body"));
-							soapBodyOutput.setUse("encoded");
-							ArrayList encodingStylesOutput = new ArrayList();
-							encodingStylesOutput.add(bodyEncodingStyle);
-							soapBodyOutput
-									.setEncodingStyles(encodingStylesOutput);
-							soapBodyOutput.setNamespaceURI(tns);
-							outputB.addExtensibilityElement(soapBodyOutput);
-							operationB.setBindingOutput(outputB);
-
-							actionSchema = (AgentActionSchema) onto
-									.getSchema(actionName);
-							resultSchema = actionSchema.getResultSchema();
-
-							if (resultSchema instanceof PrimitiveSchema) {
-								PrimitiveSchema resultPrimitive = (PrimitiveSchema) resultSchema;
-								String wsdlType = (String) types
-										.get(resultPrimitive.getTypeName());
-								Part part = new PartImpl();
-								QName qNameType = new QName(xsd, wsdlType);
-								part.setTypeName(qNameType);
-								part.setName("out");
-								messageOut.addPart(part);
-							} else if (resultSchema instanceof AggregateSchema) {
-								throw new Exception(
-										"Case of Result of Aggreagate Type not yet handled");
-							} else if (resultSchema instanceof ConceptSchema) {
-								throw new Exception(
-										"Case of Result of Complex Type Not yet handled");
-							}
-
-							// Input Parameters
-							Message messageIn = new MessageImpl();
-							messageIn.setQName(new QName(tns, actionName
-									+ "Input" + j));
-							messageIn.setUndefined(false);
-							definition.addMessage(messageIn);
-							Input input = new InputImpl();
-							input.setMessage(messageIn);
-							input.setName(actionName + "Input" + j);
-							op.setInput(input);
-							
-							Class[] parameterTypes = methods[j].getParameterTypes();
-							for (int k = 0; k < parameterTypes.length; k++) {								
-								if (parameterTypes[k].isPrimitive()) {									
-									Part part = new PartImpl();
-									QName qNameType = new QName(xsd, parameterTypes[k].getName());
-									part.setTypeName(qNameType);
-									part.setName("par" + k);
-									messageIn.addPart(part);
-								} else if (parameterTypes[k].isArray()) {
-									throw new Exception ("Not yet handled");
-								} else  {
-									toAdd = true;
-									String[] names = actionSchema.getNames();
-									String slot = null;
-									for (String name : names) {
-										Class type = parameterTypes[k];
-										if (onto.getClassForElement(name)
-												.getName().equals(
-														parameterTypes[k]
-																.getName())) {
-											slot = name;
-											break;
-										}
-									}
-									ObjectSchema slotSchema = actionSchema
-											.getSchema(slot);
-									toAdd = true;
-									String[] conceptSlotNames = slotSchema
-											.getNames();
-									xsdSchema = SchemaGeneratorUtils
-											.createSchema();
-									XSDComplexTypeDefinition complexType = SchemaGeneratorUtils
-											.addComplexTypeToSchema(xsdSchema,
-													slot);
-									XSDModelGroup sequence = SchemaGeneratorUtils
-											.addSequenceToComplexType(complexType);
-									for (String conceptSlotName : conceptSlotNames) {
-										ObjectSchema objSchema = slotSchema
-												.getSchema(conceptSlotName);
-										if (objSchema instanceof PrimitiveSchema) {
-											String slotType = (String) types
-													.get(objSchema
-															.getTypeName());
-											SchemaGeneratorUtils
-													.addElementToSequence(
-															xsdSchema,
-															conceptSlotName,
-															slotType, sequence);
-										} else {
-											throw new Exception(
-													"Not yet handled");
-										}
-									}
-									String wsdlType = complexType.getName();
-									Part part = new PartImpl();
-									QName qNameType = new QName(xsd, wsdlType);
-									part.setTypeName(qNameType);
-									part.setName(slot);
-									messageIn.addPart(part);
-								}
-							}
-
-							}
-					} else {
-						op = new OperationImpl();
-						portType.addOperation(op);
-						op.setName(actionName);
-						op.setUndefined(false);
-
-						// Output Params
-						Output output = new OutputImpl();
-						messageOut = new MessageImpl();
-						messageOut.setQName(new QName(tns, actionName
-								+ "Output"));
-						messageOut.setUndefined(false);
+						// Output Params		
+						Message messageOut = WSDLGeneratorUtils.createMessage(tns,outputName);
+						Output output = WSDLGeneratorUtils.createOutput(outputName);
 						output.setMessage(messageOut);
-						output.setName(actionName + "Output");
-						op.setOutput(output);
+						operation.setOutput(output);
 						definition.addMessage(messageOut);
 
-						// Operation for binding
-						BindingOperation operationB = new BindingOperationImpl();
-						operationB.setName(actionName);
-						// SOAP Operation
-						SOAPOperation soapOperation = (SOAPOperation) registry
-								.createExtension(BindingOperation.class,
-										new QName(wsdlsoap, "operation"));
-						soapOperation.setSoapActionURI("soapActionURI");
-						operationB.addExtensibilityElement(soapOperation);
+						BindingOperation operationB = WSDLGeneratorUtils.createBindingOperation(registry, actionName);
 						binding.addBindingOperation(operationB);
 
-						BindingInput inputB = new BindingInputImpl();
-						inputB.setName(actionName + "Input");
-						// SOAP BODY INPUT
-						SOAPBody soapBodyInput = (SOAPBody) registry
-								.createExtension(BindingInput.class, new QName(
-										wsdlsoap, "body"));
-						soapBodyInput.setUse("encoded");
-						ArrayList encodingStylesInput = new ArrayList();
-						encodingStylesInput.add(bodyEncodingStyle);
-						soapBodyInput.setEncodingStyles(encodingStylesInput);
-						soapBodyInput.setNamespaceURI(tns);
-						inputB.addExtensibilityElement(soapBodyInput);
-
+						BindingInput inputB = WSDLGeneratorUtils.createBindingInput(registry,tns,inputName);							
 						operationB.setBindingInput(inputB);
 
-						BindingOutput outputB = new BindingOutputImpl();
-						outputB.setName(actionName + "Output");
-
-						// SOAP BODY OUTPUT
-						SOAPBody soapBodyOutput = (SOAPBody) registry
-								.createExtension(BindingOutput.class,
-										new QName(wsdlsoap, "body"));
-						soapBodyOutput.setUse("encoded");
-						ArrayList encodingStylesOutput = new ArrayList();
-						encodingStylesOutput.add(bodyEncodingStyle);
-						soapBodyOutput.setEncodingStyles(encodingStylesOutput);
-						soapBodyOutput.setNamespaceURI(tns);
-						outputB.addExtensibilityElement(soapBodyOutput);
+						BindingOutput outputB = WSDLGeneratorUtils.createBindingOutput(registry, tns, outputName);
 						operationB.setBindingOutput(outputB);
 
-						actionSchema = (AgentActionSchema) onto
-								.getSchema(actionName);
+						actionSchema = (AgentActionSchema) onto.getSchema(actionName);
 						resultSchema = actionSchema.getResultSchema();
 
 						if (resultSchema instanceof PrimitiveSchema) {
 							PrimitiveSchema resultPrimitive = (PrimitiveSchema) resultSchema;
-							String wsdlType = (String) types
-									.get(resultPrimitive.getTypeName());
-							Part part = new PartImpl();
-							QName qNameType = new QName(xsd, wsdlType);
-							part.setTypeName(qNameType);
-							part.setName("out");
+							String wsdlType = (String) types.get(resultPrimitive.getTypeName());
+							Part part = WSDLGeneratorUtils.createPart(WSDLConstants.outPart, wsdlType);
 							messageOut.addPart(part);
 						} else if (resultSchema instanceof AggregateSchema) {
 							throw new Exception(
@@ -658,83 +411,104 @@ public class DFToUDDI4j implements DFMethodListener {
 							throw new Exception(
 									"Case of Result of Complex Type Not yet handled");
 						}
-						
-						//Input Parameters: retrieve all slot of action
-						String[] slotNames = actionSchema.getNames();
 
-						Message messageIn = new MessageImpl();
-						messageIn.setQName(new QName(tns, actionName + "Input"));
-						messageIn.setUndefined(false);
+						// Input Parameters
+						Message messageIn = WSDLGeneratorUtils.createMessageIn(tns,inputName);
 						definition.addMessage(messageIn);
-						Input input = new InputImpl();
-						input.setMessage(messageIn);
-						input.setName(actionName + "Input");
-						op.setInput(input);
+						Input input = WSDLGeneratorUtils.createInput(messageIn,inputName);
+						operation.setInput(input);
 
-						for (String slotName : slotNames) {
-							ObjectSchema slotSchema = actionSchema.getSchema(slotName);
-							String typeName = slotSchema.getTypeName();
-							if (slotSchema instanceof PrimitiveSchema) {
-								PrimitiveSchema schema = (PrimitiveSchema) slotSchema;
-								String wsdlType = (String) types.get(schema.getTypeName());
-								Part part = new PartImpl();
-								QName qNameType = new QName(xsd, wsdlType);
-								part.setTypeName(qNameType);
-								part.setName(slotName);
-								messageIn.addPart(part);
-								
-								
-
-							} else if (slotSchema instanceof AggregateSchema) {
-								AggregateSchema schema = (AggregateSchema) slotSchema;
-								Facet[] facets = schema.getFacets(slotName);
-								int cardMax;
-								int cardMin;
-								for (Facet facet : facets) {
-									if (facet instanceof CardinalityFacet) {
-										cardMax = ((CardinalityFacet) facet).getCardMax();
-										cardMin = ((CardinalityFacet) facet).getCardMin();
-
-									} else if (facet instanceof TypedAggregateFacet) {
-
-									} else {
-										System.out.println("Facet is unknown");
+						if(mapperFound && methodNumber > 1){
+							Class[] parameterTypes = methods[j].getParameterTypes();
+							for (int k = 0; k < parameterTypes.length; k++) {
+								String className = parameterTypes[k].getName();
+								if (parameterTypes[k].isPrimitive()) {
+									Part part = WSDLGeneratorUtils.createPart(WSDLConstants.part + k, className);
+									messageIn.addPart(part);
+								} else if (parameterTypes[k].isArray()) {
+									throw new Exception("Not yet handled");
+								} else {
+									toAdd = true;
+									String[] names = actionSchema.getNames();
+									String slot = null;
+									for (String name : names) {
+										if (onto.getClassForElement(name).getName().equals(className)) {
+											slot = name;
+											break;
+										}
 									}
-								}
-								//create Type
-								Types ts = definition.createTypes();
-
-								//ts.setDocumentationElement();
-
-								/*Types t = new TypesImpl();
-								Element element = new Element()
-								t.setDocumentationElement();
-	*/
-
-							} else if (slotSchema instanceof ConceptSchema) {
-								toAdd = true;
-								String[] conceptSlotNames = slotSchema.getNames();
-								xsdSchema = SchemaGeneratorUtils.createSchema();
-								XSDComplexTypeDefinition complexType = SchemaGeneratorUtils.addComplexTypeToSchema(xsdSchema, slotName);
-								XSDModelGroup sequence = SchemaGeneratorUtils.addSequenceToComplexType(complexType);
-								for (String conceptSlotName : conceptSlotNames) {
-									ObjectSchema objSchema = slotSchema.getSchema(conceptSlotName);
-									if (objSchema instanceof PrimitiveSchema) {
-										String slotType = (String) types.get(objSchema.getTypeName());
-										SchemaGeneratorUtils.addElementToSequence(xsdSchema, conceptSlotName, slotType, sequence);
-									} else {
-										throw new Exception("Not yet handled");
+									ObjectSchema slotSchema = actionSchema.getSchema(slot);
+									toAdd = true;
+									String[] conceptSlotNames = slotSchema.getNames();
+									xsdSchema = SchemaGeneratorUtils.createSchema();
+									XSDComplexTypeDefinition complexType = SchemaGeneratorUtils
+									.addComplexTypeToSchema(xsdSchema,	slot);
+									XSDModelGroup sequence = SchemaGeneratorUtils.addSequenceToComplexType(complexType);
+									for (String conceptSlotName : conceptSlotNames) {
+										ObjectSchema objSchema = slotSchema.getSchema(conceptSlotName);
+										if (objSchema instanceof PrimitiveSchema) {
+											String slotType = (String) types.get(objSchema.getTypeName());
+											SchemaGeneratorUtils.addElementToSequence(
+													xsdSchema,
+													conceptSlotName,
+													slotType, sequence);
+										} else {
+											throw new Exception("Not yet handled");
+										}
 									}
+									String wsdlType = complexType.getName();
+									Part part = WSDLGeneratorUtils.createPart(slot, wsdlType);
+									messageIn.addPart(part);
 								}
-								String wsdlType = complexType.getName();
-								Part part = new PartImpl();
-								QName qNameType = new QName(xsd, wsdlType);
-								part.setTypeName(qNameType);
-								part.setName(slotName);
-								messageIn.addPart(part);
 							}
+						}else{
+							String[] slotNames = actionSchema.getNames();
+							for (String slotName : slotNames) {
+								ObjectSchema slotSchema = actionSchema.getSchema(slotName);
+								if (slotSchema instanceof PrimitiveSchema) {
+									PrimitiveSchema schema = (PrimitiveSchema) slotSchema;
+									Part part = WSDLGeneratorUtils.createPart(slotName, (String) types.get(schema.getTypeName()));
+									messageIn.addPart(part);
+								} else if (slotSchema instanceof AggregateSchema) {
+									AggregateSchema schema = (AggregateSchema) slotSchema;
+									Facet[] facets = schema.getFacets(slotName);
+									int cardMax,cardMin;
+									for (Facet facet : facets) {
+										if (facet instanceof CardinalityFacet) {
+											cardMax = ((CardinalityFacet) facet).getCardMax();
+											cardMin = ((CardinalityFacet) facet).getCardMin();
+										} else if (facet instanceof TypedAggregateFacet) {
+
+										} else {
+											System.out.println("Facet is unknown");
+										}
+									}
+									//create Type
+									Types ts = definition.createTypes();
+									//TODO
+								} else if (slotSchema instanceof ConceptSchema) {
+									toAdd = true;
+									String[] conceptSlotNames = slotSchema.getNames();
+									xsdSchema = SchemaGeneratorUtils.createSchema();
+									XSDComplexTypeDefinition complexType = SchemaGeneratorUtils.addComplexTypeToSchema(xsdSchema, slotName);
+									XSDModelGroup sequence = SchemaGeneratorUtils.addSequenceToComplexType(complexType);
+									for (String conceptSlotName : conceptSlotNames) {
+										ObjectSchema objSchema = slotSchema.getSchema(conceptSlotName);
+										if (objSchema instanceof PrimitiveSchema) {
+											String slotType = (String) types.get(objSchema.getTypeName());
+											SchemaGeneratorUtils.addElementToSequence(xsdSchema, conceptSlotName, slotType, sequence);
+										} else {
+											throw new Exception("Not yet handled");
+										}
+									}
+									String wsdlType = complexType.getName();
+									Part part = WSDLGeneratorUtils.createPart(slotName, wsdlType);
+									messageIn.addPart(part);
+								}
+							}
+
 						}
-					}			
+					}
 				} catch (Exception e) {
 
 				}
@@ -761,6 +535,7 @@ public class DFToUDDI4j implements DFMethodListener {
 
 	}
 
+	
 	private int checkForMethodAndCount(Method[] methods, String actionName) {
 		int counter = 0;
 		String methodToCheck = String.valueOf(Character.toUpperCase
@@ -805,7 +580,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param aid
 	 * @throws FIPAException
 	 */
-	public synchronized void registerAction(Agent agent, DFAgentDescription dfad, AID aid) throws FIPAException {
+	public synchronized void registerAction(Agent agent, DFAgentDescription dfad, AID aid) throws Exception {
 		log.debug("A wsigs's registration from an agent: " + dfad.getName() + ".");
 
 		// test an existence
@@ -971,7 +746,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param aid
 	 * @throws FIPAException
 	 */
-	public synchronized void modifyAction(Modify modify, AID aid) throws FIPAException {
+	public synchronized void modifyAction(Modify modify, AID aid) throws Exception {
 		DFAgentDescription dfad = (DFAgentDescription) modify.getDescription();
 		log.debug("A wsigs's modification from an agent: " + dfad + ".");
 		// modification of the agent's tModel
@@ -1026,7 +801,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @return generatedList afected
 	 * @throws FIPAException
 	 */
-	public List searchAction(Search search, AID aid, List generatedList) throws FIPAException {
+	public List searchAction(Search search, AID aid, List generatedList) throws Exception {
 		// nothing advanced, generatedList is only returned
 		return generatedList;
 	}
