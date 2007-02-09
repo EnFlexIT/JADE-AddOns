@@ -35,28 +35,31 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.fipa;
 
+import com.whitestein.wsig.Configuration;
+import com.whitestein.wsig.WSIGConstants;
+import com.whitestein.wsig.net.HTTPServer;
+import com.whitestein.wsig.struct.*;
+import com.whitestein.wsig.translator.FIPASL0ToSOAP;
+import com.whitestein.wsig.ws.UDDIOperationIdentificator;
+import com.whitestein.wsig.ws.WSEndPoint;
 import jade.content.abs.AbsContentElement;
 import jade.content.abs.AbsObject;
+import jade.content.lang.Codec;
 import jade.content.lang.sl.SL0Vocabulary;
 import jade.content.lang.sl.SLCodec;
-import jade.content.lang.Codec;
 import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
-import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
-import jade.domain.FIPANames;
-import jade.domain.DFGUIManagement.DFAppletOntology;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.FIPAManagementOntology;
-import jade.domain.FIPAAgentManagement.FIPAManagementVocabulary;
-import jade.domain.FIPAAgentManagement.Modify;
 import jade.domain.FIPAAgentManagement.Property;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPANames;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
@@ -67,6 +70,9 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,23 +83,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-
-import com.whitestein.wsig.Configuration;
-import com.whitestein.wsig.WSIGConstants;
-import com.whitestein.wsig.net.HTTPServer;
-import com.whitestein.wsig.struct.Call;
-import com.whitestein.wsig.struct.CalledMessage;
-import com.whitestein.wsig.struct.EndPoint;
-import com.whitestein.wsig.struct.ReturnMessageListener;
-import com.whitestein.wsig.struct.ServedOperation;
-import com.whitestein.wsig.struct.ServedOperationStore;
-import com.whitestein.wsig.translator.FIPASL0ToSOAP;
-import com.whitestein.wsig.ws.UDDIOperationIdentificator;
-import com.whitestein.wsig.ws.WSEndPoint;
 
 
 /**
@@ -287,7 +276,7 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 	protected void setup() {
 		super.setup();
 		registerOntologies();
-		registerLanguagees();
+		registerLanguages();
 
 		// initialize an instance
 		try {
@@ -415,7 +404,7 @@ public class GatewayAgent extends GuiAgent implements WSIGConstants {
 
 	}
 
-	private void registerLanguagees() {
+	private void registerLanguages() {
 		getContentManager().registerLanguage(codecSL);
 		String[] languages = Configuration.getInstance().getLanguages();
 		for (String language : languages) {

@@ -6,6 +6,7 @@ import org.eclipse.xsd.util.XSDConstants;
 import org.w3c.dom.Element;
 
 import java.util.Map;
+import java.util.List;
 import javax.wsdl.Types;
 import javax.wsdl.Definition;
 import javax.wsdl.extensions.ExtensionRegistry;
@@ -25,7 +26,7 @@ import com.ibm.wsdl.extensions.schema.SchemaImpl;
  */
 public class SchemaGeneratorUtils {
 
-	public static XSDSchema createSchema (){
+	public static XSDSchema createSchema() {
 
 		XSDFactory xsdFactory = XSDFactory.eINSTANCE;
 		//Schema Initialization
@@ -45,7 +46,18 @@ public class SchemaGeneratorUtils {
 		return xsd;
 	}
 
-	public static XSDComplexTypeDefinition addComplexTypeToSchema (XSDSchema schema, String complexTypeName){
+	public static XSDTypeDefinition getTypeDefinition(XSDSchema schema, String targetNameSpace, String localName) {
+		XSDTypeDefinition result = null;
+		for (XSDTypeDefinition type : schema.getTypeDefinitions()) {
+			if (type.hasNameAndTargetNamespace(localName, targetNameSpace)) {
+				result = type;
+				break;
+			}
+		}
+		return result;
+	}
+
+	public static XSDComplexTypeDefinition addComplexTypeToSchema(XSDSchema schema, String complexTypeName) {
 		XSDComplexTypeDefinitionImpl simpleRecursiveComplexTypeDefinition = (XSDComplexTypeDefinitionImpl) XSDFactory.eINSTANCE.createXSDComplexTypeDefinition();
 		simpleRecursiveComplexTypeDefinition.setName(complexTypeName);
 		schema.getContents().add(simpleRecursiveComplexTypeDefinition);
@@ -54,7 +66,7 @@ public class SchemaGeneratorUtils {
 
 	}
 
-	public static XSDModelGroup addSequenceToComplexType (XSDComplexTypeDefinition complexTypeDefinition){
+	public static XSDModelGroup addSequenceToComplexType(XSDComplexTypeDefinition complexTypeDefinition) {
 
 		XSDParticle contentParticle = XSDFactory.eINSTANCE.createXSDParticle();
 		XSDModelGroup contentSequence = XSDFactory.eINSTANCE.createXSDModelGroup();
@@ -65,7 +77,7 @@ public class SchemaGeneratorUtils {
 
 	}
 
-	public static void addElementToSequence (XSDSchema schema,String elementName, String elementType,XSDModelGroup sequence ){
+	public static void addElementToSequence(XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence) {
 		XSDElementDeclaration elementAdded = XSDFactory.eINSTANCE.createXSDElementDeclaration();
 		elementAdded.setName(elementName);
 		elementAdded.setTypeDefinition(schema.resolveSimpleTypeDefinition(elementType));
@@ -75,5 +87,18 @@ public class SchemaGeneratorUtils {
 
 	}
 
-	
+
+	public static void addElementToSequence(XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence, int minOcc, int maxOcc) {
+		XSDElementDeclaration elementAdded = XSDFactory.eINSTANCE.createXSDElementDeclaration();
+		elementAdded.setName(elementName);
+		elementAdded.setTypeDefinition(schema.resolveSimpleTypeDefinition(elementType));
+		XSDParticle elementParticle = XSDFactory.eINSTANCE.createXSDParticle();
+		if (minOcc != -1) {
+			elementParticle.setMaxOccurs(maxOcc);
+			elementParticle.setMinOccurs(minOcc);
+		}
+		elementParticle.setContent(elementAdded);
+		sequence.getContents().add(elementParticle);
+
+	}
 }

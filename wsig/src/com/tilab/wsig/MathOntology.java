@@ -28,15 +28,15 @@ public class MathOntology extends Ontology implements MathVocabulary{
 
 		try {
 			add(new AgentActionSchema(SUM), Sum.class);
-		    	add(new AgentActionSchema(DIFF), Diff.class);
+		    add(new AgentActionSchema(DIFF), Diff.class);
 			add(new AgentActionSchema(ABS), Abs.class);
+			add(new AgentActionSchema(MULTIPLICATION), Multiplication.class);
 			add(new ConceptSchema(COMPLEX), Complex.class);
-
 
 
 			AgentActionSchema as = (AgentActionSchema) getSchema(ABS);
 			as.add(COMPLEX, (ConceptSchema) getSchema(COMPLEX));
-			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT));                                                              			
+			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT));
 
 			ConceptSchema cs = (ConceptSchema) getSchema(COMPLEX);
 			cs.add(REAL, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
@@ -54,10 +54,12 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			as.add(SECOND_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
 			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT));
 
-			
-			System.out.println("Action list --> " + getActionNames().toString());
-			System.out.println("Concept list --> " + getConceptNames().toString());
-			System.out.println("Predicate list --> " + getPredicateNames().toString());
+
+			as = (AgentActionSchema) getSchema(MULTIPLICATION);
+			as.add(NUMBERS, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), 2, ObjectSchema.UNLIMITED);
+			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT));
+
+
 
 
 

@@ -35,66 +35,28 @@
  * ***** END LICENSE BLOCK ***** */
 package com.whitestein.wsig.ws;
 
+import com.whitestein.wsig.Configuration;
+import com.whitestein.wsig.WSIGConstants;
+import com.whitestein.wsig.fipa.DFMethodListener;
+import com.whitestein.wsig.fipa.FIPAEndPoint;
+import com.whitestein.wsig.fipa.FIPAServiceIdentificator;
+import com.whitestein.wsig.struct.OperationID;
+import com.whitestein.wsig.struct.ServedOperation;
+import com.whitestein.wsig.struct.ServedOperationStore;
 import jade.content.ContentManager;
 import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
-import jade.content.schema.AgentActionSchema;
-import jade.content.schema.AggregateSchema;
-import jade.content.schema.ConceptSchema;
-import jade.content.schema.Facet;
-import jade.content.schema.ObjectSchema;
-import jade.content.schema.PrimitiveSchema;
+import jade.content.schema.*;
 import jade.content.schema.facets.CardinalityFacet;
 import jade.content.schema.facets.TypedAggregateFacet;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.domain.FIPAAgentManagement.*;
 import jade.domain.FIPAException;
-import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.Modify;
-import jade.domain.FIPAAgentManagement.Property;
-import jade.domain.FIPAAgentManagement.Search;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.util.leap.List;
-
-import java.io.File;
-import java.io.PrintWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Vector;
-
-import javax.wsdl.Binding;
-import javax.wsdl.BindingInput;
-import javax.wsdl.BindingOperation;
-import javax.wsdl.BindingOutput;
-import javax.wsdl.Definition;
-import javax.wsdl.Input;
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.wsdl.Output;
-import javax.wsdl.Part;
-import javax.wsdl.Port;
-import javax.wsdl.PortType;
-import javax.wsdl.Service;
-import javax.wsdl.Types;
-import javax.wsdl.WSDLException;
-import javax.wsdl.extensions.ExtensionRegistry;
-import javax.wsdl.extensions.schema.Schema;
-import javax.wsdl.extensions.soap.SOAPAddress;
-import javax.wsdl.extensions.soap.SOAPBinding;
-import javax.wsdl.extensions.soap.SOAPBody;
-import javax.wsdl.extensions.soap.SOAPOperation;
-import javax.wsdl.factory.WSDLFactory;
-import javax.wsdl.xml.WSDLWriter;
-import javax.xml.namespace.QName;
-
 import org.apache.log4j.Logger;
 import org.eclipse.xsd.XSDComplexTypeDefinition;
+import org.eclipse.xsd.XSDComponent;
 import org.eclipse.xsd.XSDModelGroup;
 import org.eclipse.xsd.XSDSchema;
 import org.uddi4j.UDDIException;
@@ -108,44 +70,20 @@ import org.uddi4j.datatype.binding.TModelInstanceDetails;
 import org.uddi4j.datatype.binding.TModelInstanceInfo;
 import org.uddi4j.datatype.service.BusinessService;
 import org.uddi4j.datatype.tmodel.TModel;
-import org.uddi4j.response.AuthToken;
-import org.uddi4j.response.BindingDetail;
-import org.uddi4j.response.DispositionReport;
-import org.uddi4j.response.Result;
-import org.uddi4j.response.ServiceDetail;
-import org.uddi4j.response.ServiceInfo;
-import org.uddi4j.response.ServiceInfos;
-import org.uddi4j.response.ServiceList;
-import org.uddi4j.response.TModelDetail;
+import org.uddi4j.response.*;
 import org.uddi4j.transport.TransportException;
-import org.uddi4j.util.CategoryBag;
-import org.uddi4j.util.FindQualifiers;
-import org.uddi4j.util.KeyedReference;
-import org.uddi4j.util.ServiceKey;
-import org.uddi4j.util.TModelBag;
-import org.uddi4j.util.TModelKey;
+import org.uddi4j.util.*;
 
-import com.ibm.wsdl.BindingImpl;
-import com.ibm.wsdl.BindingInputImpl;
-import com.ibm.wsdl.BindingOperationImpl;
-import com.ibm.wsdl.BindingOutputImpl;
-import com.ibm.wsdl.DefinitionImpl;
-import com.ibm.wsdl.InputImpl;
-import com.ibm.wsdl.MessageImpl;
-import com.ibm.wsdl.OperationImpl;
-import com.ibm.wsdl.OutputImpl;
-import com.ibm.wsdl.PartImpl;
-import com.ibm.wsdl.PortImpl;
-import com.ibm.wsdl.PortTypeImpl;
-import com.ibm.wsdl.ServiceImpl;
-import com.whitestein.wsig.Configuration;
-import com.whitestein.wsig.WSIGConstants;
-import com.whitestein.wsig.fipa.DFMethodListener;
-import com.whitestein.wsig.fipa.FIPAEndPoint;
-import com.whitestein.wsig.fipa.FIPAServiceIdentificator;
-import com.whitestein.wsig.struct.OperationID;
-import com.whitestein.wsig.struct.ServedOperation;
-import com.whitestein.wsig.struct.ServedOperationStore;
+import javax.wsdl.*;
+import javax.wsdl.extensions.ExtensionRegistry;
+import javax.wsdl.factory.WSDLFactory;
+import javax.wsdl.xml.WSDLWriter;
+import java.io.File;
+import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.lang.reflect.TypeVariable;
+import java.net.URL;
+import java.util.*;
 
 
 /**
@@ -166,10 +104,11 @@ public class DFToUDDI4j implements DFMethodListener {
 	private String businessKey;
 	private String userName;
 	private String password;
-	private static Hashtable types = new Hashtable();
-	
 
+	private static final String INPUT_PARAM_SUFF = "Input";
+	private static final String OUTPUT_PARAM_SUFF = "Output";
 
+	private static Hashtable<String,String> types = new Hashtable<String,String>();
 	static {
 		types.put(BasicOntology.FLOAT, "float");
 		types.put(BasicOntology.INTEGER, "int");
@@ -177,6 +116,25 @@ public class DFToUDDI4j implements DFMethodListener {
 		types.put(BasicOntology.BOOLEAN, "boolean");
 		types.put(BasicOntology.DATE, "dateTime");
 		types.put(BasicOntology.BYTE_SEQUENCE, "byte");//verify it!!!
+	}
+
+	private static Hashtable<Class,String> java2xsd = new Hashtable<Class,String>();
+
+	static {
+		java2xsd.put(java.lang.Boolean.class, "boolean");
+		java2xsd.put(java.lang.Byte.class, "byte");
+		java2xsd.put(java.lang.Double.class, "double");
+		java2xsd.put(java.lang.Float.class, "float");
+		java2xsd.put(java.lang.Integer.class, "integer");
+		java2xsd.put(java.lang.Long.class, "long");
+		java2xsd.put(java.lang.Short.class, "short");
+		java2xsd.put(java.math.BigDecimal.class, "decimal");
+		java2xsd.put(java.math.BigInteger.class, "int");
+		java2xsd.put(java.net.URI.class, "anyURI");
+		java2xsd.put(java.util.Calendar.class, "dateTime");
+		java2xsd.put(java.util.Date.class, "dateTime");
+
+
 	}
 
 
@@ -211,7 +169,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 *
 	 * @param dfad agent's registration structure
 	 * @return collection of served operations
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private synchronized Collection createServedOperations(Agent agent, DFAgentDescription dfad) throws Exception {
 		Collection coll = new ArrayList();
@@ -240,7 +198,7 @@ public class DFToUDDI4j implements DFMethodListener {
 	 *
 	 * @param fipaSId an end point identification
 	 * @return servedOperation created or null
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private ServedOperation createServedOperation(Agent agent, AID agentId, ServiceDescription sd) throws Exception {
 		UDDIOperationIdentificator uddiOId;
@@ -263,9 +221,6 @@ public class DFToUDDI4j implements DFMethodListener {
 			return null;
 		}
 
-		//manageAgentOntologies(sd);
-		
-		
 		Definition definition = createDefinitionFromOntologies(agent, sd);
 		fipaSId = new FIPAServiceIdentificator(agentId, sd);
 		fipaEP = new FIPAEndPoint(fipaSId);
@@ -276,6 +231,8 @@ public class DFToUDDI4j implements DFMethodListener {
 		// add structure into a WSDL
 		// input data:  sd, uddiOId
 		WSDLDefinition wsdl = new WSDLDefinition();
+		wsdl.setDefinition(definition);
+
 		try {
 			wsdl.setURL(new URL(Configuration.getInstance().getURIPathForWSDLs() + uddiOId.getWSDLOperation() + ".wsdl"));
 			op.setWSDL(wsdl);
@@ -288,61 +245,56 @@ public class DFToUDDI4j implements DFMethodListener {
 		return op;
 	}
 
-	private Definition createDefinitionFromOntologies(Agent agent, ServiceDescription sd) throws Exception{
-		XSDSchema xsdSchema = null;
-	
-		boolean toAdd = false;
-		
+	private Definition createDefinitionFromOntologies(Agent agent, ServiceDescription sd) throws Exception {
+		XSDSchema xsdSchema = xsdSchema = SchemaGeneratorUtils.createSchema();
+
 		//Checking for Ontology Mapper
 		boolean mapperFound = false;
 		Class mapperClass = WSDLGeneratorUtils.getMapperClass(sd);
-		if(mapperClass != null)
+		if (mapperClass != null)
 			mapperFound = true;
-		
+
 		Method[] methods = null;
-		if(mapperFound){
+		if (mapperFound) {
 			methods = mapperClass.getDeclaredMethods();
 		}
 
 		WSDLFactory factory = WSDLFactory.newInstance();
 		String tns = "urn:" + sd.getName();
-		
+
 		//Definition
-		Definition definition = WSDLGeneratorUtils.createWSDLDefinition(factory,tns);
-		
+		Definition definition = WSDLGeneratorUtils.createWSDLDefinition(factory, tns);
+
 		//Extension Registry
 		ExtensionRegistry registry = null;
 		registry = factory.newPopulatedExtensionRegistry();
 		definition.setExtensionRegistry(registry);
-				
+
 		//Port Type
 		PortType portType = WSDLGeneratorUtils.createPortType(sd);
 		definition.addPortType(portType);
 
-		
 		//Binding
 		Binding binding = WSDLGeneratorUtils.createBinding(tns);
 		try {
-			binding.addExtensibilityElement(WSDLGeneratorUtils.createSOAPBinding(registry));			
+			binding.addExtensibilityElement(WSDLGeneratorUtils.createSOAPBinding(registry));
 		} catch (WSDLException e1) {
-			throw new Exception("Error in SOAPBinding Handling "+e1.getMessage());
-		}		
+			throw new Exception("Error in SOAPBinding Handling " + e1.getMessage());
+		}
 		definition.addBinding(binding);
-		
+
 		Port port = WSDLGeneratorUtils.createPort(tns);
 		try {
 			port.addExtensibilityElement(WSDLGeneratorUtils.createSOAPAddress(registry));
 		} catch (WSDLException e1) {
-			throw new Exception("Error in SOAPAddress Handling "+e1.getMessage());
+			throw new Exception("Error in SOAPAddress Handling " + e1.getMessage());
 		}
-		
-		
+
 		//Service
 		Service service = WSDLGeneratorUtils.createService(sd.getName());
 		service.addPort(port);
 		definition.addService(service);
-		
-		
+
 		// Managing Ontologies
 		Iterator ontologies = sd.getAllOntologies();
 		ContentManager cntManager = agent.getContentManager();
@@ -351,37 +303,29 @@ public class DFToUDDI4j implements DFMethodListener {
 			Ontology onto = cntManager.lookupOntology(ontoName);
 			java.util.List actionNames = onto.getActionNames();
 
-			//if (actionNames.size() > 0) portType.setUndefined(false);
-			//definition.addPortType(portType);
-			//Operation op = null;
-			//Message messageOut = null;
 			AgentActionSchema actionSchema = null;
 			ObjectSchema resultSchema = null;
 			for (int i = 0; i < actionNames.size(); i++) {
 				try {
 					String actionName = (String) actionNames.get(i);
 
-					int methodNumber = 0;
-					
-					if (mapperFound) {
-						methodNumber = checkForMethodAndCount(methods,actionName);
-						if(methodNumber == 0) //mapperFound but not for this action
-							methodNumber = 1;  //number of for cycles if no mapper is found
+					int methodNumber = 1;
+
+					if (mapperFound && checkForMethodAndCount(methods, actionName) != 0) {
+						methodNumber = checkForMethodAndCount(methods, actionName);
 					}
-
-
 					for (int j = 0; j < methodNumber; j++) {
-						String outputName = actionName + "Output";
-						String inputName = actionName + "Input";
-						if(mapperFound && methodNumber > 1){
-							outputName=outputName+j;
-							inputName=inputName+j;
+						String outputName = actionName + OUTPUT_PARAM_SUFF;
+						String inputName = actionName + INPUT_PARAM_SUFF;
+						if (mapperFound && methodNumber > 1) {
+							outputName = outputName + j;
+							inputName = inputName + j;
 						}
 						Operation operation = WSDLGeneratorUtils.createOperation(actionName);
 						portType.addOperation(operation);
 
 						// Output Params		
-						Message messageOut = WSDLGeneratorUtils.createMessage(tns,outputName);
+						Message messageOut = WSDLGeneratorUtils.createMessage(tns, outputName);
 						Output output = WSDLGeneratorUtils.createOutput(outputName);
 						output.setMessage(messageOut);
 						operation.setOutput(output);
@@ -390,7 +334,7 @@ public class DFToUDDI4j implements DFMethodListener {
 						BindingOperation operationB = WSDLGeneratorUtils.createBindingOperation(registry, actionName);
 						binding.addBindingOperation(operationB);
 
-						BindingInput inputB = WSDLGeneratorUtils.createBindingInput(registry,tns,inputName);							
+						BindingInput inputB = WSDLGeneratorUtils.createBindingInput(registry, tns, inputName);
 						operationB.setBindingInput(inputB);
 
 						BindingOutput outputB = WSDLGeneratorUtils.createBindingOutput(registry, tns, outputName);
@@ -398,128 +342,44 @@ public class DFToUDDI4j implements DFMethodListener {
 
 						actionSchema = (AgentActionSchema) onto.getSchema(actionName);
 						resultSchema = actionSchema.getResultSchema();
-
-						if (resultSchema instanceof PrimitiveSchema) {
-							PrimitiveSchema resultPrimitive = (PrimitiveSchema) resultSchema;
-							String wsdlType = (String) types.get(resultPrimitive.getTypeName());
-							Part part = WSDLGeneratorUtils.createPart(WSDLConstants.outPart, wsdlType);
-							messageOut.addPart(part);
-						} else if (resultSchema instanceof AggregateSchema) {
-							throw new Exception(
-									"Case of Result of Aggreagate Type not yet handled");
-						} else if (resultSchema instanceof ConceptSchema) {
-							throw new Exception(
-									"Case of Result of Complex Type Not yet handled");
-						}
+						String resultType = convertObjectSchemaIntoXsdType(actionSchema, resultSchema, xsdSchema, WSDLConstants.outPart, null, -1, -1);
+						Part partR = WSDLGeneratorUtils.createPart(WSDLConstants.outPart, resultType);
+						messageOut.addPart(partR);
 
 						// Input Parameters
-						Message messageIn = WSDLGeneratorUtils.createMessageIn(tns,inputName);
+						Message messageIn = WSDLGeneratorUtils.createMessageIn(tns, inputName);
 						definition.addMessage(messageIn);
-						Input input = WSDLGeneratorUtils.createInput(messageIn,inputName);
+						Input input = WSDLGeneratorUtils.createInput(messageIn, inputName);
 						operation.setInput(input);
 
-						if(mapperFound && methodNumber > 1){
+						if (mapperFound && checkForMethodAndCount(methods, actionName) > 0) {
 							Class[] parameterTypes = methods[j].getParameterTypes();
 							for (int k = 0; k < parameterTypes.length; k++) {
-								String className = parameterTypes[k].getName();
-								if (parameterTypes[k].isPrimitive()) {
-									Part part = WSDLGeneratorUtils.createPart(WSDLConstants.part + k, className);
-									messageIn.addPart(part);
-								} else if (parameterTypes[k].isArray()) {
-									throw new Exception("Not yet handled");
-								} else {
-									toAdd = true;
-									String[] names = actionSchema.getNames();
-									String slot = null;
-									for (String name : names) {
-										if (onto.getClassForElement(name).getName().equals(className)) {
-											slot = name;
-											break;
-										}
-									}
-									ObjectSchema slotSchema = actionSchema.getSchema(slot);
-									toAdd = true;
-									String[] conceptSlotNames = slotSchema.getNames();
-									xsdSchema = SchemaGeneratorUtils.createSchema();
-									XSDComplexTypeDefinition complexType = SchemaGeneratorUtils
-									.addComplexTypeToSchema(xsdSchema,	slot);
-									XSDModelGroup sequence = SchemaGeneratorUtils.addSequenceToComplexType(complexType);
-									for (String conceptSlotName : conceptSlotNames) {
-										ObjectSchema objSchema = slotSchema.getSchema(conceptSlotName);
-										if (objSchema instanceof PrimitiveSchema) {
-											String slotType = (String) types.get(objSchema.getTypeName());
-											SchemaGeneratorUtils.addElementToSequence(
-													xsdSchema,
-													conceptSlotName,
-													slotType, sequence);
-										} else {
-											throw new Exception("Not yet handled");
-										}
-									}
-									String wsdlType = complexType.getName();
-									Part part = WSDLGeneratorUtils.createPart(slot, wsdlType);
-									messageIn.addPart(part);
-								}
+								String slotName = WSDLConstants.part + k;
+								String slotType = convertObjectSchemaIntoXsdType(onto, actionSchema, parameterTypes[k], xsdSchema, slotName, null);
+								Part part = WSDLGeneratorUtils.createPart(slotName, slotType);
+								messageIn.addPart(part);
 							}
-						}else{
+						} else {
 							String[] slotNames = actionSchema.getNames();
 							for (String slotName : slotNames) {
 								ObjectSchema slotSchema = actionSchema.getSchema(slotName);
-								if (slotSchema instanceof PrimitiveSchema) {
-									PrimitiveSchema schema = (PrimitiveSchema) slotSchema;
-									Part part = WSDLGeneratorUtils.createPart(slotName, (String) types.get(schema.getTypeName()));
-									messageIn.addPart(part);
-								} else if (slotSchema instanceof AggregateSchema) {
-									AggregateSchema schema = (AggregateSchema) slotSchema;
-									Facet[] facets = schema.getFacets(slotName);
-									int cardMax,cardMin;
-									for (Facet facet : facets) {
-										if (facet instanceof CardinalityFacet) {
-											cardMax = ((CardinalityFacet) facet).getCardMax();
-											cardMin = ((CardinalityFacet) facet).getCardMin();
-										} else if (facet instanceof TypedAggregateFacet) {
-
-										} else {
-											System.out.println("Facet is unknown");
-										}
-									}
-									//create Type
-									Types ts = definition.createTypes();
-									//TODO
-								} else if (slotSchema instanceof ConceptSchema) {
-									toAdd = true;
-									String[] conceptSlotNames = slotSchema.getNames();
-									xsdSchema = SchemaGeneratorUtils.createSchema();
-									XSDComplexTypeDefinition complexType = SchemaGeneratorUtils.addComplexTypeToSchema(xsdSchema, slotName);
-									XSDModelGroup sequence = SchemaGeneratorUtils.addSequenceToComplexType(complexType);
-									for (String conceptSlotName : conceptSlotNames) {
-										ObjectSchema objSchema = slotSchema.getSchema(conceptSlotName);
-										if (objSchema instanceof PrimitiveSchema) {
-											String slotType = (String) types.get(objSchema.getTypeName());
-											SchemaGeneratorUtils.addElementToSequence(xsdSchema, conceptSlotName, slotType, sequence);
-										} else {
-											throw new Exception("Not yet handled");
-										}
-									}
-									String wsdlType = complexType.getName();
-									Part part = WSDLGeneratorUtils.createPart(slotName, wsdlType);
-									messageIn.addPart(part);
-								}
+								String slotType = convertObjectSchemaIntoXsdType(actionSchema, slotSchema, xsdSchema, slotName, null, -1, -1);
+								Part part = WSDLGeneratorUtils.createPart(slotName, slotType);
+								messageIn.addPart(part);
 							}
-
 						}
 					}
 				} catch (Exception e) {
-
+					throw new Exception("Error in Agent Action Handling: "+ e.getMessage());
 				}
 			}
 
-			if (toAdd)
-				WSDLGeneratorUtils.addTypeToDefinition(definition, xsdSchema.getElement());
+			WSDLGeneratorUtils.addTypeToDefinition(definition, xsdSchema.getElement());
 
-			//onto
+
 			try {
-								
+
 				WSDLWriter writer = factory.newWSDLWriter();
 				String wsdlDir = Configuration.getInstance().getWsdlDirectory();
 				File file = new File(wsdlDir + File.separator + sd.getName() + ".wsdl");
@@ -527,7 +387,7 @@ public class DFToUDDI4j implements DFMethodListener {
 				//writer.writeWSDL(definition, System.out);
 				writer.writeWSDL(definition, output);
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error("Error in WSDL file writing " + e.getMessage());
 			}
 
 		}
@@ -535,12 +395,116 @@ public class DFToUDDI4j implements DFMethodListener {
 
 	}
 
-	
-	private int checkForMethodAndCount(Method[] methods, String actionName) {
+
+	private String convertObjectSchemaIntoXsdType(ConceptSchema containerSchema, ObjectSchema objSchema, XSDSchema xsdSchema, String slotName, XSDComponent parentComponent, int cardMin, int cardMax) throws Exception {
+		String slotType = null;
+		if (objSchema instanceof PrimitiveSchema) {
+			slotType = (String) types.get(objSchema.getTypeName());
+			if (parentComponent != null)
+				SchemaGeneratorUtils.addElementToSequence(xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
+
+		} else if (objSchema instanceof ConceptSchema) {
+			if (SchemaGeneratorUtils.getTypeDefinition(xsdSchema, xsdSchema.getTargetNamespace(), slotName) == null) {
+				XSDComplexTypeDefinition complexType = SchemaGeneratorUtils.addComplexTypeToSchema(xsdSchema, slotName);
+				XSDModelGroup sequence = SchemaGeneratorUtils.addSequenceToComplexType(complexType);
+				if (parentComponent != null) {
+					SchemaGeneratorUtils.addElementToSequence(xsdSchema, slotName, slotName, (XSDModelGroup) parentComponent, cardMin, cardMax);
+				}
+				for (String conceptSlotName : objSchema.getNames()) {
+					ObjectSchema slotSchema = objSchema.getSchema(conceptSlotName);
+					convertObjectSchemaIntoXsdType((ConceptSchema) objSchema, slotSchema, xsdSchema, conceptSlotName, sequence, -1, -1);
+				}
+			}
+			slotType = slotName;
+
+		} else if (objSchema instanceof AggregateSchema) {
+			slotType = slotName + "Array";
+			if (SchemaGeneratorUtils.getTypeDefinition(xsdSchema, xsdSchema.getTargetNamespace(), slotType) == null) {
+				XSDComplexTypeDefinition complexType = SchemaGeneratorUtils.addComplexTypeToSchema(xsdSchema, slotType);
+				XSDModelGroup sequence = SchemaGeneratorUtils.addSequenceToComplexType(complexType);
+				if (parentComponent != null) {
+					SchemaGeneratorUtils.addElementToSequence(xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent);
+				}
+				Facet[] facets = containerSchema.getFacets(slotName);
+				ObjectSchema aggrType = null;
+				for (Facet facet : facets) {
+					if (facet instanceof CardinalityFacet) {
+						cardMax = ((CardinalityFacet) facet).getCardMax();
+						cardMin = ((CardinalityFacet) facet).getCardMin();
+					} else if (facet instanceof TypedAggregateFacet) {
+						aggrType = ((TypedAggregateFacet) facet).getType();
+
+					} else {
+						System.out.println("Facet is unknown");
+					}
+
+				}
+				convertObjectSchemaIntoXsdType(containerSchema, aggrType, xsdSchema, slotName.substring(0, slotName.length() - 1), sequence, cardMin, cardMax);
+			}
+
+		}
+		return slotType;
+
+	}
+
+
+	private String convertObjectSchemaIntoXsdType(Ontology onto, ConceptSchema containerSchema, Class paramType, XSDSchema xsdSchema, String slotName, XSDComponent parentComponent) throws Exception {
+		String slotType = null;
+		if (paramType.isPrimitive() || java2xsd.get(paramType) != null) {
+			//primitive dataType XSD
+			if (paramType.isPrimitive()) {
+				slotType = paramType.getName();
+			} else {
+				slotType = (String) java2xsd.get(paramType);
+			}
+			if (parentComponent != null)
+				SchemaGeneratorUtils.addElementToSequence(xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent, 0, -1);
+
+		} else if (paramType.isArray()) {
+			Class aggrType = paramType.getComponentType();
+			slotName = aggrType.getSimpleName();
+			slotType = slotName + "Array";
+			if (SchemaGeneratorUtils.getTypeDefinition(xsdSchema, xsdSchema.getTargetNamespace(), slotType) == null) {
+				XSDComplexTypeDefinition complexType = SchemaGeneratorUtils.addComplexTypeToSchema(xsdSchema, slotType);
+				XSDModelGroup sequence = SchemaGeneratorUtils.addSequenceToComplexType(complexType);
+				convertObjectSchemaIntoXsdType(onto, containerSchema, aggrType, xsdSchema, slotName, sequence);
+
+			}
+		} else if (paramType.isAssignableFrom(Collection.class)) {
+			//TODO Collection Handling
+			throw new Exception("Collection NOT supported");
+
+
+		} else {
+			//built-in type
+			String[] names = containerSchema.getNames();
+
+			String slot = null;
+			for (String name : names) {
+				if (onto.getClassForElement(name).equals(paramType)) {
+					slot = name;
+					break;
+				}
+			}
+			if (slot == null) {
+				throw new Exception("Concept doesn't exist in "+ onto.getName());
+			}
+			ObjectSchema slotSchema = containerSchema.getSchema(slot);
+			slotType = convertObjectSchemaIntoXsdType(containerSchema, slotSchema, xsdSchema, slot, parentComponent, -1, -1);
+
+
+		}
+		return slotType;
+	}
+
+
+	private int checkForMethodAndCount
+		(Method[] methods, String
+			actionName) {
 		int counter = 0;
 		String methodToCheck = String.valueOf(Character.toUpperCase
-				(actionName.charAt(0)))+actionName.substring(1);
-		for (int j = 0; j < methods.length; j++) {			
+			(actionName.charAt(0))) + actionName.substring(1);
+		for (int j = 0; j < methods.length; j++) {
 			if (methods[j].getName().equals("to" + methodToCheck))
 				counter ++;
 		}
@@ -554,7 +518,9 @@ public class DFToUDDI4j implements DFMethodListener {
 	 *
 	 * @param dfad agent's registration structure
 	 */
-	private synchronized void removeServedOperations(DFAgentDescription dfad) {
+	private synchronized void removeServedOperations
+		(DFAgentDescription
+			dfad) {
 		ServiceDescription sd;
 		FIPAServiceIdentificator fipaSId;
 		Iterator it = dfad.getAllServices();
@@ -580,7 +546,11 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param aid
 	 * @throws FIPAException
 	 */
-	public synchronized void registerAction(Agent agent, DFAgentDescription dfad, AID aid) throws Exception {
+	public synchronized void registerAction
+		(Agent
+			agent, DFAgentDescription
+			dfad, AID
+			aid) throws Exception {
 		log.debug("A wsigs's registration from an agent: " + dfad.getName() + ".");
 
 		// test an existence
@@ -682,7 +652,10 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param aid
 	 * @throws FIPAException
 	 */
-	public synchronized void deregisterAction(DFAgentDescription dfad, AID aid) throws FIPAException {
+	public synchronized void deregisterAction
+		(DFAgentDescription
+			dfad, AID
+			aid) throws FIPAException {
 		log.debug("A wsigs's deregistration from an agent: " + dfad + ".");
 
 		// test an existence
@@ -746,7 +719,10 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param aid
 	 * @throws FIPAException
 	 */
-	public synchronized void modifyAction(Modify modify, AID aid) throws Exception {
+	public synchronized void modifyAction
+		(Modify
+			modify, AID
+			aid) throws Exception {
 		DFAgentDescription dfad = (DFAgentDescription) modify.getDescription();
 		log.debug("A wsigs's modification from an agent: " + dfad + ".");
 		// modification of the agent's tModel
@@ -801,16 +777,20 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @return generatedList afected
 	 * @throws FIPAException
 	 */
-	public List searchAction(Search search, AID aid, List generatedList) throws Exception {
+	public List searchAction
+		(Search
+			search, AID
+			aid, List
+			generatedList) throws Exception {
 		// nothing advanced, generatedList is only returned
 		return generatedList;
 	}
 
-
 	/**
 	 * removes old records in UDDI
 	 */
-	private void resetUDDI4j() {
+	private void resetUDDI4j
+		() {
 		ServiceList sl = new ServiceList(); // default is an empty list
 		try {
 			Vector names = new Vector(1);
@@ -861,7 +841,8 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * sets up the DFToUDDI4j. It starts components required.
 	 * Class fields authToken and uddiProxy are set properly as main result.
 	 */
-	private void setupUDDI4j() {
+	private void setupUDDI4j
+		() {
 		// to register into UDDI
 		// structures used for a communication with UDDI is retrieved
 		Configuration c = Configuration.getInstance();
@@ -904,7 +885,8 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @throws TransportException if transport problems are occured
 	 * @throws UDDIException	  if UDDI problems are occured
 	 */
-	private AuthToken getAuthToken() throws TransportException, UDDIException {
+	private AuthToken getAuthToken
+		() throws TransportException, UDDIException {
 		// Get an authorization token
 		log.debug("Ask for authToken.");
 
@@ -922,7 +904,11 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param tModelKey   tModel key to be reffered
 	 * @return a new bindingTemplate registered in a UDDI
 	 */
-	public BindingTemplate createBindingTemplate(AccessPoint accessPoint, ServiceKey serviceKey, TModelKey tModelKey) {
+	public BindingTemplate createBindingTemplate
+		(AccessPoint
+			accessPoint, ServiceKey
+			serviceKey, TModelKey
+			tModelKey) {
 		log.debug("A bindingTemplate is going to be created.");
 		BindingTemplate bindingTemplateReturned = null;
 		try {
@@ -961,7 +947,6 @@ public class DFToUDDI4j implements DFMethodListener {
 		return bindingTemplateReturned;
 	}
 
-
 	/**
 	 * creates and registers a new TModel
 	 *
@@ -969,7 +954,10 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param name	name for a tModel
 	 * @return tModel created
 	 */
-	public TModel createTModel(String wsdlURL, String name) {
+	public TModel createTModel
+		(String
+			wsdlURL, String
+			name) {
 		log.debug("A tModel is going to be created.");
 		TModel tModelReturned = null;
 		try {
@@ -994,6 +982,7 @@ public class DFToUDDI4j implements DFMethodListener {
 			tModelReturned = (TModel) (tModelsVector.elementAt(0));
 
 		} catch (UDDIException e) {
+			e.printStackTrace();
 			log.error(e);
 		} catch (TransportException e) {
 			log.error(e);
@@ -1010,7 +999,9 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param col a collection of servedOperations
 	 * @return a wsdl's URL as String
 	 */
-	private String extractWsdlUrl(Collection col) {
+	private String extractWsdlUrl
+		(Collection
+			col) {
 		if (col.isEmpty()) {
 			return "";
 		}
@@ -1026,7 +1017,9 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @param col a collection of servedOperations
 	 * @return an accessPoint
 	 */
-	private AccessPoint extractAccessPoint(Collection col) {
+	private AccessPoint extractAccessPoint
+		(Collection
+			col) {
 		if (col.isEmpty()) {
 			return new AccessPoint(Configuration.getInstance().getHostURI(), "http");
 		}
@@ -1037,7 +1030,6 @@ public class DFToUDDI4j implements DFMethodListener {
 			"http");
 	}
 
-
 	/**
 	 * gets a service identified by a key
 	 *
@@ -1046,9 +1038,22 @@ public class DFToUDDI4j implements DFMethodListener {
 	 * @throws UDDIException
 	 * @throws TransportException
 	 */
-	public BusinessService takeService(ServiceKey serviceKey) throws UDDIException, TransportException {
+	public BusinessService takeService
+		(ServiceKey
+			serviceKey) throws UDDIException, TransportException {
 		ServiceDetail serviceDetail = uddiProxy.get_serviceDetail(serviceKey.getText());
 		Vector businessServices = serviceDetail.getBusinessServiceVector();
 		return (BusinessService) (businessServices.elementAt(0));
 	}
+
+
+	public static void main
+		(String[] args) {
+		Vector<Integer> a = new Vector<Integer>();
+		TypeVariable tVar = a.getClass().getTypeParameters()[0];
+		System.out.println(a.getClass());
+
+
+	}
+
 }
