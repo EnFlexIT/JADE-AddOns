@@ -59,6 +59,8 @@ import jade.util.Logger;
    agents and containers to persistent storage, using Hibernate.
 
    @author Giovanni Rimassa - FRAMeTech s.r.l.
+   
+   modified by Vincenzo Gioviale
 
  */
 public class PersistenceManager {
@@ -1108,7 +1110,14 @@ public class PersistenceManager {
 		Session s = null;
 		try {
 			s = sf.openSession();
-			int howMany = ((Integer)s.createQuery("select count(*) from jade.core.persistence.SavedAgent").iterate().next()).intValue();
+			Object tmp = s.createQuery("select count(*) from jade.core.persistence.SavedAgent").iterate().next();
+			long howMany = -1;
+			if (tmp instanceof Long) {
+				howMany = ((Long) tmp).longValue();
+			}
+			else if (tmp instanceof Integer) {
+				howMany = ((Integer) tmp).longValue();
+			}
 			if(logger.isLoggable(Logger.INFO))
 				logger.log(Logger.INFO,"--- The DB <" + name + "> holds " + howMany + " saved agents ---");
 		}
@@ -1140,7 +1149,14 @@ public class PersistenceManager {
 		Session s = null;
 		try {
 			s = metaSessions.openSession();
-			int howMany = ((Integer)s.createQuery("select count(*) from jade.core.persistence.Repository").iterate().next()).intValue();
+			Object tmp = s.createQuery("select count(*) from jade.core.persistence.Repository").iterate().next();
+			long howMany = -1;
+			if (tmp instanceof Long) {
+				howMany = ((Long) tmp).longValue();
+			}
+			else if (tmp instanceof Integer) {
+				howMany = ((Integer) tmp).longValue();
+			}
 			if(logger.isLoggable(Logger.INFO))
 				logger.log(Logger.INFO,"--- The Meta-DB holds " + howMany + " repositories ---");
 		}

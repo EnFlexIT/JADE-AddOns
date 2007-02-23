@@ -18,7 +18,7 @@
       <generator class="hilo"/>
     </id>
 
-    <property name="agentData"/>
+    <property name="agentData" length="257"/>
     <property name="name"/>
     <property name="owned"/>
 
