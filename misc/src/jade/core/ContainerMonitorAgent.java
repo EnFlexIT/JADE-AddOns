@@ -3,14 +3,20 @@ package jade.core;
 //#J2ME_EXCLUDE_FILE
 //#APIDOC_EXCLUDE_FILE
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.lang.reflect.Method;
 
 import jade.core.behaviours.*;
 import jade.core.messaging.MessagingService;
 import jade.domain.introspection.IntrospectionServer;
 import jade.lang.acl.*;
+
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.Map.Entry;
 
 import jade.util.leap.Iterator;
 import jade.util.leap.Map;
@@ -20,10 +26,12 @@ public class ContainerMonitorAgent extends Agent {
 	
 	public static final String HELP_ACTION = "HELP";
 	public static final String DUMP_AGENTS_ACTION = "DUMP-AGENTS";
+	public static final String DUMP_AGENT_ACTION = "DUMP-AGENT";
 	public static final String DUMP_MESSAGEQUEUE_ACTION = "DUMP-MESSAGEQUEUE";
 	public static final String DUMP_MESSAGEMANAGER_ACTION = "DUMP-MESSAGEMANAGER";
 	public static final String DUMP_LADT_ACTION = "DUMP-LADT";
 	public static final String DUMP_SERVICES_ACTION = "DUMP-SERVICES";
+	public static final String DUMP_THREADS_ACTION = "DUMP-THREADS";
 	
 	private AgentContainerImpl myContainer;
 	private LADT myLADT;
@@ -56,10 +64,33 @@ public class ContainerMonitorAgent extends Agent {
 							System.out.println(replyContent);
 							reply.setContent(replyContent);
 						}
+						else if (contentUC.startsWith(DUMP_AGENT_ACTION)) {
+							String agentName = getParameter(content);
+							Agent a = getAgentFromLADT(agentName);
+							String replyContent = null;
+							if(a != null) {
+								reply.setPerformative(ACLMessage.INFORM);
+								replyContent = getAgentDump(a, true);
+							}
+							else {
+								reply.setPerformative(ACLMessage.FAILURE);
+								replyContent = "Agent " + agentName + " doesn't exist";
+							}
+							System.out.println(replyContent);
+							reply.setContent(replyContent);
+						}
 						else if (contentUC.startsWith(DUMP_MESSAGEQUEUE_ACTION)) {
 							String agentName = getParameter(content);
-							reply.setPerformative(ACLMessage.INFORM);
-							String replyContent = getMessageQueueDump(agentName);
+							Agent a = getAgentFromLADT(agentName);
+							String replyContent = null;
+							if(a != null) {
+								reply.setPerformative(ACLMessage.INFORM);
+								replyContent = getMessageQueueDump(a);
+							}
+							else {
+								reply.setPerformative(ACLMessage.FAILURE);
+								replyContent = "Agent " + agentName + "doesn't exist";
+							}
 							System.out.println(replyContent);
 							reply.setContent(replyContent);
 						}
@@ -78,6 +109,12 @@ public class ContainerMonitorAgent extends Agent {
 						else if (contentUC.startsWith(DUMP_SERVICES_ACTION)) {
 							reply.setPerformative(ACLMessage.INFORM);
 							String replyContent = getServicesDump();
+							System.out.println(replyContent);
+							reply.setContent(replyContent);
+						}
+						else if (contentUC.startsWith(DUMP_THREADS_ACTION)) {
+							reply.setPerformative(ACLMessage.INFORM);
+							String replyContent = getThreadsDump();
 							System.out.println(replyContent);
 							reply.setContent(replyContent);
 						}
@@ -123,12 +160,17 @@ public class ContainerMonitorAgent extends Agent {
 		StringBuffer sb = new StringBuffer("This agent accepts REQUEST messages refering to the "+CONTAINER_MONITOR_ONTOLOGY+" ontology.\nSupported actions:\n");
 		sb.append(DUMP_AGENTS_ACTION);
 		sb.append('\n');
+		sb.append(DUMP_AGENT_ACTION);
+		sb.append(" <agent-local-name>");
+		sb.append('\n');
 		sb.append(DUMP_MESSAGEQUEUE_ACTION);
 		sb.append(" <agent-local-name>");
 		sb.append('\n');
 		sb.append(DUMP_LADT_ACTION);
 		sb.append('\n');
 		sb.append(DUMP_MESSAGEMANAGER_ACTION);
+		sb.append('\n');
+		sb.append(DUMP_THREADS_ACTION);
 		sb.append('\n');
 		return sb.toString();
 	}
@@ -153,30 +195,107 @@ public class ContainerMonitorAgent extends Agent {
 	    Agent[] agents = myLADT.values();
 	    for (int i = 0; i < agents.length; ++i) {
 	    	Agent a = agents[i];
-	    	if (a != null) {
-	    		try {
-		    		sb.append("Agent "+a.getName()+"\n");
-		    		sb.append("  - Class = "+a.getClass().getName()+"\n");
-		    		sb.append("  - State = "+a.getState()+"\n");
-		    		sb.append("  - MessageQueue size = "+a.getMessageQueue().size()+"\n");
-		    		sb.append("  - Behaviours\n");
-		    		Behaviour[] bb = a.getScheduler().getBehaviours();
-		    		for (int j = 0; j < bb.length; ++j) {
-		    			Behaviour b = bb[j];
-			    		sb.append("    - Behaviour "+b.getBehaviourName()+"\n");
-			    		appendBehaviourInfo(b, sb, "      ");
-		    		}
-	    		}
-	    		catch (Exception e) {
-	    			e.printStackTrace();
-	    		}
-	    	}
+	    	String agentDump = getAgentDump(a, false);
+	    	sb.append(agentDump);
 	    }
 		sb.append("-------------------------------------------------------------\n");
 		return sb.toString();
 	}
 	
-	private void appendBehaviourInfo(Behaviour b, StringBuffer sb, String prefix) {
+	public String getAgentDump(Agent a, boolean stackTraceMode) {
+		StringBuffer sb = new StringBuffer();
+		if (a != null) {
+    		try {
+	    		sb.append("Agent "+a.getName()+"\n");
+	    		sb.append("  - Class = "+a.getClass().getName()+"\n");
+	    		sb.append("  - State = "+a.getState()+"\n");
+	    		sb.append("  - MessageQueue size = "+a.getMessageQueue().size()+"\n");
+	    		sb.append("  - Behaviours\n");
+	    		Behaviour[] bb = a.getScheduler().getBehaviours();
+	    		for (int j = 0; j < bb.length; ++j) {
+	    			Behaviour b = bb[j];
+		    		sb.append("    - Behaviour "+b.getBehaviourName()+"\n");
+		    		appendBehaviourInfo(b, sb, "      ", stackTraceMode);
+	    		}
+	    		if(stackTraceMode) {
+	    			String dumpAgentThread = dumpThread(a.getThread());
+	    			sb.append("  - Agent thread dump\n");
+	    			sb.append(dumpAgentThread);
+	    		}
+    		}
+    		catch (Exception e) {
+    			e.printStackTrace();
+    		}
+    	}
+		return sb.toString();
+	}
+	
+	private Agent getAgentFromLADT(String agentName) {
+		Agent result = null;
+		Agent[] agents = myLADT.values();
+	    for (int i = 0; i < agents.length; ++i) {
+	    	Agent a = agents[i];
+	    	if(a.getAID().getLocalName().equals(agentName)) {
+	    		result = a;
+	    		break;
+	    	}
+	    }
+		return result;
+	}
+	
+	private String dumpThread(Thread t) {
+		ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+		ThreadInfo threadInfo = threadMXBean.getThreadInfo(t.getId());
+		return dumpThread(t, threadInfo);
+	}
+
+	private String dumpThread(Thread t, ThreadInfo threadInfo) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("\n");
+		sb.append("\"" + threadInfo.getThreadName() + "\"");
+		if(t.isDaemon()) {
+			sb.append(" daemon");
+		}
+		sb.append(" tid=" + threadInfo.getThreadId());
+		sb.append(" " + threadInfo.getThreadState().toString().toLowerCase());
+		String lockedOn = threadInfo.getLockName();
+		if(lockedOn != null) {
+			String lockedBy = threadInfo.getLockOwnerName();
+			sb.append(" on " + lockedOn);
+			if(lockedBy != null) {
+				sb.append(" held by " + lockedBy);
+			}
+		}
+		sb.append("\n");
+		StackTraceElement[] ste = t.getStackTrace();
+		for(int i=0; i<ste.length; i++) {
+			sb.append("\t at " + ste[i] + "\n");
+		}
+		return sb.toString();
+	}
+	
+	private String dumpAllThreads() {
+		ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+		StringBuffer sb = new StringBuffer();
+		java.util.Map<Thread, StackTraceElement[]> allStackTraces = Thread.currentThread().getAllStackTraces();
+		Set<Thread> threads = allStackTraces.keySet();
+		for (Thread thread : threads) {
+			ThreadInfo threadInfo = threadMXBean.getThreadInfo(thread.getId());
+			sb.append(dumpThread(thread, threadInfo));
+		}
+		long[] threadIds = threadMXBean.findMonitorDeadlockedThreads();
+		if(threadIds != null) {
+			ThreadInfo[] threadInfoInDeadlock = threadMXBean.getThreadInfo(threadIds);
+			sb.append("\n\n\n**************** WARNING ****************: Threads ");
+			for (int i = 0; i < threadInfoInDeadlock.length; i++) {
+				sb.append(" \"" + threadInfoInDeadlock[i].getThreadName() + "\"");
+			}
+			sb.append(" are in deadlock!");
+		}
+		return sb.toString();
+	}	
+	
+	private void appendBehaviourInfo(Behaviour b, StringBuffer sb, String prefix, boolean stackTraceMode) {
 		sb.append(prefix+"- Class = "+b.getClass().getName()+"\n");
 		sb.append(prefix+"- State = "+b.getExecutionState()+"\n");
 		sb.append(prefix+"- Runnable = "+b.isRunnable()+"\n");
@@ -186,7 +305,7 @@ public class ContainerMonitorAgent extends Agent {
 			if (child != null) {
 				sb.append(prefix+"- Current child information\n");
 				sb.append(prefix+"  - Name = "+child.getBehaviourName()+"\n");
-				appendBehaviourInfo(child, sb, prefix+"  ");
+				appendBehaviourInfo(child, sb, prefix+"  ", stackTraceMode);
 			}
 		}
 		else if (b instanceof ThreadedBehaviourFactory.ThreadedBehaviourWrapper) {
@@ -198,11 +317,16 @@ public class ContainerMonitorAgent extends Agent {
 			if (t != null) {
 				sb.append(prefix+"  - Alive = "+t.isAlive()+"\n");
 				sb.append(prefix+"  - Interrupted = "+t.isInterrupted()+"\n");
+				if(stackTraceMode) {
+					String dumpBehaviourThread = dumpThread(t);
+					sb.append(prefix+"  - Behaviour thread dump\n");
+					sb.append(dumpBehaviourThread);
+				}
 			}
 			sb.append(prefix+"- Threaded Behaviour Information\n");
 			Behaviour tb = w.getBehaviour();
 			sb.append(prefix+"  - Name = "+tb.getBehaviourName()+"\n");
-			appendBehaviourInfo(tb, sb, prefix+"  ");
+			appendBehaviourInfo(tb, sb, prefix+"  ", stackTraceMode);
 		}
 		else {
 			sb.append(prefix+"- Type = "+getSimpleType(b)+"\n");
@@ -283,34 +407,28 @@ public class ContainerMonitorAgent extends Agent {
 		return null;
 	}
 	
-	public String getMessageQueueDump(String agentName) {
+	public String getMessageQueueDump(Agent a) {
 		// WE don't use acquire() to avoid risk of blocking in case there is a deadlock
-	    Agent[] agents = myLADT.values();
-	    for (int i = 0; i < agents.length; ++i) {
-	    	if (agents[i].getLocalName().equalsIgnoreCase(agentName)) {
-	    		StringBuffer sb = new StringBuffer();
-	    		sb.append("-------------------------------------------------------------\n");
-	    		sb.append("Agent ");
-	    		sb.append(agentName);
-	    		sb.append(" MessageQueue DUMP\n");
-	    		sb.append("-------------------------------------------------------------\n");
-	    		Object[] messages = agents[i].getMessageQueue().getAllMessages();
-	    		if (messages.length > 0) {
-		    		for (int j = 0; j < messages.length; ++j) {
-		    			sb.append("Message # ");
-		    			sb.append(j);
-		    			sb.append('\n');
-		    			sb.append(messages[j]);
-		    			sb.append('\n');
-		    		}
-	    		}
-	    		else {
-	    			sb.append("Queue is empty\n");
-	    		}
-	    		return sb.toString();
-	    	}
-	    }
-		return "Agent "+agentName+" not found!";
+		StringBuffer sb = new StringBuffer();
+		sb.append("-------------------------------------------------------------\n");
+		sb.append("Agent ");
+		sb.append(a.getLocalName());
+		sb.append(" MessageQueue DUMP\n");
+		sb.append("-------------------------------------------------------------\n");
+		Object[] messages = a.getMessageQueue().getAllMessages();
+		if (messages.length > 0) {
+    		for (int j = 0; j < messages.length; ++j) {
+    			sb.append("Message # ");
+    			sb.append(j);
+    			sb.append('\n');
+    			sb.append(messages[j]);
+    			sb.append('\n');
+    		}
+		}
+		else {
+			sb.append("Queue is empty\n");
+		}
+		return sb.toString();
 	}
 	
 	public String getLADTDump() {
@@ -391,6 +509,16 @@ public class ContainerMonitorAgent extends Agent {
 			e.printStackTrace();
 			sb.append(e.toString());
 		}
+		return sb.toString();
+	}
+
+	public String getThreadsDump() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("-------------------------------------------------------------\n");
+		sb.append("JVM Threads DUMP\n");
+		sb.append("-------------------------------------------------------------\n");
+		sb.append(dumpAllThreads());
+		sb.append("-------------------------------------------------------------\n");
 		return sb.toString();
 	}
 	
