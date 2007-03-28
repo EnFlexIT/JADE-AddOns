@@ -89,7 +89,7 @@ public class ContainerMonitorAgent extends Agent {
 							}
 							else {
 								reply.setPerformative(ACLMessage.FAILURE);
-								replyContent = "Agent " + agentName + "doesn't exist";
+								replyContent = "Agent " + agentName + " doesn't exist";
 							}
 							System.out.println(replyContent);
 							reply.setContent(replyContent);
@@ -218,7 +218,7 @@ public class ContainerMonitorAgent extends Agent {
 		    		appendBehaviourInfo(b, sb, "      ", stackTraceMode);
 	    		}
 	    		if(stackTraceMode) {
-	    			String dumpAgentThread = dumpThread(a.getThread());
+	    			String dumpAgentThread = dumpThread("    ", a.getThread());
 	    			sb.append("  - Agent thread dump\n");
 	    			sb.append(dumpAgentThread);
 	    		}
@@ -243,33 +243,35 @@ public class ContainerMonitorAgent extends Agent {
 		return result;
 	}
 	
-	private String dumpThread(Thread t) {
+	private String dumpThread(String prefix, Thread t) {
 		ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 		ThreadInfo threadInfo = threadMXBean.getThreadInfo(t.getId());
-		return dumpThread(t, threadInfo);
+		return dumpThread(prefix, t, threadInfo);
 	}
 
-	private String dumpThread(Thread t, ThreadInfo threadInfo) {
+	private String dumpThread(String prefix, Thread t, ThreadInfo threadInfo) {
 		StringBuffer sb = new StringBuffer();
-		sb.append("\n");
-		sb.append("\"" + threadInfo.getThreadName() + "\"");
+		sb.append(prefix + "\"" + t.getName() + "\"");
 		if(t.isDaemon()) {
 			sb.append(" daemon");
 		}
-		sb.append(" tid=" + threadInfo.getThreadId());
-		sb.append(" " + threadInfo.getThreadState().toString().toLowerCase());
-		String lockedOn = threadInfo.getLockName();
-		if(lockedOn != null) {
-			String lockedBy = threadInfo.getLockOwnerName();
-			sb.append(" on " + lockedOn);
-			if(lockedBy != null) {
-				sb.append(" held by " + lockedBy);
+		String threadId = threadInfo != null ? String.valueOf(threadInfo.getThreadId()) : String.valueOf(t.getId());
+		sb.append(" tid=" + threadId);
+		sb.append(" " + t.getState().toString().toLowerCase());
+		if(threadInfo != null) {
+			String lockedOn = threadInfo.getLockName();
+			if(lockedOn != null) {
+				String lockedBy = threadInfo.getLockOwnerName();
+				sb.append(" on " + lockedOn);
+				if(lockedBy != null) {
+					sb.append(" held by " + lockedBy);
+				}
 			}
 		}
 		sb.append("\n");
 		StackTraceElement[] ste = t.getStackTrace();
 		for(int i=0; i<ste.length; i++) {
-			sb.append("\t at " + ste[i] + "\n");
+			sb.append(prefix + "\t at " + ste[i] + "\n");
 		}
 		return sb.toString();
 	}
@@ -281,7 +283,7 @@ public class ContainerMonitorAgent extends Agent {
 		Set<Thread> threads = allStackTraces.keySet();
 		for (Thread thread : threads) {
 			ThreadInfo threadInfo = threadMXBean.getThreadInfo(thread.getId());
-			sb.append(dumpThread(thread, threadInfo));
+			sb.append(dumpThread("", thread, threadInfo));
 		}
 		long[] threadIds = threadMXBean.findMonitorDeadlockedThreads();
 		if(threadIds != null) {
@@ -318,7 +320,7 @@ public class ContainerMonitorAgent extends Agent {
 				sb.append(prefix+"  - Alive = "+t.isAlive()+"\n");
 				sb.append(prefix+"  - Interrupted = "+t.isInterrupted()+"\n");
 				if(stackTraceMode) {
-					String dumpBehaviourThread = dumpThread(t);
+					String dumpBehaviourThread = dumpThread(prefix+"    ", t);
 					sb.append(prefix+"  - Behaviour thread dump\n");
 					sb.append(dumpBehaviourThread);
 				}
