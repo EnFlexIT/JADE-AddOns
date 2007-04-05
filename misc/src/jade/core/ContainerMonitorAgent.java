@@ -462,8 +462,7 @@ public class ContainerMonitorAgent extends Agent {
 		try {
 			ServiceFinder sf = myContainer.getServiceFinder();
 			MessagingService service = (MessagingService) sf.findService(MessagingService.NAME);
-			int queueSize = service.getQueueSize();
-			sb.append("- Queue size: " + queueSize + "\n");
+			sb.append("- Global information: " + service.getMessageManagerGlobalInfo() + "\n");
 			String[] queueStatus = service.getMessageManagerQueueStatus();	
 			sb.append("- Queue status:\n");
 			if (queueStatus.length == 0) {
@@ -480,7 +479,7 @@ public class ContainerMonitorAgent extends Agent {
 				sb.append("  - "+threadPoolStatus[i]+"\n");
 			}
 			sb.append("- Thread pool dump:\n");
-			Thread[] threadPool = service.getThreadPool();
+			Thread[] threadPool = service.getMessageManagerThreadPool();
 			for (int i = 0; i < threadPool.length; i++) {
 				String dumpDelivererThread = dumpThread("  ", threadPool[i]);
 				sb.append(dumpDelivererThread);
