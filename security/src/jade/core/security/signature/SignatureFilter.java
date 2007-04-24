@@ -125,6 +125,7 @@ public class SignatureFilter {
           msg = (GenericMessage)params[1];
           SecurityObject so;
           Envelope env = msg.getEnvelope();
+    	  System.out.println("Signature filter: Processing message from "+msg.getACLMessage().getSender().getName()+": Envelope is "+env);
           if (env != null) {
             if ((so=SecurityService.getSecurityObject(env,SecurityObject.SIGN)) != null) {
             sender = (AID)params[0];

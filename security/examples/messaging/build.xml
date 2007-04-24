@@ -27,7 +27,7 @@
   </path>
 
 
-  <target name="run" depends="" description="Starts the messaging example." >
+  <target name="main" description="Starts the Main Container of the messaging example." >
 
        <java classname="jade.Boot" fork="yes">
          <arg line="-conf main.conf" />
@@ -38,4 +38,14 @@
        </java>
   </target>
 
+  <target name="container" description="Starts the peripheral container of the messaging example." >
+
+       <java classname="jade.Boot" fork="yes">
+         <arg line="-conf container.conf" />
+         <classpath>
+           <path refid="jade-classes"/>
+           <path refid="jade-S-classes"/>
+         </classpath>
+       </java>
+  </target>
 </project>

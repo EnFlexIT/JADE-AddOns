@@ -19,7 +19,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
-*****************************************************************/
+ *****************************************************************/
 
 package jade.core.security.permission.checkers;
 
@@ -51,83 +51,83 @@ import java.util.Hashtable;
  *
  *   @author Giosue Vitaglione - Telecom Italia LAB
  *   @see jade.core.security.permission.PermissionService
-*/
+ */
 abstract public class BaseJADEChecker implements CommandChecker {
 
 
-protected static JADEAccessController defaultJADEAccessController=null;
-protected static Profile defaultProfile=null;
-protected static AgentContainer myDefaultContainer=null;
-protected static PermissionService defaultPermservice = null;
-  
-// contains rows composed by: command-type, permission, action
-private Hashtable table = new Hashtable();
+	protected static JADEAccessController defaultJADEAccessController=null;
+	protected static Profile defaultProfile=null;
+	protected static AgentContainer myDefaultContainer=null;
+	protected static PermissionService defaultPermservice = null;
 
-// access controller wrapping the used container's policy
-protected JADEAccessController ac = null;
-protected Profile p = null;
-protected AgentContainer myContainer = null;  
-protected PermissionService service = null;
+//	contains rows composed by: command-type, permission, action
+	private Hashtable table = new Hashtable();
 
-protected Logger myLogger = Logger.getMyLogger(this.getClass().getName());
-     
-protected boolean direction;
-    public void setDirection(boolean direction){ this.direction=direction; }
-      
-    public BaseJADEChecker() {
-        this.p = defaultProfile;
-        this.ac = defaultJADEAccessController;
-        this.myContainer = myDefaultContainer;
-        this.service = defaultPermservice;
-    }
+//	access controller wrapping the used container's policy
+	protected JADEAccessController ac = null;
+	protected Profile p = null;
+	protected AgentContainer myContainer = null;  
+	protected PermissionService service = null;
 
-    public BaseJADEChecker( Profile p, PermissionService permservice, JADEAccessController ac ) {
-        this.p = p;
-        this.service = permservice;
-        this.ac = ac;
-    }
+	protected Logger myLogger = Logger.getMyLogger(this.getClass().getName());
 
-    public static void setDefaultJADEAccessController(JADEAccessController ac){
-      defaultJADEAccessController=ac;
-    }
-    public static void setDefaultProfile(Profile myProfile) {
-      defaultProfile = myProfile;
-    }
-    public static void setDefaultContainer(AgentContainer ac) {
-      myDefaultContainer = ac;
-    }
-    public static void setDefaultPermissionService(PermissionService permservice) {
-      defaultPermservice = permservice;
-    }
+	protected boolean direction;
+	public void setDirection(boolean direction){ this.direction=direction; }
 
+	public BaseJADEChecker() {
+		this.p = defaultProfile;
+		this.ac = defaultJADEAccessController;
+		this.myContainer = myDefaultContainer;
+		this.service = defaultPermservice;
+	}
 
+	public BaseJADEChecker( Profile p, PermissionService permservice, JADEAccessController ac ) {
+		this.p = p;
+		this.service = permservice;
+		this.ac = ac;
+	}
+
+	public static void setDefaultJADEAccessController(JADEAccessController ac){
+		defaultJADEAccessController=ac;
+	}
+	public static void setDefaultProfile(Profile myProfile) {
+		defaultProfile = myProfile;
+	}
+	public static void setDefaultContainer(AgentContainer ac) {
+		myDefaultContainer = ac;
+	}
+	public static void setDefaultPermissionService(PermissionService permservice) {
+		defaultPermservice = permservice;
+	}
 
 
 
 
 
 
-    public void checkAction(JADEPrincipal subject,
-                      Permission permission, 
-                      JADEPrincipal target,
-                      Credentials creds) throws JADESecurityException {
-
-      ac.checkAction( subject, permission, target, creds );
-      // Note: for now a single JADEAccessController checks against a single policy
-      
-    } // end check
 
 
+	public void checkAction(JADEPrincipal subject,
+			Permission permission, 
+			JADEPrincipal target,
+			Credentials creds) throws JADESecurityException {
+
+		ac.checkAction( subject, permission, target, creds );
+		// Note: for now a single JADEAccessController checks against a single policy
+
+	} // end check
 
 
-    /**
-     *
-     * Implement the check(Command) so that:
-     *  takes the cmd, gets the required info from the cmd parameters
-     *  calls the method: check(subject, permission, action, target, credential)
-     *
-     */
-    abstract public void check(Command cmd) throws JADESecurityException;
+
+
+	/**
+	 *
+	 * Implement the check(Command) so that:
+	 *  takes the cmd, gets the required info from the cmd parameters
+	 *  calls the method: check(subject, permission, action, target, credential)
+	 *
+	 */
+	abstract public void check(Command cmd) throws JADESecurityException;
 
 } // end checker class
 

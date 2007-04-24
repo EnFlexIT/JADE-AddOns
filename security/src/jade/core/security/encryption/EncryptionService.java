@@ -19,21 +19,33 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
-*****************************************************************/
+ *****************************************************************/
 
 package jade.core.security.encryption;
 
 //#MIDP_EXCLUDE_FILE
 
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.AgentContainer;
 import jade.core.BaseService;
 import jade.core.Filter;
 import jade.core.Profile;
 import jade.core.ProfileException;
-import jade.core.Service;
-import jade.core.ServiceHelper;
-import jade.core.Sink;
+import jade.core.ServiceException;
+import jade.core.VerticalCommand;
+import jade.core.messaging.GenericMessage;
+import jade.core.messaging.MessagingService;
+import jade.core.messaging.MessagingSlice;
+import jade.core.security.SecurityHelper;
+import jade.core.security.SecurityService;
+import jade.core.security.SecuritySlice;
+import jade.domain.FIPAAgentManagement.Envelope;
+import jade.domain.FIPAAgentManagement.InternalError;
+import jade.domain.FIPAAgentManagement.SecurityObject;
+import jade.lang.acl.ACLMessage;
+import jade.security.JADEPrincipal;
+import jade.util.Logger;
 
 
 /**
@@ -48,67 +60,180 @@ import jade.core.Sink;
  * @author jerome Picault - Motorola Labs
  */
 public class EncryptionService extends BaseService {
+	private AgentContainer myContainer;
+	private Filter in = new In();
+	private Filter out = new Out();
+	
+	private SecurityService ss;
+	private MessagingService ms;
+	
+	public String getName() {
+		return EncryptionSlice.NAME;
+	}
 
-  // the filter performing the real authorization check
-  private EncryptionFilter filter;
+	public void init(AgentContainer ac, Profile p) throws ProfileException {
+		super.init(ac, p);
+		myContainer = ac;
+	}
 
-  // logging verbosity
-  private int verbosity;
+	public void boot(Profile p) throws ServiceException {
+		try {
+			// Retrieve the local SecurityService (used to perform basic security functions)
+			ss = (SecurityService)myContainer.getServiceFinder().findService(SecuritySlice.NAME);
+			// Retrieve the local MessagingService (used to notify failures to senders)
+			ms = (MessagingService)myContainer.getServiceFinder().findService(MessagingSlice.NAME);
+		}
+		catch(ServiceException se) {
+			throw se;
+		}
+		catch(Exception e) {
+			throw new ServiceException("Unable to find local Security or Messaging services", e);
+		}
+	}
+	
+	public Filter getCommandFilter(boolean direction) {
+		if (direction == Filter.INCOMING) {
+			return in;
+		}
+		else {
+			return out;
+		}
+	}
+	
+	
+	/**
+	 * Outgoing filter for encryption service
+	 */
+	class Out extends Filter {
 
-  private static final String VERBOSITY_KEY = "jade_core_security_SecurityService_verbosity";
+		public Out(){
+			// sets the relative position of the filter in the filter chain.
+			setPreferredPosition(30);
+		}
 
-  public String getName() {
-    return EncryptionSlice.NAME;
-  }
+		/**
+		 * Encrypt the message contained in the command and update envelope info
+		 */
+		public boolean accept(VerticalCommand cmd) {
+			String name = cmd.getName();
 
-  public void init(AgentContainer ac, Profile p) throws ProfileException {
-    super.init(ac, p);
+			// Only process if it is a SEND_MESSAGE CMD
+			if (name.equals(MessagingSlice.SEND_MESSAGE)) {
+				GenericMessage msg = null;
+				AID sender = null;
+				
+				if (myLogger.isLoggable(Logger.FINEST)) {
+					myLogger.log(Logger.FINEST, "Processing Incoming Command: "+cmd.getName());
+				}
 
-    // set verbosity level for logging
-    try {
-      verbosity = Integer.parseInt(p.getParameter(VERBOSITY_KEY,"0"));
-    }
-    catch (Exception e) {
-      // Ignore and keep default (0)
-    }
+				try {
+					Object[] params = cmd.getParams();
+					msg = (GenericMessage)params[1];
+					SecurityObject so;
+					Envelope env = msg.getEnvelope();
+					if ((env != null)&&((so=SecurityService.getSecurityObject(env,SecurityObject.ENCRYPT)) != null)) {
+						if (myLogger.isLoggable(Logger.FINE)) {
+							myLogger.log(Logger.FINE, "Encrypting message");
+						}
+						sender = (AID)params[0];
+						Agent agt = myContainer.acquireLocalAgent(sender);
+						SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
+						myContainer.releaseLocalAgent(sender);
 
-    // create and initialize the filter of this service
-    filter = new EncryptionFilter();
-    filter.init(ac);
-  }
+						// encrypts the message payload and update the security object
+						JADEPrincipal principal = sh.getPrincipal(((AID)params[2]).getName());
+						byte[] enc = sh.getAuthority().encrypt(so,msg.getPayload(),principal);
+						// Obfuscate some fields in the ACLMessage
+						ACLMessage acl = msg.getACLMessage();
+						if (acl != null) { 
+							acl.setContent(null);
+							so.setConversationId(acl.getConversationId());
+						}
+						ss.encode(so);
+						// update the Generic Message in the command
+						msg.update(acl, env, enc);
+					}
+				}
+				catch(Exception e) {
+					myLogger.log(Logger.WARNING, "Unexpected error processing message", e);
+					try {
+						// Reports the exception to the sender
+						ss.reconstructACLMessage(msg);
+						ms.notifyFailureToSender(msg, sender, new InternalError(e.getMessage()));
+					}
+					catch(Exception ne) {
+						cmd.setReturnValue(ne);
+					}
+					return false;
+				}
+			}
+			return true;
+		}
 
-  public Filter getCommandFilter(boolean direction) {
+	} // End of Out class
 
-    if (direction == Filter.INCOMING) {
-      return filter.in;
-    }
-    else {
-      return filter.out;
-    }
 
-  }
+	/**
+	 * Incoming filter for encryption service
+	 */
+	class In extends Filter {
 
-  /* *****************************************************
-   *   Dummy implementation of Sink and Slice interfaces
-   * *****************************************************/
+		public In(){
+			// sets the relative position of the filter in the filter chain.
+			setPreferredPosition(30);
+		}
 
-  public Class getHorizontalInterface() {
-    return null;
-  }
+		/**
+		 * Verifies the signature of the received message
+		 */
+		public boolean accept(VerticalCommand cmd) {
+			String name = cmd.getName();
 
-  public Service.Slice getLocalSlice() {
-    return null;
-  }
+			// Only process if it is a SEND_MESSAGE CMD
+			if (name.equals(MessagingSlice.SEND_MESSAGE)) {
+				GenericMessage msg = null;
+				Object[] params = cmd.getParams();
 
-  public Sink getCommandSink(boolean side) {
-    return null;
-  }
+				if (myLogger.isLoggable(Logger.FINEST)) {
+					myLogger.log(Logger.FINEST, "Processing Incoming Command: "+cmd.getName());
+				}
 
-  public String[] getOwnedCommands() {
-    return null;
-  }
+				try {
+					msg = (GenericMessage)params[1];
+					SecurityObject so;
+					Envelope env = msg.getEnvelope();
 
-  public ServiceHelper getHelper(Agent a) {
-    return null;
-  }
+					if ((env != null)&&((so=SecurityService.getSecurityObject(env,SecurityObject.ENCRYPT)) != null)) {
+						if (myLogger.isLoggable(Logger.FINE)) {
+							myLogger.log(Logger.FINE, "Decrypting message");
+						}
+						AID receiver = (AID)params[2];
+						Agent agt = myContainer.acquireLocalAgent(receiver);
+						SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
+						myContainer.releaseLocalAgent(receiver);
+
+						// decrypt payload
+						ss.decode(so);
+						byte[] dec = sh.getAuthority().decrypt(so,msg.getPayload());
+						// update the command
+						msg.update(msg.getACLMessage(), env, dec);
+					}
+				}
+				catch(Exception e) {
+					myLogger.log(Logger.WARNING, "Unexpected error processing message", e);
+					try {
+						// Reports the exception to the sender
+						ss.reconstructACLMessage(msg);
+						ms.notifyFailureToSender(msg, (AID)params[0], new InternalError(e.getMessage()));
+					}
+					catch(Exception ne) {
+						cmd.setReturnValue(ne);
+					}
+					return false;
+				}
+			}
+			return true;
+		}
+
+	} // End of In class
 }

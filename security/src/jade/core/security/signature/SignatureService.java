@@ -19,19 +19,36 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
-*****************************************************************/
+ *****************************************************************/
 
 package jade.core.security.signature;
 
 //#MIDP_EXCLUDE_FILE
 
+import jade.core.AID;
+import jade.core.Agent;
 import jade.core.AgentContainer;
 import jade.core.BaseService;
 import jade.core.Filter;
 import jade.core.Profile;
 import jade.core.ProfileException;
 import jade.core.Service;
+import jade.core.ServiceException;
 import jade.core.Sink;
+import jade.core.VerticalCommand;
+import jade.core.messaging.GenericMessage;
+import jade.core.messaging.MessagingService;
+import jade.core.messaging.MessagingSlice;
+import jade.core.security.SecurityHelper;
+import jade.core.security.SecurityService;
+import jade.core.security.SecuritySlice;
+import jade.domain.FIPAAgentManagement.Envelope;
+import jade.domain.FIPAAgentManagement.InternalError;
+import jade.domain.FIPAAgentManagement.SecurityObject;
+import jade.lang.acl.ACLMessage;
+import jade.security.JADESecurityException;
+import jade.security.util.SecurityData;
+import jade.util.Logger;
 
 
 /**
@@ -42,63 +59,186 @@ import jade.core.Sink;
  */
 public class SignatureService extends BaseService {
 
-  // the filter performing the real authorization check
-  private SignatureFilter filter;
+	private AgentContainer myContainer;
+	Filter in = new In();
+	Filter out = new Out();
 
-  // logging verbosity
-  private int verbosity;
+	private SecurityService ss;
+	private MessagingService ms;
 
-  private static final String VERBOSITY_KEY = "jade_core_security_SecurityService_verbosity";
 
-  public String getName() {
-    return SignatureSlice.NAME;
-  }
+	public String getName() {
+		return SignatureSlice.NAME;
+	}
 
-  public void init(AgentContainer ac, Profile p) throws ProfileException {
-    super.init(ac, p);
+	public void init(AgentContainer ac, Profile p) throws ProfileException {
+		super.init(ac, p);
+		myContainer = ac;
+	}
 
-    // set verbosity level for logging
-    try {
-      verbosity = Integer.parseInt(p.getParameter(VERBOSITY_KEY,"0"));
-    }
-    catch (Exception e) {
-      // Ignore and keep default (0)
-    }
+	public void boot(Profile p) throws ServiceException {
+		try {
+			// Retrieve the local SecurityService (used to perform basic security functions)
+			ss = (SecurityService)myContainer.getServiceFinder().findService(SecuritySlice.NAME);
+			// Retrieve the local MessagingService (used to notify failures to senders)
+			ms = (MessagingService)myContainer.getServiceFinder().findService(MessagingSlice.NAME);
+		}
+		catch(ServiceException se) {
+			throw se;
+		}
+		catch(Exception e) {
+			throw new ServiceException("Unable to find local Security or Messaging services", e);
+		}
+	}
+	
+	public Filter getCommandFilter(boolean direction) {
+		if (direction == Filter.INCOMING) {
+			return in;
+		}
+		else {
+			return out;
+		}
+	}
 
-    // create and initialize the filter of this service
-    filter = new SignatureFilter();
-    filter.init(ac);
-  }
 
-  public Filter getCommandFilter(boolean direction) {
+	/**
+	 * Outgoing filter for signature service
+	 */
+	class Out extends Filter {
 
-    if (direction == Filter.INCOMING) {
-      return filter.in;
-    }
-    else {
-      return filter.out;
-    }
+		public Out() {
+			setPreferredPosition(50);
+		}
 
-  }
+		/**
+		 * Sign the message contains in the command and update envelope info
+		 */
+		public boolean accept(VerticalCommand cmd) {
+			String name = cmd.getName();
 
-  /* *****************************************************
-   *   Dummy implementation of Sink and Slice interfaces
-   * *****************************************************/
+			// Only process if it is a SEND_MESSAGE CMD
+			if (name.equals(MessagingSlice.SEND_MESSAGE)) {
+				GenericMessage msg = null;
+				AID sender = null;
+				
+				if (myLogger.isLoggable(Logger.FINEST)) {
+					myLogger.log(Logger.FINEST, "Processing Incoming Command: "+cmd.getName());
+				}
 
-  public Class getHorizontalInterface() {
-    return null;
-  }
+				try {
+					Object[] params = cmd.getParams();
+					msg = (GenericMessage)params[1];
+					SecurityObject so;
+					Envelope env = msg.getEnvelope();
+					if (env != null) {
+						if ((so=SecurityService.getSecurityObject(env,SecurityObject.SIGN)) != null) {
+							if (myLogger.isLoggable(Logger.FINE)) {
+								myLogger.log(Logger.FINE, "Signing message");
+							}
+							sender = (AID)params[0];
+							SecurityData sd = (SecurityData)so.getEncoded();
+							Agent agt = myContainer.acquireLocalAgent(sender);
+							SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
+							myContainer.releaseLocalAgent(sender);
+							sd = sh.getAuthority().sign(sd.algorithm,msg.getPayload());
+							so.setEncoded(sd);
+							ACLMessage acl = msg.getACLMessage();
+							if (acl!=null) so.setConversationId(acl.getConversationId());
+							ss.encode(so);   
+						}
+					}
+					else {
+						// If envelope is null, ACLMessage can't be null
+						env = msg.getACLMessage().getEnvelope();
+						if ((env != null)&&((so=SecurityService.getSecurityObject(env,SecurityObject.SIGN)) != null)) {
+							// This is a local message, the trick is that it is not signed
+							// However we need to put the principal into the envelope
+							sender = (AID)params[0];
+							Agent agt = myContainer.acquireLocalAgent(sender);
+							SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
+							((SecurityData)so.getEncoded()).key = sh.getPrincipal();
+							myContainer.releaseLocalAgent(sender); 
+						}
+					}
+				}
+				catch(Exception e) {
+					myLogger.log(Logger.WARNING, "Unexpected error processing message", e);
+					try {
+						// Reports the exception to the sender
+						ss.reconstructACLMessage(msg);
+						ms.notifyFailureToSender(msg, sender, new InternalError(e.getMessage()));
+					}
+					catch(Exception ne) {
+						cmd.setReturnValue(ne);
+					}
+					return false;
+				}
+			}
+			return true;
+		}
 
-  public Service.Slice getLocalSlice() {
-    return null;
-  }
+	} // End of Out class
 
-  public Sink getCommandSink(boolean side) {
-    return null;
-  }
 
-  public String[] getOwnedCommands() {
-    return null;
-  }
+	/**
+	 * Incoming filter for signature service
+	 */
+	class In extends Filter {
 
+		public In() {
+			setPreferredPosition(10);
+		}
+
+		/**
+		 * Verifies the signature of the received message
+		 */
+		public boolean accept(VerticalCommand cmd) {
+			String name = cmd.getName();
+
+			// Only process if it is a SEND_MESSAGE CMD
+			if (name.equals(MessagingSlice.SEND_MESSAGE)) {
+				GenericMessage msg = null;
+				Object[] params = null;
+
+				if (myLogger.isLoggable(Logger.FINEST)) {
+					myLogger.log(Logger.FINEST, "Processing Incoming Command: "+cmd.getName());
+				}
+
+				try {
+					params = cmd.getParams();
+					msg = (GenericMessage)params[1];
+					SecurityObject so;
+					Envelope env = msg.getEnvelope();
+					if ((env != null)&&((so=SecurityService.getSecurityObject(env,SecurityObject.SIGN)) != null)) {
+						if (myLogger.isLoggable(Logger.FINE)) {
+							myLogger.log(Logger.FINE, "Verifying message signature");
+						}
+						AID receiver = (AID)params[2];
+						ss.decode(so);
+						SecurityData sd = (SecurityData)so.getEncoded();
+						Agent agt = myContainer.acquireLocalAgent(receiver);
+						SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
+						myContainer.releaseLocalAgent(receiver);
+						if (! sh.getAuthority().verifySignature(sd,msg.getPayload())) {
+							throw new JADESecurityException("Invalid signature");
+						}
+					}
+				}
+				catch(Exception e) {
+					myLogger.log(Logger.WARNING, "Unexpected error processing message", e);
+					try {
+						// Reports the exception to the sender
+						ss.reconstructACLMessage(msg);
+						ms.notifyFailureToSender(msg, (AID)params[0], new InternalError(e.getMessage()));
+					}
+					catch(Exception ne) {
+						cmd.setReturnValue(ne);
+					}
+					return false;
+				}
+			}
+			return true;
+		}
+
+	} // End of In class
 }

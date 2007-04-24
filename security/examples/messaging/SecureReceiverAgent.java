@@ -32,59 +32,59 @@ import jade.lang.acl.*;
 /**
    This is an agent that waits for messages and prints those that 
    are signed while discards those that are not.
-   
+
    @author Giovanni Caire - TILAB
  */
 public class SecureReceiverAgent extends Agent {
 	public static final String GET_PRINCIPAL = "get-principal";
-  
+
 	private SecurityHelper mySecurityHelper = null;
-  
+
 	protected void setup() {
 		try {
 			// Get the SecurityHelper
 			mySecurityHelper = (SecurityHelper) getHelper("jade.core.security.Security");
-			
+
 			// Add the behaviour listening for incoming messages
-	  	addBehaviour(new CyclicBehaviour(this) {
-	  		public void action() {
-	  			ACLMessage msg = myAgent.receive();
-	  			if (msg != null) {
-	  				if (mySecurityHelper.getUseSignature(msg)) {
-	  					if (GET_PRINCIPAL.equals(msg.getContent())) {
-		  					System.out.println(myAgent.getName()+": Principal request received from "+msg.getSender().getName()+". Replying...");
-	  						ACLMessage reply = msg.createReply();
-	  						reply.setPerformative(ACLMessage.INFORM);
-	  						mySecurityHelper.setUseSignature(reply);
-	  						myAgent.send(reply);
-	  					}
-	  					else { 
-	  						if (mySecurityHelper.getUseEncryption(msg)) {
-			  					System.out.println(myAgent.getName()+": Signed and encrypted message received:");
-	  						}
-	  						else { 
-			  					System.out.println(myAgent.getName()+": Signed message received:");
-	  						}
-		  					System.out.println(msg);
-	  					}
-	  				} 
-	  				else {
-	  					System.out.println(myAgent.getName()+": Received NON signed message from "+msg.getSender().getName());
-	  					System.out.println(myAgent.getName()+": Discard it");
-	  				}
-	  			}
-	  			else {
-	  				block();
-	  			}
-	  		}
-	  	} );
+			addBehaviour(new CyclicBehaviour(this) {
+				public void action() {
+					ACLMessage msg = myAgent.receive();
+					if (msg != null) {
+						if (mySecurityHelper.getUseSignature(msg)) {
+							if (GET_PRINCIPAL.equals(msg.getContent())) {
+								System.out.println(myAgent.getName()+": Principal request received from "+msg.getSender().getName()+". Replying...");
+								ACLMessage reply = msg.createReply();
+								reply.setPerformative(ACLMessage.INFORM);
+								mySecurityHelper.setUseSignature(reply);
+								myAgent.send(reply);
+							}
+							else { 
+								if (mySecurityHelper.getUseEncryption(msg)) {
+									System.out.println(myAgent.getName()+": Signed and encrypted message received:");
+								}
+								else { 
+									System.out.println(myAgent.getName()+": Signed message received:");
+								}
+								System.out.println(msg);
+							}
+						} 
+						else {
+							System.out.println(myAgent.getName()+": Received NON signed message from "+msg.getSender().getName());
+							System.out.println(myAgent.getName()+": Discard it");
+						}
+					}
+					else {
+						block();
+					}
+				}
+			} );
 		}
 		catch (ServiceException se) {
 			se.printStackTrace();
 			doDelete();
 		}
-		
+
 		System.out.println(getName()+": Ready to accept secure messages...");
-  }
+	}
 }
 

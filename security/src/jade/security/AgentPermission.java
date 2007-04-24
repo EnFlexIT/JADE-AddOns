@@ -23,8 +23,6 @@ Boston, MA  02111-1307, USA.
 
 package jade.security;
 
-import jade.security.*;
-
 
 public class AgentPermission extends AuthPermission implements java.io.Serializable {
 	
