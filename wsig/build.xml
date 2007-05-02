@@ -19,12 +19,10 @@
 	<property name="wsigLib.dir" location="lib"/>
 	<property name="wsigContext.dir" location="context"/>
 	<property name="wsigWebapps.dir" location="webapps"/>
-	<property name="wsigDist.dir" location="dist"/>
 	<property name="wsig.name" value="wsig"/>
 	<property name="wsig.version" value="1.0"/>
 	<property name="wsigWar.name" value="${wsig.name}"/>
 	<property name="wsigZip.name" value="${wsig.name}"/>
-	<property name="zipfile.path" location="${wsigDist.dir}/${wsigZip.name}"/>
 	<property name="warfile.path" location="${wsigWebapps.dir}/${wsigWar.name}"/>
 	<!--<property name="tomcat.dir" location="${env.CATALINA_BASE}"/>-->
 	<property name="tomcat.dir" location="${env.CATALINA_HOME}"/>
@@ -64,14 +62,14 @@
 		<echo>OS platform is ${os.name}</echo>
 	</target>
 
-	<target name="compile" depends="init" description="Compile wsig source">
+	<target name="compile" depends="init" description="Compile wsig sources">
 		<javac srcdir="${wsigSrc.dir}" debug="yes" destdir="${wsigBuild.dir}" encoding="ISO-8859-1" includeAntRuntime="no">
 			<classpath refid="wsigCompile.classpath"/>
 		</javac>
 		<echo>Compilation complete</echo>
 	</target>
 
-	<target name="build" depends="compile" description="Build wsig source">
+	<target name="build" depends="compile" >
 		<copy todir="${wsigWebLib.dir}">
 			<fileset dir="${wsigLib.dir}">
 				<include name="**/*.jar"/>
@@ -82,7 +80,7 @@
 		</copy>
 	</target>
 	
-	<target name="examples-compile" depends="init" description="Compile wsig examples source">
+	<target name="examples-compile" depends="init" description="Compile wsig examples sources">
 		<mkdir dir="${wsigExamplesBuild.dir}"/>
 		<javac srcdir="${wsigExamplesSrc.dir}" debug="yes" destdir="${wsigExamplesBuild.dir}" encoding="ISO-8859-1" includeAntRuntime="no">
 			<classpath refid="wsigCompile.classpath"/>
@@ -90,7 +88,7 @@
 		<echo>Examples compilation complete</echo>
 	</target>
 
-	<target name="examples-build" depends="examples-compile" description="Build wsig examples">
+	<target name="examples-build" depends="examples-compile" >
 		<mkdir dir="${wsigExamplesLib.dir}"/>
 		<mkdir dir="${wsigExamplesLog.dir}"/>
 	    <jar jarfile="${wsigExamplesLib.dir}/wsigExamples.jar">
@@ -99,7 +97,7 @@
 		<echo>Examples build complete</echo>
 	</target>
 	
-	<target name="war" depends="build" description="create the war file">
+	<target name="war">
 		<mkdir dir="${wsigWebapps.dir}"/>
 		<zip destfile="${warfile.path}.war">
 			<zipfileset dir="${wsigWeb.dir}">
@@ -114,47 +112,53 @@
 		<echo>War creation succeded</echo>
 	</target>
 
-	<target name="dist" depends="clean" description="create a bin distribution">
-		<mkdir dir="${wsigDist.dir}"/>
-		<zip destfile="${zipfile.path}-${DSTAMP}-${wsig.version}.zip">
-			<zipfileset dir="." prefix="add-ons/wsig"/>
+
+	<target name="webApp" depends="build, war" description="create the WSIG web application (war file)">
+	</target>
+
+	<target name="dist" depends="clean" description="create the distribution ZIP file">
+		<zip zipfile="../wsigAddOn-${wsig.version}.zip" basedir="../..">
+			<include name="add-ons/wsig/**"/>
 		</zip>
 		<echo>Zip creation completed</echo>
 	</target>
 
-    <target name="deploy" depends="war">
+	<target name="deploy" depends="war">
+		<fail unless="env.CATALINA_HOME" message="CATALINA_HOME environment variable not set. Check the Tomcat installation"/>
 		<delete file="${tomcat.dir}/webapps/${wsigWar.name}.war"/>
-        <copy todir="${tomcat.dir}/webapps">
-            <fileset dir="${wsigWebapps.dir}">
-                <include name="**/*.war"/>
-            </fileset>
-        </copy>
-        <delete dir="${tomcat.dir}/webapps/${wsigWar.name}"/>
-    </target>
-	
-	<target name="wsig-deploy" depends="war" description="deploy only wsig in Tomcat">
-		<copy overwrite="true" file="${wsigWeb.dir}/conf/wsig-template.properties" tofile="${wsigWeb.dir}/conf/wsig.properties"/>
-		<antcall target="deploy"/>
-		<echo>Tomcat wsig deployed succeded</echo>
+		<copy todir="${tomcat.dir}/webapps">
+			<fileset dir="${wsigWebapps.dir}">
+				<include name="**/*.war"/>
+			</fileset>
+		</copy>
+		<delete dir="${tomcat.dir}/webapps/${wsigWar.name}"/>
 	</target>
 	
-    <target name="examples-deploy" depends="examples-build" description="deploy wsig with example in Tomcat">
-    	<copy overwrite="true" file="${wsigWeb.dir}/conf/wsig-template.properties" tofile="${wsigWeb.dir}/conf/wsig.properties"/>
-		<replace file="${wsigWeb.dir}/conf/wsig.properties" value="onto.math-ontology=com.tilab.wsig.examples.MathOntology">
-		  <replacetoken>#MyOntologies#</replacetoken>
-		</replace>
-        <copy todir="${wsigWebLib.dir}">
-            <fileset dir="${wsigExamplesLib.dir}">
-                <include name="**/wsigExamples.jar"/>
-            </fileset>
-        </copy>
-    	<antcall target="deploy"/>
-        <echo>Tomcat wsig with examples deployed succeded</echo>
-    </target>
 
-	<target name="clean" description="clean">
+	<target name="wsig-deploy" depends="build, deploy" description="deploy wsig in Tomcat">
+<!--
+		<copy overwrite="true" file="${wsigWeb.dir}/conf/wsig-template.properties" tofile="${wsigWeb.dir}/conf/wsig.properties"/>
+		<antcall target="deploy"/>
+-->
+		<echo>Wsig successfully deployed</echo>
+	</target>
+	
+	<target name="examples-deploy" depends="examples-build" description="deploy wsig with the examples in Tomcat">
+		<copy overwrite="true" file="${wsigWeb.dir}/conf/wsig-template.properties" tofile="${wsigWeb.dir}/conf/wsig.properties"/>
+		<replace file="${wsigWeb.dir}/conf/wsig.properties" value="onto.math-ontology=com.tilab.wsig.examples.MathOntology">
+			<replacetoken>#MyOntologies#</replacetoken>
+		</replace>
+		<copy todir="${wsigWebLib.dir}">
+			<fileset dir="${wsigExamplesLib.dir}">
+				<include name="**/wsigExamples.jar"/>
+			</fileset>
+		</copy>
+		<antcall target="deploy"/>
+		<echo>Tomcat wsig with examples deployed succeded</echo>
+	</target>
+
+	<target name="clean" description="clean the WSIG environment">
 		<delete dir="${wsigBuild.dir}/com"/>
-		<delete dir="${wsigDist.dir}"/>
 		<delete dir="${wsigWebapps.dir}"/>
 		<delete includeemptydirs="true">
 			<fileset dir="${wsigWebLib.dir}" includes="**/*"/>
@@ -162,10 +166,7 @@
 		<delete dir="${wsigExamplesBuild.dir}"/>
 		<delete dir="${wsigExamplesLib.dir}"/>
 		<delete dir="${wsigExamplesLog.dir}"/>
-		<delete file="${wsigWeb.dir}/conf/wsig.properties"/>
 		<echo>Dir deletion succeded</echo>
 	</target>
-
-	<target name="all" depends="clean, examples-deploy" description="build and deploy all"/>
 	
 </project>
