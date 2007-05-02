@@ -62,7 +62,7 @@
 		<echo>OS platform is ${os.name}</echo>
 	</target>
 
-	<target name="compile" depends="init" description="Compile wsig sources">
+	<target name="compile" depends="init" description="Compile WSIG sources">
 		<javac srcdir="${wsigSrc.dir}" debug="yes" destdir="${wsigBuild.dir}" encoding="ISO-8859-1" includeAntRuntime="no">
 			<classpath refid="wsigCompile.classpath"/>
 		</javac>
@@ -80,24 +80,7 @@
 		</copy>
 	</target>
 	
-	<target name="examples-compile" depends="init" description="Compile wsig examples sources">
-		<mkdir dir="${wsigExamplesBuild.dir}"/>
-		<javac srcdir="${wsigExamplesSrc.dir}" debug="yes" destdir="${wsigExamplesBuild.dir}" encoding="ISO-8859-1" includeAntRuntime="no">
-			<classpath refid="wsigCompile.classpath"/>
-		</javac>
-		<echo>Examples compilation complete</echo>
-	</target>
-
-	<target name="examples-build" depends="examples-compile" >
-		<mkdir dir="${wsigExamplesLib.dir}"/>
-		<mkdir dir="${wsigExamplesLog.dir}"/>
-	    <jar jarfile="${wsigExamplesLib.dir}/wsigExamples.jar">
-	      <fileset dir="${wsigExamplesBuild.dir}" />
-	    </jar>
-		<echo>Examples build complete</echo>
-	</target>
-	
-	<target name="war">
+	<target name="war0">
 		<mkdir dir="${wsigWebapps.dir}"/>
 		<zip destfile="${warfile.path}.war">
 			<zipfileset dir="${wsigWeb.dir}">
@@ -113,17 +96,10 @@
 	</target>
 
 
-	<target name="webApp" depends="build, war" description="create the WSIG web application (war file)">
+	<target name="war" depends="build, war0" description="create the WSIG web application (war file)">
 	</target>
 
-	<target name="dist" depends="clean" description="create the distribution ZIP file">
-		<zip zipfile="../wsigAddOn-${wsig.version}.zip" basedir="../..">
-			<include name="add-ons/wsig/**"/>
-		</zip>
-		<echo>Zip creation completed</echo>
-	</target>
-
-	<target name="deploy" depends="war">
+	<target name="deploy0" depends="war0">
 		<fail unless="env.CATALINA_HOME" message="CATALINA_HOME environment variable not set. Check the Tomcat installation"/>
 		<delete file="${tomcat.dir}/webapps/${wsigWar.name}.war"/>
 		<copy todir="${tomcat.dir}/webapps">
@@ -135,38 +111,68 @@
 	</target>
 	
 
-	<target name="wsig-deploy" depends="build, deploy" description="deploy wsig in Tomcat">
-<!--
-		<copy overwrite="true" file="${wsigWeb.dir}/conf/wsig-template.properties" tofile="${wsigWeb.dir}/conf/wsig.properties"/>
-		<antcall target="deploy"/>
--->
+	<target name="deploy" depends="build, deploy0" description="deploy WSIG in Tomcat">
 		<echo>Wsig successfully deployed</echo>
 	</target>
+
+
+	<!-- EXAMPLES related targets -->
 	
-	<target name="examples-deploy" depends="examples-build" description="deploy wsig with the examples in Tomcat">
-		<copy overwrite="true" file="${wsigWeb.dir}/conf/wsig-template.properties" tofile="${wsigWeb.dir}/conf/wsig.properties"/>
-		<replace file="${wsigWeb.dir}/conf/wsig.properties" value="onto.math-ontology=com.tilab.wsig.examples.MathOntology">
-			<replacetoken>#MyOntologies#</replacetoken>
-		</replace>
+	<target name="compile-examples" depends="init" description="Compile WSIG examples sources">
+		<mkdir dir="${wsigExamplesBuild.dir}"/>
+		<javac srcdir="${wsigExamplesSrc.dir}" debug="yes" destdir="${wsigExamplesBuild.dir}" encoding="ISO-8859-1" includeAntRuntime="no">
+			<classpath refid="wsigCompile.classpath"/>
+		</javac>
+		<echo>Examples compilation complete</echo>
+	</target>
+
+	<target name="build-examples" depends="compile-examples" >
+		<mkdir dir="${wsigExamplesLib.dir}"/>
+		<mkdir dir="${wsigExamplesLog.dir}"/>
+		<jar jarfile="${wsigExamplesLib.dir}/wsigExamples.jar">
+			<fileset dir="${wsigExamplesBuild.dir}" />
+		</jar>
+
 		<copy todir="${wsigWebLib.dir}">
 			<fileset dir="${wsigExamplesLib.dir}">
 				<include name="**/wsigExamples.jar"/>
 			</fileset>
 		</copy>
-		<antcall target="deploy"/>
+
+		<copy overwrite="true" file="${wsigWeb.dir}/conf/wsig-template.properties" tofile="${wsigWeb.dir}/conf/wsig.properties"/>
+		<replace file="${wsigWeb.dir}/conf/wsig.properties" value="onto.math-ontology=com.tilab.wsig.examples.MathOntology">
+			<replacetoken>#MyOntologies#</replacetoken>
+		</replace>
+
+		<echo>Examples build complete</echo>
+	</target>
+	
+	<target name="war-examples" depends="build-examples, war0" description="create the WSIG web application (war file) properly configured to run the examples">
+	</target>
+
+	<target name="deploy-examples" depends="build-examples, deploy0" description="deploy WSIG properly configured to run the examples in Tomcat">
 		<echo>Tomcat wsig with examples deployed succeded</echo>
 	</target>
 
+
+
 	<target name="clean" description="clean the WSIG environment">
-		<delete dir="${wsigBuild.dir}/com"/>
-		<delete dir="${wsigWebapps.dir}"/>
-		<delete includeemptydirs="true">
+		<delete dir="${wsigBuild.dir}/com" quiet="true"/>
+		<delete dir="${wsigWebapps.dir}" quiet="true"/>
+		<delete includeemptydirs="true" quiet="true">
 			<fileset dir="${wsigWebLib.dir}" includes="**/*"/>
 		</delete>
-		<delete dir="${wsigExamplesBuild.dir}"/>
-		<delete dir="${wsigExamplesLib.dir}"/>
-		<delete dir="${wsigExamplesLog.dir}"/>
+		<delete dir="${wsigExamplesBuild.dir}" quiet="true"/>
+		<delete dir="${wsigExamplesLib.dir}" quiet="true"/>
+		<delete dir="${wsigExamplesLog.dir}" quiet="true"/>
 		<echo>Dir deletion succeded</echo>
 	</target>
 	
+	<target name="dist" depends="clean" description="create the distribution ZIP file">
+		<zip zipfile="../wsigAddOn-${wsig.version}.zip" basedir="../..">
+			<include name="add-ons/wsig/**"/>
+		</zip>
+		<echo>Zip creation completed</echo>
+	</target>
+
 </project>

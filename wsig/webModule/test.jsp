@@ -1,6 +1,6 @@
 <%@page 
 import="com.tilab.wsig.WSIGConfiguration,
-		com.tilab.wsig.examples.SoapClient"
+		com.tilab.wsig.soap.SoapClient"
 %>
 
 
