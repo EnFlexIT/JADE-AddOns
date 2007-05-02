@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' xmlns:q0='http://www.w3.org/2000/10/XMLSchema' xmlns:xsd='http://www.w3.org/2001/XMLSchema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
+	<soapenv:Body>
+		<ns0:second-diff xmlns:ns0='urn:second-MathService' soapenv:encodingStyle='http://schemas.xmlsoap.org/soap/encoding/'>
+			<firstElement xsi:type='q0:float'>5</firstElement>
+			<secondElement xsi:type='q0:float'>1</secondElement>
+		</ns0:second-diff>
+	</soapenv:Body>
+</soapenv:Envelope>

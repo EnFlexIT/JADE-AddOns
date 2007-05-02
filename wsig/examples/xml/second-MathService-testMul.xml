@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:q0="http://www.w3.org/2000/10/XMLSchema" xmlns:q1="urn:second-MathService" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Body>
+		<q1:second-multiplication soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+			<numbers xsi:type="q1:float-array">
+				<float xsi:type="q0:float">5</float> 
+				<float xsi:type="q0:float">4</float> 
+			</numbers>
+		</q1:second-multiplication>
+	</soapenv:Body>
+</soapenv:Envelope>

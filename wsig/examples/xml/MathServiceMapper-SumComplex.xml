@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:q0="http://www.w3.org/2000/10/XMLSchema" xmlns:q1="urn:MathServiceMapper" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Body>
+		<q1:sumcomplex soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+			<firstComplexElement xsi:type="q1:complex">
+				<real xsi:type="q0:float">1</real> 
+				<immaginary xsi:type="q0:float">2</immaginary> 
+			</firstComplexElement>
+			<secondComplexElement xsi:type="q1:complex">
+				<real xsi:type="q0:float">3</real> 
+				<immaginary xsi:type="q0:float">4</immaginary> 
+			</secondComplexElement>
+		</q1:sumcomplex>
+	</soapenv:Body>
+</soapenv:Envelope>

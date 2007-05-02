@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:q0="http://www.w3.org/2000/10/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<soapenv:Body>
+		<ns0:abs-0 xmlns:ns0="urn:MathServiceMapper" soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+			<real xsi:type="q0:float">2</real> 
+			<immaginary xsi:type="q0:float">3</immaginary> 
+		</ns0:abs-0>
+	</soapenv:Body>
+</soapenv:Envelope>
