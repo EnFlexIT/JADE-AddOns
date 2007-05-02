@@ -4,6 +4,9 @@
 	<!-- properties -->
 	<property file="build.properties"/>
 	<property environment="env"/>
+
+	<property name="wsig.version" value="1.0-beta"/>
+
 	<property name="jade-home" value="../.."/>
 	<property name="wsigSrc.dir" location="src"/>
 	<property name="wsigDoc.dir" location="doc"/>
@@ -20,7 +23,6 @@
 	<property name="wsigContext.dir" location="context"/>
 	<property name="wsigWebapps.dir" location="webapps"/>
 	<property name="wsig.name" value="wsig"/>
-	<property name="wsig.version" value="1.0"/>
 	<property name="wsigWar.name" value="${wsig.name}"/>
 	<property name="wsigZip.name" value="${wsig.name}"/>
 	<property name="warfile.path" location="${wsigWebapps.dir}/${wsigWar.name}"/>
@@ -168,7 +170,9 @@
 		<echo>Dir deletion succeded</echo>
 	</target>
 	
+
 	<target name="dist" depends="clean" description="create the distribution ZIP file">
+		<delete file="../wsigAddOn-${wsig.version}.zip" quiet="true"/>
 		<zip zipfile="../wsigAddOn-${wsig.version}.zip" basedir="../..">
 			<include name="add-ons/wsig/**"/>
 		</zip>
