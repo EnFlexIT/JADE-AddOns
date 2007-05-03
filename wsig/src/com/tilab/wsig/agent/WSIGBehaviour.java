@@ -21,7 +21,7 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package com.tilab.wsig.servlet;
+package com.tilab.wsig.agent;
 
 import jade.content.AgentAction;
 import jade.content.lang.sl.SLCodec;
@@ -90,7 +90,7 @@ public class WSIGBehaviour extends AchieveREInitiator {
 		request.setReplyByDate(new Date(System.currentTimeMillis() + timeout));
 		try {
 			request.addReceiver(agentReceiver);
-			myAgent.getContentManager().fillContent(request, new Action(myAgent.getAID(), agentAction));
+			myAgent.getContentManager().fillContent(request, new Action(agentReceiver, agentAction));
 			
 		} catch (Exception e) {
 			status = FAILURE_STATUS;

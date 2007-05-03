@@ -44,6 +44,7 @@ public class WSIGConfiguration extends Properties {
 	// AGENT CONFIGURATION FOR SERVLET
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
 	public static final String KEY_WSIG_URI = "wsig.uri";
+	public static final String KEY_WSIG_CONSOLE_URI = "wsig.console.uri";
 	public static final String KEY_WSIG_TIMEOUT = "wsig.timeout";
 	
 	// DF to WSDL converter
@@ -105,6 +106,9 @@ public class WSIGConfiguration extends Properties {
 	}
 	public synchronized String getWsigUri() {
 		return getProperty(KEY_WSIG_URI);
+	}
+	public synchronized String getWsigConsoleUri() {
+		return getProperty(KEY_WSIG_CONSOLE_URI);
 	}
 	public synchronized int getWsigTimeout() {
 		String timeout = getProperty(KEY_WSIG_TIMEOUT);
@@ -185,6 +189,7 @@ public class WSIGConfiguration extends Properties {
 	 */
 	private void setDefaultProperties() {
 		setProperty(WSIGConfiguration.KEY_WSIG_URI, "http://localhost:8080/wsig/ws");
+		setProperty(WSIGConfiguration.KEY_WSIG_CONSOLE_URI, "http://localhost:8080/wsig");
 		setProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT, "30000");
 		setProperty(WSIGConfiguration.KEY_WSDL_DIRECTORY, "wsdl");
 		setProperty(WSIGConfiguration.KEY_WSDL_URI, "http://localhost:8080/wsig/wsdl");

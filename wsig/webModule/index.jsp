@@ -30,6 +30,17 @@ import="jade.content.onto.Ontology,
 	WSIGStore wsigStore = (WSIGStore)application.getAttribute("WSIGStore");
 	WSIGConfiguration wsigConfig = (WSIGConfiguration)application.getAttribute("WSIGConfiguration");
 
+	// WSIG Agent status
+	String wsigAgentStatus;
+	Boolean wsigAgentUp = (Boolean)application.getAttribute("WSIGAgentUp");
+	if (wsigAgentUp.booleanValue() == true) {
+		wsigAgentStatus = "<font color='green'>Active</font>";
+		wsigAgentStatus += " ( <a href='"+wsigConfig.getWsigUri()+"?WSIGAgentCommand=stop'>STOP</a> )";
+	} else {
+		wsigAgentStatus = "<font color='red'><b>Down</b></font>";
+		wsigAgentStatus += " ( <a href='"+wsigConfig.getWsigUri()+"?WSIGAgentCommand=start'>START</a> )";
+	}
+
 	// Get services list
 	WSIGService service;
 	Collection services = wsigStore.getAllServices();
@@ -64,6 +75,10 @@ import="jade.content.onto.Ontology,
 <table width="80%" border="1">
 	<tr><td class="head" colspan="2"><h2>WSIG Configuration</h2></td></tr>
 	<tr>
+		<td width="30%" class="title">JADE WSIG agent status:</td>
+		<td class="value"><% out.print(wsigAgentStatus); %></td>
+	</tr>
+	<tr>
 		<td width="30%" class="title">JADE main host:</td>
 		<td class="value"><% out.print(wsigConfig.getMainHost()); %></td>
 	</tr>
@@ -80,12 +95,16 @@ import="jade.content.onto.Ontology,
 		<td class="value"><% out.print(wsigConfig.getLocalPort()); %></td>
 	</tr>
 	<tr>
-		<td width="30%" class="title">JADE WSIG agent:</td>
+		<td width="30%" class="title">JADE WSIG agent class:</td>
 		<td class="value"><% out.print(wsigConfig.getAgentClassName()); %></td>
 	</tr>
 	<tr>
-		<td width="30%" class="title">WSIG uri:</td>
+		<td width="30%" class="title">WSIG webservices uri:</td>
 		<td class="value"><% out.print(wsigConfig.getWsigUri()); %></td>
+	</tr>
+	<tr>
+		<td width="30%" class="title">WSIG console uri:</td>
+		<td class="value"><% out.print(wsigConfig.getWsigConsoleUri()); %></td>
 	</tr>
 	<tr>
 		<td width="30%" class="title">WSIG timeout (ms):</td>

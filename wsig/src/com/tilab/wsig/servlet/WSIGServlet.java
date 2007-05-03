@@ -33,14 +33,13 @@ import jade.wrapper.gateway.JadeGateway;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.Map.Entry;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
@@ -58,6 +57,7 @@ import org.apache.log4j.Logger;
 import org.apache.soap.rpc.SOAPContext;
 
 import com.tilab.wsig.WSIGConfiguration;
+import com.tilab.wsig.agent.WSIGBehaviour;
 import com.tilab.wsig.soap.JadeToSoap;
 import com.tilab.wsig.soap.SoapToJade;
 import com.tilab.wsig.store.WSIGService;
@@ -71,6 +71,8 @@ public class WSIGServlet extends HttpServlet {
 	private SoapToJade soapToJade = new SoapToJade();
 	private JadeToSoap jadeToSoap = new JadeToSoap();
 	private int executionTimeout = 0;
+	private ServletContext servletContext = null;
+	private String consoleUri;
 
 	/**
 	 * Init wsig servlet
@@ -79,7 +81,8 @@ public class WSIGServlet extends HttpServlet {
 		super.init(servletConfig);
 		
 		log.info("Starting WSIG Servlet...");
-		String wsigPropertyPath = getServletContext().getRealPath(WSIGConfiguration.WSIG_DEFAULT_CONFIGURATION_FILE);
+		servletContext = servletConfig.getServletContext();
+		String wsigPropertyPath = servletContext.getRealPath(WSIGConfiguration.WSIG_DEFAULT_CONFIGURATION_FILE);
 		log.info("Configuration file= " + wsigPropertyPath);
 
 		// Read WSIG property
@@ -92,19 +95,20 @@ public class WSIGServlet extends HttpServlet {
 		}
 		
 		// Get properties
+		consoleUri = props.getProperty(WSIGConfiguration.KEY_WSIG_CONSOLE_URI);
 		String gatewayClassName = props.getProperty(WSIGConfiguration.KEY_WSIG_AGENT_CLASS_NAME);
 		String wsdlDirectory = props.getProperty(WSIGConfiguration.KEY_WSDL_DIRECTORY);
-		String wsdlPath = getServletContext().getRealPath(wsdlDirectory);
+		String wsdlPath = servletContext.getRealPath(wsdlDirectory);
 		String timeout = props.getProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT);
 		executionTimeout = Integer.parseInt(timeout);
 		
 		// Create a wsig store
 		wsigStore = new WSIGStore();
-		servletConfig.getServletContext().setAttribute("WSIGStore", wsigStore);
+		servletContext.setAttribute("WSIGStore", wsigStore);
 		
 		// Init configuration
 		WSIGConfiguration.init(wsigPropertyPath);
-		servletConfig.getServletContext().setAttribute("WSIGConfiguration", WSIGConfiguration.getInstance());
+		servletContext.setAttribute("WSIGConfiguration", WSIGConfiguration.getInstance());
 		
 		// Init Jade Gateway
 		log.info("Init Jade Gateway...");
@@ -115,13 +119,7 @@ public class WSIGServlet extends HttpServlet {
 		log.info("Jade Gateway initialized");
 
 		// Start WSIGAgent
-		try {
-			log.info("Starting WSIG agent...");
-			JadeGateway.checkJADE();
-			log.info("WSIG agent started");
-		} catch (ControllerException e) {
-			throw new ServletException("Error starting WSIGAgent", e);
-		}
+		startWSIGAgent();
 		
 		log.info("WSIG Servlet started");
 	}
@@ -132,7 +130,7 @@ public class WSIGServlet extends HttpServlet {
 	public void destroy() {
 
 		// Close WSIGAgent
-		JadeGateway.shutdown();
+		stopWSIGAgent();
 
 		super.destroy();
 		log.info("WSIG Servlet destroied");
@@ -151,7 +149,17 @@ public class WSIGServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
 
-		log.info("WSIGServlet doPost arrived, start elaboration...");
+		// Check if the request is a WSIG agent command
+		String wsigAgentCommand = httpRequest.getParameter("WSIGAgentCommand");
+		if (wsigAgentCommand != null && !wsigAgentCommand.equals("")) {
+
+			// Elaborate WSIG agent command
+			elaborateWSIGAgentCommand(wsigAgentCommand, httpResponse);
+			return;
+		}
+
+		// SOAP message elaboration
+		log.info("WSIG SOAP request arrived, start elaboration...");
 
 		// Extract soap messge from http
 		Message soapRequest = null;
@@ -268,6 +276,33 @@ public class WSIGServlet extends HttpServlet {
 		
 		return result;
 	}
+
+	/**
+	 * Elaborate WSIG Agent Command
+	 * @param wsigAgentCommand
+	 * @param httpResponse
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void elaborateWSIGAgentCommand(String wsigAgentCommand, HttpServletResponse httpResponse) throws ServletException, IOException {
+	
+		log.info("WSIG agent command arrived ("+wsigAgentCommand+")");
+
+		if (wsigAgentCommand.equalsIgnoreCase("start")) {
+			// Start WSIGAgent
+			startWSIGAgent();
+		} else if (wsigAgentCommand.equalsIgnoreCase("stop")) {
+			// Stop WSIGAgent
+			stopWSIGAgent();				
+		} else {
+			log.warn("WSIG agent command not implementated");
+		}
+		
+		log.info("WSIG agent command elaborated");
+
+		// Redirect to console home page
+		httpResponse.sendRedirect(consoleUri);
+	}
 	
 	/**
 	 * get operation name from soap body
@@ -374,5 +409,38 @@ public class WSIGServlet extends HttpServlet {
         responseOutputStream.write(content);
         responseOutputStream.flush();
         responseOutputStream.close();
+	}
+	
+	/**
+	 * Start WSIG Agent
+	 */
+	private void startWSIGAgent() {
+		try {
+			log.info("Starting WSIG agent...");
+			JadeGateway.checkJADE();
+			setWSIGAgentUpStatus(true);
+			log.info("WSIG agent started");
+		} catch (ControllerException e) {
+			setWSIGAgentUpStatus(false);
+			log.warn("Jade platform not present...WSIG agent not started");
+		}
+	}
+
+	/**
+	 * Close WSIG Agent
+	 */
+	private void stopWSIGAgent() {
+	
+		JadeGateway.shutdown();
+		setWSIGAgentUpStatus(false);
+		log.info("WSIG agent closed");
+	}
+	
+	/**
+	 * Set WSIG agent status
+	 * @param wsigAgentUp
+	 */
+	private void setWSIGAgentUpStatus(boolean wsigAgentUp) {
+		servletContext.setAttribute("WSIGAgentUp", new Boolean(wsigAgentUp));
 	}
 }
