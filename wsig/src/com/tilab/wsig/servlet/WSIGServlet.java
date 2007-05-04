@@ -119,7 +119,7 @@ public class WSIGServlet extends HttpServlet {
 		log.info("Jade Gateway initialized");
 
 		// Start WSIGAgent
-		startWSIGAgent();
+		startupWSIGAgent();
 		
 		log.info("WSIG Servlet started");
 	}
@@ -130,7 +130,7 @@ public class WSIGServlet extends HttpServlet {
 	public void destroy() {
 
 		// Close WSIGAgent
-		stopWSIGAgent();
+		shutdownWSIGAgent();
 
 		super.destroy();
 		log.info("WSIG Servlet destroied");
@@ -290,10 +290,10 @@ public class WSIGServlet extends HttpServlet {
 
 		if (wsigAgentCommand.equalsIgnoreCase("start")) {
 			// Start WSIGAgent
-			startWSIGAgent();
+			startupWSIGAgent();
 		} else if (wsigAgentCommand.equalsIgnoreCase("stop")) {
 			// Stop WSIGAgent
-			stopWSIGAgent();				
+			shutdownWSIGAgent();				
 		} else {
 			log.warn("WSIG agent command not implementated");
 		}
@@ -414,25 +414,24 @@ public class WSIGServlet extends HttpServlet {
 	/**
 	 * Start WSIG Agent
 	 */
-	private void startWSIGAgent() {
+	private void startupWSIGAgent() {
 		try {
 			log.info("Starting WSIG agent...");
 			JadeGateway.checkJADE();
-			setWSIGAgentUpStatus(true);
 			log.info("WSIG agent started");
 		} catch (ControllerException e) {
-			setWSIGAgentUpStatus(false);
 			log.warn("Jade platform not present...WSIG agent not started");
 		}
+		setWSIGStatus();
 	}
 
 	/**
 	 * Close WSIG Agent
 	 */
-	private void stopWSIGAgent() {
+	private void shutdownWSIGAgent() {
 	
 		JadeGateway.shutdown();
-		setWSIGAgentUpStatus(false);
+		setWSIGStatus();
 		log.info("WSIG agent closed");
 	}
 	
@@ -440,7 +439,7 @@ public class WSIGServlet extends HttpServlet {
 	 * Set WSIG agent status
 	 * @param wsigAgentUp
 	 */
-	private void setWSIGAgentUpStatus(boolean wsigAgentUp) {
-		servletContext.setAttribute("WSIGAgentUp", new Boolean(wsigAgentUp));
+	private void setWSIGStatus() {
+		servletContext.setAttribute("WSIGActive", new Boolean(JadeGateway.isGatewayActive()));
 	}
 }
