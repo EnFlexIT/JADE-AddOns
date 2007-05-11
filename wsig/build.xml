@@ -128,7 +128,7 @@
 		<echo>Examples compilation complete</echo>
 	</target>
 
-	<target name="build-examples" depends="compile-examples" >
+	<target name="build-examples" depends="build, compile-examples" >
 		<mkdir dir="${wsigExamplesLib.dir}"/>
 		<mkdir dir="${wsigExamplesLog.dir}"/>
 		<jar jarfile="${wsigExamplesLib.dir}/wsigExamples.jar">
