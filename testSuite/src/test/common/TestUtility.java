@@ -336,6 +336,7 @@ public class TestUtility {
 	
 	/**
 	 Launch a new instance of JADE in a separate process.
+	 If the jvmArgs string includes the -cp or -classpath option, the <code>classpath</code> parameter is ignored.  
 	 */
 	public static JadeController launch(RemoteManager rm, String instanceName, String classpath, String jvmArgs, String mainClass, String jadeArgs, String[] protoNames, OutputHandler outHandler) throws TestException { 
 		JadeController jc = null;
@@ -356,19 +357,23 @@ public class TestUtility {
 		}
 		else {
 			// Otherwise launch the JADE instance locally
-			if (classpath == null || classpath.startsWith("+")) {
-				String currentCp = System.getProperty("java.class.path");
-				if (classpath == null) {
-					classpath = currentCp;
-				}
-				else {
-					classpath = classpath.substring(1)+System.getProperty("path.separator")+currentCp;
-				}
-			}
 			if (jvmArgs == null) {
 				jvmArgs = "";
 			}
-			String commandLine = new String("java -cp "+classpath+" "+jvmArgs+" "+mainClass+" "+jadeArgs);
+			String classpathOption = "";
+			if (jvmArgs.indexOf("-cp ") < 0 && jvmArgs.indexOf("-classpath ") < 0) {
+				if (classpath == null || classpath.startsWith("+")) {
+					String currentCp = System.getProperty("java.class.path");
+					if (classpath == null) {
+						classpath = currentCp;
+					}
+					else {
+						classpath = classpath.substring(1)+System.getProperty("path.separator")+currentCp;
+					}
+				}
+				classpathOption = "-cp "+classpath;
+			}
+			String commandLine = new String("java "+classpathOption+" "+jvmArgs+" "+mainClass+" "+jadeArgs);
 			if ("true".equalsIgnoreCase(System.getProperty("DEBUG"))) {
 				System.out.println("Manual launch!!!!!!!!!!!!!!");
 				jc = new ManualJadeController(instanceName, commandLine, protoNames);

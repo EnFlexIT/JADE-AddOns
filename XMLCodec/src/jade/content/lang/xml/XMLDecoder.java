@@ -26,11 +26,11 @@ import org.apache.commons.codec.binary.Base64;
 
 public class XMLDecoder {
 	private Ontology ontology;
-	
+
 	public void init(Ontology onto) {
 		ontology = onto;
 	}
-	
+
 	public AbsObject decode(String xml) throws CodecException, OntologyException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		factory.setValidating(false);
@@ -48,7 +48,7 @@ public class XMLDecoder {
 		// If we get here, root is certainly != null
 		return decodeNode(root);
 	}
-	
+
 	private AbsObject decodeNode(Node n) throws CodecException, OntologyException {
 		String typeName = n.getNodeName();
 		if (typeName.equals(XMLCodec.PRIMITIVE_TAG)) {
@@ -73,10 +73,10 @@ public class XMLDecoder {
 			}
 		}
 	}
-	
+
 	private AbsObject decodeNodeByName(Node n, ObjectSchema schema) throws CodecException, OntologyException {
 		AbsPrimitiveSlotsHolder abs = (AbsPrimitiveSlotsHolder) schema.newInstance();
-		
+
 		// Handle primitive slots
 		NamedNodeMap attributes = n.getAttributes();
 		int length = attributes.getLength();
@@ -85,7 +85,7 @@ public class XMLDecoder {
 			String slotName = slot.getNodeName();
 			setPrimitiveSlot(abs, slotName, slot.getNodeValue());
 		}
-		
+
 		// Handle non-primitive slots
 		NodeList list = n.getChildNodes();
 		length = list.getLength();
@@ -170,7 +170,7 @@ public class XMLDecoder {
 				}
 			}
 		}
-	
+
 		int k = 0;
 		for (int i = 0; i < slotNames.length; ++i) {
 			if (slotValuesByName[i] != null) {
@@ -184,7 +184,7 @@ public class XMLDecoder {
 		}
 		return abs;
 	}
-	
+
 	private AbsObject decodePrimitive(Node n) throws CodecException {
 		NamedNodeMap attributes = n.getAttributes();
 		int length = attributes.getLength();
@@ -202,85 +202,85 @@ public class XMLDecoder {
 			throw new CodecException("Missing \"value\" attribute in primitive element "+n);
 		}
 	}
-	
+
 	private void setPrimitiveSlot(AbsPrimitiveSlotsHolder abs, String slotName, String value) {
-  		// Try as a Long
-	  	try {
-	  		abs.set(slotName, Long.parseLong(value));
+		// Try as a Long
+		try {
+			abs.set(slotName, Long.parseLong(value));
 			return;
-	  	}
-	  	catch (Exception e) {}
-	  	// Try as a Double
-	  	try {
-	  		abs.set(slotName, Double.parseDouble(value));
+		}
+		catch (Exception e) {}
+		// Try as a Double
+		try {
+			abs.set(slotName, Double.parseDouble(value));
 			return;
-	  	}
-	  	catch (Exception e) {}
-	  	// Try as a Date
-	  	try {
-	  		abs.set(slotName, ISO8601.toDate(value));
+		}
+		catch (Exception e) {}
+		// Try as a Date
+		try {
+			abs.set(slotName, ISO8601.toDate(value));
 			return;
-	  	}
-	  	catch (Exception e) {}
-	  	// Try as a byte[]
-	  	if (value.startsWith(XMLCodec.BINARY_STARTER)) {
-		  	try {
-		  		String base64Str = value.substring(1);
+		}
+		catch (Exception e) {}
+		// Try as a byte[]
+		if (value.startsWith(XMLCodec.BINARY_STARTER)) {
+			try {
+				String base64Str = value.substring(1);
 				byte[] binaryValue = Base64.decodeBase64(base64Str.getBytes("US-ASCII")); 
-		  		abs.set(slotName, binaryValue);
+				abs.set(slotName, binaryValue);
 				return;
-		  	}
-		  	catch (Exception e) {}
-	  	}
-	  	// Try as a Boolean (note that Boolean.parseBoolean() returns false for all strings but "true")
-	  	if (value.equalsIgnoreCase("true")) {
-	  		abs.set(slotName, true);
-	  		return;
-	  	}
-	  	if (value.equalsIgnoreCase("false")) {
-	  		abs.set(slotName, false);
-	  		return;
-	  	}
+			}
+			catch (Exception e) {}
+		}
+		// Try as a Boolean (note that Boolean.parseBoolean() returns false for all strings but "true")
+		if (value.equalsIgnoreCase("true")) {
+			abs.set(slotName, true);
+			return;
+		}
+		if (value.equalsIgnoreCase("false")) {
+			abs.set(slotName, false);
+			return;
+		}
 		abs.set(slotName, value);
 	}
-	
+
 	private void setPrimitiveSlot(String[] slotNames, AbsObject[] slotValues, String slotName, String value) throws OntologyException {
 		for (int i = 0; i < slotNames.length; ++i) {
 			if (slotNames[i].equalsIgnoreCase(slotName)) {
-		  		// Try as a Long
-			  	try {
-			  		slotValues[i] = AbsPrimitive.wrap(Long.parseLong(value));
+				// Try as a Long
+				try {
+					slotValues[i] = AbsPrimitive.wrap(Long.parseLong(value));
 					return;
-			  	}
-			  	catch (Exception e) {}
-			  	// Try as a Double
-			  	try {
-			  		slotValues[i] = AbsPrimitive.wrap(Double.parseDouble(value));
+				}
+				catch (Exception e) {}
+				// Try as a Double
+				try {
+					slotValues[i] = AbsPrimitive.wrap(Double.parseDouble(value));
 					return;
-			  	}
-			  	catch (Exception e) {}
-			  	// Try as a Date
-			  	try {
-			  		slotValues[i] = AbsPrimitive.wrap(ISO8601.toDate(value));
+				}
+				catch (Exception e) {}
+				// Try as a Date
+				try {
+					slotValues[i] = AbsPrimitive.wrap(ISO8601.toDate(value));
 					return;
-			  	}
-			  	catch (Exception e) {}
-			  	// Try as a byte[]
-			  	if (value.startsWith(XMLCodec.BINARY_STARTER)) {
-				  	try {
-				  		String base64Str = value.substring(1);
+				}
+				catch (Exception e) {}
+				// Try as a byte[]
+				if (value.startsWith(XMLCodec.BINARY_STARTER)) {
+					try {
+						String base64Str = value.substring(1);
 						byte[] binaryValue = Base64.decodeBase64(base64Str.getBytes("US-ASCII")); 
-				  		slotValues[i] = AbsPrimitive.wrap(binaryValue);
+						slotValues[i] = AbsPrimitive.wrap(binaryValue);
 						return;
-				  	}
-				  	catch (Exception e) {}
-			  	}
-			  	// Try as a Boolean
-			  	try {
-			  		slotValues[i] = AbsPrimitive.wrap(Boolean.parseBoolean(value));
+					}
+					catch (Exception e) {}
+				}
+				// Try as a Boolean
+				try {
+					slotValues[i] = AbsPrimitive.wrap(Boolean.parseBoolean(value));
 					return;
-			  	}
-			  	catch (Exception e) {}
+				}
+				catch (Exception e) {}
 				slotValues[i] = AbsPrimitive.wrap(value);
 				return;
 			}
@@ -288,7 +288,7 @@ public class XMLDecoder {
 		// If we get here, there is an attribute that is not a slot name.
 		throw new OntologyException("Attribute "+slotName+" is not a valid slot name.");
 	}
-	
+
 	private boolean handleStringSlot(String[] slotNames, AbsObject[] slotValues, Node slot) throws CodecException, OntologyException {
 		String slotName = slot.getNodeName();
 		for (int i = 0; i < slotNames.length; ++i) {
@@ -306,7 +306,7 @@ public class XMLDecoder {
 		}
 		return false;
 	}
-	
+
 	private boolean handleAggregateSlot(String[] slotNames, AbsObject[] slotValues, Node slot, ObjectSchema schema) throws CodecException, OntologyException {
 		String slotName = slot.getNodeName();
 		for (int i = 0; i < slotNames.length; ++i) {
@@ -339,7 +339,7 @@ public class XMLDecoder {
 		}
 		return false;
 	}
-	
+
 	private AbsAggregate decodeAggregate(NodeList list) throws CodecException, OntologyException {
 		AbsAggregate abs = new AbsAggregate("sequence");
 		int length = list.getLength();
@@ -351,7 +351,7 @@ public class XMLDecoder {
 		}
 		return abs;
 	}
-	
+
 	private AbsContentElementList decodeContentElementList(Node n) throws CodecException, OntologyException {
 		AbsContentElementList abs = new AbsContentElementList();
 		NodeList list = n.getChildNodes();

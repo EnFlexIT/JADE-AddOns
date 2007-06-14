@@ -94,7 +94,7 @@ public class TestSuiteAgent extends GuiAgent {
 	
 	public static JadeController mainController;
 	
-	public static final String   MAIN_SERVICES = "jade.core.mobility.AgentMobilityService;jade.core.event.NotificationService;jade.core.replication.MainReplicationService;jade.core.replication.AddressNotificationService;jade.core.messaging.PersistentDeliveryService";
+	public static final String   MAIN_SERVICES = "jade.core.mobility.AgentMobilityService;jade.core.event.NotificationService;jade.core.replication.MainReplicationService;jade.core.replication.AddressNotificationService;jade.core.messaging.PersistentDeliveryService;jade.core.messaging.TopicManagementService";
 	public static final String   TEST_PLATFORM_NAME = "TestPlatform";
 	
 	private static final String  NAME = "test-suite";
@@ -724,7 +724,7 @@ public class TestSuiteAgent extends GuiAgent {
 			rt.setCloseVM(true);
 			
 			p.setParameter(Profile.MAIN, "false");
-			p.setParameter(Profile.SERVICES, "jade.core.event.NotificationService;jade.core.mobility.AgentMobilityService;jade.core.replication.AddressNotificationService");
+			p.setParameter(Profile.SERVICES, "jade.core.event.NotificationService;jade.core.mobility.AgentMobilityService;jade.core.replication.AddressNotificationService;jade.core.messaging.TopicManagementService");
 			p.setSpecifiers(Profile.MTPS, new ArrayList());
 			
 			AgentContainer  mc = rt.createAgentContainer(p);

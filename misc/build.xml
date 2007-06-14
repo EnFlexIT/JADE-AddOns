@@ -9,6 +9,9 @@
   <property name="lib" value="lib"/>
   <property name="jade-lib-dir" value="${jade-home}/lib"/>
 
+  <property name="javac.optimize" value="off"/>
+  <property name="javac.debug" value="on"/>
+
   <path id="jade-classes">
     <fileset dir="${jade-lib-dir}">
       <include name="commons-codec/commons-codec-1.3.jar"/>
@@ -38,11 +41,26 @@
   </target>
 
   <target name="compile" depends="init">
-    <javac srcdir="${src}" destdir="${build}" nowarn="off" optimize="on" deprecation="on">
+    <javac srcdir="${src}" 
+           destdir="${build}" 
+           nowarn="off" 
+           optimize="${javac.optimize}" 
+           debug="${javac.debug}" 
+           debuglevel="lines,vars,source" 
+           deprecation="on">
       <classpath>
         <path refid="jade-classes"/>
       </classpath>
     </javac>
+
+    <!-- Copy images if any -->
+    <copy todir="${build}">
+      <fileset dir="${src}">
+        <include name="**/*.png"/>
+        <include name="**/*.gif"/>
+        <include name="**/*.jpg"/>
+      </fileset>
+    </copy>
   </target>
 
   <target name="lib" depends="compile" description="generate jar archive">
