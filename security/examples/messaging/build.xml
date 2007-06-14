@@ -7,7 +7,7 @@
 
 <!-- =========  MAIN - ExitExample  ========= -->
 
-<project name="exit-example" default="run" basedir=".">
+<project name="exit-example" default="main" basedir=".">
   <!-- set global properties for this build -->
   <property name="jade-home" value="../../../.."/>
   <property name="jade-lib-dir" value="${jade-home}/lib" />
