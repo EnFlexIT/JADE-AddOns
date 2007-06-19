@@ -167,6 +167,12 @@
 		<delete dir="${wsigExamplesBuild.dir}" quiet="true"/>
 		<delete dir="${wsigExamplesLib.dir}" quiet="true"/>
 		<delete dir="${wsigExamplesLog.dir}" quiet="true"/>
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset dir=".">
+				<include name="**/APDescription.txt"/>
+				<include name="**/MTPs-Main-Container.txt"/>
+			</fileset>
+		</delete>
 		<echo>Dir deletion succeded</echo>
 	</target>
 	
