@@ -1,5 +1,3 @@
-REM script for \bin\sh converted to bat
-
-.\runMathAgent.bat MathAgent3 MathServiceMapper true
+.\runMathAgentAux.bat MathAgent3 MathServiceMapper true
 
 
