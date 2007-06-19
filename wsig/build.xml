@@ -5,7 +5,7 @@
 	<property file="build.properties"/>
 	<property environment="env"/>
 
-	<property name="wsig.version" value="1.0-beta"/>
+	<property name="wsig.version" value="1.0"/>
 
 	<property name="jade-home" value="../.."/>
 	<property name="wsigSrc.dir" location="src"/>
@@ -71,7 +71,7 @@
 		<echo>Compilation complete</echo>
 	</target>
 
-	<target name="build" depends="compile" >
+	<target name="build" depends="compile" description="Prepare the WSIG web application content in the webModule directory">
 		<copy todir="${wsigWebLib.dir}">
 			<fileset dir="${wsigLib.dir}">
 				<include name="**/*.jar"/>
@@ -82,7 +82,7 @@
 		</copy>
 	</target>
 	
-	<target name="war0">
+	<target name="createWar" description="Create the WSIG war file zipping the content of the webModule directory">
 		<mkdir dir="${wsigWebapps.dir}"/>
 		<zip destfile="${warfile.path}.war">
 			<zipfileset dir="${wsigWeb.dir}">
@@ -98,10 +98,10 @@
 	</target>
 
 
-	<target name="war" depends="build, war0" description="create the WSIG web application (war file)">
+	<target name="war" depends="build, createWar" description="create the WSIG web application (war file)">
 	</target>
 
-	<target name="deploy0" depends="war0">
+	<target name="deploy0" depends="createWar">
 		<fail unless="env.CATALINA_HOME" message="CATALINA_HOME environment variable not set. Check the Tomcat installation"/>
 		<delete file="${tomcat.dir}/webapps/${wsigWar.name}.war"/>
 		<copy todir="${tomcat.dir}/webapps">
@@ -149,7 +149,7 @@
 		<echo>Examples build complete</echo>
 	</target>
 	
-	<target name="war-examples" depends="build-examples, war0" description="create the WSIG web application (war file) properly configured to run the examples">
+	<target name="war-examples" depends="build-examples, createWar" description="create the WSIG web application (war file) properly configured to run the examples">
 	</target>
 
 	<target name="deploy-examples" depends="build-examples, deploy0" description="deploy WSIG properly configured to run the examples in Tomcat">

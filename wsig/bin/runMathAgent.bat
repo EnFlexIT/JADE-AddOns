@@ -1,7 +1,5 @@
+REM script for \bin\sh converted to bat
 
-SET JADECP=../../../lib/jade.jar
-SET WSIGEXAMPLESCP=../examples;../examples/lib/wsigExamples.jar;../lib/log4j-1.2.14.jar
-SET PORT=1099
+.\runMathAgent.bat MathAgent1 MathService false 
 
-java -classpath %JADECP%;%WSIGEXAMPLESCP% jade.Boot -container "%1:com.tilab.wsig.examples.MathAgent(%2 %3 %4)" -name "WSIGTestPlatform" -port %PORT 
 
