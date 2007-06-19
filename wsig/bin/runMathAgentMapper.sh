@@ -1,5 +1,5 @@
 #!/bin/sh
 
-./runMathAgent.sh MathAgent3 MathServiceMapper true
+./runMathAgentAux.sh MathAgent3 MathServiceMapper true
 
 

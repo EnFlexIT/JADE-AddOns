@@ -1,5 +1,5 @@
 #!/bin/sh
 
-./runMathAgent.sh MathAgent1 MathService false 
+./runMathAgentAux.sh MathAgent1 MathService false 
 
 
