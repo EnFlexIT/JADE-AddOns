@@ -178,9 +178,17 @@
 	
 
 	<target name="dist" depends="clean" description="create the distribution ZIP file">
+		<echo message="GENERATE THE PDF FORM OF THE WSIG GUIDE, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/wsig) AND THEN PRESS ENTER -->"/>
+		<input/>
+		<mkdir dir="${jade-home}/doc"/>
+		<mkdir dir="${jade-home}/doc/tutorials"/>
+		<copy file="WSIG_Guide.pdf" todir="${jade-home}/doc/tutorials"/>
+
 		<delete file="../wsigAddOn-${wsig.version}.zip" quiet="true"/>
-		<zip zipfile="../wsigAddOn-${wsig.version}.zip" basedir="../..">
+		<zip zipfile="../wsigAddOn-${wsig.version}.zip" basedir="${jade-home}">
 			<include name="add-ons/wsig/**"/>
+			<exclude name="add-ons/wsig/WSIG_Guide.*"/>
+			<include name="doc/tutorials/WSIG_Guide.pdf"/>
 		</zip>
 		<echo>Zip creation completed</echo>
 	</target>
