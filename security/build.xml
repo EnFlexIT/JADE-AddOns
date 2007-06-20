@@ -180,7 +180,7 @@
     <copy file="JADE_Security.pdf" todir="${jade-doc-dir}/tutorials"/>
     <zip zipfile="../securityAddOn.zip" basedir="../..">
       <include name="add-ons/security/*"/>
-      <exclude name="add-ons/security/JADE_Security.pdf"/>
+      <exclude name="add-ons/security/JADE_Security.*"/>
       <include name="add-ons/security/src/**"/>
       <include name="add-ons/security/examples/**"/>
       <include name="add-ons/security/doc/**"/>
