@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+JSA ant build file
+
+It is created according a JADE's build.xml.
+-->
+
+<project name="Jade Semantic Agent" default="compile" basedir=".">
+	<description>JSA build file</description>
+	<property environment="env"/>
+	<property file="buildJSA.properties"/>
+	<property name="version" value="1.4"/>
+	<property name="build.compiler" value="modern"/>
+	<property name="javac.optimize" value="on"/>
+	<property name="javac.debug" value="on"/>
+	
+	<!-- set global properties for this build -->
+	<property name="root" location="."/>
+	<property name="lib" location="lib"/>
+	<property name="src" location="src"/>
+	<property name="dist" location=".."/>
+	<property name="doc" location="doc/api"/>
+	<property name="build" location="classes"/>
+	<property name="demo" location="demo"/>
+	<property name="libJADEDir" value="../../lib"/>
+	<property name="libJADEPJAVADir" value="../../leap/pjava/lib" />
+    	<property name="leap-dir" value="../../leap"/>
+    	<property name="dotnet-root" value="${root}\dotnet"/>
+    	<property name="dotnet-src" value="${root}\dotnet\src"/>
+    	<property name="dotnet-lib" value="${root}\dotnet\lib"/>
+    	<property name="dotnet-extras" value="${root}\dotnet\extras"/>
+    	<property name="dotnet-solution" value="${root}\dotnet\solution"/>
+	<property name="pjava-root" value="${root}\pjava"/>
+	<property name="pjava-src" value="${root}\pjava\src"/>
+    	<property name="pjava-lib" value="${root}\pjava\lib"/>
+    	<property name="pjava-build" value="${root}\pjava\build"/>
+    	<property name="pjava-demo" value="${root}\pjava\demo"/>
+    	<property name="j2se-root" value="${root}\j2se"/>
+    	<property name="j2se-lib" value="${root}\j2se\lib"/>
+    	<property name="j2se-build" value="${root}\j2se\build"/>
+    	<property name="j2se-demo" value="${root}\j2se\demo"/>
+	 
+	<property name="vjc" value="${dotnet-home}/vjc.exe"/>
+	<property name="vjsresgen" value="./dotnet/extras/vjsresgen.exe"/>
+	<property name="resgen" value="./dotnet/extras/resgen.exe"/>
+    	
+	
+
+	<!--******************** TARGETS ********************-->
+	<!-- HELP -->
+  	<target name="help" description="show the usage of the most frequently used targets of this ant file">
+   		<echo message="env = all, j2se, pjava, dotnet    (possible environments)"/>
+   		<echo message="ant [env] lib  (to clean and recompile for selected env)"/>
+   		<echo message="ant [env] demo (to clean and recompile the demo for selected env)"/>
+   		<echo message="ant dist (to make the JSA distribution)"/>
+   		<echo message="Example: ant j2se lib      (create lib for Java environment)"/>
+  	</target>
+
+
+	<!-- JAVA DOC -->
+	<target name="doc" depends="init" description="generate javadoc documentation">
+	      	<javadoc destdir="${doc}" author="true" version="true"
+	      		     windowtitle="Jade Semantics Add-On ${version} API Reference" use="true"
+	      		     overview="src/overview.html">
+	      		<classpath>
+	        		<fileset dir="${libJADEDir}" includes="*.jar"/>
+	      		</classpath>
+		  	<packageset dir="src" defaultexcludes="yes">
+				<include name="jade/**"/>
+		  	</packageset>
+	    	</javadoc>
+	</target>
+	
+	<!-- EXTERNAL TOOLS (used by the pJava and .net environments -->
+	<target name="ext_tools" unless="j2se" description="defines the proper external tools such as the pproc">
+		<!-- Preprocessor -->
+		<taskdef name = "pproc"    classname="leapTools.Preprocessor">
+			<classpath path ="${leap-dir}/resources/antTasks/leapTools.jar"/>
+		</taskdef>
+		<!-- Minimizer -->
+		<taskdef name = "minimize"    classname="leapTools.Minimizer">
+			<classpath path ="${leap-dir}/resources/antTasks/leapTools.jar"/>
+		</taskdef>
+		<!-- Preverifier -->
+		<taskdef  name="preverify" classname="com.stampysoft.ant.j2me.PreverifyTask">
+			<classpath path ="${leap-dir}/resources/antTasks/StampysoftAntTasks.jar" />
+		</taskdef>
+	</target>	
+
+	<!-- DIST -->
+	<target name="dist" depends="init">
+		<zip zipfile="../semanticsAddOn.zip" basedir="../..">
+			<include name="add-ons/semantics/*"/>
+			
+			<include name="add-ons/semantics/doc/*"/>
+			<include name="add-ons/semantics/doc/cookbook/**"/>
+			<include name="add-ons/semantics/doc/guides/**/*.pdf"/>
+			<include name="add-ons/semantics/doc/papers/**/*.pdf"/>
+			<include name="add-ons/semantics/doc/tutorials/english/**/*.pdf"/>
+			<include name="add-ons/semantics/doc/tutorials/exercises/*"/>
+			<include name="add-ons/semantics/doc/tutorials/exercises/src/**"/>
+			<include name="add-ons/semantics/doc/tutorials/solutions/*"/>
+			<include name="add-ons/semantics/doc/tutorials/solutions/src/**"/>
+
+			<include name="add-ons/semantics/src/overview.html"/>
+			<include name="add-ons/semantics/src/jsademos/booktrading/**"/>
+			<include name="add-ons/semantics/src/jsademos/temperature/**"/>
+			<include name="add-ons/semantics/src/jade/**"/>
+
+			<exclude name="**/.*"/>
+			<exclude name="**/.xvpics"/>
+			<exclude name="**/Thumbs.db"/>
+			<exclude name="**/APDescription.txt"/>
+			<exclude name="add-ons/semantics/doc/tutorials/**/*.txt"/>
+		</zip>
+	</target>
+
+	<!-- JAVA -->
+	<target name = "j2se" depends = "j2se-do"
+	        description = "Set the java property"/>
+	<target name = "j2se-do">
+		<property name = "j2se"  value = "true"/>
+	</target>
+
+	<!-- PJAVA (java-1.1-home must be set in the buildJSA.properties file) -->
+	<target name = "pjava" depends = "pjava-do"
+	        description = "Set the pjava property"/>
+	<target name = "pjava-do">
+		<property name = "pjava"  value = "true"/>
+	</target>
+	
+	<!-- DOTNET (vjc must be set in the buildLEAP.properties file) -->
+	<target name = "dotnet" depends = "dotnet-do, dotnet-dont"
+	        description = "Set the dotnet property --> dotnet.xml will be called (unless vjc is not set)"/>
+	<target name = "dotnet-do" if = "dotnet-home">
+		<property name = "dotnet"  value = "true"/>
+	</target>
+	<target name = "dotnet-dont" unless = "dotnet-home">
+		<echo> WARNING: 'dotnet directory' not specified in buildLEAP.properties. Skipping dotnet build.</echo>
+	</target>
+	<target name = "all" depends = "j2se-do, dotnet-do, dotnet-dont, pjava-do"
+	        description = "Set ALL property"/>
+	
+	<!-- INIT -->
+	<target name="init" depends="init-j2se, init-dotnet, init-pjava"
+		description="Initialization of selected environment"/>
+	<target name="init-j2se" if="j2se">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the directory structure -->
+		<mkdir dir="${doc}"/>
+		<mkdir dir="${j2se-lib}"/>
+		<mkdir dir="${j2se-build}"/>
+		<mkdir dir="${j2se-demo}"/>
+	</target>
+	<target name="init-dotnet" if="dotnet">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the directory structure for .Net-->
+		<mkdir dir="${dotnet-lib}"/>
+		<mkdir dir="${dotnet-src}"/>
+		<mkdir dir="${dotnet-solution}"/>
+	</target>
+	<target name="init-pjava" if="pjava">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<!-- Create the directory structure -->
+		<mkdir dir="${pjava-root}"/>
+		<mkdir dir="${pjava-src}"/>
+		<mkdir dir="${pjava-lib}"/>
+		<mkdir dir="${pjava-build}"/>
+		<!-- <mkdir dir="${pjava-demo}"/> -->
+	</target>
+	
+	<!-- SETUP PJAVA -->
+	<target name="do-setup" if="pjava" depends="init,ext_tools"
+	        description="Setup the build environment">
+	  <!-- 1) Copy JADE sources -->
+	  <copy todir="${pjava-src}">
+			<fileset dir="${src}/jade"/>
+	  </copy>
+	  <!-- 3) Preprocess the whole -->
+	  <pproc basedir="${pjava-src}" type="pjava"/>
+	</target>
+
+	<!-- COMPILE jsa for the selected environments -->
+	<target name="compile" depends="init, compile-j2se, compile-dotnet, compile-pjava"
+	        description="Compile for selected environment"/>
+	<target name="compile-j2se" if="j2se">
+	      <javac srcdir="${src}"
+	      	     destdir="${j2se-build}" 
+	      	     includes="jade/**,jsademos/**"
+	      	     nowarn="off" 
+	      	     optimize="${javac.optimize}" 
+	      	     debug="${javac.debug}" 
+	      	     deprecation="on">
+	      <classpath>
+	        <fileset dir="${libJADEDir}" includes="*.jar"/>
+	        <!-- <fileset dir="${lib}" includes="**/*.jar"/> -->
+	      </classpath>
+	    </javac>
+	</target>	
+	<target name="compile-pjava" if="pjava" depends="do-setup">
+		<javac srcdir="${pjava-src}"
+		       destdir="${pjava-build}"
+		       nowarn="off" 
+		       optimize="${javac.optimize}" 
+		       debug="${javac.debug}" 
+		       deprecation="on"
+		       compiler="classic"
+		       source="1.1"
+		       target="1.1">
+	      <classpath>
+	        <fileset dir="${libJADEPJAVADir}" includes="*.jar"/>
+	      </classpath>
+	    </javac>
+	</target>
+	<target name="compile-dotnet" if="dotnet" depends="setup">
+	      <echo>Visual J# compiler is: ${vjc}</echo>
+	      <exec executable="${vjc}">
+	        <arg value="/recurse:.\dotnet\src\*.java" /> 
+	        <arg line="/t:library" />
+	        <arg line="/r:System.Xml.dll" />
+	        <arg line="/r:VJSSupUILib.dll" />
+	        <arg line="/r:..\..\leap\dotnet\lib\JadeLeap.dll" />
+	        <arg line="/debug" />
+	        <arg line="/out:.\dotnet\lib\jsa.dll" />
+	      </exec>
+	</target>
+	
+	<!-- LIB -->
+	<target name="lib" depends="init,compile,lib-j2se,lib-pjava" description="generate the jar file"/>
+	<target name="lib-j2se" if="j2se">
+		<!-- Create the jsa.jar file -->
+		<delete file="${j2se-lib}/jsa.jar" quiet="true"/> 
+		<jar jarfile="${j2se-lib}/jsa.jar">
+			<fileset dir="${j2se-build}" excludes="jsademos/**"/>
+		</jar>
+	</target>
+	<target name="lib-pjava" if="pjava">
+		<!-- Create the jsa.jar file -->
+		<delete file="${pjava-lib}/jsa.jar" quiet="true"/> 
+		<jar jarfile="${pjava-lib}/jsa.jar">
+			<fileset dir="${pjava-build}" excludes="jsademos/**"/>
+		</jar>
+	</target>
+	
+	<!-- SETUP DOTNET -->
+	<target name="setup" if="dotnet" depends="ext_tools" description="setup for .Net version">
+	    	<!-- Create the jsa.dll file -->
+		<delete file="${dotnet-lib}\jsa.dll" quiet="true"/> 
+		<!-- 1) Copy java files to dotnet source directory -->
+		    <copy todir="${dotnet-src}" overwrite="yes">
+			<fileset dir="${src}">
+				<include name="jade/**"/>
+			</fileset>
+		    </copy>
+		<!-- 2) Copy additional JAVA files -->
+		    <copy todir="${dotnet-src}" overwrite="yes">
+			<fileset dir="${dotnet-root}/extras">
+				<exclude name="**/*.java@"/>
+				<exclude name="**/*.java#"/>
+			</fileset>
+		    </copy>
+	  	<!-- 3) Preprocess the whole files for DOTNET -->
+	  	     <pproc basedir="${dotnet-root}" type="dotnet"/>
+		<!-- 4) Erase demo subdirectory -->	  	     
+	  	     <delete dir = "${dotnet-src}\demo"/>
+	</target>
+	
+	<!-- CLEAN -->
+	<target name="clean" depends="clean-j2se, clean-dotnet, clean-pjava"/>
+	<target name="clean-j2se" if="j2se">
+		<!-- Delete the ${build} directory tree -->
+		<delete includeEmptyDirs="true">
+			<fileset dir="${j2se-build}" excludes="**/*.mf"/>
+			<fileset dir="${j2se-lib}" includes="*.jar"/>
+		</delete>
+	</target>
+	<target name="clean-pjava" if="pjava">
+		<!-- Delete the ${build} directory tree -->
+		<delete includeEmptyDirs="true">
+			<fileset dir="${pjava-build}" excludes="**/*.mf"/>
+			<fileset dir="${pjava-lib}" includes="*.jar"/>
+			<fileset dir= "${pjava-src}"/>
+		</delete>
+	</target>
+	<target name="clean-dotnet" if="dotnet">
+		<delete dir = "${dotnet-src}"/>
+		<delete dir = "${dotnet-lib}"/>
+		<delete dir = "${dotnet-solution}"/>
+	</target>
+	
+	<!-- DEMO -->
+	<target name="demo" depends="demo-j2se, demo-dotnet, demo-pjava"/>
+	<target name="demo-j2se" if="j2se" depends="init,compile,lib" description="generate the demo jar file">
+	    <!-- Copy the gifs -->
+	    <copy todir="${j2se-build}/jsademos">
+		<fileset dir="${src}/jsademos">
+			<include name="**/*.gif"/>
+			<include name="**/*.jpg"/>
+		</fileset>
+	    </copy>
+	    <!-- Create the jsaDemo.jar file -->
+	    <delete file="${j2se-demo}/jsaDemo.jar" quiet="true"/> 
+	    <jar jarfile="${j2se-demo}/jsaDemo.jar">
+			<fileset dir="${j2se-build}" includes="jsademos/**"/>
+	    </jar>
+	</target>
+	
+	<target name="demo-pjava" if="pjava" description="generate the demo jar file">
+	    <echo> There is not yet a pJava version of the JSA demo. Sorry... </echo>
+	</target>
+
+	<target name="demo-dotnet" if="dotnet" depends="init,compile" description="generate the demo exe file">
+    	    <!-- Create the jsaDemo.exe file -->
+    	    <!-- 1) Copy java files to dotnet source directory -->
+	    <copy todir="${dotnet-src}" overwrite="yes">
+		<fileset dir="${src}">
+			<include name="jsademos/**"/>
+		</fileset>
+	    </copy>
+	    <!-- 2) Preprocess the whole files for DOTNET -->
+	    <pproc basedir="${dotnet-src}\demo" type="dotnet"/>
+	    <!-- 3) Copy file with MainMethod -->
+	    <copy todir="${dotnet-src}\demo" overwrite="yes">
+	    	<fileset dir="${leap-dir}\dotnet\VS2003S">
+	    		<include name="**/AgentBooterJSharp.java"/>
+	    	</fileset>
+	    </copy>
+	    <!-- 4) Create resource .resx file-->
+	    <exec executable="${vjsresgen}">
+	    <arg line=" /out:.\dotnet\src\myResource.resx .\demo\trousers.gif .\demo\son.gif .\demo\shirt.gif .\demo\red.gif .\demo\pullover.gif .\demo\mother.gif .\demo\man.gif green.gif .\demo\daughter.gif .\demo\coat.gif .\demo\cap.gif .\demo\son.txt .\demo\mother.txt .\demo\daughter.txt" />
+	    </exec>
+	    <!-- 5) Create resource .resources file-->
+	    <exec executable="${resgen}">
+	    <arg line=" .\dotnet\src\myResource.resx" />
+	    </exec>
+	    <!-- 6) Delete previous version of jsaDemo.exe-->
+	    <delete file="${demo}/jsaDemo.exe" quiet="true"/> 
+	    <!-- 7) Compile the code-->
+	    <exec executable="${vjc}">
+	    <arg value="/recurse:.\dotnet\src\demo\*.java" /> 
+	    <arg line="/t:exe" />
+	    <arg line="/r:System.Xml.dll" />
+	    <arg line="/r:VJSSupUILib.dll" />
+	    <arg line="/r:..\..\leap\dotnet\lib\JadeLeap.dll" />
+	    <arg line="/r:.\dotnet\lib\jsa.dll" />
+	    <arg line="/res:.\dotnet\src\myResource.resources,JadeSemantics.myResource.resources" />
+	    <arg line="/out:.\dotnet\lib\jsaDemo.exe" />
+	  </exec>
+	</target>
+	
+	<!-- SOLUTION -->
+	<target name="solution" if="dotnet" description="Create Visual Studio 2003 solution">
+	<echo>Deleting Solution directory...</echo>
+	<delete>
+		<fileset dir="${dotnet-solution}" />
+	</delete>
+	<echo>Generating project file...</echo>
+	<echo>DIR: ${root}</echo>
+	<exec dir="${root}"
+	      executable="${leap-dir}/dotnet/VS2003S/GenerateProjectFile.exe"
+	      failonerror="true" >
+	      <arg line=".\dotnet\src .\dotnet\extras\JadeSemantics.vjsproj.master .\dotnet\solution\SemanticsAddOn.vjsproj"/>
+          </exec>
+	  <echo>Generation ended</echo>
+	  <copy todir="${dotnet-solution}" overwrite="yes">
+	    <fileset dir="${dotnet-extras}">
+	      <include name="**/*.vjsproj"/>
+	      <include name="**/*.user"/>
+	    </fileset>
+	  </copy>
+	  <copy todir="${dotnet-solution}" overwrite="yes">
+	    <fileset dir="${dotnet-src}">
+	      <include name="**/*.java"/>
+	    </fileset>
+	  </copy>
+	  <!-- Create resource .resx file-->
+	    <exec executable="${vjsresgen}">
+	    <arg line=" /out:.\dotnet\solution\myResource.resx .\demo\trousers.gif .\demo\son.gif .\demo\shirt.gif .\demo\red.gif .\demo\pullover.gif .\demo\mother.gif .\demo\man.gif green.gif .\demo\daughter.gif .\demo\coat.gif .\demo\cap.gif .\demo\son.txt .\demo\mother.txt .\demo\daughter.txt" />
+	    </exec>
+	    <!--Create resource .resources file-->
+	    <exec executable="${resgen}">
+	    <arg line=" .\dotnet\solution\myResource.resx" />
+	    </exec>
+	  <echo>Visual Studio 2003 Solution created</echo>
+	</target>
+	
+</project> 
+
