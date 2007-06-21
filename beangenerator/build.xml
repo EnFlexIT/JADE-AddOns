@@ -7,11 +7,17 @@
   <property environment="env"/>
   <property name="jade-home" value="../.."/>
   <property name="protege-home" value="${env.PROTEGE_HOME}"/>
+  <available file="${protege-home}" type="dir" property="protege.present"/>
+  <property name="protege-plugins" value="${env.PROTEGE_HOME}/plugins"/>
+  <property name="protege-examples" value="${env.PROTEGE_HOME}/examples"/>
+  <property name="pluginname" value="nl.uva.psy.swi.beangenerator"/>
   <property name="projectname" value="beangenerator"/>
   <property name="src" value="src"/>
   <property name="build" value="classes"/>
   <property name="doc" value="doc"/>
   <property name="lib" value="lib"/>
+  <property name="plugin" value="plugin"/>
+  <property name="plugin-package" value="${projectname}-plugin.zip"/>
   <property name="resources" value="resources"/>
   <property name="ontologies" value="${resources}/ontologies"/>
   <property name="jade-lib-dir" value="${jade-home}/lib"/>
@@ -28,6 +34,9 @@
     <fileset dir="${protege-home}">
       <include name="*.jar"/>
     </fileset>
+  	<fileset dir="${protege-plugins}/edu.stanford.smi.protegex.owl">
+  		<include name="*.jar"/>
+  	</fileset>
   </path>
   
   <target name="init">
@@ -36,6 +45,7 @@
     <!-- Create the directories structure used to store files -->
     <mkdir dir="${lib}"/>
     <mkdir dir="${build}"/>
+    <mkdir dir="${plugin}"/>
   </target>
   
 
@@ -54,7 +64,7 @@
   </target>
 
   <!-- Make jars file and put in ${lib} -->
-  <target name="lib" depends="compile">
+  <target name="lib" depends="compile" description="build library">
     <jar jarfile="${lib}/${projectname}.jar"
          manifest="${resources}/MANIFEST.txt"
          update="true"
@@ -62,45 +72,44 @@
     </jar>
   </target>
  
+  <!-- Create plugin zip -->
+  <target name="plugin" depends="lib" description="build Protege plugin">
+    <zip zipfile="${plugin}/${plugin-package}">
+      <!-- plugin -->
+      <zipfileset file="${lib}/${projectname}.jar" prefix="plugins/${pluginname}"/>
+      <zipfileset file="${resources}/${projectname}.properties" prefix="plugins/${pluginname}"/>
+      <zipfileset file="${resources}/plugin.properties" prefix="plugins/${pluginname}"/>
+      <zipfileset dir="${resources}/ontologies" prefix="plugins/${pluginname}/ontologies">
+        <include name="*"/>
+      </zipfileset>
+      <zipfileset dir="${resources}/doc" prefix="plugins/${pluginname}/doc">
+        <include name="*"/>
+      </zipfileset>
+      <!-- examples -->
+      <zipfileset dir="${resources}/examples" prefix="examples/jade-beangenerator">
+        <include name="*"/>
+      </zipfileset>
+    </zip>
+  </target>
+
+  <target name="check-protege">
+    <fail unless="env.PROTEGE_HOME">Environment variable PROTEGE_HOME not set, where is Protege?</fail>
+    <fail unless="protege.present">Protege directory not found, check value of environment variable PROTEGE_HOME</fail>
+  </target>
+
   <!-- Install the bean in Protege -->
-  <target name="install" depends="lib">
-    <copy file="${lib}/${projectname}.jar" tofile="${protege-home}/plugins/${projectname}.jar" />
-    <copy file="${resources}/${projectname}.properties" tofile="${protege-home}/${projectname}.properties" />
-    <copy todir="${protege-home}/projects">
-       <fileset dir="${ontologies}">
-         <include name="SimpleJADEAbstractOntology**"/>
-         <include name="OWLSimpleJADEAbstractOntology**"/>
-       </fileset>
-    </copy>
+  <target name="install" depends="check-protege,plugin" description="install Protege plugin and examples">
+    <unzip src="${plugin}/${plugin-package}" dest="${protege-home}"/>
   </target>
-
-  <!-- Install the examples in the Protege directory -->
-  <target name="examples" depends="install">
-    <copy todir="${protege-home}/projects">
-       <fileset dir="${ontologies}">
-         <include name="MusicShop**"/>
-       </fileset>
-    </copy>
-    <copy todir="${protege-home}/projects">
-       <fileset dir="${ontologies}">
-         <include name="OWLMusicShop**"/>
-       </fileset>
-    </copy>
-    <copy todir="${protege-home}/projects">
-       <fileset dir="${ontologies}">
-         <include name="FIPAAgentManagement**"/>
-       </fileset>
-    </copy>
-  </target>
-
 
   <!-- Make distribution zip file and put in ${dist} -->
-  <target name="dist" depends="lib">
+  <target name="dist" depends="plugin" description="creates distribution package">
     <zip zipfile="../${projectname}.zip" basedir="../..">
       <include name="add-ons/${projectname}/${src}/**"/>
       <include name="add-ons/${projectname}/resources/**"/>
       <include name="add-ons/${projectname}/*"/>
       <include name="add-ons/${projectname}/lib/**"/>
+      <include name="add-ons/${projectname}/${plugin}/${plugin-package}"/>
     </zip>
   </target>
  
@@ -109,10 +118,16 @@
   <!-- delete ${build} and ${lib} directories -->
   <target name="clean" description="clean up">
     <!-- Delete the ${build} directory tree -->
-    <delete includeEmptyDirs="true" quiet="true">
-      <fileset dir="${build}"/>
-      <fileset dir="${lib}" includes="${projectname}.jar"/>
+    <delete includeEmptyDirs="true">
+      <fileset dir="${build}" includes="**/*"/>
     </delete>
+  </target>
+
+  <target name="cleanall" depends="clean" description="complete cleanup, including plugin and package">
+      <delete>
+        <fileset dir="${lib}"/>
+        <fileset dir="${plugin}"/>
+      </delete>
   </target>
 
 </project>

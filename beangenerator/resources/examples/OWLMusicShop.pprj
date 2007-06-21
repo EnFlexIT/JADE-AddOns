@@ -1,4 +1,4 @@
-; Tue Jun 27 17:32:06 PDT 2006
+; Mon Jul 03 14:07:48 PDT 2006
 ; 
 ;+ (version "3.1.1")
 ;+ (build "Build 216")
@@ -6,11 +6,11 @@
 ([BROWSER_SLOT_NAMES] of  Property_List
 
 	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_64]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_65]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_66]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_67]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_68]))
+		[OWLMusicShop_ProjectKB_Instance_76]
+		[OWLMusicShop_ProjectKB_Instance_77]
+		[OWLMusicShop_ProjectKB_Instance_78]
+		[OWLMusicShop_ProjectKB_Instance_79]
+		[OWLMusicShop_ProjectKB_Instance_80]))
 
 ([CLSES_TAB] of  Widget
 
@@ -252,6 +252,24 @@
 	(label "Instances")
 	(property_list [Instance_88])
 	(widget_class_name "edu.stanford.smi.protege.widget.InstancesTab"))
+
+([KB_024013_Instance_0] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [KB_024013_Instance_1])
+	(widget_class_name "edu.stanford.smi.protegex.queries_tab.QueriesTab"))
+
+([KB_024013_Instance_1] of  Property_List
+)
+
+([KB_024013_Instance_2] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [KB_024013_Instance_3])
+	(widget_class_name "edu.stanford.smi.protegex.owl.swrl.ui.tab.SWRLTab"))
+
+([KB_024013_Instance_3] of  Property_List
+)
 
 ([KB_024013_Instance_4] of  Widget
 
@@ -875,20 +893,14 @@
 	(x 7)
 	(y 28))
 
-([KB_485000_Instance_0] of  String
+([KB_575585_Instance_0] of  Widget
 
-	(name "owl_file_name")
-	(string_value "OWLSimpleJADEAbstractOntology.owl"))
+	(is_hidden TRUE)
+	(property_list [KB_575585_Instance_1])
+	(widget_class_name "edu.stanford.smi.protegex.owl.swrl.ui.tab.SWRLTab"))
 
-([KB_485000_Instance_1] of  String
-
-	(name "SwitchableClassDefinitionType")
-	(string_value "edu.stanford.smi.protegex.owl.ui.cls.LogicClassDefinitionWidget"))
-
-([KB_485000_Instance_2] of  String
-
-	(name "OWL-PREDEFINED-PROFILE-URI")
-	(string_value "http://protege.stanford.edu/plugins/owl/OWLProfiles.owl#OWL-Full"))
+([KB_575585_Instance_1] of  Property_List
+)
 
 ([KB_635552_Instance_0] of  Widget
 
@@ -1057,6 +1069,24 @@
 ([KB_635552_Instance_9] of  Property_List
 )
 
+([KB_646337_Instance_0] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [KB_646337_Instance_1])
+	(widget_class_name "edu.stanford.smi.protegex.queries_tab.QueriesTab"))
+
+([KB_646337_Instance_1] of  Property_List
+)
+
+([KB_646337_Instance_2] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [KB_646337_Instance_3])
+	(widget_class_name "edu.stanford.smi.protegex.owl.swrl.ui.tab.SWRLTab"))
+
+([KB_646337_Instance_3] of  Property_List
+)
+
 ([KB_691299_Instance_398] of  Widget
 
 	(is_hidden FALSE)
@@ -1070,6 +1100,15 @@
 	(name "owl:ObjectProperty")
 	(property_list [XY_Instance_462])
 	(widget_class_name "edu.stanford.smi.protegex.owl.ui.widget.OWLFormWidget"))
+
+([KB_713803_Instance_0] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [KB_713803_Instance_1])
+	(widget_class_name "edu.stanford.smi.protegex.queries_tab.QueriesTab"))
+
+([KB_713803_Instance_1] of  Property_List
+)
 
 ([KB_713803_Instance_10] of  Widget
 
@@ -1160,6 +1199,12 @@
 		[KB_713803_Instance_20]
 		[KB_713803_Instance_21]))
 
+([KB_713803_Instance_2] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [KB_713803_Instance_3])
+	(widget_class_name "edu.stanford.smi.protegex.owl.swrl.ui.tab.SWRLTab"))
+
 ([KB_713803_Instance_20] of  Boolean
 
 	(boolean_value FALSE)
@@ -1215,6 +1260,9 @@
 	(is_hidden FALSE)
 	(name "rdfs:isDefinedBy")
 	(property_list [KB_713803_Instance_30]))
+
+([KB_713803_Instance_3] of  Property_List
+)
 
 ([KB_713803_Instance_30] of  Property_List
 )
@@ -3130,6 +3178,21 @@
 	(property_list [XY_Instance_195])
 	(widget_class_name "edu.stanford.smi.protegex.owl.ui.widget.OWLFormWidget"))
 
+([KB_839937_Instance_0] of  String
+
+	(name "owl_file_name")
+	(string_value "OWLMusicShop.owl"))
+
+([KB_839937_Instance_1] of  String
+
+	(name "SwitchableClassDefinitionType")
+	(string_value "edu.stanford.smi.protegex.owl.ui.cls.LogicClassDefinitionWidget"))
+
+([KB_839937_Instance_2] of  String
+
+	(name "OWL-PREDEFINED-PROFILE-URI")
+	(string_value "http://protege.stanford.edu/plugins/owl/OWLProfiles.owl#OWL-Full"))
+
 ([KB_868747_Instance_76] of  Widget
 
 	(is_hidden FALSE)
@@ -3255,6 +3318,10 @@
 	(width 200)
 	(x 400)
 	(y 190))
+
+([KB_886778_Instance_151] of  Widget
+
+	(name ":DIRECT-SUPERSLOTS"))
 
 ([KB_886778_Instance_152] of  Widget
 
@@ -3665,6 +3732,7 @@
 	(is_hidden FALSE)
 	(label "Name")
 	(name ":NAME")
+	(property_list [OWLMusicShop_ProjectKB_Instance_68])
 	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
 	(width 286)
 	(x 0)
@@ -4436,6 +4504,10 @@
 
 	(name ":SLOT-CONSTRAINTS"))
 
+([KB_938545_Instance_255] of  Widget
+
+	(name ":DIRECT-SUPERSLOTS"))
+
 ([KB_938545_Instance_256] of  Widget
 
 	(name ":DIRECT-SUBSLOTS"))
@@ -4953,6 +5025,10 @@
 
 	(name ":SLOT-CONSTRAINTS"))
 
+([KB_938545_Instance_338] of  Widget
+
+	(name ":DIRECT-SUPERSLOTS"))
+
 ([KB_938545_Instance_339] of  Widget
 
 	(name ":DIRECT-SUBSLOTS"))
@@ -5460,6 +5536,10 @@
 
 	(name ":SLOT-CONSTRAINTS"))
 
+([KB_938545_Instance_421] of  Widget
+
+	(name ":DIRECT-SUPERSLOTS"))
+
 ([KB_938545_Instance_422] of  Widget
 
 	(name ":DIRECT-SUBSLOTS"))
@@ -5966,6 +6046,10 @@
 ([KB_938545_Instance_501] of  Widget
 
 	(name ":SLOT-CONSTRAINTS"))
+
+([KB_938545_Instance_504] of  Widget
+
+	(name ":DIRECT-SUPERSLOTS"))
 
 ([KB_938545_Instance_505] of  Widget
 
@@ -6518,6 +6602,10 @@
 
 	(name ":SLOT-CONSTRAINTS"))
 
+([KB_938545_Instance_587] of  Widget
+
+	(name ":DIRECT-SUPERSLOTS"))
+
 ([KB_938545_Instance_588] of  Widget
 
 	(name ":DIRECT-SUBSLOTS"))
@@ -6535,7 +6623,7 @@
 ([KB_938545_Instance_59] of  Widget
 
 	(name ":SLOT-CONSTRAINTS")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_71]))
+	(property_list [OWLMusicShop_ProjectKB_Instance_74]))
 
 ([KB_938545_Instance_590] of  Property_List
 )
@@ -6741,6 +6829,10 @@
 
 	(boolean_value FALSE)
 	(name "ButtonDisplayed-Delete Instance"))
+
+([KB_938545_Instance_62] of  Widget
+
+	(name ":DIRECT-SUPERSLOTS"))
 
 ([KB_938545_Instance_620] of  Widget
 
@@ -7059,6 +7151,10 @@
 
 ([KB_938545_Instance_67] of  Property_List
 )
+
+([KB_938545_Instance_670] of  Widget
+
+	(name ":DIRECT-SUPERSLOTS"))
 
 ([KB_938545_Instance_671] of  Widget
 
@@ -7582,7 +7678,7 @@
 	(is_hidden FALSE)
 	(label "Name")
 	(name ":NAME")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_72])
+	(property_list [OWLMusicShop_ProjectKB_Instance_75])
 	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
 	(width 286)
 	(x 0)
@@ -7813,882 +7909,330 @@
 	(integer_value 284)
 	(name "owl_build"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_0] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_1])
-	(widget_class_name "TGViztab.TGVizTab"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_1] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_10] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_11])
-	(widget_class_name "com.dcx.ricek.protege.modelica.export.ModelicaExportTab"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10064] of  Widget
+([OWLMusicShop_ProjectKB_Instance_11] of  Widget
 
 	(is_hidden FALSE)
-	(name "JADE-CLASS")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10067])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.widget.OWLFormWidget"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10067] of  Property_List
-
-	(name "class widget properties")
-	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10068]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10070]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10071]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10072]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10092]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10107]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10109]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10110]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10112]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10115]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10117]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10119]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10121]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10123]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10125]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10127]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10129]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10131]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10133]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10135]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10137]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10139]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10068] of  Widget
-
-	(height 0)
-	(label "Constraints")
-	(name ":SLOT-CONSTRAINTS")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10069])
-	(width 0)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10069] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10070] of  Widget
-
-	(name ":DIRECT-INSTANCES"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10071] of  Widget
-
-	(name ":DIRECT-SUBCLASSES"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10072] of  Widget
-
-	(height 310)
-	(label "Definition")
-	(name ":DIRECT-SUPERCLASSES")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10073])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.cls.SwitchableClassDefinitionWidget")
-	(width 560)
-	(x 0)
-	(y 160))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10073] of  Property_List
-
-	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10074]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10084]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10074] of  Widget
-
-	(height 310)
-	(is_hidden FALSE)
-	(label "LogicView")
-	(name ":DIRECT-TEMPLATE-SLOTS")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10075])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 560)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10075] of  Property_List
-
-	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10076]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10080]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10082]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10083]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10076] of  Widget
-
-	(height 310)
-	(is_hidden FALSE)
-	(label "Conditions")
-	(name ":DIRECT-SUPERCLASSES")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10077])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 332)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10077] of  Property_List
-
-	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10078]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10079]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10078] of  Widget
-
-	(height 274)
-	(is_hidden FALSE)
-	(label "AssertedDescription")
-	(name ":DIRECT-SUPERCLASSES")
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 318)
-	(x 7)
-	(y 28))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10079] of  Widget
-
-	(height 274)
-	(is_hidden FALSE)
-	(label "InferredDescription")
-	(name "protege:inferredSubclassOf")
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 318)
-	(x 7)
-	(y 28))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10080] of  Widget
-
-	(height 181)
-	(is_hidden FALSE)
-	(label "Properties")
-	(name ":DIRECT-TEMPLATE-SLOTS")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10081])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 226)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10081] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10082] of  Widget
-
-	(height 124)
-	(is_hidden FALSE)
-	(label "Disjoints")
-	(name ":OWL-DISJOINT-CLASSES")
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 222)
-	(x 0)
-	(y 176))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10083] of  Widget
-
-	(height 127)
-	(is_hidden FALSE)
-	(label "Disjoints")
-	(name "owl:disjointWith")
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 226)
-	(x 0)
-	(y 183))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10084] of  Widget
-
-	(height -36)
-	(is_hidden FALSE)
-	(label "PropertiesView")
-	(name ":DIRECT-SUPERCLASSES")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10085])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width -14)
-	(x 7)
-	(y 28))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10085] of  Property_List
-
-	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10086]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10087]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10090]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10091]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10086] of  Widget
-
-	(is_hidden FALSE)
-	(label "Superclasses")
-	(name ":DIRECT-SUPERCLASSES")
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10087] of  Widget
-
-	(is_hidden FALSE)
-	(label "Properties")
-	(name ":DIRECT-TEMPLATE-SLOTS")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10088])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10088] of  Property_List
-
-	(properties [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10089]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10089] of  Boolean
-
-	(boolean_value TRUE)
-	(name "DisplayRestrictions"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10090] of  Widget
-
-	(is_hidden FALSE)
-	(label "Disjoints")
-	(name ":OWL-DISJOINT-CLASSES")
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10091] of  Widget
-
-	(is_hidden FALSE)
-	(label "Disjoints")
-	(name "owl:disjointWith")
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10092] of  Widget
-
-	(height 160)
-	(label "Name")
-	(name ":NAME")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10093])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.metadata.RDFSNamedClassMetadataWidget")
-	(width 280)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10093] of  Property_List
-
-	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10094]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10099]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10103]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10094] of  Widget
-
-	(height 124)
-	(is_hidden FALSE)
-	(label "Name")
-	(name ":NAME")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10095])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 266)
-	(x 7)
-	(y 28))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10095] of  Property_List
-
-	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10096]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10098]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10096] of  Widget
-
-	(height 30)
-	(is_hidden FALSE)
-	(label "Name")
-	(name ":NAME")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10097])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 266)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10097] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10098] of  Widget
-
-	(height 94)
-	(is_hidden FALSE)
-	(label "Comment")
-	(name "rdfs:comment")
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 266)
-	(x 0)
-	(y 30))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10099] of  Widget
-
-	(height 124)
-	(is_hidden FALSE)
-	(label "owl:sameAs")
-	(name "owl:sameAs")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10100])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 266)
-	(x 7)
-	(y 28))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10100] of  Property_List
-
-	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10101]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10102]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10101] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value  "))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10102] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10103] of  Widget
-
-	(height 124)
-	(is_hidden FALSE)
-	(label "owl:differentFrom")
-	(name "owl:differentFrom")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10104])
-	(widget_class_name "edu.stanford.smi.protege.widget.FormWidget")
-	(width 266)
-	(x 7)
-	(y 28))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10104] of  Property_List
-
-	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10105]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10106]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10105] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-View References to Value  "))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10106] of  Boolean
-
-	(boolean_value FALSE)
-	(name "ButtonDisplayed-Delete Instance"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10107] of  Widget
-
-	(height 0)
-	(label "Role")
-	(name ":ROLE")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10108])
-	(width 0)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10108] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10109] of  Widget
-
-	(name ":DIRECT-TYPE"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10110] of  Widget
-
-	(height 0)
-	(label "OWL Properties")
-	(name ":DIRECT-TEMPLATE-SLOTS")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10111])
-	(width 0)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10111] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10112] of  Property_List
-
-	(name "layout properties")
-	(properties
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10113]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10114]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10113] of  String
-
-	(name "vertical_stretcher")
-	(string_value "<<all>>"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10114] of  String
-
-	(name "horizontal_stretcher")
-	(string_value "<<all>>"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10115] of  Widget
-
-	(height 0)
-	(is_hidden FALSE)
-	(name ":DOCUMENTATION")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10116])
-	(width 0)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10116] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10117] of  Widget
-
-	(height 160)
-	(is_hidden FALSE)
-	(name "protege:inferredType")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10118])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.metadata.AnnotationsWidget")
-	(width 280)
-	(x 280)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10118] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10119] of  Widget
-
-	(is_hidden FALSE)
-	(name "owl:versionInfo")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10120]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10120] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10121] of  Widget
-
-	(is_hidden FALSE)
-	(name "rdfs:seeAlso")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10122]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10122] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10123] of  Widget
-
-	(is_hidden FALSE)
-	(name "rdfs:isDefinedBy")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10124]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10124] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10125] of  Widget
-
-	(is_hidden FALSE)
-	(name "rdfs:comment")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10126]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10126] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10127] of  Widget
-
-	(is_hidden FALSE)
-	(name "rdfs:label")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10128]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10128] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10129] of  Widget
-
-	(height 0)
-	(is_hidden FALSE)
-	(name "owl:equivalentClass")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10130])
-	(width 0)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10130] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10131] of  Widget
-
-	(height 0)
-	(is_hidden FALSE)
-	(name "rdfs:subClassOf")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10132])
-	(width 0)
-	(x 0)
-	(y 0))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10132] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10133] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "JADE-JAVA-BASE-CLASS")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10134])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.widget.SingleLiteralWidget")
-	(width 200)
-	(x 400)
-	(y 470))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10134] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10135] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "JADE-IGNORE")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10136])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.widget.SingleLiteralWidget")
-	(width 200)
-	(x 0)
-	(y 470))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10136] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10137] of  Widget
-
-	(height 270)
-	(is_hidden FALSE)
-	(name "JADE-JAVA-CODE")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10138])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.widget.SingleLiteralAreaWidget")
-	(width 600)
-	(x 0)
-	(y 530))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10138] of  Property_List
-
-	(properties [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10179]))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10139] of  Widget
-
-	(height 60)
-	(is_hidden FALSE)
-	(name "JADE-NAME")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10140])
-	(widget_class_name "edu.stanford.smi.protegex.owl.ui.widget.SingleLiteralWidget")
-	(width 200)
-	(x 200)
-	(y 470))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10140] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10179] of  Boolean
-
-	(boolean_value FALSE)
-	(name "DisabledByUser"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_11] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_12] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_13])
+	(property_list [OWLMusicShop_ProjectKB_Instance_12])
 	(widget_class_name "nl.uva.psy.swi.beangenerator.OntologyBeanGeneratorTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_13] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_12] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_14] of  Widget
+([OWLMusicShop_ProjectKB_Instance_13] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_15])
+	(property_list [OWLMusicShop_ProjectKB_Instance_14])
+	(widget_class_name "edu.stanford.smi.protege.keywordsearch.StringSearch"))
+
+([OWLMusicShop_ProjectKB_Instance_14] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_15] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [OWLMusicShop_ProjectKB_Instance_16])
+	(widget_class_name "com.dcx.ricek.protege.modelica.export.ModelicaExportTab"))
+
+([OWLMusicShop_ProjectKB_Instance_16] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_17] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [OWLMusicShop_ProjectKB_Instance_18])
 	(widget_class_name "edu.stanford.smi.RemoteKBTab.WordNetTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_15] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_18] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_16] of  Widget
+([OWLMusicShop_ProjectKB_Instance_19] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_17])
+	(property_list [OWLMusicShop_ProjectKB_Instance_20])
 	(widget_class_name "com.dcx.mixer.ui.MappedMixerTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_17] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_20] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_18] of  Widget
+([OWLMusicShop_ProjectKB_Instance_21] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_19])
+	(property_list [OWLMusicShop_ProjectKB_Instance_22])
 	(widget_class_name "edu.stanford.smi.protegex.psm.PSMTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_19] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_22] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_2] of  Widget
+([OWLMusicShop_ProjectKB_Instance_23] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_3])
-	(widget_class_name "dfki.protege.ontoviz_tab.OntovizTab"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_20] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_21])
+	(property_list [OWLMusicShop_ProjectKB_Instance_24])
 	(widget_class_name "edu.stanford.smi.protegex.queries_tab.QueriesTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_21] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_24] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_22] of  Widget
+([OWLMusicShop_ProjectKB_Instance_25] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_23])
+	(property_list [OWLMusicShop_ProjectKB_Instance_26])
 	(widget_class_name "instancesTab2.InstancesTab2"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_23] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_26] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_24] of  Widget
+([OWLMusicShop_ProjectKB_Instance_27] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_25])
+	(property_list [OWLMusicShop_ProjectKB_Instance_28])
 	(widget_class_name "ezOWLTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_25] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_28] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_26] of  Widget
+([OWLMusicShop_ProjectKB_Instance_29] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_27])
+	(property_list [OWLMusicShop_ProjectKB_Instance_30])
 	(widget_class_name "ezpal.EZPalTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_27] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_28] of  Widget
+([OWLMusicShop_ProjectKB_Instance_3] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_29])
+	(property_list [OWLMusicShop_ProjectKB_Instance_4])
+	(widget_class_name "TGViztab.TGVizTab"))
+
+([OWLMusicShop_ProjectKB_Instance_30] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_31] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [OWLMusicShop_ProjectKB_Instance_32])
 	(widget_class_name "com.dcx.ricek.protege.modelica.xmlimport.ModelicaImportTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_29] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_32] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_3] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_30] of  Widget
+([OWLMusicShop_ProjectKB_Instance_33] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_31])
+	(property_list [OWLMusicShop_ProjectKB_Instance_34])
 	(widget_class_name "edu.stanford.smi.protegex.owl.swrl.ui.tab.SWRLTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_31] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_34] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_32] of  Widget
+([OWLMusicShop_ProjectKB_Instance_35] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_33])
+	(property_list [OWLMusicShop_ProjectKB_Instance_36])
 	(widget_class_name "edu.stanford.smi.protegex.fctab.FacetConstraintsTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_33] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_36] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_34] of  Widget
+([OWLMusicShop_ProjectKB_Instance_37] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_35])
+	(property_list [OWLMusicShop_ProjectKB_Instance_38])
 	(widget_class_name "edu.stanford.smi.protegex.xml.tab.XMLTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_35] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_38] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_36] of  Widget
+([OWLMusicShop_ProjectKB_Instance_39] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_37])
+	(property_list [OWLMusicShop_ProjectKB_Instance_40])
 	(widget_class_name "tabview.TabView"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_37] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_4] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_38] of  Widget
+([OWLMusicShop_ProjectKB_Instance_40] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_41] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_39])
+	(property_list [OWLMusicShop_ProjectKB_Instance_42])
 	(widget_class_name "edu.stanford.smi.protegex.widget.pal.PalConstraintsTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_39] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_42] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_4] of  Widget
+([OWLMusicShop_ProjectKB_Instance_43] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_5])
-	(widget_class_name "JessTab.JessTab"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_40] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_41])
+	(property_list [OWLMusicShop_ProjectKB_Instance_44])
 	(widget_class_name "DataGenieTab.DataGenieTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_41] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_44] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_42] of  Widget
+([OWLMusicShop_ProjectKB_Instance_45] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_43])
+	(property_list [OWLMusicShop_ProjectKB_Instance_46])
 	(widget_class_name "edu.stanford.smi.protege.widget.instance_tree.KnowledgeTreeTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_43] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_46] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_44] of  Widget
+([OWLMusicShop_ProjectKB_Instance_47] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_45])
+	(property_list [OWLMusicShop_ProjectKB_Instance_48])
 	(widget_class_name "edu.stanford.smi.protege.widget.instance_tree.InstanceTreeTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_45] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_48] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_46] of  Widget
+([OWLMusicShop_ProjectKB_Instance_49] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_47])
+	(property_list [OWLMusicShop_ProjectKB_Instance_50])
 	(widget_class_name "com.dcx.ricek.protege.ontoquery.OntoQueryTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_47] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_48] of  Widget
+([OWLMusicShop_ProjectKB_Instance_5] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_49])
+	(property_list [OWLMusicShop_ProjectKB_Instance_6])
+	(widget_class_name "dfki.protege.ontoviz_tab.OntovizTab"))
+
+([OWLMusicShop_ProjectKB_Instance_50] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_51] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [OWLMusicShop_ProjectKB_Instance_52])
 	(widget_class_name "ca.uvic.csr.shrimp.protegeTab.JambalayaTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_49] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_52] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_5] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_50] of  Widget
+([OWLMusicShop_ProjectKB_Instance_53] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_51])
+	(property_list [OWLMusicShop_ProjectKB_Instance_54])
 	(widget_class_name "com.sri.owlseditor.Owlstab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_51] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_54] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_52] of  Widget
+([OWLMusicShop_ProjectKB_Instance_55] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_53])
+	(property_list [OWLMusicShop_ProjectKB_Instance_56])
 	(widget_class_name "com.dcx.ricek.protege.modelica.instantiation.ModelicaInstanceTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_53] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_56] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_54] of  Widget
+([OWLMusicShop_ProjectKB_Instance_57] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_55])
+	(property_list [OWLMusicShop_ProjectKB_Instance_58])
 	(widget_class_name "org.algernon.kb.okbc.protege.plugins.AlgernonTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_55] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_58] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_56] of  Widget
+([OWLMusicShop_ProjectKB_Instance_59] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_57])
+	(property_list [OWLMusicShop_ProjectKB_Instance_60])
 	(widget_class_name "edu.stanford.smi.protegex.widget.pal.PalQueriesTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_57] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_6] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_58] of  Widget
+([OWLMusicShop_ProjectKB_Instance_60] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_61] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_59])
+	(property_list [OWLMusicShop_ProjectKB_Instance_62])
 	(widget_class_name "com.dcx.reiik.engviz.EngVizTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_59] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_62] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_6] of  Widget
+([OWLMusicShop_ProjectKB_Instance_63] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_7])
-	(widget_class_name "script.ProtegeScriptTab"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_60] of  Widget
-
-	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_61])
+	(property_list [OWLMusicShop_ProjectKB_Instance_64])
 	(widget_class_name "edu.stanford.smi.RemoteKBTab.UMLSTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_61] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_64] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_62] of  Widget
+([OWLMusicShop_ProjectKB_Instance_65] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_63])
+	(property_list [OWLMusicShop_ProjectKB_Instance_66])
 	(widget_class_name "uk.ac.man.cs.mig.coode.owlviz.ui.OWLVizTab"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_63] of  Property_List
+([OWLMusicShop_ProjectKB_Instance_66] of  Property_List
 )
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_64] of  String
+([OWLMusicShop_ProjectKB_Instance_67] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_68] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_7] of  Widget
+
+	(is_hidden TRUE)
+	(property_list [OWLMusicShop_ProjectKB_Instance_8])
+	(widget_class_name "JessTab.JessTab"))
+
+([OWLMusicShop_ProjectKB_Instance_74] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_75] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_76] of  String
 
 	(name "owl:Class")
 	(string_value "%3ANAME"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_65] of  String
+([OWLMusicShop_ProjectKB_Instance_77] of  String
 
 	(name ":META-CLASS")
 	(string_value "%3ANAME"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_66] of  String
+([OWLMusicShop_ProjectKB_Instance_78] of  String
 
 	(name ":INSTANCE-ANNOTATION")
 	(string_value "%3AANNOTATION-TEXT"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_67] of  String
+([OWLMusicShop_ProjectKB_Instance_79] of  String
 
 	(name ":PAL-CONSTRAINT")
 	(string_value "%3APAL-NAME"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_68] of  String
+([OWLMusicShop_ProjectKB_Instance_8] of  Property_List
+)
+
+([OWLMusicShop_ProjectKB_Instance_80] of  String
 
 	(name "owl:Thing")
 	(string_value "%3ANAME"))
 
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_7] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_71] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_72] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_8] of  Widget
+([OWLMusicShop_ProjectKB_Instance_9] of  Widget
 
 	(is_hidden TRUE)
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_9])
-	(widget_class_name "edu.stanford.smi.protege.keywordsearch.StringSearch"))
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_9] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_96] of  Property_List
-)
-
-([OWLSimpleJADEAbstractOntology_ProjectKB_Instance_97] of  Property_List
-)
+	(property_list [OWLMusicShop_ProjectKB_Instance_10])
+	(widget_class_name "script.ProtegeScriptTab"))
 
 ([PAL_FORM_WIDGET] of  Widget
 
@@ -8712,7 +8256,6 @@
 		[INSTANCE_ANNOTATION_FORM_WIDGET]
 		[Instance_581]
 		[KB_301165_Instance_1013]
-		[OWLSimpleJADEAbstractOntology_ProjectKB_Instance_10064]
 		[KB_465546_Instance_567]
 		[KB_713803_Instance_477]
 		[Instance_443]
@@ -8743,70 +8286,102 @@
 	(hidden_classes
 		"owl:Ontology"
 		"rdfs:Container"
-		"owl:DataRange"
-		"owl:TransitiveProperty"
 		"rdf:Property"
-		"owl:hasValue"
-		"owl:Nothing"
 		"protege:inferredSubclassOf"
-		"protege:ExternalResource"
-		"owl:oneOf"
 		"rdf:predicate"
 		"rdfs:Datatype"
-		"rdf:first"
 		"owl:AnnotationProperty"
 		"protege:inferredSuperclassOf"
-		"owl:distinctMembers"
-		"rdf:value"
 		"rdf:object"
 		"protege:classificationStatus"
+		"owl:SymmetricProperty"
+		"owl:sameAs"
+		":OWL-ANONYMOUS-ROOT"
+		":TO"
+		"owl:differentFrom"
+		"owl:DatatypeProperty"
+		"rdfs:member"
+		"owl:onProperty"
+		"rdf:Statement"
+		"owl:AllDifferent"
+		"owl:maxCardinality"
+		"owl:InverseFunctionalProperty"
+		"owl:DeprecatedClass"
+		"owl:Class"
+		"owl:DataRange"
+		"owl:TransitiveProperty"
+		"owl:hasValue"
+		"owl:Nothing"
+		"protege:ExternalResource"
+		"owl:oneOf"
+		"rdf:first"
+		"owl:distinctMembers"
+		"rdf:value"
+		"rdfs:Class"
 		"owl:allValuesFrom"
 		"owl:DeprecatedProperty"
-		"owl:SymmetricProperty"
-		"rdfs:Literal"
 		"owl:someValuesFrom"
-		"owl:sameAs"
-		":TO"
-		":OWL-ANONYMOUS-ROOT"
+		"rdfs:Literal"
 		"owl:disjointWith"
-		"rdf:type"
 		"owl:cardinality"
+		"rdf:type"
 		":FROM"
 		"owl:minCardinality"
-		"owl:differentFrom"
 		"owl:FunctionalProperty"
-		"owl:DatatypeProperty"
-		"owl:onProperty"
-		"rdfs:member"
-		"rdf:List"
 		"rdf:subject"
-		"owl:AllDifferent"
-		"rdf:Statement"
+		"rdf:List"
 		"rdf:rest"
 		":SYSTEM-CLASS"
 		"owl:ObjectProperty"
-		"owl:maxCardinality"
-		"owl:InverseFunctionalProperty"
-		":DIRECTED-BINARY-RELATION"
-		"owl:DeprecatedClass")
+		":DIRECTED-BINARY-RELATION")
 	(journaling_enabled FALSE)
 	(next_frame_number 0)
 	(options [Instance_48])
 	(sources [SOURCES])
 	(tabs
-		[CLSES_TAB]
 		[Instance_86]
-		[SLOTS_TAB]
 		[Instance_2600]
 		[FORMS_TAB]
-		[INSTANCES_TAB]
 		[Instance_3234]
-		[Instance_43]
-		[Instance_45]
-		[Instance_89]
 		[Instance_2534]
-		[KB_484936_Instance_0]
-		[KB_484936_Instance_2]))
+		[OWLMusicShop_ProjectKB_Instance_57]
+		[Instance_43]
+		[CLSES_TAB]
+		[OWLMusicShop_ProjectKB_Instance_43]
+		[OWLMusicShop_ProjectKB_Instance_61]
+		[OWLMusicShop_ProjectKB_Instance_27]
+		[OWLMusicShop_ProjectKB_Instance_35]
+		[INSTANCES_TAB]
+		[OWLMusicShop_ProjectKB_Instance_25]
+		[OWLMusicShop_ProjectKB_Instance_47]
+		[OWLMusicShop_ProjectKB_Instance_51]
+		[OWLMusicShop_ProjectKB_Instance_7]
+		[Instance_45]
+		[OWLMusicShop_ProjectKB_Instance_45]
+		[OWLMusicShop_ProjectKB_Instance_19]
+		[OWLMusicShop_ProjectKB_Instance_15]
+		[OWLMusicShop_ProjectKB_Instance_31]
+		[OWLMusicShop_ProjectKB_Instance_55]
+		[OWLMusicShop_ProjectKB_Instance_11]
+		[OWLMusicShop_ProjectKB_Instance_49]
+		[OWLMusicShop_ProjectKB_Instance_5]
+		[OWLMusicShop_ProjectKB_Instance_53]
+		[OWLMusicShop_ProjectKB_Instance_65]
+		[OWLMusicShop_ProjectKB_Instance_41]
+		[KB_484936_Instance_2]
+		[OWLMusicShop_ProjectKB_Instance_9]
+		[OWLMusicShop_ProjectKB_Instance_21]
+		[OWLMusicShop_ProjectKB_Instance_23]
+		[SLOTS_TAB]
+		[OWLMusicShop_ProjectKB_Instance_13]
+		[OWLMusicShop_ProjectKB_Instance_33]
+		[OWLMusicShop_ProjectKB_Instance_39]
+		[OWLMusicShop_ProjectKB_Instance_3]
+		[OWLMusicShop_ProjectKB_Instance_63]
+		[OWLMusicShop_ProjectKB_Instance_37]
+		[OWLMusicShop_ProjectKB_Instance_29]
+		[OWLMusicShop_ProjectKB_Instance_59]
+		[OWLMusicShop_ProjectKB_Instance_17]))
 
 ([SLOTS_TAB] of  Widget
 
@@ -8824,9 +8399,9 @@
 		[KB_307200_Instance_22]
 		[KB_307200_Instance_23]
 		[OWL_ProjectKB_Instance_3]
-		[KB_485000_Instance_0]
-		[KB_485000_Instance_1]
-		[KB_485000_Instance_2]))
+		[KB_839937_Instance_0]
+		[KB_839937_Instance_1]
+		[KB_839937_Instance_2]))
 
 ([STANDARD_CLASS_FORM_WIDGET] of  Widget
 
@@ -8898,12 +8473,40 @@
 ([XY_Instance_1016] of  Property_List
 )
 
+([XY_Instance_102] of  Widget
+
+	(height 160)
+	(is_hidden FALSE)
+	(name "rdfs:seeAlso")
+	(property_list [XY_Instance_103])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.metadata.AnnotationsWidget")
+	(width 300)
+	(x 300)
+	(y 0))
+
+([XY_Instance_103] of  Property_List
+)
+
 ([XY_Instance_104] of  Property_List
 
 	(name "layout properties")
 	(properties
 		[XY_Instance_105]
 		[XY_Instance_106]))
+
+([XY_Instance_1042] of  Widget
+
+	(height 454)
+	(is_hidden FALSE)
+	(name "rdfs:seeAlso")
+	(property_list [XY_Instance_1043])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.metadata.AnnotationsWidget")
+	(width 463)
+	(x 0)
+	(y 0))
+
+([XY_Instance_1043] of  Property_List
+)
 
 ([XY_Instance_105] of  String
 
@@ -8980,7 +8583,6 @@
 	(height 60)
 	(label "Name")
 	(name ":NAME")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_96])
 	(widget_class_name "edu.stanford.smi.protege.widget.InstanceNameWidget")
 	(width 200)
 	(x 0)
@@ -8991,7 +8593,6 @@
 	(height 60)
 	(label "Role")
 	(name ":ROLE")
-	(property_list [OWLSimpleJADEAbstractOntology_ProjectKB_Instance_97])
 	(widget_class_name "edu.stanford.smi.protege.widget.RoleWidget")
 	(width 200)
 	(x 0)
@@ -9246,6 +8847,61 @@
 
 	(name ":CREATION-TIMESTAMP"))
 
+([XY_Instance_302] of  Widget
+
+	(height 454)
+	(is_hidden FALSE)
+	(name "rdfs:seeAlso")
+	(property_list [XY_Instance_303])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.metadata.AnnotationsWidget")
+	(width 463)
+	(x 0)
+	(y 0))
+
+([XY_Instance_303] of  Property_List
+)
+
+([XY_Instance_344] of  Widget
+
+	(height 454)
+	(is_hidden FALSE)
+	(name "rdfs:seeAlso")
+	(property_list [XY_Instance_345])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.metadata.AnnotationsWidget")
+	(width 463)
+	(x 0)
+	(y 0))
+
+([XY_Instance_345] of  Property_List
+)
+
+([XY_Instance_346] of  Widget
+
+	(height 0)
+	(is_hidden FALSE)
+	(name ":OWL-LOGICAL-OPERANDS")
+	(property_list [XY_Instance_347])
+	(width 0)
+	(x 0)
+	(y 0))
+
+([XY_Instance_347] of  Property_List
+)
+
+([XY_Instance_386] of  Widget
+
+	(height 454)
+	(is_hidden FALSE)
+	(name "rdfs:seeAlso")
+	(property_list [XY_Instance_387])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.metadata.AnnotationsWidget")
+	(width 463)
+	(x 0)
+	(y 0))
+
+([XY_Instance_387] of  Property_List
+)
+
 ([XY_Instance_4] of  Widget
 
 	(height 100)
@@ -9299,6 +8955,57 @@
 ([XY_Instance_413] of  Widget
 
 	(name ":DIRECT-SUBCLASSES"))
+
+([XY_Instance_414] of  Widget
+
+	(height 160)
+	(label "Superclasses")
+	(name ":DIRECT-SUPERCLASSES")
+	(property_list [XY_Instance_415])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.widget.RDFSSuperclassesWidget")
+	(width 240)
+	(x 0)
+	(y 160))
+
+([XY_Instance_415] of  Property_List
+
+	(properties
+		[XY_Instance_416]
+		[XY_Instance_417]
+		[XY_Instance_418]
+		[XY_Instance_419]
+		[XY_Instance_420]
+		[XY_Instance_421]))
+
+([XY_Instance_416] of  Boolean
+
+	(boolean_value TRUE)
+	(name "ButtonDisplayed-View Selected Classes"))
+
+([XY_Instance_417] of  Boolean
+
+	(boolean_value TRUE)
+	(name "ButtonDisplayed-Add"))
+
+([XY_Instance_418] of  Boolean
+
+	(boolean_value TRUE)
+	(name "ButtonDisplayed-Remove"))
+
+([XY_Instance_419] of  String
+
+	(name "ButtonDescription-View Selected Classes")
+	(string_value "View Selected Classes"))
+
+([XY_Instance_420] of  String
+
+	(name "ButtonDescription-Add")
+	(string_value "Select Classes"))
+
+([XY_Instance_421] of  String
+
+	(name "ButtonDescription-Remove")
+	(string_value "Remove Selected Classes"))
 
 ([XY_Instance_422] of  Widget
 
@@ -9444,7 +9151,8 @@
 
 ([XY_Instance_467] of  Widget
 
-	(name ":SLOT-CONSTRAINTS"))
+	(name ":SLOT-CONSTRAINTS")
+	(property_list [OWLMusicShop_ProjectKB_Instance_67]))
 
 ([XY_Instance_468] of  Widget
 
@@ -9455,6 +9163,10 @@
 	(width 200)
 	(x 400)
 	(y 190))
+
+([XY_Instance_469] of  Widget
+
+	(name ":DIRECT-SUPERSLOTS"))
 
 ([XY_Instance_470] of  Widget
 
@@ -10459,6 +10171,20 @@
 	(y 0))
 
 ([XY_Instance_813] of  Property_List
+)
+
+([XY_Instance_875] of  Widget
+
+	(height 454)
+	(is_hidden FALSE)
+	(name "rdfs:seeAlso")
+	(property_list [XY_Instance_876])
+	(widget_class_name "edu.stanford.smi.protegex.owl.ui.metadata.AnnotationsWidget")
+	(width 463)
+	(x 0)
+	(y 0))
+
+([XY_Instance_876] of  Property_List
 )
 
 ([XY_Instance_89] of  Property_List

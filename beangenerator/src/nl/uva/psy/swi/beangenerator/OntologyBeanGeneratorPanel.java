@@ -15,19 +15,49 @@
  */
 package nl.uva.psy.swi.beangenerator;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import edu.stanford.smi.protege.model.*;
-import edu.stanford.smi.protege.ui.*;
-import edu.stanford.smi.protege.util.*;
-import edu.stanford.smi.protege.widget.*;
+import edu.stanford.smi.protege.plugin.PluginUtilities;
+import edu.stanford.smi.protege.util.Log;
+import edu.stanford.smi.protege.util.WaitCursor;
 
 /*
  *  @author     Chris van Aart - Acklin, University of Amsterdam
@@ -119,16 +149,23 @@ public class OntologyBeanGeneratorPanel extends JPanel {
     ontologyComboBox.setBackground(Color.white);
 
     Properties p = new Properties();
-    try {
-      p.load(new FileInputStream(new File("beangenerator.properties")));
-    } catch (Exception ex) {
-      JOptionPane.showMessageDialog(null,
-                                    ex.getMessage() +
-                                    "\nPut beangenerator.properties in the home directory of protege. In you are a windows users, make sure windows did not alter the extension of the file into e.g. .txt.",
-                                    "error", JOptionPane.ERROR_MESSAGE);
-      return;
-    }
-
+	String propFile =  "beangenerator.properties";
+	
+	File pluginDir = PluginUtilities.getInstallationDirectory("nl.uva.psy.swi.beangenerator.OntologyBeanGeneratorTab");			
+	if (pluginDir != null)
+		propFile = pluginDir.getAbsolutePath() + File.separator + propFile;
+	
+	try {
+		p.load(new FileInputStream(new File(propFile)));
+	} catch (Exception ex) {
+		/*
+		JOptionPane.showMessageDialog(null,ex.getMessage()+
+				"\nPut beangenerator.properties in the home directory of protege. In you are a windows users, make sure windows did not alter the extension of the file into e.g. .txt.",
+				"error", JOptionPane.ERROR_MESSAGE);
+		*/
+		Log.getLogger().warning("The beangenerator.properties was not found. Path:" + propFile);
+		return;
+	}
     String key = "location";
     String value = "";
     int i = 1;
@@ -238,6 +275,8 @@ public class OntologyBeanGeneratorPanel extends JPanel {
 
   void itsPackageNameButton_actionPerformed(ActionEvent e) {
     String projectName = this.model.getProject().getName();
+    if (projectName == null)
+    	projectName = "noName";
     projectName = projectName.toLowerCase() + ".ontology";
     if (this.packageBoxModel.getIndexOf(projectName) < 0) {
       this.packageBoxModel.addElement(projectName);
@@ -492,9 +531,9 @@ public class OntologyBeanGeneratorPanel extends JPanel {
                                               new ChangeListener() {
                                                 public void stateChanged(ChangeEvent e) {
                                                   if (!doFormatting.isSelected()) {
-                                                    jalopyFile.disable();
+                                                    jalopyFile.setEnabled(false);
                                                   } else {
-                                                    jalopyFile.enable();
+                                                    jalopyFile.setEnabled(true);
                                                   }
                                                   jalopyFile.repaint();
                                                 }

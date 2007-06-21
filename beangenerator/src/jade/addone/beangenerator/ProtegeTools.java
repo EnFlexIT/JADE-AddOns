@@ -1,7 +1,7 @@
 /**
  *  JADE - Java Agent DEvelopment Framework is a framework to develop
  *  multi-agent systems in compliance with the FIPA specifications. Copyright
- *  (C) 2002 TILAB S.p.A. This file is donated by Y'All B.V. to the JADE
+ *  (C) 2002 TILAB S.p.A. This file is donated by Acklin B.V. to the JADE
  *  project. GNU Lesser General Public License This library is free software;
  *  you can redistribute it and/or modify it under the terms of the GNU Lesser
  *  General Public License as published by the Free Software Foundation, version
@@ -17,7 +17,7 @@ package jade.addone.beangenerator;
 
 /*
  *  @author     Jamie Lawrence - Media Lab Europe
- *  @author  Chris van Aart - Y'All, University of Amsterdam
+ *  @author  Chris van Aart - Acklin, University of Amsterdam
  *  @created    November 14, 2002
  */
 public class ProtegeTools {
@@ -42,7 +42,7 @@ public class ProtegeTools {
     return buff.toString();
   }
   /**
-   *  Convert Strings to a valid Java identifiers by replacing ' ' and '-' with
+   *  Convert Strings to a valid Java identifiers by replacing ' ' and '-' and ':' with
    *  an underscore '_'
    *
    *@param  buff  Description of the Parameter
@@ -51,13 +51,16 @@ public class ProtegeTools {
     for (int i = 0; i < buff.length(); i++) {
       char c = buff.charAt(i);
       switch (c) {
-          case ' ':
-            buff.setCharAt(i, '_');
-            break;
-          case '-':
-            buff.setCharAt(i, '_');
-            break;
-          default:
+      case ' ':
+        buff.setCharAt(i, '_');
+        break;
+      case '-':
+        buff.setCharAt(i, '_');
+        break;
+      case ':':
+    	  buff.setCharAt(i, '_');
+          break;
+      default:
       }
     }
   }
@@ -74,18 +77,18 @@ public class ProtegeTools {
     // capitalise letters after a '_'
 
 
-/*    for (int i = 0; i < buff.length(); i++) {
-      char c = buff.charAt(i);
-      switch (c) {
+    /*    for (int i = 0; i < buff.length(); i++) {
+          char c = buff.charAt(i);
+          switch (c) {
           case '_':
-            buff.deleteCharAt(i);
-            // after deletion, char i+1 is at position i
-            buff.setCharAt(i, Character.toUpperCase(buff.charAt(i)));
-            break;
+          buff.deleteCharAt(i);
+          // after deletion, char i+1 is at position i
+          buff.setCharAt(i, Character.toUpperCase(buff.charAt(i)));
+          break;
           default:
-      }
-    }
-*/
+          }
+          }
+    */
   }
 
   public static String toJavaStyleString(String key) {

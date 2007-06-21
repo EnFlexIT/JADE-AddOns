@@ -3,7 +3,7 @@
  * multi-agent systems in compliance with the FIPA specifications.
  * Copyright (C) 2002 TILAB S.p.A.
  *
- * This file is donated by Y'All B.V. to the JADE project.
+ * This file is donated by Acklin B.V. to the JADE project.
  *
  *
  * GNU Lesser General Public License
@@ -27,7 +27,6 @@ package jade.addone.beangenerator;
 
 /*
  *  @author     Jamie Lawrence - Media Lab Europe
- *  @author     Chris van Aart - Y'All
  *  @created    November 14, 2002
  */
 public class SlotHolder {

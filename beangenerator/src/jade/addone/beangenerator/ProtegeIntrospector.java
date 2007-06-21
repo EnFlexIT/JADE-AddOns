@@ -1,7 +1,7 @@
 /**
  *  JADE - Java Agent DEvelopment Framework is a framework to develop
  *  multi-agent systems in compliance with the FIPA specifications. Copyright
- *  (C) 2002 TILAB S.p.A. This file is donated by Y'All B.V. to the JADE
+ *  (C) 2002 TILAB S.p.A. This file is donated by Acklin B.V. to the JADE
  *  project. GNU Lesser General Public License This library is free software;
  *  you can redistribute it and/or modify it under the terms of the GNU Lesser
  *  General Public License as published by the Free Software Foundation, version
@@ -14,19 +14,18 @@
  *  MA 02111-1307, USA. **************************************************************
  */
 package jade.addone.beangenerator;
-import java.lang.reflect.*;
+import jade.content.abs.AbsHelper;
+import jade.content.abs.AbsObject;
+import jade.content.onto.Ontology;
+import jade.content.onto.OntologyException;
+import jade.content.onto.ReflectiveIntrospector;
+import jade.content.onto.UngroundedException;
+import jade.content.schema.ObjectSchema;
 
-import jade.content.*;
-import jade.content.abs.*;
-import jade.content.onto.*;
-import jade.content.schema.*;
-import jade.core.CaseInsensitiveString;
-import jade.util.leap.Iterator;
-import jade.util.leap.List;
+import java.lang.reflect.Method;
 
 /**
  *@author     Jamie Lawrence - Media Lab Europe
-  @author     Chris van Aart - Y'All
  *@created    November 14, 2002
  */
 public class ProtegeIntrospector extends ReflectiveIntrospector {

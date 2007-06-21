@@ -30,7 +30,6 @@ import javax.swing.*;
 
 // Protege
 import edu.stanford.smi.protege.model.*;
-import edu.stanford.smi.protege.widget.*;
 
 /**
  * Main class which handles the Ontology conversion.

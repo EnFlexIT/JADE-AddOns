@@ -14,15 +14,15 @@
  *  MA 02111-1307, USA. **************************************************************
  */
 package nl.uva.psy.swi.beangenerator;
-import java.lang.reflect.*;
+import jade.content.abs.AbsHelper;
+import jade.content.abs.AbsObject;
+import jade.content.onto.Ontology;
+import jade.content.onto.OntologyException;
+import jade.content.onto.ReflectiveIntrospector;
+import jade.content.onto.UngroundedException;
+import jade.content.schema.ObjectSchema;
 
-import jade.content.*;
-import jade.content.abs.*;
-import jade.content.onto.*;
-import jade.content.schema.*;
-import jade.core.CaseInsensitiveString;
-import jade.util.leap.Iterator;
-import jade.util.leap.List;
+import java.lang.reflect.Method;
 
 /**
  *@author     Jamie Lawrence - Media Lab Europe

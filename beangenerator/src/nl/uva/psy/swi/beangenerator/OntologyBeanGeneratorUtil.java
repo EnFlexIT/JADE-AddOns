@@ -25,21 +25,16 @@
  * ***************************************************************/
 package nl.uva.psy.swi.beangenerator;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.text.*;
-import java.util.*;
-import javax.swing.*;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Locale;
 
-import javax.swing.event.*;
-
-import edu.stanford.smi.protege.action.*;
-import edu.stanford.smi.protege.event.*;
-import edu.stanford.smi.protege.model.*;
-import edu.stanford.smi.protege.ui.*;
-import edu.stanford.smi.protege.util.*;
-import edu.stanford.smi.protege.widget.*;
+import edu.stanford.smi.protege.model.Cls;
+import edu.stanford.smi.protege.model.Slot;
+import edu.stanford.smi.protege.model.ValueType;
 
 /*
  *@author     Chris van Aart - Acklin, University of Amsterdam
@@ -82,7 +77,8 @@ public class OntologyBeanGeneratorUtil {
 
     //valueType.ANY
     if (valueType.equals(ValueType.ANY)) {
-      return "Ontology.STRING_TYPE";
+      //return "Ontology.STRING_TYPE";
+    	return "String";
     }
 
     if (valueType.equals(ValueType.ANY) || valueType.equals(ValueType.SYMBOL)) {

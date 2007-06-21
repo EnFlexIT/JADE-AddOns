@@ -42,7 +42,7 @@ public class ProtegeTools {
     return buff.toString();
   }
   /**
-   *  Convert Strings to a valid Java identifiers by replacing ' ' and '-' with
+   *  Convert Strings to a valid Java identifiers by replacing ' ' and '-' and ':' with
    *  an underscore '_'
    *
    *@param  buff  Description of the Parameter
@@ -57,6 +57,9 @@ public class ProtegeTools {
       case '-':
         buff.setCharAt(i, '_');
         break;
+      case ':':
+    	  buff.setCharAt(i, '_');
+          break;
       default:
       }
     }
