@@ -31,6 +31,7 @@ Boston, MA  02111-1307, USA.
 package jade.semantics.interpreter.sips.adapters;
 
 import jade.semantics.interpreter.SemanticCapabilities;
+import jade.semantics.interpreter.SemanticInterpretationPrinciple;
 import jade.semantics.interpreter.SemanticRepresentation;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.tools.MatchResult;
@@ -39,32 +40,52 @@ import jade.util.leap.ArrayList;
 import java.util.Date;
 
 /**
- * This SIP adapter is the base class to create "neutral" application-specific
+ * This SIP adapter is the root class to create "neutral" application-specific
  * SIPs, that is, SIPs that neither produce nor consume any SR. Such SIPs make
- * it possible to be notified that a particular pattern of SR to observer is
- * being interpreted. They are particularly useful to handle notification tasks
+ * it possible to be notified that a particular pattern of SR to observe is
+ * being interpreted, without affecting the interpretation process.
+ * They are particularly useful to handle notification tasks
  * (e.g. updating a GUI by adding or removing proper behaviours).
  * 
- * <br>The right way to use this adapter simply consists in overriding the
- * abstract method notify(), which must specify what to do when notified the SR
- * to observe is being interpreted.
+ * <br>
+ * The right way to use this adapter simply consists in overriding the abstract
+ * {@link #notify(MatchResult, SemanticRepresentation)} method, which must
+ * specify what to do when the SR to observe is being interpreted.
+ * </br>
  * 
+ * @since JSA 1.4
  * @author Vincent Louis - France Telecom
  */
 public abstract class NotificationSIPAdapter extends ApplicationSpecificSIPAdapter {
 
-	/***************************************************************************
-	 **** CONSTRUCTORS
-	 **************************************************************************/
+	//**************************************************************************
+	//**** CONSTRUCTORS
+	//**************************************************************************
 	
+	/**
+	 * Create a Notification SIP, which observes a given pattern of SR. This
+	 * pattern obeys the same rules as the one given to the
+	 * {@link SemanticInterpretationPrinciple} super-class: it is automatically
+	 * surrounded by a belief modality and all <code>??myself</code> meta-references
+	 * are instantiated with the semantic agent's AID. 
+	 * 
+	 * @param capabilities {@link SemanticCapabilities} instance of the semantic
+     *                     agent owning this instance of SIP.
+	 * @param pattern      the pattern of SR to observe, the SIP applies to.
+	 */
+	public NotificationSIPAdapter(SemanticCapabilities capabilities, Formula pattern) {
+		super(capabilities, pattern);
+	}
+
 	/**
 	 * Create a Notification SIP, which observes a given pattern of SR and has a
 	 * given deadline to be applied. A <code>null</code> deadline does not set
 	 * any "timeout" or "one shot" option of the SIP.
 	 * 
-	 * @param capabilities the semantic capabilities that hold the SIP table.
-	 * @param pattern the pattern of SR to observe.
-	 * @param timeout the deadline (given as a Java Date) attached to the SIP.
+	 * @param capabilities {@link SemanticCapabilities} instance of the semantic
+     *                     agent owning this instance of SIP.
+	 * @param pattern      the pattern of SR to observe, the SIP applies to.
+	 * @param timeout      the deadline (given as a {@link Date}) attached to the SIP.
 	 * 
 	 * @see ApplicationSpecificSIPAdapter#setTimeout(Date)
 	 * @see #NotificationSIPAdapter(SemanticCapabilities, Formula)
@@ -78,8 +99,9 @@ public abstract class NotificationSIPAdapter extends ApplicationSpecificSIPAdapt
 	 * given timeout. A null timeout only sets the SIP in "one shot" mode
 	 * (without timeout).
 	 * 
-	 * @param capabilities the semantic capabilities that hold the SIP table.
-	 * @param pattern the pattern of SR to observe.
+	 * @param capabilities {@link SemanticCapabilities} instance of the semantic
+     *                     agent owning this instance of SIP.
+	 * @param pattern      the pattern of SR to observe, the SIP applies to.
 	 * @param timeout the timeout (in milliseconds) attached to the SIP.
 	 *                If <code>0</code>, the SIP is only "one shot".
 	 *                
@@ -91,27 +113,31 @@ public abstract class NotificationSIPAdapter extends ApplicationSpecificSIPAdapt
 	}
 
 	/**
-	 * Create a Notification SIP, which observes a given pattern of SR. Note
-	 * that this SR is generally a belief of the agent, and thus is of the form
-	 * <code>(B ??myself <i>belief_to_match</i>)</code> (<code>??myself</code>
-	 * is a standard meta-reference that matches the interpreting semantic
-	 * agent).
+	 * Create a Notification SIP, which observes a given pattern of SR.
+	 * Equivalent to
+	 * {@link #NotificationSIPAdapter(SemanticCapabilities, Formula)},
+	 * with the <code>pattern</code> parameter specified as a {@link String}
+	 * object (representing a FIPA-SL formula).
 	 * 
-	 * @param capabilities the semantic capabilities that hold the SIP table.
-	 * @param pattern the pattern of SR to observe.
+	 * @param capabilities {@link SemanticCapabilities} instance of the semantic
+     *                     agent owning this instance of SIP.
+	 * @param pattern      the pattern of SR to observe, the SIP applies to.
 	 */
-	public NotificationSIPAdapter(SemanticCapabilities capabilities, Formula pattern) {
+	public NotificationSIPAdapter(SemanticCapabilities capabilities, String pattern) {
 		super(capabilities, pattern);
 	}
 
 	/**
 	 * Create a Notification SIP, which observes a given pattern of SR and has a
-	 * given deadline to be applied. A <code>null</code> deadline does not set
-	 * any "timeout" or "one shot" option of the SIP.
+	 * given deadline to be applied. Equivalent to
+	 * {@link #NotificationSIPAdapter(SemanticCapabilities, Formula, Date)},
+	 * with the <code>pattern</code> parameter specified as a {@link String}
+	 * object (representing a FIPA-SL formula).
 	 * 
-	 * @param capabilities the semantic capabilities that hold the SIP table.
-	 * @param pattern the pattern of SR to observe.
-	 * @param timeout the deadline (given as a Java Date) attached to the SIP.
+	 * @param capabilities {@link SemanticCapabilities} instance of the semantic
+     *                     agent owning this instance of SIP.
+	 * @param pattern      the pattern of SR to observe, the SIP applies to.
+	 * @param timeout      the deadline (given as a {@link Date}) attached to the SIP.
 	 * 
 	 * @see ApplicationSpecificSIPAdapter#setTimeout(Date)
 	 * @see #NotificationSIPAdapter(SemanticCapabilities, String)
@@ -122,11 +148,14 @@ public abstract class NotificationSIPAdapter extends ApplicationSpecificSIPAdapt
 
 	/**
 	 * Create a Notification SIP, which observes a given pattern of SR and has a
-	 * given timeout. A null timeout only sets the SIP in "one shot" mode
-	 * (without timeout).
+	 * given timeout. Equivalent to
+	 * {@link #NotificationSIPAdapter(SemanticCapabilities, Formula, long)},
+	 * with the <code>pattern</code> parameter specified as a {@link String}
+	 * object (representing a FIPA-SL formula).
 	 * 
-	 * @param capabilities the semantic capabilities that hold the SIP table.
-	 * @param pattern the pattern of SR to observe.
+	 * @param capabilities {@link SemanticCapabilities} instance of the semantic
+     *                     agent owning this instance of SIP.
+	 * @param pattern      the pattern of SR to observe, the SIP applies to.
 	 * @param timeout the timeout (in milliseconds) attached to the SIP.
 	 *                If <code>0</code>, the SIP is only "one shot".
 	 *                
@@ -137,23 +166,9 @@ public abstract class NotificationSIPAdapter extends ApplicationSpecificSIPAdapt
 		super(capabilities, pattern, timeout);
 	}
 
-	/**
-	 * Create a Notification SIP, which observes a given pattern of SR. Note
-	 * that this SR is generally a belief of the agent, and thus is of the form
-	 * <code>(B ??myself <i>belief_to_match</i>)</code> (<code>??myself</code>
-	 * is a standard meta-reference that matches the interpreting semantic
-	 * agent).
-	 * 
-	 * @param capabilities the semantic capabilities that hold the SIP table.
-	 * @param pattern the pattern of SR to observe.
-	 */
-	public NotificationSIPAdapter(SemanticCapabilities capabilities, String pattern) {
-		super(capabilities, pattern);
-	}
-
-	/***************************************************************************
-	 **** OVERRIDDEN METHODS
-	 **************************************************************************/
+	//**************************************************************************
+	//**** OVERRIDDEN METHODS
+	//**************************************************************************
 	
 	/* (non-Javadoc)
 	 * @see jade.semantics.interpreter.sips.adapters.ApplicationSpecificSIPAdapter#doApply(jade.semantics.lang.sl.tools.MatchResult, jade.util.leap.ArrayList, jade.semantics.interpreter.SemanticRepresentation)
@@ -164,17 +179,21 @@ public abstract class NotificationSIPAdapter extends ApplicationSpecificSIPAdapt
 		return result;
 	}
 
-	/***************************************************************************
-	 **** METHODS TO OVERRIDE
-	 **************************************************************************/
+	//**************************************************************************
+	//**** METHODS TO OVERRIDE
+	//**************************************************************************
 
 	/**
 	 * This method must be overridden to specify what to do when the SR to
 	 * observe is interpreted.
 	 * 
+	 * @see SemanticInterpretationPrinciple#apply(SemanticRepresentation)
+	 * 
 	 * @param applyResult result of the matching of the observed SR against the
-	 *                    pattern to observe
-	 * @param sr input SR that matches the pattern of SR to observe
+	 *                    pattern to observe. It contains all the matched
+	 *                    meta-references of the pattern.
+	 * @param sr          input SR that matches the pattern of SR to observe and
+	 *                    has been consumed by this SIP.
 	 */
 	protected abstract void notify(MatchResult applyResult, SemanticRepresentation sr);
 	

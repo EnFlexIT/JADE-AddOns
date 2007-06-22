@@ -39,17 +39,54 @@ import jade.semantics.interpreter.SemanticRepresentation;
 import jade.semantics.lang.sl.grammar.ActionExpression;
 import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.tools.MatchResult;
-import jade.semantics.lang.sl.tools.SL;
 import jade.util.leap.ArrayList;
 
 /**
- * This semantic interpretation principle provides the Jade agent with a general 
- * mean of planning.
- * It calls an external component that returns a Jade Behaviour that implements 
- * a way to reach an input goal <i>phi</i>, and adds this Behaviour to the 
- * agent.
+ * This SIP adapter is the root class to create planning SIPs, that is, SIPs
+ * that computes a proper action plan to reach a given pattern of goal of the
+ * semantic agent. Currently, this SIP adapter is also responsible for running
+ * (and monitoring the execution of) the computed plan (by installing a corresonding
+ * behaviour on the agent). In the next version, the running and monitoring of
+ * the plan will be delegated to another SIP, so that it will be possible to
+ * intercept and post-process generated plans by a new SIP adpater.
+ * The computation of the plan to perform to reach a given pattern of goal must
+ * by specified within the abstract
+ * {@link #doApply(MatchResult, SemanticRepresentation)} method.
+ *  
+ * <br>
+ * Roughly speaking, this SIP adapter consumes Semantic Representations of the
+ * form <code>(I ??myself ??goal)</code>, and, if applicable (that is, if a plan
+ * can be generated), installs a behaviour running the generated plan on the
+ * agent AND produces the same SR, to be asserted into the belief base. In this
+ * way, the belief base contains an intention for all goals being currently
+ * performed by a generated plan.
+ * </br>
+ * <br>
+ * If a generated plan ends with success, then the corresponding intention is
+ * dropped from the belief base. If it ends with a feasibility failure, then the
+ * corresponding intention is retried against the following Planning SIP (to try
+ * another plan, if there is any). If it ends with an execution failure, then the
+ * corresponding intention is dropped from the belief base and considered as
+ * unreachable, and no more plan is tried.
+ * </br>
+ * <br>
+ * Several instances of such a SIP may be added to the SIP table of the agent,
+ * either to deal with different patterns of goals, or to provide possibly several
+ * plans to deal with the same pattern of goal. If a given goal matches several
+ * Planning SIP, the SIPs will be tried in the order they appeared in the agent's
+ * SIP table. <i>Note that using such SIPs replaces the use of the
+ * <code>Planner</code> interface in the previous JSA versions</i>.
+ * </br>
+ * <br>
+ * The goals that are dealt with by no Planning SIP adapter will be dealt with
+ * (if they match their patterns) by the two generic
+ * {@link jade.semantics.interpreter.sips.RationalityPrinciple} and
+ * {@link jade.semantics.interpreter.sips.ActionPerformance} Planning SIPs.
+ * </br>
+ * 
  * @author Vincent Pautret - France Telecom
- * @version Date: 2004/11/30 Revision: 1.0 
+ * @author Vincent Louis - France Telecom
+ * @since JSA 1.4
  */
 public abstract class PlanningSIPAdapter extends SemanticInterpretationPrinciple {
         	
@@ -58,22 +95,28 @@ public abstract class PlanningSIPAdapter extends SemanticInterpretationPrinciple
     /*********************************************************************/
     
     /**
-     * Constructor of the principle
-     * @param capabilities capabilities of the owner (the agent) of this 
-     * @param goalPattern the goal to reach 
-     * @param addIt if true the SIP is automatically added t the sip table of the agent 
-     * semantic interpretation principle
+     * Create a Planning SIP Adapter to deal with a given pattern of goals.
+     * 
+	 * @param capabilities {@link SemanticCapabilities} instance of the
+	 *                     semantic agent owning this instance of SIP.
+     * @param goalPattern  the pattern of goal, this SIP may compute a plan to
+     *                     reach 
      */
     public PlanningSIPAdapter(SemanticCapabilities capabilities, Formula goalPattern) {
         this(capabilities, goalPattern.toString());
     } 
 	
     /**
-     * Constructor of the principle
-     * @param capabilities capabilities of the owner (the agent) of this 
-     * @param goalPattern the goal to reach 
-     * @param addIt if true the SIP is automatically added t the sip table of the agent 
-     * semantic interpretation principle
+     * Create a Planning SIP Adapter to deal with a given pattern of goals.
+     * Equivalent to
+	 * {@link #PlanningSIPAdapter(SemanticCapabilities, Formula)},
+	 * with the <code>goalPattern</code> parameter specified as a {@link String}
+	 * object (representing a FIPA-SL formula).
+	 * 
+	 * @param capabilities {@link SemanticCapabilities} instance of the
+	 *                     semantic agent owning this instance of SIP.
+     * @param goalPattern  the pattern of goal, this SIP may compute a plan to
+     *                     reach 
      */
     public PlanningSIPAdapter(SemanticCapabilities capabilities, String goalPattern) {
         super(capabilities,
@@ -86,14 +129,12 @@ public abstract class PlanningSIPAdapter extends SemanticInterpretationPrinciple
     /*********************************************************************/
     
     /**
-     * Adds a new intentional behaviour ({@link IntentionalBehaviour}) on the behaviour
-     * found by the method <code>finPlan</code> of the <code>Planner</code> interface.
-     * @param sr a semantic representation
-     * @return if the pattern "(I ??agent ??phi)"
-     * matches, and the current agent believes ??phi and the agent find 
-     * an action ??act, this method returns an ArrayLIst with the same SR which
-     * SIP index is increased by one. Returns null in other cases. 
-     * @throws SemanticInterpretationPrincipleException if any exception occurs
+     * Adds a new intentional behaviour ({@link IntentionalBehaviour}) to the
+     * semantic agent, to perform the plan computed by the abstract
+     * {@link #doApply(MatchResult, SemanticRepresentation)} method.
+     * 
+     * @param sr {@inheritDoc}
+     * @throws SemanticInterpretationPrincipleException {@inheritDoc}
      */
     final public ArrayList apply(SemanticRepresentation sr) throws SemanticInterpretationPrincipleException {
         try {
@@ -119,9 +160,27 @@ public abstract class PlanningSIPAdapter extends SemanticInterpretationPrinciple
     } 
 	
 	/**
-	 * @param matchResult
-	 * @param sr the semantic representation to which applies SIP 
-	 * @return
+	 * Method to be overriden in each sub-class, to compute a proper plan of
+	 * action to reach the pattern of goal attached to the SIP.
+	 * This method must return either:
+	 * <ul>
+	 *     <li><code>null</code> if the SIP is not able to compute a proper plan,</li>
+	 *     <li>an {@link ActionExpression} representing a plan that can reach
+	 *         the matched goal.</li>
+	 * </ul>
+	 * <b>Important note:</b> the Action Expression returned by this method
+	 * should be exclusively built upon primitive actions that are defined as
+	 * semantic actions within the agent's semantic action table. If it is not
+	 * the case, the Planning SIP will not be able to generate a suitable JADE
+	 * behaviour to perform the corresponding plan.
+	 * 
+	 * @param matchResult result of the matching of the pattern of goal specified
+	 *                    in the constructor against the actual goal being
+	 *                    interpreted.
+	 * @param sr          input SR, which is to be consumed by the SIP if it is
+	 *                    eventually applicable.
+	 * @return <code>null</code> if the SIP is not applicable, or a plan to reach
+	 *         the agent's goal (given as an {@link ActionExpression})
 	 */
 	public abstract ActionExpression doApply(MatchResult matchResult, SemanticRepresentation sr);
-} // End of class Planning
+}

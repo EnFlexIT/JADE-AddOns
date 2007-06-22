@@ -67,7 +67,7 @@ It is created according a JADE's build.xml.
 	        		<fileset dir="${libJADEDir}" includes="*.jar"/>
 	      		</classpath>
 		  	<packageset dir="src" defaultexcludes="yes">
-				<include name="jade/**"/>
+				<include name="jade/semantics/**"/>
 		  	</packageset>
 	    	</javadoc>
 	</target>

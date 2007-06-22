@@ -40,145 +40,315 @@ import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.tools.ListOfMatchResults;
 
 /**
- * Definition of the belief base api. 
+ * This interface defines belief base API.
+ * The belief base is a central component of the JSA framework, which mainly
+ * maintains the internal state of semantic agents, in terms of their explicit
+ * symbolic representation of their environment. This symbolic representation
+ * is expressed by FIPA-SL formulas.
+ * <p>
+ * This interface provides three main kinds of operations:
+ * <ul>
+ *     <li>update the semantic agent's internal state, by
+ *         {@linkplain #assertFormula(Formula) asserting} or
+ *         {@linkplain #retractFormula(Formula) retracting} formulas,</li>
+ *     <li>retrieve beliefs from the semantic agent's internal state, by
+ *         querying {@linkplain #query(Formula) formulas} or
+ *         {@linkplain #queryRef(IdentifyingExpression) IREs} (Identifying
+ *         Referential Expressions),</li>
+ *     <li>notify changes of the semantic agent's internal state, by
+ *         {@linkplain #addObserver(Observer) installing} or
+ *         {@linkplain #removeObserver(Observer) uninstalling} observers.</li> 
+ * </ul>
+ * </p>
+ * The {@link KBase} interface was primarily intended to be implemented by third
+ * parties. However, as it is quite a difficult and very technical task, the
+ * JSA frameworks provides a default {@linkplain jade.semantics.kbase.FilterKBase
+ * filter-based implementation}, which offers a good trade-off between efficiency
+ * and expressiveness.
+ * 
  * @author Vincent Pautret - France Telecom
  * @version 2004/11/30 Revision: 1.0
  * @version Date: 2006/12/21 Revision: 1.4 (Thierry Martinez)
+ * @since JSA 1.0
  */
 public interface KBase {
     
     /**
-     * The KBase mechanism follows the decoration design pattern.
-     * A KBase can be enclosed within another KBase, wich can
-     * also be enclosed in another KBase and so on.  
-     * @return the most enclosing KBase, on which to proceed assertion 
-     * and query operations, which is also the KBase attached to the 
-     * semantic capabilities of an agent. It can be this KBase.
+     * The {@link KBase} mechanism follows the decoration design pattern.
+     * A {@link KBase} instance can be enclosed within another {@link KBase}
+     * instance, wich can in turn be enclosed in another {@link KBase} instance
+     * and so on.
+     *   
+     * @return the most enclosing {@link KBase} instance, on which to proceed
+     *         assertion and query operations. This also corresonds to the
+     *         {@link KBase} instance attached to the semantic capabilities of
+     *         an agent. It can be this {@link KBase} object.
      */
     public KBase getWrappingKBase();
     
     /**
-     * A KBase stores the beliefs of only one agent, even if these beliefs
-     * can concern beliefs of other agents.
-     * @return the name of the agent believing the facts stored in this KBase. 
+     * Get the name of the agent (given as a FIPA-SL term representing his AID)
+     * owning this {@link KBase} instance. Note that a {@link KBase} instance
+     * stores the beliefs of <b>only one</b> agent, even if these beliefs may
+     * concern beliefs on other agents.
+     * 
+     * @return the name of the agent believing the facts stored in this
+     *         {@link KBase} object. 
      */
     public Term getAgentName();
 
     /**
-     * Modifies the agent the beliefs stored in this KBase belongs to.
-     * @param agent the agent the beliefs of the KBase belongs to. 
+     * Modify the agent (given as a FIPA-SL term representing his AID) the
+     * beliefs stored in this {@link KBase} instance belong to.
+     * 
+     * @param agent the agent the beliefs of this {@link KBase} object belong to. 
      */
     public void setAgentName(Term agent);
 
 	/**
-     * Asserts a formula in the belief base.
-     * @param formula a formula
-     **/
+     * Assert a fact (given as a FIPA-SL formula) believed by the owning agent
+     * into this belief base. It is very important to understand that asserted
+     * facts are necessarily facts <b>believed</b> by the agent, independently
+     * from their truth value in the real world.
+     * <p>
+     * Asserting <code>p</code> actually means that <code>(B ??myself p)</code>
+     * is true (where <code>??myself</code> represents the agent owning the belief
+     * base), while asserting <code>(not p)</code> actually means that
+     * <code>(B ??myself (not p))</code> is true.
+     * <br>
+     * Consequently, asserting <code>p</code> is equivalent to asserting
+     * <code>(B ??myself p)</code> (because in the underlying formal model -
+     * see the <a href="http://www.fipa.org/specs/fipa00008">FIPA SL specifications</a>,
+     * <code>(B i (B i p))</code> is logically equivalent to <code>(B i p)</code>).
+     * </br>
+     * </p>
+     * <p>
+     * The {@link KBase} implementations are expected to maintain a logically
+     * consistent set of beliefs. When a fact, which is inconsistent with an
+     * already stored belief, is asserted, the implementation must explicitly
+     * choose an option that ensures the global consistency (for example, keeping
+     * the most recently asserted fact in the base).
+     * </p>
+     * <p>
+     * Depending on their sophistication, the {@link KBase} implementations may
+     * not be able to actually store all asserted facts. In this case, the reasoning
+     * (or "intellectual") capabilities of the owning agent will simply be
+     * considered as limited, which is a very common case. In any case, the
+     * asserted facts that cannot be dealt with should not create any inconsistency
+     * in the belief base. For example, the implementation provided with the
+     * JSA framework does not deal with uncertainty modal operators, so that
+     * asserting <code>(U ??myself p)</code> has no effect.  
+     * </p>
+     * 
+     * @param formula the formula to assert.
+     */
     public void assertFormula(Formula formula);
     
     /**
-     * Shortcut for the assertion of (not (B agent formula)). 
-     * It retracts the formula given in parameter from the belief base. The 
-     * formula to retract may include metavariables.
-     * @param formula the formula to retract 
+     * Retract a fact from the belief base. Actually, this method should be a
+     * shortcut for the assertion of <code>(not (B ??myself formula))</code>.
+     * In other words, retracting <code>p</code> actually means that
+     * <code>(not (B ??myself p))</code> is true.
+     * <p>
+     * The retracted formula may include meta-references, in this case, all
+     * stored facts that match the input formula are retracted. For example,
+     * if <code>(age john 25)</code>, <code>(age mary 25)</code> and
+     * <code>(age peter 20)</code> are believed by the agent, retracting
+     * <code>(age ??person 25)</code> will result in dropping the first two facts
+     * from the belief base.
+     * </p>
+     *  
+     * @param formula the formula to retract.
      */
     public void retractFormula(Formula formula);
 	
     /**
-     * Removes from the kowledge base all formulae recognized by the finder
-     * @param finder a finder
-     * @deprecated use retractFormula(Formula) instead
+     * Removes from the belief base all formulas recognized by a given finder.
+     * 
+     * @param finder a finder to identify formulas to remove from the belief base.
+     * @deprecated use {@link #retractFormula(Formula)} instead.
      */
     public void removeFormula(Finder finder);
     
     /**
-     * Returns a list <code>ListOfTerm</code> of objects that satisfy a property 
-     * belonging to the belief base. The method return <code>null</code> if the 
-     * agent can not answer.
-     * @return a list of solutions to the query 
-     * @param expression an IdentifyingExpression
+     * Return a list of objects satisfying a given logical description (expressed
+     * as an Identifying Referential Expression), which is believed by the agent
+     * owning this {@link KBase} instance.
+     * <p>
+     * Formally, given an IRE <code>??IRE</code> quantified by either
+     * <code>iota</code> or <code>any</code>, the method returns a list of one
+     * single term ??o such that: <code>(B ??myself (= ??IRE ??o))</code> is true.
+     * <br>
+     * Given an IRE <code>??IRE</code> quantified by either <code>all</code> or
+     * <code>some</code>, the method returns a set ??set of zero or more terms
+     * (given as a {@link ListOfTerm} object) such that:
+     * <code>(B ??myself (= ??IRE ??set))</code> is true.
+     * </br> 
+     * </p>
+     * If no term satisfy the previous formulas, then the method returns
+     * <code>null</code> (which actually means that either the agent does not
+     * know the specified objects or there is no such objects).
+     * 
+     * @return a list of terms containing all the objects satisfying the input
+     *         IRE according the the agent's beliefs, or <code>null</code> if
+     *         there is no such object in the agent's beliefs.
+     * @param expression an Identifying Referential Expression describing one or
+     *                   more objects to find within the agent's beliefs.
      **/
     public ListOfTerm queryRef(IdentifyingExpression expression);
     
     /**
-     * Queries the knoweledge base. Returns a list of MatchResults. 
-     * These MatchResults are solutions to the query.
-     * If the methods returns <code>null</code>, that means there is no solution.
-     * @return a list of solutions to the query
-     * @param formula a formula 
+     * Check wether a given fact is believed by the agent owning this {@link KBase}
+     * instance.
+     * <p>
+     * If the fact is not believed by the agent, the method returns <code>null</code>.
+     * </p>
+     * <p>
+     * The queried fact may include meta-references. In this case, the
+     * method returns all bindings of these meta-references, for which the
+     * corresponding instantiated fact is believed by the agent.
+     * These bindings are returned using a {@link ListOfMatchResults} instance.
+     * If the queried fact include no meta-reference and is actually believed,
+     * the returned {@link ListOfMatchResults} object is an empty list.
+     * </p>
+     * For example, if <code>(age john 25)</code>, <code>(age mary 25)</code> and
+     * <code>(age peter 20)</code> are believed by the agent, querying for
+     * <code>(age ??who 25)</code> will return a list of two
+     * {@link jade.semantics.lang.sl.tools.MatchResult} objects containing
+     * respectively the bindings (<code>??who</code>=<code>john</code>) and
+     * (<code>??who</code>=<code>mary</code>).
+     * 
+     * @return <code>null</code> if the queried fact is not believed by the agent,
+     *         <br>an empty list of bindings if the queried fact is believed by
+     *             the agent and includes no meta-reference,</br>
+     *         <br>a list of bindings, for which the corresponding instantiation
+     *             of the queried fact is believed by the agent.</br> 
+     * @param formula a fact to retrieve in the belief base (may include meta-
+     *                references)
      **/
     public ListOfMatchResults query(Formula formula);
     
     /**
-     * Adds an observer to the kbase at the end of the list of observers. 
+     * Add an observer to this {@link KBase} instance (at the end of the list of
+     * observers). Observers make it possible to monitor the truth value of a
+     * given fact and trigger some action each time this fact becomes believed
+     * by the agent owning the belief base. For example, this mechanism is used
+     * by the SIPs that manage the interpretation of the <code>SUBSCRIBE</code>
+     * or <code>REQUEST-WHEN*</code> messages.
+     *  
      * @param o the observer to add
      */
     public void addObserver(Observer o);
     
     /**
-     * Removes from the kbase all the observers that are identified by the 
-     * finder
-     * @param finder a finder
+     * Remove from this {@link KBase} instance all the observers that are
+     * identified by a given finder.
+     * 
+     * @param finder a finder that identifies the observers to remove.
      */
     public void removeObserver(Finder finder);
     
     /**
-     * Removes from the kbase the observer given in parameter
-     * @param obs the observer to be removed 
+     * Remove from this {@link KBase} instance a given observer.
+     * 
+     * @param obs the observer to remove. 
      */
     public void removeObserver(Observer obs);
 	
 	/**
-	 * This operation causes all the contained observers to be updated,
-	 * considering the given formula has changed. It is needed to 
-	 * trigger the observers even when an assertion doesn't lead to
-	 * a real assertion in the KBase.
+	 * Update the status of all observers concerned by a given formula.
+	 * Updating an observer means resquesting it to check wether its monitored
+	 * formula has become believed by the agent owning the belief base (and
+	 * trigger the associated action if needed). An observer is concerned by
+	 * a formula if asserting this formula may change the truth value of its
+	 * monitored formula.
+	 * <p>
+	 * A <code>null</code> formula forces all observers to be updated.
+	 * </p>
+	 * <p>
+	 * This operation is needed to trigger the observers even when an assertion
+	 * does not lead to an actual assertion in the belief base.
+	 * </p>
+	 * 
+	 * @param formula a formula that has just been asserted.
+	 * @see Observer
 	 */
 	public void updateObservers(Formula formula);
 	
     /**
-     * Returns true if the formula given in parameter is closed on the domain of
-     * values defined by the list of MatchResult given in parameter.
-     * In details, it returns true if:
+     * Return <code>true</code> if a given pattern of formula is closed on a
+     * given domain of values, and <code>false</code> otherwise.
+     * <p>
+     * A pattern of formula is considered as closed on a set of values if and
+     * only if:
      * <ul>
-     * <li>the formula is a mental attitude of the current agent;
-     * <li>if the formula is an And Formula, the left part or the right part of
-     * the formula should be closed;
-     * <li>if the formula is an Or Formula, the left part and the right part of
-     * the formula should be closed;
-     * <li>in the other cases, the formula should be match one of the patterns
-     * stored in the closed patterns list. In this case, the solutions on the
-     * query on the formula should be the same as the domain of values.
+     *     <li>its instantiation with each value is believed by the agent
+     *         owning the belief base,</li>
+     *     <li>the agent believes that its instantiation with any other value
+     *         is necessarily false.</li>
      * </ul>
-     * Otherwise, returns false.
-     * @param pattern the pattern to be tested
-     * @param values the domain of values
-     * @return true if the pattern is closed on the given domain, false if not.
+     * Closed formulas are particularly useful to deal with the <code>iota</code>
+     * and the <code>all</code> IRE quantifiers. For example, the belief
+     * <code>(B ??myself (= (all ?x (age ?x 25)) (set john mary)))</code>
+     * is actually stored in the belief base as the formula
+     * <code>(age ??x 25)</code> closed on the domain (<code>john</code>,
+     * <code>mary</code>). This makes it possible to retrieve implicit entailments
+     * such as <code>(B ??myself (not (age peter 25)))</code> (without the closed
+     * formula mechanism, one could only entail
+     * <code>(not (B ??myself (age peter 25)))</code>).
+     * <p>
+     * Consequent to the formal definition of the underlying logical model for
+     * agents' beliefs, all patterns of mental attitudes of the agent owning
+     * the belief base (that is all patterns logically equivalent to a formula
+     * of the form <code>(B ??myself ??PHI)</code>) are necessarily closed. In
+     * other words, agents know exactly what are all their mental attitudes, they
+     * cannot not be aware of them.
+     * </p> 
+     * <p>
+     * Closed formulas can be defined and undefined using the
+     * {@link #addClosedPredicate(Formula)} and {@link #removeClosedPredicate(Finder)}
+     * methods.
+     * </p>
+     * 
+     * @param pattern the pattern of closed formula to check.
+     * @param values the domain of values to used to check the closure.
+     *               <code>null</code> value does not check the values, only
+     *               the registration of the pattern as a closed formula.
+     * @return <code>true</code> if the pattern is closed on the given domain,
+     *         <code>false</code> otherwise.
      */
     public boolean isClosed(Formula pattern, ListOfMatchResults values);
 	
     /**
-     * By calling this operation on a given pattern of predicate,
-     * you assert that this predicate is closed, which means
-     * the agent (owner of this kbase) knows all the values that
-     * satisfy the predicate.
-     * @param pattern the pattern of the predicate to be considered as closed
+     * Define a new pattern of closed formula.
+     * <p>
+     * If there is no instance of this pattern, which is already believed by
+     * the agent owning the belief base, this is equivalent to assert
+     * <code>(= (all ??VARS ??pattern) (set))</code>, where <code>??VAR</code>
+     * is a sequence of all meta-references occurring in the pattern.
+     * </p>
+     *
+     * @see #isClosed(Formula, ListOfMatchResults)
+     * @param pattern the pattern of formula to declare as closed.
      */
     public void addClosedPredicate(Formula pattern);
 
 	
     /**
-     * Removes the assertion that a given predicate is closed.
-     * @see jade.semantics.kbase.KBase#addClosedPredicate
-     * @param finder the finder used to find the predicate
+     * Remove the definition of a pattern of closed formula. This pattern is
+     * identified by a {@link Finder} object.
+     * 
+     * @see #isClosed(Formula, ListOfMatchResults)
+     * @param finder a finder identifying the pattern of closed formula to remove.
      */
     public void removeClosedPredicate(Finder finder);
     
     
 	/**
-	 * This operation returns all the content of the KBase as strings.
-	 * It could be usefull for debug purpose.
-	 * @return the content of the KBase.
+	 * Return the list of believed facts contained in this {@link KBase} instance
+	 * as an array of {@link java.lang.String}. It is useful for debugging purposes.
+	 * 
+	 * @return the list of believed facts in this belief base.
 	 */
 	public String[] toStrings();
     

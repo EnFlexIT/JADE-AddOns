@@ -45,12 +45,14 @@ import java.util.Date;
  * use it simply consists in overriding the abstract
  * {@link #doApply(MatchResult, ArrayList, SemanticRepresentation)} method.
  * 
- * <br>Additionally, such an Adapter makes available a "one shot" and a
+ * <br>
+ * Additionally, such an Adapter makes available a "one shot" and a
  * "timeout" options. When activated, the first option removes the SIP from the
  * agent's SIP table as soon as the SIP is applied (the SIP will then no longer
  * be applied). The second option removes the SIP from the agent's SIP table as
  * soon as the SIP is applied, if it is applied before a given timeout expires,
  * or when this timeout expires, if the SIP was not applied before.
+ * </br>
  * 
  * @author Thierry Martinez - France Telecom
  * @author Vincent Louis - France Telecom
@@ -257,6 +259,8 @@ public abstract class ApplicationSpecificSIPAdapter extends
 	 * It consumes the input matched SR and produces the returned list of SRs.
 	 * It must be overriden in all subclasses to specify what the application of
 	 * the SIP Adapter consists of.
+	 * 
+	 * @see SemanticInterpretationPrinciple#apply(SemanticRepresentation)
 	 * 
 	 * @param applyResult the result of the matching between the input SR and
 	 *                    the SIP pattern. It contains all the matched

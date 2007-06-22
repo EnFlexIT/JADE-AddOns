@@ -50,6 +50,7 @@ import jade.util.leap.ArrayList;
  * The belief adoption control must be specified within the abstract
  * {@link #doApply(MatchResult, MatchResult, ArrayList, ArrayList, SemanticRepresentation)}
  * method.
+ * 
  * <br>
  * Roughly speaking, this SIP adapter consumes Semantic Representations of the
  * form <code>(B ??myself (I ??agent (B ??myself ??fact)))</code>, and, if
@@ -65,6 +66,8 @@ import jade.util.leap.ArrayList;
  * {@link jade.semantics.interpreter.sips.BeliefTransfer} SIP (that is, they
  * will be systematically adopted among the semantic agent's beliefs).
  * </br>
+ * 
+ * @since JSA 1.4
  * @see jade.semantics.interpreter.sips.BeliefTransfer
  * @author Vincent Louis - France Telecom
  * @version Date: 2006/07/31
@@ -403,6 +406,9 @@ public abstract class BeliefTransferSIPAdapter extends
 	 * method with this parameter. Otherwise, this behaviour should run an
 	 * interpretation process on the <code>refuseResult</code> SR.
 	 * </br>
+	 * 
+	 * @see SemanticInterpretationPrinciple#apply(SemanticRepresentation)
+	 * 
 	 * @param matchFormula result of the matching of the pattern of formula to
 	 *                     believe, which is controlled by this Belief Transfer
 	 *                     SIP Adapter, against the formula to believe, intended
@@ -417,7 +423,8 @@ public abstract class BeliefTransferSIPAdapter extends
 	 *                     must finally not be adopted by the semantic agent.
 	 * @param sr           incoming Semantic Representation that triggered the
 	 *                     application of this Belief Transfer SIP Adapter (this
-	 *                     SR has therefore been consummed).
+	 *                     SR is therefore consummed if the SIP is eventually
+	 *                     applicable).
 	 * @return             a list of SR produced by the application of this SIP,
 	 *                     or <code>null</code> if this SIP is not applicable.
 	 */

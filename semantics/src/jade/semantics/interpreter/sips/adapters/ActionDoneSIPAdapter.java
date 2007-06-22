@@ -56,6 +56,7 @@ import jade.semantics.lang.sl.tools.SL;
  * Several instances of such a SIP may be added to the SIP table of the agent.
  * </br>
  * 
+ * @since JSA 1.4
  * @author Vincent Louis - France Telecom
  *
  */
@@ -102,9 +103,10 @@ public abstract class ActionDoneSIPAdapter extends
 	 * action has been done within a given deadline. A <code>null</code>
 	 * deadline does not set any "timeout" or "one shot" option of the SIP.
 	 * 
-	 * @param capabilities the semantic capabilities that hold the SIP table.
-	 * @param pattern the pattern of action to monitor.
-	 * @param timeout the deadline (given as a Java Date) attached to the SIP.
+	 * @param capabilities  {@link SemanticCapabilities} instance of the
+	 *                      semantic agent owning this instance of SIP.
+	 * @param pattern       the pattern of action to monitor.
+	 * @param timeout       the deadline (given as a {@link Date}) attached to the SIP.
 	 * 
 	 * @see ApplicationSpecificSIPAdapter#setTimeout(Date)
 	 */
@@ -117,10 +119,11 @@ public abstract class ActionDoneSIPAdapter extends
 	 * action has been done within a given timeout. A null timeout only sets the
 	 * SIP in "one shot" mode (without timeout). 
 	 * 
-	 * @param capabilities the semantic capabilities that hold the SIP table.
-	 * @param pattern the pattern of action to monitor.
-	 * @param timeout the timeout (in milliseconds) attached to the SIP.
-	 *                If <code>0</code>, the SIP is only "one shot".
+	 * @param capabilities  {@link SemanticCapabilities} instance of the
+	 *                      semantic agent owning this instance of SIP.
+	 * @param pattern       the pattern of action to monitor.
+	 * @param timeout       the timeout (in milliseconds) attached to the SIP.
+	 *                      If <code>0</code>, the SIP is only "one shot".
 	 * 
 	 * @see ApplicationSpecificSIPAdapter#setTimeout(long)
 	 */
@@ -130,12 +133,15 @@ public abstract class ActionDoneSIPAdapter extends
 
 	/**
 	 * Create an ActionDoneSIPAdapter that monitors the belief that a given
-	 * action has been done within a given deadline. A <code>null</code>
-	 * deadline does not set any "timeout" or "one shot" option of the SIP.
+	 * action has been done within a given deadline. Equivalent to
+	 * {@link #ActionDoneSIPAdapter(SemanticCapabilities, ActionExpression, Date)},
+	 * with the <code>pattern</code> parameter specified as a {@link String}
+	 * object (representing a FIPA-SL action expression).
 	 * 
-	 * @param capabilities the semantic capabilities that hold the SIP table.
-	 * @param pattern the pattern of action to monitor.
-	 * @param timeout the deadline (given as a Java Date) attached to the SIP.
+	 * @param capabilities  {@link SemanticCapabilities} instance of the
+	 *                      semantic agent owning this instance of SIP.
+	 * @param pattern       the pattern of action to monitor.
+	 * @param timeout       the deadline (given as a {@link Date}) attached to the SIP.
 	 * 
 	 * @see ApplicationSpecificSIPAdapter#setTimeout(Date)
 	 */
@@ -145,13 +151,16 @@ public abstract class ActionDoneSIPAdapter extends
 
 	/**
 	 * Create an ActionDoneSIPAdapter that monitors the belief that a given
-	 * action has been done within a given timeout. A null timeout only sets the
-	 * SIP in "one shot" mode (without timeout). 
+	 * action has been done within a given timeout. Equivalent to
+	 * {@link #ActionDoneSIPAdapter(SemanticCapabilities, ActionExpression, long)},
+	 * with the <code>pattern</code> parameter specified as a {@link String}
+	 * object (representing a FIPA-SL action expression).
 	 * 
-	 * @param capabilities the semantic capabilities that hold the SIP table.
-	 * @param pattern the pattern of action to monitor.
-	 * @param timeout the timeout (in milliseconds) attached to the SIP.
-	 *                If <code>0</code>, the SIP is only "one shot".
+	 * @param capabilities  {@link SemanticCapabilities} instance of the
+	 *                      semantic agent owning this instance of SIP.
+	 * @param pattern       the pattern of action to monitor.
+	 * @param timeout       the timeout (in milliseconds) attached to the SIP.
+	 *                      If <code>0</code>, the SIP is only "one shot".
 	 * 
 	 * @see ApplicationSpecificSIPAdapter#setTimeout(long)
 	 */
