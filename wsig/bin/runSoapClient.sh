@@ -1,5 +1,5 @@
 #!/bin/sh
 
-WSIGEXAMPLESCP=../examples/lib/wsigExamples.jar
+CP=../webModule/WEB-INF/classes
 
-java -classpath $WSIGEXAMPLESCP com.tilab.wsig.soap.SoapClient $1 $2
+java -classpath $CP com.tilab.wsig.soap.SoapClient $1 $2
