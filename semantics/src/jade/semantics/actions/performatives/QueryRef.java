@@ -58,8 +58,14 @@ import jade.semantics.lang.sl.tools.MatchResult;
  * <li> believes that the other agent can inform the querying agent the object 
  * or set of objects that correspond to the descriptor.
  * </ul>
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
- * @version Date: 2004/11/30 Revision: 1.0 
+ * @version Date: 2004/11/30 Revision: 1.0
+ * @since JSA 1.0 
  */
 public class QueryRef extends Request {
 	/*********************************************************************/
@@ -69,8 +75,8 @@ public class QueryRef extends Request {
     /**
      * Creates a new <code>QueryRef</code> prototype. By default, the surface content format
      * is set to [IdentifyingExpression]. 
-     * @param table the SemanticActionTable, which this action prototype belongs
-     *            to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content (used to control the validity of the content)
@@ -96,8 +102,8 @@ public class QueryRef extends Request {
      * The surface content format, the surface content format message, and
      * the rational effect recognition pattern are the default ones. 
      * The surface performative is set to <code>QUERY_REF</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public QueryRef(SemanticCapabilities capabilities) {
     	this(capabilities, ACLMessage.QUERY_REF, null, null, null);

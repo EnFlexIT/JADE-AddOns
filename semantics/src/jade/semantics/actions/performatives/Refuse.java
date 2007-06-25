@@ -55,8 +55,14 @@ import jade.semantics.lang.sl.tools.SL.WrongTypeException;
  * the refusal), and,
  * <li>the reason for the refusal is represented by a proposition which is the 
  * second element of the content (which may be the constant <code>true</code>).
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/04/25 Revision: 1.0
+ * @since JSA 1.0
  */
 public class Refuse extends CommunicativeActionImpl {
     
@@ -91,8 +97,8 @@ public class Refuse extends CommunicativeActionImpl {
      * is set to "(and (B ??receiver (not (feasible ??act)))(and (B ??receiver 
      * ??condition) (and (B ??receiver (not (done ??act)))(B ??receiver 
      * (not (I ??sender (done ??act)))))))". 
-     * @param table the SemanticActionTable, which this action prototype belongs
-     *            to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content (used to control the validity of the content)
@@ -129,8 +135,8 @@ public class Refuse extends CommunicativeActionImpl {
      * The surface content format, the surface content format message, and
      * the rational effect recognition pattern are the default ones. 
      * The surface performative is set to <code>REFUSE</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Refuse(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.REFUSE, null, null, null);

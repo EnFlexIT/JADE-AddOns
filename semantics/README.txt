@@ -55,7 +55,7 @@ The required software to build and run agents upon the JADE Semantics Add-On
 are:
 - the Java Development Kit version 1.5 (1.4 is enough if the javadoc is not
 compiled),
-- the JADE framework version 3.3
+- the JADE framework version 3.3 or higher
 Additionally, the ANT program is needed to build (compile the source code and
 generate the javadoc) the Semantics Add-On framework from the build.xml file
 (ANT is available from http://jakarta.apache.org).

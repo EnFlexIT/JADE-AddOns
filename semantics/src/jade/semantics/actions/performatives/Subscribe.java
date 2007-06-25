@@ -51,8 +51,14 @@ import jade.semantics.lang.sl.tools.SL.WrongTypeException;
  * The act of requesting a persistent intention to notify the sender of the value
  * of a reference, and to notify again whenever the object identified by the 
  * reference changes.
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/02/23 Revision: 1.0
+ * @since JSA 1.0
  */
 public class Subscribe extends RequestWhenever {
     
@@ -69,8 +75,8 @@ public class Subscribe extends RequestWhenever {
     /**
      * Creates a new <code>Subscribe</code> prototype. By default, the surface content format
      * is set to [IdentifyingExpression].
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -90,8 +96,8 @@ public class Subscribe extends RequestWhenever {
     /**
      * Creates a new <code>Subscribe</code> prototype. The surface content 
      * format, and the surface content format message are the default ones. 
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Subscribe(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.SUBSCRIBE, null, null);

@@ -43,16 +43,22 @@ import jade.semantics.lang.sl.tools.SL;
  * just sent to agt1. The first element of the message content is the action
  * agt1 has not understood. The second element is a proposition representing
  * the reason for the failure to understand.
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/05/18 Revision: 1.0
+ * @since JSA 1.0
  */
 public class NotUnderstood extends ActionReasonInform {
     
     /**
      * Creates a new <code>NotUnderstood</code> prototype. By default, the inform content
      * is set to "(and (not-understood ??action) ??reason)".
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -75,8 +81,8 @@ public class NotUnderstood extends ActionReasonInform {
      * The surface content format, and the surface content format message, 
      * are set to <code>null</code>. 
      * The surface performative is set to <code>NOT_UNDERSTOOD</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public NotUnderstood(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.NOT_UNDERSTOOD, null, null);

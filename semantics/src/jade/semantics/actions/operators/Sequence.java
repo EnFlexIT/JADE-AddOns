@@ -50,8 +50,14 @@ import jade.util.leap.ArrayList;
 
 /**
  * Defines a prototype for the sequence operator.
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
+ * @since JSA 1.0
  */
 public class Sequence extends SemanticActionImpl {
     /**
@@ -80,7 +86,8 @@ public class Sequence extends SemanticActionImpl {
     
     /**
      * Creates a new Sequence Action prototype.
-     * @param table the semantic action table
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Sequence(SemanticCapabilities capabilities) {
         super(capabilities);

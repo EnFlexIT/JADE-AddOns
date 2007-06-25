@@ -45,15 +45,21 @@ import jade.semantics.lang.sl.tools.SL.WrongTypeException;
  * reason. The first part of the content is the action not feasible. The second
  * part is the reason for the failure, which is represented by a proposition. 
  * It may be the constant <code>true</code>. 
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/05/18 Revision: 1.0
+ * @since JSA 1.0
  */
 public class Failure extends ActionReasonInform {
     /**
      * Creates a new <code>Failure</code> prototype. By default, the inform content
      * is set to "(and (failure ??action) (and (not (done ??action)) (and (not (I ??sender (done ??action))) ??reason)))".
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -76,8 +82,8 @@ public class Failure extends ActionReasonInform {
      * The surface content format, and the surface content format message, 
      * are the default ones. 
      * The surface performative is set to <code>FAILURE</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Failure(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.FAILURE, null, null);

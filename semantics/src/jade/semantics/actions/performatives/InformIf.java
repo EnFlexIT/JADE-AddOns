@@ -66,8 +66,14 @@ import java.util.Date;
  * <li><i>sender</i> informs <i>receiver</i> that <i>proposition</i>
  * <li><i>sender</i> informs <i>receiver</i> that not <i>proposition</i>
  * </ul> 
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
+ * @since JSA 1.0
  */
 public class InformIf extends Alternative implements CommunicativeActionProto {
 
@@ -176,8 +182,8 @@ public class InformIf extends Alternative implements CommunicativeActionProto {
      * Creates a new <code>InformIf</code> action prototype. By default, the
      * rational effect recognition pattern is "(or (B ??receiver ??formula) (B ??receiver (not (??formula))))".
      * By default, the surface content format is [Formula].
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -210,8 +216,8 @@ public class InformIf extends Alternative implements CommunicativeActionProto {
      * Creates a new <code>InformIf</code> action prototype. The surface content
      * format, the surface content format message, and the rational effect
      * recognition pattern are the default ones.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public InformIf(SemanticCapabilities capabilities) {
     	this(capabilities, ACLMessage.INFORM_IF, null, null, null);

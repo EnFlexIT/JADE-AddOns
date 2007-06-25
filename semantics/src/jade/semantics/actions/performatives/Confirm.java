@@ -54,9 +54,15 @@ import jade.semantics.lang.sl.tools.SL;
  * <li>the sender believes the proposition that is the content of the message,
  * <li>the sender whishes the receiver to believe that proposition also.
  * </ul>
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * 
  * @author Vincent Pautret - France Telecom
- * @version Date: 2004/11/30 Revision: 1.0 
+ * @version Date: 2004/11/30 Revision: 1.0
+ * @since JSA 1.0 
  */
 public class Confirm extends Assertive {
     
@@ -70,8 +76,8 @@ public class Confirm extends Assertive {
      * <li>"(B ??sender ??formula)"
      * <li>"(B ??sender (B ??receiver ??formula))"
      * </ul>
-	 * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -98,8 +104,8 @@ public class Confirm extends Assertive {
      * The surface content format, the surface content format message, and
      * the rational effect recognition pattern are the default ones. 
      * The surface performative is set to <code>CONFIRM</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Confirm(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.CONFIRM, null, null, null);

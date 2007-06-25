@@ -47,8 +47,14 @@ import jade.semantics.lang.sl.tools.SL.WrongTypeException;
  * It is a general-purpose rejection to a previously submitted proposal. The agent
  * sending the rejection informs the receiver that it has no intention that the
  * recipient performs the given action under the given preconditions. 
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/02/24 Revision: 1.0
+ * @since JSA 1.0
  */
 public class RejectProposal extends NonPrimitiveInform {
     
@@ -58,8 +64,8 @@ public class RejectProposal extends NonPrimitiveInform {
      * is set to "(and (not (I ??sender (done ??act ??phi))) ??psi)". By default, 
      * the surface content format is set to 
      * <code>[ActionExpression, Formula, Formula]</code>.  
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -84,8 +90,8 @@ public class RejectProposal extends NonPrimitiveInform {
      * The surface content format, the surface content format message, and
      * the inform content pattern are the default ones. 
      * The surface performative is set to <code>REJECT_PROPOSAL</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public RejectProposal(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.REJECT_PROPOSAL, null, null, null);

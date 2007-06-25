@@ -31,27 +31,30 @@ Boston, MA  02111-1307, USA.
 package jade.semantics.actions.performatives;
 
 import jade.lang.acl.ACLMessage;
-import jade.semantics.actions.SemanticActionTable;
 import jade.semantics.interpreter.SemanticCapabilities;
-import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.tools.SL;
 
 /**
  * This class represents the semantic action: <code>Accept Proposal</code>.<br>
  * It is the action of accepting a previously submitted proposal to perform an 
  * action. 
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/03/12 Revision: 1.0
+ * @since JSA 1.0
  */
 public class AcceptProposal extends ActConditionInform {
 
     /**
      * Creates a new AcceptProposal prototype. By default, the inform content
-     * is set to "(I ??sender (done ??act ??condition))". The action is not from the
-     * sender (the boolean <code>isActFromSender</code> is set to <code>false</code>
-     *  {@link ActConditionInform#ActConditionInform(SemanticActionTable, int, Class[], String, boolean, Formula)}).
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * is set to "(I ??sender (done ??act ??condition))".
+     * 
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -75,7 +78,8 @@ public class AcceptProposal extends ActConditionInform {
      * The surface content format, and the surface content format message 
      * are the default ones. 
      * The surface performative is set to <code>ACCEPT_PROPOSAL</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * to
      */
     public AcceptProposal(SemanticCapabilities capabilities) {

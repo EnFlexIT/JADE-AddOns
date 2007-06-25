@@ -53,8 +53,14 @@ import jade.semantics.lang.sl.tools.SL.WrongTypeException;
  * In fact, this action is a macro action that represents an unbounded, 
  * possibly infinite set of possible courses of action, in which <i>sender</i>
  * informs <i>receiver</i> of the referent <i>x</i>.  
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
+ * @since JSA 1.0
  */
 public class InformRef extends CommunicativeActionImpl {
     
@@ -73,8 +79,8 @@ public class InformRef extends CommunicativeActionImpl {
      * <li>"(exists ?y (B ??sender (= ??ire ?y)))"
      * <li>"(B ??sender (exists ?y (B ??receiver (= ??ire ?y))))"
      * </ul>
-     * @param table the SemanticActionTable, which this action prototype belongs
-     *            to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content (used to control the validity of the content)
@@ -106,8 +112,8 @@ public class InformRef extends CommunicativeActionImpl {
      * The surface content format, the surface content format message, and
      * the rational effect recognition pattern are the default ones. 
      * The surface performative is set to <code>INFORM_REF</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public InformRef(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.INFORM_REF, null, null, null);

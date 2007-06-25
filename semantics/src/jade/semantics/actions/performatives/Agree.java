@@ -31,19 +31,26 @@ Boston, MA  02111-1307, USA.
 package jade.semantics.actions.performatives;
 
 import jade.lang.acl.ACLMessage;
-import jade.semantics.actions.SemanticActionTable;
 import jade.semantics.interpreter.SemanticCapabilities;
-import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.tools.SL;
 
 /**
- * The action of agreeing to perform some action, possibly in the future. <br>
- * <code>Agree</code> is the general-purpose agreement to a previously submitted <code>request</code>
+ * This class implements the prototype of the <code>AGREE</code> FIPA-ACL
+ * communicative act.
+ * <br>
+ * <code>AGREE</code> is the general-purpose agreement to a previously submitted <code>REQUEST</code>
  * to perform some action. The agent sending the agreement informs the receiver
  * that it does intend to perform the action, but not until the given precondition
  * is true.
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
+ * 
  * @author Vincent Pautret - France Telecom
- * @version Date: 2005/02/24 Revision: 1.0 
+ * @version Date: 2005/02/24 Revision: 1.0
+ * @since JSA 1.0 
  */
 public class Agree extends ActConditionInform {
     
@@ -52,17 +59,18 @@ public class Agree extends ActConditionInform {
     /*********************************************************************/
 
     /**
-     * Creates a new <code>Agree</code> prototype. By default, the inform content
-     * is set to "(I ??sender (done ??act ??condition))". The action is from the
-     * sender (the boolean <code>isActFromSender</code> is set to <code>true</code>
-     * {@link ActConditionInform#ActConditionInform(SemanticActionTable, int, Class[], String, boolean, Formula)}).
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
-     * @param surfacePerformative the surface form
+     * Create a new <code>Agree</code> prototype. According to the FIPA-ACL
+     * formal specifications, the corresponding <code>INFORM</code> content
+     * is set to <code>(I ??sender (done ??act ??condition))</code>.
+     * 
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
+     * @param surfacePerformative the surface form (specified with the constants
+     *                            from the {@link ACLMessage} class).
      * @param surfaceContentFormat the list of class expected in the surface
-     * content
+     * content.
      * @param surfaceContentFormatMessage the message to send when an 
-     * unexpected exception occurs
+     * unexpected exception occurs.
      */
     public Agree(SemanticCapabilities capabilities,
 			     int surfacePerformative, 
@@ -81,8 +89,8 @@ public class Agree extends ActConditionInform {
      * The surface content format, and the surface content format message 
      * are the default ones. 
      * The surface performative is set to <code>AGREE</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Agree(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.AGREE, null, null);

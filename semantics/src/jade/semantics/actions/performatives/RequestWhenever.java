@@ -31,10 +31,8 @@ Boston, MA  02111-1307, USA.
 package jade.semantics.actions.performatives;
 
 import jade.lang.acl.ACLMessage;
-import jade.semantics.actions.SemanticActionTable;
 import jade.semantics.interpreter.SemanticCapabilities;
 import jade.semantics.lang.sl.grammar.Content;
-import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.Node;
 import jade.semantics.lang.sl.tools.SL;
 import jade.semantics.lang.sl.tools.SL.WrongTypeException;
@@ -45,18 +43,22 @@ import jade.semantics.lang.sl.tools.SL.WrongTypeException;
  * proposition becomes true ans thereafter each time the proposition becomes true again..<br>
  * The content of this action is a tuple of an action expression and a 
  * proposition.<br>
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
+ * @since JSA 1.0
  */
 public class RequestWhenever extends ActConditionInform {
     
     /**
      * Creates a new <code>RequestWhenever</code> prototype. By default, the inform content
      * is set to "(or (I ??sender (done ??act )) (or (forall ?e (not (done ?e (not (B ??receiver ??condition))))) (not (B ??receiver ??condition))))". 
-     * The action is not from the sender (the boolean <code>isActFromSender</code> is set to <code>false</code>
-     * {@link ActConditionInform#ActConditionInform(SemanticActionTable, int, Class[], String, boolean, Formula)}).
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -82,8 +84,8 @@ public class RequestWhenever extends ActConditionInform {
      * The surface content format, and the surface content format message 
      * are the default ones. 
      * The surface performative is set to <code>REQUEST_WHENEVER</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */   
     public RequestWhenever(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.REQUEST_WHENEVER, null, null);

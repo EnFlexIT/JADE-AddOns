@@ -48,8 +48,14 @@ import jade.semantics.lang.sl.tools.SL.WrongTypeException;
 /**
  * The action of one agent informing another agent that the first agent no longer
  * has the intention that the second agent perform some action. 
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/04/21 Revision: 1.0
+ * @since JSA 1.0
  */
 public class Cancel extends Disconfirm {
     
@@ -67,9 +73,11 @@ public class Cancel extends Disconfirm {
      * Creates a new <code>Cancel</code> prototype. The performative is set to 
      * <code>CANCEL</code>. 
      * By default, the surface content format is set to <code>ActionExpression</code>.
-     * By default, the rational effect recognition pattern is set to  
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to "(B ??receiver (not (I ??sender (done ??action))))".
+     * By default, the rational effect recognition pattern is set to
+     * "(B ??receiver (not (I ??sender (done ??action))))". 
+     *  
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -95,8 +103,8 @@ public class Cancel extends Disconfirm {
      * The surface content format, the surface content format message, and
      * the rational effect recognition pattern are the default ones. 
      * The surface performative is set to <code>CANCEL</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Cancel(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.CANCEL, null, null, null);

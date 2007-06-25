@@ -60,8 +60,15 @@ import jade.semantics.lang.sl.tools.SL.WrongTypeException;
  * is false,
  * <li> the sender whishes the receiver to believe the negated proposition also.
  * </ul> 
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
+ * 
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
+ * @since JSA 1.0
  */
 public class Disconfirm extends Assertive {
 
@@ -79,8 +86,8 @@ public class Disconfirm extends Assertive {
      * <li>"(B ??sender (not ??formula))"
      * <li>"(B ??sender (B ??receiver (not ??formula)))"
      * </ul>
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -107,8 +114,8 @@ public class Disconfirm extends Assertive {
      * The surface content format, the surface content format message, and
      * the rational effect recognition pattern are the default ones. 
      * The surface performative is set to <code>DISCONFIRM</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Disconfirm(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.DISCONFIRM, null, null, null);

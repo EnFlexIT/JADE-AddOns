@@ -48,8 +48,14 @@ import jade.semantics.lang.sl.tools.SL.WrongTypeException;
  * This class represents the semantic action: <code>Request</code>. <br>
  * The sender requests the receiver to perform some action.<br>
  * The content of this action is an action expression.<br>
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
- * @version Date: 2004/11/08 Revision: 1.0 
+ * @version Date: 2004/11/08 Revision: 1.0
+ * @since JSA 1.0 
  */
 public class Request extends CommunicativeActionImpl {
     
@@ -74,8 +80,8 @@ public class Request extends CommunicativeActionImpl {
      * <li>null
      * <li>"(B ??sender (I ??receiver (done ??action true)))"
      * </ul>
-     * @param table the SemanticActionTable, which this action prototype belongs
-     *            to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content (used to control the validity of the content)
@@ -107,8 +113,8 @@ public class Request extends CommunicativeActionImpl {
      * The surface content format, the surface content format message, and
      * the rational effect recognition pattern are the default ones. 
      * The surface performative is set to <code>REQUEST</code>.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Request(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.REQUEST, null, null, null);

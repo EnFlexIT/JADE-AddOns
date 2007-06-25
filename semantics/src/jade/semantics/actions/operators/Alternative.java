@@ -36,7 +36,6 @@ import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import jade.semantics.actions.SemanticAction;
 import jade.semantics.actions.SemanticActionImpl;
-import jade.semantics.actions.SemanticActionTable;
 import jade.semantics.behaviours.AlternativeBehaviour;
 import jade.semantics.behaviours.SemanticBehaviour;
 import jade.semantics.interpreter.SemanticCapabilities;
@@ -53,8 +52,14 @@ import jade.util.leap.ArrayList;
 
 /**
  * Defines a prototype for the alternative operator.
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2004/11/30 Revision: 1.0 
+ * @since JSA 1.0
  */
 public class Alternative extends SemanticActionImpl {
     
@@ -84,7 +89,8 @@ public class Alternative extends SemanticActionImpl {
     
     /**
      * Creates a new Alternative Action prototype.
-     * @param table the semantic action table
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Alternative(SemanticCapabilities capabilities) {
         super(capabilities);

@@ -31,10 +31,8 @@ Boston, MA  02111-1307, USA.
 package jade.semantics.actions.performatives;
 
 import jade.lang.acl.ACLMessage;
-import jade.semantics.actions.SemanticActionTable;
 import jade.semantics.interpreter.SemanticCapabilities;
 import jade.semantics.lang.sl.grammar.Content;
-import jade.semantics.lang.sl.grammar.Formula;
 import jade.semantics.lang.sl.grammar.Node;
 import jade.semantics.lang.sl.tools.SL;
 import jade.semantics.lang.sl.tools.SL.WrongTypeException;
@@ -44,8 +42,14 @@ import jade.semantics.lang.sl.tools.SL.WrongTypeException;
  * certain preconditions. The content contains an action description, 
  * representing the action that the sender is proposing to perform, and a 
  * proposition representing the preconditions on the performance of the action.
+ * <p>
+ * This class is not intended to be directly used by developers. It is loaded
+ * in semantic agents' semantic action table by the
+ * {@link jade.semantics.actions.DefaultSemanticActionLoader}.
+ * </p>
  * @author Vincent Pautret - France Telecom
  * @version Date: 2005/02/24 Revision: 1.0
+ * @since JSA 1.0
  */
 public class Propose extends ActConditionInform {
     
@@ -56,11 +60,9 @@ public class Propose extends ActConditionInform {
     /**
      * Creates a new <code>Propose</code> prototype. By default, the inform content
      * is set to "(or (not (I ??receiver (done ??act ??condition))) (I ??sender (done ??act ??condition)))".
-     * The action is from the
-     * sender (the boolean <code>isActFromSender</code> is set to <code>true</code>
-     * {@link ActConditionInform#ActConditionInform(SemanticActionTable, int, Class[], String, boolean, Formula)}).
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * 
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      * @param surfacePerformative the surface form
      * @param surfaceContentFormat the list of class expected in the surface
      * content
@@ -83,8 +85,8 @@ public class Propose extends ActConditionInform {
      * The surface content format, and the surface content format message 
      * are set to <code>null</code>. 
      * The surface performative is set the default ones.
-     * @param table the SemanticActionTable, which this action prototype belongs
-     * to
+     * @param capabilities the {@link SemanticCapabilities} instance, which this
+     *                     action prototype belongs to.
      */
     public Propose(SemanticCapabilities capabilities) {
         this(capabilities, ACLMessage.PROPOSE, null, null);
