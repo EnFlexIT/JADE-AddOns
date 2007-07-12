@@ -241,7 +241,7 @@ public class SoapToJade extends DefaultHandler {
 				Class clazz = SoapUtils.getClassByType(onto, paramEi.getType());
 
 				// Fill value
-				if (clazz.isPrimitive()) {
+				if (SoapUtils.isPrimitiveJadeType(clazz)) {
 					// Primitive type
 					paramEi.setValue(SoapUtils.getPrimitiveValue(paramEi.getType(), fieldValue));
 					log.debug("Set "+name+" with "+paramEi.getValue());

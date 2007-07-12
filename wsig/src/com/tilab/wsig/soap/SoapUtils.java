@@ -74,6 +74,15 @@ public class SoapUtils {
 	}
 
 	/**
+	 * Return true if clazz is a primitive jade type
+	 * @param clazz
+	 * @return
+	 */
+	public static boolean isPrimitiveJadeType(Class clazz) {
+		return clazz.isPrimitive() || clazz.equals(String.class);
+	}
+	
+	/**
 	 * getClassFromOnto
 	 * @param onto
 	 * @param name

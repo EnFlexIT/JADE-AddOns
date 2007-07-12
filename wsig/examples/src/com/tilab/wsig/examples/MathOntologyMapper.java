@@ -40,6 +40,12 @@ public class MathOntologyMapper {
 		return abs;
 	}
 	
-	
-
+	public Abs toAbs(String real,String immaginary){
+		Abs abs = new Abs();
+		Complex complex = new Complex();
+		complex.setImmaginary(Float.parseFloat(immaginary));
+		complex.setReal(Float.parseFloat(real));
+		abs.setComplex(complex);
+		return abs;
+	}
 }

@@ -104,6 +104,7 @@ public class WSDLGeneratorUtils {
 
 	public static Hashtable<Class,String> java2xsd = new Hashtable<Class,String>();
 	static {
+		java2xsd.put(java.lang.String.class, "string");
 		java2xsd.put(java.lang.Boolean.class, "boolean");
 		java2xsd.put(java.lang.Byte.class, "byte");
 		java2xsd.put(java.lang.Double.class, "double");
