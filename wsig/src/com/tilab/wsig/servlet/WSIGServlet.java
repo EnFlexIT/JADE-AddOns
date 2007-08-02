@@ -50,6 +50,10 @@ import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.axis.Message;
 import org.apache.axis.transport.http.HTTPConstants;
@@ -230,6 +234,12 @@ public class WSIGServlet extends HttpServlet {
 		try {
 			soapResponse = jadeToSoap.convert(operationResult, wsigService, operationName);
 			
+			log.debug("SOAP response:");
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            Transformer trans = TransformerFactory.newInstance().newTransformer();
+            trans.transform(new DOMSource(soapResponse.getSOAPPart()), new StreamResult(baos));
+            log.debug(baos.toString());
+
 		} catch(Exception e) {
 			log.error("Error in jade to soap conversion", e);
 			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in jade to soap conversion");
