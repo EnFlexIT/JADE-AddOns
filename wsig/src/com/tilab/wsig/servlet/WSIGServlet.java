@@ -236,9 +236,8 @@ public class WSIGServlet extends HttpServlet {
 			
 			log.debug("SOAP response:");
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            Transformer trans = TransformerFactory.newInstance().newTransformer();
-            trans.transform(new DOMSource(soapResponse.getSOAPPart()), new StreamResult(baos));
-            log.debug(baos.toString());
+			soapResponse.writeTo(baos);
+			log.debug(baos.toString());
 
 		} catch(Exception e) {
 			log.error("Error in jade to soap conversion", e);
