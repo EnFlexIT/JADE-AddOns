@@ -205,6 +205,7 @@ public class SoapToJade extends DefaultHandler {
 			}
 
 		} catch(Exception e) {
+			level = 0;
 			throw new RuntimeException("Error parsing element "+name, e);
 		}
 	}
@@ -301,6 +302,7 @@ public class SoapToJade extends DefaultHandler {
 				}
 			}
 		} catch(Exception e) {
+			level = 0;
 			throw new RuntimeException("Error parsing element "+name, e);
 		}
 

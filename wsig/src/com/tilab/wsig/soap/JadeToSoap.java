@@ -90,6 +90,9 @@ public class JadeToSoap {
         envelope.addNamespaceDeclaration(PREFIX_Q1, tns);
         
         SOAPBody body = envelope.getBody();
+
+        String responseElementName = operationName + "Response";
+        SOAPElement responseElement = addSoapElement(body, responseElementName, null, null);
         
         // Get operation schema
         String operationNameOnto = operationName; 
@@ -105,7 +108,7 @@ public class JadeToSoap {
         log.debug("Ontology result type: "+resultSchema.getTypeName());
         
         // Create soap message
-        convertObjectToSoapElement(actionSchema, resultSchema, resultObject, WSDLGeneratorUtils.getResultName(operationName), body);
+        convertObjectToSoapElement(actionSchema, resultSchema, resultObject, WSDLGeneratorUtils.getResultName(operationName), responseElement);
 
         // Save all modifies of soap message
         soapResponse.saveChanges();
@@ -222,13 +225,11 @@ public class JadeToSoap {
 	 */
 	private SOAPElement addSoapElement(SOAPElement rootSoapElement, String elementName, String uri, String soapType) throws Exception {
 		
-		String prefix;
-		if (uri.equals(WSDLConstants.xsd)) {
+		String prefix = PREFIX_Q1;
+		if (uri != null && uri.equals(WSDLConstants.xsd)) {
 			prefix = PREFIX_Q0;
-		} else {
-			prefix = PREFIX_Q1;
 		}
-		
+			
 		// Create Name and Element
 	    Name soapName = envelope.createName(elementName, "", "");
 	    SOAPElement soapElement = rootSoapElement.addChildElement(soapName);
@@ -239,8 +240,10 @@ public class JadeToSoap {
 	    }
 	    
 	    // Add type
-	    Name typeName = envelope.createName("type", "xsi", WSDLConstants.xsi);
-	    soapElement.addAttribute(typeName, prefix+":"+soapType);
+	    if (soapType != null) {
+		    Name typeName = envelope.createName("type", "xsi", WSDLConstants.xsi);
+		    soapElement.addAttribute(typeName, prefix+":"+soapType);
+	    }
 	    
 	    return soapElement;
 	}
