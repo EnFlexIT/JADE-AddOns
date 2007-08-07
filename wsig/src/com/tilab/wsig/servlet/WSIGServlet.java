@@ -161,7 +161,15 @@ public class WSIGServlet extends HttpServlet {
 			elaborateWSIGAgentCommand(wsigAgentCommand, httpResponse);
 			return;
 		}
-
+		
+		// Check if the request is WSDL request
+		if (httpRequest.getParameterMap().containsKey("WSDL")) {
+			// Elaborate WSDL request
+			elaborateWSDLRequest(httpRequest.getRequestURL().toString(), httpResponse);
+			return;
+			
+		}
+		
 		// SOAP message elaboration
 		log.info("WSIG SOAP request arrived, start elaboration...");
 
@@ -312,7 +320,39 @@ public class WSIGServlet extends HttpServlet {
 		// Redirect to console home page
 		httpResponse.sendRedirect(consoleUri);
 	}
-	
+
+	/**
+	 * Elaborate WSDL request
+	 * @param requestURL
+	 * @param httpResponse
+	 */
+	private void elaborateWSDLRequest(String requestURL, HttpServletResponse httpResponse) throws ServletException, IOException {
+		
+		log.info("WSDL request arrived ("+requestURL+")");
+
+		int pos = requestURL.lastIndexOf('/');
+		if (pos == -1) {
+			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "WSDL request " + requestURL + " not correct");
+			return;
+		}
+
+		String serviceName = requestURL.substring(pos+1);
+		log.info("WSDL request for service "+serviceName);
+		
+		// Get WSIGService 
+		WSIGService wsigService = wsigStore.getService(serviceName);
+		if (wsigService == null) {
+			log.error("Service "+serviceName+" not present in wsig");
+			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Service "+serviceName+" not present in wsig");
+			return;
+		}
+
+		// Redirect to wsdl
+		String wsdlUrl = wsigService.getWsdl().toString();
+		log.info("Redirect to " + wsdlUrl);
+		httpResponse.sendRedirect(wsdlUrl);
+	}
+
 	/**
 	 * get operation name from soap body
 	 * @param body
