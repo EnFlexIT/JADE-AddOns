@@ -166,19 +166,27 @@ class LocalJadeController implements JadeController, OutputHandler {
 			
 			stopErrorManager();
 		}   // END of run()
-		
+
 		private void handleLine(String line) {
 			if (line != null) {
+				String id = name;
+				if (id == null) {
+					id = containerName;
+				}
+				if (id == null) {
+					id = "(unknown)";
+				}
 				// Redirect sub-process output
-				outHandler.handleOutput(name, line);
-				
+				outHandler.handleOutput(id, line);
+
 				// Possibly update the list of addresses of this JADE instance
 				catchAddress(line);
-			
+
 				// Notify the launcher when JADE startup is completed 
 				if (containerName == null && line.startsWith("Agent container") && line.endsWith("is ready.")) {
 					catchContainerName(line);
 					notifyStarted();
+				} else {
 				}
 			}
 		}

@@ -2,19 +2,19 @@
  JADE - Java Agent DEvelopment Framework is a framework to develop 
  multi-agent systems in compliance with the FIPA specifications.
  Copyright (C) 2000 CSELT S.p.A. 
- 
+
  GNU Lesser General Public License
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation, 
  version 2.1 of the License. 
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the
  Free Software Foundation, Inc., 59 Temple Place - Suite 330,
@@ -37,26 +37,26 @@ import jade.util.leap.List;
  @author Giovanni Caire - TILAB
  */
 public class TSDaemon extends UnicastRemoteObject implements RemoteManager, OutputHandler {
-	
+
 	public static final String DEFAULT_NAME = "TSDaemon";
 	public static final int DEFAULT_PORT = 7777;
-	
+
 	private Hashtable controllers = new Hashtable();
 	private int instanceCnt = 0;
-	
+
 	private String additionalArgs = null;
-	
+
 	public TSDaemon() throws RemoteException {
 		super();
 	}
 	/**
 	@param port the port where the TSDaemon started
 	@param name the name used for name binding
-	**/
+	 **/
 	protected void printWelcomeMessage(String port, String name) {
 		System.out.println("Test Suite Daemon ready on port " + port + " using name: " + name);
 	}
-	
+
 	public static void main(String args[]) {
 		try {
 			TSDaemon daemon = new TSDaemon();
@@ -75,16 +75,16 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 				sb.append(" ");
 			}
 		}
-		
+
 		try {
 			// Create an RMI registry on the local host and DAEMON port
 			// (if one is already running just get it)
 			String name = System.getProperty("tsdaemon.name", DEFAULT_NAME);
-		  String port = System.getProperty("tsdaemon.port", String.valueOf(DEFAULT_PORT));
+			String port = System.getProperty("tsdaemon.port", String.valueOf(DEFAULT_PORT));
 			String hostName = InetAddress.getLocalHost().getHostName();      
 			Registry theRegistry = getRmiRegistry(hostName, Integer.parseInt(port));
 			String registryID = new String("rmi://"+hostName+":"+port);
-			
+
 			// Bind to the registry
 			additionalArgs = sb.toString();
 			Naming.bind(new String(registryID+"//"+name), this);
@@ -96,7 +96,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 			System.exit(1);
 		}
 	}
-	
+
 	/**
 	 * If an RMI registry is already active on this host
 	 * at the given portNumber, then that registry is returned, 
@@ -113,16 +113,16 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 		catch (Exception exc) {
 			rmiRegistry = null;
 		}
-		
+
 		// If rmiRegistry is null, then we failed to find an already running
 		// instance of the registry, so let's create one.
 		if (rmiRegistry == null) {
 			rmiRegistry = LocateRegistry.createRegistry(portNumber);
 		}
-		
+
 		return rmiRegistry;
 	}
-	
+
 	//////////////////////////////////////////
 	// RemoteManager INTERFACE IMPLEMENTATION
 	//////////////////////////////////////////
@@ -134,7 +134,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 		controllers.put(new Integer(instanceCnt), jc);
 		return instanceCnt;
 	}
-	
+
 	public List getJadeInstanceAddresses(int id) throws TestException, RemoteException {
 		JadeController jc = (JadeController) controllers.get(new Integer(id));
 		if (jc != null) {
@@ -144,7 +144,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 			throw new TestException("No JADE instance corresponding to ID "+id);
 		}
 	}
-	
+
 	public String getJadeInstanceContainerName(int id) throws TestException, RemoteException {
 		JadeController jc = (JadeController) controllers.get(new Integer(id));
 		if (jc != null) {
@@ -154,7 +154,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 			throw new TestException("No JADE instance corresponding to ID "+id);
 		}
 	}
-	
+
 	public void killJadeInstance(int id) throws TestException, RemoteException {
 		JadeController jc = (JadeController) controllers.remove(new Integer(id));
 		if (jc != null) {
@@ -164,7 +164,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 			throw new TestException("No JADE instance corresponding to ID "+id);
 		}
 	}
-	
+
 	public int getJadeInstanceId(String containerName) throws TestException, RemoteException {
 		synchronized (controllers) {
 			Iterator it = controllers.keySet().iterator();
@@ -178,7 +178,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 			return -1;
 		}
 	}
-	
+
 	/////////////////////////////////////////////////
 	// OutputHandler interface implementation
 	/////////////////////////////////////////////////
