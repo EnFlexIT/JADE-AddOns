@@ -72,6 +72,9 @@ namespace JadeSharp
             if (frame == null)
                 return new byte[0];
 
+            object oFrame = Convert.ChangeType(frame, frame.GetType(), System.Globalization.CultureInfo.CurrentCulture);
+
+
             lock (_Sync)
             {
                 _StreamOut.Seek(0, SeekOrigin.Begin);
@@ -79,7 +82,7 @@ namespace JadeSharp
 
                 _StringRefs.Clear();
 
-                WriteFrame(frame);
+                WriteFrame(oFrame);
 
                 _StreamOut.Flush();
             }
@@ -88,7 +91,7 @@ namespace JadeSharp
 
         public IFrame Decode(byte[] content)
         {
-            if (content == null || content.Length == 0) 
+            if (content == null || content.Length == 0)
                 return null;
 
             lock (_Sync)
@@ -105,89 +108,106 @@ namespace JadeSharp
 
         #region Private Methods
 
+        //NOTE: Fixed problem with operator overloading.
         private void WriteFrame(object obj)
         {
+            // PRIMITIVES
+            if (obj is string)
+            {
+                WriteString(STRING, (string)obj);
+                return;
+            }
+
+            if (obj is Boolean)
+            {
+                _StreamOut.WriteByte(BOOLEAN);
+                _StreamOut.WriteBoolean((bool)obj);
+                return;
+            }
+
+            if (obj is Int16)
+            {
+                Int16 i16 = (Int16)obj;
+                _StreamOut.WriteByte(INTEGER);
+                _StreamOut.WriteLong((long)i16);
+                return;
+            }
+
+            if (obj is Int32)
+            {
+                Int32 i32 = (Int32)obj;
+                _StreamOut.WriteByte(INTEGER);
+                _StreamOut.WriteLong((long)i32);
+                return;
+            }
+
+            if (obj is Int64)
+            {
+                Int64 i64 = (Int64)obj;
+                _StreamOut.WriteByte(INTEGER);
+                _StreamOut.WriteLong(i64);
+                return;
+            }
+
+            if (obj is DateTime)
+            {
+                _StreamOut.WriteByte(DATE);
+                _StreamOut.WriteLong((((DateTime)obj).Ticks - UnixEpoch.StartOfEpoch.Ticks) / 10000);
+                return;
+            }
+
+            if (obj is byte[])
+            {
+                byte[] b = (byte[])obj;
+                _StreamOut.WriteByte(BYTE_SEQUENCE);
+                _StreamOut.WriteInt(b.Length);
+                _StreamOut.Write(b, 0, b.Length);
+                return;
+            }
+
+            // ORDERED FRAME
+            if (obj is OrderedFrame)
+            {
+                OrderedFrame frame = (OrderedFrame)obj;
+                string typeName = frame.TypeName;
+                if (typeName != null)
+                {
+                    // AGGREGATE
+                    WriteString(AGGREGATE, typeName);
+                }
+                else
+                {
+                    // CONTENT_ELEMENT_LIST
+                    _StreamOut.WriteByte(CONTENT_ELEMENT_LIST);
+                }
+                for (int i = 0; i < frame.Count; ++i)
+                {
+                    _StreamOut.WriteByte(ELEMENT);
+                    WriteFrame(frame[i]);
+                }
+                _StreamOut.WriteByte(END);
+                return;
+            }
+
+            // QUALIFIED FRAME
+            if (obj is QualifiedFrame)
+            {
+                QualifiedFrame frame = (QualifiedFrame)obj;
+                WriteString(OBJECT, frame.TypeName);
+                foreach (DictionaryEntry entry in frame)
+                {
+                    WriteString(ELEMENT, (string)entry.Key);
+                    WriteFrame(entry.Value);
+                }
+                _StreamOut.WriteByte(END);
+                return;
+            }
+
+            // if we're here then the obj is not recognised
+            //throw new Exception("Object " + obj + " cannot be encoded");
             System.Diagnostics.Debug.WriteLine("Object " + obj + " cannot be encoded");
         }
 
-        private void WriteFrame(string s)
-        {
-            WriteString(STRING, s);
-        }
-
-        private void WriteFrame(bool b)
-        {
-            _StreamOut.WriteByte(BOOLEAN);
-            _StreamOut.WriteBoolean(b);
-        }
-
-        private void WriteFrame(Int16 i16)
-        {
-            _StreamOut.WriteByte(INTEGER);
-            _StreamOut.WriteLong((long)i16);
-        }
-
-        private void WriteFrame(Int32 i32)
-        {
-            _StreamOut.WriteByte(INTEGER);
-            _StreamOut.WriteLong((long)i32);
-        }
-
-        private void WriteFrame(Int64 i64)
-        {
-            _StreamOut.WriteByte(INTEGER);
-            _StreamOut.WriteLong(i64);
-        }
-
-        private void WriteFrame(DateTime dt)
-        {
-            _StreamOut.WriteByte(DATE);
-            _StreamOut.WriteLong((dt.Ticks - UnixEpoch.StartOfEpoch.Ticks) / 10000);
-        }
-
-        private void WriteFrame(byte[]  b)
-        {
-            _StreamOut.WriteByte(BYTE_SEQUENCE);
-            _StreamOut.WriteInt(b.Length);
-            _StreamOut.Write(b, 0, b.Length);
-        }
-
-        private void WriteFrame(OrderedFrame  frame)
-        {
-            string typeName = frame.TypeName;
-            if (typeName != null)
-            {
-                // AGGREGATE
-                WriteString(AGGREGATE, typeName);
-            }
-            else
-            {
-                // CONTENT_ELEMENT_LIST
-                _StreamOut.WriteByte(CONTENT_ELEMENT_LIST);
-            }
-
-            for (int i = 0; i < frame.Count; ++i)
-            {
-                _StreamOut.WriteByte(ELEMENT);
-                WriteFrame(frame[i]);
-            }
-
-            _StreamOut.WriteByte(END);
-        }
-
-        private void WriteFrame(QualifiedFrame frame)
-        {
-            WriteString(OBJECT, frame.TypeName);
-            
-            foreach (DictionaryEntry entry in frame)
-            {
-                WriteString(ELEMENT, (string)entry.Key);
-                WriteFrame(entry.Value);
-            }
-
-            _StreamOut.WriteByte(END);
-        }
-           
         private void WriteString(byte tag, string s)
         {
             int index = _StringRefs.IndexOf(s);

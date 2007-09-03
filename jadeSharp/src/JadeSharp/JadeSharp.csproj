@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\GPRSConnection.cs" />
     <Compile Include="Utils\ConfigurationSettings.cs" />
     <Compile Include="Message\ACLMessage.cs" />
     <Compile Include="Utils\Consts.cs" />

@@ -106,6 +106,7 @@ namespace JadeSharp
 
         private const byte MESSAGE_IN = 14;     // from FrontEndSkel
         private const byte EXIT = 15;           // from FrontEndSkel
+        private const string DUMMY_URL = "http://fakehost.nonexist.not";
 
         #endregion
 
@@ -395,6 +396,8 @@ namespace JadeSharp
                     _Stream = null;
 
                     _Connection.Close();
+
+                    GPRSConnection.Release(DUMMY_URL);
                 }
                 catch (Exception e)
                 {
@@ -412,6 +415,13 @@ namespace JadeSharp
 
             try
             {
+                bool isGprsConnected = GPRSConnection.Setup(DUMMY_URL);
+                if (!isGprsConnected)
+                {
+                    Logger.LogLine("[JadeConnector] - ConnectMediator: Failed to open GPRS Connection. ", Logger.LogLevel.HIGH);
+                    _DoConnect = false;
+                    return;
+                }
                 _Connection = new TcpClient();
                 
                 int bSize = _Connection.ReceiveBufferSize;
@@ -422,13 +432,7 @@ namespace JadeSharp
             catch (SocketException e)
             {
                 Logger.LogLine("SocketException caught: " + e.Message, Logger.LogLevel.LOW);
-
-                if (!_IsRunning)
-                {
-                    _IsRunning = true;
-                    new Thread(new ThreadStart(this.HttpConnect)).Start();
-                }
-                throw e;
+                throw e;                                
             }
 
             JICPPacket packet;
@@ -507,26 +511,7 @@ namespace JadeSharp
                 OnConnectionEvent(new ConnectionEventArgs(ConnectionEventType.error, data));
             }
         }
-
-        // this method, called by a worker-thread, is a trick to setup the GPRS connection.
-        // Apparently there's no way to force a GPRS connection from TCP in the CF.
-        private void HttpConnect()
-        {
-            try
-            {
-                WebRequest webReq = HttpWebRequest.Create("http://fakehost.nonexist.not");
-                webReq.Proxy = new WebProxy("proxy-rr.cselt.it", 8080);
-                webReq.Proxy.Credentials = new NetworkCredential("ue_pieri", "60AB9D20352EDE");
-
-                webReq.GetResponse();
-            }
-            catch (Exception e) 
-            {
-                Debug.WriteLine(e.Message.ToString());
-            }
-            _IsRunning = false;
-        }
-
+        
         private void WritePacket(JICPPacket packet)
         {
             try

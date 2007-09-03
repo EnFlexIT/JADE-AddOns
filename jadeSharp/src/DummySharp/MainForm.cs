@@ -228,11 +228,11 @@ namespace DummySharp
             // pictureBoxLogo
             // 
             this.pictureBoxLogo.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxLogo.Image")));
-            this.pictureBoxLogo.Location = new System.Drawing.Point(3, 63);
+            this.pictureBoxLogo.Location = new System.Drawing.Point(3, 61);
             this.pictureBoxLogo.Size = new System.Drawing.Size(110, 30);
             this.pictureBoxLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             // 
-            // Form1
+            // MainForm
             // 
             this.ClientSize = new System.Drawing.Size(240, 268);
             this.Controls.Add(this.pictureBoxLogo);
