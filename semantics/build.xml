@@ -90,7 +90,7 @@ It is created according a JADE's build.xml.
 
 	<!-- DIST -->
 	<target name="dist" depends="init">
-		<zip zipfile="../semanticsAddOn.zip" basedir="../..">
+		<zip zipfile="../semanticsAddOn-${version}.zip" basedir="../..">
 			<include name="add-ons/semantics/*"/>
 			
 			<include name="add-ons/semantics/doc/*"/>
@@ -112,6 +112,7 @@ It is created according a JADE's build.xml.
 			<exclude name="**/.xvpics"/>
 			<exclude name="**/Thumbs.db"/>
 			<exclude name="**/APDescription.txt"/>
+			<exclude name="add-ons/semantics/doc/papers/**/_*"/>
 			<exclude name="add-ons/semantics/doc/tutorials/**/*.txt"/>
 		</zip>
 	</target>
