@@ -28,7 +28,7 @@ public class LeaderElectionOntology extends Ontology implements LeaderElectionVo
 			
 			// ATTRIBUTE
 			PredicateSchema ps = (PredicateSchema) getSchema(LEADER);
-			ps.add(LEADER_NAME, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
+			ps.add(LEADER_NAME, (ConceptSchema) getSchema(BasicOntology.AID), ObjectSchema.MANDATORY);
 			ps.add(LEADER_AGE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 		}
 		catch (OntologyException oe) {

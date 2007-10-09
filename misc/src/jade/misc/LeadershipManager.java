@@ -158,9 +158,11 @@ public class LeadershipManager implements Serializable {
 				if (!msg.getSender().equals(myAgent.getAID())) {
 					switch (msg.getPerformative()) {
 					case ACLMessage.PROPOSE:
+						//System.out.println("Agent "+myAgent.getLocalName()+" - PROPOSE message received. Status is "+status);
 						handlePropose(msg);
 						break;
 					case ACLMessage.INFORM:
+						//System.out.println("Agent "+myAgent.getLocalName()+" - INFORM message received. Status is "+status);
 						handleLeadershipNotification(msg);
 						break;
 					}
@@ -232,7 +234,7 @@ public class LeadershipManager implements Serializable {
 		private LeaderElectionInitiator(Agent a) {
 			super(a);
 			
-			registerState(new SingleAttemptLeaderElectionInitiator(a), TRY_ACQUIRE_STATE);
+			registerFirstState(new SingleAttemptLeaderElectionInitiator(a), TRY_ACQUIRE_STATE);
 			registerState(new WakerBehaviour(a, -1) {
 				public void onStart() {
 					// Get a random waiting time between 0 and proposalRetryInterval
@@ -240,6 +242,7 @@ public class LeadershipManager implements Serializable {
 					if (interval == 0) {
 						interval = proposalRetryInterval;
 					}
+					//System.out.println("--- Sleep time = "+interval);
 					reset(interval);
 				}
 				
@@ -253,7 +256,7 @@ public class LeadershipManager implements Serializable {
 					return status;
 				}
 			}, WAIT_STATE);
-			registerState(new OneShotBehaviour(a) {
+			registerLastState(new OneShotBehaviour(a) {
 				public void action() {
 					// Just do nothing
 				}
@@ -287,25 +290,29 @@ public class LeadershipManager implements Serializable {
 					sendLeadershipMessage(ACLMessage.PROPOSE, convId);
 					// Avoid intercepting messages sent by myself. 
 					// Such messages will be read and discarded by the LeaderElectionResponder
-					template = MessageTemplate.and(
-							MessageTemplate.MatchConversationId(convId),
-							MessageTemplate.not(MessageTemplate.MatchSender(myAgent.getAID())));
+					template = MessageTemplate.MatchConversationId(convId);
 				}
 				
 				public void action() {
 					ACLMessage msg = myAgent.receive(template);
 					if (msg != null) {
-						switch (msg.getPerformative()) {
-						case ACLMessage.ACCEPT_PROPOSAL:
-							// Just do nothing
-							break;
-						case ACLMessage.REJECT_PROPOSAL:
-							proposalAccepted = false;
-							break;
-						case ACLMessage.INFORM:
-							// Someone other acquired the leadership
-							handleLeadershipNotification(msg);
-							break;
+						// Ignore messages sent by myself
+						if (!msg.getSender().equals(myAgent.getAID())) {
+							switch (msg.getPerformative()) {
+							case ACLMessage.ACCEPT_PROPOSAL:
+								//System.out.println("Agent "+myAgent.getLocalName()+" - ACCEPT_PROPOSAL response received. Status is "+status);
+								// Just do nothing
+								break;
+							case ACLMessage.REJECT_PROPOSAL:
+								//System.out.println("Agent "+myAgent.getLocalName()+" - REJECT_PROPOSAL response received. Status is "+status);
+								proposalAccepted = false;
+								break;
+							case ACLMessage.INFORM:
+								//System.out.println("Agent "+myAgent.getLocalName()+" - INFORM response received. Status is "+status);
+								// Someone other acquired the leadership
+								handleLeadershipNotification(msg);
+								break;
+							}
 						}
 					}
 					else {
@@ -343,7 +350,7 @@ public class LeadershipManager implements Serializable {
 	// Utility methods
 	/////////////////////////////////
 	private void sendLeadershipMessage(int performative, String conversationId) {
-		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+		ACLMessage msg = new ACLMessage(performative);
 		msg.addReceiver(leaderElectionTopic);
 		msg.setOntology(LeaderElectionOntology.getInstance().getName());
 		msg.setLanguage(FIPANames.ContentLanguage.FIPA_SL);
