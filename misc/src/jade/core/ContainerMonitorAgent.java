@@ -13,6 +13,7 @@ import jade.core.messaging.MessagingService;
 import jade.domain.introspection.IntrospectionServer;
 import jade.lang.acl.*;
 
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -30,7 +31,8 @@ public class ContainerMonitorAgent extends Agent {
 	public static final String DUMP_MESSAGEQUEUE_ACTION = "DUMP-MESSAGEQUEUE";
 	public static final String DUMP_MESSAGEMANAGER_ACTION = "DUMP-MESSAGEMANAGER";
 	public static final String DUMP_LADT_ACTION = "DUMP-LADT";
-	public static final String DUMP_SERVICES_ACTION = "DUMP-SERVICES";
+	public static final String DUMP_SERVICES_MAP_ACTION = "DUMP-SERVICES-MAP";
+	public static final String DUMP_SERVICE_ACTION = "DUMP-SERVICE";
 	public static final String DUMP_THREADS_ACTION = "DUMP-THREADS";
 	
 	private AgentContainerImpl myContainer;
@@ -55,28 +57,24 @@ public class ContainerMonitorAgent extends Agent {
 				ACLMessage msg = myAgent.receive(template);
 				if (msg != null) {
 					ACLMessage reply = msg.createReply();
+					reply.setPerformative(ACLMessage.INFORM);
 					String content = msg.getContent();
 					try {
 						String contentUC = content.toUpperCase();
 						if (contentUC.startsWith(DUMP_AGENTS_ACTION)) {
-							reply.setPerformative(ACLMessage.INFORM);
-							String replyContent = getAgentsDump();
-							System.out.println(replyContent);
-							reply.setContent(replyContent);
+							reply.setContent(getAgentsDump());
 						}
 						else if (contentUC.startsWith(DUMP_AGENT_ACTION)) {
 							String agentName = getParameter(content);
 							Agent a = getAgentFromLADT(agentName);
 							String replyContent = null;
 							if(a != null) {
-								reply.setPerformative(ACLMessage.INFORM);
 								replyContent = getAgentDump(a, true);
 							}
 							else {
 								reply.setPerformative(ACLMessage.FAILURE);
 								replyContent = "Agent " + agentName + " doesn't exist";
 							}
-							System.out.println(replyContent);
 							reply.setContent(replyContent);
 						}
 						else if (contentUC.startsWith(DUMP_MESSAGEQUEUE_ACTION)) {
@@ -84,42 +82,38 @@ public class ContainerMonitorAgent extends Agent {
 							Agent a = getAgentFromLADT(agentName);
 							String replyContent = null;
 							if(a != null) {
-								reply.setPerformative(ACLMessage.INFORM);
 								replyContent = getMessageQueueDump(a);
 							}
 							else {
 								reply.setPerformative(ACLMessage.FAILURE);
 								replyContent = "Agent " + agentName + " doesn't exist";
 							}
-							System.out.println(replyContent);
 							reply.setContent(replyContent);
 						}
 						else if (contentUC.startsWith(DUMP_MESSAGEMANAGER_ACTION)) {
-							reply.setPerformative(ACLMessage.INFORM);
-							String replyContent = getMessageManagerDump();
-							System.out.println(replyContent);
-							reply.setContent(replyContent);
+							reply.setContent(getMessageManagerDump());
 						}
 						else if (contentUC.startsWith(DUMP_LADT_ACTION)) {
-							reply.setPerformative(ACLMessage.INFORM);
-							String replyContent = getLADTDump();
-							System.out.println(replyContent);
-							reply.setContent(replyContent);
+							reply.setContent(getLADTDump());
 						}
-						else if (contentUC.startsWith(DUMP_SERVICES_ACTION)) {
-							reply.setPerformative(ACLMessage.INFORM);
-							String replyContent = getServicesDump();
-							System.out.println(replyContent);
-							reply.setContent(replyContent);
+						else if (contentUC.startsWith(DUMP_SERVICES_MAP_ACTION)) {
+							reply.setContent(getServicesMapDump());
+						}
+						else if (contentUC.startsWith(DUMP_SERVICE_ACTION)) {
+							String serviceName = getParameter(content);
+							BaseService srv = getService(serviceName);
+							if (srv != null) {
+								reply.setContent(getServiceDump(srv, null));
+							}
+							else {
+								reply.setPerformative(ACLMessage.FAILURE);
+								reply.setContent("Service " + serviceName + " not installed");
+							}
 						}
 						else if (contentUC.startsWith(DUMP_THREADS_ACTION)) {
-							reply.setPerformative(ACLMessage.INFORM);
-							String replyContent = getThreadsDump();
-							System.out.println(replyContent);
-							reply.setContent(replyContent);
+							reply.setContent(getThreadsDump());
 						}
 						else if (contentUC.startsWith(HELP_ACTION)) {
-							reply.setPerformative(ACLMessage.INFORM);
 							reply.setContent(getHelp());
 						}
 						else {
@@ -130,6 +124,9 @@ public class ContainerMonitorAgent extends Agent {
 						e.printStackTrace();
 						reply.setPerformative(ACLMessage.FAILURE);
 						reply.setContent(e.toString());
+					}
+					if (reply.getPerformative() == ACLMessage.INFORM) {
+						System.out.println(reply.getContent());
 					}
 					myAgent.send(reply);
 				}
@@ -158,27 +155,27 @@ public class ContainerMonitorAgent extends Agent {
 	
 	public String getHelp() {
 		StringBuffer sb = new StringBuffer("This agent accepts REQUEST messages refering to the "+CONTAINER_MONITOR_ONTOLOGY+" ontology.\nSupported actions:\n");
-		sb.append(DUMP_AGENTS_ACTION);
-		sb.append('\n');
-		sb.append(DUMP_AGENT_ACTION);
-		sb.append(" <agent-local-name>");
-		sb.append('\n');
-		sb.append(DUMP_MESSAGEQUEUE_ACTION);
-		sb.append(" <agent-local-name>");
-		sb.append('\n');
-		sb.append(DUMP_LADT_ACTION);
-		sb.append('\n');
-		sb.append(DUMP_MESSAGEMANAGER_ACTION);
-		sb.append('\n');
-		sb.append(DUMP_THREADS_ACTION);
-		sb.append('\n');
+		sb.append(DUMP_AGENTS_ACTION).append('\n');
+		sb.append(DUMP_AGENT_ACTION).append(" <agent-local-name>").append('\n');
+		sb.append(DUMP_MESSAGEQUEUE_ACTION).append(" <agent-local-name>").append('\n');
+		sb.append(DUMP_LADT_ACTION).append('\n');
+		sb.append(DUMP_MESSAGEMANAGER_ACTION).append('\n');
+		sb.append(DUMP_SERVICES_MAP_ACTION).append('\n');
+		sb.append(DUMP_SERVICE_ACTION).append(" <service-name>").append('\n');
+		sb.append(DUMP_THREADS_ACTION).append('\n');
 		return sb.toString();
 	}
 	
 	private String getParameter(String content) throws Exception {
+		String action = null;
 		StringTokenizer st = new StringTokenizer(content, " ");
-		st.nextToken();
-		return st.nextToken();
+		try {
+			action = st.nextToken();
+			return st.nextToken();
+		}
+		catch (NoSuchElementException nsee) {
+			throw new Exception("Missing parameter for action "+action);
+		}
 	}
 	
 	public String[] getLADTStatus() {
@@ -241,6 +238,32 @@ public class ContainerMonitorAgent extends Agent {
 	    	}
 	    }
 		return result;
+	}
+	
+	private BaseService getService(String serviceName) throws Exception {
+		BaseService srv = null;
+		try {
+			srv = (BaseService) myContainer.getServiceFinder().findService(serviceName);
+		}
+		catch (ClassCastException cce) {
+			throw new Exception("Service "+serviceName+" is not a BaseService. It cannot be dumped");
+		}
+		catch (Exception e) {
+			// ServiceException and IMTPException should never happen as this is a local call
+			e.printStackTrace();
+		}
+		return srv;
+	}
+	
+	public String getServiceDump(BaseService srv, String key) {
+		StringBuffer sb = new StringBuffer();
+		if (srv != null) {
+    		sb.append("SERVICE ").append(srv.getName()).append('\n');
+    		sb.append("--------------------------------------------\n");
+    		sb.append(srv.dump(key));
+    		sb.append("--------------------------------------------\n");
+		}
+		return sb.toString();
 	}
 	
 	private String dumpThread(String prefix, Thread t) {
@@ -491,7 +514,7 @@ public class ContainerMonitorAgent extends Agent {
 		return sb.toString();
 	}
 	
-	public String getServicesDump() {
+	public String getServicesMapDump() {
 		StringBuffer sb = new StringBuffer();
 		try {
 			MainContainerImpl mc = (MainContainerImpl) myContainer.getMain();
