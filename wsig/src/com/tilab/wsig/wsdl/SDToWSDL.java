@@ -250,7 +250,12 @@ public class SDToWSDL {
 			}
 
 			xsdSchema.setTargetNamespace(tns);
-			WSDLGeneratorUtils.addTypeToDefinition(definition, xsdSchema.getElement());
+			
+			try {
+				definition.setTypes(WSDLGeneratorUtils.createTypes(registry, xsdSchema.getElement()));
+			} catch (WSDLException e) {
+				throw new Exception("Error adding type to definition", e);
+			}
 
 			try {
 				String filename = WSDLGeneratorUtils.getWSDLFilename(wsigService.getServicePrefix() + sd.getName());

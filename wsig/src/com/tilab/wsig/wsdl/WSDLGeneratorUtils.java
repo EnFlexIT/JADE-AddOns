@@ -86,8 +86,7 @@ import com.ibm.wsdl.PortImpl;
 import com.ibm.wsdl.PortTypeImpl;
 import com.ibm.wsdl.ServiceImpl;
 import com.ibm.wsdl.TypesImpl;
-import com.ibm.wsdl.extensions.PopulatedExtensionRegistry;
-import com.ibm.wsdl.extensions.schema.SchemaImpl;
+
 import com.tilab.wsig.WSIGConfiguration;
 
 public class WSDLGeneratorUtils {
@@ -208,16 +207,17 @@ public class WSDLGeneratorUtils {
 		return elementParticle;
 	}
 	
-	public static void addTypeToDefinition(Definition definition, Element element) {
-		Types ts = new TypesImpl();
-		definition.setTypes(ts);
-		ExtensionRegistry reg = new PopulatedExtensionRegistry();
-		definition.setExtensionRegistry(reg);
-		Schema schema = new SchemaImpl();
-		schema.setElement(element);
-		schema.setElementType(new QName(WSDLConstants.xsd, "schema"));
+	public static Types createTypes(ExtensionRegistry registry, Element element) throws WSDLException {
 		
-		ts.addExtensibilityElement(schema);
+		Types types = new TypesImpl();
+
+		Schema schema = (Schema) registry.createExtension(
+							Types.class, new QName(WSDLConstants.xsd,
+							WSDLConstants.schema));
+		schema.setElement(element);
+		types.addExtensibilityElement(schema);
+		
+		return types;
 	}
 	
 	public static Definition createWSDLDefinition(WSDLFactory factory, String tns) {

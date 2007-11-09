@@ -44,7 +44,7 @@ import="com.tilab.wsig.WSIGConfiguration,
 		<tr><td colspan="2" class="head"><h2>Test page</h2></td></tr>
 		<tr>
 			<td width="20%" class="title">WebService url:</td>
-			<td class="value"><input type="TEXT" name="soapurl" size="80" value="<% out.print(SOAPUrl); %>"></input></td>
+			<td class="value"><input type="text" name="soapurl" size="80" value="<% out.print(SOAPUrl); %>"></input></td>
 		</tr>
 		<tr>
 			<td width="20%" class="title">SOAP request:</td>
@@ -56,7 +56,7 @@ import="com.tilab.wsig.WSIGConfiguration,
 		</tr>
 		<tr>
 			<td width="20%" class="title"></td>
-			<td class="value"><input type="SUBMIT" value="Send"></input><button type="reset">Reset</button></td>
+			<td class="value"><input type="submit" value="Send"></input><button type="reset">Reset</button></td>
 		</tr>
 	</table>
 </form>

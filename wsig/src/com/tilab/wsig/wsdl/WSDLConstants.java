@@ -25,12 +25,14 @@ package com.tilab.wsig.wsdl;
 
 public class WSDLConstants {
 	public static final String xsi = "http://www.w3.org/2001/XMLSchema-instance";
-	public static final String xsd = "http://www.w3.org/2000/10/XMLSchema";
+	//public static final String xsd = "http://www.w3.org/2000/10/XMLSchema";
+	public static final String xsd = "http://www.w3.org/2001/XMLSchema";
 	public static final String wsdlsoap = "http://schemas.xmlsoap.org/wsdl/soap/";
 	public static final String encodingStyle = "http://schemas.xmlsoap.org/soap/encoding/";
 	public static final String transportURI = "http://schemas.xmlsoap.org/soap/http";
 	public static final String soapStyle = "rpc";
 	public static final String publishSoapBinding = "publishSoapBinding";
+	public static final String schema = "schema";
 	public static final String portPublish = "publish";
 	public static final String QNameOperation = "operation";
 	public static final String soapActionURI = "soapActionURI";
