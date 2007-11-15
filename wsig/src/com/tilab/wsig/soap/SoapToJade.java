@@ -305,7 +305,7 @@ public class SoapToJade extends DefaultHandler {
 							// Get parameter and verify...
 							String paramName = dfs[count].getName();
 							ParameterInfo paramEi1 = objParams.get(count);
-							if (paramEi1.getName() != paramName) {
+							if (!paramEi1.getName().equals(paramName)) {
 								throw new RuntimeException("Parameter "+paramName+" not match with parameter in store ("+paramEi1.getName()+")");
 							}
 

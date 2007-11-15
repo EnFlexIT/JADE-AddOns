@@ -73,6 +73,9 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 	protected void setup() {
 		super.setup();
 
+		// Set non-standard archive scheme called “wsjar" 
+		System.setProperty("org.eclipse.emf.common.util.URI.archiveSchemes", "wsjar wszip jar zip");
+		
 		log.info("Agent "+getLocalName()+" - starting...");
 
 		// Get agent arguments

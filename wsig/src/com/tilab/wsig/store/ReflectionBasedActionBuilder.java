@@ -69,7 +69,7 @@ public class ReflectionBasedActionBuilder implements ActionBuilder {
 					// Get parameter and verify...
 					String paramName = dfs[count].getName();
 					ParameterInfo paramEi = params.get(count);
-					if (paramEi.getName() != paramName) {
+					if (!paramEi.getName().equals(paramName)) {
 						throw new RuntimeException("Parameter "+paramName+" not match with parameter in store ("+paramEi.getName()+")");
 					}
 	
