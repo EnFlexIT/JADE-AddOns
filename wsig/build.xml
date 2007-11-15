@@ -75,6 +75,7 @@
 		<copy todir="${wsigWebLib.dir}">
 			<fileset dir="${wsigLib.dir}">
 				<include name="**/*.jar"/>
+				<exclude name="**/servlet.jar"/>
 			</fileset>
 			<fileset dir="${jade-home}/lib">
 				<include name="**/*"/>

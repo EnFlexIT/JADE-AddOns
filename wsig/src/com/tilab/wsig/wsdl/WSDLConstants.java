@@ -25,7 +25,6 @@ package com.tilab.wsig.wsdl;
 
 public class WSDLConstants {
 	public static final String xsi = "http://www.w3.org/2001/XMLSchema-instance";
-	//public static final String xsd = "http://www.w3.org/2000/10/XMLSchema";
 	public static final String xsd = "http://www.w3.org/2001/XMLSchema";
 	public static final String wsdlsoap = "http://schemas.xmlsoap.org/wsdl/soap/";
 	public static final String encodingStyle = "http://schemas.xmlsoap.org/soap/encoding/";

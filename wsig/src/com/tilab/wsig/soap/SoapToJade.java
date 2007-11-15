@@ -30,14 +30,15 @@ import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.util.Vector;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.axis.Message;
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.tilab.wsig.store.ActionBuilder;
 import com.tilab.wsig.store.ParameterInfo;
@@ -58,17 +59,39 @@ public class SoapToJade extends DefaultHandler {
 	 * SoapToJade2
 	 */
 	public SoapToJade() {
-		try {
-			xr = XMLReaderFactory.createXMLReader();
+	    try { 
+	    	String parserName = getSaxParserName();
+	    	
+			xr = (XMLReader)Class.forName(parserName).newInstance();
 			xr.setContentHandler(this);
 			xr.setErrorHandler(this);
-
-		} catch(SAXException e) {
+		}
+	    catch(Exception e) {
 			log.error("Unable to create XML reader", e);
-			xr = null;
 		}
 	}
 
+	/**
+	 * Get SAX parser class name
+	 * @param s
+	 * @return parser name
+	 */
+	private static String getSaxParserName() throws Exception {
+		String saxFactory = System.getProperty( "org.xml.sax.driver" );
+		if( saxFactory != null ) {
+			// SAXParser specified by means of the org.xml.sax.driver Java option
+			return saxFactory;
+		}
+		else {
+			// Use the JVM default SAX Parser
+			SAXParserFactory newInstance = SAXParserFactory.newInstance();
+			SAXParser newSAXParser = newInstance.newSAXParser();
+			XMLReader reader = newSAXParser.getXMLReader();
+			String name = reader.getClass().getName();
+			return name;
+		}
+	}
+	
 	/**
 	 * convert
 	 * @param soapMessage

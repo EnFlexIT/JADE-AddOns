@@ -71,6 +71,7 @@ import org.eclipse.xsd.XSDParticle;
 import org.eclipse.xsd.XSDSchema;
 import org.eclipse.xsd.XSDTypeDefinition;
 import org.eclipse.xsd.impl.XSDComplexTypeDefinitionImpl;
+import org.eclipse.xsd.impl.XSDSchemaImpl;
 import org.w3c.dom.Element;
 
 import com.ibm.wsdl.BindingImpl;
@@ -124,7 +125,7 @@ public class WSDLGeneratorUtils {
 		XSDSchema xsd = xsdFactory.createXSDSchema();
 		xsd.setSchemaForSchemaQNamePrefix("xsd");
 		xsd.setTargetNamespace(tns);
-		
+
 		Map qNamePrefixToNamespaceMap = xsd.getQNamePrefixToNamespaceMap();
 		qNamePrefixToNamespaceMap.put("xsd", xsd.getTargetNamespace());
 		qNamePrefixToNamespaceMap.put(xsd.getSchemaForSchemaQNamePrefix(), WSDLConstants.xsd);
