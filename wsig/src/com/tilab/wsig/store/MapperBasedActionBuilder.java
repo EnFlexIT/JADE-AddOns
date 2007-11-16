@@ -69,7 +69,7 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 			log.debug("Invoked method "+method.getName()+"("+parameterList.substring(0,parameterList.length()-1)+") in mapper");
 
 		} catch(Exception e) {
-			log.debug("Method "+method.getName()+"("+parameterList.substring(0,parameterList.length()-1)+") not found in mapper");
+			log.error("Method "+method.getName()+"("+parameterList.substring(0,parameterList.length()-1)+") not found in mapper");
 			throw e;
 		}
 		

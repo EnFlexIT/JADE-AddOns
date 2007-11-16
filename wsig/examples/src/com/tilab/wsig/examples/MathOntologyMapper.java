@@ -23,6 +23,9 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.examples;
 
+import com.tilab.wsig.store.OperationName;
+import com.tilab.wsig.store.SuppressOperation;
+
 public class MathOntologyMapper {
 	
 	public Abs toAbs(float real,float immaginary){
@@ -48,4 +51,15 @@ public class MathOntologyMapper {
 		abs.setComplex(complex);
 		return abs;
 	}
+
+	@SuppressOperation
+	public Abs toAbs(int real,int immaginary){
+		return null;
+	}
+
+	@OperationName(name="abs")
+	public Abs myMethod(int real,int immaginary){
+		return toAbs((float)real, (float)immaginary);
+	}
+	
 }

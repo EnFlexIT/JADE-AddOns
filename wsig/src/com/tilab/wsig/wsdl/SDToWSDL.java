@@ -66,7 +66,9 @@ import org.eclipse.xsd.XSDSchema;
 
 import com.tilab.wsig.store.ActionBuilder;
 import com.tilab.wsig.store.MapperBasedActionBuilder;
+import com.tilab.wsig.store.OperationName;
 import com.tilab.wsig.store.ReflectionBasedActionBuilder;
+import com.tilab.wsig.store.SuppressOperation;
 import com.tilab.wsig.store.WSIGService;
 
 public class SDToWSDL {
@@ -284,11 +286,20 @@ public class SDToWSDL {
 		if (mapperClass != null) {
 			Method[] methods = mapperClass.getDeclaredMethods();
 		
-			String methodToCheck = WSDLConstants.mapperMethodPrefix + actionName;
+			Method method = null;
+			String defaultMethodNameToCheck = WSDLConstants.mapperMethodPrefix + actionName;
 			for (int j = 0; j < methods.length; j++) {
-				if (methods[j].getName().equalsIgnoreCase(methodToCheck)) {
-					methodsAction.add(methods[j]);
-				}
+				method = methods[j];
+				
+				// Add method if:
+				// - exist annotation OperationName with name equals to actionName
+				// - method name is equals to defaultMethodNameToCheck and the method in not annotated with SuppressOperation 
+				OperationName annotationOperationName = method.getAnnotation(OperationName.class);
+				SuppressOperation annotationSuppressOperation = method.getAnnotation(SuppressOperation.class);
+				if ((annotationOperationName != null && actionName.equalsIgnoreCase(annotationOperationName.name())) ||
+					(method.getName().equalsIgnoreCase(defaultMethodNameToCheck) && annotationSuppressOperation == null)) {
+					methodsAction.add(method);
+				} 
 			}
 		}
 		return methodsAction;
