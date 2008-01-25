@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package jade.android.demo;
+package jade.android;
 
 public final class R {
     public static final class attr {
@@ -13,8 +13,15 @@ public final class R {
     public static final class drawable {
         public static final int icon=0x7f020000;
     }
+    public static final class id {
+        public static final int bind=0x7f050000;
+        public static final int sendCommand=0x7f050002;
+        public static final int unbind=0x7f050001;
+    }
     public static final class layout {
-        public static final int main=0x7f030000;
+        public static final int jade_bind_activity=0x7f030000;
+        public static final int main=0x7f030001;
+        public static final int send_command=0x7f030002;
     }
     public static final class string {
         public static final int activity_local_jade_controller=0x7f040000;

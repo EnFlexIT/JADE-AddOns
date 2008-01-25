@@ -2,33 +2,29 @@ package jade.android;
 
 import jade.core.MicroRuntime;
 import jade.util.Event;
-import jade.util.Logger;
 import jade.util.leap.Properties;
 import jade.wrapper.AgentController;
-import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
-import jade.wrapper.gateway.JadeGateway;
 import android.app.Service;
 import android.os.BinderNative;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.util.Log;
 
 public class MicroRuntimeService extends Service {
 
-	private String myAgentName = "myDummy2";
+	private String myAgentName = "gateway";
 
 	@Override
 	protected void onCreate() {
 
 		// put my ref to be accessed by the agent and the activities
-		Log.v(null, "LocalJadeService onCreate");
+		Log.v(null, "MicroRuntimeService onCreate");
 		// Start Jade
 		String agentOptions = "gateway:jade.android.GatewayAgent";
 		Properties pp = new Properties();
-		pp.setProperty(MicroRuntime.HOST_KEY, "localhost");
-		pp.setProperty(MicroRuntime.PORT_KEY, "1099");
+		pp.setProperty(MicroRuntime.HOST_KEY, "163.162.224.13");
+		pp.setProperty(MicroRuntime.PORT_KEY, "2199");
 		pp.setProperty("msisdn", "android");
 		pp.setProperty(MicroRuntime.AGENTS_KEY, agentOptions);
 		Log.v(null, "Starting Jade");
@@ -39,7 +35,7 @@ public class MicroRuntimeService extends Service {
 	@Override
 	protected void onStart(int startId, Bundle arguments) {
 
-		Log.v(null, "LocalJadeService: onStart()");
+		Log.v(null, "MicroRuntimeService: onStart()");
 	}
 
 	@Override
@@ -65,7 +61,6 @@ public class MicroRuntimeService extends Service {
 
 	private class JadeBinder extends BinderNative implements Command {
 
-		@Override
 		public void execute(Object command) {
 			if (MicroRuntime.isRunning()) {
 
