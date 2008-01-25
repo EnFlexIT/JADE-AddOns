@@ -20,10 +20,9 @@
     <string name="local_service_failure">Local service cannot start</string>
     <string name="local_service_label">Sample Local Service</string>
     <string name="hello_jade">Welcome to the first jade app for android</string>
-    <string name="host_key">163.162.76.23</string>
-    <string name="port_key">1099</string>
-    <string name="container_key">android2</string>
-    <string name="msg_received">messaggio ricevuto</string>
+    <string name="host_key">163.162.244.13</string>
+    <string name="port_key">2199</string>
+    <string name="container_key">android</string>
     <string name="menu_jade_controller">jade controller</string>
     <string name="menu_send_message">invio messaggi</string>
     <string name="menu_test_puto2aobject">test invio oggetto</string>
@@ -31,5 +30,6 @@
     <string name="content">content</string>
     <string name="confirm">confirm</string>
     <string name="close">close</string>
+    <string name="message_received">Ricevuto messaggio di risposta: </string>
 
 </resources>

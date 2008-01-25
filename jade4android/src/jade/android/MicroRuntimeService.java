@@ -23,11 +23,11 @@ public class MicroRuntimeService extends Service {
 		// Start Jade
 		String agentOptions = "gateway:jade.android.GatewayAgent";
 		Properties pp = new Properties();
-		pp.setProperty(MicroRuntime.HOST_KEY, "163.162.224.13");
-		pp.setProperty(MicroRuntime.PORT_KEY, "2199");
-		pp.setProperty("msisdn", "android");
+		pp.setProperty(MicroRuntime.HOST_KEY, getText(R.string.host_key).toString());
+		pp.setProperty(MicroRuntime.PORT_KEY, getText(R.string.port_key).toString());
+		pp.setProperty("msisdn", getText(R.string.container_key).toString());
 		pp.setProperty(MicroRuntime.AGENTS_KEY, agentOptions);
-		Log.v(null, "Starting Jade");
+        Log.v(null, "Starting Jade");
 		MicroRuntime.startJADE(pp, null);
 
 	}
@@ -60,6 +60,10 @@ public class MicroRuntimeService extends Service {
 	private final IBinder mBinder = new JadeBinder(); 
 
 	private class JadeBinder extends BinderNative implements Command {
+		
+		public JadeBinder() {
+			Log.v(null, "creating JadeBinder...");
+		}
 
 		public void execute(Object command) {
 			if (MicroRuntime.isRunning()) {

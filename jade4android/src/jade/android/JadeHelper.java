@@ -30,6 +30,11 @@ public class JadeHelper {
             null, mConnection, Context.BIND_AUTO_CREATE);
 
 	}
+	
+	public boolean isConnected(){
+		return jadeBinder != null;
+	}
+	
 	public void disconnect() {
         myContext.unbindService(mConnection);
 

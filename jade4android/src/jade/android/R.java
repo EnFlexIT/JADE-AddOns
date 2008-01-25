@@ -15,6 +15,10 @@ public final class R {
     }
     public static final class id {
         public static final int bind=0x7f050000;
+        public static final int close=0x7f050006;
+        public static final int confirm=0x7f050005;
+        public static final int content=0x7f050004;
+        public static final int receiver=0x7f050003;
         public static final int sendCommand=0x7f050002;
         public static final int unbind=0x7f050001;
     }
@@ -22,16 +26,17 @@ public final class R {
         public static final int jade_bind_activity=0x7f030000;
         public static final int main=0x7f030001;
         public static final int send_command=0x7f030002;
+        public static final int send_message=0x7f030003;
     }
     public static final class string {
         public static final int activity_local_jade_controller=0x7f040000;
         public static final int app_name=0x7f040001;
         public static final int app_name2=0x7f040002;
         public static final int bind_service=0x7f040007;
-        public static final int close=0x7f04001d;
-        public static final int confirm=0x7f04001c;
+        public static final int close=0x7f04001c;
+        public static final int confirm=0x7f04001b;
         public static final int container_key=0x7f040015;
-        public static final int content=0x7f04001b;
+        public static final int content=0x7f04001a;
         public static final int hello_jade=0x7f040012;
         public static final int host_key=0x7f040013;
         public static final int local_jade_binding=0x7f040003;
@@ -42,12 +47,12 @@ public final class R {
         public static final int local_service_label=0x7f040011;
         public static final int local_service_started=0x7f04000e;
         public static final int local_service_stopped=0x7f04000f;
-        public static final int menu_jade_controller=0x7f040017;
-        public static final int menu_send_message=0x7f040018;
-        public static final int menu_test_puto2aobject=0x7f040019;
-        public static final int msg_received=0x7f040016;
+        public static final int menu_jade_controller=0x7f040016;
+        public static final int menu_send_message=0x7f040017;
+        public static final int menu_test_puto2aobject=0x7f040018;
+        public static final int message_received=0x7f04001d;
         public static final int port_key=0x7f040014;
-        public static final int receiver=0x7f04001a;
+        public static final int receiver=0x7f040019;
         public static final int send_command=0x7f04000a;
         public static final int send_message=0x7f040009;
         public static final int start_service=0x7f040005;
