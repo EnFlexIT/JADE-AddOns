@@ -25,7 +25,7 @@ public class MicroRuntimeService extends Service {
 		// put my ref to be accessed by the agent and the activities
 		Log.v(null, "LocalJadeService onCreate");
 		// Start Jade
-		String agentOptions = "myDummy2:com.ughetti.DummyAgent(pippo pluto)";
+		String agentOptions = "gateway:jade.android.GatewayAgent";
 		Properties pp = new Properties();
 		pp.setProperty(MicroRuntime.HOST_KEY, "localhost");
 		pp.setProperty(MicroRuntime.PORT_KEY, "1099");
@@ -61,35 +61,31 @@ public class MicroRuntimeService extends Service {
 
 	// This is the object that receives interactions from clients. See
 	// RemoteService for a more complete example.
-	private final IBinder mBinder = new BinderNative() {
-		@Override
-		protected boolean onTransact(int code, Parcel data, Parcel reply,
-				int flags) {
+	private final IBinder mBinder = new JadeBinder(); 
 
+	private class JadeBinder extends BinderNative implements Command {
+
+		@Override
+		public void execute(Object command) {
 			if (MicroRuntime.isRunning()) {
 
 				Event e = null;
 				// incapsulate the command into an Event
-				e = new Event(-1, data, reply);
+				e = new Event(-1, command);
 				try {
 					AgentController agent = MicroRuntime.getAgent(myAgentName);
 					agent.putO2AObject(e, AgentController.ASYNC);
 					e.waitUntilProcessed();
-				
+
 				} catch (StaleProxyException exc) {
 					exc.printStackTrace();
 				} catch (Exception ex) {
 					// TODO Auto-generated catch block
 					ex.printStackTrace();
 				}
-				// wait until the answer is ready
-				synchronized (mBinder) {
-					mBinder.notifyAll();
-				}
 			}
-			return true;
 
 		}
-	};
 
+	}
 }

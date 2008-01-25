@@ -2,6 +2,8 @@ package jade.android;
 
 
 
+import java.util.Map;
+
 import android.app.ApplicationContext;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,10 +16,12 @@ import android.util.Log;
 
 public class JadeHelper {
 	private ApplicationContext myContext;
-	private IBinder jadeBinder;
+	private Command jadeBinder;
+	private ConnectionListener connectionListener;
 	
-	public JadeHelper(ApplicationContext context) {
+	public JadeHelper(ApplicationContext context, ConnectionListener cnl) {
 		myContext = context;
+		connectionListener = cnl; 
 	}
 	
 	public void connect() {
@@ -34,30 +38,10 @@ public class JadeHelper {
 		myContext.stopService(new Intent(myContext, 
                 MicroRuntimeService.class));
 	}
-	public Parcel sendParcel(Parcel parcel) {
-    	Parcel reply = Parcel.obtain();
+	public void execute(Object command) {
 		if(jadeBinder != null) {
-			
-			try {
-				synchronized(jadeBinder) {
-				jadeBinder.transact(IBinder.FIRST_CALL_TRANSACTION, parcel, reply, 0);
-					jadeBinder.wait();
-				}
-			} catch (DeadObjectException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				jadeBinder.execute(command);
 		}
-		return reply;
-	}
-	public void onConnected() {
-		
-	}
-	public void onDisconnected() {
-		
 	}
 	
 	
@@ -65,14 +49,14 @@ public class JadeHelper {
 	    
 	        public void onServiceConnected(ComponentName className, IBinder service) {
 	        	Log.v(null,"JadeHelper onServiceConnected");
-	        	jadeBinder = service;
-	        	onConnected();
+	        	jadeBinder = (Command)service;
+	        	connectionListener.onConnected();
 	        }
 
 	        public void onServiceDisconnected(ComponentName className){
 	        	Log.v(null,"JAdeHelper onServiceDisconnected");
 	        	jadeBinder = null;
-	        	onDisconnected();
+	        	connectionListener.onDisconnected();
 	        }
 	    };
 
