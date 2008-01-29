@@ -1,53 +1,71 @@
 package jade.android;
 
+import java.io.InputStream;
+
 import jade.core.MicroRuntime;
 import jade.util.Event;
 import jade.util.leap.Properties;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
+
 import android.app.Service;
 import android.os.BinderNative;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.content.AssetManager;
+import android.content.Resources;
 
 public class MicroRuntimeService extends Service {
 
-	private String myAgentName = "gateway";
-
+	private String myAgentName;
+	private String TAG = "MicroRuntimeService";
+	
 	@Override
 	protected void onCreate() {
-
-		// put my ref to be accessed by the agent and the activities
-		Log.v(null, "MicroRuntimeService onCreate");
+		Log.v(TAG, "onCreate");
 		// Start Jade
-		String agentOptions = "gateway:jade.android.GatewayAgent";
-		Properties pp = new Properties();
-		pp.setProperty(MicroRuntime.HOST_KEY, getText(R.string.host_key).toString());
-		pp.setProperty(MicroRuntime.PORT_KEY, getText(R.string.port_key).toString());
-		pp.setProperty("msisdn", getText(R.string.container_key).toString());
-		pp.setProperty(MicroRuntime.AGENTS_KEY, agentOptions);
-        Log.v(null, "Starting Jade");
-		MicroRuntime.startJADE(pp, null);
-
+		try{
+			Properties props = getProperties();
+			String agents = props.getProperty(MicroRuntime.AGENTS_KEY);
+			if(agents == null){
+				Log.w(TAG, "No agents specified !!");
+			}else{
+				int index = agents.indexOf(":");
+				myAgentName = agents.substring(0, index);
+			}
+			Log.v(TAG, "Starting Jade with agent " + myAgentName);
+			MicroRuntime.startJADE(props, null);
+		}catch(Exception e){
+			Log.e(TAG, e.getMessage(), e);
+		}
 	}
 
 	@Override
 	protected void onStart(int startId, Bundle arguments) {
-
-		Log.v(null, "MicroRuntimeService: onStart()");
+		Log.v(TAG, "MicroRuntimeService: onStart()");
 	}
 
 	@Override
 	protected void onDestroy() {
-
 		// stop Jade
 		Log.v(null, "Stopping Jade");
 		if (MicroRuntime.isRunning()) {
 			MicroRuntime.stopJADE();
-			Log.v(null, "Jade stopped");
+			Log.v(TAG, "Jade stopped");
 
 		}
+	}
+	
+	//read the run.properties from the assets folder
+	private Properties getProperties() throws Exception {
+		Resources resources = this.getResources(); 
+        AssetManager aM = resources.getAssets(); 
+		InputStream iS = aM.open("run.properties");
+		Properties props = new Properties();
+		props.load(iS);
+		Log.v(TAG, "properties: " + props);
+		return  props;
 	}
 
 	@Override
@@ -62,7 +80,7 @@ public class MicroRuntimeService extends Service {
 	private class JadeBinder extends BinderNative implements Command {
 		
 		public JadeBinder() {
-			Log.v(null, "creating JadeBinder...");
+			Log.v(TAG, "creating JadeBinder...");
 		}
 
 		public void execute(Object command) {
