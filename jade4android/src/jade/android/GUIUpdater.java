@@ -21,7 +21,6 @@ class GUIUpdater implements ACLMessageListener {
 		
 	}
 	
-	@Override
 	public void OnMessageReceived(ACLMessage msg) {
 		// TODO Auto-generated method stub
 		Updater up = new Updater(act,msg);

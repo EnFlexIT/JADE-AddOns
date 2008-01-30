@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<resources>
+    
+    <array name="comActList">
+        <item>accept-proposal</item>
+        <item>inform</item>
+        <item>propose</item>
+        <item>refuse</item>
+        <item>request</item>
+    </array>
+    
+  
+    
+</resources>
