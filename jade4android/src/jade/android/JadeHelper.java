@@ -2,16 +2,12 @@ package jade.android;
 
 
 
-import java.util.Map;
-
 import android.app.ApplicationContext;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.DeadObjectException;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.util.Log;
 
 public class JadeHelper {

@@ -1,44 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-	
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content">
-
-		<TextView android:layout_width="wrap_content"
-			android:layout_height="wrap_content" 
-			android:text="@string/receiver" />
-		<EditText id="@+id/receiver" 
-		  android:layout_width="wrap_content"
-			android:layout_height="wrap_content" 
-			android:layout_weight="1"/>
-	</LinearLayout>
-
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content">
-	<TextView android:layout_width="wrap_content"
-		android:layout_height="wrap_content" 
-		android:text="@string/content" />
-	<EditText id="@+id/content" android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		android:scrollbars="vertical" />
-	</LinearLayout>
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content">
-	
-	<Button id="@+id/confirm" 
-	  android:text="@string/confirm"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" />
-	<Button id="@+id/close" 
-	  android:text="@string/close"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" />
-	</LinearLayout>
-</LinearLayout>
+<AbsoluteLayout
+id="@+id/widget0"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:background="#ffffffff"
+xmlns:android="http://schemas.android.com/apk/res/android"
+>
+<TextView
+id="@+id/widget26"
+android:layout_width="93px"
+android:layout_height="wrap_content"
+android:text="Sender"
+android:layout_x="10px"
+android:layout_y="2px"
+>
+</TextView>
+<EditText
+id="@+id/sender"
+android:layout_width="156px"
+android:layout_height="wrap_content"
+android:layout_x="10px"
+android:layout_y="22px"
+>
+</EditText>
+<TextView
+id="@+id/widget28"
+android:layout_width="82px"
+android:layout_height="wrap_content"
+android:text="Receiver"
+android:layout_x="10px"
+android:layout_y="52px"
+>
+</TextView>
+<EditText
+id="@+id/receiver"
+android:layout_width="160px"
+android:layout_height="wrap_content"
+android:layout_x="10px"
+android:layout_y="72px"
+>
+</EditText>
+<TextView
+id="@+id/widget30"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Communicative Act"
+android:layout_x="10px"
+android:layout_y="102px"
+>
+</TextView>
+<Spinner
+id="@+id/commAct"
+android:layout_width="163px"
+android:layout_height="wrap_content"
+android:layout_x="10px"
+android:layout_y="122px"
+>
+</Spinner>
+<Button
+id="@+id/sendBtn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Send"
+android:layout_x="20px"
+android:layout_y="182px"
+>
+</Button>
+<Button
+id="@+id/replyBtn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Reply"
+android:layout_x="120px"
+android:layout_y="182px"
+>
+</Button>
+<TextView
+id="@+id/widget41"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Content"
+android:layout_x="180px"
+android:layout_y="2px"
+>
+</TextView>
+<ListView
+id="@+id/messageList"
+android:layout_width="fill_parent"
+android:layout_height="165px"
+android:layout_x="20px"
+android:layout_y="252px"
+>
+</ListView>
+<Button
+id="@+id/backBtn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Back"
+android:layout_x="220px"
+android:layout_y="182px"
+>
+</Button>
+<TextView
+id="@+id/widget45"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Message List"
+android:layout_x="20px"
+android:layout_y="222px"
+>
+</TextView>
+<EditText
+id="@+id/content"
+android:layout_width="119px"
+android:layout_height="125px"
+android:layout_x="180px"
+android:layout_y="22px"
+>
+</EditText>
+</AbsoluteLayout>

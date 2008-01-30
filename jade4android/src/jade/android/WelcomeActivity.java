@@ -35,7 +35,7 @@ public class WelcomeActivity extends Activity implements ConnectionListener {
 			connectService();
 			break;
 		case Menu.FIRST+1:
-			forwarding(SendMessage.class);
+			forwarding(SendMessageActivity.class);
 			break;
 		}
 
