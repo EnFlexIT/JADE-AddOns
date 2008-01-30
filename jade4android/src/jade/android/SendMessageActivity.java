@@ -3,7 +3,7 @@ package jade.android;
 import java.util.ArrayList;
 import java.util.List;
 
-import jade.lang.acl.ACLMessage;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
