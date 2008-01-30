@@ -51,13 +51,17 @@ public class JadeHelper {
 	        public void onServiceConnected(ComponentName className, IBinder service) {
 	        	Log.v(null,"JadeHelper onServiceConnected");
 	        	jadeBinder = (Command)service;
-	        	connectionListener.onConnected();
+	        	if(connectionListener != null) {
+	        		connectionListener.onConnected();
+	        	}
 	        }
 
 	        public void onServiceDisconnected(ComponentName className){
 	        	Log.v(null,"JAdeHelper onServiceDisconnected");
 	        	jadeBinder = null;
-	        	connectionListener.onDisconnected();
+	        	if(connectionListener != null) {
+		        	connectionListener.onDisconnected();
+	        	}
 	        }
 	    };
 
