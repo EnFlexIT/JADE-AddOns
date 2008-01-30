@@ -1,26 +1,39 @@
 package jade.android;
 
+import jade.lang.acl.ACLMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 
+
 public class SendMessageActivity extends Activity implements ConnectionListener{
 
 
 	public static final String KEY_RECEIVER = "receiver";
 	public static final String KEY_CONTENT = "content";
+	
+	//Keys for parameters to Message details activity
+	public static final String KEY_INTENT_SENDER="key_sender";
+	public static final String KEY_INTENT_COM_ACT="key_commAct";
+	public static final String KEY_INTENT_CONTENT="key_content";
+	
+	
 	private EditText receiverText, contentText;
 	private Spinner spn;
+	private ListView lv;
 	private JadeHelper helper;
 	
 	private List<MessageInfo> messageList;
@@ -30,6 +43,8 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		// TODO Auto-generated method stub
 		super.onCreate(icicle);
         
+		messageList = new ArrayList<MessageInfo>();
+		
 		helper = new JadeHelper(this, this);
 		helper.connect();
 		
@@ -42,12 +57,15 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		comActList.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spn.setAdapter(comActList);
 		
-		ListView lv = (ListView) findViewById(R.id.messageList);
+		lv = (ListView) findViewById(R.id.messageList);
 		
 		ArrayAdapter<CharSequence> msgListItems = new ArrayAdapter<CharSequence>(this,android.R.layout.list_content,new ArrayList<CharSequence>());
 		lv.setAdapter(msgListItems);
-	
-		messageList = new ArrayList<MessageInfo>();
+		lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+			public void  onItemClick(AdapterView parent, View v, int position, long id) {
+				forwarding(MessageDetailsActivity.class, position);
+			}
+		});
 		
 		Button sendButton = (Button) findViewById(R.id.sendBtn);
 		sendButton.setOnClickListener(new View.OnClickListener() {
@@ -62,6 +80,8 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
         });
 		
 		
+		
+		
 
 		Button backButton = (Button) findViewById(R.id.backBtn);
 		backButton.setOnClickListener(new View.OnClickListener() {
@@ -72,6 +92,18 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
            
         });     
 
+	}
+	
+	private void forwarding(Class nextActivity, int position) {
+        Intent intent = new Intent();
+        intent.setClass(this, nextActivity);
+        ACLMessage msg =  messageList.get(position).getMessage();
+        
+        intent.putExtra(SendMessageActivity.KEY_INTENT_SENDER, msg.getSender().getLocalName());
+        intent.putExtra(SendMessageActivity.KEY_INTENT_COM_ACT, ACLMessage.getPerformative(msg.getPerformative()));
+        intent.putExtra(SendMessageActivity.KEY_INTENT_CONTENT, msg.getContent());
+        
+        startSubActivity(intent,1);
 	}
 	
 	private void sendMessage(String receiver, String content, String comAct) {				
