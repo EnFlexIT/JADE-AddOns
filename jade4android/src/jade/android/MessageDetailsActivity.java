@@ -1,6 +1,5 @@
 package jade.android;
 
-import jade.lang.acl.ACLMessage;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
