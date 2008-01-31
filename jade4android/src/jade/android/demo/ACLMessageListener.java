@@ -1,4 +1,4 @@
-package jade.android;
+package jade.android.demo;
 
 import jade.lang.acl.ACLMessage;
 

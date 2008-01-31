@@ -1,4 +1,4 @@
-package jade.android;
+package jade.android.demo;
 
 import jade.core.AID;
 import jade.core.behaviours.OneShotBehaviour;

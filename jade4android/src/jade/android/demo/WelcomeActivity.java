@@ -1,5 +1,10 @@
-package jade.android;
+package jade.android.demo;
 
+import jade.android.ConnectionListener;
+import jade.android.JadeHelper;
+import jade.android.R;
+import jade.android.R.layout;
+import jade.android.R.string;
 import jade.core.behaviours.OneShotBehaviour;
 import android.app.Activity;
 import android.app.NotificationManager;

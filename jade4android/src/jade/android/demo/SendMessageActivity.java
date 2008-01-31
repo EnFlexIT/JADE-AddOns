@@ -1,11 +1,15 @@
-package jade.android;
+package jade.android.demo;
 
+import jade.android.ConnectionListener;
+import jade.android.JadeHelper;
+import jade.android.R;
+import jade.android.R.array;
+import jade.android.R.id;
+import jade.android.R.layout;
 import jade.lang.acl.ACLMessage;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

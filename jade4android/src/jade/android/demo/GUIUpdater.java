@@ -1,4 +1,4 @@
-package jade.android;
+package jade.android.demo;
 
 import java.util.ArrayList;
 
@@ -7,6 +7,8 @@ import java.util.List;
 import android.os.Handler;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import jade.android.R;
+import jade.android.R.id;
 import jade.lang.acl.ACLMessage;
 
 class GUIUpdater implements ACLMessageListener {

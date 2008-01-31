@@ -1,4 +1,4 @@
-package jade.android;
+package jade.android.demo;
 
 import android.util.Log;
 import jade.core.behaviours.CyclicBehaviour;

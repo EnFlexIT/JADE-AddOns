@@ -1,5 +1,8 @@
-package jade.android;
+package jade.android.demo;
 
+import jade.android.R;
+import jade.android.R.id;
+import jade.android.R.layout;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

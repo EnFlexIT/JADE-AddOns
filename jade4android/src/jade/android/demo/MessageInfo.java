@@ -1,4 +1,4 @@
-package jade.android;
+package jade.android.demo;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
