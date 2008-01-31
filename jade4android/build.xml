@@ -3,7 +3,7 @@
     <property file="build.properties" />	
     <property name="android-tools" value="${android-sdk-folder}/tools" />
     <property name="leap-home-dir" value="${jade-home-dir}/leap" />
-    
+	
     <!-- Input directories -->
     <property name="resource-dir" value="res" />
     <property name="asset-dir" value="assets" />
@@ -11,6 +11,7 @@
 
     <!-- Output directories -->
     <property name="lib" value="lib" />
+	<property name="dist" value="dist" />
     <property name="classes" value="classes" />
 
     <!-- Create R.java in the source directory -->
@@ -18,12 +19,13 @@
 
     <!-- Intermediate files -->
     <property name="dex-file" value="classes.dex" />
-    <property name="intermediate-dex" value="${lib}/${dex-file}" />
+    <property name="intermediate-dex" value="${dist}/${dex-file}" />
 
     <!-- The final package file to generate -->
-    <property name="out-package" value="${lib}/${ant.project.name}.apk" />
+    <property name="out-package" value="${dist}/${ant.project.name}.apk" />
     <property name="addon-name" value="../${ant.project.name}AddOn.zip" />
-
+	<property name="jade-leap-android-jar" value="${lib}/JadeLeapAndroid.jar" />
+	
     <!-- Tools -->
     <property name="aapt" value="${android-tools}/aapt.exe" />
     <property name="aidl" value="${android-tools}/aidl.exe" />
@@ -32,9 +34,7 @@
     
     <!-- Create the output directories if they don't exist yet. -->
     <target name="dirs">
- 	<delete dir="${lib}" />   
         <delete dir="${classes}" />   
-        <mkdir dir="${lib}" />
         <mkdir dir="${classes}" />
     </target>
 
@@ -66,16 +66,17 @@
     </target>
 
     <!-- Compile this project's .java files into .class files. -->
-    <target name="compile" depends="dirs, resource-src, aidl, compile-leap-pjava">
+    <target name="compile-demo" depends="resource-src, aidl">
         <javac encoding="ascii" target="1.5" debug="true" extdirs=""
-                srcdir="."
                 destdir="${classes}"
                 bootclasspath="${android-jar}">
           <classpath>
-            <fileset dir="${leap-home-dir}/pjava/lib" >
+            <fileset dir="${lib}" >
               <include name="*.jar"/>
             </fileset>
           </classpath>
+          <src path="${srcdir}"/>
+          <include name="jade/android/demo/**"/>
         </javac>
     </target>
     
@@ -84,13 +85,33 @@
     	<ant dir="${leap-home-dir}" target="rebuild" inheritAll="false">
     	  <property name="pjava" value="true"/>
     	  <property name="root" value="${leap-home-dir}"/>
-    	</ant>
+    	</ant>  
     	<unjar src="${leap-home-dir}/pjava/lib/JadeLeap.jar" dest="${classes}" />
     	<javac target="1.5" srcdir="${jade-home-dir}/src" destdir="${classes}" classpath="${classes}" includes="jade/wrapper/gateway/GatewayBehaviour.java" />
     </target>
 
+	<!-- Compile this project's .java files into .class files. -->
+	<target name="compile" depends="dirs, compile-leap-pjava">
+		<javac encoding="ascii" target="1.5" debug="true" extdirs=""
+	                destdir="${classes}"
+	                bootclasspath="${android-jar}">
+			<src path="${srcdir}"/>
+			<include name="jade/android/**"/>
+			<exclude name="jade/android/demo/**"/>
+	    </javac>
+	</target>
+	
+	<target name="jar" depends="compile">
+		<delete dir="${lib}" />  
+		<mkdir dir="${lib}" />
+		<jar destfile="${jade-leap-android-jar}" basedir="${classes}" />
+	</target>
+	
     <!-- Convert this project's .class files into .dex files. -->
-    <target name="dex" depends="compile">
+    <target name="dex" depends="compile-demo">
+    	<delete dir="${dist}"/>
+    	<mkdir dir="${dist}"/>
+    	<unjar src="${jade-leap-android-jar}" dest="${classes}" />
         <exec executable="${dx}" failonerror="true">
             <arg value="--dex" />
             <arg value="--output=${basedir}\${intermediate-dex}" />
@@ -148,13 +169,13 @@
         <antcall target="package-res-${res-target}" />
     </target>
 
-    <!-- Put the project's .class files into the output package file. -->
+    <!-- Put the project's .class files into the output package file.>
     <target name="package-java" depends="compile, package-res">
         <echo>Packaging java...</echo>
         <jar destfile="${out-package}"
                 basedir="${classes}"
                 update="true" />
-    </target>
+    </target -->
 
     <!-- Put the project's .dex files into the output package file. -->
     <target name="package-dex" depends="dex, package-res">
@@ -167,11 +188,10 @@
     </target>
 
     <!-- Create the package file for this project from the sources. -->
-    <target name="package" depends="package-dex" />
+    <target name="demo" depends="package-dex" />
     
-    <target name="dist" depends="package">
+    <target name="dist" depends="jar, demo">
      <echo>Create distribution files for Jade Android Add-on</echo>
-     <!-- FIXME: dobbiamo distribuire anche i classes.dex ? -->
      <zip destfile="${addon-name}" basedir="../..">
        <include name="add-ons/android/*"/>
        <include name="add-ons/android/src/**"/>
