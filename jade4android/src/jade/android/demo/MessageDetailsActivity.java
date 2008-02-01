@@ -1,8 +1,6 @@
 package jade.android.demo;
 
 import jade.android.R;
-import jade.android.R.id;
-import jade.android.R.layout;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,6 +21,9 @@ public class MessageDetailsActivity extends Activity {
 		
 		EditText sender = (EditText) this.findViewById(R.id.senderDet);
 		sender.setText( (String)it.getExtra(SendMessageActivity.KEY_INTENT_SENDER) );
+		
+		EditText receiver = (EditText) this.findViewById(R.id.receiverDet);
+		receiver.setText( (String)it.getExtra(SendMessageActivity.KEY_INTENT_RECEIVER) );
 		
 		EditText comAct = (EditText) this.findViewById(R.id.comActDet);
 		comAct.setText( (String)it.getExtra(SendMessageActivity.KEY_INTENT_COM_ACT)  );

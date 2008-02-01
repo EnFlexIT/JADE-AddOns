@@ -11,6 +11,10 @@
     <string name="bind_service">Start Container</string>
     <string name="unbind_service">Kill Container</string>
     <string name="send_message">Send message</string>
+    
+    <string name="send_and_recv_message">Send and Receive message</string>
+    <string name="msg_details">Message Details</string>
+    
     <string name="send_command">Send Command</string>
     <string name="test_puto2aobject">test puto2aobject</string>
     <string name="local_service_connected">Connected to local service</string>

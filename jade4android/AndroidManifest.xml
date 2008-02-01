@@ -9,18 +9,13 @@
     
     <application android:icon="@drawable/icon">
     	<service class=".MicroRuntimeService" />
-        <activity class=".demo.WelcomeActivity" android:label="@string/app_name">
+        <activity class=".demo.SendMessageActivity" android:label="@string/send_and_recv_message">
             <intent-filter>
                 <action android:value="android.intent.action.MAIN" />
                 <category android:value="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity class=".demo.SendMessageActivity" android:label="@string/app_name">
-            <intent-filter>
-                <action android:value="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
-        <activity class=".demo.MessageDetailsActivity" android:label="@string/app_name">
+        <activity class=".demo.MessageDetailsActivity" android:label="@string/msg_details">
             <intent-filter>
                 <action android:value="android.intent.action.MAIN" />
             </intent-filter>

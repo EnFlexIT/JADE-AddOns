@@ -6,6 +6,7 @@ import jade.android.R;
 import jade.android.R.array;
 import jade.android.R.id;
 import jade.android.R.layout;
+import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	
 	//Keys for parameters to Message details activity
 	public static final String KEY_INTENT_SENDER="key_sender";
+	public static final String KEY_INTENT_RECEIVER="key_receiver";
 	public static final String KEY_INTENT_COM_ACT="key_commAct";
 	public static final String KEY_INTENT_CONTENT="key_content";
 	
@@ -103,7 +105,9 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
         intent.setClass(this, nextActivity);
         ACLMessage msg =  messageList.get(position).getMessage();
         
-        intent.putExtra(SendMessageActivity.KEY_INTENT_SENDER, msg.getSender().getLocalName());
+        intent.putExtra(SendMessageActivity.KEY_INTENT_SENDER, msg.getSender().getName());
+        AID aid = (AID) msg.getAllReceiver().next();
+        intent.putExtra(SendMessageActivity.KEY_INTENT_RECEIVER,  aid.getName());
         intent.putExtra(SendMessageActivity.KEY_INTENT_COM_ACT, ACLMessage.getPerformative(msg.getPerformative()));
         intent.putExtra(SendMessageActivity.KEY_INTENT_CONTENT, msg.getContent());
         
@@ -115,7 +119,26 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		if (helper.isConnected()) {
 			DummySenderBehaviour dsb = new DummySenderBehaviour(receiver,content,comAct);
 			helper.execute(dsb);
-			Log.v(null,"Message sent!!!");
+			
+			
+			ACLMessage msg = new ACLMessage(DummySenderBehaviour.convertPerformative(comAct));
+			msg.setSender(new AID("gateway", AID.ISLOCALNAME));
+			msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
+			msg.setContent(content);
+		
+			MessageInfo info = new MessageInfo(msg);
+			messageList.add(info);
+			
+			List<String> strlist = new ArrayList<String>();
+			
+			for (MessageInfo minfo : messageList)
+			{
+				strlist.add(minfo.toString());
+			}
+			
+			ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, strlist);
+			lv.setAdapter(adapter);
+			
 		}	else {
 			Log.v(null,"ERRRORRRR!!!!!! SEND WAS CALLED WITHOUT CONNECTION TO SERVICE!!!");
 		}	
