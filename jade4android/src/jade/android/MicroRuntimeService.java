@@ -20,7 +20,7 @@ public class MicroRuntimeService extends Service {
 
 	private String myAgentName;
 	private String TAG = "MicroRuntimeService";
-	private final IBinder mBinder; 
+	private final IBinder mBinder = new JadeBinder(); 
 
 	
 	@Override
