@@ -23,7 +23,9 @@ public class JadeHelper {
 	}
 	
 	public void connect() {
-        myContext.bindService(new Intent(myContext, 
+       myContext.startService(new Intent(myContext, 
+                MicroRuntimeService.class), null);
+		myContext.bindService(new Intent(myContext, 
                 MicroRuntimeService.class),
             null, mConnection, Context.BIND_AUTO_CREATE);
 
@@ -38,8 +40,9 @@ public class JadeHelper {
 	
 	public void disconnect() {
         myContext.unbindService(mConnection);
-
+        jadeBinder = null;
 	}
+	
 	public void stop() {
 		myContext.stopService(new Intent(myContext, 
                 MicroRuntimeService.class));

@@ -3,9 +3,6 @@ package jade.android.demo;
 import jade.android.ConnectionListener;
 import jade.android.JadeHelper;
 import jade.android.R;
-import jade.android.R.array;
-import jade.android.R.id;
-import jade.android.R.layout;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 
@@ -16,7 +13,9 @@ import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
+import android.view.Menu.Item;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -37,6 +36,11 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	public static final String KEY_INTENT_COM_ACT="key_commAct";
 	public static final String KEY_INTENT_CONTENT="key_content";
 	
+	//Codes for menu items
+	private final int JADE_CONNECTED_ID = Menu.FIRST;
+	private final int JADE_DISCONNECTED_ID = Menu.FIRST+1;
+	private final int JADE_EXIT_ID = Menu.FIRST+2;
+	
 	
 	private EditText receiverText, contentText;
 	private Spinner spn;
@@ -49,60 +53,57 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	
 	@Override
 	protected void onCreate(Bundle icicle) {
-		// TODO Auto-generated method stub
+	
 		super.onCreate(icicle);
-        
+		
+		//Create the list of messages
 		nManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		messageList = new ArrayList<MessageInfo>();
 		
+		//Create the helper
 		helper = new JadeHelper(this, this);
-		helper.connect();
 		
+		//Set the xml layout from resource
 		setContentView(R.layout.send_message);
+		
+		//Retrieve all components
 		receiverText = (EditText) findViewById(R.id.receiver);
 		contentText = (EditText) findViewById(R.id.content);;
-
 		spn = (Spinner) findViewById(R.id.commAct);
-		ArrayAdapter<CharSequence> comActList = ArrayAdapter.createFromResource(this, R.array.comActList, android.R.layout.simple_spinner_item);
+		lv = (ListView) findViewById(R.id.messageList);
+		
+		
+		//SPINNER: fill with data
+		String[] performatives= ACLMessage.getAllPerformativeNames();
+		ArrayAdapter<CharSequence> comActList = new ArrayAdapter<CharSequence>(this,android.R.layout.simple_spinner_item, performatives);
 		comActList.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spn.setAdapter(comActList);
 		
-		lv = (ListView) findViewById(R.id.messageList);
 		
-		ArrayAdapter<CharSequence> msgListItems = new ArrayAdapter<CharSequence>(this,android.R.layout.list_content,new ArrayList<CharSequence>());
-		lv.setAdapter(msgListItems);
+		//LISTVIEW: handle click event
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-			public void  onItemClick(AdapterView parent, View v, int position, long id) {
+			public void onItemClick(AdapterView parent, View v, int position, long id) {
 				forwarding(MessageDetailsActivity.class, position);
 			}
 		});
 		
+		
+		//SEND BUTTON: retrieve and handle click event
 		Button sendButton = (Button) findViewById(R.id.sendBtn);
 		sendButton.setOnClickListener(new View.OnClickListener() {
-
             public void onClick(View view) {
             	Log.v(null,"receiver: "+receiverText.getText().toString());
             	Log.v(null,"content: "+contentText.getText().toString());
             	sendMessage(receiverText.getText().toString(), contentText.getText().toString(), (String)spn.getSelectedItem() );
        
             }
-          
         });
 		
 		
-		
-		
-
-		Button backButton = (Button) findViewById(R.id.backBtn);
-		backButton.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View view) {
-            	finish();
-            }
-           
-        });     
-
+	
 	}
+	
+	
 	
 	private void forwarding(Class nextActivity, int position) {
         Intent intent = new Intent();
@@ -177,5 +178,37 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	
 	public final List<MessageInfo> getMessageList() {
 		return messageList;
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		menu.add(0, JADE_CONNECTED_ID, R.string.menu_item_connect);
+		menu.add(0, JADE_DISCONNECTED_ID, R.string.menu_item_disconnect);
+		menu.add(0, JADE_EXIT_ID, R.string.menu_item_exit);
+		return true;
+	}
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, Item item) {
+		super.onMenuItemSelected(featureId, item);
+		
+		switch(item.getId()) {
+			case JADE_CONNECTED_ID:
+				if (!helper.isConnected())
+					helper.connect();
+			break;
+				
+			case JADE_DISCONNECTED_ID:
+				if (helper.isConnected())
+					helper.disconnect();
+			break;
+			
+			case JADE_EXIT_ID:
+				helper.stop();
+				finish();
+			break;
+		}
+		return true;
 	}
 }

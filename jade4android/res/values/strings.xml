@@ -6,13 +6,15 @@
     <string name="send_and_recv_message">Send and Receive message</string>
     <string name="msg_details">Message Details</string>
     <string name="execute_command_error">Error executing command</string>
-    <string name="menu_jade_controller">jade controller</string>
-    <string name="menu_send_message">invio messaggi</string>
-    <string name="menu_test_puto2aobject">test invio oggetto</string>
+	<string name="menu_item_connect">Connect to Jade</string>
+	<string name="menu_item_disconnect">Disconnect from Jade</string>
+	<string name="menu_item_exit">Exit</string>
+	
+	
     <string name="receiver">receiver</string>
     <string name="content">content</string>
     <string name="confirm">confirm</string>
     <string name="close">close</string>
     <string name="message_received">Ricevuto messaggio di risposta: </string>
-
+	
 </resources>

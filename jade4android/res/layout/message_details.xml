@@ -59,8 +59,6 @@ android:layout_y="122px"
 >
 </EditText>
 
-
-
 <TextView
 id="@+id/widget4Det1"
 android:layout_width="wrap_content"
@@ -80,6 +78,18 @@ android:layout_x="220px"
 android:layout_y="182px"
 >
 </Button>
+
+
+<Button
+id="@+id/replyBtnDet"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Reply"
+android:layout_x="120px"
+android:layout_y="182px"
+>
+</Button>
+
 
 <EditText
 id="@+id/contentDet"
