@@ -20,6 +20,8 @@ public class MicroRuntimeService extends Service {
 
 	private String myAgentName;
 	private String TAG = "MicroRuntimeService";
+	private final IBinder mBinder; 
+
 	
 	@Override
 	protected void onCreate() {
@@ -36,6 +38,9 @@ public class MicroRuntimeService extends Service {
 			}
 			Log.v(TAG, "Starting Jade with agent " + myAgentName);
 			MicroRuntime.startJADE(props, null);
+			if(MicroRuntime.isRunning())
+				mBinder.
+			
 		}catch(Exception e){
 			Log.e(TAG, e.getMessage(), e);
 		}
@@ -73,9 +78,6 @@ public class MicroRuntimeService extends Service {
 		return mBinder;
 	}
 
-	// This is the object that receives interactions from clients. See
-	// RemoteService for a more complete example.
-	private final IBinder mBinder = new JadeBinder(); 
 
 	private class JadeBinder extends BinderNative implements Command {
 		
@@ -83,9 +85,12 @@ public class MicroRuntimeService extends Service {
 			Log.v(TAG, "creating JadeBinder...");
 		}
 
-		public void execute(Object command) {
-			if (MicroRuntime.isRunning()) {
-
+		public boolean execute(Object command) {
+			boolean result = true;
+			if(!MicroRuntime.isRunning()) {
+				return false;
+			}
+			else {
 				Event e = null;
 				// incapsulate the command into an Event
 				e = new Event(-1, command);
@@ -93,16 +98,14 @@ public class MicroRuntimeService extends Service {
 					AgentController agent = MicroRuntime.getAgent(myAgentName);
 					agent.putO2AObject(e, AgentController.ASYNC);
 					e.waitUntilProcessed();
+					
 
-				} catch (StaleProxyException exc) {
-					exc.printStackTrace();
-				} catch (Exception ex) {
-					// TODO Auto-generated catch block
-					ex.printStackTrace();
-				}
+				}  catch (Exception ex) {
+					result = false;
+					Log.e (null,ex.getMessage(),ex);				}
 			}
+			return result;
 
 		}
-
 	}
 }

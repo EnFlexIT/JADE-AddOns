@@ -2,6 +2,7 @@ package jade.android;
 
 
 
+import jade.core.MicroRuntime;
 import android.app.ApplicationContext;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,6 +30,9 @@ public class JadeHelper {
 	
 	public boolean isConnected(){
 		return jadeBinder != null;
+	}
+	public boolean isRunning(){
+		return MicroRuntime.isRunning();
 	}
 	
 	public void disconnect() {
