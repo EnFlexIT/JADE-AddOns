@@ -143,7 +143,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 				lv.setAdapter(adapter);
 
 			} catch (Exception e) {
-				Log.e(getClass().getPackage().getName(),e.getMessage(),e);
+				Log.e("jade.android.demo",e.getMessage(),e);
 				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
 			}
 			
@@ -161,7 +161,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
         try {
 			helper.execute(drb);
 		} catch (Exception e) {
-			Log.e(getClass().getPackage().getName(),e.getMessage(),e);
+			Log.e("jade.android.demo",e.getMessage(),e);
 			nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
 		}
 	}
