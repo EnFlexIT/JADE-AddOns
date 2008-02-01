@@ -144,8 +144,8 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		}	
 	}
 
-	public void onConnected() {
-		
+	public void onConnected(boolean isStarted) {
+		//FIXME: gestione isStarted
 		GUIUpdater updater = new GUIUpdater(this);
 
 		DummyReceiverBehaviour drb = new DummyReceiverBehaviour(updater);

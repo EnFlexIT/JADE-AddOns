@@ -56,12 +56,12 @@ public class JadeHelper {
 	        	Log.v(null,"JadeHelper onServiceConnected");
 	        	jadeBinder = (Command)service;
 	        	if(connectionListener != null) {
-	        		connectionListener.onConnected();
+	        		connectionListener.onConnected(isRunning());
 	        	}
 	        }
 
 	        public void onServiceDisconnected(ComponentName className){
-	        	Log.v(null,"JAdeHelper onServiceDisconnected");
+	        	Log.v(null,"JadeHelper onServiceDisconnected");
 	        	jadeBinder = null;
 	        	if(connectionListener != null) {
 		        	connectionListener.onDisconnected();

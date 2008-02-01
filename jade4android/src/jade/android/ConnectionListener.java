@@ -1,6 +1,6 @@
 package jade.android;
 
 public interface ConnectionListener {
-	public void onConnected();
+	public void onConnected(boolean isStarted);
 	public void onDisconnected();
 }
