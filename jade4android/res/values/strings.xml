@@ -1,29 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="activity_local_jade_controller">Jade Controller</string>
-    <string name="app_name">Jade App</string>
-    <string name="app_name2">Jade Binding</string>
-    <string name="local_jade_binding">Jade Controller Console</string>
-    <string name="local_jade_controller">This demonstrates how you can implement a jade service that
-        may be started and stopped as desired.</string>
-    <string name="start_service">Start Service</string>
-    <string name="stop_service">Stop Service</string>
-    <string name="bind_service">Start Container</string>
-    <string name="unbind_service">Kill Container</string>
+    <string name="app_name">Jade Demo App</string>
     <string name="send_message">Send message</string>
-    
     <string name="send_and_recv_message">Send and Receive message</string>
     <string name="msg_details">Message Details</string>
-    
-    <string name="send_command">Send Command</string>
-    <string name="test_puto2aobject">test puto2aobject</string>
-    <string name="local_service_connected">Connected to local service</string>
-    <string name="local_service_disconnected">Disconnected from local service</string>
-    <string name="local_service_started">Local service has started</string>
-    <string name="local_service_stopped">Local service has stopped</string>
-    <string name="local_service_failure">Local service cannot start</string>
-    <string name="local_service_label">Sample Local Service</string>
-    <string name="hello_jade">Welcome to the first jade app for android</string>
     <string name="menu_jade_controller">jade controller</string>
     <string name="menu_send_message">invio messaggi</string>
     <string name="menu_test_puto2aobject">test invio oggetto</string>
