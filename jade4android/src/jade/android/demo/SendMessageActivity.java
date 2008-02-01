@@ -6,6 +6,7 @@ import jade.android.R;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 import android.app.Activity;
@@ -121,7 +122,6 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	
 	private void sendMessage(String receiver, String content, String comAct) {				
 		
-		if (helper.isConnected()) {
 			DummySenderBehaviour dsb = new DummySenderBehaviour(receiver,content,comAct);
 			try {
 				helper.execute(dsb);
@@ -143,15 +143,18 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, strlist);
 				lv.setAdapter(adapter);
 
-			} catch (Exception e) {
+			}
+			catch (ConnectException e) {
+				Log.e("jade.android.demo",e.getMessage(),e);
+				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error) + "connect to jadeService",NotificationManager.LENGTH_SHORT,null);
+			}
+			catch (Exception e) {
 				Log.e("jade.android.demo",e.getMessage(),e);
 				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
 			}
 			
-		}	else {
-			//fixme
-			Log.v(null,"ERRRORRRR!!!!!! SEND WAS CALLED WITHOUT CONNECTION TO SERVICE!!!");
-		}	
+		
+			
 	}
 
 	public void onConnected(boolean isStarted) {

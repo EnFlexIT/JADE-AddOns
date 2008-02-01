@@ -2,6 +2,8 @@ package jade.android;
 
 
 
+import java.net.ConnectException;
+
 import jade.core.MicroRuntime;
 import jade.wrapper.StaleProxyException;
 import android.app.ApplicationContext;
@@ -47,18 +49,21 @@ public class JadeHelper {
 		myContext.stopService(new Intent(myContext, 
                 MicroRuntimeService.class));
 	}
-	public void execute(Object command) throws Exception {
-		try {
-			if(jadeBinder != null) {
+	
+	public void execute(Object command) throws ConnectException, Exception {
+		
+		if(jadeBinder != null) {
+			try {
 				jadeBinder.execute(command);
+			} catch(StaleProxyException spe) {
+				throw new Exception("Failed to connect to jade runtime",spe);
 			}
-		}
-		catch(StaleProxyException spe) {
-			throw new Exception("Failed to connect to jade runtime",spe);
-		}
-		catch (Exception e) {
-			throw new Exception("Unexpected error",e);
-		}
+			catch (Exception e) {
+				throw new Exception("Unexpected error",e);
+			}
+		} else {
+			throw new ConnectException("Error: not connected to jade service");
+		}		
 	}
 	
 	
