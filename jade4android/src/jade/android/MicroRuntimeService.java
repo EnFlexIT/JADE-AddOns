@@ -1,20 +1,21 @@
 package jade.android;
 
-import java.io.InputStream;
-
 import jade.core.MicroRuntime;
 import jade.util.Event;
 import jade.util.leap.Properties;
 import jade.wrapper.AgentController;
+import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 
+import java.io.InputStream;
+
 import android.app.Service;
+import android.content.AssetManager;
+import android.content.Resources;
 import android.os.BinderNative;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.content.AssetManager;
-import android.content.Resources;
 
 public class MicroRuntimeService extends Service {
 
@@ -84,27 +85,13 @@ public class MicroRuntimeService extends Service {
 			Log.v(TAG, "creating JadeBinder...");
 		}
 
-		public boolean execute(Object command) {
-			boolean result = true;
-			if(!MicroRuntime.isRunning()) {
-				return false;
-			}
-			else {
-				Event e = null;
-				// incapsulate the command into an Event
-				e = new Event(-1, command);
-				try {
-					AgentController agent = MicroRuntime.getAgent(myAgentName);
-					agent.putO2AObject(e, AgentController.ASYNC);
-					e.waitUntilProcessed();
-					
-
-				}  catch (Exception ex) {
-					result = false;
-					Log.e (null,ex.getMessage(),ex);				}
-			}
-			return result;
-
+		public void execute(Object command) throws StaleProxyException,ControllerException,InterruptedException {
+			Event e = null;
+			// incapsulate the command into an Event
+			e = new Event(-1, command);
+			AgentController agent = MicroRuntime.getAgent(myAgentName);
+			agent.putO2AObject(e, AgentController.ASYNC);
+			e.waitUntilProcessed();
 		}
 	}
 }

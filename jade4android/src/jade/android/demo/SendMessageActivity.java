@@ -12,6 +12,7 @@ import jade.lang.acl.ACLMessage;
 import java.util.ArrayList;
 import java.util.List;
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -41,14 +42,17 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	private Spinner spn;
 	private ListView lv;
 	private JadeHelper helper;
-	
+    private NotificationManager nManager; 
+
 	private List<MessageInfo> messageList;
+	
 	
 	@Override
 	protected void onCreate(Bundle icicle) {
 		// TODO Auto-generated method stub
 		super.onCreate(icicle);
         
+		nManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		messageList = new ArrayList<MessageInfo>();
 		
 		helper = new JadeHelper(this, this);
@@ -118,28 +122,33 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		
 		if (helper.isConnected()) {
 			DummySenderBehaviour dsb = new DummySenderBehaviour(receiver,content,comAct);
-			helper.execute(dsb);
+			try {
+				helper.execute(dsb);
+				ACLMessage msg = new ACLMessage(DummySenderBehaviour.convertPerformative(comAct));
+				msg.setSender(new AID("gateway", AID.ISLOCALNAME));
+				msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
+				msg.setContent(content);
 			
-			
-			ACLMessage msg = new ACLMessage(DummySenderBehaviour.convertPerformative(comAct));
-			msg.setSender(new AID("gateway", AID.ISLOCALNAME));
-			msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
-			msg.setContent(content);
-		
-			MessageInfo info = new MessageInfo(msg);
-			messageList.add(info);
-			
-			List<String> strlist = new ArrayList<String>();
-			
-			for (MessageInfo minfo : messageList)
-			{
-				strlist.add(minfo.toString());
+				MessageInfo info = new MessageInfo(msg);
+				messageList.add(info);
+				
+				List<String> strlist = new ArrayList<String>();
+				
+				for (MessageInfo minfo : messageList)
+				{
+					strlist.add(minfo.toString());
+				}
+				
+				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, strlist);
+				lv.setAdapter(adapter);
+
+			} catch (Exception e) {
+				Log.e(getClass().getPackage().getName(),e.getMessage(),e);
+				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
 			}
 			
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, strlist);
-			lv.setAdapter(adapter);
-			
 		}	else {
+			//fixme
 			Log.v(null,"ERRRORRRR!!!!!! SEND WAS CALLED WITHOUT CONNECTION TO SERVICE!!!");
 		}	
 	}
@@ -149,7 +158,12 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		GUIUpdater updater = new GUIUpdater(this);
 
 		DummyReceiverBehaviour drb = new DummyReceiverBehaviour(updater);
-        helper.execute(drb);
+        try {
+			helper.execute(drb);
+		} catch (Exception e) {
+			Log.e(getClass().getPackage().getName(),e.getMessage(),e);
+			nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
+		}
 	}
 
 	public void onDisconnected() {

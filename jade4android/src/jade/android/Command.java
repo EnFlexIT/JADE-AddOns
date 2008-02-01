@@ -1,6 +1,9 @@
 package jade.android;
 
+import jade.wrapper.ControllerException;
+import jade.wrapper.StaleProxyException;
+
 public interface Command {
-	public boolean execute(Object command);
+	public void execute(Object command) throws StaleProxyException,ControllerException, InterruptedException;
 
 }
