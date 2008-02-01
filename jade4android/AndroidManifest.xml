@@ -7,9 +7,9 @@
     <uses-permission id="com.google.android.xmppService.permission.XMPP_SERVICE" />
     <uses-permission id="android.permission.RUN_INSTRUMENTATION" />
     
-    <application android:icon="@drawable/icon">
+    <application android:icon="@drawable/jade" android:label="@string/app_name">
     	<service class=".MicroRuntimeService" />
-        <activity class=".demo.SendMessageActivity" android:label="@string/send_and_recv_message">
+        <activity class=".demo.SendMessageActivity" android:label="@string/app_name">
             <intent-filter>
                 <action android:value="android.intent.action.MAIN" />
                 <category android:value="android.intent.category.LAUNCHER" />
