@@ -38,8 +38,7 @@ public class MicroRuntimeService extends Service {
 			}
 			Log.v(TAG, "Starting Jade with agent " + myAgentName);
 			MicroRuntime.startJADE(props, null);
-			if(MicroRuntime.isRunning())
-				mBinder.
+		
 			
 		}catch(Exception e){
 			Log.e(TAG, e.getMessage(), e);
