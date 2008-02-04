@@ -4,14 +4,19 @@ import jade.android.ConnectionListener;
 import jade.android.JadeHelper;
 import jade.android.R;
 import jade.core.AID;
+import jade.core.MicroRuntime;
 import jade.lang.acl.ACLMessage;
+import jade.util.leap.Properties;
 
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.AssetManager;
 import android.content.Intent;
+import android.content.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -43,7 +48,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	private final int JADE_EXIT_ID = Menu.FIRST+2;
 	
 	
-	private EditText receiverText, contentText;
+	private EditText receiverText, contentText, senderText;
 	private Spinner spn;
 	private ListView lv;
 	private JadeHelper helper;
@@ -51,6 +56,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 
 	private List<MessageInfo> messageList;
 	
+	private String senderName;
 	
 	@Override
 	protected void onCreate(Bundle icicle) {
@@ -68,6 +74,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		setContentView(R.layout.send_message);
 		
 		//Retrieve all components
+		senderText = (EditText) findViewById(R.id.sender);
 		receiverText = (EditText) findViewById(R.id.receiver);
 		contentText = (EditText) findViewById(R.id.content);;
 		spn = (Spinner) findViewById(R.id.commAct);
@@ -99,9 +106,30 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
        
             }
         });
-		
-		
 	
+		//read property file
+		Resources resources = this.getResources(); 
+        AssetManager aM = resources.getAssets(); 
+		
+        try {
+        
+	        InputStream iS = aM.open("run.properties");
+			Properties props = new Properties();
+			props.load(iS);
+			String property = props.getProperty(MicroRuntime.AGENTS_KEY);
+			
+			//FIXME: Here we get the agent name from property file by string manipulation
+			//we should probably find a better way
+			senderName=property.substring(0,property.indexOf(':'));
+		//	senderName = firstPart.substring(firstPart.lastIndexOf('@')+1,firstPart.length());
+			
+        } catch (Exception e){
+        	Log.e("jade.android.demo", e.getMessage(), e);
+        }
+        
+        //put the agent name into sender box
+        senderText.setText(senderName);
+        
 	}
 	
 	
@@ -122,14 +150,17 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	
 	private void sendMessage(String receiver, String content, String comAct) {				
 		
-			DummySenderBehaviour dsb = new DummySenderBehaviour(receiver,content,comAct);
+			ACLMessage msg = new ACLMessage(DummySenderBehaviour.convertPerformative(comAct));
+				
+			msg.setSender(new AID(senderName, AID.ISLOCALNAME));
+			msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
+			msg.setContent(content);
+			
+			DummySenderBehaviour dsb = new DummySenderBehaviour(msg);
+			
 			try {
 				helper.execute(dsb);
-				ACLMessage msg = new ACLMessage(DummySenderBehaviour.convertPerformative(comAct));
-				msg.setSender(new AID("gateway", AID.ISLOCALNAME));
-				msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
-				msg.setContent(content);
-			
+				
 				MessageInfo info = new MessageInfo(msg);
 				messageList.add(info);
 				
