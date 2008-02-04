@@ -7,10 +7,13 @@
     <string name="msg_details">Message Details</string>
     <string name="execute_command_error">Error executing command, retry to connect to jade service</string>
     <string name="execute_command_unexpected_error">Unexpected error executing command. Now I try to restart the service...</string>
+	
 	<string name="menu_item_connect">Connect to Jade</string>
 	<string name="menu_item_disconnect">Disconnect from Jade</string>
 	<string name="menu_item_exit">Exit</string>
 	
+	<string name="statusbar_msg_connected">Connected to service</string>
+	<string name="statusbar_msg_disconnected">Disconnected from service</string>
 	
     <string name="receiver">receiver</string>
     <string name="content">content</string>

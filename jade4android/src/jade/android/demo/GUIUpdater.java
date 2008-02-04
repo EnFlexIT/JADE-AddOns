@@ -46,20 +46,15 @@ class GUIUpdater implements ACLMessageListener {
 			MessageInfo mf = new MessageInfo(message);
 			
 			sendMsgAct.addMessage(mf);
-			
-			List<MessageInfo> list = sendMsgAct.getMessageList();
-			List<String> strlist = new ArrayList<String>();
-			
-			for (MessageInfo msg : list)
-			{
-				strlist.add(msg.toString());
-			}
+			IconifiedTextListAdapter adapter = sendMsgAct.getListAdapter();
+			IconifiedText txt = new IconifiedText(mf.toString(),sendMsgAct.getResources().getDrawable(R.drawable.downmod));
+			txt.setTextColor(sendMsgAct.getResources().getColor(R.color.listitem_received_msg));
+			adapter.addItem(txt);
 			
 			ListView lv = (ListView) sendMsgAct.findViewById(R.id.messageList);
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(sendMsgAct,android.R.layout.simple_list_item_1, strlist);
 			lv.setAdapter(adapter);
-			
+		    
 		}
 	}
-	
 }
+	

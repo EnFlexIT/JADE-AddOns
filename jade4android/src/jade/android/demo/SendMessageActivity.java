@@ -12,9 +12,14 @@ import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.mobilecontrol.syncML.protocol.mcNotification;
+
 import android.app.Activity;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.AssetManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Resources;
 import android.os.Bundle;
@@ -42,6 +47,9 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	public static final String KEY_INTENT_COM_ACT="key_commAct";
 	public static final String KEY_INTENT_CONTENT="key_content";
 	
+	//notification ID
+	private final int STATUSBAR_NOTIFICATION= R.layout.send_message;
+	
 	//Codes for menu items
 	private final int JADE_CONNECTED_ID = Menu.FIRST;
 	private final int JADE_DISCONNECTED_ID = Menu.FIRST+1;
@@ -52,9 +60,11 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	private Spinner spn;
 	private ListView lv;
 	private JadeHelper helper;
-    private NotificationManager nManager; 
+    private Button sendButton;
+	private NotificationManager nManager; 
 
 	private List<MessageInfo> messageList;
+	private IconifiedTextListAdapter listAdapter;
 	
 	private String senderName;
 	
@@ -96,13 +106,15 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		});
 		
 		
-		//SEND BUTTON: retrieve and handle click event
-		Button sendButton = (Button) findViewById(R.id.sendBtn);
+		//SEND BUTTON: retrieve and handle click event (Initially disabled)
+		sendButton = (Button) findViewById(R.id.sendBtn);
+		sendButton.setEnabled(false);
 		sendButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             	Log.v(null,"receiver: "+receiverText.getText().toString());
             	Log.v(null,"content: "+contentText.getText().toString());
-            	sendMessage(receiverText.getText().toString(), contentText.getText().toString(), (String)spn.getSelectedItem() );
+            	if (sendButton.isEnabled())
+            		sendMessage(receiverText.getText().toString(), contentText.getText().toString(), (String)spn.getSelectedItem() );
        
             }
         });
@@ -130,6 +142,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
         //put the agent name into sender box
         senderText.setText(senderName);
         
+        listAdapter = new IconifiedTextListAdapter(this);
 	}
 	
 	
@@ -164,16 +177,11 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 				MessageInfo info = new MessageInfo(msg);
 				messageList.add(info);
 				
-				List<String> strlist = new ArrayList<String>();
-				
-				for (MessageInfo minfo : messageList)
-				{
-					strlist.add(minfo.toString());
-				}
-				
-				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, strlist);
-				lv.setAdapter(adapter);
-			}
+				IconifiedText IT = new IconifiedText (info.toString(), getResources().getDrawable(R.drawable.upmod));
+				IT.setTextColor(getResources().getColor(R.color.listitem_sent_msg));
+				listAdapter.addItem(IT);
+				lv.setAdapter(listAdapter);
+			    }
 			catch (ConnectException e) {
 				Log.e("jade.android.demo",e.getMessage(),e);
 				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
@@ -195,14 +203,22 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		DummyReceiverBehaviour drb = new DummyReceiverBehaviour(updater);
         try {
 			helper.execute(drb);
-		} catch (Exception e) {
+			sendButton.setEnabled(true);
+			CharSequence txt = getResources().getText(R.string.statusbar_msg_connected);
+			Notification notification = new Notification(R.drawable.dummyagent,txt ,null,txt,null );
+			nManager.notify(STATUSBAR_NOTIFICATION, notification);
+			sendButton.invalidate();
+        } catch (Exception e) {
 			Log.e("jade.android.demo",e.getMessage(),e);
 			nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
 		}
+		
+		
 	}
 
 	public void onDisconnected() {
 		// TODO Auto-generated method stub
+		Log.v("SendMessageActivity","OnDisconnected has been called!!!!");
 		
 	}	
 		
@@ -214,6 +230,9 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		return messageList;
 	}
 	
+	public  IconifiedTextListAdapter getListAdapter() {
+		return listAdapter;
+	}	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
@@ -222,7 +241,8 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		menu.add(0, JADE_EXIT_ID, R.string.menu_item_exit);
 		return true;
 	}
-
+	
+		
 	@Override
 	public boolean onMenuItemSelected(int featureId, Item item) {
 		super.onMenuItemSelected(featureId, item);
@@ -231,14 +251,19 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			case JADE_CONNECTED_ID:
 				if (!helper.isConnected())
 					helper.connect();
+				
 			break;
 				
 			case JADE_DISCONNECTED_ID:
-				if (helper.isConnected())
+//				if (helper.isConnected())
 					helper.disconnect();
+					nManager.cancel(STATUSBAR_NOTIFICATION);
+					sendButton.setEnabled(false);
+					sendButton.invalidate();
 			break;
 			
 			case JADE_EXIT_ID:
+				nManager.cancel(STATUSBAR_NOTIFICATION);
 				helper.stop();
 				finish();
 			break;
