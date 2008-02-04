@@ -8,6 +8,7 @@ import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 
 import java.io.InputStream;
+import java.util.StringTokenizer;
 
 import android.app.Service;
 import android.content.AssetManager;
@@ -31,16 +32,20 @@ public class MicroRuntimeService extends Service {
 		try{
 			Properties props = getProperties();
 			String agents = props.getProperty(MicroRuntime.AGENTS_KEY);
-			if(agents == null){
+			if((agents == null) || agents.length() == 0){
 				Log.w(TAG, "No agents specified !!");
 			}else{
-				int index = agents.indexOf(":");
-				myAgentName = agents.substring(0, index);
+				StringTokenizer st = new StringTokenizer(agents, ";");
+				if(st.countTokens() > 1){
+					Log.w(TAG, "Only the first agent will be started !!!");
+				}
+				String firstAgent = st.nextToken();
+				int index = firstAgent.indexOf(":");
+				myAgentName = firstAgent.substring(0, index);
+				props.put(MicroRuntime.AGENTS_KEY, firstAgent);
 			}
 			Log.v(TAG, "Starting Jade with agent " + myAgentName);
 			MicroRuntime.startJADE(props, null);
-		
-			
 		}catch(Exception e){
 			Log.e(TAG, e.getMessage(), e);
 		}
