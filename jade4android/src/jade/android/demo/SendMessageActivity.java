@@ -173,15 +173,15 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 				
 				ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, strlist);
 				lv.setAdapter(adapter);
-
 			}
 			catch (ConnectException e) {
 				Log.e("jade.android.demo",e.getMessage(),e);
-				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error) + "connect to jadeService",NotificationManager.LENGTH_SHORT,null);
+				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
 			}
 			catch (Exception e) {
 				Log.e("jade.android.demo",e.getMessage(),e);
-				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
+				nManager.notifyWithText(R.string.execute_command_unexpected_error,getText(R.string.execute_command_unexpected_error),NotificationManager.LENGTH_SHORT,null);
+				helper.reconnectToJADE();
 			}
 			
 		

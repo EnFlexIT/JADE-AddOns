@@ -1,11 +1,11 @@
 package jade.android;
 
-
-
 import java.net.ConnectException;
 
 import jade.core.MicroRuntime;
 import jade.wrapper.StaleProxyException;
+import jade.wrapper.ControllerException;
+
 import android.app.ApplicationContext;
 import android.content.ComponentName;
 import android.content.Context;
@@ -15,6 +15,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 public class JadeHelper {
+	
 	private ApplicationContext myContext;
 	private Command jadeBinder;
 	private ConnectionListener connectionListener;
@@ -25,12 +26,9 @@ public class JadeHelper {
 	}
 	
 	public void connect() {
-       myContext.startService(new Intent(myContext, 
-                MicroRuntimeService.class), null);
-		myContext.bindService(new Intent(myContext, 
-                MicroRuntimeService.class),
-            null, mConnection, Context.BIND_AUTO_CREATE);
-
+		Log.v("JadeHelper","connecting to jade service");
+		myContext.startService(new Intent(myContext, MicroRuntimeService.class), null);
+		myContext.bindService(new Intent(myContext, MicroRuntimeService.class),null, mConnection, Context.BIND_AUTO_CREATE);
 	}
 	
 	public boolean isConnected(){
@@ -46,31 +44,34 @@ public class JadeHelper {
 	}
 	
 	public void stop() {
-		myContext.stopService(new Intent(myContext, 
-                MicroRuntimeService.class));
+		Log.v("JadeHelper","stopping jade service");
+		myContext.stopService(new Intent(myContext, MicroRuntimeService.class));
 	}
 	
-	public void execute(Object command) throws ConnectException, Exception {
+	public void execute(Object command) throws ConnectException, StaleProxyException, ControllerException, InterruptedException {
 		
 		if(jadeBinder != null) {
-			try {
-				jadeBinder.execute(command);
-			} catch(StaleProxyException spe) {
-				throw new Exception("Failed to connect to jade runtime",spe);
-			}
-			catch (Exception e) {
-				throw new Exception("Unexpected error",e);
-			}
+			jadeBinder.execute(command);
 		} else {
+			//jadeBinder null so retry to connect to the service
 			throw new ConnectException("Error: not connected to jade service");
 		}		
 	}
 	
+	//FIXME: questo metodo e' stato aggiunto per riattivare jade dopo che il container e' stato
+	//killato da remoto. Viene richiamato a livello applicativo. non abbiamo trovato un modo per 
+	//far ripartire jade e sottomettere nuovamente il comando (fino a quando la onServiceConnected non viene
+	//richiamata non e' possibile fare la execute, ma in quel modo viene richiamato il codice del listener con il quale l' helper e' stato inizializzato)
+	public void reconnectToJADE(){
+		disconnect();
+		stop();
+		connect();
+	}
 	
 	 private ServiceConnection mConnection = new ServiceConnection() {
 	    
 	        public void onServiceConnected(ComponentName className, IBinder service) {
-	        	Log.v(null,"JadeHelper onServiceConnected");
+	        	Log.v("JadeHelper","JadeHelper onServiceConnected");
 	        	jadeBinder = (Command)service;
 	        	if(connectionListener != null) {
 	        		connectionListener.onConnected(isRunning());
@@ -78,13 +79,11 @@ public class JadeHelper {
 	        }
 
 	        public void onServiceDisconnected(ComponentName className){
-	        	Log.v(null,"JadeHelper onServiceDisconnected");
+	        	Log.v("JadeHelper","JadeHelper onServiceDisconnected");
 	        	jadeBinder = null;
 	        	if(connectionListener != null) {
 		        	connectionListener.onDisconnected();
 	        	}
 	        }
 	    };
-
-
 }
