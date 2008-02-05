@@ -218,7 +218,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 
 	public void onDisconnected() {
 		// TODO Auto-generated method stub
-		Log.v("SendMessageActivity","OnDisconnected has been called!!!!");
+		Log.v("jade.android.demo","OnDisconnected has been called!!!!");
 		
 	}	
 		

@@ -33,7 +33,7 @@ public class DummyReceiverBehaviour extends OneShotBehaviour {
 		@Override
 		public void action() {
 			ACLMessage msg = myAgent.receive();
-			Log.v("DummyReceiverBehaviour", "Message received");
+			Log.v("jade.android.demo", "Message received");
 			
 			//if a message is available
 			if (msg != null){

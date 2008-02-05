@@ -21,7 +21,7 @@ public class CommandHandlerBehaviour extends GatewayBehaviour {
 			myAgent.addBehaviour(sb);
 		}
 		else {
-			Log.v(null, "Unknown command "+command);
+			Log.v("jade.android", "Unknown command "+command);
 		}
 
 	}

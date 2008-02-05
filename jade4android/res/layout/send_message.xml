@@ -87,6 +87,10 @@ android:layout_width="fill_parent"
 android:layout_height="180px"
 android:layout_x="0px"
 android:layout_y="252px"
+android:verticalScrollbarTrack="@drawable/scrollbar_vertical_track"
+android:verticalScrollbarThumb="@drawable/scrollbar_vertical_thumb"
+android:scrollbarFadeDuration="1000"
+android:scrollbarSize="10dip">
 >
 </ListView>
 <EditText

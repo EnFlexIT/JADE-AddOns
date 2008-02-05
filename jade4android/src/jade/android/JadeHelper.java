@@ -26,7 +26,7 @@ public class JadeHelper {
 	}
 	
 	public void connect() {
-		Log.v("JadeHelper","connecting to jade service");
+		Log.v("jade.android","connecting to jade service");
 		myContext.startService(new Intent(myContext, MicroRuntimeService.class), null);
 		myContext.bindService(new Intent(myContext, MicroRuntimeService.class),null, mConnection, Context.BIND_AUTO_CREATE);
 	}
@@ -44,7 +44,7 @@ public class JadeHelper {
 	}
 	
 	public void stop() {
-		Log.v("JadeHelper","stopping jade service");
+		Log.v("jade.android","stopping jade service");
 		myContext.stopService(new Intent(myContext, MicroRuntimeService.class));
 	}
 	

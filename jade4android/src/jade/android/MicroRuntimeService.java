@@ -21,7 +21,7 @@ import android.util.Log;
 public class MicroRuntimeService extends Service {
 
 	private String myAgentName;
-	private String TAG = "MicroRuntimeService";
+	private String TAG = "jade.android";
 	private final IBinder mBinder = new JadeBinder(); 
 
 	
@@ -59,7 +59,7 @@ public class MicroRuntimeService extends Service {
 	@Override
 	protected void onDestroy() {
 		// stop Jade
-		Log.v(null, "Stopping Jade");
+		Log.v(TAG, "Stopping Jade");
 		if (MicroRuntime.isRunning()) {
 			MicroRuntime.stopJADE();
 			Log.v(TAG, "Jade stopped");
