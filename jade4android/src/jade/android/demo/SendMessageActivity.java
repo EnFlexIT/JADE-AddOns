@@ -255,11 +255,12 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			break;
 				
 			case JADE_DISCONNECTED_ID:
-//				if (helper.isConnected())
+				if (helper.isConnected()) {
 					helper.disconnect();
 					nManager.cancel(STATUSBAR_NOTIFICATION);
 					sendButton.setEnabled(false);
 					sendButton.invalidate();
+				}
 			break;
 			
 			case JADE_EXIT_ID:
@@ -270,4 +271,11 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		}
 		return true;
 	}
+	
+	protected void onActivityResult(int requestCode, int resultCode, String data, Bundle extras) {         
+		 if (resultCode == MessageDetailsActivity.REPLY_TO_RESULT) {             
+			 receiverText.setText(data);
+		 }
+	}
+
 }

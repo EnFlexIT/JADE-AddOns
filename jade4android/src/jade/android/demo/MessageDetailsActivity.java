@@ -11,6 +11,11 @@ import android.widget.EditText;
 
 public class MessageDetailsActivity extends Activity {
 
+	public static final int REPLY_TO_RESULT=0;
+	public static final int BACK_RESULT=1;
+	
+	private EditText sender;
+	
 	protected void onCreate(Bundle icicle) {
 		
 		super.onCreate(icicle);
@@ -19,28 +24,41 @@ public class MessageDetailsActivity extends Activity {
 		Intent it =getIntent();
 		
 		
-		EditText sender = (EditText) this.findViewById(R.id.senderDet);
+		sender = (EditText) this.findViewById(R.id.senderDet);
 		sender.setText( (String)it.getExtra(SendMessageActivity.KEY_INTENT_SENDER) );
+		sender.setEnabled(false);
 		
 		EditText receiver = (EditText) this.findViewById(R.id.receiverDet);
 		receiver.setText( (String)it.getExtra(SendMessageActivity.KEY_INTENT_RECEIVER) );
+		receiver.setEnabled(false);
 		
 		EditText comAct = (EditText) this.findViewById(R.id.comActDet);
 		comAct.setText( (String)it.getExtra(SendMessageActivity.KEY_INTENT_COM_ACT)  );
+		comAct.setEnabled(false);
 		
 		EditText content = (EditText) this.findViewById(R.id.contentDet);
 		content.setText( (String)it.getExtra(SendMessageActivity.KEY_INTENT_CONTENT) );
-	
+		content.setEnabled(false);
+		
 		Button btn = (Button) this.findViewById(R.id.backBtnDet);
 		btn.setOnClickListener(new OnClickListener(){
 
 			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
 				finish();
 			}
 			
-		} );
-	}
+		});
+		
+		Button reply = (Button) this.findViewById(R.id.replyBtnDet);
+		reply.setOnClickListener(new OnClickListener(){
+			public void onClick(View arg0) {
+				String snd = sender.getText().toString();
+				String nameToSend = snd.substring(0, snd.indexOf('@'));
+				setResult(REPLY_TO_RESULT, nameToSend);
+				finish();
+			}
+				
+		});
 	
-	
+	}	
 }
