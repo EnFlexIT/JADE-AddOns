@@ -38,6 +38,10 @@ public class IconifiedTextListAdapter extends BaseAdapter {
           return position; 
      } 
 
+     public void clear(){
+    	 mItems.clear();
+     }
+     
      /** @param convertView The old view to overwrite, if one is passed 
       * @returns a IconifiedTextView that holds wraps around an IconifiedText */ 
      public View getView(int position, View convertView, ViewGroup parent) { 

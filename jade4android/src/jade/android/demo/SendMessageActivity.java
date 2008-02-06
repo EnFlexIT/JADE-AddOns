@@ -63,6 +63,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	private ListView lv;
 	private JadeHelper helper;
     private Button sendButton;
+    private Button clearButton;
 	private NotificationManager nManager; 
 
 	private LinkedList<MessageInfo> messageList;
@@ -114,13 +115,26 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		sendButton.setEnabled(false);
 		sendButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-            	Log.v(null,"receiver: "+receiverText.getText().toString());
-            	Log.v(null,"content: "+contentText.getText().toString());
+            	Log.v("jade.android.demo","receiver: "+receiverText.getText().toString());
+            	Log.v("jade.android.demo","content: "+contentText.getText().toString());
             	if (sendButton.isEnabled())
             		sendMessage(receiverText.getText().toString(), contentText.getText().toString(), (String)spn.getSelectedItem() );
        
             }
         });
+
+		//CLEAR BUTTON: retrieve and handle click event (Initially disabled)
+		clearButton = (Button) findViewById(R.id.clearbtn);		
+		clearButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {      	
+            	if (clearButton.isEnabled()){
+            		messageList.clear();           	
+            	    listAdapter.clear();
+            	    lv.setAdapter(listAdapter);
+            	 }
+            }
+        });
+
 	
 		//read property file
 		Resources resources = this.getResources(); 

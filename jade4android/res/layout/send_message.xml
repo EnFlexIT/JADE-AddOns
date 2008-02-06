@@ -57,8 +57,8 @@ id="@+id/sendBtn"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="Send"
-android:layout_x="10px"
-android:layout_y="192px"
+android:layout_x="40px"
+android:layout_y="194px"
 >
 </Button>
 <TextView
@@ -87,10 +87,6 @@ android:layout_width="fill_parent"
 android:layout_height="180px"
 android:layout_x="0px"
 android:layout_y="252px"
-android:verticalScrollbarTrack="@drawable/scrollbar_vertical_track"
-android:verticalScrollbarThumb="@drawable/scrollbar_vertical_thumb"
-android:scrollbarFadeDuration="1000"
-android:scrollbarSize="10dip">
 >
 </ListView>
 <EditText
@@ -101,9 +97,18 @@ android:layout_x="180px"
 android:layout_y="22px"
 >
 </EditText>
+<Button
+id="@+id/clearbtn"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Clear List"
+android:layout_x="197px"
+android:layout_y="194px"
+>
+</Button>
 <Spinner
 id="@+id/commAct"
-android:layout_width="287px"
+android:layout_width="250px"
 android:layout_height="wrap_content"
 android:layout_x="10px"
 android:layout_y="142px"
