@@ -11,7 +11,9 @@ import jade.util.leap.Properties;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 import org.mobilecontrol.syncML.protocol.mcNotification;
 
@@ -63,7 +65,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
     private Button sendButton;
 	private NotificationManager nManager; 
 
-	private List<MessageInfo> messageList;
+	private LinkedList<MessageInfo> messageList;
 	private IconifiedTextListAdapter listAdapter;
 	
 	private String senderName;
@@ -73,9 +75,11 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	
 		super.onCreate(icicle);
 		
+		Log.v("jade.android.demo","SendMessageActivity.onCreate() : starting onCreate method");
+		
 		//Create the list of messages
 		nManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-		messageList = new ArrayList<MessageInfo>();
+		messageList = new LinkedList<MessageInfo>();
 		
 		//Create the helper
 		helper = new JadeHelper(this, this);
@@ -104,8 +108,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 				forwarding(MessageDetailsActivity.class, position);
 			}
 		});
-		
-		
+	
 		//SEND BUTTON: retrieve and handle click event (Initially disabled)
 		sendButton = (Button) findViewById(R.id.sendBtn);
 		sendButton.setEnabled(false);
@@ -175,11 +178,11 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 				helper.execute(dsb);
 				
 				MessageInfo info = new MessageInfo(msg);
-				messageList.add(info);
+				addFirstMessage(info);
 				
 				IconifiedText IT = new IconifiedText (info.toString(), getResources().getDrawable(R.drawable.upmod));
 				IT.setTextColor(getResources().getColor(R.color.listitem_sent_msg));
-				listAdapter.addItem(IT);
+				listAdapter.addFirstItem(IT);
 				lv.setAdapter(listAdapter);
 			    }
 			catch (ConnectException e) {
@@ -222,11 +225,11 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		
 	}	
 		
-	public void addMessage(MessageInfo msg) { 
-		messageList.add(msg);
+	public void addFirstMessage(MessageInfo msg) { 
+		messageList.addFirst(msg);
 	}
 	
-	public final List<MessageInfo> getMessageList() {
+	public final LinkedList<MessageInfo> getMessageList() {
 		return messageList;
 	}
 	
@@ -264,8 +267,6 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			break;
 			
 			case JADE_EXIT_ID:
-				nManager.cancel(STATUSBAR_NOTIFICATION);
-				helper.stop();
 				finish();
 			break;
 		}
@@ -278,4 +279,48 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		 }
 	}
 
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.v("jade.android.demo","SendMessageActivity.onDestroy() : calling onDestroy method");
+		nManager.cancel(STATUSBAR_NOTIFICATION);
+		helper.stop();
+	}
+	
+	@Override
+	protected void onFreeze(Bundle out) {
+		super.onFreeze(out);
+		Log.v("jade.android.demo","SendMessageActivity.onFreeze() : calling onFreeze method");
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.v("jade.android.demo","SendMessageActivity.onResume() : calling onResume method");
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.v("jade.android.demo","SendMessageActivity.onPause() : calling onPause method");
+	}
+	
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.v("jade.android.demo","SendMessageActivity.onStop() : calling onStop method");
+	}
+	
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		Log.v("jade.android.demo","SendMessageActivity.onRestart() : calling onRestart method");
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		Log.v("jade.android.demo","SendMessageActivity.onStart() : calling onStart method");
+	}
+	
 }

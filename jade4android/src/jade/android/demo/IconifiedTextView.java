@@ -21,7 +21,7 @@ public class IconifiedTextView extends LinearLayout {
           mIcon = new ImageView(context); 
           mIcon.setImageDrawable(aIconifiedText.getIcon()); 
           // left, top, right, bottom 
-          mIcon.setPadding(0, 2, 5, 0); // 5px to the right 
+          mIcon.setPadding(0, 2, 3, 0); // 5px to the right 
            
           /* At first, add the Icon to ourself 
            * (! we are extending LinearLayout) */ 
@@ -40,7 +40,10 @@ public class IconifiedTextView extends LinearLayout {
           mText.setText(words); 
      } 
 
-     	 
+     public void setTextColor(int color) {
+    	 mText.setTextColor(color);
+     }
+    	 
      public void setIcon(Drawable bullet) { 
           mIcon.setImageDrawable(bullet); 
      } 

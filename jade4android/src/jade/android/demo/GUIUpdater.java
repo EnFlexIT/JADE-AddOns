@@ -43,13 +43,13 @@ class GUIUpdater implements ACLMessageListener {
 		
 		public void run() {
 		
-			MessageInfo mf = new MessageInfo(message);
+			MessageInfo mi = new MessageInfo(message);
 			
-			sendMsgAct.addMessage(mf);
+			sendMsgAct.addFirstMessage(mi);
 			IconifiedTextListAdapter adapter = sendMsgAct.getListAdapter();
-			IconifiedText txt = new IconifiedText(mf.toString(),sendMsgAct.getResources().getDrawable(R.drawable.downmod));
+			IconifiedText txt = new IconifiedText(mi.toString(),sendMsgAct.getResources().getDrawable(R.drawable.downmod));
 			txt.setTextColor(sendMsgAct.getResources().getColor(R.color.listitem_received_msg));
-			adapter.addItem(txt);
+			adapter.addFirstItem(txt);
 			
 			ListView lv = (ListView) sendMsgAct.findViewById(R.id.messageList);
 			lv.setAdapter(adapter);
