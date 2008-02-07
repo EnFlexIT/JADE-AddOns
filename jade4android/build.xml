@@ -79,16 +79,36 @@
           <include name="jade/android/demo/**"/>
         </javac>
     </target>
-    
-    <!-- compile JadeLeap for pjava -->
-    <target name="compile-leap-pjava">
-    	<ant dir="${leap-home-dir}" target="rebuild" inheritAll="false">
-    	  <property name="pjava" value="true"/>
-    	  <property name="root" value="${leap-home-dir}"/>
-    	</ant>  
-    	<unjar src="${leap-home-dir}/pjava/lib/JadeLeap.jar" dest="${classes}" />
-    	<javac target="1.5" srcdir="${jade-home-dir}/src" destdir="${classes}" classpath="${classes}" includes="jade/wrapper/gateway/GatewayBehaviour.java" />
-    </target>
+    	
+	<target name="compile-leap-pjava">
+		<ant dir="${leap-home-dir}" target="setup" inheritAll="false">
+			<property name="pjava" value="true"/>
+		   	<property name="root" value="${leap-home-dir}"/>
+		</ant>
+		<copy overwrite="true" file="${srcdir}/jade/util/Logger.java" todir="${leap-home-dir}/pjava/src/jade/util/"/>
+		<copy file="${jade-home-dir}/src/jade/wrapper/gateway/GatewayBehaviour.java" todir="${leap-home-dir}/pjava/src/jade/wrapper/gateway"/>
+		<copy file="${jade-home-dir}/src/jade/wrapper/gateway/GatewayAgent.java" todir="${leap-home-dir}/pjava/src/jade/wrapper/gateway"/>
+		
+		<javac srcdir="${leap-home-dir}/pjava/src"
+			destdir="${classes}"
+			debug="${debug-build}"
+			debuglevel="vars,lines,source"
+			optimize="${optimised-build}"
+			deprecation="off"
+			bootclasspath="${android-jar}"
+			classpath="${jade-home-dir}/lib/commons-codec/commons-codec-1.3.jar"
+			fork="yes"
+			compiler="classic"
+			source="1.5"
+		    target="1.5">
+			<exclude name="jade/AppletBoot.java"/>
+		</javac>
+		
+		<ant dir="${leap-home-dir}" target="reset" inheritAll="false">
+			<property name="pjava" value="true"/>
+			<property name="root" value="${leap-home-dir}"/>
+		</ant>
+	</target>
 
 	<!-- Compile this project's .java files into .class files. -->
 	<target name="compile" depends="dirs, compile-leap-pjava">
@@ -97,6 +117,7 @@
 	                bootclasspath="${android-jar}">
 			<src path="${srcdir}"/>
 			<include name="jade/android/**"/>
+			<exclude name="jade/android/R.java"/>
 			<exclude name="jade/android/demo/**"/>
 	    </javac>
 	</target>
