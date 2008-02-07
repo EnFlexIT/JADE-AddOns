@@ -13,12 +13,11 @@
 	<string name="menu_item_exit">Exit</string>
 	
 	<string name="statusbar_msg_connected">Connected to service</string>
-	<string name="statusbar_msg_disconnected">Disconnected from service</string>
-	
+
     <string name="receiver">receiver</string>
     <string name="content">content</string>
     <string name="confirm">confirm</string>
     <string name="close">close</string>
-    <string name="message_received">Ricevuto messaggio di risposta: </string>
+
 	
 </resources>
