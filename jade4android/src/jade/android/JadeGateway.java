@@ -1,6 +1,6 @@
 package jade.android;
 
-import java.sql.PreparedStatement;
+import java.net.ConnectException;
 import java.util.Enumeration;
 
 import android.content.ComponentName;
@@ -9,10 +9,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
+
 import jade.core.Profile;
-import jade.core.Runtime;
-import jade.util.Event;
 import jade.util.Logger;
 import jade.util.leap.Properties;
 import jade.wrapper.ControllerException;
@@ -22,7 +20,7 @@ import jade.wrapper.gateway.GatewayAgent;
 
 public class JadeGateway {
 	
-	private  Command jadeBinder;
+	private  Command jadeBinder = null;
 	
 	/**Instance of the service connection interface used for getting the 
 	 * IBinder object after bindService()
@@ -40,8 +38,6 @@ public class JadeGateway {
 
 	private static Properties jadeProps;
 
-	
-	
 	//Constants for keys inside the Bundle
 	public static final String GATEWAY_CLASS_NAME="GATEWAY_CLASS_NAME";
 	public static final String GATEWAY_AGENT_ARGS="GATEWAY_AGENT_ARGS";
@@ -73,7 +69,7 @@ public class JadeGateway {
 	 * @throws StaleProxyException if the method was not able to execute the Command
 	 * @see jade.wrapper.AgentController#putO2AObject(Object, boolean)
 	 **/
-	public final void execute(Object command) throws StaleProxyException,ControllerException,InterruptedException {
+	public final void execute(Object command) throws StaleProxyException,ControllerException,InterruptedException, Exception {
 		execute(command, 0);
 	}
 	
@@ -89,7 +85,8 @@ public class JadeGateway {
 	 * @throws StaleProxyException if the method was not able to execute the Command
 	 * @see jade.wrapper.AgentController#putO2AObject(Object, boolean)
 	 **/
-	public final void execute(Object command, long timeout) throws StaleProxyException,ControllerException,InterruptedException {
+	public final void execute(Object command, long timeout) throws StaleProxyException,ControllerException,InterruptedException, ConnectException, Exception {
+	
 	
 		//FIXME: controllare se serve sincronizzare la execute
 		checkJADE();
@@ -110,8 +107,11 @@ public class JadeGateway {
 	 * If not, then the method is responsible for renewing myContainer.
 	 * Normally programmers do not need to invoke this method explicitly.
 	 **/
-	public final void checkJADE() throws StaleProxyException,ControllerException {
-		jadeBinder.checkJADE();
+	public final void checkJADE() throws ConnectException, Exception {
+		if (jadeBinder != null)
+			jadeBinder.checkJADE();
+		else 
+			throw new ConnectException("Not connected to MicroRuntimeService!!");
 	}
 	
 	/**
@@ -140,12 +140,20 @@ public class JadeGateway {
 		}
 		
 	
-		Bundle b = prepareBundle(agentClassName,agentArgs,jadeProfile);
+		Bundle b = prepareBundle(agentType,agentArgs,jadeProfile);
 		
 		ctn.startService(new Intent(ctn, MicroRuntimeService.class), b);
 		ctn.bindService(new Intent(ctn, MicroRuntimeService.class),null, mConnection, Context.BIND_AUTO_CREATE);
 		
 	
+	}
+	
+	public String getAgentName() throws ConnectException {
+		if (jadeBinder != null){
+			return jadeBinder.getAgentName();
+		} else {
+			throw new ConnectException("Not connected to MicroRuntimeService!!");
+		}
 	}
 	
 	private static Bundle prepareBundle(String agentClassName, String[] agentArgs, Properties jadeProfile){
@@ -174,14 +182,20 @@ public class JadeGateway {
 	/**
 	 * Kill the JADE Container in case it is running.
 	 */
-	public final void shutdownJADE() {
-		jadeBinder.shutdownJADE();
+	public final void shutdownJADE() throws ConnectException {
+		if (jadeBinder != null)
+			jadeBinder.shutdownJADE();
+		else 
+			throw new ConnectException("Not connected to MicroRuntimeService!!");
+		
 	}
 	
-	public final static void disconnect(Context ctn) {
-		//FIXME: come possiamo invalidare il JadeBinder ?
-		//cosa accade se provo a fare un' operazione sul jadeBinder dopo la disconnect ?
+	public final void disconnect(Context ctn) {
+		//FIXME: Il metodo non è statico poichè la unbind non invalida il binder
+		//che quindi viene impostato a null per impedire l'esecuzione di comandi
+		myLogger.log(Logger.INFO, "Disconnecting from service!!");
 		ctn.unbindService(mConnection);
+		jadeBinder = null;
 	}
 	
 	

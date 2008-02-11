@@ -10,6 +10,8 @@
 	
 	<string name="menu_item_connect">Connect</string>
 	<string name="menu_item_disconnect">Disconnect</string>
+	<string name="menu_item_shutdown">Shutdown</string>
+	<string name="menu_item_restart">Restart</string>
 	<string name="menu_item_exit">Exit</string>
 	
 	<string name="statusbar_msg_connected">Connected to service</string>
@@ -19,5 +21,11 @@
     <string name="confirm">confirm</string>
     <string name="close">close</string>
 
+	
+	<!-- JADE CONNECTION PROPERTIES -->
+	<string name="host">163.162.244.25</string>
+	<string name="port">1099</string>
+	<string name="msisdn">android</string>
+	
 	
 </resources>

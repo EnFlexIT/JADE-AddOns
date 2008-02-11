@@ -1,7 +1,11 @@
 package jade.android;
 
 import jade.core.MicroRuntime;
+import jade.core.NotFoundException;
+import jade.imtp.leap.JICP.JICPProtocol;
 import jade.util.Event;
+import jade.util.Logger;
+
 import java.util.Map;
 import jade.util.leap.Properties;
 import jade.wrapper.AgentController;
@@ -32,33 +36,16 @@ public class MicroRuntimeService extends Service {
 	
 	private final IBinder mBinder = new JadeBinder(); 
 	
+	//Instance of the Logger
+	private static final Logger myLogger = Logger.getMyLogger(MicroRuntimeService.class.getName()); 
+
 
 	
 	@Override
 	protected void onCreate() {
 		Log.v(TAG, "onCreate");
 		// Start Jade
-		try{
-			Properties props = getProperties();
-			String agents = props.getProperty(MicroRuntime.AGENTS_KEY);
-			if((agents == null) || agents.length() == 0){
-				Log.w(TAG, "No agents specified !!");
-			}else{
-				StringTokenizer st = new StringTokenizer(agents, ";");
-				if(st.countTokens() > 1){
-					Log.w(TAG, "Only the first agent will be started !!!");
-				}
-				String firstAgent = st.nextToken();
-				int index = firstAgent.indexOf(":");
-				myAgentName = firstAgent.substring(0, index);
-				props.put(MicroRuntime.AGENTS_KEY, firstAgent);
-			}
-			Log.v(TAG, "Starting Jade with agent " + myAgentName);
-			MicroRuntime.startJADE(props, null);
-			
-		}catch(Exception e){
-			Log.e(TAG, e.getMessage(), e);
-		}
+		
 	}
 
 	@Override
@@ -97,17 +84,7 @@ public class MicroRuntimeService extends Service {
 		}
 	}
 	
-	//read the run.properties from the assets folder
-	private Properties getProperties() throws Exception {
-		Resources resources = this.getResources(); 
-        AssetManager aM = resources.getAssets(); 
-		InputStream iS = aM.open("run.properties");
-		Properties props = new Properties();
-		props.load(iS);
-		Log.v(TAG, "properties: " + props);
-		return  props;
-	}
-
+	
 	@Override
 	public IBinder getBinder() {
 		return mBinder;
@@ -125,16 +102,18 @@ public class MicroRuntimeService extends Service {
 		}
 
 		
-		//FIXME: Dobbiamo finire l'implementazione!!!!!!
-		public void checkJADE() throws StaleProxyException, ControllerException, Exception {
+
+		public void checkJADE() throws Exception {
+			myLogger.log(Logger.INFO, "JadeBinder.checkJade(): starting checkJade");
 			if (!MicroRuntime.isRunning()){
 				MicroRuntime.startJADE(jadeProperties, null);
-				
-				//FIXME: Verifica argomenti startAgent()
-				MicroRuntime.startAgent(null, gatewayClassName, gatewayAgentArgs);
+				myAgentName = (String)jadeProperties.get(JICPProtocol.MEDIATOR_ID_KEY);
+				//FIXME: Indagare da dove è meglio prendere il nome dell'agente
+				MicroRuntime.startAgent(myAgentName, gatewayClassName, gatewayAgentArgs);
 			}
 		}
 
+		
 		public void execute(Object command, long timeout) throws StaleProxyException, ControllerException, InterruptedException {
 			Event e = null;
 			//incapsulate the command into an Event
@@ -145,8 +124,19 @@ public class MicroRuntimeService extends Service {
 		}
 
 		public void shutdownJADE() {
-			// TODO Auto-generated method stub
-			
+			try {
+				MicroRuntime.killAgent(myAgentName);
+			} catch (NotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				myLogger.log(Logger.SEVERE, "JadeBinder.shutdownJADE(): Wrong agent name!");
+			}
+			MicroRuntime.stopJADE();			
+		}
+
+		
+		public String getAgentName() {
+			return myAgentName;
 		}
 	}
 }

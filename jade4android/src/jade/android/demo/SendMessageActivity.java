@@ -1,27 +1,24 @@
 package jade.android.demo;
 
 import jade.android.ConnectionListener;
-import jade.android.JadeHelper;
+import jade.android.JadeGateway;
 import jade.android.R;
 import jade.core.AID;
 import jade.core.MicroRuntime;
+import jade.core.Profile;
+import jade.imtp.leap.JICP.JICPProtocol;
 import jade.lang.acl.ACLMessage;
 import jade.util.leap.Properties;
 
 import java.io.InputStream;
 import java.net.ConnectException;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
 
-import org.mobilecontrol.syncML.protocol.mcNotification;
 
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.AssetManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.Resources;
 import android.os.Bundle;
@@ -56,12 +53,14 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	private final int JADE_CONNECTED_ID = Menu.FIRST;
 	private final int JADE_DISCONNECTED_ID = Menu.FIRST+1;
 	private final int JADE_EXIT_ID = Menu.FIRST+2;
+	private final int JADE_SHUTDOWN_ID = Menu.FIRST+3;
+	private final int JADE_CHECK_ID = Menu.FIRST+4;
 	
 	
 	private EditText receiverText, contentText, senderText;
 	private Spinner spn;
 	private ListView lv;
-	private JadeHelper helper;
+	private JadeGateway gateway;
     private Button sendButton;
     private Button clearButton;
 	private NotificationManager nManager; 
@@ -78,31 +77,22 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		
 		Log.v("jade.android.demo","SendMessageActivity.onCreate() : starting onCreate method");
 		
+		//Set the xml layout from resource
+		setContentView(R.layout.send_message);
 		//Create the list of messages
 		nManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		messageList = new LinkedList<MessageInfo>();
-		
-		//Create the helper
-		helper = new JadeHelper(this, this);
-		
-		//Set the xml layout from resource
-		setContentView(R.layout.send_message);
-		
 		//Retrieve all components
 		senderText = (EditText) findViewById(R.id.sender);
 		receiverText = (EditText) findViewById(R.id.receiver);
 		contentText = (EditText) findViewById(R.id.content);;
 		spn = (Spinner) findViewById(R.id.commAct);
 		lv = (ListView) findViewById(R.id.messageList);
-		
-		
 		//SPINNER: fill with data
 		String[] performatives= ACLMessage.getAllPerformativeNames();
 		ArrayAdapter<CharSequence> comActList = new ArrayAdapter<CharSequence>(this,android.R.layout.simple_spinner_item, performatives);
 		comActList.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spn.setAdapter(comActList);
-		
-		
 		//LISTVIEW: handle click event
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 			public void onItemClick(AdapterView parent, View v, int position, long id) {
@@ -147,17 +137,13 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			props.load(iS);
 			String property = props.getProperty(MicroRuntime.AGENTS_KEY);
 			
-			//FIXME: Here we get the agent name from property file by string manipulation
-			//we should probably find a better way
-			senderName=property.substring(0,property.indexOf(':'));
-		//	senderName = firstPart.substring(firstPart.lastIndexOf('@')+1,firstPart.length());
+		
 			
         } catch (Exception e){
         	Log.e("jade.android.demo", e.getMessage(), e);
         }
         
-        //put the agent name into sender box
-        senderText.setText(senderName);
+        
         
         listAdapter = new IconifiedTextListAdapter(this);
 	}
@@ -189,7 +175,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			DummySenderBehaviour dsb = new DummySenderBehaviour(msg);
 			
 			try {
-				helper.execute(dsb);
+				gateway.execute(dsb);
 				
 				MessageInfo info = new MessageInfo(msg);
 				addFirstMessage(info);
@@ -199,27 +185,26 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 				listAdapter.addFirstItem(IT);
 				lv.setAdapter(listAdapter);
 			    }
-			catch (ConnectException e) {
-				Log.e("jade.android.demo",e.getMessage(),e);
-				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
-			}
 			catch (Exception e) {
 				Log.e("jade.android.demo",e.getMessage(),e);
-				nManager.notifyWithText(R.string.execute_command_unexpected_error,getText(R.string.execute_command_unexpected_error),NotificationManager.LENGTH_SHORT,null);
-				helper.reconnectToJADE();
+				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
 			}
 			
 		
 			
 	}
 
-	public void onConnected(boolean isStarted) {
+	public void onConnected(JadeGateway gw) {
 		//FIXME: gestione isStarted
+		gateway = gw;
+		
 		GUIUpdater updater = new GUIUpdater(this);
 
-		DummyReceiverBehaviour drb = new DummyReceiverBehaviour(updater);
+		//DummyReceiverBehaviour drb = new DummyReceiverBehaviour(updater);
         try {
-			helper.execute(drb);
+			//gateway.execute(drb);
+			//senderName = gateway.getAgentName(); 
+		//	senderText.setText(senderName);
 			sendButton.setEnabled(true);
 			CharSequence txt = getResources().getText(R.string.statusbar_msg_connected);
 			Notification notification = new Notification(R.drawable.dummyagent,txt ,null,txt,null );
@@ -256,6 +241,8 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		menu.add(0, JADE_CONNECTED_ID, R.string.menu_item_connect);
 		menu.add(0, JADE_DISCONNECTED_ID, R.string.menu_item_disconnect);
 		menu.add(0, JADE_EXIT_ID, R.string.menu_item_exit);
+		menu.add(0, JADE_SHUTDOWN_ID,R.string.menu_item_shutdown);
+		menu.add(0, JADE_CHECK_ID,R.string.menu_item_restart);
 		return true;
 	}
 	
@@ -266,22 +253,48 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		
 		switch(item.getId()) {
 			case JADE_CONNECTED_ID:
-				if (!helper.isConnected())
-					helper.connect();
-				
+				Properties props = new Properties();
+				props.setProperty(Profile.MAIN_HOST, getResources().getString(R.string.host));
+				props.setProperty(Profile.MAIN_PORT, getResources().getString(R.string.port));
+				props.setProperty(JICPProtocol.MSISDN_KEY, getResources().getString(R.string.msisdn));
+				//Connect to the service and get the gateway
+				JadeGateway.connect(null, props, this, this);
+							
 			break;
 				
 			case JADE_DISCONNECTED_ID:
-				if (helper.isConnected()) {
-					helper.disconnect();
-					nManager.cancel(STATUSBAR_NOTIFICATION);
-					sendButton.setEnabled(false);
-					sendButton.invalidate();
-				}
+				gateway.disconnect(this);
+				nManager.cancel(STATUSBAR_NOTIFICATION);
 			break;
 			
 			case JADE_EXIT_ID:
 				finish();
+				try {
+					gateway.shutdownJADE();
+				} catch (ConnectException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				gateway.disconnect(this);
+			break;
+			
+			case JADE_SHUTDOWN_ID:
+				try {
+					gateway.shutdownJADE();
+				} catch (ConnectException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			break;
+			
+			case JADE_CHECK_ID:
+				try {
+					gateway.checkJADE();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			break;
 		}
 		return true;
@@ -298,7 +311,12 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		super.onDestroy();
 		Log.v("jade.android.demo","SendMessageActivity.onDestroy() : calling onDestroy method");
 		nManager.cancel(STATUSBAR_NOTIFICATION);
-		helper.stop();
+		try {
+			gateway.shutdownJADE();
+		} catch (ConnectException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
