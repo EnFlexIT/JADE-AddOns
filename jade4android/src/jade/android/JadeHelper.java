@@ -11,7 +11,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 
 public class JadeHelper {
@@ -19,6 +21,8 @@ public class JadeHelper {
 	private ApplicationContext myContext;
 	private Command jadeBinder;
 	private ConnectionListener connectionListener;
+	private MyHandler handl;
+
 	
 	public JadeHelper(ApplicationContext context, ConnectionListener cnl) {
 		myContext = context;
@@ -26,9 +30,17 @@ public class JadeHelper {
 	}
 	
 	public void connect() {
-		Log.v("jade.android","connecting to jade service");
-		myContext.startService(new Intent(myContext, MicroRuntimeService.class), null);
-		myContext.bindService(new Intent(myContext, MicroRuntimeService.class),null, mConnection, Context.BIND_AUTO_CREATE);
+		Log.v("jade.android","connecting to jade service. Thread: " + Thread.currentThread().getId());
+		
+		handl =  new MyHandler();
+		
+		Runnable rr = new Runnable(){
+			public void run() {
+				Log.v("jadeHelper", "Thread ID: " + Thread.currentThread().getId() );
+				myContext.startService(new Intent(myContext, MicroRuntimeService.class), null);
+				myContext.bindService(new Intent(myContext, MicroRuntimeService.class),null, mConnection, Context.BIND_AUTO_CREATE);
+			}
+		};
 	}
 	
 	public boolean isConnected(){
@@ -68,16 +80,23 @@ public class JadeHelper {
 		connect();
 	}
 	
+	
+	
 	 private ServiceConnection mConnection = new ServiceConnection() {
 	    
 	        public void onServiceConnected(ComponentName className, IBinder service) {
+	        	Log.v("jadeHelper", "Sono in thread: " + Thread.currentThread().getId());
 	        	Log.v("JadeHelper","JadeHelper onServiceConnected");
 	        	jadeBinder = (Command)service;
+	     
+	        	
 	        	if(connectionListener != null) {
 	        		connectionListener.onConnected(isRunning());
 	        	}
 	        }
 
+	        //is called only when the connection to the service fails. 
+	        //i.e. crash of the service process.
 	        public void onServiceDisconnected(ComponentName className){
 	        	Log.v("JadeHelper","JadeHelper onServiceDisconnected");
 	        	jadeBinder = null;
@@ -86,4 +105,10 @@ public class JadeHelper {
 	        	}
 	        }
 	    };
+	    
+	    private class MyHandler extends Handler {
+	    	 public void handleMessage(Message msg){
+	    		 Log.v("MyHandler", "Thread " + Thread.currentThread().getId() + " received message " + msg.toString());
+	    	 }
+	    }
 }
