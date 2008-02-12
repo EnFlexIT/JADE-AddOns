@@ -4,13 +4,11 @@ import jade.android.ConnectionListener;
 import jade.android.JadeGateway;
 import jade.android.R;
 import jade.core.AID;
-import jade.core.MicroRuntime;
 import jade.core.Profile;
 import jade.imtp.leap.JICP.JICPProtocol;
 import jade.lang.acl.ACLMessage;
 import jade.util.leap.Properties;
 
-import java.io.InputStream;
 import java.net.ConnectException;
 import java.util.LinkedList;
 
@@ -18,9 +16,8 @@ import java.util.LinkedList;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.content.AssetManager;
+
 import android.content.Intent;
-import android.content.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -50,12 +47,12 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	private final int STATUSBAR_NOTIFICATION= R.layout.send_message;
 	
 	//Codes for menu items
-	private final int JADE_CONNECTED_ID = Menu.FIRST;
-	private final int JADE_DISCONNECTED_ID = Menu.FIRST+1;
-	private final int JADE_EXIT_ID = Menu.FIRST+2;
-	private final int JADE_SHUTDOWN_ID = Menu.FIRST+3;
-	private final int JADE_CHECK_ID = Menu.FIRST+4;
-	
+	public static final int JADE_CONNECTED_ID = Menu.FIRST;
+	public static final int JADE_DISCONNECTED_ID = Menu.FIRST+1;
+	public static final int JADE_EXIT_ID = Menu.FIRST+2;
+	public static final int JADE_SHUTDOWN_ID = Menu.FIRST+3;
+	public static final int JADE_CHECK_ID = Menu.FIRST+4;
+	public static final int JADE_SUBACTIVITY_ID = Menu.FIRST+5;
 	
 	private EditText receiverText, contentText, senderText;
 	private Spinner spn;
@@ -102,7 +99,6 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	
 		//SEND BUTTON: retrieve and handle click event (Initially disabled)
 		sendButton = (Button) findViewById(R.id.sendBtn);
-		sendButton.setEnabled(false);
 		sendButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             	Log.v("jade.android.demo","receiver: "+receiverText.getText().toString());
@@ -124,28 +120,11 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
             	 }
             }
         });
-
-	
-		//read property file
-		Resources resources = this.getResources(); 
-        AssetManager aM = resources.getAssets(); 
 		
-        try {
-        
-	        InputStream iS = aM.open("run.properties");
-			Properties props = new Properties();
-			props.load(iS);
-			String property = props.getProperty(MicroRuntime.AGENTS_KEY);
-			
-		
-			
-        } catch (Exception e){
-        	Log.e("jade.android.demo", e.getMessage(), e);
-        }
-        
-        
         
         listAdapter = new IconifiedTextListAdapter(this);
+        
+        senderText.setEnabled(false);
 	}
 	
 	
@@ -168,7 +147,6 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		
 			ACLMessage msg = new ACLMessage(DummySenderBehaviour.convertPerformative(comAct));
 				
-			msg.setSender(new AID(senderName, AID.ISLOCALNAME));
 			msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
 			msg.setContent(content);
 			
@@ -209,7 +187,6 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			CharSequence txt = getResources().getText(R.string.statusbar_msg_connected);
 			Notification notification = new Notification(R.drawable.dummyagent,txt ,null,txt,null );
 			nManager.notify(STATUSBAR_NOTIFICATION, notification);
-			sendButton.invalidate();
         } catch (Exception e) {
 			Log.e("jade.android.demo",e.getMessage(),e);
 			nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
@@ -243,6 +220,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		menu.add(0, JADE_EXIT_ID, R.string.menu_item_exit);
 		menu.add(0, JADE_SHUTDOWN_ID,R.string.menu_item_shutdown);
 		menu.add(0, JADE_CHECK_ID,R.string.menu_item_restart);
+		menu.add(0, JADE_SUBACTIVITY_ID,R.string.menu_item_subactivity);
 		return true;
 	}
 	
@@ -263,25 +241,21 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			break;
 				
 			case JADE_DISCONNECTED_ID:
-				gateway.disconnect(this);
-				nManager.cancel(STATUSBAR_NOTIFICATION);
+				if (gateway != null) {
+					gateway.disconnect(this);
+					nManager.cancel(STATUSBAR_NOTIFICATION);
+				}
 			break;
 			
 			case JADE_EXIT_ID:
 				finish();
-				try {
-					gateway.shutdownJADE();
-				} catch (ConnectException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 				
-				gateway.disconnect(this);
 			break;
 			
 			case JADE_SHUTDOWN_ID:
 				try {
-					gateway.shutdownJADE();
+					if (gateway != null)
+						gateway.shutdownJADE();
 				} catch (ConnectException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -290,11 +264,20 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			
 			case JADE_CHECK_ID:
 				try {
-					gateway.checkJADE();
+					if (gateway != null){
+						gateway.checkJADE();
+						sendButton.setEnabled(true);
+					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			break;
+			
+			case JADE_SUBACTIVITY_ID:
+				Intent it = new Intent();
+				it.setClass(this, TestActivity.class);
+				startSubActivity(it, 5);
 			break;
 		}
 		return true;
@@ -312,11 +295,16 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		Log.v("jade.android.demo","SendMessageActivity.onDestroy() : calling onDestroy method");
 		nManager.cancel(STATUSBAR_NOTIFICATION);
 		try {
-			gateway.shutdownJADE();
+			if (gateway != null)
+				gateway.shutdownJADE();
+				
 		} catch (ConnectException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+			if (gateway != null )
+				gateway.disconnect(this);
+		
 	}
 	
 	@Override

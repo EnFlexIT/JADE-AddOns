@@ -39,7 +39,6 @@ public class MicroRuntimeService extends Service {
 	//Instance of the Logger
 	private static final Logger myLogger = Logger.getMyLogger(MicroRuntimeService.class.getName()); 
 
-
 	
 	@Override
 	protected void onCreate() {
@@ -109,6 +108,7 @@ public class MicroRuntimeService extends Service {
 				MicroRuntime.startJADE(jadeProperties, null);
 				myAgentName = (String)jadeProperties.get(JICPProtocol.MEDIATOR_ID_KEY);
 				//FIXME: Indagare da dove è meglio prendere il nome dell'agente
+				myLogger.log(Logger.INFO, "JadeBinder.checkJade() : Agent name is " + myAgentName);
 				MicroRuntime.startAgent(myAgentName, gatewayClassName, gatewayAgentArgs);
 			}
 		}

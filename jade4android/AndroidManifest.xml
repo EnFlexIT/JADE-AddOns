@@ -15,10 +15,18 @@
                 <category android:value="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
         <activity class=".demo.MessageDetailsActivity" android:label="@string/msg_details">
             <intent-filter>
                 <action android:value="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+        
+        <activity class=".demo.TestActivity" android:label="@string/msg_details">
+            <intent-filter>
+                <action android:value="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+        
     </application>
 </manifest> 

@@ -12,6 +12,7 @@
 	<string name="menu_item_disconnect">Disconnect</string>
 	<string name="menu_item_shutdown">Shutdown</string>
 	<string name="menu_item_restart">Restart</string>
+	<string name="menu_item_subactivity">Start subactivity</string>
 	<string name="menu_item_exit">Exit</string>
 	
 	<string name="statusbar_msg_connected">Connected to service</string>

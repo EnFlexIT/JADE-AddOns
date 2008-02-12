@@ -2,6 +2,7 @@ package jade.android;
 
 import java.net.ConnectException;
 import java.util.Enumeration;
+import java.util.HashMap;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+
 
 import jade.core.Profile;
 import jade.util.Logger;
@@ -18,18 +20,10 @@ import jade.wrapper.StaleProxyException;
 import jade.wrapper.gateway.GatewayAgent;
 
 
-public class JadeGateway {
+public class JadeGateway   {
 	
+	private static HashMap map = new HashMap();
 	private  Command jadeBinder = null;
-	
-	/**Instance of the service connection interface used for getting the 
-	 * IBinder object after bindService()
-	 */
-	private static MicroRuntimeServiceConnection mConnection =  new MicroRuntimeServiceConnection();
-	
-	/**Instance of the Listener that returns the JadeGateway object after connection
-	 */
-	private static ConnectionListener conListener;  
 	
 	//Instance of the Logger
 	private static final Logger myLogger = Logger.getMyLogger(JadeGateway.class.getName()); 
@@ -126,24 +120,25 @@ public class JadeGateway {
 	 **/
 	public final static void connect(String agentClassName, String[] agentArgs, Properties jadeProfile, Context ctn, ConnectionListener list) {
 		myLogger.log(Logger.INFO,"MicroRuntimeServiceConnection.init called");
-		conListener= list;
-		
+	
 		String agentType = agentClassName;
 		if (agentType == null) {
 			agentType = GatewayAgent.class.getName();
 		}
-		//FIXME: dobbiamo verificare se il jade profile e' nullo
+
 		Properties jadeProps = jadeProfile;
 		if (jadeProps != null) {
 			// Since we will create a non-main container --> force the "main" property to be false
 			jadeProps.setProperty(Profile.MAIN, "false");
 		}
 		
-	
+		
+		MicroRuntimeServiceConnection sConn = new MicroRuntimeServiceConnection(list);
+		map.put(ctn, sConn);
 		Bundle b = prepareBundle(agentType,agentArgs,jadeProfile);
 		
 		ctn.startService(new Intent(ctn, MicroRuntimeService.class), b);
-		ctn.bindService(new Intent(ctn, MicroRuntimeService.class),null, mConnection, Context.BIND_AUTO_CREATE);
+		ctn.bindService(new Intent(ctn, MicroRuntimeService.class),null, sConn, Context.BIND_AUTO_CREATE);
 		
 	
 	}
@@ -194,36 +189,34 @@ public class JadeGateway {
 		//FIXME: Il metodo non è statico poichè la unbind non invalida il binder
 		//che quindi viene impostato a null per impedire l'esecuzione di comandi
 		myLogger.log(Logger.INFO, "Disconnecting from service!!");
-		ctn.unbindService(mConnection);
+		ctn.unbindService((ServiceConnection)map.get(ctn));
 		jadeBinder = null;
+		map.remove(ctn);
 	}
 	
 	
-	/**
-	 * Return the state of JadeGateway
-	 * @return true if the container and the gateway agent are active, false otherwise
-	//FIXME: da capire se si riesce ad implementare... 
-	public final static boolean isGatewayActive() {
-		return myContainer != null && myAgent != null;
-	}
-	*/
-
 	private static class MicroRuntimeServiceConnection implements ServiceConnection {
-		    
-	        public void onServiceConnected(ComponentName className, IBinder service) {
-	        	myLogger.log(Logger.INFO,"MicroRuntimeServiceConnection.onServiceConnected called");
-	        	if(conListener != null) {
-	        		conListener.onConnected(new JadeGateway((Command)service));
-	        	}
-	        }
 
-	        //is called only when the connection to the service fails. 
-	        //i.e. crash of the service process.
-	        public void onServiceDisconnected(ComponentName className){
-	        	myLogger.log(Logger.INFO,"MicroRuntimeServiceConnection.onServiceDisconnected called");
-	        	if(conListener != null) {
-		        	conListener.onDisconnected();
-	        	}
-	        }
-	    };
+		private ConnectionListener conListener;
+
+		public MicroRuntimeServiceConnection(ConnectionListener listener) {
+			this.conListener = listener;
+		}
+
+		public void onServiceConnected(ComponentName className, IBinder service) {
+			myLogger.log(Logger.INFO,"MicroRuntimeServiceConnection.onServiceConnected called");
+			if(conListener != null) {
+				conListener.onConnected(new JadeGateway((Command)service));
+			}
+		}
+
+		//is called only when the connection to the service fails. 
+		//i.e. crash of the service process.
+		public void onServiceDisconnected(ComponentName className){
+			myLogger.log(Logger.INFO,"MicroRuntimeServiceConnection.onServiceDisconnected called");
+			if(conListener != null) {
+				conListener.onDisconnected();
+			}
+		}
+	}
 }
