@@ -7,14 +7,17 @@ import java.util.List;
 import android.os.Handler;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import jade.android.JadeGateway;
 import jade.android.R;
 import jade.android.R.id;
 import jade.lang.acl.ACLMessage;
+import jade.util.Logger;
 
 class GUIUpdater implements ACLMessageListener {
 
 	private Handler handl;
-	private SendMessageActivity act;
+	private SendMessageActivity act;	
+	private static final Logger myLogger = Logger.getMyLogger(JadeGateway.class.getName());
 	
 	public GUIUpdater(SendMessageActivity baseActivity) {
 		
@@ -25,6 +28,7 @@ class GUIUpdater implements ACLMessageListener {
 	
 	public void OnMessageReceived(ACLMessage msg) {
 		// TODO Auto-generated method stub
+		myLogger.log(Logger.INFO, "GuiUpdater has received message");
 		Updater up = new Updater(act,msg);
 		handl.post(up);
 	}

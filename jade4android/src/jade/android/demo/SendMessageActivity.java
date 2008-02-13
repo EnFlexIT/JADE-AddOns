@@ -62,6 +62,8 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
     private Button clearButton;
 	private NotificationManager nManager; 
 
+	private GUIUpdater updater;
+	
 	private LinkedList<MessageInfo> messageList;
 	private IconifiedTextListAdapter listAdapter;
 	
@@ -125,6 +127,8 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
         listAdapter = new IconifiedTextListAdapter(this);
         
         senderText.setEnabled(false);
+        
+		updater = new GUIUpdater(this);
 	}
 	
 	
@@ -176,23 +180,11 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		//FIXME: gestione isStarted
 		gateway = gw;
 		
-		GUIUpdater updater = new GUIUpdater(this);
-
-		//DummyReceiverBehaviour drb = new DummyReceiverBehaviour(updater);
-        try {
-			//gateway.execute(drb);
-			//senderName = gateway.getAgentName(); 
-		//	senderText.setText(senderName);
-			sendButton.setEnabled(true);
-			CharSequence txt = getResources().getText(R.string.statusbar_msg_connected);
-			Notification notification = new Notification(R.drawable.dummyagent,txt ,null,txt,null );
-			nManager.notify(STATUSBAR_NOTIFICATION, notification);
-        } catch (Exception e) {
-			Log.e("jade.android.demo",e.getMessage(),e);
-			nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
-		}
-		
-		
+		sendButton.setEnabled(true);
+		CharSequence txt = getResources().getText(R.string.statusbar_msg_connected);
+		Notification notification = new Notification(R.drawable.dummyagent,txt ,null,txt,null );
+		nManager.notify(STATUSBAR_NOTIFICATION, notification);
+        
 	}
 
 	public void onDisconnected() {
@@ -236,7 +228,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 				props.setProperty(Profile.MAIN_PORT, getResources().getString(R.string.port));
 				props.setProperty(JICPProtocol.MSISDN_KEY, getResources().getString(R.string.msisdn));
 				//Connect to the service and get the gateway
-				JadeGateway.connect(null, props, this, this);
+				JadeGateway.connect(DummyAgent.class.getName(), props, this, this);
 							
 			break;
 				
@@ -264,8 +256,10 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			
 			case JADE_CHECK_ID:
 				try {
+
 					if (gateway != null){
 						gateway.checkJADE();
+						gateway.execute(updater);
 						sendButton.setEnabled(true);
 					}
 				} catch (Exception e) {

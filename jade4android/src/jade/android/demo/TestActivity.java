@@ -46,7 +46,7 @@ public class TestActivity extends Activity  implements ConnectionListener {
 				props.setProperty(Profile.MAIN_PORT, getResources().getString(R.string.port));
 				props.setProperty(JICPProtocol.MSISDN_KEY, getResources().getString(R.string.msisdn));
 				//Connect to the service and get the gateway
-				JadeGateway.connect(null, props, this, this);
+				JadeGateway.connect(DummyAgent.class.getName(), props, this, this);
 							
 			break;
 				
