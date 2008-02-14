@@ -10,7 +10,12 @@ import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 import jade.util.leap.Properties;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
 import android.app.Service;
 import android.content.Intent;
@@ -49,7 +54,15 @@ public class MicroRuntimeService extends Service {
 			gatewayAgentArgs = null;
 
 		myLogger.log(Logger.INFO, "properties: " + arguments.getSerializable(JadeGateway.PROPERTIES_BUNDLE).getClass().getName());	
-		jadeProperties = (Properties) arguments.getSerializable(JadeGateway.PROPERTIES_BUNDLE);
+		
+		Serializable ser = arguments.getSerializable(JadeGateway.PROPERTIES_BUNDLE);
+		HashMap props = (HashMap)ser;
+		jadeProperties = new jade.util.leap.Properties();
+
+		for(Iterator it = props.keySet().iterator(); it.hasNext(); ){
+			String key = (String)it.next();
+			jadeProperties.put(key, props.get(key));
+		}
 	}
 
 	

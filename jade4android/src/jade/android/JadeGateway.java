@@ -3,6 +3,7 @@ package jade.android;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 
 import android.content.ComponentName;
@@ -160,7 +161,13 @@ public class JadeGateway   {
 			ArrayList<String> aArgs =  new ArrayList<String>(Arrays.asList(agentArgs));
 			b.putSerializable(GATEWAY_AGENT_ARGS, aArgs);
 		}
-		b.putSerializable(PROPERTIES_BUNDLE, jadeProfile);
+		HashMap theProps = new HashMap();
+		for(Enumeration e = jadeProfile.keys(); e.hasMoreElements();){
+			String key = (String)e.nextElement();
+			theProps.put(key, jadeProfile.get(key));
+		}
+		
+		b.putSerializable(PROPERTIES_BUNDLE, theProps);
 		return b;
 	}
 	

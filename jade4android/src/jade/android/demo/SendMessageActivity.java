@@ -183,13 +183,15 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		sendButton.setEnabled(true);
 		try{
 			senderText.setText(gateway.getAgentName());
+			gateway.execute(updater);
 			CharSequence txt = getResources().getText(R.string.statusbar_msg_connected);
-		
 			Notification notification = new Notification(this,R.drawable.dummyagent,getResources().getText(R.string.statusbar_msg_connected),1000,"Ciao","Anna",null,R.drawable.dummyagent,"DummyAgent",null);
 			nManager.notify(STATUSBAR_NOTIFICATION, notification);
 		}catch(ConnectException ce){
 			Log.e("jade.android", ce.getMessage(), ce);
-		}   
+		}catch(Exception e1){
+			Log.e("jade.android", e1.getMessage(), e1);
+		}
 	}
 
 	public void onDisconnected() {
