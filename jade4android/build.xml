@@ -80,7 +80,9 @@
         </javac>
     </target>
     	
-	<target name="compile-leap-pjava">
+	<target name="compile-leap-pjava" depends="dirs">
+		<delete dir="${lib}" />  
+		<mkdir dir="${lib}" />
 		<ant dir="${leap-home-dir}" target="setup" inheritAll="false">
 			<property name="pjava" value="true"/>
 		   	<property name="root" value="${leap-home-dir}"/>
@@ -103,7 +105,7 @@
 		    target="1.5">
 			<exclude name="jade/AppletBoot.java"/>
 		</javac>
-		
+		<jar destfile="${lib}/JadeLeap-tmp.jar" basedir="${classes}" />
 		<ant dir="${leap-home-dir}" target="reset" inheritAll="false">
 			<property name="pjava" value="true"/>
 			<property name="root" value="${leap-home-dir}"/>
@@ -111,7 +113,7 @@
 	</target>
 
 	<!-- Compile this project's .java files into .class files. -->
-	<target name="compile" depends="dirs, compile-leap-pjava">
+	<target name="compile" depends="compile-leap-pjava">
 		<javac encoding="ascii" target="1.5" debug="true" extdirs=""
 	                destdir="${classes}"
 	                bootclasspath="${android-jar}">
@@ -123,8 +125,6 @@
 	</target>
 	
 	<target name="jar" depends="compile">
-		<delete dir="${lib}" />  
-		<mkdir dir="${lib}" />
 		<jar destfile="${jade-leap-android-jar}" basedir="${classes}" />
 	</target>
 	
