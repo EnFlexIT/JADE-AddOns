@@ -8,7 +8,7 @@ import jade.core.behaviours.SequentialBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.util.Logger;
 import jade.wrapper.gateway.GatewayAgent;
-import jade.wrapper.gateway.GatewayBehaviour;
+
 
 public class DummyAgent extends GatewayAgent {
 

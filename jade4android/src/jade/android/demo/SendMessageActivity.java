@@ -14,6 +14,7 @@ import java.util.LinkedList;
 
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 
@@ -47,13 +48,8 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	private final int STATUSBAR_NOTIFICATION= R.layout.send_message;
 	
 	//Codes for menu items
-	public static final int JADE_CONNECTED_ID = Menu.FIRST;
-	public static final int JADE_DISCONNECTED_ID = Menu.FIRST+1;
-	public static final int JADE_EXIT_ID = Menu.FIRST+2;
-	public static final int JADE_SHUTDOWN_ID = Menu.FIRST+3;
-	public static final int JADE_CHECK_ID = Menu.FIRST+4;
-	public static final int JADE_SUBACTIVITY_ID = Menu.FIRST+5;
-	
+	public static final int JADE_EXIT_ID = Menu.FIRST;
+
 	private EditText receiverText, contentText, senderText;
 	private Spinner spn;
 	private ListView lv;
@@ -67,7 +63,6 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	private LinkedList<MessageInfo> messageList;
 	private IconifiedTextListAdapter listAdapter;
 	
-	private String senderName;
 	
 	@Override
 	protected void onCreate(Bundle icicle) {
@@ -84,7 +79,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		//Retrieve all components
 		senderText = (EditText) findViewById(R.id.sender);
 		receiverText = (EditText) findViewById(R.id.receiver);
-		contentText = (EditText) findViewById(R.id.content);;
+		contentText = (EditText) findViewById(R.id.content);
 		spn = (Spinner) findViewById(R.id.commAct);
 		lv = (ListView) findViewById(R.id.messageList);
 		//SPINNER: fill with data
@@ -125,10 +120,17 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		
         
         listAdapter = new IconifiedTextListAdapter(this);
-        
         senderText.setEnabled(false);
-        
 		updater = new GUIUpdater(this);
+		
+		Properties props = new Properties();
+		props.setProperty(Profile.MAIN_HOST, getResources().getString(R.string.host));
+		props.setProperty(Profile.MAIN_PORT, getResources().getString(R.string.port));
+		props.setProperty(JICPProtocol.MSISDN_KEY, getResources().getString(R.string.msisdn));
+		//Connect to the service and get the gateway
+		//FIXME: togliere agent args.
+		JadeGateway.connect(DummyAgent.class.getName(), new String[]{"pippo", "pluto"}, props, this, this);	
+			
 	}
 	
 	
@@ -148,43 +150,46 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	}
 	
 	private void sendMessage(String receiver, String content, String comAct) {				
+
+		Log.v("jade.android.demo","SendMessageActivity.onStart() : calling onStart method");
 		
-			ACLMessage msg = new ACLMessage(DummySenderBehaviour.convertPerformative(comAct));
-				
-			msg.addReceiver(new AID(receiver, AID.ISLOCALNAME));
-			msg.setContent(content);
-			
-			DummySenderBehaviour dsb = new DummySenderBehaviour(msg);
-			
-			try {
-				gateway.execute(dsb);
-				
-				MessageInfo info = new MessageInfo(msg);
-				addFirstMessage(info);
-				
-				IconifiedText IT = new IconifiedText (info.toString(), getResources().getDrawable(R.drawable.upmod));
-				IT.setTextColor(getResources().getColor(R.color.listitem_sent_msg));
-				listAdapter.addFirstItem(IT);
-				lv.setAdapter(listAdapter);
-			    }
-			catch (Exception e) {
-				Log.e("jade.android.demo",e.getMessage(),e);
-				nManager.notifyWithText(R.string.execute_command_error,getText(R.string.execute_command_error),NotificationManager.LENGTH_SHORT,null);
-			}
-			
+
 		
-			
+		ACLMessage msg = new ACLMessage(ACLMessage.getInteger(comAct));		
+		msg.setContent(content);
+		//FIXME: il booleano dovrebbe essere ricavato da una checkbox accanto al nome.
+		DummySenderBehaviour dsb = new DummySenderBehaviour(msg, receiver, AID.ISLOCALNAME);
+
+		try {
+			gateway.execute(dsb);
+
+			MessageInfo info = new MessageInfo(msg);
+			addFirstMessage(info);
+
+			IconifiedText IT = new IconifiedText (info.toString(), getResources().getDrawable(R.drawable.upmod));
+			IT.setTextColor(getResources().getColor(R.color.listitem_sent_msg));
+			listAdapter.addFirstItem(IT);
+			lv.setAdapter(listAdapter);
+		}
+		catch (Exception e) {
+			Log.e("jade.android.demo",e.getMessage(),e);
+		
+		}
 	}
 
 	public void onConnected(JadeGateway gw) {
-		//FIXME: gestione isStarted
-		gateway = gw;
-		
+
+		gateway = gw;		
 		sendButton.setEnabled(true);
-		CharSequence txt = getResources().getText(R.string.statusbar_msg_connected);
-		Notification notification = new Notification(R.drawable.dummyagent,txt ,null,txt,null );
-		nManager.notify(STATUSBAR_NOTIFICATION, notification);
-        
+		try{
+			senderText.setText(gateway.getAgentName());
+			CharSequence txt = getResources().getText(R.string.statusbar_msg_connected);
+		
+			Notification notification = new Notification(this,R.drawable.dummyagent,getResources().getText(R.string.statusbar_msg_connected),1000,"Ciao","Anna",null,R.drawable.dummyagent,"DummyAgent",null);
+			nManager.notify(STATUSBAR_NOTIFICATION, notification);
+		}catch(ConnectException ce){
+			Log.e("jade.android", ce.getMessage(), ce);
+		}   
 	}
 
 	public void onDisconnected() {
@@ -204,75 +209,21 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	public  IconifiedTextListAdapter getListAdapter() {
 		return listAdapter;
 	}	
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(0, JADE_CONNECTED_ID, R.string.menu_item_connect);
-		menu.add(0, JADE_DISCONNECTED_ID, R.string.menu_item_disconnect);
 		menu.add(0, JADE_EXIT_ID, R.string.menu_item_exit);
-		menu.add(0, JADE_SHUTDOWN_ID,R.string.menu_item_shutdown);
-		menu.add(0, JADE_CHECK_ID,R.string.menu_item_restart);
-		menu.add(0, JADE_SUBACTIVITY_ID,R.string.menu_item_subactivity);
 		return true;
 	}
 	
-		
-	@Override
 	public boolean onMenuItemSelected(int featureId, Item item) {
 		super.onMenuItemSelected(featureId, item);
 		
 		switch(item.getId()) {
-			case JADE_CONNECTED_ID:
-				Properties props = new Properties();
-				props.setProperty(Profile.MAIN_HOST, getResources().getString(R.string.host));
-				props.setProperty(Profile.MAIN_PORT, getResources().getString(R.string.port));
-				props.setProperty(JICPProtocol.MSISDN_KEY, getResources().getString(R.string.msisdn));
-				//Connect to the service and get the gateway
-				JadeGateway.connect(DummyAgent.class.getName(), props, this, this);
-							
-			break;
-				
-			case JADE_DISCONNECTED_ID:
-				if (gateway != null) {
-					gateway.disconnect(this);
-					nManager.cancel(STATUSBAR_NOTIFICATION);
-				}
-			break;
-			
 			case JADE_EXIT_ID:
 				finish();
-				
-			break;
-			
-			case JADE_SHUTDOWN_ID:
-				try {
-					if (gateway != null)
-						gateway.shutdownJADE();
-				} catch (ConnectException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			break;
-			
-			case JADE_CHECK_ID:
-				try {
-
-					if (gateway != null){
-						gateway.checkJADE();
-						gateway.execute(updater);
-						sendButton.setEnabled(true);
-					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			break;
-			
-			case JADE_SUBACTIVITY_ID:
-				Intent it = new Intent();
-				it.setClass(this, TestActivity.class);
-				startSubActivity(it, 5);
-			break;
+				break;
 		}
 		return true;
 	}
@@ -298,7 +249,6 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		}
 			if (gateway != null )
 				gateway.disconnect(this);
-		
 	}
 	
 	@Override
@@ -334,7 +284,8 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Log.v("jade.android.demo","SendMessageActivity.onStart() : calling onStart method");
+		
+		
 	}
 	
 }

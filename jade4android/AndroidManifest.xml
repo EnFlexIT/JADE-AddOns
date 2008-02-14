@@ -8,23 +8,23 @@
     <uses-permission id="android.permission.RUN_INSTRUMENTATION" />
     
     <application android:icon="@drawable/jade" android:label="@string/app_name">
-    	<service class=".MicroRuntimeService" />
-        <activity class=".demo.SendMessageActivity" android:label="@string/app_name">
+    	<service android:name=".MicroRuntimeService" />
+        <activity android:name=".demo.SendMessageActivity" android:label="@string/app_name">
             <intent-filter>
-                <action android:value="android.intent.action.MAIN" />
-                <category android:value="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         
-        <activity class=".demo.MessageDetailsActivity" android:label="@string/msg_details">
+        <activity android:name=".demo.MessageDetailsActivity" android:label="@string/msg_details">
             <intent-filter>
-                <action android:value="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
         
-        <activity class=".demo.TestActivity" android:label="@string/msg_details">
+        <activity android:name=".demo.TestActivity" android:label="@string/msg_details">
             <intent-filter>
-                <action android:value="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
         

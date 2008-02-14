@@ -1,9 +1,6 @@
 package jade.android.demo;
 
-import java.util.ArrayList; 
 import java.util.LinkedList;
-import java.util.List; 
-import java.util.Stack;
 
 import android.content.Context; 
 import android.view.View; 

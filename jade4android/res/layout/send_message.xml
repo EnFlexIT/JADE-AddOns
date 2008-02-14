@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AbsoluteLayout
-id="@+id/widget0"
+android:id="@+id/widget0"
 android:layout_width="fill_parent"
 android:layout_height="fill_parent"
 android:background="#ffffffff"
 xmlns:android="http://schemas.android.com/apk/res/android"
 >
 <TextView
-id="@+id/widget26"
+android:id="@+id/widget26"
 android:layout_width="93px"
 android:layout_height="wrap_content"
 android:text="Sender"
@@ -17,7 +17,7 @@ android:layout_y="2px"
 >
 </TextView>
 <EditText
-id="@+id/sender"
+android:id="@+id/sender"
 android:layout_width="156px"
 android:layout_height="32px"
 android:layout_x="10px"
@@ -25,7 +25,7 @@ android:layout_y="22px"
 >
 </EditText>
 <TextView
-id="@+id/widget28"
+android:id="@+id/widget28"
 android:layout_width="82px"
 android:layout_height="wrap_content"
 android:text="Receiver"
@@ -35,7 +35,7 @@ android:layout_y="62px"
 >
 </TextView>
 <EditText
-id="@+id/receiver"
+android:id="@+id/receiver"
 android:layout_width="160px"
 android:layout_height="31px"
 android:layout_x="10px"
@@ -43,7 +43,7 @@ android:layout_y="82px"
 >
 </EditText>
 <TextView
-id="@+id/widget30"
+android:id="@+id/widget30"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="Communicative Act"
@@ -53,7 +53,7 @@ android:layout_y="122px"
 >
 </TextView>
 <Button
-id="@+id/sendBtn"
+android:id="@+id/sendBtn"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="Send"
@@ -62,7 +62,7 @@ android:layout_y="194px"
 >
 </Button>
 <TextView
-id="@+id/widget41"
+android:id="@+id/widget41"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="Content"
@@ -72,7 +72,7 @@ android:layout_y="2px"
 >
 </TextView>
 <TextView
-id="@+id/widget45"
+android:id="@+id/widget45"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="Message List"
@@ -82,7 +82,7 @@ android:layout_y="232px"
 >
 </TextView>
 <ListView
-id="@+id/messageList"
+android:id="@+id/messageList"
 android:layout_width="fill_parent"
 android:layout_height="180px"
 android:layout_x="0px"
@@ -90,7 +90,7 @@ android:layout_y="252px"
 >
 </ListView>
 <EditText
-id="@+id/content"
+android:id="@+id/content"
 android:layout_width="119px"
 android:layout_height="112px"
 android:layout_x="180px"
@@ -98,7 +98,7 @@ android:layout_y="22px"
 >
 </EditText>
 <Button
-id="@+id/clearbtn"
+android:id="@+id/clearbtn"
 android:layout_width="wrap_content"
 android:layout_height="wrap_content"
 android:text="Clear List"
@@ -107,7 +107,7 @@ android:layout_y="194px"
 >
 </Button>
 <Spinner
-id="@+id/commAct"
+android:id="@+id/commAct"
 android:layout_width="250px"
 android:layout_height="wrap_content"
 android:layout_x="10px"

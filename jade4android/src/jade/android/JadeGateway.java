@@ -1,7 +1,8 @@
 package jade.android;
 
 import java.net.ConnectException;
-import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import android.content.ComponentName;
@@ -10,7 +11,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-
 
 import jade.core.Profile;
 import jade.util.Logger;
@@ -81,7 +81,6 @@ public class JadeGateway   {
 	 **/
 	public final void execute(Object command, long timeout) throws StaleProxyException,ControllerException,InterruptedException, ConnectException, Exception {
 	
-	
 		//FIXME: controllare se serve sincronizzare la execute
 		checkJADE();
 		try {
@@ -119,7 +118,7 @@ public class JadeGateway   {
 	 * If jadeProfile is null, then a JADE container attaching to a main on the local host is launched
 	 **/
 	public final static void connect(String agentClassName, String[] agentArgs, Properties jadeProfile, Context ctn, ConnectionListener list) {
-		myLogger.log(Logger.INFO,"MicroRuntimeServiceConnection.init called");
+		myLogger.log(Logger.FINE,"JadeGateway.connect(): called");
 	
 		String agentType = agentClassName;
 		if (agentType == null) {
@@ -132,14 +131,12 @@ public class JadeGateway   {
 			jadeProps.setProperty(Profile.MAIN, "false");
 		}
 		
-		
 		MicroRuntimeServiceConnection sConn = new MicroRuntimeServiceConnection(list);
 		map.put(ctn, sConn);
 		Bundle b = prepareBundle(agentType,agentArgs,jadeProfile);
 		
 		ctn.startService(new Intent(ctn, MicroRuntimeService.class), b);
-		ctn.bindService(new Intent(ctn, MicroRuntimeService.class),null, sConn, Context.BIND_AUTO_CREATE);
-		
+		ctn.bindService(new Intent(ctn, MicroRuntimeService.class), sConn,Context.BIND_AUTO_CREATE);
 	
 	}
 	
@@ -155,18 +152,15 @@ public class JadeGateway   {
 		Bundle b = new Bundle();
 		
 		b.putString(GATEWAY_CLASS_NAME, agentClassName);
-		b.putStringArray(GATEWAY_AGENT_ARGS, agentArgs);
 		
-		Bundle propertiesBundle = new Bundle();
-		
-		for (Enumeration e= jadeProfile.keys(); e.hasMoreElements();){
-			String key = (String) e.nextElement();
-			String value = jadeProfile.getProperty(key);
-			propertiesBundle.putString(key, value);
+		//FIXME: I casted List interface to ArrayList that is Serializable... 
+		//but no way to know which object is returned... May be is better if we use 
+		//our own method to do the cast
+		if (agentArgs != null){
+			ArrayList<String> aArgs =  new ArrayList<String>(Arrays.asList(agentArgs));
+			b.putSerializable(GATEWAY_AGENT_ARGS, aArgs);
 		}
-		
-		b.putBundle(PROPERTIES_BUNDLE, propertiesBundle);
-		
+		b.putSerializable(PROPERTIES_BUNDLE, jadeProfile);
 		return b;
 	}
 	
@@ -186,9 +180,9 @@ public class JadeGateway   {
 	}
 	
 	public final void disconnect(Context ctn) {
-		//FIXME: Il metodo non è statico poichè la unbind non invalida il binder
+		//FIXME: Il metodo non e' statico poiche' la unbind non invalida il binder
 		//che quindi viene impostato a null per impedire l'esecuzione di comandi
-		myLogger.log(Logger.INFO, "Disconnecting from service!!");
+		myLogger.log(Logger.FINE, "JadeGateway.disconnect(): disconnecting from service");
 		ctn.unbindService((ServiceConnection)map.get(ctn));
 		jadeBinder = null;
 		map.remove(ctn);
@@ -204,7 +198,7 @@ public class JadeGateway   {
 		}
 
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			myLogger.log(Logger.INFO,"MicroRuntimeServiceConnection.onServiceConnected called");
+			myLogger.log(Logger.FINE,"MicroRuntimeServiceConnection.onServiceConnected(): called");
 			if(conListener != null) {
 				conListener.onConnected(new JadeGateway((Command)service));
 			}
@@ -213,7 +207,7 @@ public class JadeGateway   {
 		//is called only when the connection to the service fails. 
 		//i.e. crash of the service process.
 		public void onServiceDisconnected(ComponentName className){
-			myLogger.log(Logger.INFO,"MicroRuntimeServiceConnection.onServiceDisconnected called");
+			myLogger.log(Logger.FINE,"MicroRuntimeServiceConnection.onServiceDisconnected(): called");
 			if(conListener != null) {
 				conListener.onDisconnected();
 			}
