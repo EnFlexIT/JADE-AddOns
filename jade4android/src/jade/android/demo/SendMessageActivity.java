@@ -8,6 +8,8 @@ import jade.core.Profile;
 import jade.imtp.leap.JICP.JICPProtocol;
 import jade.lang.acl.ACLMessage;
 import jade.util.leap.Properties;
+import jade.wrapper.ControllerException;
+import jade.wrapper.StaleProxyException;
 
 import java.net.ConnectException;
 import java.util.LinkedList;
@@ -28,8 +30,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TabHost;
+import android.widget.Toast;
+import android.widget.TabHost.TabSpec;
 
 
 public class SendMessageActivity extends Activity implements ConnectionListener{
@@ -43,6 +49,13 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	public static final String KEY_INTENT_RECEIVER="key_receiver";
 	public static final String KEY_INTENT_COM_ACT="key_commAct";
 	public static final String KEY_INTENT_CONTENT="key_content";
+	
+	//Duration of error notification
+	public static final int ERROR_MSG_DURATION=1000;
+	
+	//keys to index the tabs
+	public static final String SEND_MSG_TAB_TAG="SendMsg";
+	public static final String RECV_MSG_TAB_TAG="RecvMsg";
 	
 	//notification ID
 	private final int STATUSBAR_NOTIFICATION= R.layout.send_message;
@@ -69,10 +82,29 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	
 		super.onCreate(icicle);
 		
+		
 		Log.v("jade.android.demo","SendMessageActivity.onCreate() : starting onCreate method");
 		
 		//Set the xml layout from resource
 		setContentView(R.layout.send_message);
+		
+		TabHost host = (TabHost) findViewById(R.id.tabs);
+	
+		host.setup();
+		
+		TabSpec sendMsgSpecs = host.newTabSpec(SEND_MSG_TAB_TAG);
+		sendMsgSpecs.setIndicator(getText(R.string.send_msg_tab_indicator));
+		sendMsgSpecs.setContent(R.id.content1);
+		host.addTab(sendMsgSpecs);
+		
+		TabSpec recvMsgSpecs = host.newTabSpec(RECV_MSG_TAB_TAG);
+		recvMsgSpecs.setIndicator(getText(R.string.recv_msg_tab_indicator));
+		recvMsgSpecs.setContent(R.id.content2);
+		host.addTab(recvMsgSpecs);
+		
+		host.setCurrentTab(0);
+	
+	
 		//Create the list of messages
 		nManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		messageList = new LinkedList<MessageInfo>();
@@ -127,8 +159,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		props.setProperty(Profile.MAIN_HOST, getResources().getString(R.string.host));
 		props.setProperty(Profile.MAIN_PORT, getResources().getString(R.string.port));
 		props.setProperty(JICPProtocol.MSISDN_KEY, getResources().getString(R.string.msisdn));
-		//Connect to the service and get the gateway
-		//FIXME: togliere agent args.
+	
 		JadeGateway.connect(DummyAgent.class.getName(), new String[]{"pippo", "pluto"}, props, this, this);	
 			
 	}
@@ -171,9 +202,10 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			listAdapter.addFirstItem(IT);
 			lv.setAdapter(listAdapter);
 		}
+		
 		catch (Exception e) {
 			Log.e("jade.android.demo",e.getMessage(),e);
-		
+			Toast.makeText(this,e.getMessage(), ERROR_MSG_DURATION);
 		}
 	}
 
@@ -189,8 +221,10 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			nManager.notify(STATUSBAR_NOTIFICATION, notification);
 		}catch(ConnectException ce){
 			Log.e("jade.android", ce.getMessage(), ce);
+			Toast.makeText(this,ce.getMessage(), ERROR_MSG_DURATION);
 		}catch(Exception e1){
 			Log.e("jade.android", e1.getMessage(), e1);
+			Toast.makeText(this,e1.getMessage(), ERROR_MSG_DURATION);
 		}
 	}
 
@@ -248,6 +282,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		} catch (ConnectException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			Toast.makeText(this, e.getMessage(), ERROR_MSG_DURATION);
 		}
 			if (gateway != null )
 				gateway.disconnect(this);

@@ -31,6 +31,7 @@ public class IconifiedTextView extends LinearLayout {
           mText = new TextView(context); 
           mText.setText(aIconifiedText.getText());
           mText.setTextColor(aIconifiedText.getTextColor());
+          mText.setHeight(20);
           /* Now the text (after the icon) */ 
           addView(mText, new LinearLayout.LayoutParams( 
                     LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)); 
