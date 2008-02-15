@@ -105,7 +105,9 @@
 		    target="1.5">
 			<exclude name="jade/AppletBoot.java"/>
 		</javac>
-		<jar destfile="${lib}/JadeLeap-tmp.jar" basedir="${classes}" />
+		<jar destfile="${lib}/JadeLeap-tmp.jar">
+		    <fileset dir="${classes}" excludes="**/Logger.class"/>
+		</jar>
 		<ant dir="${leap-home-dir}" target="reset" inheritAll="false">
 			<property name="pjava" value="true"/>
 			<property name="root" value="${leap-home-dir}"/>
