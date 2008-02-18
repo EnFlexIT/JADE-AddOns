@@ -1,23 +1,21 @@
-package jade.android.demo;
+package demo.dummyagent;
 
 import jade.android.ConnectionListener;
 import jade.android.JadeGateway;
-import jade.android.R;
 import jade.core.AID;
 import jade.core.Profile;
 import jade.imtp.leap.JICP.JICPProtocol;
 import jade.lang.acl.ACLMessage;
-import jade.util.Logger;
+
 import jade.util.leap.Properties;
-import jade.wrapper.ControllerException;
-import jade.wrapper.StaleProxyException;
+
 
 import java.net.ConnectException;
 import java.util.LinkedList;
 
 
 import android.app.Activity;
-import android.app.AlertDialog;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 
@@ -31,7 +29,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TabHost;

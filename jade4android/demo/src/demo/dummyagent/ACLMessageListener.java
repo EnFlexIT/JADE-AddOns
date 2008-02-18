@@ -1,4 +1,4 @@
-package jade.android.demo;
+package demo.dummyagent;
 
 import jade.lang.acl.ACLMessage;
 

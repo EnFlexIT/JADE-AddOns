@@ -1,4 +1,4 @@
-package jade.android.demo;
+package demo.dummyagent;
 import android.graphics.drawable.Drawable; 
 
 public class IconifiedText implements Comparable<IconifiedText>{ 

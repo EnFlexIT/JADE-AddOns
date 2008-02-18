@@ -1,6 +1,5 @@
-package jade.android.demo;
+package demo.dummyagent;
 
-import jade.android.R;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

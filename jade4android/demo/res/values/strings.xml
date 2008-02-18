@@ -5,7 +5,7 @@
 	<string name="recv_msg_tab_indicator">Msg List</string>
 
     <string name="activity_local_jade_controller">Jade Controller</string>
-    <string name="app_name">Jade Dummy Agent</string>
+    <string name="app_name">Dummy Agent</string>
     <string name="send_message">Send message</string>
     <string name="send_and_recv_message">Send and Receive message</string>
     <string name="msg_details">Message Details</string>
