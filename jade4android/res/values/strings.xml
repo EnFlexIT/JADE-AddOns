@@ -10,6 +10,7 @@
     <string name="send_and_recv_message">Send and Receive message</string>
     <string name="msg_details">Message Details</string>
     
+    
     <!--  ERROR MESSAGES -->
     <string name="error_msg_stale_proxy">Error getting Jade agent proxy</string>
     <string name="error_msg_connect">Error connecting to Android MicroRuntime Service</string>

@@ -86,14 +86,27 @@ public class JadeGateway   {
 		checkJADE();
 		try {
 			jadeBinder.execute(command,timeout);
-		} catch (StaleProxyException exc) {
+		} 
+		catch (StaleProxyException exc)  
+		{
 			exc.printStackTrace();
 			// in case an exception was thrown, restart JADE
 			// and then reexecute the command
-			jadeBinder.shutdownJADE();
-			jadeBinder.checkJADE();
-			jadeBinder.execute(command,timeout);
+			restartAfterFailure(command, timeout);
 		}
+		catch (ControllerException exc) 
+		{
+			exc.printStackTrace();
+			// in case an exception was thrown, restart JADE
+			// and then reexecute the command
+			restartAfterFailure(command, timeout);
+		}
+	}
+	
+	private void restartAfterFailure(Object command, long timeout) throws StaleProxyException, ControllerException, InterruptedException, Exception {
+		jadeBinder.shutdownJADE();
+		jadeBinder.checkJADE();
+		jadeBinder.execute(command,timeout);
 	}
 	
 	/**

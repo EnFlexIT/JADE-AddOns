@@ -70,7 +70,8 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
     private Button sendButton;
     private Button clearButton;
 	private NotificationManager nManager; 
-
+	private TabHost tabHost;
+	
 	private GUIUpdater updater;
 	
 	private LinkedList<MessageInfo> messageList;
@@ -82,27 +83,26 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	
 		super.onCreate(icicle);
 		
-		
 		Log.v("jade.android.demo","SendMessageActivity.onCreate() : starting onCreate method");
 		
 		//Set the xml layout from resource
 		setContentView(R.layout.send_message);
 		
-		TabHost host = (TabHost) findViewById(R.id.tabs);
+		tabHost = (TabHost) findViewById(R.id.tabs);
 	
-		host.setup();
+		tabHost.setup();
 		
-		TabSpec sendMsgSpecs = host.newTabSpec(SEND_MSG_TAB_TAG);
-		sendMsgSpecs.setIndicator(getText(R.string.send_msg_tab_indicator));
+		TabSpec sendMsgSpecs = tabHost.newTabSpec(SEND_MSG_TAB_TAG);
+		sendMsgSpecs.setIndicator(getText(R.string.send_msg_tab_indicator),getResources().getDrawable(R.drawable.msg));
 		sendMsgSpecs.setContent(R.id.content1);
-		host.addTab(sendMsgSpecs);
+		tabHost.addTab(sendMsgSpecs);
 		
-		TabSpec recvMsgSpecs = host.newTabSpec(RECV_MSG_TAB_TAG);
-		recvMsgSpecs.setIndicator(getText(R.string.recv_msg_tab_indicator));
+		TabSpec recvMsgSpecs = tabHost.newTabSpec(RECV_MSG_TAB_TAG);
+		recvMsgSpecs.setIndicator(getText(R.string.recv_msg_tab_indicator),getResources().getDrawable(R.drawable.contact_32));
 		recvMsgSpecs.setContent(R.id.content2);
-		host.addTab(recvMsgSpecs);
+		tabHost.addTab(recvMsgSpecs);
 		
-		host.setCurrentTab(0);
+		tabHost.setCurrentTab(0);
 	
 	
 		//Create the list of messages
@@ -114,11 +114,13 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		contentText = (EditText) findViewById(R.id.content);
 		spn = (Spinner) findViewById(R.id.commAct);
 		lv = (ListView) findViewById(R.id.messageList);
+		
 		//SPINNER: fill with data
 		String[] performatives= ACLMessage.getAllPerformativeNames();
 		ArrayAdapter<CharSequence> comActList = new ArrayAdapter<CharSequence>(this,android.R.layout.simple_spinner_item, performatives);
 		comActList.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spn.setAdapter(comActList);
+		
 		//LISTVIEW: handle click event
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 			public void onItemClick(AdapterView parent, View v, int position, long id) {
@@ -152,7 +154,10 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		
         
         listAdapter = new IconifiedTextListAdapter(this);
-        senderText.setEnabled(false);
+        
+        senderText.setText(getResources().getText(R.string.msisdn));
+ 
+        
 		updater = new GUIUpdater(this);
 		
 		Properties props = new Properties();
@@ -214,7 +219,6 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		gateway = gw;		
 		sendButton.setEnabled(true);
 		try{
-			senderText.setText(gateway.getAgentName());
 			gateway.execute(updater);
 			CharSequence txt = getResources().getText(R.string.statusbar_msg_connected);
 			Notification notification = new Notification(this,R.drawable.dummyagent,getResources().getText(R.string.statusbar_msg_connected),1000,"Ciao","Anna",null,R.drawable.dummyagent,"DummyAgent",null);
@@ -266,7 +270,9 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	
 	protected void onActivityResult(int requestCode, int resultCode, String data, Bundle extras) {         
 		 if (resultCode == MessageDetailsActivity.REPLY_TO_RESULT) {             
+			 tabHost.setCurrentTab(0);
 			 receiverText.setText(data);
+			 
 		 }
 	}
 

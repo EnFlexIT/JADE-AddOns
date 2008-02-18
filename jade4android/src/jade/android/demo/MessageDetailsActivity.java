@@ -26,19 +26,19 @@ public class MessageDetailsActivity extends Activity {
 		
 		sender = (EditText) this.findViewById(R.id.senderDet);
 		sender.setText( (String)it.getSerializableExtra(SendMessageActivity.KEY_INTENT_SENDER) );
-		sender.setEnabled(false);
+		
 		
 		EditText receiver = (EditText) this.findViewById(R.id.receiverDet);
 		receiver.setText( (String)it.getSerializableExtra(SendMessageActivity.KEY_INTENT_RECEIVER) );
-		receiver.setEnabled(false);
+		
 		
 		EditText comAct = (EditText) this.findViewById(R.id.comActDet);
 		comAct.setText( (String)it.getSerializableExtra(SendMessageActivity.KEY_INTENT_COM_ACT)  );
-		comAct.setEnabled(false);
+		
 		
 		EditText content = (EditText) this.findViewById(R.id.contentDet);
 		content.setText( (String)it.getSerializableExtra(SendMessageActivity.KEY_INTENT_CONTENT) );
-		content.setEnabled(false);
+	
 		
 		Button btn = (Button) this.findViewById(R.id.backBtnDet);
 		btn.setOnClickListener(new OnClickListener(){

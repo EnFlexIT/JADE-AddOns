@@ -2,6 +2,7 @@ package jade.android.demo;
 
 import android.content.Context; 
 import android.graphics.drawable.Drawable; 
+import android.util.TypedValue;
 import android.widget.ImageView; 
 import android.widget.LinearLayout; 
 import android.widget.TextView; 
@@ -31,7 +32,7 @@ public class IconifiedTextView extends LinearLayout {
           mText = new TextView(context); 
           mText.setText(aIconifiedText.getText());
           mText.setTextColor(aIconifiedText.getTextColor());
-          mText.setHeight(20);
+          mText.setTextSize(TypedValue.COMPLEX_UNIT_PX, 15.0f);
           /* Now the text (after the icon) */ 
           addView(mText, new LinearLayout.LayoutParams( 
                     LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)); 
