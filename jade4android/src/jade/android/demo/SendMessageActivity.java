@@ -7,6 +7,7 @@ import jade.core.AID;
 import jade.core.Profile;
 import jade.imtp.leap.JICP.JICPProtocol;
 import jade.lang.acl.ACLMessage;
+import jade.util.Logger;
 import jade.util.leap.Properties;
 import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
@@ -82,7 +83,6 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	protected void onCreate(Bundle icicle) {
 	
 		super.onCreate(icicle);
-		
 		Log.v("jade.android.demo","SendMessageActivity.onCreate() : starting onCreate method");
 		
 		//Set the xml layout from resource
@@ -164,9 +164,10 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		props.setProperty(Profile.MAIN_HOST, getResources().getString(R.string.host));
 		props.setProperty(Profile.MAIN_PORT, getResources().getString(R.string.port));
 		props.setProperty(JICPProtocol.MSISDN_KEY, getResources().getString(R.string.msisdn));
-	
-		JadeGateway.connect(DummyAgent.class.getName(), new String[]{"pippo", "pluto"}, props, this, this);	
-			
+
+		//Connect to the service and get the gateway
+		JadeGateway.connect(DummyAgent.class.getName(), null, props, this, this);		
+
 	}
 	
 	
