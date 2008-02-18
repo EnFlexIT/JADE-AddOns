@@ -82,7 +82,6 @@ public class JadeGateway   {
 	 **/
 	public final void execute(Object command, long timeout) throws StaleProxyException,ControllerException,InterruptedException, ConnectException, Exception {
 	
-		//FIXME: controllare se serve sincronizzare la execute
 		checkJADE();
 		try {
 			jadeBinder.execute(command,timeout);
@@ -91,7 +90,7 @@ public class JadeGateway   {
 		{
 			exc.printStackTrace();
 			// in case an exception was thrown, restart JADE
-			// and then reexecute the command
+			// and then re-execute the command
 			restartAfterFailure(command, timeout);
 		}
 		catch (ControllerException exc) 
@@ -131,7 +130,7 @@ public class JadeGateway   {
 	 * Typically these properties will have to be read from a JADE configuration file.
 	 * If jadeProfile is null, then a JADE container attaching to a main on the local host is launched
 	 **/
-	public final static void connect(String agentClassName, String[] agentArgs, Properties jadeProfile, Context ctn, ConnectionListener list) {
+	public final static void connect(String agentClassName, String[] agentArgs, Properties jadeProfile, Context ctn, ConnectionListener list) throws Exception{
 		myLogger.log(Logger.FINE,"JadeGateway.connect(): called");
 	
 		String agentType = agentClassName;
@@ -143,11 +142,14 @@ public class JadeGateway   {
 		if (jadeProps != null) {
 			// Since we will create a non-main container --> force the "main" property to be false
 			jadeProps.setProperty(Profile.MAIN, "false");
+		}else{
+			myLogger.log(Logger.SEVERE,"JadeGateway.connect(): jade properties cannot be null.");
+			throw new Exception("Jade properties cannot be null.");
 		}
 		
 		MicroRuntimeServiceConnection sConn = new MicroRuntimeServiceConnection(list);
 		map.put(ctn, sConn);
-		Bundle b = prepareBundle(agentType,agentArgs,jadeProfile);
+		Bundle b = prepareBundle(agentType,agentArgs,jadeProps);
 		
 		ctn.startService(new Intent(ctn, MicroRuntimeService.class), b);
 		ctn.bindService(new Intent(ctn, MicroRuntimeService.class), sConn,Context.BIND_AUTO_CREATE);
@@ -167,13 +169,12 @@ public class JadeGateway   {
 		
 		b.putString(GATEWAY_CLASS_NAME, agentClassName);
 		
-		//FIXME: I casted List interface to ArrayList that is Serializable... 
-		//but no way to know which object is returned... May be is better if we use 
-		//our own method to do the cast
 		if (agentArgs != null){
 			ArrayList<String> aArgs =  new ArrayList<String>(Arrays.asList(agentArgs));
 			b.putSerializable(GATEWAY_AGENT_ARGS, aArgs);
 		}
+		//since there are some serialization problems, we create an hashmap 
+		//to store the properties that be to be put into to bundle 
 		HashMap theProps = new HashMap();
 		for(Enumeration e = jadeProfile.keys(); e.hasMoreElements();){
 			String key = (String)e.nextElement();
@@ -184,7 +185,8 @@ public class JadeGateway   {
 		return b;
 	}
 	
-	public final static void connect(String agentClassName, Properties jadeProfile, Context ctn, ConnectionListener list) {
+
+	public final static void connect(String agentClassName, Properties jadeProfile, Context ctn, ConnectionListener list) throws Exception{
 		connect(agentClassName, null, jadeProfile, ctn, list);
 	}
 	

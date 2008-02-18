@@ -5,17 +5,15 @@ import jade.core.NotFoundException;
 import jade.imtp.leap.JICP.JICPProtocol;
 import jade.util.Event;
 import jade.util.Logger;
+import jade.util.leap.Properties;
 import jade.wrapper.AgentController;
 import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
-import jade.util.leap.Properties;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 
 import android.app.Service;
 import android.content.Intent;
@@ -94,7 +92,7 @@ public class MicroRuntimeService extends Service {
 				Properties props = (Properties)jadeProperties.clone();
 				MicroRuntime.startJADE(props, null);
 				myAgentName = (String)props.get(JICPProtocol.MEDIATOR_ID_KEY);
-				//FIXME: Indagare da dove è meglio prendere il nome dell'agente
+				
 				myLogger.log(Logger.INFO, "JadeBinder.checkJade() : Agent name is " + myAgentName);
 				MicroRuntime.startAgent(myAgentName, gatewayClassName, gatewayAgentArgs);
 			}

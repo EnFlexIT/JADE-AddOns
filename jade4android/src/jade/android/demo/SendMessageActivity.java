@@ -164,9 +164,13 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 		props.setProperty(Profile.MAIN_HOST, getResources().getString(R.string.host));
 		props.setProperty(Profile.MAIN_PORT, getResources().getString(R.string.port));
 		props.setProperty(JICPProtocol.MSISDN_KEY, getResources().getString(R.string.msisdn));
-
+		
 		//Connect to the service and get the gateway
-		JadeGateway.connect(DummyAgent.class.getName(), null, props, this, this);		
+		try{
+			JadeGateway.connect(DummyAgent.class.getName(), null, props, this, this);		
+		}catch(Exception e){
+			//TODO
+		}
 
 	}
 	
@@ -189,8 +193,6 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	private void sendMessage(String receiver, String content, String comAct) {				
 
 		Log.v("jade.android.demo","SendMessageActivity.onStart() : calling onStart method");
-		
-
 		
 		ACLMessage msg = new ACLMessage(ACLMessage.getInteger(comAct));		
 		msg.setContent(content);
@@ -225,10 +227,11 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 			Notification notification = new Notification(this,R.drawable.dummyagent,getResources().getText(R.string.statusbar_msg_connected),1000,"Ciao","Anna",null,R.drawable.dummyagent,"DummyAgent",null);
 			nManager.notify(STATUSBAR_NOTIFICATION, notification);
 		}catch(ConnectException ce){
-			Log.e("jade.android", ce.getMessage(), ce);
+			Log.e("jade.android.demo", ce.getMessage(), ce);
 			Toast.makeText(this,ce.getMessage(), ERROR_MSG_DURATION);
+			
 		}catch(Exception e1){
-			Log.e("jade.android", e1.getMessage(), e1);
+			Log.e("jade.android.demo", e1.getMessage(), e1);
 			Toast.makeText(this,e1.getMessage(), ERROR_MSG_DURATION);
 		}
 	}
