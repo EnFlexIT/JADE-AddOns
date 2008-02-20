@@ -66,14 +66,13 @@
 
 <EditText
 	android:id="@+id/contentDet"
-	android:singleLine="true"
 	android:editable="false"
 	android:textSize="15px"
 	android:layout_width="fill_parent"
 	android:background="@android:drawable/editbox_background"
 	android:cursorVisible="false"
 	android:padding="5px"
-	android:layout_height="wrap_content"/>
+	android:layout_height="50px"/>
 
 
 <Button

@@ -84,12 +84,11 @@ android:padding="10px"
 				android:text="Content"/>
 			<EditText
 				android:id="@+id/content"
-				android:singleLine="true"
 				android:textSize="15px"
 				android:layout_width="fill_parent"
 				android:background="@android:drawable/editbox_background"
 				android:padding="5px"
-				android:layout_height="wrap_content"/>
+				android:layout_height="50px"/>
 			
 			<Button
 				android:id="@+id/sendBtn"

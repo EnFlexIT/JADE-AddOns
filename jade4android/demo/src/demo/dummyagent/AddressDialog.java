@@ -50,12 +50,7 @@ public class AddressDialog extends Dialog {
 				
 				if (agentTxtName.length() > 0)
 				{
-					AID agentAID = new AID();
-					if (longNameFormat.isChecked()) {
-						agentAID.setLocalName(agentTxtName);
-					} else {
-						agentAID.setName(agentTxtName);
-					}
+					AID agentAID = new AID(agentTxtName, !longNameFormat.isChecked());
 					
 					if (address.length() > 0) {
 						agentAID.addAddresses(address);
