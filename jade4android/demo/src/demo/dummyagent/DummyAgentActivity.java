@@ -38,7 +38,7 @@ import android.widget.AdapterView.ContextMenuInfo;
 import android.widget.TabHost.TabSpec;
 
 
-public class SendMessageActivity extends Activity implements ConnectionListener{
+public class DummyAgentActivity extends Activity implements ConnectionListener{
 
 
 	private final Logger myLogger = Logger.getMyLogger(this.getClass().getName());
@@ -90,7 +90,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
 	private LinkedList<MessageInfo> messageList;
 	private ArrayList<AID> receivers;
 	private IconifiedTextListAdapter listAdapter;
-	private AddressDialog addrDialog;
+	private AIDDialog addrDialog;
 	
 	@Override
 	protected void onCreate(Bundle icicle) {
@@ -188,7 +188,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
             }
         });
 		
-        addrDialog = new AddressDialog(this);
+        addrDialog = new AIDDialog(this);
         
         listAdapter = new IconifiedTextListAdapter(this);
         
@@ -229,7 +229,7 @@ public class SendMessageActivity extends Activity implements ConnectionListener{
         	recList.add( ((AID)it.next()).getName() );
         }
         
-        intent.putExtra(SendMessageActivity.KEY_INTENT_RECEIVER_LIST, recList);
+        intent.putExtra(DummyAgentActivity.KEY_INTENT_RECEIVER_LIST, recList);
         startSubActivity(intent,RESCODE_MSG_DETAILS);
 	}
 	

@@ -9,7 +9,7 @@
     
     <application android:icon="@drawable/jade" android:label="@string/app_name" >
     	<service android:name="jade.android.MicroRuntimeService" />
-        <activity android:name=".SendMessageActivity" android:label="@string/app_name">
+        <activity android:name=".DummyAgentActivity" android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

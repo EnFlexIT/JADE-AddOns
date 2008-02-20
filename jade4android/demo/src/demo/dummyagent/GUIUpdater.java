@@ -10,10 +10,10 @@ import android.widget.Toast;
 class GUIUpdater implements ACLMessageListener {
 
 	private Handler handl;
-	private SendMessageActivity act;	
+	private DummyAgentActivity act;	
 	private static final Logger myLogger = Logger.getMyLogger(JadeGateway.class.getName());
 	
-	public GUIUpdater(SendMessageActivity baseActivity) {
+	public GUIUpdater(DummyAgentActivity baseActivity) {
 		
 		handl = new Handler();
 		act = baseActivity;
@@ -29,11 +29,11 @@ class GUIUpdater implements ACLMessageListener {
 
 	private class Updater implements Runnable {
 		
-		private SendMessageActivity sendMsgAct;
+		private DummyAgentActivity sendMsgAct;
 		private ACLMessage message;
 		
 		
-		public Updater(SendMessageActivity sm, ACLMessage msg) { 
+		public Updater(DummyAgentActivity sm, ACLMessage msg) { 
 			sendMsgAct = sm;
 			message = msg;
 			

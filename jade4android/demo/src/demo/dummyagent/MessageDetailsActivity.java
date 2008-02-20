@@ -27,14 +27,14 @@ public class MessageDetailsActivity extends Activity {
 		setContentView(R.layout.message_details);
 		
 		Intent it =getIntent();
-		String senderName = (String) it.getSerializableExtra(SendMessageActivity.KEY_INTENT_SENDER);
+		String senderName = (String) it.getSerializableExtra(DummyAgentActivity.KEY_INTENT_SENDER);
 
 		sender = (EditText) this.findViewById(R.id.senderDet);
 		sender.setText( senderName );
 		
 		
 		ListView receiverList = (ListView) this.findViewById(R.id.receiverListDet);
-		ArrayList<String> strList = (ArrayList<String>) it.getSerializableExtra(SendMessageActivity.KEY_INTENT_RECEIVER_LIST);
+		ArrayList<String> strList = (ArrayList<String>) it.getSerializableExtra(DummyAgentActivity.KEY_INTENT_RECEIVER_LIST);
 		
 		IconifiedTextListAdapter ita = new IconifiedTextListAdapter(this);
 		
@@ -50,12 +50,12 @@ public class MessageDetailsActivity extends Activity {
 		receiverList.setAdapter(ita);
 		
 		EditText comAct = (EditText) this.findViewById(R.id.comActDet);
-		String comActName = (String) it.getSerializableExtra(SendMessageActivity.KEY_INTENT_COM_ACT);
+		String comActName = (String) it.getSerializableExtra(DummyAgentActivity.KEY_INTENT_COM_ACT);
 		comAct.setText(comActName);
 		
 		
 		EditText content = (EditText) this.findViewById(R.id.contentDet);
-		String contentName = (String) it.getSerializableExtra(SendMessageActivity.KEY_INTENT_CONTENT);
+		String contentName = (String) it.getSerializableExtra(DummyAgentActivity.KEY_INTENT_CONTENT);
 		content.setText( contentName );
 	
 		

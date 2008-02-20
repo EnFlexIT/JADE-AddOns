@@ -10,17 +10,17 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-public class AddressDialog extends Dialog {
+public class AIDDialog extends Dialog {
 
 	private EditText agentNameEdt;
 	private CheckBox longNameFormat;
 	private EditText addressEdt;
 	private int selectedPosition;
 	private boolean editing;
-	private SendMessageActivity myActivity;
+	private DummyAgentActivity myActivity;
 
 	
-	public AddressDialog(SendMessageActivity ctn) {
+	public AIDDialog(DummyAgentActivity ctn) {
 		super(ctn);
 		
 		myActivity = ctn;
@@ -56,7 +56,7 @@ public class AddressDialog extends Dialog {
 						agentAID.addAddresses(address);
 					}
 					
-					if (!AddressDialog.this.editing)
+					if (!AIDDialog.this.editing)
 						myActivity.addReceiver(agentAID);
 					else 
 						myActivity.editReceiver(selectedPosition, agentAID);
