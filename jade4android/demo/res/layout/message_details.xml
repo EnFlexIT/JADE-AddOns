@@ -31,16 +31,12 @@
 	android:text="Receiver"
 />
 
-<EditText
-	android:id="@+id/receiverDet"
-	android:singleLine="true"
-	android:editable="false"
-	android:textSize="15px"
+<ListView
+	android:id="@+id/receiverListDet"
 	android:layout_width="fill_parent"
+	android:layout_height="60px"
 	android:background="@android:drawable/editbox_background"
-	android:cursorVisible="false"
-	android:padding="5px"
-	android:layout_height="wrap_content"/>
+	android:listSelector="@android:drawable/list_highlight_background_yellow"/>
 
 <TextView
 	android:id="@+id/widget30Det"
@@ -79,22 +75,7 @@
 	android:padding="5px"
 	android:layout_height="wrap_content"/>
 
-<LinearLayout
-android:id="@+id/widget57"
-android:layout_width="fill_parent"
-android:layout_height="wrap_content"
-android:orientation="horizontal"
-xmlns:android="http://schemas.android.com/apk/res/android"
->
 
-<Button android:id="@+id/backBtnDet"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content"
-	android:background="@android:drawable/button_background"
-	android:text="Back"
-	android:padding="10px"
-
-/>
 <Button
 	android:id="@+id/replyBtnDet"
 	android:layout_width="wrap_content"
@@ -103,5 +84,4 @@ xmlns:android="http://schemas.android.com/apk/res/android"
 	android:text="Reply"
 	android:padding="10px"
 />
-</LinearLayout>
 </LinearLayout>

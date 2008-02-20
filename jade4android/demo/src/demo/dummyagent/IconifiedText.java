@@ -42,8 +42,13 @@ public class IconifiedText implements Comparable<IconifiedText>{
 		return mTextColor;
 	}
 
+	public boolean hasIcon(){
+		return (mIcon != null);
+	}
+	
 	public void setTextColor(int color) {
 		mTextColor = color;
 	} 
+
 } 
 

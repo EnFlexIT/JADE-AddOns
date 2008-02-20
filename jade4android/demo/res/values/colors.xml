@@ -2,6 +2,7 @@
 
 <resources> 
    <color name="listitem_received_msg">#FFFF0000</color> 
-   <color name="listitem_sent_msg">#FF00FF00</color> 
+   <color name="listitem_sent_msg">#FF0000FF</color>
+   <color name="listitem_receivers_text_color">#FFFF00FF</color> 
 </resources>
     

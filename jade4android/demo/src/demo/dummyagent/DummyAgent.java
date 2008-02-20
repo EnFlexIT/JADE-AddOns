@@ -15,13 +15,11 @@ public class DummyAgent extends GatewayAgent {
 	private final Logger myLogger = Logger.getMyLogger(this.getClass().getName());
 	private ACLMessageListener updater;
 	
-	@Override
 	protected void setup() {
 		super.setup();
 		addBehaviour(new MessageReceiverBehaviour());
 	}
 	
-	@Override
 	protected void processCommand(final Object command) {
 		if (command instanceof Behaviour) {
 			SequentialBehaviour sb = new SequentialBehaviour(this);
@@ -47,10 +45,8 @@ public class DummyAgent extends GatewayAgent {
 	}
 
 	
-	
 	private class MessageReceiverBehaviour extends CyclicBehaviour{
 
-		@Override
 		public void action() {
 			ACLMessage msg = myAgent.receive();
 			Log.v("jade.android.demo", "Message received: " + this.hashCode());

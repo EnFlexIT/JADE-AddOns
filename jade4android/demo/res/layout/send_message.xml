@@ -56,14 +56,12 @@ android:padding="10px"
 				android:layout_height="wrap_content"
 				android:text="Receiver">
 			</TextView>
-			<EditText
-				android:id="@+id/receiver"
-				android:singleLine="true"
+			<ListView
+				android:id="@+id/receiverList"
 				android:layout_width="fill_parent"
-				android:textSize="15px"
+				android:layout_height="60px"
 				android:background="@android:drawable/editbox_background"
-				android:padding="5px"
-				android:layout_height="wrap_content"/>
+				android:listSelector="@android:drawable/list_highlight_background_yellow"/>
 			
 			<TextView
 				android:id="@+id/commActTxtView"
@@ -100,7 +98,6 @@ android:padding="10px"
 				android:layout_height="wrap_content"
 				android:padding="10px"
 				android:text="Send"/>
-			
 
 </LinearLayout>
 

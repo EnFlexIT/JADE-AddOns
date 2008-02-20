@@ -1,18 +1,24 @@
 package demo.dummyagent;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jade.core.AID;
+import jade.lang.acl.ACLMessage;
+import jade.util.leap.Iterator;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 
 public class MessageDetailsActivity extends Activity {
 
-	public static final int REPLY_TO_RESULT=0;
-	public static final int BACK_RESULT=1;
-	
 	private EditText sender;
 	
 	protected void onCreate(Bundle icicle) {
@@ -21,43 +27,64 @@ public class MessageDetailsActivity extends Activity {
 		setContentView(R.layout.message_details);
 		
 		Intent it =getIntent();
-		
-		
+		String senderName = (String) it.getSerializableExtra(SendMessageActivity.KEY_INTENT_SENDER);
+
 		sender = (EditText) this.findViewById(R.id.senderDet);
-		sender.setText( (String)it.getSerializableExtra(SendMessageActivity.KEY_INTENT_SENDER) );
+		sender.setText( senderName );
 		
 		
-		EditText receiver = (EditText) this.findViewById(R.id.receiverDet);
-		receiver.setText( (String)it.getSerializableExtra(SendMessageActivity.KEY_INTENT_RECEIVER) );
+		ListView receiverList = (ListView) this.findViewById(R.id.receiverListDet);
+		ArrayList<String> strList = (ArrayList<String>) it.getSerializableExtra(SendMessageActivity.KEY_INTENT_RECEIVER_LIST);
 		
+		IconifiedTextListAdapter ita = new IconifiedTextListAdapter(this);
+		
+		Drawable icon = getResources().getDrawable(R.drawable.runtree);
+		
+		for (java.util.Iterator<String> iterator = strList.iterator(); iterator.hasNext();) {
+			String string = iterator.next();
+			IconifiedText txt = new IconifiedText(string,icon);
+			txt.setTextColor(R.color.listitem_receivers_text_color);
+			ita.addLastItem(txt);
+		}
+		
+		receiverList.setAdapter(ita);
 		
 		EditText comAct = (EditText) this.findViewById(R.id.comActDet);
-		comAct.setText( (String)it.getSerializableExtra(SendMessageActivity.KEY_INTENT_COM_ACT)  );
+		String comActName = (String) it.getSerializableExtra(SendMessageActivity.KEY_INTENT_COM_ACT);
+		comAct.setText(comActName);
 		
 		
 		EditText content = (EditText) this.findViewById(R.id.contentDet);
-		content.setText( (String)it.getSerializableExtra(SendMessageActivity.KEY_INTENT_CONTENT) );
+		String contentName = (String) it.getSerializableExtra(SendMessageActivity.KEY_INTENT_CONTENT);
+		content.setText( contentName );
 	
 		
-		Button btn = (Button) this.findViewById(R.id.backBtnDet);
-		btn.setOnClickListener(new OnClickListener(){
-
-			public void onClick(View arg0) {
-				finish();
-			}
-			
-		});
+	
 		
 		Button reply = (Button) this.findViewById(R.id.replyBtnDet);
 		reply.setOnClickListener(new OnClickListener(){
 			public void onClick(View arg0) {
 				String snd = sender.getText().toString();
-				String nameToSend = snd.substring(0, snd.indexOf('@'));
-				setResult(REPLY_TO_RESULT, nameToSend);
+				setResult(Activity.RESULT_OK, snd);
 				finish();
 			}
 				
 		});
 	
 	}	
+	
+	private List<String> aidToString(Iterator receivers){
+		
+		List<String> recList = new ArrayList<String>();
+		
+		while (receivers.hasNext()){
+			recList.add(((AID)receivers.next()).getName());
+		}
+		
+		return recList;
+	}
+	
+	protected void onDestroy(){
+		super.onDestroy();
+	}
 }

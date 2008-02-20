@@ -10,17 +10,17 @@
     <string name="send_and_recv_message">Send and Receive message</string>
     <string name="msg_details">Message Details</string>
     
+    <!-- DIALOG PROPERTIES -->
+    <string name="dialog_title">AID</string>
+    
     
     <!--  ERROR MESSAGES -->
+    <string name="error_msg_empty_aid">AID name cannot be empty!</string>
     <string name="error_msg_stale_proxy">Error getting Jade agent proxy</string>
     <string name="error_msg_connect">Error connecting to Android MicroRuntime Service</string>
 	<string name="error_msg_generic">Generic error contacting Jade platform</string>
 	
-	<string name="menu_item_connect">Connect</string>
-	<string name="menu_item_disconnect">Disconnect</string>
-	<string name="menu_item_shutdown">Shutdown</string>
-	<string name="menu_item_restart">Restart</string>
-	<string name="menu_item_subactivity">Start subactivity</string>
+	
 	<string name="menu_item_exit">Exit</string>
 	
 	<string name="statusbar_msg_connected">Connected to service</string>
@@ -36,5 +36,12 @@
 	<string name="host">163.162.244.71</string>
 	<string name="port">1099</string>
 	<string name="msisdn">android</string>
+	
+	
+	<!-- CONTEXT MENU ITEMS -->
+	<string name="menu_item_add">Add</string>
+	<string name="menu_item_edit">Edit</string>
+	<string name="menu_item_remove">Remove</string>
+	<string name="menu_item_removeall">Remove All</string>
 	
 </resources>

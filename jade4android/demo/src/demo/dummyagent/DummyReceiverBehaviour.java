@@ -13,7 +13,6 @@ public class DummyReceiverBehaviour extends OneShotBehaviour {
 		msgList = listener;
 	}
 	
-	@Override
 	public void action() {
 		// TODO Auto-generated method stub
 		MessageReceiverBehaviour msgRecBh = new MessageReceiverBehaviour(msgList);
@@ -30,7 +29,6 @@ public class DummyReceiverBehaviour extends OneShotBehaviour {
 			msgListener = msgList;
 		}
 
-		@Override
 		public void action() {
 			ACLMessage msg = myAgent.receive();
 			Log.v("jade.android.demo", "Message received: " + this.hashCode());
