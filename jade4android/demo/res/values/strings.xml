@@ -24,6 +24,7 @@
 	<string name="menu_item_exit">Exit</string>
 	
 	<string name="statusbar_msg_connected">Connected to service</string>
+	<string name="notify_msg_received">A message has arrived</string>
 
     <string name="receiver">receiver</string>
     <string name="content">content</string>
@@ -32,7 +33,7 @@
 
 	
 	<!-- JADE CONNECTION PROPERTIES -->
-	<string name="host">163.162.244.63</string>
+	<string name="host">163.162.244.71</string>
 	<string name="port">1099</string>
 	<string name="msisdn">android</string>
 	

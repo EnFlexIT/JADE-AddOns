@@ -1,10 +1,11 @@
 package demo.dummyagent;
 
-import android.os.Handler;
-import android.widget.ListView;
 import jade.android.JadeGateway;
 import jade.lang.acl.ACLMessage;
 import jade.util.Logger;
+import android.os.Handler;
+import android.widget.ListView;
+import android.widget.Toast;
 
 class GUIUpdater implements ACLMessageListener {
 
@@ -50,6 +51,8 @@ class GUIUpdater implements ACLMessageListener {
 			
 			ListView lv = (ListView) sendMsgAct.findViewById(R.id.messageList);
 			lv.setAdapter(adapter);
+			Toast t = Toast.makeText(sendMsgAct, sendMsgAct.getResources().getText(R.string.notify_msg_received), 2000);
+			t.show();
 		    
 		}
 	}
