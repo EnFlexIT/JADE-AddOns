@@ -52,14 +52,16 @@ public class MathOntologyMapper {
 		return abs;
 	}
 
+	// DO not expose a web service operation corresponding to the Diff ontology action
 	@SuppressOperation
-	public Abs toAbs(int real,int immaginary){
+	public Abs toDiff(){
 		return null;
 	}
 
-	@OperationName(name="abs")
-	public Abs myMethod(int real,int immaginary){
-		return toAbs((float)real, (float)immaginary);
+	// The web service operation corresponding to the Multiplication ontology action will be called Mul
+	@OperationName(name="Mul")
+	public Multiplication toMultiplication(List numbers){
+		return new Multiplication(numbers);
 	}
 	
 }
