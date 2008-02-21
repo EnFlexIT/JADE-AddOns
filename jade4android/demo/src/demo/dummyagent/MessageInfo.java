@@ -6,6 +6,11 @@ import java.util.Locale;
 
 import jade.lang.acl.ACLMessage;
 
+/**
+ * 
+ * @author 00917598
+ *
+ */
 public class MessageInfo {
 	
 	private ACLMessage message;

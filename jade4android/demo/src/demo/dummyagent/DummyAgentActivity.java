@@ -40,7 +40,20 @@ import android.widget.TabHost.TabSpec;
 
 public class DummyAgentActivity extends Activity implements ConnectionListener{
 
-
+/**
+ * This class implements the Activity associated with the DummyAgent application
+ * This activity starts a Jade MicroRuntime with a GatewayAgent in it that replicates 
+ * the capabilities of the <code>jade.tools.DummyAgent</code>
+ * This class replicates on ANDROID SDK the capabilities of the GUI of DummyAgent
+ * It provides support to send message to other jade agent running on the same Jade 
+ * platform and show the received ones.
+ * A notify implemented with the Tast mechanism is sent to the View when a new message 
+ * has arrived     
+ * 
+ * @author Stefano Semeria  Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ * @author Marco Ughetti Telecomitalia
+ */
 	private final Logger myLogger = Logger.getMyLogger(this.getClass().getName());
 	public static final String KEY_RECEIVER = "receiver";
 	public static final String KEY_CONTENT = "content";

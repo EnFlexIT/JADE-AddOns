@@ -20,11 +20,67 @@ import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 import jade.wrapper.gateway.GatewayAgent;
 
+/**
+ * This class provide a gateway between ANDROID applications and a JADE based multi agent system.
+ * It mantains an internal JADE Agent of class <code>GatewayAgent<code> that acts as entry point
+ * in the JADE based system. 
+ * The activation/termination of this agent (and its underlying split container) are completely managed
+ * by the JadeGateway class and the android application developers do not need to care about them.
+ *
+ * This class provides APIs very similat to the class <code>jade.wrapper.gateway.JadeGateway</code>
+ * (refer to Jade documentation); the main difference is that this one uses the <code>jade.core.MicroRuntime</code> 
+ * instead of <code>jade.core.Runtime</code> in order to start a container in a split mode that is better suitable 
+ * in a mobile environment.  
+ * 
+ * The following are the main steps in order to use the JadeGateway in your Android Application:
+ *	1)	Create your  Jade Agent class extending <code>jade.wrapper.gateway.GatewayAgent</code>
+ *	2)	Add your application specific behaviours to your Jade Agent and override the processCommand method 
+ *		with your application specific implementation;
+ *	3)	Create an android activity that implements ConnectionListener;
+ *	4)	Initialize this  JadeGateway by calling its method <code>connect</code> in the onCreate method 
+ *		of your activity passing all required arguments:
+ *		<code>agentClassName</code> is the fully qualified name of the class that extends <code>jade.android.GatewayAgent</code> 
+ *		and implements the application specific jade agent 
+		<code>agentArgs</code> are the args passed to the jade agent when the Jade MicroRuntime starts it. They can be null.
+		<code>jadeProfile</code> is the set of jade properties to be passed to the Jade MicroRuntime.
+		 The minimal set shall be passed to this method is:
+		<code>jade.core.Profile.MAIN_HOST</code> is the hostname or ipaddress of the Jade Platform Main Container.
+		<code>jade.core.Profile.MAIN_PORT</code> is the port of the Jade Platform Main Container.
+		<code>jade.imtp.leap.JICP.JICPProtocol.MSISDN_KEY</code> is the unique identifier  of the split Container and Jade agent 
+		that are started on Android Emulator. Typically you can use the IMEI code. 
+	 
+ *	5)	Implement the <code>onConnected(JadeGayeway gateway)</code> method of the ConnectionListener interface in order to store the 
+ *		JadeGateway instance returned;
+ *	6)	Call the execute method of the JadeGateway instance whenever you shall send a command to the agent
+ *		This method will cause the callback ofc the method <code>processCommand</code> of the application-specific agent.
+ *	 	The method <code>execute</code> will return only after the method <code>GatewayAgent.releaseCommand(command)</code> has been called
+ * 		by your application-specific agent.
+ *	7)	Call the disconnect method in order to unbind to the service.
+
+ * The suggested way of using the JadeGateway class is creating proper behaviours that perform the commands 
+ * that the external system must issue to the JADE based system and pass them as parameters to the execute() 
+ * method. When the execute() method returns the internal agent of the JadeGateway as completely executed
+ * the behaviour and outputs (if any) can be retrieved from the behaviour object using ad hoc methods 
+ * as exemplified below.
+ <code>
+ DoSomeActionBehaviour b = new DoSomeActionBehaviour(....);
+ JadeGateway.execute(b);
+ // At this point b has been completely executed --> we can get results
+ result = b.getResult();
+ </code>
+ * <br>
+ * 
+ * 
+ * @author Stefano Semeria Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ * @author Marco Ughetti Telecomitalia
+ *
+ */
 
 public class JadeGateway   {
 	
 	private static HashMap map = new HashMap();
-	private  Command jadeBinder = null;
+	private  JadeBinder jadeBinder = null;
 	
 	//Instance of the Logger
 	private static final Logger myLogger = Logger.getMyLogger(JadeGateway.class.getName()); 
@@ -39,7 +95,7 @@ public class JadeGateway   {
 	static final String PROPERTIES_BUNDLE="PROPERTIES_BUNDLE";
 	
 	
-	private JadeGateway(Command cmd){
+	private JadeGateway(JadeBinder cmd){
 		jadeBinder = cmd;
 	}
 	
@@ -102,11 +158,6 @@ public class JadeGateway   {
 		}
 	}
 	
-	private void restartAfterFailure(Object command, long timeout) throws StaleProxyException, ControllerException, InterruptedException, Exception {
-		jadeBinder.shutdownJADE();
-		jadeBinder.checkJADE();
-		jadeBinder.execute(command,timeout);
-	}
 	
 	/**
 	 * This method checks if both the container, and the agent, are up and running.
@@ -164,26 +215,6 @@ public class JadeGateway   {
 		}
 	}
 	
-	private static Bundle prepareBundle(String agentClassName, String[] agentArgs, Properties jadeProfile){
-		Bundle b = new Bundle();
-		
-		b.putString(GATEWAY_CLASS_NAME, agentClassName);
-		
-		if (agentArgs != null){
-			ArrayList<String> aArgs =  new ArrayList<String>(Arrays.asList(agentArgs));
-			b.putSerializable(GATEWAY_AGENT_ARGS, aArgs);
-		}
-		//since there are some serialization problems, we create an hashmap 
-		//to store the properties that be to be put into to bundle 
-		HashMap theProps = new HashMap();
-		for(Enumeration e = jadeProfile.keys(); e.hasMoreElements();){
-			String key = (String)e.nextElement();
-			theProps.put(key, jadeProfile.get(key));
-		}
-		
-		b.putSerializable(PROPERTIES_BUNDLE, theProps);
-		return b;
-	}
 	
 
 	public final static void connect(String agentClassName, Properties jadeProfile, Context ctn, ConnectionListener list) throws Exception{
@@ -211,6 +242,34 @@ public class JadeGateway   {
 	}
 	
 	
+	//utility method
+	
+	private static Bundle prepareBundle(String agentClassName, String[] agentArgs, Properties jadeProfile){
+		Bundle b = new Bundle();
+		
+		b.putString(GATEWAY_CLASS_NAME, agentClassName);
+		
+		if (agentArgs != null){
+			ArrayList<String> aArgs =  new ArrayList<String>(Arrays.asList(agentArgs));
+			b.putSerializable(GATEWAY_AGENT_ARGS, aArgs);
+		}
+		//since there are some serialization problems, we create an hashmap 
+		//to store the properties that be to be put into to bundle 
+		HashMap theProps = new HashMap();
+		for(Enumeration e = jadeProfile.keys(); e.hasMoreElements();){
+			String key = (String)e.nextElement();
+			theProps.put(key, jadeProfile.get(key));
+		}
+		
+		b.putSerializable(PROPERTIES_BUNDLE, theProps);
+		return b;
+	}
+
+	private void restartAfterFailure(Object command, long timeout) throws StaleProxyException, ControllerException, InterruptedException, Exception {
+		jadeBinder.shutdownJADE();
+		jadeBinder.checkJADE();
+		jadeBinder.execute(command,timeout);
+	}
 	private static class MicroRuntimeServiceConnection implements ServiceConnection {
 
 		private ConnectionListener conListener;
@@ -222,7 +281,7 @@ public class JadeGateway   {
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			myLogger.log(Logger.FINE,"onServiceConnected(): called");
 			if(conListener != null) {
-				conListener.onConnected(new JadeGateway((Command)service));
+				conListener.onConnected(new JadeGateway((JadeBinder)service));
 			}
 		}
 

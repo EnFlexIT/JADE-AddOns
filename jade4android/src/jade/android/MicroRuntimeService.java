@@ -21,7 +21,18 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 
-
+/**
+ * This class provides an implementation of the Service that is responsible for
+ * the management of the Jade Microruntime life cycle
+ * When an activity binds to this Service an implementation of JadeBinder is returned.
+ * Note that this class SHALL NOT be directly used by the android application developer that
+ * SHALL use the JadeGateway instead
+ * 
+ * 
+ * @author Stefano Semeria Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ * @author Marco Ughetti Telecomitalia 
+ */
 public class MicroRuntimeService extends Service {
 
 	private String myAgentName;	
@@ -29,7 +40,7 @@ public class MicroRuntimeService extends Service {
 	private String[] gatewayAgentArgs;
 	private Properties jadeProperties;
 	
-	private final IBinder mBinder = new JadeBinder(); 
+	private final IBinder mBinder = new JadeBinderImpl(); 
 	
 	//Instance of the Logger
 	private static final Logger myLogger = Logger.getMyLogger(MicroRuntimeService.class.getName()); 
@@ -75,9 +86,9 @@ public class MicroRuntimeService extends Service {
 	}
 
 
-	private class JadeBinder extends Binder implements Command {
+	private class JadeBinderImpl extends Binder implements JadeBinder {
 		
-		public JadeBinder() {
+		public JadeBinderImpl() {
 			myLogger.log(Logger.FINE, "JadeBinder(): constructor");
 		}
 

@@ -10,6 +10,18 @@ import jade.util.Logger;
 import jade.wrapper.gateway.GatewayAgent;
 
 
+/**
+ * This class implements a jade Agent able to process Command in the shape of Jade
+ * Behaviours with the mechanism inherited by <code>jade.wrapper.gateway.GatewayAgent</code>
+ * A cyclic behaviour is provided in order to manage ACLMessage from other agents. 
+ * Moreover it receives with the same mechanism an object called updater that implements the
+ * <code>ACLMessageListener</code> interface and it calls its callback method <code>onMessageReceived</code>
+ * when a message is received
+ * 
+ * @author Stefano Semeria Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ *
+ */
 public class DummyAgent extends GatewayAgent {
 
 	private final Logger myLogger = Logger.getMyLogger(this.getClass().getName());
