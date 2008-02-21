@@ -27,7 +27,7 @@ import jade.wrapper.gateway.GatewayAgent;
  * The activation/termination of this agent (and its underlying split container) are completely managed
  * by the JadeGateway class and the android application developers do not need to care about them.
  *
- * This class provides APIs very similat to the class <code>jade.wrapper.gateway.JadeGateway</code>
+ * This class provides APIs very similar to the class <code>jade.wrapper.gateway.JadeGateway</code>
  * (refer to Jade documentation); the main difference is that this one uses the <code>jade.core.MicroRuntime</code> 
  * instead of <code>jade.core.Runtime</code> in order to start a container in a split mode that is better suitable 
  * in a mobile environment.  
