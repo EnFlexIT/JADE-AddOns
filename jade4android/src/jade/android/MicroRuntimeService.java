@@ -36,22 +36,22 @@ public class MicroRuntimeService extends Service {
 
 	
 	protected void onCreate() {
-		myLogger.log(Logger.INFO, "MicroRuntimeService.onCreate(): called");	
+		myLogger.log(Logger.INFO, "onCreate(): called");	
 	}
 
 
 	protected void onStart(int startId, Bundle arguments) {
-		myLogger.log(Logger.INFO, "MicroRuntimeService.onStart(): called");
+		myLogger.log(Logger.INFO, "onStart(): called");
 		gatewayClassName = arguments.getString(JadeGateway.GATEWAY_CLASS_NAME);
 		ArrayList<String> args = (ArrayList<String>)arguments.getSerializable(JadeGateway.GATEWAY_AGENT_ARGS);
 		if (args != null){
 			gatewayAgentArgs = new String[args.size()]; 
 			args.toArray(gatewayAgentArgs);
-			myLogger.log(Logger.INFO, "AGENT ARGS: " + gatewayAgentArgs);
+			myLogger.log(Logger.INFO, "onStart(): AGENT ARGS: " + gatewayAgentArgs);
 		}else
 			gatewayAgentArgs = null;
 
-		myLogger.log(Logger.INFO, "properties: " + arguments.getSerializable(JadeGateway.PROPERTIES_BUNDLE).getClass().getName());	
+		myLogger.log(Logger.INFO, "onStart(): properties: " + arguments.getSerializable(JadeGateway.PROPERTIES_BUNDLE).getClass().getName());	
 		
 		Serializable ser = arguments.getSerializable(JadeGateway.PROPERTIES_BUNDLE);
 		HashMap props = (HashMap)ser;
@@ -67,10 +67,10 @@ public class MicroRuntimeService extends Service {
 
 	protected void onDestroy() {
 		// stop Jade
-		myLogger.log(Logger.INFO, "MicroRuntimeService.onDestroy(): called");
+		myLogger.log(Logger.INFO, "onDestroy(): called");
 		if (MicroRuntime.isRunning()) {
 			MicroRuntime.stopJADE();
-			myLogger.log(Logger.INFO, "MicroRuntimeService.onDestroy(): JADE stopped");
+			myLogger.log(Logger.INFO, "onDestroy(): JADE stopped");
 		}
 	}
 
@@ -87,13 +87,13 @@ public class MicroRuntimeService extends Service {
 
 		
 		public void checkJADE() throws Exception {
-			myLogger.log(Logger.INFO, "JadeBinder.checkJade(): starting checkJade");
+			myLogger.log(Logger.INFO, "checkJADE(): starting checkJade");
 			if (!MicroRuntime.isRunning()){
 				Properties props = (Properties)jadeProperties.clone();
 				MicroRuntime.startJADE(props, null);
 				myAgentName = (String)props.get(JICPProtocol.MEDIATOR_ID_KEY);
 				
-				myLogger.log(Logger.INFO, "JadeBinder.checkJade() : Agent name is " + myAgentName);
+				myLogger.log(Logger.INFO, "checkJADE() : Agent name is " + myAgentName);
 				MicroRuntime.startAgent(myAgentName, gatewayClassName, gatewayAgentArgs);
 			}
 		}
@@ -111,7 +111,7 @@ public class MicroRuntimeService extends Service {
 			try {
 				MicroRuntime.killAgent(myAgentName);
 			} catch (NotFoundException e) {
-				myLogger.log(Logger.SEVERE, "JadeBinder.shutdownJADE(): agent not found.", e);
+				myLogger.log(Logger.SEVERE, "shutdownJADE(): agent not found.", e);
 			}
 			MicroRuntime.stopJADE();			
 		}

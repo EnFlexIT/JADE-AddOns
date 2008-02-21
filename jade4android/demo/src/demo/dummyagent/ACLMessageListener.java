@@ -4,6 +4,6 @@ import jade.lang.acl.ACLMessage;
 
 public interface ACLMessageListener {
 
-	public void OnMessageReceived(ACLMessage msg); 
+	public void onMessageReceived(ACLMessage msg); 
 	
 }

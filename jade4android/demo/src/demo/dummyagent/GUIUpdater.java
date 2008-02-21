@@ -20,9 +20,9 @@ class GUIUpdater implements ACLMessageListener {
 		
 	}
 	
-	public void OnMessageReceived(ACLMessage msg) {
+	public void onMessageReceived(ACLMessage msg) {
 		// TODO Auto-generated method stub
-		myLogger.log(Logger.INFO, "GuiUpdater has received message");
+		myLogger.log(Logger.INFO, "onMessageReceived(): GuiUpdater has received message");
 		Updater up = new Updater(act,msg);
 		handl.post(up);
 	}

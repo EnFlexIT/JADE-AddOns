@@ -54,10 +54,10 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 	
 	
 	//Subactivities result code
-	private int RESCODE_MSG_DETAILS =1;
+	private final int RESCODE_MSG_DETAILS =1;
 	
 	//Duration of error notification
-	public static final int ERROR_MSG_DURATION=1000;
+	private final int ERROR_MSG_DURATION=1000;
 	
 	//keys to index the tabs
 	private final String SEND_MSG_TAB_TAG="SendMsg";
@@ -73,7 +73,7 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 	private final int STATUSBAR_NOTIFICATION= R.layout.send_message;
 	
 	//Codes for menu items
-	public static final int JADE_EXIT_ID = Menu.FIRST;
+	private final int JADE_EXIT_ID = Menu.FIRST;
 
 	private EditText contentText, senderText;
 	private Spinner spn;
@@ -92,31 +92,32 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 	private IconifiedTextListAdapter listAdapter;
 	private AIDDialog addrDialog;
 	
-	@Override
+
 	protected void onCreate(Bundle icicle) {
 	
 		super.onCreate(icicle);
-		
 		myLogger.log(Logger.INFO, "SendMessageActivity.onCreate() : starting onCreate method");
+		
 		//Set the xml layout from resource
 		setContentView(R.layout.send_message);
 		
+		//PREPARE TAB HOST
 		tabHost = (TabHost) findViewById(R.id.tabs);
-	
 		tabHost.setup();
-		
+		//Send Message Tab
 		TabSpec sendMsgSpecs = tabHost.newTabSpec(SEND_MSG_TAB_TAG);
 		sendMsgSpecs.setIndicator(getText(R.string.send_msg_tab_indicator),getResources().getDrawable(R.drawable.msg));
 		sendMsgSpecs.setContent(R.id.content1);
 		tabHost.addTab(sendMsgSpecs);
-		
+		//MessageList Tab
 		TabSpec recvMsgSpecs = tabHost.newTabSpec(RECV_MSG_TAB_TAG);
 		recvMsgSpecs.setIndicator(getText(R.string.recv_msg_tab_indicator),getResources().getDrawable(R.drawable.contact_32));
 		recvMsgSpecs.setContent(R.id.content2);
 		tabHost.addTab(recvMsgSpecs);
-		
+		//Select default tab
 		tabHost.setCurrentTab(0);
 		
+		//PREPARE THE CONTEXT MENU IN RECEIVER LIST
 		recvListView = (ListView) findViewById(R.id.receiverList);
 		recvListView.setOnPopulateContextMenuListener(new View.OnPopulateContextMenuListener(){
 			public void  onPopulateContextMenu(ContextMenu menu, View v, Object menuInfo) {
@@ -132,22 +133,25 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 			
 			}
 		});
-		
+		//Draw the receiver list. 
 		receivers = new ArrayList<AID>();
-		
-		List<String> emptyList = receiverListToString();
 		updateReceiverList();
 		
 	
-		//Create the list of messages
+		//PREPARE THE NOTIFICTION MANAGER for Connection notification
 		nManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		
+		//PREPARE THE MESSAGE LIST
 		messageList = new LinkedList<MessageInfo>();
-		//Retrieve all components
+		
+		
+		//SAVE GUI COMPONENTS TO BE USED
 		senderText = (EditText) findViewById(R.id.sender);
 		//receiverText = (EditText) findViewById(R.id.receiver);
 		contentText = (EditText) findViewById(R.id.content);
 		spn = (Spinner) findViewById(R.id.commAct);
 		lv = (ListView) findViewById(R.id.messageList);
+		
 		
 		//SPINNER: fill with data
 		String[] performatives= ACLMessage.getAllPerformativeNames();
@@ -155,18 +159,19 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 		comActList.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spn.setAdapter(comActList);
 		
-		//LISTVIEW: handle click event
+		//MESSAGE LISTVIEW: handle click event
 		lv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
 			public void onItemClick(AdapterView parent, View v, int position, long id) {
 				forwarding(MessageDetailsActivity.class, position);
 			}
 		});
 		
-		//SEND BUTTON: retrieve and handle click event (Initially disabled)
+		
+		//SEND BUTTON: retrieve and handle click event 
 		sendButton = (Button) findViewById(R.id.sendBtn);
 		sendButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-            	myLogger.log(Logger.INFO,"content: "+contentText.getText().toString());
+            	myLogger.log(Logger.INFO,"onClick(): content: "+contentText.getText().toString());
             	if (sendButton.isEnabled())
             		sendMessage(contentText.getText().toString(), (String)spn.getSelectedItem() );
        
@@ -175,7 +180,6 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 		
 		
 		
-
 		//CLEAR BUTTON: retrieve and handle click event (Initially disabled)
 		clearButton = (Button) findViewById(R.id.clearbtn);		
 		clearButton.setOnClickListener(new View.OnClickListener() {
@@ -188,19 +192,21 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
             }
         });
 		
-        addrDialog = new AIDDialog(this);
-        
+        //CREATE THE AID DIALOG
+		addrDialog = new AIDDialog(this);
+        //CREATE MESSAGE LIST ADAPTER
         listAdapter = new IconifiedTextListAdapter(this);
-        
- 
-        
+      
+        //CREATE THE UI UPDATER 
 		updater = new GUIUpdater(this);
 		
+		//CREATE AND THE JADE PROPERTIES CLASS
 		Properties props = new Properties();
 		props.setProperty(Profile.MAIN_HOST, getResources().getString(R.string.host));
 		props.setProperty(Profile.MAIN_PORT, getResources().getString(R.string.port));
 		props.setProperty(JICPProtocol.MSISDN_KEY, getResources().getString(R.string.msisdn));
 	
+		
 		try {
 			JadeGateway.connect(DummyAgent.class.getName(), null, props, this, this);
 		} catch (Exception e) {
@@ -233,9 +239,8 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
         startSubActivity(intent,RESCODE_MSG_DETAILS);
 	}
 	
+	
 	private void sendMessage(String content, String comAct) {				
-
-		Log.v("jade.android.demo","SendMessageActivity.onStart() : calling onStart method");
 		
 		ACLMessage msg = new ACLMessage(ACLMessage.getInteger(comAct));		
 		msg.setContent(content);
@@ -266,6 +271,7 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 		}
 	}
 
+	
 	public void onConnected(JadeGateway gw) {
 
 		gateway = gw;		
@@ -278,7 +284,6 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 	        id.setLocalName(localName.toString());
 	        senderText.setText(id.getName());
 
-			CharSequence txt = getResources().getText(R.string.statusbar_msg_connected);
 			Notification notification = new Notification(this,R.drawable.dummyagent,getResources().getText(R.string.statusbar_msg_connected),1000,"Ciao","Anna",null,R.drawable.dummyagent,"DummyAgent",null);
 			nManager.notify(STATUSBAR_NOTIFICATION, notification);
 		}catch(ConnectException ce){
@@ -291,7 +296,6 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 	}
 
 	public void onDisconnected() {
-		// TODO Auto-generated method stub
 		Log.v("jade.android.demo","OnDisconnected has been called!!!!");
 		
 	}	
@@ -336,7 +340,6 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 		 }
 	}
 
-	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		addrDialog.dismiss();
@@ -355,41 +358,34 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 				gateway.disconnect(this);
 	}
 	
-	@Override
 	protected void onFreeze(Bundle out) {
 		super.onFreeze(out);
-		Log.v("jade.android.demo","SendMessageActivity.onFreeze() : calling onFreeze method");
+		myLogger.log(Logger.INFO,"onFreeze() : called");
 	}
 	
-	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.v("jade.android.demo","SendMessageActivity.onResume() : calling onResume method");
+		myLogger.log(Logger.INFO,"onResume() : called");
 	}
 	
-	@Override
 	protected void onPause() {
 		super.onPause();
-		Log.v("jade.android.demo","SendMessageActivity.onPause() : calling onPause method");
+		myLogger.log(Logger.INFO,"onPause() : called");
 	}
 	
-	@Override
 	protected void onStop() {
 		super.onStop();
-		Log.v("jade.android.demo","SendMessageActivity.onStop() : calling onStop method");
+		myLogger.log(Logger.INFO,"onStop() : called");
 	}
 	
-	@Override
 	protected void onRestart() {
 		super.onRestart();
-		Log.v("jade.android.demo","SendMessageActivity.onRestart() : calling onRestart method");
+		myLogger.log(Logger.INFO,"onRestart() : called");
 	}
-	
-	@Override
+
 	protected void onStart() {
 		super.onStart();
-		
-		
+		myLogger.log(Logger.INFO,"onStart() : called");
 	}
 			
 	
@@ -450,7 +446,7 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 		recvListView.invalidate();
 	}
 	
-	@Override
+
 	public boolean onContextItemSelected(Item item) {
 	
 		switch(item.getId()) {

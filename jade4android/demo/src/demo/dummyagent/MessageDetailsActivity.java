@@ -73,16 +73,6 @@ public class MessageDetailsActivity extends Activity {
 	
 	}	
 	
-	private List<String> aidToString(Iterator receivers){
-		
-		List<String> recList = new ArrayList<String>();
-		
-		while (receivers.hasNext()){
-			recList.add(((AID)receivers.next()).getName());
-		}
-		
-		return recList;
-	}
 	
 	protected void onDestroy(){
 		super.onDestroy();

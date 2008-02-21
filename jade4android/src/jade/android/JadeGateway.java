@@ -34,9 +34,9 @@ public class JadeGateway   {
 	private static Properties jadeProps;
 
 	//Constants for keys inside the Bundle
-	public static final String GATEWAY_CLASS_NAME="GATEWAY_CLASS_NAME";
-	public static final String GATEWAY_AGENT_ARGS="GATEWAY_AGENT_ARGS";
-	public static final String PROPERTIES_BUNDLE="PROPERTIES_BUNDLE";
+	static final String GATEWAY_CLASS_NAME="GATEWAY_CLASS_NAME";
+	static final String GATEWAY_AGENT_ARGS="GATEWAY_AGENT_ARGS";
+	static final String PROPERTIES_BUNDLE="PROPERTIES_BUNDLE";
 	
 	
 	private JadeGateway(Command cmd){
@@ -131,7 +131,7 @@ public class JadeGateway   {
 	 * If jadeProfile is null, then a JADE container attaching to a main on the local host is launched
 	 **/
 	public final static void connect(String agentClassName, String[] agentArgs, Properties jadeProfile, Context ctn, ConnectionListener list) throws Exception{
-		myLogger.log(Logger.FINE,"JadeGateway.connect(): called");
+		myLogger.log(Logger.FINE,"connect(): called");
 	
 		String agentType = agentClassName;
 		if (agentType == null) {
@@ -143,7 +143,7 @@ public class JadeGateway   {
 			// Since we will create a non-main container --> force the "main" property to be false
 			jadeProps.setProperty(Profile.MAIN, "false");
 		}else{
-			myLogger.log(Logger.SEVERE,"JadeGateway.connect(): jade properties cannot be null.");
+			myLogger.log(Logger.SEVERE,"connect(): jade properties cannot be null.");
 			throw new Exception("Jade properties cannot be null.");
 		}
 		
@@ -204,7 +204,7 @@ public class JadeGateway   {
 	public final void disconnect(Context ctn) {
 		//FIXME: Il metodo non e' statico poiche' la unbind non invalida il binder
 		//che quindi viene impostato a null per impedire l'esecuzione di comandi
-		myLogger.log(Logger.FINE, "JadeGateway.disconnect(): disconnecting from service");
+		myLogger.log(Logger.FINE, "disconnect(): disconnecting from service");
 		ctn.unbindService((ServiceConnection)map.get(ctn));
 		jadeBinder = null;
 		map.remove(ctn);
@@ -220,7 +220,7 @@ public class JadeGateway   {
 		}
 
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			myLogger.log(Logger.FINE,"MicroRuntimeServiceConnection.onServiceConnected(): called");
+			myLogger.log(Logger.FINE,"onServiceConnected(): called");
 			if(conListener != null) {
 				conListener.onConnected(new JadeGateway((Command)service));
 			}
@@ -229,7 +229,7 @@ public class JadeGateway   {
 		//is called only when the connection to the service fails. 
 		//i.e. crash of the service process.
 		public void onServiceDisconnected(ComponentName className){
-			myLogger.log(Logger.FINE,"MicroRuntimeServiceConnection.onServiceDisconnected(): called");
+			myLogger.log(Logger.FINE,"onServiceDisconnected(): called");
 			if(conListener != null) {
 				conListener.onDisconnected();
 			}

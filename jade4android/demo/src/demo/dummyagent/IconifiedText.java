@@ -6,13 +6,18 @@ public class IconifiedText implements Comparable<IconifiedText>{
      private String mText = ""; 
      private Drawable mIcon; 
      private int mTextColor;
+	private int mTextSize;
      
-     public IconifiedText(String text, Drawable bullet) { 
+     public IconifiedText(String text, Drawable bullet, int size) { 
           mIcon = bullet; 
           mText = text; 
+          mTextSize = size;
      } 
       
-            
+     public IconifiedText(String text, Drawable bullet){
+    	 this(text,bullet,15);
+     }
+     
      public String getText() { 
           return mText; 
      } 
@@ -41,7 +46,17 @@ public class IconifiedText implements Comparable<IconifiedText>{
 	public int getTextColor() {
 		return mTextColor;
 	}
-
+	
+	
+	public void setTextSize(int size) {
+		mTextSize = size;
+	}
+	
+	public int getTextSize(int size) {
+		return mTextSize;
+	}
+	
+	
 	public boolean hasIcon(){
 		return (mIcon != null);
 	}

@@ -1,6 +1,6 @@
 package demo.dummyagent;
 
-import android.util.Log;
+
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
@@ -31,7 +31,7 @@ public class DummyAgent extends GatewayAgent {
 			});
 			addBehaviour(sb);
 		} else if (command instanceof ACLMessageListener) {
-			myLogger.log(Logger.INFO, "New GUI updater received and registered!");
+			myLogger.log(Logger.INFO, "processCommand(): New GUI updater received and registered!");
 			
 			ACLMessageListener listener =(ACLMessageListener) command;
 			
@@ -40,7 +40,7 @@ public class DummyAgent extends GatewayAgent {
 		}
 		
 		else {
-			myLogger.log(Logger.WARNING, "Unknown command "+command);
+			myLogger.log(Logger.WARNING, "processCommand().Unknown command "+command);
 		}
 	}
 
@@ -49,12 +49,12 @@ public class DummyAgent extends GatewayAgent {
 
 		public void action() {
 			ACLMessage msg = myAgent.receive();
-			Log.v("jade.android.demo", "Message received: " + this.hashCode());
+			myLogger.log(Logger.INFO, "MessageReceiverBehaviour().Message received: " + this.hashCode());
 			
 			//if a message is available and a listener is available
 			if (msg != null && updater != null){
 				//callback the interface update function
-				updater.OnMessageReceived(msg);				
+				updater.onMessageReceived(msg);				
 			} else {
 				block();
 			}
