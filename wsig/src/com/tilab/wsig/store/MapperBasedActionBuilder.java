@@ -36,15 +36,17 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 
 	private Method method;
 	private Object mapperObj;
+	private String ontoActionName;
 
 	/**
 	 * MapperBasedActionBuilder
 	 * @param mapperObj
 	 * @param method
 	 */
-	public MapperBasedActionBuilder(Object mapperObj, Method method) {
+	public MapperBasedActionBuilder(Object mapperObj, Method method, String ontoActionName) {
 		this.method = method;
 		this.mapperObj = mapperObj;
+		this.ontoActionName = ontoActionName;
 	}
 
 	/**
@@ -74,5 +76,9 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 		}
 		
 		return actionObj;
+	}
+	
+	public String getOntoActionName() {
+		return ontoActionName;
 	}
 }

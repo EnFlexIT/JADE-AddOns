@@ -35,14 +35,16 @@ public class ReflectionBasedActionBuilder implements ActionBuilder {
 	private static Logger log = Logger.getLogger(ReflectionBasedActionBuilder.class.getName());
 	
 	private Class actionClass;
+	private String ontoActionName;
 	
 
 	/**
 	 * ReflectionBasedActionBuilder
 	 * @param actionClass
 	 */
-	public ReflectionBasedActionBuilder(Class actionClass) {
+	public ReflectionBasedActionBuilder(Class actionClass, String ontoActionName) {
 		this.actionClass = actionClass;
+		this.ontoActionName = ontoActionName;
 	}
 
 	/**
@@ -85,4 +87,8 @@ public class ReflectionBasedActionBuilder implements ActionBuilder {
 		
 		return actionObj;
 	}
+	
+	public String getOntoActionName() {
+		return ontoActionName;
+	}	
 }

@@ -30,4 +30,6 @@ import jade.content.AgentAction;
 public interface ActionBuilder {
 	
 	public AgentAction getAgentAction(Vector<ParameterInfo> params) throws Exception;
+
+	public String getOntoActionName();
 }

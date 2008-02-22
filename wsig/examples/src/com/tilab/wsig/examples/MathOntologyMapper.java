@@ -58,10 +58,13 @@ public class MathOntologyMapper {
 		return null;
 	}
 
-	// The web service operation corresponding to the Multiplication ontology action will be called Mul
-	@OperationName(name="Mul")
-	public Multiplication toMultiplication(List numbers){
-		return new Multiplication(numbers);
+	// The web service operation corresponding to the sum ontology action will be called add
+	@OperationName(name="add")
+	public Sum toSum(float firstElement, float secondElement){
+		Sum sum = new Sum();
+		sum.setFirstElement(firstElement);
+		sum.setSecondElement(secondElement);
+		return sum;
 	}
 	
 }

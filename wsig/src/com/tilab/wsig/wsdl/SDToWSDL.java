@@ -152,6 +152,12 @@ public class SDToWSDL {
 					log.debug("Elaborate action: "+ actionName);		
 					int methodNumber = 1;
 
+					// Check if action is suppressed
+					if (isActionSuppressed(mapperClass, actionName)) {
+						log.debug("Action "+actionName+" suppressed");
+						continue;
+					}
+					
 					// Get action methods of mapper 
 					Vector<Method> methodsForAction = getMethodsForAction(mapperClass, actionName);
 					if (methodsForAction.size() > 0) {
@@ -171,22 +177,32 @@ public class SDToWSDL {
 							operationName = operationName + WSDLConstants.separator + j;
 						}
 
-						// Operation
-						Operation operation = WSDLGeneratorUtils.createOperation(operationName);
-						portType.addOperation(operation);
-
 						// Create appropriate ActionBuilder
 						ActionBuilder actionBuilder = null;
 						if (methodsForAction.size() > 0) {
 							// Mapper
 							Method method = methodsForAction.get(j);
-							actionBuilder = new MapperBasedActionBuilder(mapperObject, method);
+							
+							// Check is the operation has a specific name
+							OperationName annotationOperationName = method.getAnnotation(OperationName.class);
+							if (annotationOperationName != null) {
+
+								// Set specific operation name
+								operationName = annotationOperationName.name();
+							}
+							
+							actionBuilder = new MapperBasedActionBuilder(mapperObject, method, actionName);
 						} else {
 							// Ontology/reflection
 							Class opClass = onto.getClassForElement(actionName);
-							actionBuilder = new ReflectionBasedActionBuilder(opClass);
+							actionBuilder = new ReflectionBasedActionBuilder(opClass, actionName);
 						}
 
+						// Operation
+						Operation operation = WSDLGeneratorUtils.createOperation(operationName);
+						portType.addOperation(operation);
+
+						// Add ActionBuilder
 						wsigService.addActionBuilder(operationName, actionBuilder);
 						
 						// Output Params		
@@ -287,17 +303,10 @@ public class SDToWSDL {
 			Method[] methods = mapperClass.getDeclaredMethods();
 		
 			Method method = null;
-			String defaultMethodNameToCheck = WSDLConstants.mapperMethodPrefix + actionName;
+			String methodNameToCheck = WSDLConstants.mapperMethodPrefix + actionName;
 			for (int j = 0; j < methods.length; j++) {
 				method = methods[j];
-				
-				// Add method if:
-				// - exist annotation OperationName with name equals to actionName
-				// - method name is equals to defaultMethodNameToCheck and the method in not annotated with SuppressOperation 
-				OperationName annotationOperationName = method.getAnnotation(OperationName.class);
-				SuppressOperation annotationSuppressOperation = method.getAnnotation(SuppressOperation.class);
-				if ((annotationOperationName != null && actionName.equalsIgnoreCase(annotationOperationName.name())) ||
-					(method.getName().equalsIgnoreCase(defaultMethodNameToCheck) && annotationSuppressOperation == null)) {
+				if (method.getName().equalsIgnoreCase(methodNameToCheck)) {
 					methodsAction.add(method);
 				} 
 			}
@@ -305,6 +314,33 @@ public class SDToWSDL {
 		return methodsAction;
 	}
 
+	/**
+	 * isActionSuppressed
+	 * @param mapperClass
+	 * @param actionName
+	 * @return
+	 */
+	private static boolean isActionSuppressed(Class mapperClass, String actionName) {
+
+		boolean isSuppressed = false;
+		if (mapperClass != null) {
+			Method[] methods = mapperClass.getDeclaredMethods();
+		
+			Method method = null;
+			String methodNameToCheck = WSDLConstants.mapperMethodPrefix + actionName;
+			for (int j = 0; j < methods.length; j++) {
+				method = methods[j];
+				
+				SuppressOperation annotationSuppressOperation = method.getAnnotation(SuppressOperation.class);
+				if ((method.getName().equalsIgnoreCase(methodNameToCheck) && annotationSuppressOperation != null)) {
+					isSuppressed = true;
+					break;
+				} 
+			}
+		}
+		return isSuppressed;
+	}
+	
 	/**
 	 * convertObjectSchemaIntoXsdType
 	 * @param onto
@@ -317,6 +353,7 @@ public class SDToWSDL {
 	 * @throws Exception
 	 */
 	private static String convertObjectSchemaIntoXsdType(String tns, Ontology onto, ConceptSchema containerSchema, Class paramType, XSDSchema xsdSchema, String slotName, XSDComponent parentComponent) throws Exception {
+		
 		String slotType = null;
 		if (paramType.isPrimitive() || WSDLGeneratorUtils.java2xsd.get(paramType) != null) {
 			//primitive dataType XSD
@@ -337,8 +374,11 @@ public class SDToWSDL {
 				XSDModelGroup sequence = WSDLGeneratorUtils.addSequenceToComplexType(complexType);
 				convertObjectSchemaIntoXsdType(tns, onto, containerSchema, aggrType, xsdSchema, slotName, sequence);
 			}
-		} else if (paramType.isAssignableFrom(Collection.class)) {
+		} else if (	Collection.class.isAssignableFrom(paramType) ||
+					jade.util.leap.Collection.class.isAssignableFrom(paramType)) {
 			//TODO Collection Handling
+			// Manage collection element type with a specif annotation associated to mapper method
+			// es. @CollectionElementType (parameter=xxx, type=java.util.String)
 			throw new Exception("Collection NOT supported");
 
 		} else {
@@ -352,7 +392,7 @@ public class SDToWSDL {
 				}
 			}
 			if (slot == null) {
-				throw new Exception("Concept doesn't exist in "+ onto.getName());
+				throw new Exception("Concept "+paramType.getSimpleName()+" doesn't exist in "+ onto.getName());
 			}
 			ObjectSchema slotSchema = containerSchema.getSchema(slot);
 			slotType = convertObjectSchemaIntoXsdType(tns, false, containerSchema, slotSchema, xsdSchema, slot, parentComponent, -1, -1);

@@ -24,6 +24,7 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.soap;
 
 import jade.content.onto.Ontology;
+import jade.content.onto.OntologyException;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.AggregateSchema;
 import jade.content.schema.ConceptSchema;
@@ -45,6 +46,7 @@ import javax.xml.soap.SOAPPart;
 
 import org.apache.log4j.Logger;
 
+import com.tilab.wsig.store.ActionBuilder;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.wsdl.WSDLConstants;
 import com.tilab.wsig.wsdl.WSDLGeneratorUtils;
@@ -93,15 +95,22 @@ public class JadeToSoap {
 
         String responseElementName = operationName + "Response";
         SOAPElement responseElement = addSoapElement(body, responseElementName, null, null);
-        
-        // Get operation schema
-        String operationNameOnto = operationName; 
-        if (wsigService.getServicePrefix() != null) {
-        	int prefixLength = wsigService.getServicePrefix().length();
-        	operationNameOnto = operationNameOnto.substring(prefixLength);
+
+        // Get action builder
+        log.debug("Operation name: "+operationName);
+        ActionBuilder actionBuilder = wsigService.getActionBuilder(operationName);
+        if (actionBuilder == null) {
+			throw new Exception("Action builder not found for operation "+operationName+" in WSIG");
         }
-        log.debug("Ontology operation schema name: "+operationNameOnto);
-        AgentActionSchema actionSchema = getActionSchema(operationNameOnto, wsigService);
+        
+        // Get action schema
+        AgentActionSchema actionSchema;
+        try {
+	        String ontoActionName = actionBuilder.getOntoActionName();
+	        actionSchema = (AgentActionSchema)onto.getSchema(ontoActionName);
+        } catch (OntologyException oe) {
+        	throw new Exception("Operation schema not found for operation "+operationName+" in "+onto.getName()+" ontology", oe);
+        }
 
 		// Get result schema
         ObjectSchema resultSchema = actionSchema.getResultSchema();
@@ -276,37 +285,6 @@ public class JadeToSoap {
 		}
 
 		return fieldValue;
-	}
-	
-	/**
-	 * getOperationResultSchema
-	 * @param operation
-	 * @return
-	 * @throws Exception
-	 */
-	private AgentActionSchema getActionSchema(String operationName, WSIGService wsigService) throws Exception {
-
-		AgentActionSchema operationSchema = null;
-		try {
-			// Remove prefix
-			String prefix = wsigService.getServicePrefix();
-			if (prefix != null && prefix.length() > 0 && operationName.startsWith(prefix)) {
-				operationName = operationName.substring(prefix.length()+1);
-			}
-			// Remove suffix
-			int pos = operationName.indexOf(WSDLConstants.separator);
-			if (pos > 0) {
-				operationName = operationName.substring(0, pos);
-			}
-
-			// Get action schema
-			operationSchema = (AgentActionSchema)onto.getSchema(operationName);
-			
-		} catch(Exception e) {
-			log.error("Operation schema not found for operation "+operationName+" in "+onto.getName()+" ontology" , e);
-			throw new Exception("Operation schema not found for operation "+operationName+" in "+onto.getName()+" ontology", e);
-		}
-		return operationSchema;
 	}
 	
 }
