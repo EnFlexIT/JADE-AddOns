@@ -52,6 +52,8 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			add(new AgentActionSchema(MULTIPLICATION), Multiplication.class);
 			add(new AgentActionSchema(SUMCOMPLEX), SumComplex.class);
 			add(new AgentActionSchema(GETCOMPONENTS), GetComponents.class);
+			add(new AgentActionSchema(GETRANDOM), GetRandom.class);
+			add(new AgentActionSchema(PRINTCOMPLEX), PrintComplex.class);
 			add(new ConceptSchema(COMPLEX), Complex.class);
 
 			ConceptSchema cs = (ConceptSchema) getSchema(COMPLEX);
@@ -90,7 +92,13 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			as = (AgentActionSchema) getSchema(GETCOMPONENTS);
 			as.add(COMPLEX, (ConceptSchema) getSchema(COMPLEX));
 			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT), 2, ObjectSchema.UNLIMITED);
+
+			as = (AgentActionSchema) getSchema(GETRANDOM);
+			as.setResult((ConceptSchema) getSchema(COMPLEX));
 			
+			as = (AgentActionSchema) getSchema(PRINTCOMPLEX);
+			as.add(COMPLEX, (ConceptSchema) getSchema(COMPLEX));
+
 		} catch (OntologyException oe) {
 			oe.printStackTrace();
 		}

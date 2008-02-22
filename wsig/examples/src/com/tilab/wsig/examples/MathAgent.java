@@ -146,6 +146,10 @@ public class MathAgent extends Agent {
 							serveSumComplexAction((SumComplex) action, actExpr, msg);
 						} else if (action instanceof GetComponents) {
 							serveGetComponentsAction((GetComponents) action, actExpr, msg);
+						} else if (action instanceof GetRandom) {
+							serveGetRandomAction((GetRandom) action, actExpr, msg);
+						} else if (action instanceof PrintComplex) {
+							servePrintComplexAction((PrintComplex) action, actExpr, msg);
 						}
 					} catch (Exception e) {
 						log.error("Exception: " + e.getMessage(), e);
@@ -206,7 +210,21 @@ public class MathAgent extends Agent {
 		
 		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
-	
+
+	private void serveGetRandomAction(GetRandom rnd, Action actExpr, ACLMessage msg) {
+		log.debug("MathAgent.serveGetRandomAction");
+		Complex result = new Complex();
+		result.setReal((float)Math.random() * 10);
+		result.setImmaginary((float)Math.random() * 10);
+		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
+	}
+
+	private void servePrintComplexAction(PrintComplex printComplex, Action actExpr, ACLMessage msg) {
+		log.debug("MathAgent.servePrintComplexAction");
+		log.info("Complex number is "+printComplex.getComplex());
+		sendNotification(actExpr, msg, ACLMessage.INFORM, null);
+	}
+
 	private void sendNotification(Action actExpr, ACLMessage request, int performative, Object result) {
 		// Send back a proper reply to the requester
 		ACLMessage reply = request.createReply();

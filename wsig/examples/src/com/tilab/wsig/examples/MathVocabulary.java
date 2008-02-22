@@ -46,4 +46,6 @@ public interface MathVocabulary {
 	public static final String ABS = "abs";
 	public static final String SUMCOMPLEX = "sumComplex";
 	public static final String GETCOMPONENTS = "getComponents";
+	public static final String GETRANDOM = "getRandom";
+	public static final String PRINTCOMPLEX = "printComplex";
 }

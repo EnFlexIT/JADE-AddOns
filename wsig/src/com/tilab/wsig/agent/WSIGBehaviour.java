@@ -24,9 +24,11 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.agent;
 
 import jade.content.AgentAction;
+import jade.content.ContentElement;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
 import jade.content.onto.basic.Action;
+import jade.content.onto.basic.Done;
 import jade.content.onto.basic.Result;
 import jade.core.AID;
 import jade.domain.FIPANames;
@@ -116,7 +118,14 @@ public class WSIGBehaviour extends AchieveREInitiator {
 		
 		status = EXECUTED_STATUS;
 		try {
-			result = ((Result)myAgent.getContentManager().extractContent(message)).getValue();
+			ContentElement content = myAgent.getContentManager().extractContent(message);
+			if (content instanceof Result) {
+				result = ((Result)content).getValue();
+			} else if (content instanceof Done) {
+				result = null;
+			} else {
+				throw new Exception("Content element of type "+content.getClass()+" not supported");
+			}
 		} catch (Exception e) {
 			status = FAILURE_STATUS;
 			exception = e;

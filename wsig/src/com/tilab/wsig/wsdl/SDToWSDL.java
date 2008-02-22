@@ -223,10 +223,11 @@ public class SDToWSDL {
 
 						actionSchema = (AgentActionSchema) onto.getSchema(actionName);
 						resultSchema = actionSchema.getResultSchema();
-						
-						String resultType = convertObjectSchemaIntoXsdType(tns, true, actionSchema, resultSchema, xsdSchema, resultSchema.getTypeName(), null, -1, -1);
-						Part partR = WSDLGeneratorUtils.createPart(WSDLGeneratorUtils.getResultName(operationName), resultType, tns);
-						messageOut.addPart(partR);
+						if (resultSchema != null) {
+							String resultType = convertObjectSchemaIntoXsdType(tns, true, actionSchema, resultSchema, xsdSchema, resultSchema.getTypeName(), null, -1, -1);
+							Part partR = WSDLGeneratorUtils.createPart(WSDLGeneratorUtils.getResultName(operationName), resultType, tns);
+							messageOut.addPart(partR);
+						}
 
 						// Input Parameters
 						Message messageIn = WSDLGeneratorUtils.createMessageIn(tns, inputName);

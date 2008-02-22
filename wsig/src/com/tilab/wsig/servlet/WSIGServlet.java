@@ -225,8 +225,11 @@ public class WSIGServlet extends HttpServlet {
 		Object operationResult = null;
 		try {
 			operationResult = executeOperation(agentAction, wsigService);
-			log.info("operationResult: "+operationResult+", type "+operationResult.getClass().getName());
-			
+			if (operationResult != null) {
+				log.info("operationResult: "+operationResult+", type "+operationResult.getClass().getName());
+			} else {
+				log.info("operation without result");
+			}
 		} catch (Exception e) {
 			log.error("Error executing operation "+serviceName+"."+operationName);
 			int errorCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;

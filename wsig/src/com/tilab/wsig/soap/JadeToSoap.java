@@ -114,10 +114,14 @@ public class JadeToSoap {
 
 		// Get result schema
         ObjectSchema resultSchema = actionSchema.getResultSchema();
-        log.debug("Ontology result type: "+resultSchema.getTypeName());
-        
-        // Create soap message
-        convertObjectToSoapElement(actionSchema, resultSchema, resultObject, WSDLGeneratorUtils.getResultName(operationName), responseElement);
+        if (resultSchema != null) {
+        	log.debug("Ontology result type: "+resultSchema.getTypeName());
+
+        	// Create soap message
+            convertObjectToSoapElement(actionSchema, resultSchema, resultObject, WSDLGeneratorUtils.getResultName(operationName), responseElement);
+        } else {
+        	log.debug("Ontology with no result type");
+        }
 
         // Save all modifies of soap message
         soapResponse.saveChanges();
