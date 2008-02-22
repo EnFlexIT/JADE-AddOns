@@ -7,6 +7,14 @@ import android.os.Handler;
 import android.widget.ListView;
 import android.widget.Toast;
 
+/**
+ * This class implements the ACLMessageListener interface
+ * and it is called by the agent to update the GUI when a message is received
+ * 
+ * @author Stefano Semeria  Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ */
+
 class GUIUpdater implements ACLMessageListener {
 
 	private Handler handl;

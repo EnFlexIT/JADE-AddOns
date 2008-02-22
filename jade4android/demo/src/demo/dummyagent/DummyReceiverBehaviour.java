@@ -5,6 +5,16 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.util.Logger;
 
+/**
+ * This class implements a message receiver behaviour that is executed by the
+ * agent. It extends a <code>OneShotBehaviour</code> because <code>GatewayAgent.execute()</code>
+ * is blocking. The inner class <code>MessageReceiverBehaviour</code> extends a <code>CyclicBehaviour</code>
+ * to be able to wait for incoming message.
+ * @author Stefano Semeria  Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ */
+
+
 public class DummyReceiverBehaviour extends OneShotBehaviour {
 
 	private final Logger myLogger = Logger.getMyLogger(this.getClass().getName());

@@ -10,6 +10,15 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
+/**
+ * This class extends <code>Dialog</code>
+ * and shows the AID dialog the user
+ * 
+ * @author Stefano Semeria  Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ */
+
+
 public class AIDDialog extends Dialog {
 
 	private EditText agentNameEdt;

@@ -17,6 +17,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 
+/**
+ * This Activity is shown when the user selects a message into the message list in <code>DummyAgentActivity</code>
+ * It provides controls to show the message details (Sender, Receiver, Communicative Act and Content) 
+ * and provides a Reply button to perform automatic reply.
+ * It is launched as a subactivity from <code>DummyAgentActivity</code> and returns the Sender field to its parent.
+ * 
+ * @author Cristina Cucè  University of Reggio Calabria 
+ * @author Stefano Semeria  Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ * 
+ */
+
+
+
 public class MessageDetailsActivity extends Activity {
 
 	private EditText sender;

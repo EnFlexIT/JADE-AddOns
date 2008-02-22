@@ -1,6 +1,14 @@
 package demo.dummyagent;
 import android.graphics.drawable.Drawable; 
 
+/**
+ * This class stores an Icon (as a Drawable) and the Text to be shown in a 
+ * ListView entry and it is called by the agent to update the GUI when a message is received
+ * 
+ * @author Stefano Semeria  Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ */
+
 public class IconifiedText implements Comparable<IconifiedText>{ 
     
      private String mText = ""; 

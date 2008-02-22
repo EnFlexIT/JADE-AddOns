@@ -45,7 +45,10 @@ import android.util.Log;
  *
  * Following the Android logging style, the Logger class name is used as TAG and  the name 
  * of the Logger is added to the printed message.
+ * 
+ * @author Anna Porcino - University of Reggio Calabria
  * @author Tiziana Trucco - Telecom Italia
+ * 
  */
 
 public class Logger implements Serializable{
@@ -145,8 +148,8 @@ public class Logger implements Serializable{
 	
 	/**
 	 * Prints out a log message onto the emulator log file.
-	 * @param level
-	 * @param msg
+	 * @param level The desired log level
+	 * @param msg the message to log
 	 */
 	
 	public void log(int level, String msg) {

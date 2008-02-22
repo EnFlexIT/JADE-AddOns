@@ -7,6 +7,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout; 
 import android.widget.TextView; 
 
+/**
+ * This class rapresents a single item in a iconified ListView
+ * 
+ * @author Stefano Semeria  Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ */
+
+
 public class IconifiedTextView extends LinearLayout { 
       
      private TextView mText; 

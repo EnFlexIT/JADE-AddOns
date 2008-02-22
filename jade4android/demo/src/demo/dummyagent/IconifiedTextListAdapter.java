@@ -7,6 +7,14 @@ import android.view.View;
 import android.view.ViewGroup; 
 import android.widget.BaseAdapter; 
 
+/**
+ * This class provides an Adapter used to store IconifiedText objects and to
+ * display iconified items in a list
+ * 
+ * @author Stefano Semeria  Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
+ */
+
 
 public class IconifiedTextListAdapter extends BaseAdapter { 
 

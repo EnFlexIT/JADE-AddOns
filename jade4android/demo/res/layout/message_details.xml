@@ -36,7 +36,7 @@
 	android:layout_width="fill_parent"
 	android:layout_height="60px"
 	android:background="@android:drawable/editbox_background"
-	android:listSelector="@android:drawable/list_highlight_background_yellow"/>
+	android:listSelector="@android:drawable/list_highlight_background_blue"/>
 
 <TextView
 	android:id="@+id/widget30Det"

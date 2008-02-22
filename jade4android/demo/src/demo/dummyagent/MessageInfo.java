@@ -6,11 +6,15 @@ import java.util.Locale;
 
 import jade.lang.acl.ACLMessage;
 
+
 /**
+ * This class stores an <code>ACLMessage</code>
+ * and it is called by the agent to update the GUI when a message is received
  * 
- * @author 00917598
- *
+ * @author Stefano Semeria  Reply Cluster
+ * @author Tiziana Trucco Telecomitalia
  */
+
 public class MessageInfo {
 	
 	private ACLMessage message;

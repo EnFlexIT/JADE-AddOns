@@ -138,7 +138,11 @@ public class JadeGateway   {
 	 **/
 	public final void execute(Object command, long timeout) throws StaleProxyException,ControllerException,InterruptedException, ConnectException, Exception {
 	
-		checkJADE();
+		if (jadeBinder != null)
+			jadeBinder.checkJADE();
+		else 
+			throw new ConnectException("Not connected to MicroRuntimeService!!");
+		
 		try {
 			jadeBinder.execute(command,timeout);
 		} 
@@ -159,17 +163,6 @@ public class JadeGateway   {
 	}
 	
 	
-	/**
-	 * This method checks if both the container, and the agent, are up and running.
-	 * If not, then the method is responsible for renewing myContainer.
-	 * Normally programmers do not need to invoke this method explicitly.
-	 **/
-	public final void checkJADE() throws ConnectException, Exception {
-		if (jadeBinder != null)
-			jadeBinder.checkJADE();
-		else 
-			throw new ConnectException("Not connected to MicroRuntimeService!!");
-	}
 	
 	/**
 	 * Initialize this gateway by passing the proper configuration parameters
