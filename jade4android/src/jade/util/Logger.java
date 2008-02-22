@@ -46,7 +46,7 @@ import android.util.Log;
  * Following the Android logging style, the Logger class name is used as TAG and  the name 
  * of the Logger is added to the printed message.
  * 
- * @author Anna Porcino - University of Reggio Calabria
+ * @author Anna Maria Porcino - University of Reggio Calabria
  * @author Tiziana Trucco - Telecom Italia
  * 
  */
