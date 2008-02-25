@@ -37,9 +37,6 @@ import android.widget.Toast;
 import android.widget.AdapterView.ContextMenuInfo;
 import android.widget.TabHost.TabSpec;
 
-
-public class DummyAgentActivity extends Activity implements ConnectionListener{
-
 /**
  * This class implements the Activity associated with the DummyAgent application
  * This activity starts a Jade MicroRuntime with a GatewayAgent in it that replicates 
@@ -54,6 +51,10 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
  * @author Tiziana Trucco Telecomitalia
  * @author Marco Ughetti Telecomitalia
  */
+
+public class DummyAgentActivity extends Activity implements ConnectionListener{
+
+
 	private final Logger myLogger = Logger.getMyLogger(this.getClass().getName());
 	public static final String KEY_RECEIVER = "receiver";
 	public static final String KEY_CONTENT = "content";

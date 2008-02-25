@@ -48,7 +48,7 @@ public class IconifiedTextListAdapter extends BaseAdapter {
      }
      
      /** @param convertView The old view to overwrite, if one is passed 
-      * @returns a IconifiedTextView that holds wraps around an IconifiedText */ 
+      * @return a IconifiedTextView that holds wraps around an IconifiedText */ 
      public View getView(int position, View convertView, ViewGroup parent) { 
           IconifiedTextView btv; 
           if (convertView == null) { 
