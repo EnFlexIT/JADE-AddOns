@@ -24,9 +24,8 @@ public interface ConnectionListener {
 	/**
 	 * Callback method called from onServiceConnection method of 
 	 * MicroRuntimeServiceConnection object when JadeGateway.connect 
-	 * is called from an activity
-	 *  
-	 * @param gateway
+	 * is called from an activity  
+	 * @param gateway instance of a connected JadeGateway
 	 */
 	public void onConnected(JadeGateway gateway);
 
@@ -38,7 +37,6 @@ public interface ConnectionListener {
 	 * in order to understand in which cases the onServiceDisconnected() 
 	 * method is called
 	 *  
-	 * @param gateway
 	 */
 	public void onDisconnected();
 }
