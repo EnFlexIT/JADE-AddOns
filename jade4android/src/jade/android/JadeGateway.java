@@ -22,7 +22,7 @@ import jade.wrapper.gateway.GatewayAgent;
 
 /**
  * This class provide a gateway between ANDROID applications and a JADE based multi agent system.
- * It mantains an internal JADE Agent of class <code>GatewayAgent<code> that acts as entry point
+ * It maintains an internal JADE Agent of class <code>GatewayAgent</code> that acts as entry point
  * in the JADE based system. 
  * The activation/termination of this agent (and its underlying split container) are completely managed
  * by the JadeGateway class and the android application developers do not need to care about them.
@@ -33,40 +33,48 @@ import jade.wrapper.gateway.GatewayAgent;
  * in a mobile environment.  
  * 
  * The following are the main steps in order to use the JadeGateway in your Android Application:
- *	1)	Create your  Jade Agent class extending <code>jade.wrapper.gateway.GatewayAgent</code>
- *	2)	Add your application specific behaviours to your Jade Agent and override the processCommand method 
- *		with your application specific implementation;
- *	3)	Create an android activity that implements ConnectionListener;
- *	4)	Initialize this  JadeGateway by calling its method <code>connect</code> in the onCreate method 
- *		of your activity passing all required arguments:
- *		<code>agentClassName</code> is the fully qualified name of the class that extends <code>jade.android.GatewayAgent</code> 
- *		and implements the application specific jade agent 
-		<code>agentArgs</code> are the args passed to the jade agent when the Jade MicroRuntime starts it. They can be null.
-		<code>jadeProfile</code> is the set of jade properties to be passed to the Jade MicroRuntime.
-		 The minimal set shall be passed to this method is:
-		<code>jade.core.Profile.MAIN_HOST</code> is the hostname or ipaddress of the Jade Platform Main Container.
-		<code>jade.core.Profile.MAIN_PORT</code> is the port of the Jade Platform Main Container.
-		<code>jade.imtp.leap.JICP.JICPProtocol.MSISDN_KEY</code> is the unique identifier  of the split Container and Jade agent 
-		that are started on Android Emulator. Typically you can use the IMEI code. 
-	 
- *	5)	Implement the <code>onConnected(JadeGayeway gateway)</code> method of the ConnectionListener interface in order to store the 
- *		JadeGateway instance returned;
- *	6)	Call the execute method of the JadeGateway instance whenever you shall send a command to the agent
- *		This method will cause the callback ofc the method <code>processCommand</code> of the application-specific agent.
- *	 	The method <code>execute</code> will return only after the method <code>GatewayAgent.releaseCommand(command)</code> has been called
- * 		by your application-specific agent.
- *	7)	Call the disconnect method in order to unbind to the service.
+ *	<ol>
+ *	<li>	Create your  Jade Agent class extending <code>jade.wrapper.gateway.GatewayAgent</code> </li>
+ *	<li>	Add your application specific behaviours to your Jade Agent and override the processCommand method 
+ *			with your application specific implementation </li>
+ *	<li>	Create an android activity that implements ConnectionListener </li>
+ *	<li>	Initialize this  JadeGateway by calling its method <code>connect</code> in the onCreate method 
+ *		of your activity passing all required arguments: </li>
+ *		<ul> 
+ *			<li> <code>agentClassName</code> is the fully qualified name of the class that extends <code>jade.android.GatewayAgent</code> 
+ *				and implements the application specific jade agent </li> 
+			<li> <code>agentArgs</code> are the args passed to the jade agent when the Jade MicroRuntime starts it. They can be null.</li>
+			<li> <code>jadeProfile</code> is the set of jade properties to be passed to the Jade MicroRuntime. </li>
+		 			The minimal set shall be passed to this method is:
+		 			<ul>
+						<li> <code>jade.core.Profile.MAIN_HOST</code> is the hostname or ip address of the Jade Platform Main Container. </li>
+						<li> <code>jade.core.Profile.MAIN_PORT</code> is the port of the Jade Platform Main Container. </li>
+						<li> <code>jade.imtp.leap.JICP.JICPProtocol.MSISDN_KEY</code> is the unique identifier  of the split Container and Jade agent 
+								that are started on Android Emulator. Typically you can use the IMEI code. </li> 
+	 				</ul>
+	 	</ul>
+	 	
+ *	<li>	Implement the <code>onConnected(JadeGayeway gateway)</code> method of the ConnectionListener interface in order to store the 
+ *			JadeGateway instance returned </li>
+ *	<li>	Call the execute method of the JadeGateway instance whenever you shall send a command to the agent
+ *			This method will cause the callback of the method <code>processCommand</code> of the application-specific agent.
+ *	 		The method <code>execute</code> will return only after the method <code>GatewayAgent.releaseCommand(command)</code> has been called
+ * 			by your application-specific agent. </li>
+ *	<li>	Call the disconnect method in order to unbind to the service. </li>
+ *	</ol>
 
  * The suggested way of using the JadeGateway class is creating proper behaviours that perform the commands 
- * that the external system must issue to the JADE based system and pass them as parameters to the execute() 
- * method. When the execute() method returns the internal agent of the JadeGateway as completely executed
+ * that the external system must issue to the JADE based system and pass them as parameters to the <code>execute()</code> 
+ * method. When the <code>execute()</code> method returns the internal agent of the JadeGateway as completely executed
  * the behaviour and outputs (if any) can be retrieved from the behaviour object using ad hoc methods 
- * as exemplified below.
+ * as examplified below.
+ * 
+ * <p>
  <code>
- DoSomeActionBehaviour b = new DoSomeActionBehaviour(....);
- JadeGateway.execute(b);
- // At this point b has been completely executed --> we can get results
- result = b.getResult();
+ DoSomeActionBehaviour b = new DoSomeActionBehaviour(....);<br>
+ JadeGateway.execute(b);<br>
+ // At this point b has been completely executed --> we can get results<br>
+ result = b.getResult();<br>
  </code>
  * <br>
  * 
@@ -117,7 +125,16 @@ public class JadeGateway   {
 	 * request to the agent, finally it blocks waiting until the command
 	 * has been executed (i.e. the method <code>releaseCommand</code> 
 	 * is called by the executor agent)
+	 * 	<p> 
+	 * <b>WARNING: if the main container of jade platform is not reachable (because the main container is not running or 
+	 * the connection parameters are wrong) the call to execute shall take a very long time to complete and shall fail in the end, blocking 
+	 * the Android application using it. Please always launch the platform BEFORE using execute().</b>
+	 * 
 	 * @throws StaleProxyException if the method was not able to execute the Command
+	 * @throws ControllerException if agent is not reachable
+	 * @throws InterruptedException if the timeout expires or the Thread
+	 * executing this method is interrupted.
+	 * @throws Exception for any other problem reaching the JADE platform
 	 * @see jade.wrapper.AgentController#putO2AObject(Object, boolean)
 	 **/
 	public final void execute(Object command) throws StaleProxyException,ControllerException,InterruptedException, Exception {
@@ -131,9 +148,16 @@ public class JadeGateway   {
 	 * request to the agent, finally it blocks waiting until the command
 	 * has been executed. In case the command is a behaviour this method blocks 
 	 * until the behaviour has been completely executed. 
+	 * 	<p> 
+	 * <b>WARNING: if the main container of jade platform is not reachable (because the main container is not running or 
+	 * the connection parameters are wrong) the call to execute shall take a very long time to complete and shall fail in the end, blocking 
+	 * the Android application using it. Please always launch the platform BEFORE using execute().</b>
+	 * 
 	 * @throws InterruptedException if the timeout expires or the Thread
 	 * executing this method is interrupted.
 	 * @throws StaleProxyException if the method was not able to execute the Command
+	 * @throws ControllerException if agent is not reachable
+	 * @throws Exception for any other problem reaching the JADE platform
 	 * @see jade.wrapper.AgentController#putO2AObject(Object, boolean)
 	 **/
 	public final void execute(Object command, long timeout) throws StaleProxyException,ControllerException,InterruptedException, ConnectException, Exception {
@@ -173,6 +197,10 @@ public class JadeGateway   {
 	 * @param jadeProfile the properties that contain all parameters for running JADE (see jade.core.Profile).
 	 * Typically these properties will have to be read from a JADE configuration file.
 	 * If jadeProfile is null, then a JADE container attaching to a main on the local host is launched
+	 * @param ctn the current Application context (usually the activity using this method)
+	 * @param list a listener for the connection to the service. Once the connection is completed the listener "onConnected" shall be called 
+	 * @throws Exception   if the jade properties are wrong or connection to the MicroRuntimeService is not possible.
+	 * 
 	 **/
 	public final static void connect(String agentClassName, String[] agentArgs, Properties jadeProfile, Context ctn, ConnectionListener list) throws Exception{
 		myLogger.log(Logger.FINE,"connect(): called");
@@ -200,6 +228,11 @@ public class JadeGateway   {
 	
 	}
 	
+	/**
+	 * Retrieve the agent name (usually provided together with JADE connection properties)
+	 * @return name of the agent
+	 */
+	
 	public String getAgentName() throws ConnectException {
 		if (jadeBinder != null){
 			return jadeBinder.getAgentName();
@@ -209,14 +242,22 @@ public class JadeGateway   {
 	}
 	
 	
-
+	/**
+	 * Initialize this gateway by passing the proper configuration parameters
+	 * It connects to the MicroRuntime service and set the jade properties.
+	 * @param agentClassName is the fully-qualified class name of the JadeGateway internal agent. If null is passed
+	 * the default class will be used.
+	 * @param jadeProfile the properties that contain all parameters for running JADE (see jade.core.Profile).
+	 * Typically these properties will have to be read from a JADE configuration file.
+	 * If jadeProfile is null, then a JADE container attaching to a main on the local host is launched
+	 **/
 	public final static void connect(String agentClassName, Properties jadeProfile, Context ctn, ConnectionListener list) throws Exception{
 		connect(agentClassName, null, jadeProfile, ctn, list);
 	}
 	
 	/**
-	 * Kill the JADE Container in case it is running.
-	 */
+	 * Shutdown the local container on Android platform.
+	 **/
 	public final void shutdownJADE() throws ConnectException {
 		if (jadeBinder != null)
 			jadeBinder.shutdownJADE();
@@ -225,9 +266,12 @@ public class JadeGateway   {
 		
 	}
 	
+	
+	/**
+	 * Disconnect from the local MicroRuntimeService, without stopping the JADE agent.
+	 * @param ctn the current application context
+	 **/
 	public final void disconnect(Context ctn) {
-		//FIXME: Il metodo non e' statico poiche' la unbind non invalida il binder
-		//che quindi viene impostato a null per impedire l'esecuzione di comandi
 		myLogger.log(Logger.FINE, "disconnect(): disconnecting from service");
 		ctn.unbindService((ServiceConnection)map.get(ctn));
 		jadeBinder = null;

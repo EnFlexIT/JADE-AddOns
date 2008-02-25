@@ -7,11 +7,12 @@ package jade.android;
  * ConnectionListener and includes application specific implementation of callback methods
  * The onConnected implementation shall at least include the code in order to save the returned 
  * JadeGateway instance in a variable to be used when needed  
- * Note that the on Connected method is called from the onServiceConnected() method of MicroRuntimeServiceConnection object
+ * <p>
+ * Note that the on Connected method is called from the <code>onServiceConnected()</code> method of MicroRuntimeServiceConnection object
  * after the call of JadeGateway.connect the performs the binding to the MicroRuntimeService
- * The onDisconnected() method shall be used to manage some problem with the MicroruntimeService and it is called
- * by the onServiceDisconnected() method of MicroRuntimeServiceConnection object 
-
+ * The <code>onDisconnected()</code> method shall be used to manage some problem with the MicroruntimeService and it is called
+ * by the <code>onServiceDisconnected()</code> method of MicroRuntimeServiceConnection object 
+ *	</p>
  *  
  * 
  * @author Stefano Semeria Reply Cluster
