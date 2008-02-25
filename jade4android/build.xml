@@ -8,6 +8,7 @@
     <property name="resource-dir" value="res" />
     <property name="asset-dir" value="assets" />
     <property name="srcdir" value="src" />
+    <property name="docdir" value="doc" />
 
     <!-- Output directories -->
     <property name="lib" value="lib" />
@@ -202,4 +203,27 @@
        <include name="add-ons/android/demo/**"/>     
      </zip>
     </target>
+    	
+	
+    
+    	<target name="apidoc"
+    	        description="Generate javadoc for both android add-on and dummy agent demo">
+    		<javadoc sourcepath="${srcdir}"
+    		         destdir="${docdir}/API"
+    		         bootclasspath="${android-sdk-folder}/android.jar"
+    			 classpath="${jade-leap-android-jar} "
+    		         verbose="false"
+    		         packagenames="jade.android.*"
+                         />
+                <javadoc sourcepath="${demo-src}"
+    		         destdir="demo/doc/API"
+    		         classpath="${jade-leap-android-jar}"
+                	 bootclasspath="${android-sdk-folder}/android.jar"
+    		         verbose="false"
+    		         packagenames="demo.dummyagent.*"
+                         />
+                	 
+    	</target>
+    	
+	
 </project>
