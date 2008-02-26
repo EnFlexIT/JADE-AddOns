@@ -23,7 +23,7 @@ import android.widget.ListView;
  * and provides a Reply button to perform automatic reply.
  * It is launched as a subactivity from <code>DummyAgentActivity</code> and returns the Sender field to its parent.
  * 
- * @author Cristina Cucè  University of Reggio Calabria 
+ * @author Cristina Cuce'  University of Reggio Calabria 
  * @author Stefano Semeria  Reply Cluster
  * @author Tiziana Trucco Telecomitalia
  * 
