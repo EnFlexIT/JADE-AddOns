@@ -217,7 +217,7 @@ public class WSIGServlet extends HttpServlet {
 			log.info("Jade Action: "+agentAction.toString());
 		} catch (Exception e) {
 			log.error("Error in soap to jade conversion", e);
-			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in soap to jade conversion");
+			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in soap to jade conversion. "+e.getMessage());
 			return;
 		}
 

@@ -23,7 +23,11 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.soap;
 
+import jade.content.lang.sl.SL0Vocabulary;
+import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
+import jade.core.AID;
+import jade.lang.acl.ACLMessage;
 import jade.util.leap.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -94,6 +98,18 @@ public class SoapUtils {
 		Class clazz = null;
 		try {
 			clazz = onto.getClassForElement(name);
+			if (clazz == null) {
+				// BasicOntology schema are not associated to any class
+				if (name.equals(SL0Vocabulary.AID)) {
+					clazz = AID.class;
+				}
+				else if (name.equals(SL0Vocabulary.ACLMSG)) {
+					clazz = ACLMessage.class;
+				}
+				else if (name.equals(SL0Vocabulary.ACLMSG)) {
+					clazz = ACLMessage.class;
+				}
+			}
 		} catch(Exception e) {
 			log.error("Element "+name+" not found in ontology "+onto.getName(), e);
 			throw new Exception("Element "+name+" not found in ontology "+onto.getName(), e);

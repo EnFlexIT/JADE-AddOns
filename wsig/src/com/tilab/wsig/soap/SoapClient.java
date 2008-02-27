@@ -83,11 +83,13 @@ public class SoapClient {
 	private static String sendMessage(String SOAPUrl, byte[] byteMessage) {
 
 		String resp = null;
+		boolean requestSent = false;
+		HttpURLConnection httpConn = null;
 		try {
 			// Create the connection
 			URL url = new URL(SOAPUrl);
 			URLConnection connection = url.openConnection();
-			HttpURLConnection httpConn = (HttpURLConnection) connection;
+			httpConn = (HttpURLConnection) connection;
 
 			// Set the appropriate HTTP parameters.
 			httpConn.setRequestProperty( "Content-Length", String.valueOf( byteMessage.length ) );
@@ -102,24 +104,35 @@ public class SoapClient {
 			out.write(byteMessage);    
 			out.close();
 
-			// Read the response
-			InputStreamReader isr =	new InputStreamReader(httpConn.getInputStream());
-			BufferedReader in = new BufferedReader(isr);
+			requestSent = true;
+			
+			// Check response code
+			if (httpConn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+				
+				// Read the response
+				InputStreamReader isr =	new InputStreamReader(httpConn.getInputStream());
+				BufferedReader in = new BufferedReader(isr);
 
-			String inputLine;
-			StringBuffer sb = new StringBuffer();
-			while ((inputLine = in.readLine()) != null) {
-				sb.append(inputLine);
+				String inputLine;
+				StringBuffer sb = new StringBuffer();
+				while ((inputLine = in.readLine()) != null) {
+					sb.append(inputLine);
+				}
+
+				in.close();
+
+				resp = sb.toString();
+			} else {
+
+				// Get error message
+				resp = httpConn.getResponseMessage();
 			}
-
-			in.close();
-
-			resp = sb.toString();
-
 		} catch(Exception e) {
-			resp = "Error sending soap message";
+			resp = (requestSent ? "Error response received" : "Error sending soap message")+" - "+e.getMessage();
 			System.out.println(resp);
 			e.printStackTrace();
+		} finally {
+			try { httpConn.disconnect(); } catch(Exception e) {}
 		}
 
 		return resp;

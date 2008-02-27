@@ -103,32 +103,27 @@ public class SoapToJade extends DefaultHandler {
 	public Object convert(Message soapRequest, WSIGService wsigService, String operationName) throws Exception {
 
 		Object actionObj = null;
-		try {
-			String soapMessage = soapRequest.getSOAPPartAsString();
-			
-			// Verify if parser is ready
-			if (xr == null) {
-				throw new Exception("Parser not initialized");
-			}
-	
-			// Set ontology
-			onto = wsigService.getOnto();
-	
-			// Parse xml to extract parameters value
-			xr.parse(new InputSource(new StringReader(soapMessage)));
-	
-			// Get parameters
-			Vector<ParameterInfo> params = getParameters();
-			
-			// Get action builder
-			ActionBuilder actionBuilder = wsigService.getActionBuilder(operationName);
-			
-			// Prepare jade action
-			actionObj = actionBuilder.getAgentAction(params);
-
-		} catch(Exception e) {
-			log.error("Error parsing soap message", e);
+		String soapMessage = soapRequest.getSOAPPartAsString();
+		
+		// Verify if parser is ready
+		if (xr == null) {
+			throw new Exception("Parser not initialized");
 		}
+
+		// Set ontology
+		onto = wsigService.getOnto();
+
+		// Parse xml to extract parameters value
+		xr.parse(new InputSource(new StringReader(soapMessage)));
+
+		// Get parameters
+		Vector<ParameterInfo> params = getParameters();
+		
+		// Get action builder
+		ActionBuilder actionBuilder = wsigService.getActionBuilder(operationName);
+		
+		// Prepare jade action
+		actionObj = actionBuilder.getAgentAction(params);
 		
 		return actionObj;
 	}
@@ -229,7 +224,7 @@ public class SoapToJade extends DefaultHandler {
 
 		} catch(Exception e) {
 			level = 0;
-			throw new RuntimeException("Error parsing element "+name, e);
+			throw new RuntimeException("Error parsing element "+name+" - "+e.getMessage(), e);
 		}
 	}
 
@@ -258,75 +253,78 @@ public class SoapToJade extends DefaultHandler {
 				// Get parameter infos & verify...
 				ParameterInfo paramEi = params.lastElement();
 				if (!paramEi.getName().equals(name)) {
-					throw new RuntimeException("Parameter "+name+" not match with parameter in store ("+paramEi.getName()+")");
+					throw new RuntimeException("Parameter "+name+" doesn't match with parameter in store ("+paramEi.getName()+")");
 				}
 
 				// Get class type
 				Class clazz = SoapUtils.getClassByType(onto, paramEi.getType());
-
-				// Fill value
-				if (SoapUtils.isPrimitiveJadeType(clazz)) {
-					// Primitive type
-					paramEi.setValue(SoapUtils.getPrimitiveValue(paramEi.getType(), fieldValue));
-					log.debug("Set "+name+" with "+paramEi.getValue());
-
-				} else {
-					// Not primitive type
-					
-					// Create parameter object
-					Object obj = clazz.newInstance();
-					
-					// Get store of object parameters
-					Vector<ParameterInfo> objParams = params4Level.get(params4LevelIndex+1);
-
-					if (obj instanceof ArrayList) {
-
-						// Object is an array
-						for (int count = 0; count < objParams.size(); ++count) {
-							
-							// Add param to array
-							ParameterInfo objParamEi = objParams.get(count);
-							((ArrayList)obj).add(objParamEi.getValue());
-							log.debug("Add element "+count+" to "+name+" with "+objParamEi.getValue());
-						}
+				if (clazz != null) {
+					// Fill value
+					if (SoapUtils.isPrimitiveJadeType(clazz)) {
+						// Primitive type
+						paramEi.setValue(SoapUtils.getPrimitiveValue(paramEi.getType(), fieldValue));
+						log.debug("Set "+name+" with "+paramEi.getValue());
+	
 					} else {
-
-						// Object is a custom type
-
-						// Get fields of object
-						Field[] dfs = clazz.getDeclaredFields();
-
-						// Set value to every fields
-						for (int count = 0; count < dfs.length; ++count) {
-							
-							// Set reflection accessiable method
-							dfs[count].setAccessible(true);
-
-							// Get parameter and verify...
-							String paramName = dfs[count].getName();
-							ParameterInfo paramEi1 = objParams.get(count);
-							if (!paramEi1.getName().equals(paramName)) {
-								throw new RuntimeException("Parameter "+paramName+" not match with parameter in store ("+paramEi1.getName()+")");
+						// Not primitive type
+						
+						// Create parameter object
+						Object obj = clazz.newInstance();
+						
+						// Get store of object parameters
+						Vector<ParameterInfo> objParams = params4Level.get(params4LevelIndex+1);
+	
+						if (obj instanceof ArrayList) {
+	
+							// Object is an array
+							for (int count = 0; count < objParams.size(); ++count) {
+								
+								// Add param to array
+								ParameterInfo objParamEi = objParams.get(count);
+								((ArrayList)obj).add(objParamEi.getValue());
+								log.debug("Add element "+count+" to "+name+" with "+objParamEi.getValue());
 							}
-
-							// Set parameter value
-							dfs[count].set(obj, paramEi1.getValue());
-							log.debug("Set "+name+"."+paramName+" with "+paramEi1.getValue());
+						} else {
+	
+							// Object is a custom type
+	
+							// Get fields of object
+							Field[] dfs = clazz.getDeclaredFields();
+	
+							// Set value to every fields
+							for (int count = 0; count < dfs.length; ++count) {
+								
+								// Set reflection accessiable method
+								dfs[count].setAccessible(true);
+	
+								// Get parameter and verify...
+								String paramName = dfs[count].getName();
+								ParameterInfo paramEi1 = objParams.get(count);
+								if (!paramEi1.getName().equals(paramName)) {
+									throw new RuntimeException("Parameter "+paramName+" not match with parameter in store ("+paramEi1.getName()+")");
+								}
+	
+								// Set parameter value
+								dfs[count].set(obj, paramEi1.getValue());
+								log.debug("Set "+name+"."+paramName+" with "+paramEi1.getValue());
+							}
 						}
-					}
-
-					// Remove params level from store
-					params4Level.remove(objParams);
+	
+						// Remove params level from store
+						params4Level.remove(objParams);
+						
+						// Set value in param object
+						paramEi.setValue(obj);
 					
-					// Set value in param object
-					paramEi.setValue(obj);
-				
-					log.debug("End managing parameter "+name);
+						log.debug("End managing parameter "+name);
+					}
+				} else {
+					throw new RuntimeException("No class found for type "+paramEi.getType()+" in ontology "+onto.getName());
 				}
 			}
 		} catch(Exception e) {
 			level = 0;
-			throw new RuntimeException("Error parsing element "+name, e);
+			throw new RuntimeException("Error parsing element "+name+" - "+e.getMessage(), e);
 		}
 
 		--level;
