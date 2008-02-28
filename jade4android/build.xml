@@ -195,12 +195,18 @@
     
     <target name="dist" depends="jar, demo">
      <echo>Create distribution files for Jade Android Add-on</echo>
+   
+      
      <zip destfile="${addon-name}" basedir="../..">
        <include name="add-ons/android/*"/>
        <include name="add-ons/android/src/**"/>
        <include name="add-ons/android/doc/**"/>
        <include name="add-ons/android/lib/**"/>
-       <include name="add-ons/android/demo/**"/>     
+       <include name="add-ons/android/demo/**"/> 
+       <exclude name="add-ons/android/${classes}/**"/>
+       <exclude name="add-ons/android/${demo-classes}/**"/>
+    
+
      </zip>
     </target>
     	
