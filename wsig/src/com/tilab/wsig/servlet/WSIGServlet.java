@@ -162,8 +162,12 @@ public class WSIGServlet extends HttpServlet {
 			return;
 		}
 		
-		// Check if the request is WSDL request
-		if (httpRequest.getParameterMap().containsKey("WSDL")) {
+		// A typical Web Service convention is that a request of the form 
+		// http://<wsig-url>/<service-name>?WSDL (elements following the '?' are HTTP 
+		// request parameters), e.g. http://localhost:8080/wsig/ws/MatchService?WSDL, 
+		// is intended to retrieve the WSDL of the specified service.
+		if (httpRequest.getParameterMap().containsKey("WSDL") ||
+			httpRequest.getParameterMap().containsKey("wsdl")) {
 			// Elaborate WSDL request
 			elaborateWSDLRequest(httpRequest.getRequestURL().toString(), httpResponse);
 			return;

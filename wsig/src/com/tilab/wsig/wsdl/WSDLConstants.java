@@ -24,25 +24,26 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.wsdl;
 
 public class WSDLConstants {
-	public static final String xsi = "http://www.w3.org/2001/XMLSchema-instance";
-	public static final String xsd = "http://www.w3.org/2001/XMLSchema";
-	public static final String wsdlsoap = "http://schemas.xmlsoap.org/wsdl/soap/";
-	public static final String encodingStyle = "http://schemas.xmlsoap.org/soap/encoding/";
-	public static final String transportURI = "http://schemas.xmlsoap.org/soap/http";
-	public static final String soapStyle = "rpc";
-	public static final String publishSoapBinding = "publishSoapBinding";
-	public static final String schema = "schema";
-	public static final String portPublish = "publish";
-	public static final String QNameOperation = "operation";
-	public static final String soapActionURI = "soapActionURI";
-	public static final String QNamebody = "body";
-	public static final String bodyInputUse = "encoded";
-	public static final String part = "par";
-	public static final String array = "array";
-	public static final String mapperMethodPrefix = "to";
-	public static final String inputParamSuff = "input";
-	public static final String outputParamSuff = "output";
-	public static final String separator = "-";
-	public static final String prefResult = "get";
-	public static final String suffResult = "result";
+	public static final String XSI = "http://www.w3.org/2001/XMLSchema-instance";
+	public static final String XSD = "http://www.w3.org/2001/XMLSchema";
+	public static final String WSDL_SOAP = "http://schemas.xmlsoap.org/wsdl/soap/";
+	public static final String ENCODING_STYLE = "http://schemas.xmlsoap.org/soap/encoding/";
+	public static final String TRANSPORT_URI = "http://schemas.xmlsoap.org/soap/http";
+	public static final String SOAP_STYLE = "rpc";
+	public static final String PUBLISH_BINDING_SUFFIX = "SOAP";
+	public static final String SCHEMA = "schema";
+	public static final String PUBLISH = "publish";
+	public static final String OPERATION = "operation";
+	public static final String SOAP_ACTION_URI = "soapActionURI";
+	public static final String BODY = "body";
+	public static final String ENCODED = "encoded";
+	public static final String PAR = "par";
+	public static final String ARRAY = "array";
+	public static final String MAPPER_METHOD_PREFIX = "to";
+	public static final String INPUT_PARAM_SUFFIX = "input";
+	public static final String OUTPUT_PARAM_SUFFIX = "output";
+	public static final String SEPARATOR = "-";
+	public static final String RESULT_PREFIX = "get";
+	public static final String RESULT_SUFFIX = "result";
+	
 }

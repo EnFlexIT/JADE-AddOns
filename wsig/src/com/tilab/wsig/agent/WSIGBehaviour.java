@@ -53,7 +53,6 @@ public class WSIGBehaviour extends AchieveREInitiator {
 	private int status = UNKNOWN_STATUS;
 	private Object result = null;
 	private String error = null;
-	private Exception exception = null;
 
 	private SLCodec codec = new SLCodec();
 	private Ontology onto = null;
@@ -78,7 +77,6 @@ public class WSIGBehaviour extends AchieveREInitiator {
 		
 		myAgent.getContentManager().registerOntology(onto);
 		myAgent.getContentManager().registerLanguage(codec);
-		myAgent.getContentManager().setValidationMode(false);
 	}
 
 	protected ACLMessage prepareRequest(ACLMessage request) {
@@ -96,8 +94,8 @@ public class WSIGBehaviour extends AchieveREInitiator {
 			
 		} catch (Exception e) {
 			status = FAILURE_STATUS;
-			exception = e;
 			request = null;
+			error = "Action encoding error: "+e.getMessage();
 			log.error(e);
 		}
 		return request;
@@ -128,7 +126,7 @@ public class WSIGBehaviour extends AchieveREInitiator {
 			}
 		} catch (Exception e) {
 			status = FAILURE_STATUS;
-			exception = e;
+			error = "Action result decoding error: "+e.getMessage();
 		}
 	}
 
@@ -158,9 +156,5 @@ public class WSIGBehaviour extends AchieveREInitiator {
 
 	public Object getResult() {
 		return result;
-	}
-
-	public Exception getException() {
-		return exception;
 	}
 }

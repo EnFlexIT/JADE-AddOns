@@ -140,8 +140,10 @@ public class SoapToJade extends DefaultHandler {
 		if (params4Level.size() >= 1) {
 			params = params4Level.get(0);
 			
-			for (ParameterInfo param : params) {
-				log.debug("   "+param.getName()+"= "+param.getValue());
+			if (log.isDebugEnabled()) {
+				for (ParameterInfo param : params) {
+					log.debug("   "+param.getName()+"= "+param.getValue());
+				}
 			}
 		} else {
 			log.debug("   No parameters");
@@ -200,7 +202,7 @@ public class SoapToJade extends DefaultHandler {
 			if (level >= 4) {
 
 				// Get parameter type
-				String attrValue = attrs.getValue(WSDLConstants.xsi, "type");
+				String attrValue = attrs.getValue(WSDLConstants.XSI, "type");
 				int pos = attrValue.indexOf(':');
 				String valueType = attrValue.substring(pos+1);
 				log.debug("Start managing parameter "+name+" of type "+valueType);
@@ -301,7 +303,7 @@ public class SoapToJade extends DefaultHandler {
 								String paramName = dfs[count].getName();
 								ParameterInfo paramEi1 = objParams.get(count);
 								if (!paramEi1.getName().equals(paramName)) {
-									throw new RuntimeException("Parameter "+paramName+" not match with parameter in store ("+paramEi1.getName()+")");
+									throw new RuntimeException("Parameter "+paramName+" doesn't match with parameter in store ("+paramEi1.getName()+")");
 								}
 	
 								// Set parameter value

@@ -68,7 +68,7 @@ public class MathOntology extends Ontology implements MathVocabulary{
 
 			as = (AgentActionSchema) getSchema(SUM);
 			as.add(FIRST_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
-			as.add(SECOND_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
+			as.add(SECOND_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.OPTIONAL);
 			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT));
 
 			

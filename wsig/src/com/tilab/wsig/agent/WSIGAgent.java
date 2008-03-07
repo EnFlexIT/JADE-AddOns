@@ -297,7 +297,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			p = (Property) it.next();
 
 			if (WSIGConstants.WSIG_PREFIX.equalsIgnoreCase(p.getName()) && !p.getValue().toString().equals("")) {
-				return p.getValue().toString()+WSDLConstants.separator;
+				return p.getValue().toString()+WSDLConstants.SEPARATOR;
 			}
 		}
 		return "";

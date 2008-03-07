@@ -168,13 +168,13 @@ public class SDToWSDL {
 					for (int j = 0; j < methodNumber; j++) {
 						
 						// Prepare names
-						String outputName = actionName + WSDLConstants.separator + WSDLConstants.outputParamSuff;
-						String inputName = actionName + WSDLConstants.separator + WSDLConstants.inputParamSuff;
+						String outputName = actionName + WSDLConstants.SEPARATOR + WSDLConstants.OUTPUT_PARAM_SUFFIX;
+						String inputName = actionName + WSDLConstants.SEPARATOR + WSDLConstants.INPUT_PARAM_SUFFIX;
 						String operationName = wsigService.getServicePrefix()+actionName;
 						if (methodNumber > 1) {
-							outputName = outputName + WSDLConstants.separator + j;
-							inputName = inputName + WSDLConstants.separator + j;
-							operationName = operationName + WSDLConstants.separator + j;
+							outputName = outputName + WSDLConstants.SEPARATOR + j;
+							inputName = inputName + WSDLConstants.SEPARATOR + j;
+							operationName = operationName + WSDLConstants.SEPARATOR + j;
 						}
 
 						// Create appropriate ActionBuilder
@@ -194,8 +194,7 @@ public class SDToWSDL {
 							actionBuilder = new MapperBasedActionBuilder(mapperObject, method, actionName);
 						} else {
 							// Ontology/reflection
-							Class opClass = onto.getClassForElement(actionName);
-							actionBuilder = new ReflectionBasedActionBuilder(opClass, actionName);
+							actionBuilder = new ReflectionBasedActionBuilder(onto, actionName);
 						}
 
 						// Operation
@@ -246,7 +245,7 @@ public class SDToWSDL {
 								if (parameterNames != null) {
 									slotName = parameterNames[k];
 								} else {
-									slotName = parClass.getSimpleName() + WSDLConstants.separator + k;
+									slotName = parClass.getSimpleName() + WSDLConstants.SEPARATOR + k;
 								}
 
 								String slotType = convertObjectSchemaIntoXsdType(tns, onto, actionSchema, parClass, xsdSchema, slotName, null);
@@ -304,7 +303,7 @@ public class SDToWSDL {
 			Method[] methods = mapperClass.getDeclaredMethods();
 		
 			Method method = null;
-			String methodNameToCheck = WSDLConstants.mapperMethodPrefix + actionName;
+			String methodNameToCheck = WSDLConstants.MAPPER_METHOD_PREFIX + actionName;
 			for (int j = 0; j < methods.length; j++) {
 				method = methods[j];
 				if (method.getName().equalsIgnoreCase(methodNameToCheck)) {
@@ -328,7 +327,7 @@ public class SDToWSDL {
 			Method[] methods = mapperClass.getDeclaredMethods();
 		
 			Method method = null;
-			String methodNameToCheck = WSDLConstants.mapperMethodPrefix + actionName;
+			String methodNameToCheck = WSDLConstants.MAPPER_METHOD_PREFIX + actionName;
 			for (int j = 0; j < methods.length; j++) {
 				method = methods[j];
 				

@@ -71,7 +71,6 @@ import org.eclipse.xsd.XSDParticle;
 import org.eclipse.xsd.XSDSchema;
 import org.eclipse.xsd.XSDTypeDefinition;
 import org.eclipse.xsd.impl.XSDComplexTypeDefinitionImpl;
-import org.eclipse.xsd.impl.XSDSchemaImpl;
 import org.w3c.dom.Element;
 
 import com.ibm.wsdl.BindingImpl;
@@ -128,7 +127,7 @@ public class WSDLGeneratorUtils {
 
 		Map qNamePrefixToNamespaceMap = xsd.getQNamePrefixToNamespaceMap();
 		qNamePrefixToNamespaceMap.put("xsd", xsd.getTargetNamespace());
-		qNamePrefixToNamespaceMap.put(xsd.getSchemaForSchemaQNamePrefix(), WSDLConstants.xsd);
+		qNamePrefixToNamespaceMap.put(xsd.getSchemaForSchemaQNamePrefix(), WSDLConstants.XSD);
 		qNamePrefixToNamespaceMap.put(WSIGConfiguration.getInstance().getLocalNamespacePrefix(), tns);
 		
 		XSDAnnotation xsdAnnotation = xsdFactory.createXSDAnnotation();
@@ -178,7 +177,7 @@ public class WSDLGeneratorUtils {
 		
 		XSDTypeDefinition xsdTypeDefinition;
 		if (primitive) {
-			xsdTypeDefinition = schema.resolveSimpleTypeDefinition(WSDLConstants.xsd, elementType);
+			xsdTypeDefinition = schema.resolveSimpleTypeDefinition(WSDLConstants.XSD, elementType);
 		} else {
 			xsdTypeDefinition = getTypeDefinition(schema, tns, elementType);
 			
@@ -213,8 +212,8 @@ public class WSDLGeneratorUtils {
 		Types types = new TypesImpl();
 
 		Schema schema = (Schema) registry.createExtension(
-							Types.class, new QName(WSDLConstants.xsd,
-							WSDLConstants.schema));
+							Types.class, new QName(WSDLConstants.XSD,
+							WSDLConstants.SCHEMA));
 		schema.setElement(element);
 		types.addExtensibilityElement(schema);
 		
@@ -226,9 +225,9 @@ public class WSDLGeneratorUtils {
 		definition.setQName(new QName(tns, tns.substring(tns.indexOf(":")+1)));
 		definition.setTargetNamespace(tns);
 		definition.addNamespace(WSIGConfiguration.getInstance().getLocalNamespacePrefix(), tns);
-		definition.addNamespace("xsd", WSDLConstants.xsd);
-		definition.addNamespace("xsi", WSDLConstants.xsi);
-		definition.addNamespace("wsdlsoap", WSDLConstants.wsdlsoap);
+		definition.addNamespace("xsd", WSDLConstants.XSD);
+		definition.addNamespace("xsi", WSDLConstants.XSI);
+		definition.addNamespace("wsdlsoap", WSDLConstants.WSDL_SOAP);
 		
 		return definition;
 	}
@@ -247,31 +246,31 @@ public class WSDLGeneratorUtils {
 		portTypeB.setQName(new QName(tns, tns.substring(tns.indexOf(":")+1)));
 		binding.setPortType(portTypeB);
 		binding.setUndefined(false);
-		binding.setQName(new QName(WSDLConstants.publishSoapBinding));
+		binding.setQName(new QName(tns.substring(4)+WSDLConstants.PUBLISH_BINDING_SUFFIX));
 		return binding;
 	}
 
 	public static SOAPBinding createSOAPBinding(ExtensionRegistry registry) throws WSDLException {
 		SOAPBinding soapBinding = (SOAPBinding) registry.createExtension(
-				Binding.class, new QName(WSDLConstants.wsdlsoap, "binding"));
-		soapBinding.setStyle(WSDLConstants.soapStyle);
-		soapBinding.setTransportURI(WSDLConstants.transportURI);
+				Binding.class, new QName(WSDLConstants.WSDL_SOAP, "binding"));
+		soapBinding.setStyle(WSDLConstants.SOAP_STYLE);
+		soapBinding.setTransportURI(WSDLConstants.TRANSPORT_URI);
 		return soapBinding;
 	}
 	
 	public static Port createPort(String tns) {
 		Binding bindingP = new BindingImpl();
-		bindingP.setQName(new QName(tns, WSDLConstants.publishSoapBinding));
+		bindingP.setQName(new QName(tns, tns.substring(4)+WSDLConstants.PUBLISH_BINDING_SUFFIX));
 		bindingP.setUndefined(false);
 		Port port = new PortImpl();
-		port.setName(WSDLConstants.portPublish);
+		port.setName(WSDLConstants.PUBLISH);
 		port.setBinding(bindingP);
 		return port;
 	}
 	
 	public static SOAPAddress createSOAPAddress(ExtensionRegistry registry) throws WSDLException {
 		SOAPAddress soapAddress = null;
-		soapAddress = (SOAPAddress)registry.createExtension(Port.class,new QName(WSDLConstants.wsdlsoap,"address"));		
+		soapAddress = (SOAPAddress)registry.createExtension(Port.class,new QName(WSDLConstants.WSDL_SOAP,"address"));		
 		soapAddress.setLocationURI(WSIGConfiguration.getInstance().getWsigUri());
 		return soapAddress;
 	}
@@ -308,8 +307,8 @@ public class WSDLGeneratorUtils {
 		operationB.setName(actionName);
 		SOAPOperation soapOperation = (SOAPOperation) registry
 				.createExtension(BindingOperation.class,
-						new QName(WSDLConstants.wsdlsoap, WSDLConstants.QNameOperation));
-		soapOperation.setSoapActionURI(WSDLConstants.soapActionURI);
+						new QName(WSDLConstants.WSDL_SOAP, WSDLConstants.OPERATION));
+		soapOperation.setSoapActionURI(WSDLConstants.SOAP_ACTION_URI);
 		operationB.addExtensibilityElement(soapOperation);
 		return operationB;
 	}
@@ -321,13 +320,13 @@ public class WSDLGeneratorUtils {
 		SOAPBody soapBodyInput;
 		try {
 			soapBodyInput = (SOAPBody) registry.createExtension(BindingInput.class,
-							new QName(WSDLConstants.wsdlsoap, WSDLConstants.QNamebody));
+							new QName(WSDLConstants.WSDL_SOAP, WSDLConstants.BODY));
 		} catch (WSDLException e) {
 			throw new Exception("Error in SOAPBodyInput Handling", e);
 		}
-		soapBodyInput.setUse(WSDLConstants.bodyInputUse);
+		soapBodyInput.setUse(WSDLConstants.ENCODED);
 		ArrayList encodingStylesInput = new ArrayList();
-		encodingStylesInput.add(WSDLConstants.encodingStyle);
+		encodingStylesInput.add(WSDLConstants.ENCODING_STYLE);
 		soapBodyInput.setEncodingStyles(encodingStylesInput);
 		soapBodyInput.setNamespaceURI(tns);
 		inputB.addExtensibilityElement(soapBodyInput);
@@ -342,13 +341,13 @@ public class WSDLGeneratorUtils {
 		SOAPBody soapBodyOutput;
 		try {
 			soapBodyOutput = (SOAPBody) registry.createExtension(
-					BindingOutput.class, new QName(WSDLConstants.wsdlsoap, WSDLConstants.QNamebody));
+					BindingOutput.class, new QName(WSDLConstants.WSDL_SOAP, WSDLConstants.BODY));
 		} catch (WSDLException e) {
 			throw new Exception("Error in SOAPBodyOutput Handling", e);
 		}
-		soapBodyOutput.setUse(WSDLConstants.bodyInputUse);
+		soapBodyOutput.setUse(WSDLConstants.ENCODED);
 		ArrayList encodingStylesOutput = new ArrayList();
-		encodingStylesOutput.add(WSDLConstants.encodingStyle);
+		encodingStylesOutput.add(WSDLConstants.ENCODING_STYLE);
 		soapBodyOutput.setEncodingStyles(encodingStylesOutput);
 		soapBodyOutput.setNamespaceURI(tns);
 		outputB.addExtensibilityElement(soapBodyOutput);
@@ -374,7 +373,7 @@ public class WSDLGeneratorUtils {
 		
 		String namespaceURI;
 		if (types.values().contains(className)) {
-			namespaceURI = WSDLConstants.xsd;
+			namespaceURI = WSDLConstants.XSD;
 		} else {
 			namespaceURI = tns;
 		}
@@ -433,11 +432,11 @@ public class WSDLGeneratorUtils {
 	}
 
 	public static String getResultName(String operationName) { 
-		return WSDLConstants.prefResult+WSDLConstants.separator+operationName+WSDLConstants.separator+WSDLConstants.suffResult;
+		return WSDLConstants.RESULT_PREFIX+WSDLConstants.SEPARATOR+operationName+WSDLConstants.SEPARATOR+WSDLConstants.RESULT_SUFFIX;
 	}
 
 	public static String getArraySuffix() {
-		return WSDLConstants.separator+WSDLConstants.array;
+		return WSDLConstants.SEPARATOR+WSDLConstants.ARRAY;
 	}
 	
 	public static String getArrayType(String type) { 

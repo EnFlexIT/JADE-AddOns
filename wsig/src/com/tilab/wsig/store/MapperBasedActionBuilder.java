@@ -30,6 +30,8 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import com.tilab.wsig.wsdl.WSDLGeneratorUtils;
+
 public class MapperBasedActionBuilder implements ActionBuilder {
 	
 	private static Logger log = Logger.getLogger(MapperBasedActionBuilder.class.getName());
@@ -37,6 +39,7 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 	private Method method;
 	private Object mapperObj;
 	private String ontoActionName;
+	private String[] methodParameterNames;
 
 	/**
 	 * MapperBasedActionBuilder
@@ -47,31 +50,54 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 		this.method = method;
 		this.mapperObj = mapperObj;
 		this.ontoActionName = ontoActionName;
+		this.methodParameterNames = WSDLGeneratorUtils.getParameterNames(method);
 	}
 
 	/**
 	 * getAgentAction
 	 */
-	public AgentAction getAgentAction(Vector<ParameterInfo> params) throws Exception {
+	public AgentAction getAgentAction(Vector<ParameterInfo> soapParams) throws Exception {
 		
-		AgentAction actionObj = null;
-		
-		// Prepare mapper parameter
-		Object[] parameterValues = new Object[params.size()];
+		Object[] parameterValues = new Object[0];
 		String parameterList = "";
-		for (int count = 0; count < params.size(); ++count) {
-			ParameterInfo objParamEi = params.get(count);
-			parameterValues[count] = objParamEi.getValue();
-			parameterList += objParamEi.getType()+",";
+
+		// Prepare mapper parameter
+		if (soapParams != null) {
+			
+	        // If the mapper class is a Java dynamic proxy is not possible to have 
+			// the name of the parameters of the methods (methodParameterNames == null)
+			// Use SOAP parameters as master and apply it in the order of vector   
+			// See: WSDLGeneratorUtils.getParameterNames(method)
+			if (methodParameterNames == null) {
+				parameterValues = new Object[soapParams.size()];
+				for (int i = 0; i < soapParams.size(); i++) {
+					ParameterInfo objParamEi = soapParams.get(i);
+					parameterValues[i] = objParamEi.getValue();
+					parameterList += objParamEi.getType()+",";
+				}
+			} else {
+				parameterValues = new Object[methodParameterNames.length];
+				for (int i = 0; i < methodParameterNames.length; i++) {
+					try {
+						ParameterInfo objParamEi = getSoapParamByName(soapParams, methodParameterNames[i]);
+						parameterValues[i] = objParamEi.getValue();
+						parameterList += objParamEi.getType()+",";
+					} catch(Exception e) {
+						log.error("Method "+method.getName()+", mandatory param "+methodParameterNames[i]+" not found in soap request");
+						throw e;
+					}
+				}
+			}
 		}
 		
+		AgentAction actionObj = null;
 		try {
 			// Invoke mapper method
 			actionObj = (AgentAction)method.invoke(mapperObj, parameterValues);
 			log.debug("Invoked method "+method.getName()+"("+parameterList.substring(0,parameterList.length()-1)+") in mapper");
 
 		} catch(Exception e) {
-			log.error("Method "+method.getName()+"("+parameterList.substring(0,parameterList.length()-1)+") not found in mapper");
+			log.error("Method "+method.getName()+"("+parameterList.substring(0,parameterList.length()-1)+") error invocation");
 			throw e;
 		}
 		
@@ -80,5 +106,15 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 	
 	public String getOntoActionName() {
 		return ontoActionName;
+	}
+	
+	private ParameterInfo getSoapParamByName(Vector<ParameterInfo> soapParams, String methodParamName) throws Exception {
+		for (ParameterInfo param : soapParams) {
+			if (param.getName().equalsIgnoreCase(methodParamName)) {
+				return param;
+			}
+		}
+		
+		throw new Exception();
 	}
 }

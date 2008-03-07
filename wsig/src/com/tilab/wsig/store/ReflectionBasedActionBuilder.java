@@ -24,8 +24,12 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.store;
 
 import jade.content.AgentAction;
+import jade.content.abs.AbsAgentAction;
+import jade.content.abs.AbsHelper;
+import jade.content.abs.AbsObject;
+import jade.content.onto.Ontology;
+import jade.content.schema.AgentActionSchema;
 
-import java.lang.reflect.Field;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
@@ -34,58 +38,34 @@ public class ReflectionBasedActionBuilder implements ActionBuilder {
 
 	private static Logger log = Logger.getLogger(ReflectionBasedActionBuilder.class.getName());
 	
-	private Class actionClass;
 	private String ontoActionName;
-	
+	private Ontology onto;
 
 	/**
 	 * ReflectionBasedActionBuilder
 	 * @param actionClass
 	 */
-	public ReflectionBasedActionBuilder(Class actionClass, String ontoActionName) {
-		this.actionClass = actionClass;
+	public ReflectionBasedActionBuilder(Ontology onto, String ontoActionName) {
+		this.onto = onto;
 		this.ontoActionName = ontoActionName;
 	}
 
 	/**
 	 * getAgentAction
 	 */
-	public AgentAction getAgentAction(Vector<ParameterInfo> params) throws Exception {
+	public AgentAction getAgentAction(Vector<ParameterInfo> soapParams) throws Exception {
 
-		AgentAction actionObj = null;
-		
-		try {
-			actionObj = (AgentAction)actionClass.newInstance();
-			log.debug("Create jade action "+actionClass.getName()+" via ontology");
-			
-			// Set parameters
-			if (params != null) {
-				Field[] dfs = actionClass.getDeclaredFields();
-	
-				// Set value to every fields
-				for (int count = 0; count < dfs.length; ++count) {
-					
-					// Set reflection accessiable method
-					dfs[count].setAccessible(true);
-	
-					// Get parameter and verify...
-					String paramName = dfs[count].getName();
-					ParameterInfo paramEi = params.get(count);
-					if (!paramEi.getName().equals(paramName)) {
-						throw new RuntimeException("Parameter "+paramName+" not match with parameter in store ("+paramEi.getName()+")");
-					}
-	
-					// Set parameter value
-					dfs[count].set(actionObj, paramEi.getValue());
-					log.debug("Set action parameter "+paramName+" with "+paramEi.getValue());
-				}
+		AgentActionSchema schema = (AgentActionSchema) onto.getSchema(ontoActionName);
+		AbsAgentAction actionAbsObj = (AbsAgentAction) schema.newInstance();
+		if (soapParams != null) {
+			for (ParameterInfo param : soapParams) {
+				String slotName = param.getName();
+				Object value = param.getValue();
+				AbsObject slotValue = onto.fromObject(value);
+				AbsHelper.setAttribute(actionAbsObj, slotName, slotValue);
 			}
-		} catch(Exception e) {
-			log.error("Error creating jade action "+actionClass.getName()+" via ontology", e);
-			throw e;
 		}
-		
-		return actionObj;
+		return actionAbsObj;
 	}
 	
 	public String getOntoActionName() {
