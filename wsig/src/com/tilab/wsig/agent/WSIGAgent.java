@@ -367,7 +367,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		wsigService.setServiceName(serviceName);
 		wsigService.setServicePrefix(servicePrefix);
 		wsigService.setAid(aid);
-		wsigService.setWsdl(new URL(WSIGConfiguration.getInstance().getWsdlUri()+ File.separator+serviceName+".wsdl"));
+		wsigService.setWsdl(new URL(WSIGConfiguration.getInstance().getWsdlUri()+"/"+serviceName+".wsdl"));
 		wsigService.setOnto(serviceOnto);
 		wsigService.setMapperClass(mapperClass);
 
