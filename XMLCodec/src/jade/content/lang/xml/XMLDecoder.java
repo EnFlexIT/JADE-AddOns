@@ -15,6 +15,7 @@ import org.xml.sax.InputSource;
 
 import jade.content.abs.*;
 import jade.content.lang.Codec.CodecException;
+import jade.content.lang.sl.SL0Vocabulary;
 import jade.content.onto.OntologyException;
 import jade.content.onto.Ontology;
 import jade.content.schema.*;
@@ -24,11 +25,13 @@ import jade.util.leap.ArrayList;
 
 import org.apache.commons.codec.binary.Base64;
 
-public class XMLDecoder {
+class XMLDecoder {
 	private Ontology ontology;
+	private boolean preserveJavaTypes;
 
-	public void init(Ontology onto) {
+	public void init(Ontology onto, boolean preserveJavaTypes) {
 		ontology = onto;
+		this.preserveJavaTypes = preserveJavaTypes;
 	}
 
 	public AbsObject decode(String xml) throws CodecException, OntologyException {
@@ -107,17 +110,14 @@ public class XMLDecoder {
 					ObjectSchema slotSchema = schema.getSchema(slotName);
 					if (slotSchema instanceof AggregateSchema) {
 						// The slot schema mandates the value to be an aggregate
-						slotValue = decodeAggregate(slotChildList);
+						slotValue = decodeAggregate(slotChildList, slot.getAttributes());
 					}
 					else if (AggregateSchema.getBaseSchema().isCompatibleWith(slotSchema)) {
 						// The slot schema allows the value to be an aggregate. If this is the case the "aggregate" attribute is set to true
 						attributes = slot.getAttributes();
-						length = attributes.getLength();
-						if (length == 1) {
-							Node attr = attributes.item(0);
-							if (attr.getNodeName().equals(XMLCodec.AGGREGATE_ATTR) && attr.getNodeValue().equals("true")) {
-								slotValue = decodeAggregate(slotChildList);
-							}
+						Node attr = attributes.getNamedItem(XMLCodec.AGGREGATE_ATTR);
+						if (attr != null && attr.getNodeValue().equals("true")) {
+							slotValue = decodeAggregate(slotChildList, attributes);
 						}
 					}
 				}
@@ -192,7 +192,7 @@ public class XMLDecoder {
 			Node attr = attributes.item(0);
 			String attrName = attr.getNodeName();
 			if (attrName.equalsIgnoreCase(XMLCodec.VALUE_ATTR)) {
-				return AbsPrimitive.wrap(attr.getNodeValue());
+				return decodeAbsPrimitive(attr.getNodeValue());
 			}
 			else {
 				throw new CodecException("Unexpected attribute "+attrName+" in primitive element "+n);
@@ -203,8 +203,70 @@ public class XMLDecoder {
 		}
 	}
 
+	private AbsPrimitive decodeAbsPrimitive(String value) {
+		if (preserveJavaTypes) {
+			int length = value.length();
+			char lastChar = length > 0 ? value.charAt(length-1) : '#'; // '#' is used just as a character different from 'L' and 'F'
+			if (lastChar == 'L') {
+				// Try as a long
+				try {
+					return AbsPrimitive.wrap(Long.parseLong(value.substring(0, length -1)));
+				}
+				catch (Exception e) {}
+			}
+			if (lastChar == 'F') {
+				// Try as a Float
+				try {
+					return AbsPrimitive.wrap(Float.parseFloat(value.substring(0, length -1)));
+				}
+				catch (Exception e) {}
+			}
+			// Try as an Integer
+			try {
+				return AbsPrimitive.wrap(Integer.parseInt(value));
+			}
+			catch (Exception e) {}
+		}
+		else {
+			// Try as a Long
+			try {
+				return AbsPrimitive.wrap(Long.parseLong(value));
+			}
+			catch (Exception e) {}
+		}
+		// Try as a Double
+		try {
+			return AbsPrimitive.wrap(Double.parseDouble(value));
+		}
+		catch (Exception e) {}
+		// Try as a Date
+		try {
+			return AbsPrimitive.wrap(ISO8601.toDate(value));
+		}
+		catch (Exception e) {}
+		// Try as a byte[]
+		if (value.startsWith(XMLCodec.BINARY_STARTER)) {
+			try {
+				String base64Str = value.substring(1);
+				return AbsPrimitive.wrap(Base64.decodeBase64(base64Str.getBytes("US-ASCII"))); 
+			}
+			catch (Exception e) {}
+		}
+		// Try as a Boolean (note that Boolean.parseBoolean() returns false for all strings but "true")
+		if (value.equalsIgnoreCase("true")) {
+			return AbsPrimitive.wrap(true);
+		}
+		if (value.equalsIgnoreCase("false")) {
+			return AbsPrimitive.wrap(false);
+		}
+		// It must be a String
+		return AbsPrimitive.wrap(value.toString());
+	}
+	
 	private void setPrimitiveSlot(AbsPrimitiveSlotsHolder abs, String slotName, String value) {
-		// Try as a Long
+		AbsPrimitive slotValue = decodeAbsPrimitive(value);
+		abs.set(slotName, slotValue);
+		/* Try as a Long
 		try {
 			abs.set(slotName, Long.parseLong(value));
 			return;
@@ -241,13 +303,14 @@ public class XMLDecoder {
 			abs.set(slotName, false);
 			return;
 		}
-		abs.set(slotName, value);
+		abs.set(slotName, value);*/
 	}
 
 	private void setPrimitiveSlot(String[] slotNames, AbsObject[] slotValues, String slotName, String value) throws OntologyException {
 		for (int i = 0; i < slotNames.length; ++i) {
 			if (slotNames[i].equalsIgnoreCase(slotName)) {
-				// Try as a Long
+				slotValues[i] = decodeAbsPrimitive(value);
+				/* Try as a Long
 				try {
 					slotValues[i] = AbsPrimitive.wrap(Long.parseLong(value));
 					return;
@@ -281,7 +344,7 @@ public class XMLDecoder {
 					return;
 				}
 				catch (Exception e) {}
-				slotValues[i] = AbsPrimitive.wrap(value);
+				slotValues[i] = AbsPrimitive.wrap(value);*/
 				return;
 			}
 		}
@@ -315,19 +378,16 @@ public class XMLDecoder {
 					ObjectSchema slotSchema = schema.getSchema(slotName);
 					if (slotSchema instanceof AggregateSchema) {
 						// The slot value is certainly an aggregate
-						slotValues[i] = decodeAggregate(slot.getChildNodes());
+						slotValues[i] = decodeAggregate(slot.getChildNodes(), slot.getAttributes());
 						return true;
 					}
 					else if (AggregateSchema.getBaseSchema().isCompatibleWith(slotSchema)) {
 						// The slot schema allows the value to be an aggregate. If this is the case the "aggregate" attribute is set to true
 						NamedNodeMap attributes = slot.getAttributes();
-						int length = attributes.getLength();
-						if (length == 1) {
-							Node attr = attributes.item(0);
-							if (attr.getNodeName().equals("aggregate") && attr.getNodeValue().equals("true")) {
-								slotValues[i] = decodeAggregate(slot.getChildNodes());
-								return true;
-							}
+						Node attr = attributes.getNamedItem(XMLCodec.AGGREGATE_ATTR);
+						if (attr != null && attr.getNodeValue().equals("true")) {
+							slotValues[i] = decodeAggregate(slot.getChildNodes(), attributes);
+							return true;
 						}
 					}
 				}
@@ -340,8 +400,13 @@ public class XMLDecoder {
 		return false;
 	}
 
-	private AbsAggregate decodeAggregate(NodeList list) throws CodecException, OntologyException {
-		AbsAggregate abs = new AbsAggregate("sequence");
+	private AbsAggregate decodeAggregate(NodeList list, NamedNodeMap attributes) throws CodecException, OntologyException {
+		String typeName = SL0Vocabulary.SEQUENCE;
+		Node attr = attributes.getNamedItem(XMLCodec.AGGREGATE_TYPE_ATTR);
+		if (attr != null) {
+			typeName = attr.getNodeValue();
+		}
+		AbsAggregate abs = new AbsAggregate(typeName);
 		int length = list.getLength();
 		for (int i = 0; i < length; ++i) {
 			Node item = list.item(i);

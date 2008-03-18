@@ -727,7 +727,7 @@ public class TestSuiteAgent extends GuiAgent {
 			p.setParameter(Profile.SERVICES, "jade.core.event.NotificationService;jade.core.mobility.AgentMobilityService;jade.core.replication.AddressNotificationService;jade.core.messaging.TopicManagementService");
 			p.setSpecifiers(Profile.MTPS, new ArrayList());
 			
-			AgentContainer  mc = rt.createAgentContainer(p);
+			ContainerController  mc = rt.createAgentContainer(p);
 			
 			AgentController testSuite = mc.createNewAgent(NAME, TestSuiteAgent.class.getName(), null);
 			testSuite.start();
@@ -742,15 +742,6 @@ public class TestSuiteAgent extends GuiAgent {
 	 */
 	private void updateElapsedTime() {
 		myGui.setElapsedTime(System.currentTimeMillis() - startTime);
-		/*long endTime = System.currentTimeMillis();
-		 long runTime;
-		 if (myGui.getStatus() != TestSuiteGui.RUNALL_STATE) {
-		 runTime = endTime-startTime;
-		 } 
-		 else {
-		 runTime = endTime-startRunAllTime;
-		 }
-		 myGui.setElapsedTime(runTime);*/
 	} 
 	
 	/**

@@ -7,17 +7,17 @@ import jade.content.schema.*;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
 import jade.content.lang.Codec.CodecException;
+import jade.content.lang.sl.SL0Vocabulary;
 import jade.lang.acl.ISO8601;
+import jade.util.leap.HashMap;
+import jade.util.leap.Iterator;
 import jade.util.leap.List;
 import jade.util.leap.ArrayList;
+import jade.util.leap.Map;
+
 import org.apache.commons.codec.binary.Base64;
 
-////////////////////////////////////////////////////////////////
-//CLASSE DI PROVA: IGNORATELA!!!!!!!!!!!!!!!!!!!!
-////////////////////////////////////////////////////////////////
-public class XMLEncoder {
-	public static final String PRIMITIVE_TAG = "primitive";
-	
+class XMLEncoder {	
 	private static final char OPEN_ANG = '<';
 	private static final char CLOSE_ANG = '>';
 	
@@ -25,10 +25,12 @@ public class XMLEncoder {
 	private StringBuffer buffer;
 	private boolean indentEnabled = false;
 	private int tabs = 0;
+	private boolean preserveJavaTypes;
 	
-	public void init(Ontology onto, StringBuffer sb) {
+	public void init(Ontology onto, StringBuffer sb, boolean preserveJavaTypes) {
 		ontology = onto;
 		buffer = sb;
+		this.preserveJavaTypes = preserveJavaTypes;
 	}
 	
 	public void setIndentEnabled(boolean b) {
@@ -78,7 +80,7 @@ public class XMLEncoder {
 	}
 	
 	private void encodeContentElementList(AbsContentElementList abs) throws CodecException, OntologyException {
-		encodeOpenTag(abs.getTypeName());
+		encodeOpenTag(abs.getTypeName(), null);
 		tabs++;
 		for (int i = 0; i < abs.size(); ++i) {
 			encode(abs.get(i));
@@ -120,22 +122,24 @@ public class XMLEncoder {
 							boolean closeSlotNameTag = false;
 							if (slot instanceof AbsAggregate) {
 								// Aggregate slots are always encoded by name. 
-								ObjectSchema slotSchema = schema.getSchema(slotName);
-								if (slotSchema instanceof AggregateSchema) {
-									encodeOpenTag(slotName);
+								Map aggregateModifyingAttributes = new HashMap();
+								if (!slot.getTypeName().equals(SL0Vocabulary.SEQUENCE)) {
+									aggregateModifyingAttributes.put(XMLCodec.AGGREGATE_TYPE_ATTR, slot.getTypeName());
 								}
-								else {
+								ObjectSchema slotSchema = schema.getSchema(slotName);
+								if (!(slotSchema instanceof AggregateSchema)) {
 									// The slot value is an aggregate, but this cannot be desumed from the slot schema -->
 									// Insert an indication to enable correct decoding
-									encodeOpenAggregateTag(slotName);
+									aggregateModifyingAttributes.put(XMLCodec.AGGREGATE_ATTR, "true");
 								}
+								encodeOpenTag(slotName, aggregateModifyingAttributes);
 								closeSlotNameTag = true;
 								tabs++;
 							}
 							else {
 								// Frame slots are encoded according to the schema preference
 								if (!encodeByOrder) {
-									encodeOpenTag(slotName);
+									encodeOpenTag(slotName, null);
 									closeSlotNameTag = true;
 									tabs++;
 								}
@@ -232,15 +236,26 @@ public class XMLEncoder {
 		insertNewline();
 	}
 	
-	private void encodeOpenTag(String name) {
+	private void encodeOpenTag(String name, Map attrs) {
 		insertIndent();
 		buffer.append(OPEN_ANG);
 		buffer.append(name);
+		if (attrs != null) {
+			Iterator it = attrs.keySet().iterator();
+			while (it.hasNext()) {
+				String attrName = (String) it.next();
+				buffer.append(' ');
+				buffer.append(attrName);
+				buffer.append("=\"");
+				buffer.append(attrs.get(attrName));
+				buffer.append("\"");
+			}
+		}
 		buffer.append(CLOSE_ANG);
 		insertNewline();
 	}
 	
-	private void encodeOpenAggregateTag(String name) {
+	/*private void encodeOpenAggregateTag(String name) {
 		insertIndent();
 		buffer.append(OPEN_ANG);
 		buffer.append(name);
@@ -249,7 +264,7 @@ public class XMLEncoder {
 		buffer.append("=\"true\"");
 		buffer.append(CLOSE_ANG);
 		insertNewline();
-	}
+	}*/
 	
 	private void encodeCloseTag(String name) {
 		insertIndent();
@@ -265,8 +280,11 @@ public class XMLEncoder {
 		if (obj instanceof Date) {
 			return ISO8601.toString((Date) obj);
 		}
-		else if (obj instanceof Integer || obj instanceof Long || obj instanceof Boolean || obj instanceof Double || obj instanceof Float) {
-			return obj.toString();
+		else if (preserveJavaTypes && obj instanceof Long) {
+			return obj.toString()+'L';
+		}
+		else if (preserveJavaTypes && obj instanceof Float) {
+			return obj.toString()+'F';
 		}
 		else if (obj instanceof byte[]) {
 			try {
@@ -280,7 +298,8 @@ public class XMLEncoder {
 			}
 		}
 		else {
-			return (String) obj;
+			// Boolean, Integer, Double, String (Long, Float if not preserving Java types) 
+			return obj.toString();
 		}
 	}
 	

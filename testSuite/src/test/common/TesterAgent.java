@@ -127,8 +127,8 @@ public abstract class TesterAgent extends Agent {
 			// controller agent (usually the JADE TestSuiteAgent)
 			addBehaviour(new Controller(this));
 			
-      // Notify the remote controller about the number of tests in the group
-      notifyController(new NumberOfTests(theTestGroup.size()));
+			// Notify the remote controller about the number of tests in the group
+			notifyController(new NumberOfTests(theTestGroup.size()));
 		}
 		else {
 			// STAND-ALONE EXECUTION MODE

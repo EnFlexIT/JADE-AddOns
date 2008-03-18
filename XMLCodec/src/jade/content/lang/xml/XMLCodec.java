@@ -41,16 +41,45 @@ import org.xml.sax.helpers.*;
 
 public class XMLCodec extends StringCodec {
 	public static final String NAME = "XML";
-	
+
+	// Tag and attribute for aggregates of primitives:
+	// For instance a slot named foo that is a list of integers is encoded as below
+	// ...
+	// <foo>
+	//   <primitive value="1"/>
+	//   <primitive value="2"/>
+	//   ...
+	// </foo>
+	// ...
 	public static final String PRIMITIVE_TAG = "primitive";
 	public static final String VALUE_ATTR = "value";
+	
 	public static final String AGGREGATE_ATTR = "aggregate";
+	public static final String AGGREGATE_TYPE_ATTR = "aggregate-type";
 	public static final String BINARY_STARTER = "#";
 	
-    public XMLCodec() {
-    	super(NAME);
-    }
-    
+
+	private boolean preserveJavaTypes;
+
+	/**
+	 * Create an XMLCodec that preserves java primitive types (long, int, float, double).
+	 * This is achieved by encoding long values as <numeric-value>L and float values as
+	 * <numeric-valueF.
+	 * This constructor is equivalent to <code>XMLCodec(null)</code> 
+	 */
+	public XMLCodec() {
+		this(true);
+	}
+
+	/**
+	 * Create an XMLCodec specifying whether or not java primitive types (long, int, float, double) must be
+	 * preserved.
+	 */
+	public XMLCodec(boolean preserveJavaTypes) {
+		super(NAME);
+		this.preserveJavaTypes = preserveJavaTypes;
+	}
+
 	/**
 	 * Encodes a content into a string.
 	 * @param content the content as an abstract descriptor.
@@ -60,7 +89,7 @@ public class XMLCodec extends StringCodec {
 	public String encode(AbsContentElement content) throws CodecException {
 		throw new CodecException("Not supported");
 	}
-	
+
 	/**
 	 * Encodes a content into a string using a given ontology.
 	 * @param ontology the ontology 
@@ -76,16 +105,16 @@ public class XMLCodec extends StringCodec {
 			throw new CodecException("Ontology error", oe);
 		}
 	}
-	
+
 	public String encodeAbsObject(Ontology ontology, AbsObject abs, boolean indent) throws CodecException, OntologyException {
 		XMLEncoder encoder = new XMLEncoder();
 		StringBuffer sb = new StringBuffer();
-		encoder.init(ontology, sb);
+		encoder.init(ontology, sb, preserveJavaTypes);
 		encoder.setIndentEnabled(indent);
 		encoder.encode(abs);
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Encode a generic ontological entity in XML form
 	 */
@@ -93,7 +122,7 @@ public class XMLCodec extends StringCodec {
 		AbsObject abs = ontology.fromObject(obj);
 		return encodeAbsObject(ontology, abs, indent);
 	}
-	
+
 	/**
 	 * Decodes the content to an abstract description.
 	 * @param content the content as a string.
@@ -103,7 +132,7 @@ public class XMLCodec extends StringCodec {
 	public AbsContentElement decode(String content) throws CodecException {
 		throw new CodecException("Not supported");
 	}
-	
+
 	/**.
 	 * Decodes the content to an abstract description using a 
 	 * given ontology.
@@ -126,13 +155,13 @@ public class XMLCodec extends StringCodec {
 			throw new CodecException("Ontology error", oe);
 		}
 	}
-	
+
 	public AbsObject decodeAbsObject(Ontology ontology, String xml) throws CodecException, OntologyException {
 		XMLDecoder decoder = new XMLDecoder();
-		decoder.init(ontology);
+		decoder.init(ontology, preserveJavaTypes);
 		return decoder.decode(xml);
 	}
-	
+
 	/**
 	 * Decode a generic ontological entity from an XML form
 	 */
