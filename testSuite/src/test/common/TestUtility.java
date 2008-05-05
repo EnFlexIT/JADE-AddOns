@@ -360,6 +360,10 @@ public class TestUtility {
 			if (jvmArgs == null) {
 				jvmArgs = "";
 			}
+			// FIXME: We should propagate all -Dkey=value properties...
+			if (System.getProperty("project-home") != null) {
+				jvmArgs = jvmArgs + " -Dproject-home="+System.getProperty("project-home");
+			}
 			String classpathOption = "";
 			if (jvmArgs.indexOf("-cp ") < 0 && jvmArgs.indexOf("-classpath ") < 0) {
 				if (classpath == null || classpath.startsWith("+")) {
