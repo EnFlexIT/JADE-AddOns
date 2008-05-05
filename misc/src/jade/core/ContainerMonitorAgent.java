@@ -440,18 +440,24 @@ public class ContainerMonitorAgent extends Agent {
 		sb.append(a.getLocalName());
 		sb.append(" MessageQueue DUMP\n");
 		sb.append("-------------------------------------------------------------\n");
-		Object[] messages = a.getMessageQueue().getAllMessages();
-		if (messages.length > 0) {
-    		for (int j = 0; j < messages.length; ++j) {
-    			sb.append("Message # ");
-    			sb.append(j);
-    			sb.append('\n');
-    			sb.append(messages[j]);
-    			sb.append('\n');
-    		}
+		MessageQueue queue = a.getMessageQueue();
+		if (queue instanceof InternalMessageQueue) {
+			Object[] messages = ((InternalMessageQueue) queue).getAllMessages();
+			if (messages.length > 0) {
+	    		for (int j = 0; j < messages.length; ++j) {
+	    			sb.append("Message # ");
+	    			sb.append(j);
+	    			sb.append('\n');
+	    			sb.append(messages[j]);
+	    			sb.append('\n');
+	    		}
+			}
+			else {
+				sb.append("Queue is empty\n");
+			}
 		}
 		else {
-			sb.append("Queue is empty\n");
+			sb.append("MessageQueue is not an InternalMessageQueue. Cannot dump it\n");
 		}
 		return sb.toString();
 	}
