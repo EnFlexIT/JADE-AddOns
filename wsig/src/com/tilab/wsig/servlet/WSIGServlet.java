@@ -50,10 +50,6 @@ import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.axis.Message;
 import org.apache.axis.transport.http.HTTPConstants;
@@ -72,8 +68,6 @@ public class WSIGServlet extends HttpServlet {
 	private static Logger log = Logger.getLogger(WSIGServlet.class.getName());
 
 	private WSIGStore wsigStore = new WSIGStore();
-	private SoapToJade soapToJade = new SoapToJade();
-	private JadeToSoap jadeToSoap = new JadeToSoap();
 	private int executionTimeout = 0;
 	private ServletContext servletContext = null;
 	private String consoleUri;
@@ -217,6 +211,7 @@ public class WSIGServlet extends HttpServlet {
 		// Convert soap to jade
 		AgentAction agentAction = null;
 		try {
+			SoapToJade soapToJade = new SoapToJade();
 			agentAction = (AgentAction)soapToJade.convert(soapRequest, wsigService, operationName);
 			log.info("Jade Action: "+agentAction.toString());
 		} catch (Exception e) {
@@ -247,6 +242,7 @@ public class WSIGServlet extends HttpServlet {
 		// Convert jade to soap
 		SOAPMessage soapResponse = null;
 		try {
+			JadeToSoap jadeToSoap = new JadeToSoap();
 			soapResponse = jadeToSoap.convert(operationResult, wsigService, operationName);
 			
 			log.debug("SOAP response:");
