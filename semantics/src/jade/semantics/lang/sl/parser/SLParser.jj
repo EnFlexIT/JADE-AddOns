@@ -335,6 +335,7 @@ ListOfFormula ListOfFormula() :
   ( formula = Formula(new ArrayList())
     {
          list.add(formula);
+         _metaReferences.clear();
     } ) +
   {
 	return list;

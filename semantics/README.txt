@@ -1,4 +1,4 @@
-README file for the JADE Semantics Add-On, version 1.5
+README file for the JADE Semantics Add-On, version 1.6
 
 INTRODUCTION
 ============

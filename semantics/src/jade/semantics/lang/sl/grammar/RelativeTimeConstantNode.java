@@ -33,21 +33,7 @@ Boston, MA  02111-1307, USA.
 package jade.semantics.lang.sl.grammar;
 
 //#PJAVA_EXCLUDE_BEGIN
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
 import java.util.HashMap;
-//#PJAVA_EXCLUDE_END
-/*#PJAVA_INCLUDE_BEGIN
-import jade.util.leap.Collection;
-import jade.util.leap.Comparable;
-import jade.util.leap.LinkedList;
-import jade.util.leap.List;
-import jade.util.leap.HashMap;
-#PJAVA_INCLUDE_END*/
 
 public class RelativeTimeConstantNode extends IntegerConstant
 {
