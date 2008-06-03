@@ -203,25 +203,27 @@ public class SoapToJade extends DefaultHandler {
 
 				// Get parameter type
 				String attrValue = attrs.getValue(WSDLConstants.XSI, "type");
-				int pos = attrValue.indexOf(':');
-				String valueType = attrValue.substring(pos+1);
-				log.debug("Start managing parameter "+name+" of type "+valueType);
-
-				// Prepare vector store for this level
-				int params4LevelIndex = level - 4; 
-				Vector<ParameterInfo> params = null;
-				if (params4Level.size() <= params4LevelIndex) {
-					params = new Vector<ParameterInfo>();
-					params4Level.add(params4LevelIndex, params);
-				} else {
-					params = params4Level.get(params4LevelIndex);
+				if (attrValue != null) {
+					int pos = attrValue.indexOf(':');
+					String valueType = attrValue.substring(pos+1);
+					log.debug("Start managing parameter "+name+" of type "+valueType);
+	
+					// Prepare vector store for this level
+					int params4LevelIndex = level - 4; 
+					Vector<ParameterInfo> params = null;
+					if (params4Level.size() <= params4LevelIndex) {
+						params = new Vector<ParameterInfo>();
+						params4Level.add(params4LevelIndex, params);
+					} else {
+						params = params4Level.get(params4LevelIndex);
+					}
+	
+					// Create new ElementInfo for this parameter
+					ParameterInfo ei = new ParameterInfo();
+					ei.setName(name);
+					ei.setType(valueType);
+					params.add(ei);
 				}
-
-				// Create new ElementInfo for this parameter
-				ParameterInfo ei = new ParameterInfo();
-				ei.setName(name);
-				ei.setType(valueType);
-				params.add(ei);
 			}
 
 		} catch(Exception e) {
@@ -250,78 +252,83 @@ public class SoapToJade extends DefaultHandler {
 
 				// Get vector store for this level
 				int params4LevelIndex = level - 4; 
-				Vector<ParameterInfo> params = params4Level.get(params4LevelIndex);
-				
-				// Get parameter infos & verify...
-				ParameterInfo paramEi = params.lastElement();
-				if (!paramEi.getName().equals(name)) {
-					throw new RuntimeException("Parameter "+name+" doesn't match with parameter in store ("+paramEi.getName()+")");
-				}
-
-				// Get class type
-				Class clazz = SoapUtils.getClassByType(onto, paramEi.getType());
-				if (clazz != null) {
-					// Fill value
-					if (SoapUtils.isPrimitiveJadeType(clazz)) {
-						// Primitive type
-						paramEi.setValue(SoapUtils.getPrimitiveValue(paramEi.getType(), fieldValue));
-						log.debug("Set "+name+" with "+paramEi.getValue());
-	
-					} else {
-						// Not primitive type
-						
-						// Create parameter object
-						Object obj = clazz.newInstance();
-						
-						// Get store of object parameters
-						Vector<ParameterInfo> objParams = params4Level.get(params4LevelIndex+1);
-	
-						if (obj instanceof ArrayList) {
-	
-							// Object is an array
-							for (int count = 0; count < objParams.size(); ++count) {
-								
-								// Add param to array
-								ParameterInfo objParamEi = objParams.get(count);
-								((ArrayList)obj).add(objParamEi.getValue());
-								log.debug("Add element "+count+" to "+name+" with "+objParamEi.getValue());
-							}
-						} else {
-	
-							// Object is a custom type
-	
-							// Get fields of object
-							Field[] dfs = clazz.getDeclaredFields();
-	
-							// Set value to every fields
-							for (int count = 0; count < dfs.length; ++count) {
-								
-								// Set reflection accessiable method
-								dfs[count].setAccessible(true);
-	
-								// Get parameter and verify...
-								String paramName = dfs[count].getName();
-								ParameterInfo paramEi1 = objParams.get(count);
-								if (!paramEi1.getName().equals(paramName)) {
-									throw new RuntimeException("Parameter "+paramName+" doesn't match with parameter in store ("+paramEi1.getName()+")");
-								}
-	
-								// Set parameter value
-								dfs[count].set(obj, paramEi1.getValue());
-								log.debug("Set "+name+"."+paramName+" with "+paramEi1.getValue());
-							}
-						}
-	
-						// Remove params level from store
-						params4Level.remove(objParams);
-						
-						// Set value in param object
-						paramEi.setValue(obj);
+				if (params4LevelIndex < params4Level.size()) {
+					Vector<ParameterInfo> params = params4Level.get(params4LevelIndex);
 					
-						log.debug("End managing parameter "+name);
+					// Get parameter infos & verify...
+					ParameterInfo paramEi = params.lastElement();
+					if (!paramEi.getName().equals(name)) {
+						throw new RuntimeException("Parameter "+name+" doesn't match with parameter in store ("+paramEi.getName()+")");
 					}
-				} else {
-					throw new RuntimeException("No class found for type "+paramEi.getType()+" in ontology "+onto.getName());
+	
+					// Get class type
+					Class clazz = SoapUtils.getClassByType(onto, paramEi.getType());
+					if (clazz != null) {
+						// Fill value
+						if (SoapUtils.isPrimitiveJadeType(clazz)) {
+							// Primitive type
+							paramEi.setValue(SoapUtils.getPrimitiveValue(paramEi.getType(), fieldValue));
+							log.debug("Set "+name+" with "+paramEi.getValue());
+		
+						} else {
+							// Not primitive type
+							
+							// Create parameter object
+							Object obj = clazz.newInstance();
+							
+							// Get store of object parameters
+							if ((params4LevelIndex+1) < params4Level.size()) {
+								Vector<ParameterInfo> objParams = params4Level.get(params4LevelIndex+1);
+			
+								if (obj instanceof ArrayList) {
+			
+									// Object is an array
+									for (int count = 0; count < objParams.size(); ++count) {
+										
+										// Add param to array
+										ParameterInfo objParamEi = objParams.get(count);
+										((ArrayList)obj).add(objParamEi.getValue());
+										log.debug("Add element "+count+" to "+name+" with "+objParamEi.getValue());
+									}
+								} else {
+			
+									// Object is a custom type
+									
+									// Set value to every fields
+									for (int count = 0; count < objParams.size(); ++count) {
+										ParameterInfo paramEi1 = objParams.get(count);
+									
+										// Get parameter and verify...
+										Field declaredField;
+										String paramName = paramEi1.getName();
+										Object paramValue = paramEi1.getValue();
+										try {
+											declaredField = clazz.getDeclaredField(paramName);
+										} catch (NoSuchFieldException e){
+											throw new RuntimeException("Field "+paramName+" not found in classe"+clazz);
+										}
+										
+										// Set reflection accessiable method
+										declaredField.setAccessible(true);
+										
+										// Set parameter value
+										declaredField.set(obj, paramValue);
+										log.debug("Set "+name+"."+paramName+" with "+paramValue);
+									}
+								}
+
+								// Remove params level from store
+								params4Level.remove(objParams);
+							}
+
+							// Set value in param object
+							paramEi.setValue(obj);
+						
+							log.debug("End managing parameter "+name);
+						}
+					} else {
+						throw new RuntimeException("No class found for type "+paramEi.getType()+" in ontology "+onto.getName());
+					}
 				}
 			}
 		} catch(Exception e) {

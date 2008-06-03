@@ -423,11 +423,9 @@ public class SDToWSDL {
 				WSDLGeneratorUtils.addElementToSequence(true, tns, xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 
 		} else if (objSchema instanceof ConceptSchema) {
-			if (parentComponent != null) {
-				WSDLGeneratorUtils.addElementToSequence(false, tns, xsdSchema, slotName, slotName, (XSDModelGroup) parentComponent, cardMin, cardMax);
-			}
 			if (WSDLGeneratorUtils.getTypeDefinition(xsdSchema, xsdSchema.getTargetNamespace(), objSchema.getTypeName()) == null) {
 				XSDComplexTypeDefinition complexType = WSDLGeneratorUtils.addComplexTypeToSchema(tns, xsdSchema, objSchema.getTypeName());
+				
 				XSDModelGroup sequence = WSDLGeneratorUtils.addSequenceToComplexType(complexType);
 				for (String conceptSlotName : objSchema.getNames()) {
 					ObjectSchema slotSchema = objSchema.getSchema(conceptSlotName);
@@ -436,6 +434,9 @@ public class SDToWSDL {
 			}
 			slotType = objSchema.getTypeName();
 
+			if (parentComponent != null) {
+				WSDLGeneratorUtils.addElementToSequence(false, tns, xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
+			}
 		} else if (objSchema instanceof AggregateSchema) {
 
 			Facet[] facets;

@@ -106,9 +106,6 @@ public class SoapUtils {
 				else if (name.equals(SL0Vocabulary.ACLMSG)) {
 					clazz = ACLMessage.class;
 				}
-				else if (name.equals(SL0Vocabulary.ACLMSG)) {
-					clazz = ACLMessage.class;
-				}
 			}
 		} catch(Exception e) {
 			log.error("Element "+name+" not found in ontology "+onto.getName(), e);
