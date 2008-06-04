@@ -291,7 +291,6 @@ public class SoapToJade extends DefaultHandler {
 										log.debug("Add element "+count+" to "+name+" with "+objParamEi.getValue());
 									}
 								} else {
-			
 									// Object is a custom type
 									
 									// Set value to every fields
@@ -302,18 +301,9 @@ public class SoapToJade extends DefaultHandler {
 										Field declaredField;
 										String paramName = paramEi1.getName();
 										Object paramValue = paramEi1.getValue();
-										try {
-											declaredField = clazz.getDeclaredField(paramName);
-										} catch (NoSuchFieldException e){
-											throw new RuntimeException("Field "+paramName+" not found in classe"+clazz);
-										}
 										
-										// Set reflection accessiable method
-										declaredField.setAccessible(true);
-										
-										// Set parameter value
-										declaredField.set(obj, paramValue);
-										log.debug("Set "+name+"."+paramName+" with "+paramValue);
+										// Set value
+										setFieldValue(obj, paramName, paramValue);
 									}
 								}
 
@@ -344,6 +334,37 @@ public class SoapToJade extends DefaultHandler {
 	 */
 	public void characters (char ch[], int start, int length) {
 		elContent.append(ch, start, length);
+	}
+	
+	private void setFieldValue(Object obj, String fieldName, Object fieldValue) {
+		
+		try {
+			// Get class
+			Class clazz = obj.getClass();
+			
+			// Get fields of object
+			Field field = null;
+			do {
+				try {
+					field = clazz.getDeclaredField(fieldName);
+				} catch(NoSuchFieldException e) {
+					clazz = clazz.getSuperclass();
+				}
+			} while(field == null && clazz != null);
+			
+			if (field != null) {
+				// Set reflection accessible method
+				field.setAccessible(true);
+					
+				// Set field value
+				field.set(obj, fieldValue);
+				log.debug("Set "+clazz.getSimpleName()+"."+fieldName+" with "+fieldValue);
+			} else {
+				log.error("Field "+fieldName+" not found in object "+clazz.getCanonicalName());
+			}
+		} catch(Exception e) {
+			log.error("Error accessing to field "+fieldName+" in object "+obj.getClass().getCanonicalName(), e);
+		}
 	}
 }
 

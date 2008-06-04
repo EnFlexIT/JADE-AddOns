@@ -419,23 +419,22 @@ public class SDToWSDL {
 		String slotType = null;
 		if (objSchema instanceof PrimitiveSchema) {
 			slotType = WSDLGeneratorUtils.types.get(objSchema.getTypeName());
-			if (parentComponent != null)
+			if (parentComponent != null) {
 				WSDLGeneratorUtils.addElementToSequence(true, tns, xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
+			}
 
 		} else if (objSchema instanceof ConceptSchema) {
-			if (WSDLGeneratorUtils.getTypeDefinition(xsdSchema, xsdSchema.getTargetNamespace(), objSchema.getTypeName()) == null) {
-				XSDComplexTypeDefinition complexType = WSDLGeneratorUtils.addComplexTypeToSchema(tns, xsdSchema, objSchema.getTypeName());
-				
+			slotType = objSchema.getTypeName();
+			if (parentComponent != null) {
+				WSDLGeneratorUtils.addElementToSequence(false, tns, xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
+			}
+			if (WSDLGeneratorUtils.getTypeDefinition(xsdSchema, xsdSchema.getTargetNamespace(), slotType) == null) {
+				XSDComplexTypeDefinition complexType = WSDLGeneratorUtils.addComplexTypeToSchema(tns, xsdSchema, slotType);
 				XSDModelGroup sequence = WSDLGeneratorUtils.addSequenceToComplexType(complexType);
 				for (String conceptSlotName : objSchema.getNames()) {
 					ObjectSchema slotSchema = objSchema.getSchema(conceptSlotName);
 					convertObjectSchemaIntoXsdType(tns, false, (ConceptSchema) objSchema, slotSchema, xsdSchema, conceptSlotName, sequence, -1, -1);
 				}
-			}
-			slotType = objSchema.getTypeName();
-
-			if (parentComponent != null) {
-				WSDLGeneratorUtils.addElementToSequence(false, tns, xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
 		} else if (objSchema instanceof AggregateSchema) {
 

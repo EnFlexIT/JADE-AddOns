@@ -276,19 +276,30 @@ public class JadeToSoap {
 			Class clazz = obj.getClass();
 			
 			// Get fields of object
-			Field field = clazz.getDeclaredField(fieldName);
+			Field field = null;
+			do {
+				try {
+					field = clazz.getDeclaredField(fieldName);
+				} catch(NoSuchFieldException e) {
+					clazz = clazz.getSuperclass();
+				}
+			} while(field == null && clazz != null);
 			
-			// Set reflection accessiable method
-			field.setAccessible(true);
+			if (field != null) {
+				// Set reflection accessible method
+				field.setAccessible(true);
+					
+				// Get field value
+				fieldValue = field.get(obj);
+				log.debug("Get "+clazz.getSimpleName()+"."+fieldName+" = "+fieldValue);
 				
-			// Get field value
-			fieldValue = field.get(obj);
-			
+			} else {
+				log.error("Field "+fieldName+" not found in object "+clazz.getCanonicalName());
+			}
 		} catch(Exception e) {
 			log.error("Error accessing to field "+fieldName+" in object "+obj.getClass().getCanonicalName(), e);
 		}
 
 		return fieldValue;
 	}
-	
 }
