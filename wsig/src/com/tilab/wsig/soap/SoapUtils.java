@@ -23,8 +23,9 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.soap;
 
+import java.text.SimpleDateFormat;
+
 import jade.content.lang.sl.SL0Vocabulary;
-import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.lang.acl.ACLMessage;
@@ -38,6 +39,10 @@ public class SoapUtils {
 	
 	private static Logger log = Logger.getLogger(SoapUtils.class.getName());
 
+	/**
+	 * ISO 8601 date format 
+	 */
+	public static SimpleDateFormat ISO8601_DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
 	/**
 	 * getClassByType
@@ -67,6 +72,8 @@ public class SoapUtils {
 			clazz = Long.TYPE;
 		} else if("short".equals(type)) {
 			clazz = Short.TYPE;
+		} else if ("dateTime".equals (type)) {
+			clazz = java.util.Date.class;
 		} else if(type.endsWith(WSDLGeneratorUtils.getArraySuffix())) {
 			// Array
 			clazz = ArrayList.class;
@@ -83,7 +90,7 @@ public class SoapUtils {
 	 * @return
 	 */
 	public static boolean isPrimitiveJadeType(Class clazz) {
-		return clazz.isPrimitive() || clazz.equals(String.class);
+		return clazz.isPrimitive() || clazz.equals(String.class) || clazz.equals(java.util.Date.class);
 	}
 	
 	/**
@@ -144,6 +151,8 @@ public class SoapUtils {
 			obj = Long.parseLong(value);
 		} else if("short".equals(type)) {
 			obj = Short.parseShort(value);
+		} else if ("dateTime".equals (type)) {
+			obj = ISO8601_DATE_FORMAT.parse(value);			
 		} else {
 			// No primitive type
 			throw new Exception(type+" is not a primitive type");

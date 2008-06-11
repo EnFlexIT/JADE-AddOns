@@ -150,13 +150,18 @@ public class JadeToSoap {
 			// PrimitiveSchema
 			log.debug("Elaborate primitive schema: "+elementName+" of type: "+resultSchema.getTypeName());
 
-			// Get type and cretae soap element
+			// Get type and create soap element
 	        soapType = (String) WSDLGeneratorUtils.types.get(resultSchema.getTypeName());
 			soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD, soapType);
 
-			// Add value
-	        soapElement.addTextNode(resultObj.toString());
-			
+	        // Create a text node which contains the value of the object.
+	        // Format date objects in ISO8601 format;
+	        // for every other kind of object, just call toString.
+	        if (resultObj instanceof java.util.Date) {
+	        	soapElement.addTextNode(SoapUtils.ISO8601_DATE_FORMAT.format((java.util.Date)resultObj));
+	        } else {
+	        	soapElement.addTextNode(resultObj.toString ());
+	        }
 		} else if (resultSchema instanceof ConceptSchema) {
 			
 			// ConceptSchema
