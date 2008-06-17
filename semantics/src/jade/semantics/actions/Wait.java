@@ -34,9 +34,9 @@ import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import jade.semantics.behaviours.SemanticBehaviour;
 import jade.semantics.behaviours.SemanticBehaviourBase;
-import jade.semantics.ext.institutions.InstitutionTools;
 import jade.semantics.interpreter.SemanticCapabilities;
 import jade.semantics.interpreter.SemanticInterpretationException;
+import jade.semantics.interpreter.Tools;
 import jade.semantics.kbase.QueryResult;
 import jade.semantics.lang.sl.grammar.ActionExpression;
 import jade.semantics.lang.sl.grammar.BelieveNode;
@@ -144,34 +144,34 @@ public class Wait extends SemanticActionImpl implements Cloneable {
 						// starting: initialisation of wakeupdate
 						//setState(WAITING);
 						wakeUpDate = System.currentTimeMillis() + timeout;
-						InstitutionTools.printTraceMessage("start!!! formula="+waitedFormula,DEBUG);
+						Tools.printTraceMessage("start!!! formula="+waitedFormula,DEBUG);
 						setState(RUNNING);
 					}
 					else if (getState() == RUNNING) {
-						InstitutionTools.printTraceMessage("running...",DEBUG);
+						Tools.printTraceMessage("running...",DEBUG);
 						Long current = System.currentTimeMillis();
-						InstitutionTools.printTraceMessage("current="+current+"; wakeup="+wakeUpDate,DEBUG);
+						Tools.printTraceMessage("current="+current+"; wakeup="+wakeUpDate,DEBUG);
 						if (wakeUpDate - System.currentTimeMillis() > 0) {
 							// SPECIAL BUGGING CASE : OR FORMULAS
 							// DECOMPOSE OR FORMULAS (otherwise: bug)
-							InstitutionTools.printTraceMessage("waited formula="+waitedFormula,DEBUG);
+							Tools.printTraceMessage("waited formula="+waitedFormula,DEBUG);
 							if ((waitedFormula instanceof BelieveNode) && 
 									(((BelieveNode)waitedFormula).as_formula() instanceof OrNode)) {
-								InstitutionTools.printTraceMessage("special case !!!!",DEBUG);
+								Tools.printTraceMessage("special case !!!!",DEBUG);
 								OrNode orFormula = (OrNode) ((BelieveNode)waitedFormula).as_formula();
 								Formula phi = orFormula.as_left_formula();
 								Formula psi = orFormula.as_right_formula();
 								QueryResult qrPhi = capabilities.getMyKBase().query(phi);
-								InstitutionTools.printTraceMessage("phi="+phi,DEBUG);
-								InstitutionTools.printTraceMessage("qrphi="+qrPhi,DEBUG);
+								Tools.printTraceMessage("phi="+phi,DEBUG);
+								Tools.printTraceMessage("qrphi="+qrPhi,DEBUG);
 								if ((qrPhi != null) && (qrPhi != QueryResult.UNKNOWN)) {
 									setState(SemanticBehaviour.SUCCESS);
 								}
 								else {
 									//second chance
 									QueryResult qrPsi = capabilities.getMyKBase().query(psi);
-									InstitutionTools.printTraceMessage("psi="+psi,DEBUG);
-									InstitutionTools.printTraceMessage("qrpsi="+qrPsi,DEBUG);
+									Tools.printTraceMessage("psi="+psi,DEBUG);
+									Tools.printTraceMessage("qrpsi="+qrPsi,DEBUG);
 									if ((qrPsi != null) && (qrPsi != QueryResult.UNKNOWN)) {
 										setState(SemanticBehaviour.SUCCESS);
 									}
@@ -185,15 +185,15 @@ public class Wait extends SemanticActionImpl implements Cloneable {
 							else {
 								// query to KBase 
 								QueryResult qr = capabilities.getMyKBase().query(waitedFormula);
-								InstitutionTools.printTraceMessage("waited formula="+waitedFormula,DEBUG);
+								Tools.printTraceMessage("waited formula="+waitedFormula,DEBUG);
 								if ((qr != null) && (qr != QueryResult.UNKNOWN)) {
-									InstitutionTools.printTraceMessage("behaviour de l'action WAIT("+waitedFormula+"): SUCCESS",DEBUG);
-									InstitutionTools.printTraceMessage("qr waited="+qr,DEBUG);
+									Tools.printTraceMessage("behaviour de l'action WAIT("+waitedFormula+"): SUCCESS",DEBUG);
+									Tools.printTraceMessage("qr waited="+qr,DEBUG);
 									setState(SemanticBehaviour.SUCCESS);
-									InstitutionTools.printTraceMessage(" !!!!!!! myKBASE in WAIT !!!!!!! \n"+capabilities.getMyKBase().toStrings(),DEBUG);
+									Tools.printTraceMessage(" !!!!!!! myKBASE in WAIT !!!!!!! \n"+capabilities.getMyKBase().toStrings(),DEBUG);
 								}
 								else {
-									InstitutionTools.printTraceMessage("retry",DEBUG);
+									Tools.printTraceMessage("retry",DEBUG);
 									setState(RUNNING);
 								}
 								// if not found: do nothing until end of timeout

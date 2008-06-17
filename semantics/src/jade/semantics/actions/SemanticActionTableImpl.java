@@ -125,6 +125,7 @@ public class SemanticActionTableImpl extends ArrayList implements SemanticAction
         		result = ((SemanticAction)actionIterator.next()).newAction(action);
         	}
         	if (result == null) {
+        		System.err.println("getSemanticActionInstance on action="+action);
         		throw new SemanticInterpretationException("unknown-message", SL.string(action.toString()));
         	}
         }

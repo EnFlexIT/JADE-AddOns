@@ -30,13 +30,14 @@ Boston, MA  02111-1307, USA.
  */
 package jade.semantics.kbase.observers;
 
-import jade.semantics.ext.institutions.InstitutionTools;
 import jade.semantics.interpreter.Finder;
 import jade.semantics.interpreter.SemanticInterpreterBehaviour;
 import jade.semantics.interpreter.SemanticRepresentation;
+import jade.semantics.interpreter.Tools;
 import jade.semantics.kbase.KBase;
 import jade.semantics.kbase.QueryResult;
 import jade.semantics.lang.sl.grammar.Formula;
+import jade.semantics.lang.sl.tools.SL;
 
 /**
  * Observer that triggers a subscribe event. 
@@ -274,7 +275,7 @@ public class EventCreationObserver extends ObserverAdapter {
 		disableTimeout();
 		// action !
 		try {
-			InstitutionTools.printTraceMessage("action of "+this+" on "+value,DEBUG);
+			Tools.printTraceMessage("action of "+this+" on "+value,DEBUG);
 			if (value != null) {
 				if (value.size() >= 1) {
 					// scan the different possible instantiations of subscribedEvent
@@ -286,27 +287,27 @@ public class EventCreationObserver extends ObserverAdapter {
 //											((MetaTermReferenceNode)value.getResult(j).get(i)).sm_value()));
 //						}
 						Formula instantiatedEvent = subscribedEvent.getSLRepresentation();
-						instantiatedEvent = (Formula)InstitutionTools.instantiateFromMatchResult(instantiatedEvent,value.getResult(j));
+						instantiatedEvent = (Formula)SL.instantiate(instantiatedEvent,value.getResult(j));
 						// interpret each instantiation of subscribedEvent	
-						InstitutionTools.printTraceMessage("observer interprets "+instantiatedEvent,DEBUG);
+						Tools.printTraceMessage("observer interprets "+instantiatedEvent,DEBUG);
 						if (myKBase.query(instantiatedEvent) == null) {
-							InstitutionTools.printTraceMessage("--> ok",DEBUG);
+							Tools.printTraceMessage("--> ok",DEBUG);
 							interpreter.interpret(new SemanticRepresentation(instantiatedEvent), false);							
 						}
 						else {
-							InstitutionTools.printTraceMessage("--> not ok",DEBUG);
+							Tools.printTraceMessage("--> not ok",DEBUG);
 						}
 					} 
 				}
 				else {
 					// if value = Query.KNOWN, interpret subscribedEvent (already fully instantiated)
-					InstitutionTools.printTraceMessage("observer interprets "+subscribedEvent,DEBUG);
+					Tools.printTraceMessage("observer interprets "+subscribedEvent,DEBUG);
 					interpreter.interpret(new SemanticRepresentation(subscribedEvent), false);
 				}
 
 
 				if (isOneShot) {
-					InstitutionTools.printTraceMessage("!!! remove observer on "+getObservedFormula(),DEBUG);
+					Tools.printTraceMessage("!!! remove observer on "+getObservedFormula(),DEBUG);
 					myKBase.removeObserver(new Finder() {
 						public boolean identify(Object object) {
 							return EventCreationObserver.this == object;

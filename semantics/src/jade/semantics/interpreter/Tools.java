@@ -174,4 +174,18 @@ public class Tools {
     	//}
     } 
     
+    
+    
+	/*****************
+	 * DEBUG METHODS *
+	 *****************/
+    // added by CA 16 June 2008 (copied from InstitutionTools)
+    // to be used in classes external to the institutions extension
+    // in order to keep them independent from the extension
+    
+	public static void printTraceMessage(String message, boolean DEBUG) {
+		if (DEBUG) {
+			System.err.println("JIA! "+message);
+		}
+	}
 } // End of class Tools

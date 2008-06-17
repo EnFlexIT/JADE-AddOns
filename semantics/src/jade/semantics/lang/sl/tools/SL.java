@@ -53,6 +53,7 @@ import jade.semantics.lang.sl.grammar.OrNode;
 import jade.semantics.lang.sl.grammar.Parameter;
 import jade.semantics.lang.sl.grammar.RealConstantNode;
 import jade.semantics.lang.sl.grammar.RelativeTimeConstantNode;
+import jade.semantics.lang.sl.grammar.StringConstantNode;
 import jade.semantics.lang.sl.grammar.Symbol;
 import jade.semantics.lang.sl.grammar.Term;
 import jade.semantics.lang.sl.grammar.TrueNode;
