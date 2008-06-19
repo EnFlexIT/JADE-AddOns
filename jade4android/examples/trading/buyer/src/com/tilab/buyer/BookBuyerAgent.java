@@ -1,4 +1,4 @@
-package buyer;
+package com.tilab.buyer;
 
 
 import java.util.Enumeration;

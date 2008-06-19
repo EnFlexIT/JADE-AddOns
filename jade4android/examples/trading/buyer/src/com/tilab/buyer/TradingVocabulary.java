@@ -1,4 +1,4 @@
-package buyer;
+package com.tilab.buyer;
 
 public interface TradingVocabulary {
 	public static final String TRADING_ONTOLOGY = "trading-ontology";

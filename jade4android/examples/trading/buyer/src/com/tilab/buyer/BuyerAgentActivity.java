@@ -1,4 +1,4 @@
-package buyer;
+package com.tilab.buyer;
 
 import jade.android.ConnectionListener;
 import jade.android.JadeGateway;

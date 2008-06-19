@@ -1,4 +1,4 @@
-package buyer;
+package com.tilab.buyer;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;

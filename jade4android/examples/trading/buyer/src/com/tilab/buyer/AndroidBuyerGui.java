@@ -1,4 +1,4 @@
-package buyer;
+package com.tilab.buyer;
 
 public class AndroidBuyerGui implements BookBuyerGui {
 
