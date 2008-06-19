@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">buyeragent</string>
+    
+    <string name="jade_platform_address">10.0.2.2</string>
+    <string name="jade_platform_port">1099</string>
+    <string name="agent_msisdn">android</string>
+    
+</resources>
