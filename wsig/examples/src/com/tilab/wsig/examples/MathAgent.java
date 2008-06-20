@@ -23,6 +23,8 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.examples;
 
+import java.util.Date;
+
 import jade.content.AgentAction;
 import jade.content.ContentElement;
 import jade.content.lang.sl.SLCodec;
@@ -54,6 +56,7 @@ public class MathAgent extends Agent {
 	private Logger log = Logger.getLogger(MathAgent.class.getName());
 	public static AID myAID = null;
 	private SLCodec codec = new SLCodec();
+	private Date startDate;
 
 	protected void setup() {
 		log.info("A MathAgent is starting...");
@@ -122,6 +125,7 @@ public class MathAgent extends Agent {
 		}
 
 		log.debug("A MathAgent is started.");
+		startDate = new Date();
 		
 		// Add math behaviour
 		this.addBehaviour(new CyclicBehaviour(this) {
@@ -150,6 +154,10 @@ public class MathAgent extends Agent {
 							serveGetRandomAction((GetRandom) action, actExpr, msg);
 						} else if (action instanceof PrintComplex) {
 							servePrintComplexAction((PrintComplex) action, actExpr, msg);
+						} else if (action instanceof GetAgentInfo) {
+							serveGetAgentInfoAction((GetAgentInfo) action, actExpr, msg);
+						} else if (action instanceof ConvertDate) {
+							serveConvertDateAction((ConvertDate) action, actExpr, msg);
 						}
 					} catch (Exception e) {
 						log.error("Exception: " + e.getMessage(), e);
@@ -219,6 +227,20 @@ public class MathAgent extends Agent {
 		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
 
+	private void serveGetAgentInfoAction(GetAgentInfo getAgentInfo, Action actExpr, ACLMessage msg) {
+		log.debug("MathAgent.serveGetAgentInfoAction");
+		AgentInfo result = new AgentInfo();
+		result.setAgentAid(getAID());
+		result.setStartDate(startDate);
+		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
+	}
+	
+	private void serveConvertDateAction(ConvertDate convertDate, Action actExpr, ACLMessage msg) {
+		log.debug("MathAgent.serveConvertDateAction");
+		long result = convertDate.getDate().getTime();
+		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
+	}
+	
 	private void servePrintComplexAction(PrintComplex printComplex, Action actExpr, ACLMessage msg) {
 		log.debug("MathAgent.servePrintComplexAction");
 		log.info("Complex number is "+printComplex.getComplex());

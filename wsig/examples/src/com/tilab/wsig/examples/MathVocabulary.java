@@ -29,6 +29,7 @@ public interface MathVocabulary {
 	
 	public static final String COMPLEX = "complex";
 	public static final String RESULT = "result";
+	public static final String AGENTINFO = "agentInfo";
 	
 	public static final String FIRST_ELEMENT = "firstElement";
     public static final String SECOND_ELEMENT = "secondElement";
@@ -38,6 +39,9 @@ public interface MathVocabulary {
 	public static final String COMPLEX_ELEMENT = "complexElement";
     public static final String REAL = "real";
     public static final String IMMAGINARY = "immaginary";
+    public static final String AGENTAID = "agentAid";
+    public static final String STARTDATE = "startDate";
+    public static final String DATE = "date";
     
     //Actions
     public static final String SUM = "sum";
@@ -48,4 +52,6 @@ public interface MathVocabulary {
 	public static final String GETCOMPONENTS = "getComponents";
 	public static final String GETRANDOM = "getRandom";
 	public static final String PRINTCOMPLEX = "printComplex";
+	public static final String GETAGENTINFO = "getAgentInfo";
+	public static final String CONVERTDATE = "convertDate";
 }
