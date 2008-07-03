@@ -121,9 +121,10 @@ public class OrFilter extends KBQueryFilter {
      * observes the formula given in parameter.
      */
     public boolean getObserverTriggerPatterns(Formula formula, Set set) {
- 	   MatchResult match = SL.match(formula, pattern);
+ 	   MatchResult match = SL.match(pattern, formula);  // modif by CA, 26 June 08: inverse order of parameters
  	   if (match != null) {
  		   try {
+			   
 			   myKBase.getObserverTriggerPatterns(match.getFormula("phi"), set);
 			   myKBase.getObserverTriggerPatterns(match.getFormula("psi"), set);
  			   return false;
