@@ -513,17 +513,19 @@ implements NameAuthority {
 			boolean found=false;
 			for (int i=0; (i<aid.length) && (!found); i++) {
 				AgentDescriptor ad = myContainer.getMain().acquireAgentDescriptor( aid[i] );
-				// get the principal of this agent
-				JADEPrincipal jp = ad.getPrincipal();
-				if (jp!=null) { 
-					// compare the principal with the given principal
-					if (jp.getSDSIName().equals(principal.getSDSIName())) {
-						// found it!
-						foundPrincipal = jp;
-						found=true; // we assume there can be only one agent having that principal
+				if (ad !=  null) {
+					// get the principal of this agent
+					JADEPrincipal jp = ad.getPrincipal();
+					if (jp!=null) { 
+						// compare the principal with the given principal
+						if (jp.getSDSIName().equals(principal.getSDSIName())) {
+							// found it!
+							foundPrincipal = jp;
+							found=true; // we assume there can be only one agent having that principal
+						}
 					}
+					myContainer.getMain().releaseAgentDescriptor( aid[i] );
 				}
-				myContainer.getMain().releaseAgentDescriptor( aid[i] );
 			} // end for
 
 			NameCertificate nameCertificate=null;
