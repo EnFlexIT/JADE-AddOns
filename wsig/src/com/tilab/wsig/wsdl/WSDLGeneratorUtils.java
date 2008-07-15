@@ -91,33 +91,6 @@ import com.tilab.wsig.WSIGConfiguration;
 
 public class WSDLGeneratorUtils {
 	
-	public static Hashtable<String,String> types = new Hashtable<String,String>();
-	static {
-		types.put(BasicOntology.FLOAT, "float");
-		types.put(BasicOntology.INTEGER, "int");
-		types.put(BasicOntology.STRING, "string");
-		types.put(BasicOntology.BOOLEAN, "boolean");
-		types.put(BasicOntology.DATE, "dateTime");
-		types.put(BasicOntology.BYTE_SEQUENCE, "byte");
-	}
-
-	public static Hashtable<Class,String> java2xsd = new Hashtable<Class,String>();
-	static {
-		java2xsd.put(java.lang.String.class, "string");
-		java2xsd.put(java.lang.Boolean.class, "boolean");
-		java2xsd.put(java.lang.Byte.class, "byte");
-		java2xsd.put(java.lang.Double.class, "double");
-		java2xsd.put(java.lang.Float.class, "float");
-		java2xsd.put(java.lang.Integer.class, "integer");
-		java2xsd.put(java.lang.Long.class, "long");
-		java2xsd.put(java.lang.Short.class, "short");
-		java2xsd.put(java.math.BigDecimal.class, "decimal");
-		java2xsd.put(java.math.BigInteger.class, "int");
-		java2xsd.put(java.net.URI.class, "anyURI");
-		java2xsd.put(java.util.Calendar.class, "dateTime");
-		java2xsd.put(java.util.Date.class, "dateTime");
-	}
-
 	public static XSDSchema createSchema(String tns) {
 
 		XSDFactory xsdFactory = XSDFactory.eINSTANCE;
@@ -190,7 +163,7 @@ public class WSDLGeneratorUtils {
 			}
 		}
 		elementAdded.setTypeDefinition(xsdTypeDefinition);
-		
+
 		XSDParticle elementParticle = XSDFactory.eINSTANCE.createXSDParticle();
 		elementParticle.setContent(elementAdded);
 		sequence.getContents().add(elementParticle);
@@ -372,7 +345,7 @@ public class WSDLGeneratorUtils {
 		Part part = new PartImpl();
 		
 		String namespaceURI;
-		if (types.values().contains(className)) {
+		if (WSDLConstants.jade2xsd.values().contains(className)) {
 			namespaceURI = WSDLConstants.XSD;
 		} else {
 			namespaceURI = tns;
@@ -435,11 +408,11 @@ public class WSDLGeneratorUtils {
 		return WSDLConstants.RESULT_PREFIX+WSDLConstants.SEPARATOR+operationName+WSDLConstants.SEPARATOR+WSDLConstants.RESULT_SUFFIX;
 	}
 
-	public static String getArraySuffix() {
-		return WSDLConstants.SEPARATOR+WSDLConstants.ARRAY;
+	public static String getAggregateToken() {
+		return WSDLConstants.SEPARATOR+WSDLConstants.AGGREGATE+WSDLConstants.SEPARATOR;
 	}
 	
-	public static String getArrayType(String type) { 
-		return type+getArraySuffix();
+	public static String getAggregateType(String elementType, String aggregateType) { 
+		return elementType+getAggregateToken()+aggregateType;
 	}
 }

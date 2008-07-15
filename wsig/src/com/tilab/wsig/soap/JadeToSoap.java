@@ -23,6 +23,10 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.soap;
 
+import jade.content.abs.AbsAggregate;
+import jade.content.abs.AbsPrimitive;
+import jade.content.abs.AbsTerm;
+import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
 import jade.content.schema.AgentActionSchema;
@@ -32,9 +36,6 @@ import jade.content.schema.Facet;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.facets.TypedAggregateFacet;
-import jade.util.leap.ArrayList;
-
-import java.lang.reflect.Field;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.Name;
@@ -73,7 +74,7 @@ public class JadeToSoap {
 	 * @return
 	 * @throws Exception
 	 */
-	public SOAPMessage convert(Object resultObject, WSIGService wsigService, String operationName) throws Exception {
+	public SOAPMessage convert(AbsTerm resultAbsObject, WSIGService wsigService, String operationName) throws Exception {
 	
 		// Get tns
 		tns = "urn:" + wsigService.getServicePrefix() + wsigService.getServiceName();
@@ -118,7 +119,7 @@ public class JadeToSoap {
         	log.debug("Ontology result type: "+resultSchema.getTypeName());
 
         	// Create soap message
-            convertObjectToSoapElement(actionSchema, resultSchema, resultObject, WSDLGeneratorUtils.getResultName(operationName), responseElement);
+            convertObjectToSoapElement(actionSchema, resultSchema, resultAbsObject, WSDLGeneratorUtils.getResultName(operationName), responseElement);
         } else {
         	log.debug("Ontology with no result type");
         }
@@ -139,7 +140,7 @@ public class JadeToSoap {
 	 * @return
 	 * @throws Exception
 	 */
-	private SOAPElement convertObjectToSoapElement(ObjectSchema containerSchema, ObjectSchema resultSchema, Object resultObj, String elementName, SOAPElement rootSoapElement) throws Exception {
+	private SOAPElement convertObjectToSoapElement(ObjectSchema containerSchema, ObjectSchema resultSchema, AbsTerm resultAbsObj, String elementName, SOAPElement rootSoapElement) throws Exception {
 		
 		SOAPElement soapElement = null;
 		String soapType = null;
@@ -151,16 +152,18 @@ public class JadeToSoap {
 			log.debug("Elaborate primitive schema: "+elementName+" of type: "+resultSchema.getTypeName());
 
 			// Get type and create soap element
-	        soapType = (String) WSDLGeneratorUtils.types.get(resultSchema.getTypeName());
+	        soapType = (String) WSDLConstants.jade2xsd.get(resultSchema.getTypeName());
 			soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD, soapType);
 
+			AbsPrimitive primitiveAbsObj = (AbsPrimitive)resultAbsObj;
+			
 	        // Create a text node which contains the value of the object.
 	        // Format date objects in ISO8601 format;
 	        // for every other kind of object, just call toString.
-	        if (resultObj instanceof java.util.Date) {
-	        	soapElement.addTextNode(SoapUtils.ISO8601_DATE_FORMAT.format((java.util.Date)resultObj));
+	        if (BasicOntology.DATE.equals(primitiveAbsObj.getTypeName())) {
+	        	soapElement.addTextNode(SoapUtils.ISO8601_DATE_FORMAT.format(primitiveAbsObj.getDate()));
 	        } else {
-	        	soapElement.addTextNode(resultObj.toString ());
+	        	soapElement.addTextNode(primitiveAbsObj.toString());
 	        }
 		} else if (resultSchema instanceof ConceptSchema) {
 			
@@ -176,10 +179,10 @@ public class JadeToSoap {
 				ObjectSchema slotSchema = resultSchema.getSchema(conceptSlotName);
 			
 				// Get sub-object value 
-				Object subObject = getFieldValue(resultObj, conceptSlotName);
+				AbsTerm subAbsObject = (AbsTerm)resultAbsObj.getAbsObject(conceptSlotName);
 				
-				// Do ricorsive call
-				convertObjectToSoapElement(newContainerSchema, slotSchema, subObject, conceptSlotName, soapElement);
+				// Do recursive call
+				convertObjectToSoapElement(newContainerSchema, slotSchema, subAbsObject, conceptSlotName, soapElement);
 			}
 		} else if (resultSchema instanceof AggregateSchema) {
 			
@@ -208,23 +211,26 @@ public class JadeToSoap {
 			// Get slot type
 			soapType = aggrSchema.getTypeName();
 			if (aggrSchema instanceof PrimitiveSchema) {
-				soapType = WSDLGeneratorUtils.types.get(soapType);
+				soapType = WSDLConstants.jade2xsd.get(soapType);
 			}
 			String itemName = soapType;
-			soapType = WSDLGeneratorUtils.getArrayType(soapType);
+			String aggrType = resultSchema.getTypeName();
+			soapType = WSDLGeneratorUtils.getAggregateType(soapType, aggrType);
 			
 			// Create element
 			soapElement = addSoapElement(rootSoapElement, elementName, tns, soapType);
 			
 			// Elaborate all item of current aggregate schema 
-			ArrayList array = (ArrayList)resultObj;
-			for (int i=0; i<array.size(); i++) {
-				
-				//Get object value of index i
-				Object itemObject = array.get(i);
-
-				// Do ricorsive call
-				convertObjectToSoapElement(newContainerSchema, aggrSchema, itemObject, itemName, soapElement);
+			AbsAggregate aggregateAbsObj = (AbsAggregate)resultAbsObj;
+			if (aggregateAbsObj != null) {
+				for (int i=0; i<aggregateAbsObj.size(); i++) {
+					
+					//Get object value of index i
+					AbsTerm itemObject = aggregateAbsObj.get(i);
+	
+					// Do ricorsive call
+					convertObjectToSoapElement(newContainerSchema, aggrSchema, itemObject, itemName, soapElement);
+				}
 			}
 		}
 					
@@ -264,47 +270,5 @@ public class JadeToSoap {
 	    }
 	    
 	    return soapElement;
-	}
-	
-	
-	/**
-	 * getFieldValue
-	 * @param obj
-	 * @param fieldName
-	 * @return
-	 */
-	private Object getFieldValue(Object obj, String fieldName) {
-		
-		Object fieldValue = null;
-		try {
-			// Get class
-			Class clazz = obj.getClass();
-			
-			// Get fields of object
-			Field field = null;
-			do {
-				try {
-					field = clazz.getDeclaredField(fieldName);
-				} catch(NoSuchFieldException e) {
-					clazz = clazz.getSuperclass();
-				}
-			} while(field == null && clazz != null);
-			
-			if (field != null) {
-				// Set reflection accessible method
-				field.setAccessible(true);
-					
-				// Get field value
-				fieldValue = field.get(obj);
-				log.debug("Get "+clazz.getSimpleName()+"."+fieldName+" = "+fieldValue);
-				
-			} else {
-				log.error("Field "+fieldName+" not found in object "+clazz.getCanonicalName());
-			}
-		} catch(Exception e) {
-			log.error("Error accessing to field "+fieldName+" in object "+obj.getClass().getCanonicalName(), e);
-		}
-
-		return fieldValue;
 	}
 }

@@ -24,6 +24,7 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.wsdl;
 
 import jade.content.ContentManager;
+import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.AggregateSchema;
@@ -67,7 +68,7 @@ import org.eclipse.xsd.XSDSchema;
 import com.tilab.wsig.store.ActionBuilder;
 import com.tilab.wsig.store.MapperBasedActionBuilder;
 import com.tilab.wsig.store.OperationName;
-import com.tilab.wsig.store.ReflectionBasedActionBuilder;
+import com.tilab.wsig.store.OntologyBasedActionBuilder;
 import com.tilab.wsig.store.SuppressOperation;
 import com.tilab.wsig.store.WSIGService;
 
@@ -191,10 +192,10 @@ public class SDToWSDL {
 								operationName = annotationOperationName.name();
 							}
 							
-							actionBuilder = new MapperBasedActionBuilder(mapperObject, method, actionName);
+							actionBuilder = new MapperBasedActionBuilder(mapperObject, method, onto, actionName);
 						} else {
 							// Ontology/reflection
-							actionBuilder = new ReflectionBasedActionBuilder(onto, actionName);
+							actionBuilder = new OntologyBasedActionBuilder(onto, actionName);
 						}
 
 						// Operation
@@ -355,12 +356,12 @@ public class SDToWSDL {
 	private static String convertObjectSchemaIntoXsdType(String tns, Ontology onto, ConceptSchema containerSchema, Class paramType, XSDSchema xsdSchema, String slotName, XSDComponent parentComponent) throws Exception {
 		
 		String slotType = null;
-		if (paramType.isPrimitive() || WSDLGeneratorUtils.java2xsd.get(paramType) != null) {
+		if (paramType.isPrimitive() || WSDLConstants.java2xsd.get(paramType) != null) {
 			//primitive dataType XSD
 			if (paramType.isPrimitive()) {
 				slotType = paramType.getName();
 			} else {
-				slotType = (String) WSDLGeneratorUtils.java2xsd.get(paramType);
+				slotType = (String) WSDLConstants.java2xsd.get(paramType);
 			}
 			if (parentComponent != null)
 				WSDLGeneratorUtils.addElementToSequence(true, tns, xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent, 0, -1);
@@ -368,7 +369,7 @@ public class SDToWSDL {
 		} else if (paramType.isArray()) {
 			Class aggrType = paramType.getComponentType();
 			slotName = aggrType.getSimpleName().toLowerCase();
-			slotType = WSDLGeneratorUtils.getArrayType(slotName);
+			slotType = WSDLGeneratorUtils.getAggregateType(slotName, BasicOntology.SEQUENCE);
 			if (WSDLGeneratorUtils.getTypeDefinition(xsdSchema, xsdSchema.getTargetNamespace(), slotType) == null) {
 				XSDComplexTypeDefinition complexType = WSDLGeneratorUtils.addComplexTypeToSchema(tns, xsdSchema, slotType);
 				XSDModelGroup sequence = WSDLGeneratorUtils.addSequenceToComplexType(complexType);
@@ -418,7 +419,7 @@ public class SDToWSDL {
 		
 		String slotType = null;
 		if (objSchema instanceof PrimitiveSchema) {
-			slotType = WSDLGeneratorUtils.types.get(objSchema.getTypeName());
+			slotType = WSDLConstants.jade2xsd.get(objSchema.getTypeName());
 			if (parentComponent != null) {
 				WSDLGeneratorUtils.addElementToSequence(true, tns, xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
@@ -447,25 +448,26 @@ public class SDToWSDL {
 				facets = containerSchema.getFacets(slotName);
 			}
 			
-			ObjectSchema aggrType = null;
+			ObjectSchema aggregateSchema = null;
 			for (Facet facet : facets) {
 				if (facet instanceof CardinalityFacet) {
 					cardMax = ((CardinalityFacet) facet).getCardMax();
 					cardMin = ((CardinalityFacet) facet).getCardMin();
 				} else if (facet instanceof TypedAggregateFacet) {
-					aggrType = ((TypedAggregateFacet) facet).getType();
+					aggregateSchema = ((TypedAggregateFacet) facet).getType();
 
 				} else {
 					log.warn("Facet ("+facet.toString()+") is unknown");
 				}
 			}
 			
-			slotType = aggrType.getTypeName();
-			if (aggrType instanceof PrimitiveSchema) {
-				slotType = WSDLGeneratorUtils.types.get(slotType);
+			slotType = aggregateSchema.getTypeName();
+			if (aggregateSchema instanceof PrimitiveSchema) {
+				slotType = WSDLConstants.jade2xsd.get(slotType);
 			}
 			String itemName = slotType;
-			slotType = WSDLGeneratorUtils.getArrayType(slotType);
+			String aggregateType = objSchema.getTypeName();
+			slotType = WSDLGeneratorUtils.getAggregateType(slotType, aggregateType);
 			
 			if (WSDLGeneratorUtils.getTypeDefinition(xsdSchema, xsdSchema.getTargetNamespace(), slotType) == null) {
 				XSDComplexTypeDefinition complexType = WSDLGeneratorUtils.addComplexTypeToSchema(tns, xsdSchema, slotType);
@@ -473,7 +475,7 @@ public class SDToWSDL {
 				if (parentComponent != null) {
 					WSDLGeneratorUtils.addElementToSequence(false, tns, xsdSchema, slotName, slotType, (XSDModelGroup) parentComponent);
 				}
-				convertObjectSchemaIntoXsdType(tns, false, containerSchema, aggrType, xsdSchema, itemName, sequence, cardMin, cardMax);
+				convertObjectSchemaIntoXsdType(tns, false, containerSchema, aggregateSchema, xsdSchema, itemName, sequence, cardMin, cardMax);
 			}
 
 		}

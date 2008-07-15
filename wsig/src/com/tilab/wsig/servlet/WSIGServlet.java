@@ -24,6 +24,7 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.servlet;
 
 import jade.content.AgentAction;
+import jade.content.abs.AbsTerm;
 import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.util.leap.Properties;
@@ -221,11 +222,11 @@ public class WSIGServlet extends HttpServlet {
 		}
 
 		// Execute operation
-		Object operationResult = null;
+		AbsTerm operationAbsResult = null;
 		try {
-			operationResult = executeOperation(agentAction, wsigService);
-			if (operationResult != null) {
-				log.info("operationResult: "+operationResult+", type "+operationResult.getClass().getName());
+			operationAbsResult = executeOperation(agentAction, wsigService);
+			if (operationAbsResult != null) {
+				log.info("operationResult: "+operationAbsResult+", type "+operationAbsResult.getTypeName());
 			} else {
 				log.info("operation without result");
 			}
@@ -243,7 +244,7 @@ public class WSIGServlet extends HttpServlet {
 		SOAPMessage soapResponse = null;
 		try {
 			JadeToSoap jadeToSoap = new JadeToSoap();
-			soapResponse = jadeToSoap.convert(operationResult, wsigService, operationName);
+			soapResponse = jadeToSoap.convert(operationAbsResult, wsigService, operationName);
 			
 			log.debug("SOAP response:");
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -276,11 +277,11 @@ public class WSIGServlet extends HttpServlet {
 	 * @return
 	 * @throws Exception
 	 */
-	private Object executeOperation(AgentAction agentAction, WSIGService wsigService) throws Exception{
+	private AbsTerm executeOperation(AgentAction agentAction, WSIGService wsigService) throws Exception{
 		
 		AID agentReceiver = wsigService.getAid();
 		Ontology onto = wsigService.getOnto(); 
-		Object result = null;
+		AbsTerm absResult = null;
 		
 		WSIGBehaviour wsigBh = new WSIGBehaviour(agentReceiver, agentAction, onto, executionTimeout);
 
@@ -289,12 +290,13 @@ public class WSIGServlet extends HttpServlet {
 		JadeGateway.execute(wsigBh, executionTimeout);
 		if (wsigBh.getStatus() == WSIGBehaviour.EXECUTED_STATUS) {
 			log.debug("Behaviour executed");
-			result = wsigBh.getResult();
+			absResult = wsigBh.getAbsResult();
+			
 		} else {
 			throw new Exception(wsigBh.getError());
 		}
 		
-		return result;
+		return absResult;
 	}
 
 	/**

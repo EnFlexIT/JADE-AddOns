@@ -24,12 +24,12 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.agent;
 
 import jade.content.AgentAction;
-import jade.content.ContentElement;
+import jade.content.abs.AbsContentElement;
+import jade.content.abs.AbsTerm;
 import jade.content.lang.sl.SLCodec;
+import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.basic.Action;
-import jade.content.onto.basic.Done;
-import jade.content.onto.basic.Result;
 import jade.core.AID;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
@@ -51,7 +51,7 @@ public class WSIGBehaviour extends AchieveREInitiator {
 	public static final String TIMEOUT  = "TIMEOUT";
 	
 	private int status = UNKNOWN_STATUS;
-	private Object result = null;
+	private AbsTerm result = null;
 	private String error = null;
 
 	private SLCodec codec = new SLCodec();
@@ -116,13 +116,17 @@ public class WSIGBehaviour extends AchieveREInitiator {
 		
 		status = EXECUTED_STATUS;
 		try {
-			ContentElement content = myAgent.getContentManager().extractContent(message);
-			if (content instanceof Result) {
-				result = ((Result)content).getValue();
-			} else if (content instanceof Done) {
+			AbsContentElement content = myAgent.getContentManager().extractAbsContent(message);
+			String resultType = content.getTypeName();
+			
+			if (BasicOntology.RESULT.equals(resultType)) {
+				result = ((AbsTerm)content.getAbsObject(BasicOntology.RESULT_VALUE));
+				
+			} else if (BasicOntology.DONE.equals(resultType)) {
 				result = null;
+				
 			} else {
-				throw new Exception("Content element of type "+content.getClass()+" not supported");
+				throw new Exception("Abs content element of type "+content.getTypeName()+" not supported");
 			}
 		} catch (Exception e) {
 			status = FAILURE_STATUS;
@@ -154,7 +158,7 @@ public class WSIGBehaviour extends AchieveREInitiator {
 		return status;
 	}
 
-	public Object getResult() {
+	public AbsTerm getAbsResult() {
 		return result;
 	}
 }

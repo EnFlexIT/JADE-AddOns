@@ -24,6 +24,9 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.store;
 
 import jade.content.AgentAction;
+import jade.content.abs.AbsPrimitive;
+import jade.content.abs.AbsTerm;
+import jade.content.onto.Ontology;
 
 import java.lang.reflect.Method;
 import java.util.Vector;
@@ -40,17 +43,19 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 	private Object mapperObj;
 	private String ontoActionName;
 	private String[] methodParameterNames;
+	private Ontology onto;
 
 	/**
 	 * MapperBasedActionBuilder
 	 * @param mapperObj
 	 * @param method
 	 */
-	public MapperBasedActionBuilder(Object mapperObj, Method method, String ontoActionName) {
+	public MapperBasedActionBuilder(Object mapperObj, Method method, Ontology onto, String ontoActionName) {
 		this.method = method;
 		this.mapperObj = mapperObj;
 		this.ontoActionName = ontoActionName;
 		this.methodParameterNames = WSDLGeneratorUtils.getParameterNames(method);
+		this.onto = onto;
 	}
 
 	/**
@@ -72,7 +77,9 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 				parameterValues = new Object[soapParams.size()];
 				for (int i = 0; i < soapParams.size(); i++) {
 					ParameterInfo objParamEi = soapParams.get(i);
-					parameterValues[i] = objParamEi.getValue();
+					AbsTerm absValue = objParamEi.getAbsValue();
+					Object javaValue = onto.toObject(absValue);
+					parameterValues[i] = javaValue;
 					parameterList += objParamEi.getType()+",";
 				}
 			} else {
@@ -80,7 +87,9 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 				for (int i = 0; i < methodParameterNames.length; i++) {
 					try {
 						ParameterInfo objParamEi = getSoapParamByName(soapParams, methodParameterNames[i]);
-						parameterValues[i] = objParamEi.getValue();
+						AbsTerm absValue = objParamEi.getAbsValue();
+						Object javaValue = onto.toObject(absValue);
+						parameterValues[i] = javaValue;
 						parameterList += objParamEi.getType()+",";
 					} catch(Exception e) {
 						log.error("Method "+method.getName()+", mandatory param "+methodParameterNames[i]+" not found in soap request");

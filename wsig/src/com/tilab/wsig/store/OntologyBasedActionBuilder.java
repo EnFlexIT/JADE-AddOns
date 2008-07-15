@@ -26,7 +26,7 @@ package com.tilab.wsig.store;
 import jade.content.AgentAction;
 import jade.content.abs.AbsAgentAction;
 import jade.content.abs.AbsHelper;
-import jade.content.abs.AbsObject;
+import jade.content.abs.AbsTerm;
 import jade.content.onto.Ontology;
 import jade.content.schema.AgentActionSchema;
 
@@ -34,9 +34,9 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-public class ReflectionBasedActionBuilder implements ActionBuilder {
+public class OntologyBasedActionBuilder implements ActionBuilder {
 
-	private static Logger log = Logger.getLogger(ReflectionBasedActionBuilder.class.getName());
+	private static Logger log = Logger.getLogger(OntologyBasedActionBuilder.class.getName());
 	
 	private String ontoActionName;
 	private Ontology onto;
@@ -45,7 +45,7 @@ public class ReflectionBasedActionBuilder implements ActionBuilder {
 	 * ReflectionBasedActionBuilder
 	 * @param actionClass
 	 */
-	public ReflectionBasedActionBuilder(Ontology onto, String ontoActionName) {
+	public OntologyBasedActionBuilder(Ontology onto, String ontoActionName) {
 		this.onto = onto;
 		this.ontoActionName = ontoActionName;
 	}
@@ -60,8 +60,7 @@ public class ReflectionBasedActionBuilder implements ActionBuilder {
 		if (soapParams != null) {
 			for (ParameterInfo param : soapParams) {
 				String slotName = param.getName();
-				Object value = param.getValue();
-				AbsObject slotValue = onto.fromObject(value);
+				AbsTerm slotValue = param.getAbsValue();
 				AbsHelper.setAttribute(actionAbsObj, slotName, slotValue);
 			}
 		}

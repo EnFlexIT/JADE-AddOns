@@ -23,16 +23,14 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.soap;
 
-import java.text.SimpleDateFormat;
+import jade.content.abs.AbsPrimitive;
+import jade.content.abs.AbsTerm;
 
-import jade.content.lang.sl.SL0Vocabulary;
-import jade.content.onto.Ontology;
-import jade.core.AID;
-import jade.lang.acl.ACLMessage;
-import jade.util.leap.ArrayList;
+import java.text.SimpleDateFormat;
 
 import org.apache.log4j.Logger;
 
+import com.tilab.wsig.wsdl.WSDLConstants;
 import com.tilab.wsig.wsdl.WSDLGeneratorUtils;
 
 public class SoapUtils {
@@ -45,119 +43,80 @@ public class SoapUtils {
 	public static SimpleDateFormat ISO8601_DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 	
 	/**
-	 * getClassByType
-	 * @param onto
-	 * @param type
-	 * @return
-	 * @throws Exception
-	 */
-	public static Class getClassByType(Ontology onto, String type) throws Exception {
-
-		Class clazz = null;
-		if("string".equals(type)) {
-			clazz = String.class;
-		} else if("boolean".equals(type)) {
-			clazz = Boolean.TYPE;
-		} else if("byte".equals(type)) {
-			clazz = Byte.TYPE;
-		} else if("char".equals(type)) {
-			clazz = Character.TYPE;
-		} else if("double".equals(type)) {
-			clazz = Double.TYPE;
-		} else if("float".equals(type)) {
-			clazz = Float.TYPE;
-		} else if("int".equals(type)) {
-			clazz = Integer.TYPE;
-		} else if("long".equals(type)) {
-			clazz = Long.TYPE;
-		} else if("short".equals(type)) {
-			clazz = Short.TYPE;
-		} else if ("dateTime".equals (type)) {
-			clazz = java.util.Date.class;
-		} else if(type.endsWith(WSDLGeneratorUtils.getArraySuffix())) {
-			// Array
-			clazz = ArrayList.class;
-		} else {
-			// Find in ontology type
-			clazz = getClassFromOnto(onto, type);
-		}
-		return clazz;
-	}
-
-	/**
-	 * Return true if clazz is a primitive jade type
-	 * @param clazz
+	 * Return true if xsdType is a primitive abs type
+	 * @param xsdType
 	 * @return
 	 */
-	public static boolean isPrimitiveJadeType(Class clazz) {
-		return clazz.isPrimitive() || clazz.equals(String.class) || clazz.equals(java.util.Date.class);
+	public static boolean isPrimitiveAbsType(String xsdType) {
+		
+		return (WSDLConstants.XSD_STRING.equals(xsdType) || 
+				WSDLConstants.XSD_BOOLEAN.equals(xsdType) ||
+				WSDLConstants.XSD_INTEGER.equals(xsdType) ||
+				WSDLConstants.XSD_LONG.equals(xsdType) ||
+				WSDLConstants.XSD_FLOAT.equals(xsdType) ||
+				WSDLConstants.XSD_DOUBLE.equals(xsdType) ||
+				WSDLConstants.XSD_DATETIME.equals(xsdType) || 
+				WSDLConstants.XSD_BYTE.equals(xsdType) ||
+				WSDLConstants.XSD_SHORT.equals(xsdType));
 	}
 	
 	/**
-	 * getClassFromOnto
-	 * @param onto
-	 * @param name
+	 * Return true if xsdType is a aggregate
+	 * @param xsdType
 	 * @return
-	 * @throws Exception
 	 */
-	private static Class getClassFromOnto(Ontology onto, String name) throws Exception {
+	public static boolean isAggregateType(String xsdType) {
 
-		Class clazz = null;
-		try {
-			clazz = onto.getClassForElement(name);
-			if (clazz == null) {
-				// BasicOntology schema are not associated to any class
-				if (name.equals(SL0Vocabulary.AID)) {
-					clazz = AID.class;
-				}
-				else if (name.equals(SL0Vocabulary.ACLMSG)) {
-					clazz = ACLMessage.class;
-				}
-			}
-		} catch(Exception e) {
-			log.error("Element "+name+" not found in ontology "+onto.getName(), e);
-			throw new Exception("Element "+name+" not found in ontology "+onto.getName(), e);
-		}
-		return clazz;
+		return xsdType.indexOf(WSDLGeneratorUtils.getAggregateToken()) > 0;
 	}
-	
 
 	/**
-	 * getPrimitiveValue
+	 * Return the type of aggregate
+	 * @param xsdType
+	 * @return
+	 */
+	public static String getAggregateType(String xsdType) {
+		
+		int sepPos = xsdType.lastIndexOf(WSDLConstants.SEPARATOR);
+		if (sepPos <= 0)
+			return null;
+		
+		return xsdType.substring(sepPos+1);
+	}
+
+	/**
+	 * getPrimitiveAbsValue
 	 * @param type
 	 * @param value
 	 * @return
 	 * @throws Exception
 	 */
-	public static Object getPrimitiveValue(String type, String value) throws Exception {
-
-		Object obj = null;
+	public static AbsTerm getPrimitiveAbsValue(String xsdType, String value) throws Exception {
+		
+		AbsTerm absObj = null;
 		// Find in base type
-		if("string".equals(type)) {
-			obj = value;
-		} else if("boolean".equals(type)) {
-			obj = Boolean.parseBoolean(value);
-		} else if("byte".equals(type)) {
-			obj = Byte.parseByte(value);
-		} else if("char".equals(type)) {
-			obj = value.charAt(0);
-		} else if("double".equals(type)) {
-			obj = Double.parseDouble(value);
-		} else if("float".equals(type)) {
-			obj = Float.parseFloat(value);
-		} else if("int".equals(type)) {
-			obj = Integer.parseInt(value);
-		} else if("long".equals(type)) {
-			obj = Long.parseLong(value);
-		} else if("short".equals(type)) {
-			obj = Short.parseShort(value);
-		} else if ("dateTime".equals (type)) {
-			obj = ISO8601_DATE_FORMAT.parse(value);			
+		if(WSDLConstants.XSD_STRING.equals(xsdType)) {
+			absObj = AbsPrimitive.wrap(value);
+		} else if(WSDLConstants.XSD_BOOLEAN.equals(xsdType)) {
+			absObj = AbsPrimitive.wrap(Boolean.parseBoolean(value));
+		} else if(WSDLConstants.XSD_BYTE.equals(xsdType)) {
+			absObj = AbsPrimitive.wrap(Byte.parseByte(value));
+		} else if(WSDLConstants.XSD_DOUBLE.equals(xsdType)) {
+			absObj = AbsPrimitive.wrap(Double.parseDouble(value));
+		} else if(WSDLConstants.XSD_FLOAT.equals(xsdType)) {
+			absObj = AbsPrimitive.wrap(Float.parseFloat(value));
+		} else if(WSDLConstants.XSD_INTEGER.equals(xsdType)) {
+			absObj = AbsPrimitive.wrap(Integer.parseInt(value));
+		} else if(WSDLConstants.XSD_LONG.equals(xsdType)) {
+			absObj = AbsPrimitive.wrap(Long.parseLong(value));
+		} else if(WSDLConstants.XSD_SHORT.equals(xsdType)) {
+			absObj = AbsPrimitive.wrap(Short.parseShort(value));
+		} else if (WSDLConstants.XSD_DATETIME.equals (xsdType)) {
+			absObj = AbsPrimitive.wrap(ISO8601_DATE_FORMAT.parse(value));			
 		} else {
 			// No primitive type
-			throw new Exception(type+" is not a primitive type");
+			throw new Exception(xsdType+" is not a primitive type");
 		}
-		return obj;
+		return absObj;
 	}
-	
 }

@@ -23,8 +23,11 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.soap;
 
+import jade.content.abs.AbsAggregate;
+import jade.content.abs.AbsConcept;
+import jade.content.abs.AbsHelper;
+import jade.content.abs.AbsObject;
 import jade.content.onto.Ontology;
-import jade.util.leap.ArrayList;
 
 import java.io.StringReader;
 import java.lang.reflect.Field;
@@ -142,7 +145,7 @@ public class SoapToJade extends DefaultHandler {
 			
 			if (log.isDebugEnabled()) {
 				for (ParameterInfo param : params) {
-					log.debug("   "+param.getName()+"= "+param.getValue());
+					log.debug("   "+param.getName()+"= "+param.getAbsValue());
 				}
 			}
 		} else {
@@ -261,63 +264,67 @@ public class SoapToJade extends DefaultHandler {
 						throw new RuntimeException("Parameter "+name+" doesn't match with parameter in store ("+paramEi.getName()+")");
 					}
 	
-					// Get class type
-					Class clazz = SoapUtils.getClassByType(onto, paramEi.getType());
-					if (clazz != null) {
-						// Fill value
-						if (SoapUtils.isPrimitiveJadeType(clazz)) {
-							// Primitive type
-							paramEi.setValue(SoapUtils.getPrimitiveValue(paramEi.getType(), fieldValue));
-							log.debug("Set "+name+" with "+paramEi.getValue());
-		
-						} else {
-							// Not primitive type
-							
-							// Create parameter object
-							Object obj = clazz.newInstance();
-							
-							// Get store of object parameters
-							if ((params4LevelIndex+1) < params4Level.size()) {
-								Vector<ParameterInfo> objParams = params4Level.get(params4LevelIndex+1);
-			
-								if (obj instanceof ArrayList) {
-			
-									// Object is an array
-									for (int count = 0; count < objParams.size(); ++count) {
-										
-										// Add param to array
-										ParameterInfo objParamEi = objParams.get(count);
-										((ArrayList)obj).add(objParamEi.getValue());
-										log.debug("Add element "+count+" to "+name+" with "+objParamEi.getValue());
-									}
-								} else {
-									// Object is a custom type
-									
-									// Set value to every fields
-									for (int count = 0; count < objParams.size(); ++count) {
-										ParameterInfo paramEi1 = objParams.get(count);
-									
-										// Get parameter and verify...
-										Field declaredField;
-										String paramName = paramEi1.getName();
-										Object paramValue = paramEi1.getValue();
-										
-										// Set value
-										setFieldValue(obj, paramName, paramValue);
-									}
-								}
+					// Get parameter type 
+					String xsdType = paramEi.getType();
 
-								// Remove params level from store
-								params4Level.remove(objParams);
+					// Manage parameter
+					if (SoapUtils.isPrimitiveAbsType(xsdType)) {
+						
+						// Primitive type
+						paramEi.setAbsValue(SoapUtils.getPrimitiveAbsValue(paramEi.getType(), fieldValue));
+						log.debug("Set "+name+" with " + fieldValue);
+					} else {
+
+						// NOT Primitive type
+						AbsConcept absObj = null;
+						
+						// Get store of object parameters
+						if ((params4LevelIndex+1) < params4Level.size()) {
+							Vector<ParameterInfo> objParams = params4Level.get(params4LevelIndex+1);
+		
+							if (SoapUtils.isAggregateType(xsdType)) {
+		
+								// Type is an aggregate
+								String aggType = SoapUtils.getAggregateType(xsdType);
+								if (aggType == null) {
+									throw new RuntimeException("Aggregate parameter "+name+" dont'have an associated type");
+								}
+								absObj = new AbsAggregate(aggType);
+								
+								for (int count = 0; count < objParams.size(); ++count) {
+									
+									// Add param to aggregate
+									ParameterInfo objParamEi = objParams.get(count);
+									((AbsAggregate)absObj).add(objParamEi.getAbsValue());
+									log.debug("Add element "+count+" to "+name+" with "+objParamEi.getAbsValue());
+								}
+							} else {
+								
+								// Type is custom
+								absObj = new AbsConcept(xsdType);
+								
+								// Set value to every fields
+								for (int count = 0; count < objParams.size(); ++count) {
+									ParameterInfo paramEi1 = objParams.get(count);
+								
+									// Get parameter and verify...
+									Field declaredField;
+									String paramName = paramEi1.getName();
+									AbsObject paramValue = paramEi1.getAbsValue();
+									
+									// Set value
+									AbsHelper.setAttribute(absObj, paramName, paramValue);
+								}
 							}
 
-							// Set value in param object
-							paramEi.setValue(obj);
-						
-							log.debug("End managing parameter "+name);
+							// Remove params level from store
+							params4Level.remove(objParams);
 						}
-					} else {
-						throw new RuntimeException("No class found for type "+paramEi.getType()+" in ontology "+onto.getName());
+
+						// Set value in param object
+						paramEi.setAbsValue(absObj);
+					
+						log.debug("End managing parameter "+name);						
 					}
 				}
 			}
@@ -336,35 +343,5 @@ public class SoapToJade extends DefaultHandler {
 		elContent.append(ch, start, length);
 	}
 	
-	private void setFieldValue(Object obj, String fieldName, Object fieldValue) {
-		
-		try {
-			// Get class
-			Class clazz = obj.getClass();
-			
-			// Get fields of object
-			Field field = null;
-			do {
-				try {
-					field = clazz.getDeclaredField(fieldName);
-				} catch(NoSuchFieldException e) {
-					clazz = clazz.getSuperclass();
-				}
-			} while(field == null && clazz != null);
-			
-			if (field != null) {
-				// Set reflection accessible method
-				field.setAccessible(true);
-					
-				// Set field value
-				field.set(obj, fieldValue);
-				log.debug("Set "+clazz.getSimpleName()+"."+fieldName+" with "+fieldValue);
-			} else {
-				log.error("Field "+fieldName+" not found in object "+clazz.getCanonicalName());
-			}
-		} catch(Exception e) {
-			log.error("Error accessing to field "+fieldName+" in object "+obj.getClass().getCanonicalName(), e);
-		}
-	}
 }
 
