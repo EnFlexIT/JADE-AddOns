@@ -55,7 +55,7 @@ public class WSDLConstants {
 	// XSD primitive types
 	public static final String XSD_STRING = "string";
 	public static final String XSD_BOOLEAN = "boolean";
-	public static final String XSD_INTEGER = "integer";
+	public static final String XSD_INT = "int";
 	public static final String XSD_LONG = "long";
 	public static final String XSD_FLOAT = "float";
 	public static final String XSD_DOUBLE = "double";
@@ -67,7 +67,7 @@ public class WSDLConstants {
 	public static final Hashtable<String, String> jade2xsd = new Hashtable<String, String>();
 	static {
 		jade2xsd.put(BasicOntology.FLOAT, XSD_FLOAT);
-		jade2xsd.put(BasicOntology.INTEGER, XSD_INTEGER);
+		jade2xsd.put(BasicOntology.INTEGER, XSD_INT);
 		jade2xsd.put(BasicOntology.STRING, XSD_STRING);
 		jade2xsd.put(BasicOntology.BOOLEAN, XSD_BOOLEAN);
 		jade2xsd.put(BasicOntology.DATE, XSD_DATETIME);
@@ -82,7 +82,7 @@ public class WSDLConstants {
 		java2xsd.put(java.lang.Byte.class, XSD_BYTE);
 		java2xsd.put(java.lang.Double.class, XSD_DOUBLE);
 		java2xsd.put(java.lang.Float.class, XSD_FLOAT);
-		java2xsd.put(java.lang.Integer.class, XSD_INTEGER);
+		java2xsd.put(java.lang.Integer.class, XSD_INT);
 		java2xsd.put(java.lang.Long.class, XSD_LONG);
 		java2xsd.put(java.lang.Short.class, XSD_SHORT);
 		java2xsd.put(java.util.Calendar.class, XSD_DATETIME);

@@ -51,7 +51,7 @@ public class SoapUtils {
 		
 		return (WSDLConstants.XSD_STRING.equals(xsdType) || 
 				WSDLConstants.XSD_BOOLEAN.equals(xsdType) ||
-				WSDLConstants.XSD_INTEGER.equals(xsdType) ||
+				WSDLConstants.XSD_INT.equals(xsdType) ||
 				WSDLConstants.XSD_LONG.equals(xsdType) ||
 				WSDLConstants.XSD_FLOAT.equals(xsdType) ||
 				WSDLConstants.XSD_DOUBLE.equals(xsdType) ||
@@ -105,7 +105,7 @@ public class SoapUtils {
 			absObj = AbsPrimitive.wrap(Double.parseDouble(value));
 		} else if(WSDLConstants.XSD_FLOAT.equals(xsdType)) {
 			absObj = AbsPrimitive.wrap(Float.parseFloat(value));
-		} else if(WSDLConstants.XSD_INTEGER.equals(xsdType)) {
+		} else if(WSDLConstants.XSD_INT.equals(xsdType)) {
 			absObj = AbsPrimitive.wrap(Integer.parseInt(value));
 		} else if(WSDLConstants.XSD_LONG.equals(xsdType)) {
 			absObj = AbsPrimitive.wrap(Long.parseLong(value));
