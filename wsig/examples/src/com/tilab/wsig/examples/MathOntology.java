@@ -62,7 +62,7 @@ public class MathOntology extends Ontology implements MathVocabulary{
 
 			ConceptSchema cs = (ConceptSchema) getSchema(COMPLEX);
 			cs.add(REAL, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
-			cs.add(IMMAGINARY, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
+			cs.add(IMMAGINARY, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.OPTIONAL);
 
 			cs = (ConceptSchema) getSchema(AGENTINFO);
 			cs.add(AGENTAID, (TermSchema) getSchema(BasicOntology.AID));
@@ -73,7 +73,7 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT));
 
 			as = (AgentActionSchema) getSchema(SUM);
-			as.add(FIRST_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
+			as.add(FIRST_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
 			as.add(SECOND_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.OPTIONAL);
 			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT));
 			
@@ -93,7 +93,7 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			
 			as = (AgentActionSchema) getSchema(GETCOMPONENTS);
 			as.add(COMPLEX, (ConceptSchema) getSchema(COMPLEX));
-			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT), 2, ObjectSchema.UNLIMITED);
+			as.setResult((PrimitiveSchema)getSchema(BasicOntology.FLOAT), 2, 2);
 			
 			as = (AgentActionSchema) getSchema(GETRANDOM);
 			as.setResult((ConceptSchema) getSchema(COMPLEX));

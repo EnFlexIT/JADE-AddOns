@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?> 
-<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:MathServiceMapper">
+<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:MathFunctionsMapper">
    <soapenv:Header/>
    <soapenv:Body>
       <urn:sumcomplex soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
          <firstComplexElement xsi:type="urn:complex">
-            <real xsi:type="xsd:float">2</real>
-            <immaginary xsi:type="xsd:float">4</immaginary>
+            <real xsi:type="xsd:float">1</real>
+            <immaginary xsi:type="xsd:float">2</immaginary>
          </firstComplexElement>
          <secondComplexElement xsi:type="urn:complex">
             <real xsi:type="xsd:float">3</real>
-            <immaginary xsi:type="xsd:float">6</immaginary>
+            <immaginary xsi:type="xsd:float">4</immaginary>
          </secondComplexElement>
       </urn:sumcomplex>
    </soapenv:Body>

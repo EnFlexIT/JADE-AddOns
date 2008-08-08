@@ -41,6 +41,14 @@ import="jade.content.onto.Ontology,
 		wsigAgentStatus += " ( <a href='"+wsigConfig.getWsigUri()+"?WSIGAgentCommand=start'>START</a> )";
 	}
 
+	// WSDL style
+	String wsdlStyle;
+	if ("rpc".equals(wsigConfig.getWsdlStyle())) {
+		wsdlStyle = "rpc/encoded";
+	} else {
+		wsdlStyle = "document/literal (wrapped)";
+	}
+	
 	// Get services list
 	WSIGService service;
 	Collection services = wsigStore.getAllServices();
@@ -113,6 +121,10 @@ import="jade.content.onto.Ontology,
 	<tr>
 		<td width="30%" class="title">WSDL local namespace:</td>
 		<td class="value"><% out.print(wsigConfig.getLocalNamespacePrefix()); %></td>
+	</tr>
+	<tr>
+		<td width="30%" class="title">WSDL style/use:</td>
+		<td class="value"><% out.print(wsdlStyle); %></td>
 	</tr>
 	<tr>
 		<td width="30%" class="title">WSDL directory:</td>

@@ -23,8 +23,6 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.wsdl;
 
-import jade.content.onto.BasicOntology;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,7 +30,6 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Map;
 
 import javax.wsdl.Binding;
@@ -49,6 +46,7 @@ import javax.wsdl.Port;
 import javax.wsdl.PortType;
 import javax.wsdl.Service;
 import javax.wsdl.Types;
+import javax.wsdl.WSDLElement;
 import javax.wsdl.WSDLException;
 import javax.wsdl.extensions.ExtensionRegistry;
 import javax.wsdl.extensions.schema.Schema;
@@ -71,7 +69,6 @@ import org.eclipse.xsd.XSDParticle;
 import org.eclipse.xsd.XSDSchema;
 import org.eclipse.xsd.XSDTypeDefinition;
 import org.eclipse.xsd.impl.XSDComplexTypeDefinitionImpl;
-import org.w3c.dom.Element;
 
 import com.ibm.wsdl.BindingImpl;
 import com.ibm.wsdl.BindingInputImpl;
@@ -86,35 +83,40 @@ import com.ibm.wsdl.PortImpl;
 import com.ibm.wsdl.PortTypeImpl;
 import com.ibm.wsdl.ServiceImpl;
 import com.ibm.wsdl.TypesImpl;
-
 import com.tilab.wsig.WSIGConfiguration;
 
 public class WSDLGeneratorUtils {
 	
+	private static final String INPUT = "INPUT";
+	private static final String OUTPUT = "OUTPUT";
+	
+	// -----------------------------------------------------------------------------
+	// Private methods
+
 	public static XSDSchema createSchema(String tns) {
 
 		XSDFactory xsdFactory = XSDFactory.eINSTANCE;
 		XSDSchema xsd = xsdFactory.createXSDSchema();
-		xsd.setSchemaForSchemaQNamePrefix("xsd");
+		xsd.setSchemaForSchemaQNamePrefix(WSDLConstants.XSD);
 		xsd.setTargetNamespace(tns);
 
 		Map qNamePrefixToNamespaceMap = xsd.getQNamePrefixToNamespaceMap();
-		qNamePrefixToNamespaceMap.put("xsd", xsd.getTargetNamespace());
-		qNamePrefixToNamespaceMap.put(xsd.getSchemaForSchemaQNamePrefix(), WSDLConstants.XSD);
+		qNamePrefixToNamespaceMap.put(WSDLConstants.XSD, xsd.getTargetNamespace());
+		qNamePrefixToNamespaceMap.put(xsd.getSchemaForSchemaQNamePrefix(), WSDLConstants.XSD_URL);
 		qNamePrefixToNamespaceMap.put(WSIGConfiguration.getInstance().getLocalNamespacePrefix(), tns);
-		
+
+		// Add annotation (without this xsd.getElement() is null)
 		XSDAnnotation xsdAnnotation = xsdFactory.createXSDAnnotation();
 		xsd.getContents().add(xsdAnnotation);
-
 		xsdAnnotation.createUserInformation(null);
-
+		
 		return xsd;
 	}
 
-	public static XSDTypeDefinition getTypeDefinition(XSDSchema schema, String targetNameSpace, String localName) {
+	public static XSDTypeDefinition getComplexType(XSDSchema schema, String targetNameSpace, String typeName) {
 		XSDTypeDefinition result = null;
 		for (XSDTypeDefinition type : schema.getTypeDefinitions()) {
-			if (type.hasNameAndTargetNamespace(localName, targetNameSpace)) {
+			if (type.hasNameAndTargetNamespace(typeName, targetNameSpace)) {
 				result = type;
 				break;
 			}
@@ -122,85 +124,122 @@ public class WSDLGeneratorUtils {
 		return result;
 	}
 
-	public static XSDComplexTypeDefinition addComplexTypeToSchema(String tns, XSDSchema schema, String complexTypeName) {
-		XSDComplexTypeDefinitionImpl simpleRecursiveComplexTypeDefinition = (XSDComplexTypeDefinitionImpl) XSDFactory.eINSTANCE.createXSDComplexTypeDefinition();
-		simpleRecursiveComplexTypeDefinition.setName(complexTypeName);
-		simpleRecursiveComplexTypeDefinition.setTargetNamespace(tns);
+	public static XSDComplexTypeDefinition createComplexType(String tns, String name) {
+		XSDComplexTypeDefinition complexType = (XSDComplexTypeDefinitionImpl) XSDFactory.eINSTANCE.createXSDComplexTypeDefinition();
+		if (name != null) {
+			complexType.setName(name);
+		}
+		if (tns != null) {
+			complexType.setTargetNamespace(tns);
+		}
 
-		schema.getContents().add(simpleRecursiveComplexTypeDefinition);
-
-		return simpleRecursiveComplexTypeDefinition;
-
+		return complexType;
 	}
 
+	public static XSDElementDeclaration createElement(String tns, String name) {
+		XSDElementDeclaration element = XSDFactory.eINSTANCE.createXSDElementDeclaration();
+		if (name != null) {
+			element.setName(name);
+		}
+		if (tns != null) {
+			element.setTargetNamespace(tns);
+		}
+		
+		return element;
+	}
+	
+	public static XSDComplexTypeDefinition addComplexTypeToSchema(String tns, XSDSchema schema, String complexTypeName) {
+		XSDComplexTypeDefinition complexType = createComplexType(tns, complexTypeName);
+		schema.getContents().add(complexType);
+
+		return complexType;
+	}
+
+	public static XSDComplexTypeDefinition addComplexTypeToElement(XSDElementDeclaration element) {
+		XSDComplexTypeDefinition complexType = createComplexType(null, null);
+		element.setAnonymousTypeDefinition(complexType);
+
+		return complexType;
+	}
+	
+	public static XSDElementDeclaration addElementToSchema(String tns, XSDSchema schema, String elementName) {
+		
+		XSDElementDeclaration element = createElement(null, elementName);
+		schema.getContents().add(element);
+		
+		return element;
+	}
+	
 	public static XSDModelGroup addSequenceToComplexType(XSDComplexTypeDefinition complexTypeDefinition) {
 
-		XSDParticle contentParticle = XSDFactory.eINSTANCE.createXSDParticle();
+		XSDParticle particle = XSDFactory.eINSTANCE.createXSDParticle();
 		XSDModelGroup contentSequence = XSDFactory.eINSTANCE.createXSDModelGroup();
 		contentSequence.setCompositor(XSDCompositor.SEQUENCE_LITERAL);
-		contentParticle.setContent(contentSequence);
-		complexTypeDefinition.setContent(contentParticle);
+		particle.setContent(contentSequence);
+		complexTypeDefinition.setContent(particle);
 		
 		return contentSequence;
 	}
 
-	public static XSDParticle addElementToSequence(boolean primitive, String tns, XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence) {
-		XSDElementDeclaration elementAdded = XSDFactory.eINSTANCE.createXSDElementDeclaration();
-		elementAdded.setName(elementName);
+	public static XSDParticle addElementToSequence(String tns, XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence) {
+		XSDElementDeclaration element = createElement(null, elementName);
 		
-		XSDTypeDefinition xsdTypeDefinition;
-		if (primitive) {
-			xsdTypeDefinition = schema.resolveSimpleTypeDefinition(WSDLConstants.XSD, elementType);
+		XSDTypeDefinition complexType;
+		if (WSDLConstants.jade2xsd.values().contains(elementType)) {
+			complexType = schema.resolveSimpleTypeDefinition(WSDLConstants.XSD_URL, elementType);
 		} else {
-			xsdTypeDefinition = getTypeDefinition(schema, tns, elementType);
+			complexType = getComplexType(schema, tns, elementType);
 			
-			if (xsdTypeDefinition == null) {
+			if (complexType == null) {
 				// Not already present in definition type
 				// Create a temp definition in my tns
-				xsdTypeDefinition = (XSDComplexTypeDefinitionImpl) XSDFactory.eINSTANCE.createXSDComplexTypeDefinition();
-				xsdTypeDefinition.setName(elementType);
-				xsdTypeDefinition.setTargetNamespace(tns);
+				complexType = createComplexType(tns, elementType);
 			}
 		}
-		elementAdded.setTypeDefinition(xsdTypeDefinition);
-
-		XSDParticle elementParticle = XSDFactory.eINSTANCE.createXSDParticle();
-		elementParticle.setContent(elementAdded);
-		sequence.getContents().add(elementParticle);
+		element.setTypeDefinition(complexType);
 		
-		return elementParticle;
+		XSDParticle particle = XSDFactory.eINSTANCE.createXSDParticle();
+		particle.setContent(element);
+		sequence.getContents().add(particle);
+		
+		return particle;
 	}
 
-	public static XSDParticle addElementToSequence(boolean primitive, String tns, XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence, int minOcc, int maxOcc) {
-		XSDParticle elementParticle = addElementToSequence(primitive, tns, schema, elementName, elementType, sequence);
-		if (minOcc != -1) {
-			elementParticle.setMaxOccurs(maxOcc);
-			elementParticle.setMinOccurs(minOcc);
+	public static XSDParticle addElementToSequence(String tns, XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence, Integer minOcc, Integer maxOcc) {
+		XSDParticle particle = addElementToSequence(tns, schema, elementName, elementType, sequence);
+		if (minOcc != null) {
+			particle.setMinOccurs(minOcc);
 		}
-		return elementParticle;
+		if (maxOcc != null) {
+			particle.setMaxOccurs(maxOcc);
+		}
+		return particle;
 	}
 	
-	public static Types createTypes(ExtensionRegistry registry, Element element) throws WSDLException {
-		
+	public static Types createTypes(ExtensionRegistry registry, XSDSchema wsdlTypeSchema) throws WSDLException {
 		Types types = new TypesImpl();
 
 		Schema schema = (Schema) registry.createExtension(
-							Types.class, new QName(WSDLConstants.XSD,
+							Types.class, new QName(WSDLConstants.XSD_URL,
 							WSDLConstants.SCHEMA));
-		schema.setElement(element);
+		schema.setElement(wsdlTypeSchema.getElement());
 		types.addExtensibilityElement(schema);
 		
 		return types;
 	}
 	
+	public static String getLocalPart(String tns) {
+		return tns.substring(tns.indexOf(":")+1);
+	}
+	
 	public static Definition createWSDLDefinition(WSDLFactory factory, String tns) {
 		Definition definition = factory.newDefinition();
-		definition.setQName(new QName(tns, tns.substring(tns.indexOf(":")+1)));
+		definition.setQName(new QName(tns, getLocalPart(tns)));
 		definition.setTargetNamespace(tns);
 		definition.addNamespace(WSIGConfiguration.getInstance().getLocalNamespacePrefix(), tns);
-		definition.addNamespace("xsd", WSDLConstants.XSD);
-		definition.addNamespace("xsi", WSDLConstants.XSI);
-		definition.addNamespace("wsdlsoap", WSDLConstants.WSDL_SOAP);
+		definition.addNamespace(WSDLConstants.XSD, WSDLConstants.XSD_URL);
+		definition.addNamespace(WSDLConstants.XSI, WSDLConstants.XSI_URL);
+		definition.addNamespace(WSDLConstants.WSDL_SOAP, WSDLConstants.WSDL_SOAP_URL);
 		
 		return definition;
 	}
@@ -208,49 +247,49 @@ public class WSDLGeneratorUtils {
 	public static PortType createPortType(String tns) {
 		PortType portType = new PortTypeImpl();
 		portType.setUndefined(false);
-		portType.setQName(new QName(tns.substring(tns.indexOf(":")+1)));
+		portType.setQName(new QName(getPortName(tns)));
 		return portType;
 	}
 	
 	public static Binding createBinding(String tns) {
 		Binding binding = new BindingImpl();
-		PortType portTypeB = new PortTypeImpl();
-		portTypeB.setUndefined(false);
-		portTypeB.setQName(new QName(tns, tns.substring(tns.indexOf(":")+1)));
-		binding.setPortType(portTypeB);
+		PortType portType = new PortTypeImpl();
+		portType.setUndefined(false);
+		portType.setQName(new QName(tns, getPortName(tns)));
+		binding.setPortType(portType);
 		binding.setUndefined(false);
-		binding.setQName(new QName(tns.substring(4)+WSDLConstants.PUBLISH_BINDING_SUFFIX));
+		binding.setQName(new QName(getBindingName(tns)));
 		return binding;
 	}
 
-	public static SOAPBinding createSOAPBinding(ExtensionRegistry registry) throws WSDLException {
+	public static SOAPBinding createSOAPBinding(ExtensionRegistry registry, String soapStyle) throws WSDLException {
 		SOAPBinding soapBinding = (SOAPBinding) registry.createExtension(
-				Binding.class, new QName(WSDLConstants.WSDL_SOAP, "binding"));
-		soapBinding.setStyle(WSDLConstants.SOAP_STYLE);
-		soapBinding.setTransportURI(WSDLConstants.TRANSPORT_URI);
+				Binding.class, new QName(WSDLConstants.WSDL_SOAP_URL, WSDLConstants.BINDING));
+		soapBinding.setStyle(soapStyle);
+		soapBinding.setTransportURI(WSDLConstants.TRANSPORT_URL);
 		return soapBinding;
 	}
 	
 	public static Port createPort(String tns) {
 		Binding bindingP = new BindingImpl();
-		bindingP.setQName(new QName(tns, tns.substring(4)+WSDLConstants.PUBLISH_BINDING_SUFFIX));
+		bindingP.setQName(new QName(tns, tns.substring(4)+WSDLConstants.BINDING_SUFFIX));
 		bindingP.setUndefined(false);
 		Port port = new PortImpl();
-		port.setName(WSDLConstants.PUBLISH);
+		port.setName(getPortName(tns));
 		port.setBinding(bindingP);
 		return port;
 	}
 	
 	public static SOAPAddress createSOAPAddress(ExtensionRegistry registry) throws WSDLException {
 		SOAPAddress soapAddress = null;
-		soapAddress = (SOAPAddress)registry.createExtension(Port.class,new QName(WSDLConstants.WSDL_SOAP,"address"));		
+		soapAddress = (SOAPAddress)registry.createExtension(Port.class,new QName(WSDLConstants.WSDL_SOAP_URL, "address"));		
 		soapAddress.setLocationURI(WSIGConfiguration.getInstance().getWsigUri());
 		return soapAddress;
 	}
-
+	
 	public static Service createService(String tns) {
 		Service service = new ServiceImpl();
-		service.setQName(new QName(tns.substring(tns.indexOf(":")+1)));
+		service.setQName(new QName(getServiceName(tns)));
 		return service;
 	}
 
@@ -261,98 +300,66 @@ public class WSDLGeneratorUtils {
 		return operation;
 	}
 
-	public static Message createMessage(String tns, String name) {
-		Message messageOut = new MessageImpl();
-		messageOut.setQName(new QName(tns, name));
-		messageOut.setUndefined(false);
-		return messageOut;
-	}
-
-	public static Output createOutput(String name) {
-		Output output = new OutputImpl();
-		output.setName(name);
-		return output;
-	}
-	
-	public static BindingOperation createBindingOperation(ExtensionRegistry registry, String actionName) throws WSDLException {
+	public static BindingOperation createBindingOperation(ExtensionRegistry registry, String tns, String actionName) throws WSDLException {
 
 		BindingOperation operationB = new BindingOperationImpl();
 		operationB.setName(actionName);
 		SOAPOperation soapOperation = (SOAPOperation) registry
 				.createExtension(BindingOperation.class,
-						new QName(WSDLConstants.WSDL_SOAP, WSDLConstants.OPERATION));
-		soapOperation.setSoapActionURI(WSDLConstants.SOAP_ACTION_URI);
+						new QName(WSDLConstants.WSDL_SOAP_URL, WSDLConstants.OPERATION));
+		soapOperation.setSoapActionURI(getActionName(tns));
 		operationB.addExtensibilityElement(soapOperation);
 		return operationB;
 	}
-	
-	public static BindingInput createBindingInput(ExtensionRegistry registry, String tns, String name) throws Exception{
+
+	public static BindingInput createBindingInput(ExtensionRegistry registry, String tns, String soapUse) throws Exception{
 		
-		BindingInput inputB = new BindingInputImpl();
-		inputB.setName(name);
-		SOAPBody soapBodyInput;
-		try {
-			soapBodyInput = (SOAPBody) registry.createExtension(BindingInput.class,
-							new QName(WSDLConstants.WSDL_SOAP, WSDLConstants.BODY));
-		} catch (WSDLException e) {
-			throw new Exception("Error in SOAPBodyInput Handling", e);
-		}
-		soapBodyInput.setUse(WSDLConstants.ENCODED);
-		ArrayList encodingStylesInput = new ArrayList();
-		encodingStylesInput.add(WSDLConstants.ENCODING_STYLE);
-		soapBodyInput.setEncodingStyles(encodingStylesInput);
-		soapBodyInput.setNamespaceURI(tns);
-		inputB.addExtensibilityElement(soapBodyInput);
-		return inputB;
+		return (BindingInput)createBinding(registry, tns, soapUse, INPUT);
 	}
 	
-	public static BindingOutput createBindingOutput(ExtensionRegistry registry,
-			String tns, String name) throws Exception  {
+	public static BindingOutput createBindingOutput(ExtensionRegistry registry, String tns, String soapUse) throws Exception  {
 
-		BindingOutput outputB = new BindingOutputImpl();
-		outputB.setName(name);
-		SOAPBody soapBodyOutput;
-		try {
-			soapBodyOutput = (SOAPBody) registry.createExtension(
-					BindingOutput.class, new QName(WSDLConstants.WSDL_SOAP, WSDLConstants.BODY));
-		} catch (WSDLException e) {
-			throw new Exception("Error in SOAPBodyOutput Handling", e);
-		}
-		soapBodyOutput.setUse(WSDLConstants.ENCODED);
-		ArrayList encodingStylesOutput = new ArrayList();
-		encodingStylesOutput.add(WSDLConstants.ENCODING_STYLE);
-		soapBodyOutput.setEncodingStyles(encodingStylesOutput);
-		soapBodyOutput.setNamespaceURI(tns);
-		outputB.addExtensibilityElement(soapBodyOutput);
-		return outputB;
+		return (BindingOutput)createBinding(registry, tns, soapUse, OUTPUT);
 	}
 
-	public static Message createMessageIn(String tns, String name) {
+	public static Message createMessage(String tns, String name) {
 		Message messageIn = new MessageImpl();
 		messageIn.setQName(new QName(tns, name));
 		messageIn.setUndefined(false);
 		return messageIn;
 	}
 
-	public static Input createInput(Message messageIn, String name) {
+	public static Input createInput(Message messageIn) {
 		Input input = new InputImpl();
 		input.setMessage(messageIn);
-		input.setName(name);
 		return input;
 	}
 
-	public static Part createPart(String name, String className, String tns) {
+	public static Output createOutput(Message messageOut) {
+		Output output = new OutputImpl();
+		output.setMessage(messageOut);
+		return output;
+	}
+	
+	public static Part createTypePart(String name, String type, String tns) {
 		Part part = new PartImpl();
-		
 		String namespaceURI;
-		if (WSDLConstants.jade2xsd.values().contains(className)) {
-			namespaceURI = WSDLConstants.XSD;
+		if (WSDLConstants.jade2xsd.values().contains(type)) {
+			namespaceURI = WSDLConstants.XSD_URL;
 		} else {
 			namespaceURI = tns;
 		}
 		
-		QName qNameType = new QName(namespaceURI, className);
+		QName qNameType = new QName(namespaceURI, type);
 		part.setTypeName(qNameType);
+		part.setName(name);
+		return part;
+	}
+	
+	public static Part createElementPart(String name, String elementName, String tns) {
+		QName qNameElement = new QName(tns, elementName);
+		Part part = new PartImpl();
+		part.setElementName(qNameElement);
 		part.setName(name);
 		return part;
 	}
@@ -405,7 +412,7 @@ public class WSDLGeneratorUtils {
 	}
 
 	public static String getResultName(String operationName) { 
-		return WSDLConstants.RESULT_PREFIX+WSDLConstants.SEPARATOR+operationName+WSDLConstants.SEPARATOR+WSDLConstants.RESULT_SUFFIX;
+		return operationName+WSDLConstants.RETURN_SUFFIX;
 	}
 
 	public static String getAggregateToken() {
@@ -414,5 +421,59 @@ public class WSDLGeneratorUtils {
 	
 	public static String getAggregateType(String elementType, String aggregateType) { 
 		return elementType+getAggregateToken()+aggregateType;
+	}
+	
+	public static String getResponseName(String operationName) {
+		return operationName+WSDLConstants.RESPONSE_SUFFIX;
+	}
+
+	public static String getRequestName(String operationName) {
+		return operationName+WSDLConstants.REQUEST_SUFFIX;
+	}
+
+	
+	// -----------------------------------------------------------------------------
+	// Private methods
+	
+	private static WSDLElement createBinding(ExtensionRegistry registry, String tns, String soapUse, String type) throws Exception{
+
+		SOAPBody soapBody;
+		WSDLElement binding;
+		if (INPUT.equals(type)) {
+			binding = new BindingInputImpl();
+		} else {
+			binding = new BindingOutputImpl();
+		}
+		
+		try {
+			soapBody = (SOAPBody) registry.createExtension(BindingInput.class,
+							new QName(WSDLConstants.WSDL_SOAP_URL, WSDLConstants.BODY));
+		} catch (WSDLException e) {
+			throw new Exception("Error in SOAPBodyInput Handling", e);
+		}
+		soapBody.setUse(soapUse);
+		if (WSDLConstants.USE_ENCODED.equals(soapUse)) {
+			ArrayList encodingStylesInput = new ArrayList();
+			encodingStylesInput.add(WSDLConstants.ENCODING_URL);
+			soapBody.setEncodingStyles(encodingStylesInput);
+		}
+		binding.addExtensibilityElement(soapBody);
+		return binding;
+	}
+	
+	private static String getActionName(String tns) {
+		return tns+WSDLConstants.ACTION_SUFFIX;
+	}
+	
+	private static String getBindingName(String tns) {
+		return getLocalPart(tns)+WSDLConstants.BINDING_SUFFIX;
+	}
+
+	private static String getServiceName(String tns) {
+		return getLocalPart(tns)+WSDLConstants.SERVICE_SUFFIX;
+	}
+	
+	private static String getPortName(String tns) {
+		return getLocalPart(tns)+WSDLConstants.PORT_TYPE_SUFFIX;
 	}
 }

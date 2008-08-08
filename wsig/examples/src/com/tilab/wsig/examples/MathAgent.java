@@ -87,7 +87,7 @@ public class MathAgent extends Agent {
 		sd.addProperties(new Property(WSIG_FLAG, "true"));
 		
 		// Service name
-		String wsigServiceName = "MathService"; 
+		String wsigServiceName = "Math"; 
 		if (args.length >= 1) {
 			wsigServiceName = (String)args[0];
 		}

@@ -29,28 +29,34 @@ import java.util.Hashtable;
 
 public class WSDLConstants {
 	
-	// WSDL Constants 
-	public static final String XSI = "http://www.w3.org/2001/XMLSchema-instance";
-	public static final String XSD = "http://www.w3.org/2001/XMLSchema";
-	public static final String WSDL_SOAP = "http://schemas.xmlsoap.org/wsdl/soap/";
-	public static final String ENCODING_STYLE = "http://schemas.xmlsoap.org/soap/encoding/";
-	public static final String TRANSPORT_URI = "http://schemas.xmlsoap.org/soap/http";
-	public static final String SOAP_STYLE = "rpc";
-	public static final String PUBLISH_BINDING_SUFFIX = "SOAP";
+	// WSDL Constants
+	public static final String STYLE_RPC = "rpc";
+	public static final String STYLE_DOCUMENT = "document";
+	public static final String USE_ENCODED = "encoded";
+	public static final String USE_LITERAL = "literal";
+	public static final String XSI = "xsi";
+	public static final String XSI_URL = "http://www.w3.org/2001/XMLSchema-instance";
+	public static final String XSD = "xsd";
+	public static final String XSD_URL = "http://www.w3.org/2001/XMLSchema";
+	public static final String WSDL_SOAP = "wsdlsoap";
+	public static final String WSDL_SOAP_URL = "http://schemas.xmlsoap.org/wsdl/soap/";
+	public static final String ENCODING_URL = "http://schemas.xmlsoap.org/soap/encoding/";
+	public static final String TRANSPORT_URL = "http://schemas.xmlsoap.org/soap/http";
+	public static final String BINDING_SUFFIX = "Binding";
+	public static final String PORT_TYPE_SUFFIX = "Port";
+	public static final String SERVICE_SUFFIX = "Service";
+	public static final String ACTION_SUFFIX = "Action";
+	public static final String REQUEST_SUFFIX = "Request";
+	public static final String RESPONSE_SUFFIX = "Response";
+	public static final String RETURN_SUFFIX = "Return";
 	public static final String SCHEMA = "schema";
-	public static final String PUBLISH = "publish";
 	public static final String OPERATION = "operation";
-	public static final String SOAP_ACTION_URI = "soapActionURI";
 	public static final String BODY = "body";
-	public static final String ENCODED = "encoded";
-	public static final String PAR = "par";
 	public static final String AGGREGATE = "aggregate";
+	public static final String BINDING = "binding";
+	public static final String PARAMETERS = "parameters";
 	public static final String MAPPER_METHOD_PREFIX = "to";
-	public static final String INPUT_PARAM_SUFFIX = "input";
-	public static final String OUTPUT_PARAM_SUFFIX = "output";
 	public static final String SEPARATOR = "_";
-	public static final String RESULT_PREFIX = "get";
-	public static final String RESULT_SUFFIX = "result";
 	
 	// XSD primitive types
 	public static final String XSD_STRING = "string";

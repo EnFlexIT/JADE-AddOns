@@ -33,6 +33,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import com.tilab.wsig.wsdl.WSDLConstants;
+
 public class WSIGConfiguration extends Properties {
 
 	private static WSIGConfiguration anInstance;
@@ -51,6 +53,7 @@ public class WSIGConfiguration extends Properties {
 	public final static String KEY_LOCAL_NAMESPACE_PREFIX = "wsdl.localNamespacePrefix";
 	public static final String KEY_WSDL_DIRECTORY = "wsdl.directory";
 	public static final String KEY_WSDL_URI = "wsdl.uri";
+	public static final String KEY_WSDL_STYLE = "wsdl.style";
 	
 	// UDDI repository configuration
 	public final static String KEY_UDDI_ENABLE = "uddi.enable";
@@ -131,6 +134,10 @@ public class WSIGConfiguration extends Properties {
 		return getProperty(KEY_WSDL_URI);
 	}
 
+	public synchronized String getWsdlStyle() {
+		return getProperty(KEY_WSDL_STYLE);
+	}
+	
 	// UDDI repository configuration
 	public synchronized boolean isUddiEnable() {
 		String uddiEnable = getProperty(KEY_UDDI_ENABLE);
@@ -193,6 +200,7 @@ public class WSIGConfiguration extends Properties {
 		setProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT, "30000");
 		setProperty(WSIGConfiguration.KEY_WSDL_DIRECTORY, "wsdl");
 		setProperty(WSIGConfiguration.KEY_WSDL_URI, "http://localhost:8080/wsig/wsdl");
+		setProperty(WSIGConfiguration.KEY_WSDL_STYLE, WSDLConstants.STYLE_RPC);
 		setProperty(WSIGConfiguration.KEY_UDDI_ENABLE, "true");
 		setProperty(WSIGConfiguration.KEY_LIFE_CYCLE_MANAGER_URL, "");
 		setProperty(WSIGConfiguration.KEY_QUERY_MANAGER_URL, "");

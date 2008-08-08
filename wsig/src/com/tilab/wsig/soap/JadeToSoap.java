@@ -89,7 +89,7 @@ public class JadeToSoap {
         // Create objects for the message parts            
         SOAPPart soapPart = soapResponse.getSOAPPart();
         envelope = soapPart.getEnvelope();
-        envelope.addNamespaceDeclaration(PREFIX_Q0, WSDLConstants.XSD);
+        envelope.addNamespaceDeclaration(PREFIX_Q0, WSDLConstants.XSD_URL);
         envelope.addNamespaceDeclaration(PREFIX_Q1, tns);
         
         SOAPBody body = envelope.getBody();
@@ -153,7 +153,7 @@ public class JadeToSoap {
 
 			// Get type and create soap element
 	        soapType = (String) WSDLConstants.jade2xsd.get(resultSchema.getTypeName());
-			soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD, soapType);
+			soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD_URL, soapType);
 
 			AbsPrimitive primitiveAbsObj = (AbsPrimitive)resultAbsObj;
 			
@@ -250,7 +250,7 @@ public class JadeToSoap {
 	private SOAPElement addSoapElement(SOAPElement rootSoapElement, String elementName, String uri, String soapType) throws Exception {
 		
 		String prefix = PREFIX_Q1;
-		if (uri != null && uri.equals(WSDLConstants.XSD)) {
+		if (uri != null && uri.equals(WSDLConstants.XSD_URL)) {
 			prefix = PREFIX_Q0;
 		}
 			
@@ -260,12 +260,12 @@ public class JadeToSoap {
 	    
 	    // Add encoding style only to first element
 	    if (rootSoapElement instanceof SOAPBody) {
-	    	soapElement.setEncodingStyle(WSDLConstants.ENCODING_STYLE);
+	    	soapElement.setEncodingStyle(WSDLConstants.ENCODING_URL);
 	    }
 	    
 	    // Add type
 	    if (soapType != null) {
-		    Name typeName = envelope.createName("type", "xsi", WSDLConstants.XSI);
+		    Name typeName = envelope.createName("type", WSDLConstants.XSI, WSDLConstants.XSI_URL);
 		    soapElement.addAttribute(typeName, prefix+":"+soapType);
 	    }
 	    

@@ -205,7 +205,7 @@ public class SoapToJade extends DefaultHandler {
 			if (level >= 4) {
 
 				// Get parameter type
-				String attrValue = attrs.getValue(WSDLConstants.XSI, "type");
+				String attrValue = attrs.getValue(WSDLConstants.XSI_URL, "type");
 				if (attrValue != null) {
 					int pos = attrValue.indexOf(':');
 					String valueType = attrValue.substring(pos+1);

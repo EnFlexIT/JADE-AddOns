@@ -30,7 +30,10 @@ public class Complex implements Concept {
 	private float real;
 	private float immaginary;
 
-	public Complex(){}
+	public Complex() {
+		real = 0;
+		immaginary = 0;
+	}
 
 	public float getReal() {
 		return real;
