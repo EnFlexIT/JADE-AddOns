@@ -288,10 +288,10 @@ public class WSDLUtils {
 		return port;
 	}
 	
-	static SOAPAddress createSOAPAddress(ExtensionRegistry registry) throws WSDLException {
+	static SOAPAddress createSOAPAddress(ExtensionRegistry registry, String serviceName) throws WSDLException {
 		SOAPAddress soapAddress = null;
 		soapAddress = (SOAPAddress)registry.createExtension(Port.class,new QName(WSDLConstants.WSDL_SOAP_URL, "address"));		
-		soapAddress.setLocationURI(WSIGConfiguration.getInstance().getWsigUri());
+		soapAddress.setLocationURI(WSIGConfiguration.getInstance().getWsigUri()+"/"+serviceName);
 		return soapAddress;
 	}
 	
@@ -377,10 +377,6 @@ public class WSDLUtils {
 		File file = new File(fileName);
 		PrintWriter output = new PrintWriter(file);
 		writer.writeWSDL(definition, output);
-	}
-	
-	static String getAggregateToken() {
-		return WSDLConstants.SEPARATOR+WSDLConstants.AGGREGATE+WSDLConstants.SEPARATOR;
 	}
 	
 	static String getResponseName(String operationName) {
@@ -471,8 +467,13 @@ public class WSDLUtils {
 		return elementSchema;
 	}
 
-	public static String getAggregateType(String elementType, String aggregateType) { 
-		return elementType+getAggregateToken()+aggregateType;
+	public static String getAggregateType(String elementType, String aggregateType) {
+		// aggregateType (SET, SEQUENCE,...) no more used
+		
+		char[] uppercaseElementType = elementType.toCharArray();
+		uppercaseElementType[0] = Character.toUpperCase(uppercaseElementType[0]);
+
+		return WSDLConstants.ARRAY_OF + new String(uppercaseElementType);
 	}
 	
 	public static String getWSDLFilename(String serviceName) {

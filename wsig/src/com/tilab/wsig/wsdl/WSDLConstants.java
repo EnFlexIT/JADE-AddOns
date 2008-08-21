@@ -53,7 +53,7 @@ public class WSDLConstants {
 	public static final String SCHEMA = "schema";
 	public static final String OPERATION = "operation";
 	public static final String BODY = "body";
-	public static final String AGGREGATE = "aggregate";
+	public static final String ARRAY_OF = "ArrayOf";
 	public static final String BINDING = "binding";
 	public static final String PARAMETERS = "parameters";
 	public static final String TYPE = "type";

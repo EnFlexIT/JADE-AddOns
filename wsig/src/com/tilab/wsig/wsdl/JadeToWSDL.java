@@ -104,8 +104,9 @@ public class JadeToWSDL {
 		}
 		
 		// Create wsdl definition and type schema
+		String serviceName = wsigService.getServicePrefix() + sd.getName();
 		WSDLFactory factory = WSDLFactory.newInstance();
-		String tns = WSDLConstants.URN+":" + wsigService.getServicePrefix() + sd.getName();
+		String tns = WSDLConstants.URN+":" + serviceName;
 		
 		Definition definition = WSDLUtils.createWSDLDefinition(factory, tns);
 		XSDSchema wsdlTypeSchema = WSDLUtils.createSchema(tns);
@@ -130,7 +131,7 @@ public class JadeToWSDL {
 
 		Port port = WSDLUtils.createPort(tns);
 		try {
-			port.addExtensibilityElement(WSDLUtils.createSOAPAddress(registry));
+			port.addExtensibilityElement(WSDLUtils.createSOAPAddress(registry, serviceName));
 		} catch (WSDLException e) {
 			throw new Exception("Error in SOAPAddress Handling", e);
 		}
