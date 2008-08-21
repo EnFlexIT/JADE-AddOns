@@ -23,6 +23,13 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.wsdl;
 
+import jade.content.onto.OntologyException;
+import jade.content.schema.AgentActionSchema;
+import jade.content.schema.Facet;
+import jade.content.schema.ObjectSchema;
+import jade.content.schema.facets.CardinalityFacet;
+import jade.content.schema.facets.TypedAggregateFacet;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -84,16 +91,17 @@ import com.ibm.wsdl.PortTypeImpl;
 import com.ibm.wsdl.ServiceImpl;
 import com.ibm.wsdl.TypesImpl;
 import com.tilab.wsig.WSIGConfiguration;
+import com.tilab.wsig.store.TypedAggregateSchema;
 
-public class WSDLGeneratorUtils {
+public class WSDLUtils {
 	
 	private static final String INPUT = "INPUT";
 	private static final String OUTPUT = "OUTPUT";
 	
 	// -----------------------------------------------------------------------------
-	// Private methods
+	// Package-scope methods
 
-	public static XSDSchema createSchema(String tns) {
+	static XSDSchema createSchema(String tns) {
 
 		XSDFactory xsdFactory = XSDFactory.eINSTANCE;
 		XSDSchema xsd = xsdFactory.createXSDSchema();
@@ -113,7 +121,7 @@ public class WSDLGeneratorUtils {
 		return xsd;
 	}
 
-	public static XSDTypeDefinition getComplexType(XSDSchema schema, String targetNameSpace, String typeName) {
+	static XSDTypeDefinition getComplexType(XSDSchema schema, String targetNameSpace, String typeName) {
 		XSDTypeDefinition result = null;
 		for (XSDTypeDefinition type : schema.getTypeDefinitions()) {
 			if (type.hasNameAndTargetNamespace(typeName, targetNameSpace)) {
@@ -124,7 +132,7 @@ public class WSDLGeneratorUtils {
 		return result;
 	}
 
-	public static XSDComplexTypeDefinition createComplexType(String tns, String name) {
+	static XSDComplexTypeDefinition createComplexType(String tns, String name) {
 		XSDComplexTypeDefinition complexType = (XSDComplexTypeDefinitionImpl) XSDFactory.eINSTANCE.createXSDComplexTypeDefinition();
 		if (name != null) {
 			complexType.setName(name);
@@ -136,7 +144,7 @@ public class WSDLGeneratorUtils {
 		return complexType;
 	}
 
-	public static XSDElementDeclaration createElement(String tns, String name) {
+	static XSDElementDeclaration createElement(String tns, String name) {
 		XSDElementDeclaration element = XSDFactory.eINSTANCE.createXSDElementDeclaration();
 		if (name != null) {
 			element.setName(name);
@@ -148,21 +156,21 @@ public class WSDLGeneratorUtils {
 		return element;
 	}
 	
-	public static XSDComplexTypeDefinition addComplexTypeToSchema(String tns, XSDSchema schema, String complexTypeName) {
+	static XSDComplexTypeDefinition addComplexTypeToSchema(String tns, XSDSchema schema, String complexTypeName) {
 		XSDComplexTypeDefinition complexType = createComplexType(tns, complexTypeName);
 		schema.getContents().add(complexType);
 
 		return complexType;
 	}
 
-	public static XSDComplexTypeDefinition addComplexTypeToElement(XSDElementDeclaration element) {
+	static XSDComplexTypeDefinition addComplexTypeToElement(XSDElementDeclaration element) {
 		XSDComplexTypeDefinition complexType = createComplexType(null, null);
 		element.setAnonymousTypeDefinition(complexType);
 
 		return complexType;
 	}
 	
-	public static XSDElementDeclaration addElementToSchema(String tns, XSDSchema schema, String elementName) {
+	static XSDElementDeclaration addElementToSchema(String tns, XSDSchema schema, String elementName) {
 		
 		XSDElementDeclaration element = createElement(null, elementName);
 		schema.getContents().add(element);
@@ -170,7 +178,7 @@ public class WSDLGeneratorUtils {
 		return element;
 	}
 	
-	public static XSDModelGroup addSequenceToComplexType(XSDComplexTypeDefinition complexTypeDefinition) {
+	static XSDModelGroup addSequenceToComplexType(XSDComplexTypeDefinition complexTypeDefinition) {
 
 		XSDParticle particle = XSDFactory.eINSTANCE.createXSDParticle();
 		XSDModelGroup contentSequence = XSDFactory.eINSTANCE.createXSDModelGroup();
@@ -181,7 +189,7 @@ public class WSDLGeneratorUtils {
 		return contentSequence;
 	}
 
-	public static XSDParticle addElementToSequence(String tns, XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence) {
+	static XSDParticle addElementToSequence(String tns, XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence) {
 		XSDElementDeclaration element = createElement(null, elementName);
 		
 		XSDTypeDefinition complexType;
@@ -205,7 +213,7 @@ public class WSDLGeneratorUtils {
 		return particle;
 	}
 
-	public static XSDParticle addElementToSequence(String tns, XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence, Integer minOcc, Integer maxOcc) {
+	static XSDParticle addElementToSequence(String tns, XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence, Integer minOcc, Integer maxOcc) {
 		XSDParticle particle = addElementToSequence(tns, schema, elementName, elementType, sequence);
 		if (minOcc != null) {
 			particle.setMinOccurs(minOcc);
@@ -216,7 +224,7 @@ public class WSDLGeneratorUtils {
 		return particle;
 	}
 	
-	public static Types createTypes(ExtensionRegistry registry, XSDSchema wsdlTypeSchema) throws WSDLException {
+	static Types createTypes(ExtensionRegistry registry, XSDSchema wsdlTypeSchema) throws WSDLException {
 		Types types = new TypesImpl();
 
 		Schema schema = (Schema) registry.createExtension(
@@ -228,11 +236,11 @@ public class WSDLGeneratorUtils {
 		return types;
 	}
 	
-	public static String getLocalPart(String tns) {
+	static String getLocalPart(String tns) {
 		return tns.substring(tns.indexOf(":")+1);
 	}
 	
-	public static Definition createWSDLDefinition(WSDLFactory factory, String tns) {
+	static Definition createWSDLDefinition(WSDLFactory factory, String tns) {
 		Definition definition = factory.newDefinition();
 		definition.setQName(new QName(tns, getLocalPart(tns)));
 		definition.setTargetNamespace(tns);
@@ -244,14 +252,14 @@ public class WSDLGeneratorUtils {
 		return definition;
 	}
 	
-	public static PortType createPortType(String tns) {
+	static PortType createPortType(String tns) {
 		PortType portType = new PortTypeImpl();
 		portType.setUndefined(false);
 		portType.setQName(new QName(getPortName(tns)));
 		return portType;
 	}
 	
-	public static Binding createBinding(String tns) {
+	static Binding createBinding(String tns) {
 		Binding binding = new BindingImpl();
 		PortType portType = new PortTypeImpl();
 		portType.setUndefined(false);
@@ -262,7 +270,7 @@ public class WSDLGeneratorUtils {
 		return binding;
 	}
 
-	public static SOAPBinding createSOAPBinding(ExtensionRegistry registry, String soapStyle) throws WSDLException {
+	static SOAPBinding createSOAPBinding(ExtensionRegistry registry, String soapStyle) throws WSDLException {
 		SOAPBinding soapBinding = (SOAPBinding) registry.createExtension(
 				Binding.class, new QName(WSDLConstants.WSDL_SOAP_URL, WSDLConstants.BINDING));
 		soapBinding.setStyle(soapStyle);
@@ -270,7 +278,7 @@ public class WSDLGeneratorUtils {
 		return soapBinding;
 	}
 	
-	public static Port createPort(String tns) {
+	static Port createPort(String tns) {
 		Binding bindingP = new BindingImpl();
 		bindingP.setQName(new QName(tns, tns.substring(4)+WSDLConstants.BINDING_SUFFIX));
 		bindingP.setUndefined(false);
@@ -280,27 +288,27 @@ public class WSDLGeneratorUtils {
 		return port;
 	}
 	
-	public static SOAPAddress createSOAPAddress(ExtensionRegistry registry) throws WSDLException {
+	static SOAPAddress createSOAPAddress(ExtensionRegistry registry) throws WSDLException {
 		SOAPAddress soapAddress = null;
 		soapAddress = (SOAPAddress)registry.createExtension(Port.class,new QName(WSDLConstants.WSDL_SOAP_URL, "address"));		
 		soapAddress.setLocationURI(WSIGConfiguration.getInstance().getWsigUri());
 		return soapAddress;
 	}
 	
-	public static Service createService(String tns) {
+	static Service createService(String tns) {
 		Service service = new ServiceImpl();
 		service.setQName(new QName(getServiceName(tns)));
 		return service;
 	}
 
-	public static Operation createOperation(String actionName) {
+	static Operation createOperation(String actionName) {
 		Operation operation = new OperationImpl();
 		operation.setName(actionName);
 		operation.setUndefined(false);
 		return operation;
 	}
 
-	public static BindingOperation createBindingOperation(ExtensionRegistry registry, String tns, String actionName) throws WSDLException {
+	static BindingOperation createBindingOperation(ExtensionRegistry registry, String tns, String actionName) throws WSDLException {
 
 		BindingOperation operationB = new BindingOperationImpl();
 		operationB.setName(actionName);
@@ -312,36 +320,36 @@ public class WSDLGeneratorUtils {
 		return operationB;
 	}
 
-	public static BindingInput createBindingInput(ExtensionRegistry registry, String tns, String soapUse) throws Exception{
+	static BindingInput createBindingInput(ExtensionRegistry registry, String tns, String soapUse) throws Exception{
 		
 		return (BindingInput)createBinding(registry, tns, soapUse, INPUT);
 	}
 	
-	public static BindingOutput createBindingOutput(ExtensionRegistry registry, String tns, String soapUse) throws Exception  {
+	static BindingOutput createBindingOutput(ExtensionRegistry registry, String tns, String soapUse) throws Exception  {
 
 		return (BindingOutput)createBinding(registry, tns, soapUse, OUTPUT);
 	}
 
-	public static Message createMessage(String tns, String name) {
+	static Message createMessage(String tns, String name) {
 		Message messageIn = new MessageImpl();
 		messageIn.setQName(new QName(tns, name));
 		messageIn.setUndefined(false);
 		return messageIn;
 	}
 
-	public static Input createInput(Message messageIn) {
+	static Input createInput(Message messageIn) {
 		Input input = new InputImpl();
 		input.setMessage(messageIn);
 		return input;
 	}
 
-	public static Output createOutput(Message messageOut) {
+	static Output createOutput(Message messageOut) {
 		Output output = new OutputImpl();
 		output.setMessage(messageOut);
 		return output;
 	}
 	
-	public static Part createTypePart(String name, String type, String tns) {
+	static Part createTypePart(String name, String type, String tns) {
 		Part part = new PartImpl();
 		String namespaceURI;
 		if (WSDLConstants.jade2xsd.values().contains(type)) {
@@ -356,7 +364,7 @@ public class WSDLGeneratorUtils {
 		return part;
 	}
 	
-	public static Part createElementPart(String name, String elementName, String tns) {
+	static Part createElementPart(String name, String elementName, String tns) {
 		QName qNameElement = new QName(tns, elementName);
 		Part part = new PartImpl();
 		part.setElementName(qNameElement);
@@ -364,22 +372,55 @@ public class WSDLGeneratorUtils {
 		return part;
 	}
 	
-	public static void writeWSDL(WSDLFactory factory, Definition definition, String fileName) throws FileNotFoundException, WSDLException {
+	static void writeWSDL(WSDLFactory factory, Definition definition, String fileName) throws FileNotFoundException, WSDLException {
 		WSDLWriter writer = factory.newWSDLWriter();
 		File file = new File(fileName);
 		PrintWriter output = new PrintWriter(file);
 		writer.writeWSDL(definition, output);
 	}
 	
-	public static void deleteWSDL(String fileName) {
-		
-		File file = new File(fileName);
-		if (!file.exists()) {
-			return;
-		}
-
-		file.delete();
+	static String getAggregateToken() {
+		return WSDLConstants.SEPARATOR+WSDLConstants.AGGREGATE+WSDLConstants.SEPARATOR;
 	}
+	
+	static String getResponseName(String operationName) {
+		return operationName+WSDLConstants.RESPONSE_SUFFIX;
+	}
+
+	static String getRequestName(String operationName) {
+		return operationName+WSDLConstants.REQUEST_SUFFIX;
+	}
+	
+	static int getAggregateCardMin(ObjectSchema containerSchema, String slotName) {
+		
+		int cardMin = 0;
+		Facet[] facets = getAggregateFacet(containerSchema, slotName);
+		for (Facet facet : facets) {
+			if (facet instanceof CardinalityFacet) {
+				cardMin = ((CardinalityFacet) facet).getCardMin();
+			} 
+		}
+		
+		return cardMin;
+	}
+
+	static int getAggregateCardMax(ObjectSchema containerSchema, String slotName) {
+		
+		int cardMin = 0;
+		Facet[] facets = getAggregateFacet(containerSchema, slotName);
+		for (Facet facet : facets) {
+			if (facet instanceof CardinalityFacet) {
+				cardMin = ((CardinalityFacet) facet).getCardMax();
+			} 
+		}
+		
+		return cardMin;
+	}
+
+	
+	
+	// -----------------------------------------------------------------------------
+	// Public methods
 	
     public static String[] getParameterNames(Method method) {
         // Don't worry about it if there are no params.
@@ -407,29 +448,47 @@ public class WSDLGeneratorUtils {
         }
     }
 	
-	public static String getWSDLFilename(String serviceName) {
-		return WSIGConfiguration.getInstance().getWsdlDirectory() + File.separator + serviceName + ".wsdl";
-	}
-
 	public static String getResultName(String operationName) { 
 		return operationName+WSDLConstants.RETURN_SUFFIX;
 	}
 
-	public static String getAggregateToken() {
-		return WSDLConstants.SEPARATOR+WSDLConstants.AGGREGATE+WSDLConstants.SEPARATOR;
+	public static TypedAggregateSchema getTypedAggregateSchema(ObjectSchema containerSchema, String slotName) throws OntologyException  {
+		String typeName = containerSchema.getSchema(slotName).getTypeName();
+		ObjectSchema elementType = getAggregateElementSchema(containerSchema, slotName);
+		return new TypedAggregateSchema(typeName, elementType);
+	}	
+
+	public static ObjectSchema getAggregateElementSchema(ObjectSchema containerSchema, String slotName) {
+		
+		ObjectSchema elementSchema = null;
+		Facet[] facets = getAggregateFacet(containerSchema, slotName);
+		for (Facet facet : facets) {
+			if (facet instanceof TypedAggregateFacet) {
+				elementSchema = ((TypedAggregateFacet) facet).getType();
+			}
+		}
+		
+		return elementSchema;
 	}
-	
+
 	public static String getAggregateType(String elementType, String aggregateType) { 
 		return elementType+getAggregateToken()+aggregateType;
 	}
 	
-	public static String getResponseName(String operationName) {
-		return operationName+WSDLConstants.RESPONSE_SUFFIX;
+	public static String getWSDLFilename(String serviceName) {
+		return WSIGConfiguration.getInstance().getWsdlDirectory() + File.separator + serviceName + ".wsdl";
 	}
 
-	public static String getRequestName(String operationName) {
-		return operationName+WSDLConstants.REQUEST_SUFFIX;
+	public static void deleteWSDL(String fileName) {
+		
+		File file = new File(fileName);
+		if (!file.exists()) {
+			return;
+		}
+
+		file.delete();
 	}
+	
 
 	
 	// -----------------------------------------------------------------------------
@@ -475,5 +534,17 @@ public class WSDLGeneratorUtils {
 	
 	private static String getPortName(String tns) {
 		return getLocalPart(tns)+WSDLConstants.PORT_TYPE_SUFFIX;
+	}
+
+	private static Facet[] getAggregateFacet(ObjectSchema containerSchema, String slotName) {
+		
+		Facet[] facets = containerSchema.getFacets(slotName);
+		
+		// If there are no facets get result facets
+		if ((facets == null || facets.length == 0) && containerSchema instanceof AgentActionSchema) {
+			facets = ((AgentActionSchema)containerSchema).getResultFacets();
+		}
+		
+		return facets;
 	}
 }

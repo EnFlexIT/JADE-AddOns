@@ -21,16 +21,24 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package com.tilab.wsig;
+package com.tilab.wsig.store;
 
-import java.text.SimpleDateFormat;
+import jade.content.schema.AggregateSchema;
+import jade.content.schema.ObjectSchema;
 
-public interface WSIGConstants {
+public class TypedAggregateSchema extends AggregateSchema {
 
-	public static final String AGENT_TYPE = "WSIG Agent";
-	public static final String WSIG_FLAG = "wsig";
-	public static final String WSIG_MAPPER = "wsig-mapper";
-	public static final String WSIG_PREFIX = "wsig-prefix";
+	private static final long serialVersionUID = -5694127651653393499L;
 	
-	public static final SimpleDateFormat ISO8601_DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+	private ObjectSchema elementSchema;
+	
+	public TypedAggregateSchema(String typeName, ObjectSchema elementSchema) {
+		super(typeName);
+		
+		this.elementSchema = elementSchema;
+	}
+
+	public ObjectSchema getElementSchema() {
+		return elementSchema;
+	}
 }

@@ -24,13 +24,17 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.soap;
 
 import jade.content.abs.AbsAggregate;
-import jade.content.abs.AbsConcept;
 import jade.content.abs.AbsHelper;
 import jade.content.abs.AbsObject;
-import jade.content.onto.Ontology;
+import jade.content.abs.AbsPrimitive;
+import jade.content.abs.AbsTerm;
+import jade.content.onto.BasicOntology;
+import jade.content.schema.AggregateSchema;
+import jade.content.schema.ObjectSchema;
+import jade.content.schema.PrimitiveSchema;
 
 import java.io.StringReader;
-import java.lang.reflect.Field;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.xml.parsers.SAXParser;
@@ -43,43 +47,42 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.tilab.wsig.WSIGConstants;
 import com.tilab.wsig.store.ActionBuilder;
 import com.tilab.wsig.store.ParameterInfo;
+import com.tilab.wsig.store.TypedAggregateSchema;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.wsdl.WSDLConstants;
+import com.tilab.wsig.wsdl.WSDLUtils;
 
 public class SoapToJade extends DefaultHandler {
 
 	private static Logger log = Logger.getLogger(SoapToJade.class.getName());
 
+	private XMLReader xmlParser = null;
 	private int level = 0;
-	private StringBuffer elContent;
-	private XMLReader xr = null;
-	private Ontology onto;
-	private Vector<Vector<ParameterInfo>> params4Level;
-
-	/**
-	 * SoapToJade2
-	 */
+	private StringBuffer elementValue = new StringBuffer();;
+	private Vector<Vector<ParameterInfo>> parametersByLevel = new Vector<Vector<ParameterInfo>>();
+	private Vector<ObjectSchema> schemaByLevel = new Vector<ObjectSchema>();
+	private Map<String, ObjectSchema> parametersSchemaMap;
+	
 	public SoapToJade() {
+		
+		// Get xml parser
 	    try { 
 	    	String parserName = getSaxParserName();
 	    	
-			xr = (XMLReader)Class.forName(parserName).newInstance();
-			xr.setContentHandler(this);
-			xr.setErrorHandler(this);
+			xmlParser = (XMLReader)Class.forName(parserName).newInstance();
+			xmlParser.setContentHandler(this);
+			xmlParser.setErrorHandler(this);
 		}
 	    catch(Exception e) {
-			log.error("Unable to create XML reader", e);
+			log.error("Unable to create XML parser", e);
 		}
 	}
 
-	/**
-	 * Get SAX parser class name
-	 * @param s
-	 * @return parser name
-	 */
 	private static String getSaxParserName() throws Exception {
+		
 		String saxFactory = System.getProperty( "org.xml.sax.driver" );
 		if( saxFactory != null ) {
 			// SAXParser specified by means of the org.xml.sax.driver Java option
@@ -95,35 +98,27 @@ public class SoapToJade extends DefaultHandler {
 		}
 	}
 	
-	/**
-	 * convert
-	 * @param soapMessage
-	 * @param wsigService
-	 * @param operationName
-	 * @return
-	 * @throws Exception
-	 */
 	public Object convert(Message soapRequest, WSIGService wsigService, String operationName) throws Exception {
 
 		Object actionObj = null;
 		String soapMessage = soapRequest.getSOAPPartAsString();
 		
 		// Verify if parser is ready
-		if (xr == null) {
+		if (xmlParser == null) {
 			throw new Exception("Parser not initialized");
 		}
 
-		// Set ontology
-		onto = wsigService.getOnto();
-
-		// Parse xml to extract parameters value
-		xr.parse(new InputSource(new StringReader(soapMessage)));
-
-		// Get parameters
-		Vector<ParameterInfo> params = getParameters();
-		
 		// Get action builder
 		ActionBuilder actionBuilder = wsigService.getActionBuilder(operationName);
+		
+		// Get parameters schema map
+		parametersSchemaMap = actionBuilder.getParametersMap();
+		
+		// Parse soap to extract parameters value
+		xmlParser.parse(new InputSource(new StringReader(soapMessage)));
+
+		// Get parameter values
+		Vector<ParameterInfo> params = getParameterValues();
 		
 		// Prepare jade action
 		actionObj = actionBuilder.getAgentAction(params);
@@ -131,21 +126,15 @@ public class SoapToJade extends DefaultHandler {
 		return actionObj;
 	}
 	
-	/**
-	 * getParameters
-	 * @return
-	 */
-	private Vector<ParameterInfo> getParameters() {
-	
-		Vector<ParameterInfo> params = null;
+	private Vector<ParameterInfo> getParameterValues() {
 		
 		log.debug("Begin parameters list");
-		if (params4Level.size() >= 1) {
-			params = params4Level.get(0);
-			
+		Vector<ParameterInfo> params = null;
+		if (parametersByLevel.size() >= 1) {
+			params = parametersByLevel.get(0);
 			if (log.isDebugEnabled()) {
 				for (ParameterInfo param : params) {
-					log.debug("   "+param.getName()+"= "+param.getAbsValue());
+					log.debug("   "+param.getName()+"= "+param.getValue());
 				}
 			}
 		} else {
@@ -156,192 +145,248 @@ public class SoapToJade extends DefaultHandler {
 		return params;
 	}
 
-	
-	
-	//-------- SAX2 EVENT HANDLERS -----------------//
-
-	/**
-	 * startDocument
-	 */
-	public void startDocument () {
-		elContent = new StringBuffer();
-		params4Level = new Vector<Vector<ParameterInfo>>();
-	}
-
-	/**
-	 * endDocument
-	 */
-	public void endDocument () {
-	}
-
-	/**
-	 * startPrefixMapping
-	 */
-	public void startPrefixMapping (String prefix, String uri) {
-	}
-
-	/**
-	 * endPrefixMapping
-	 */
-	public void endPrefixMapping (String prefix) {
-	}
-
-	/**
-	 * startElement
-	 *
-	 * Level:
-	 * 1: Envelope
-	 * 2: Body
-	 * 3: Operation
-	 * >=4: Parameters
-	 */
-	public void startElement (String uri, String name, String qName, Attributes attrs) {
+	private ObjectSchema getParameterSchema(String elementName, int level) throws Exception {
 
 		try {
-			elContent.setLength(0);
+			ObjectSchema schema = null;
+			if (level == 0) {
+				
+				// First level -> get schema from map (Primitive, Concept or TypedAggregate)
+				schema = parametersSchemaMap.get(elementName);
+			} else {
+				
+				// Other level -> get schema from parent
+				ObjectSchema parentSchema = schemaByLevel.get(level-1);
+
+				if (parentSchema instanceof TypedAggregateSchema) {
+					// If is an aggregate get schema of content element
+					schema = ((TypedAggregateSchema)parentSchema).getElementSchema();
+				} else {
+					// If is a Concept or a Primitive get schema of the slot
+					schema = parentSchema.getSchema(elementName);
+				}
+				
+				// For aggregate wrap schema with TypedAggregateSchema  
+				if (schema instanceof AggregateSchema) {
+					schema = WSDLUtils.getTypedAggregateSchema(parentSchema, elementName);
+				}
+			}
+			
+			// Add schema to stack 
+			schemaByLevel.add(level, schema);
+			
+			return schema;
+			
+		} catch(Exception e) {
+			log.error("Schema not found for element "+elementName, e);
+			throw e;
+		}
+	}
+
+	private Vector<ParameterInfo> getParametersByLevel(int level, boolean addIfNotExist) throws Exception {
+		
+		if (!addIfNotExist && parametersByLevel.size() <= level) {
+			throw new Exception("Parameters not present in store for level "+level);
+		}
+		
+		Vector<ParameterInfo> parameters = null;
+		if (parametersByLevel.size() <= level) {
+			parameters = new Vector<ParameterInfo>();
+			parametersByLevel.add(level, parameters);
+		} else {
+			parameters = parametersByLevel.get(level);
+		}
+		return parameters;
+	}
+	
+	private ParameterInfo getLastParameterInfo(int level, String verifyName) throws Exception {
+		
+		Vector<ParameterInfo> parameters = parametersByLevel.get(level);
+		
+		// Get parameter info
+		ParameterInfo pi = parameters.lastElement();
+
+		// Verify...
+		if (verifyName != null) {
+			if (!pi.getName().equals(verifyName)) {
+				throw new Exception("Parameter "+verifyName+" doesn't match with parameter in store ("+pi.getName()+")");
+			}
+		}
+		return pi;
+	}	
+	
+	public static AbsPrimitive getPrimitiveAbsValue(ObjectSchema schema, String value) throws Exception {
+		
+		String typeName = schema.getTypeName();
+		AbsPrimitive absObj = null;
+		
+		// Get jade primitive
+		if(BasicOntology.STRING.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(value);
+		} else if(BasicOntology.BOOLEAN.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(Boolean.parseBoolean(value));
+		} else if(BasicOntology.FLOAT.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(Float.parseFloat(value));
+		} else if(BasicOntology.INTEGER.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(Integer.parseInt(value));
+		} else if(BasicOntology.DATE.equals (typeName)) {
+			absObj = AbsPrimitive.wrap(WSIGConstants.ISO8601_DATE_FORMAT.parse(value));			
+		} else if(BasicOntology.BYTE_SEQUENCE.equals (typeName)) {
+			absObj = AbsPrimitive.wrap(value.getBytes());			
+		}
+		
+		// Get java primitive
+		  else if(WSDLConstants.XSD_STRING.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(value);
+		} else if(WSDLConstants.XSD_BOOLEAN.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(Boolean.parseBoolean(value));
+		} else if(WSDLConstants.XSD_FLOAT.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(Float.parseFloat(value));
+		} else if(WSDLConstants.XSD_INT.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(Integer.parseInt(value));
+		} else if(WSDLConstants.XSD_DATETIME.equals (typeName)) {
+			absObj = AbsPrimitive.wrap(WSIGConstants.ISO8601_DATE_FORMAT.parse(value));			
+		} else if(WSDLConstants.XSD_DOUBLE.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(Double.parseDouble(value));
+		} else if(WSDLConstants.XSD_LONG.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(Long.parseLong(value));
+		} else if(WSDLConstants.XSD_SHORT.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(Short.parseShort(value));
+		} else if(WSDLConstants.XSD_BYTE.equals(typeName)) {
+			absObj = AbsPrimitive.wrap(Byte.parseByte(value));
+		} 
+		
+		// No primitive type
+		  else {
+			throw new Exception(typeName+" is not a primitive type");
+		}
+	
+		return absObj;
+	}
+	
+	
+	
+	//-------- PARSER EVENT HANDLERS -----------------//
+
+	public void startElement (String uri, String parameterName, String qName, Attributes attrs) {
+
+		try {
+			elementValue.setLength(0);
 			++level;
 
 			// Manage only parameters levels
 			if (level >= 4) {
 
-				// Get parameter type
-				String attrValue = attrs.getValue(WSDLConstants.XSI_URL, "type");
-				if (attrValue != null) {
-					int pos = attrValue.indexOf(':');
-					String valueType = attrValue.substring(pos+1);
-					log.debug("Start managing parameter "+name+" of type "+valueType);
-	
-					// Prepare vector store for this level
-					int params4LevelIndex = level - 4; 
-					Vector<ParameterInfo> params = null;
-					if (params4Level.size() <= params4LevelIndex) {
-						params = new Vector<ParameterInfo>();
-						params4Level.add(params4LevelIndex, params);
-					} else {
-						params = params4Level.get(params4LevelIndex);
-					}
-	
-					// Create new ElementInfo for this parameter
-					ParameterInfo ei = new ParameterInfo();
-					ei.setName(name);
-					ei.setType(valueType);
-					params.add(ei);
-				}
+				// Get  parameter level
+				int parameterLevel = level - 4; 
+
+				// Get parameter schema
+				ObjectSchema parameterSchema = getParameterSchema(parameterName, parameterLevel);
+				log.debug("Start managing parameter "+parameterName+" of type "+parameterSchema.getTypeName());
+
+				// Get parameters vector for this level
+				Vector<ParameterInfo> parameters = getParametersByLevel(parameterLevel, true);
+
+				// Create new ParameterInfo for this soap parameter
+				ParameterInfo pi = new ParameterInfo();
+				pi.setName(parameterName);
+				pi.setSchema(parameterSchema);
+				parameters.add(pi);
 			}
 
 		} catch(Exception e) {
 			level = 0;
-			throw new RuntimeException("Error parsing element "+name+" - "+e.getMessage(), e);
+			throw new RuntimeException("Error parsing element "+parameterName+" - "+e.getMessage(), e);
 		}
 	}
 
-	/**
-	 * endElement
-	 * 
-	 * Level:
-	 * 1: Envelope
-	 * 2: Body
-	 * 3: Operation
-	 * >=4: Parameters
-	 */
-	public void endElement (String uri, String name, String qName) {
+	public void endElement (String uri, String parameterName, String qName) {
 		
 		try {
 			// Manage only parameters levels
 			if (level >= 4) {
 
 				// Get parameter value
-				String fieldValue = elContent.toString();
+				String parameterValue = elementValue.toString();
 
-				// Get vector store for this level
-				int params4LevelIndex = level - 4; 
-				if (params4LevelIndex < params4Level.size()) {
-					Vector<ParameterInfo> params = params4Level.get(params4LevelIndex);
+				// Get  parameter level
+				int parameterLevel = level - 4; 
+
+				// Get parameter info & verify...
+				ParameterInfo pi = getLastParameterInfo(parameterLevel, parameterName);
+
+				// Get parameter schema 
+				ObjectSchema parameterSchema = pi.getSchema();
+
+				// Manage parameter
+				if (parameterSchema instanceof PrimitiveSchema) {
+					// Primitive type
+					pi.setValue(getPrimitiveAbsValue(parameterSchema, parameterValue));
+					log.debug("Set "+parameterName+" with " + parameterValue);
 					
-					// Get parameter infos & verify...
-					ParameterInfo paramEi = params.lastElement();
-					if (!paramEi.getName().equals(name)) {
-						throw new RuntimeException("Parameter "+name+" doesn't match with parameter in store ("+paramEi.getName()+")");
-					}
-	
-					// Get parameter type 
-					String xsdType = paramEi.getType();
+				} else {
+					// Complex type -> create abs object from schema
+					AbsObject absObj = parameterSchema.newInstance();
+					
+					// Get parameters for complex/aggregate type 
+					Vector<ParameterInfo> fieldsParameter = getParametersByLevel(parameterLevel+1, false);
 
-					// Manage parameter
-					if (SoapUtils.isPrimitiveAbsType(xsdType)) {
-						
-						// Primitive type
-						paramEi.setAbsValue(SoapUtils.getPrimitiveAbsValue(paramEi.getType(), fieldValue));
-						log.debug("Set "+name+" with " + fieldValue);
-					} else {
+					if (absObj instanceof AbsAggregate) {
 
-						// NOT Primitive type
-						AbsConcept absObj = null;
-						
-						// Get store of object parameters
-						if ((params4LevelIndex+1) < params4Level.size()) {
-							Vector<ParameterInfo> objParams = params4Level.get(params4LevelIndex+1);
-		
-							if (SoapUtils.isAggregateType(xsdType)) {
-		
-								// Type is an aggregate
-								String aggType = SoapUtils.getAggregateType(xsdType);
-								if (aggType == null) {
-									throw new RuntimeException("Aggregate parameter "+name+" dont'have an associated type");
-								}
-								absObj = new AbsAggregate(aggType);
-								
-								for (int count = 0; count < objParams.size(); ++count) {
-									
-									// Add param to aggregate
-									ParameterInfo objParamEi = objParams.get(count);
-									((AbsAggregate)absObj).add(objParamEi.getAbsValue());
-									log.debug("Add element "+count+" to "+name+" with "+objParamEi.getAbsValue());
-								}
-							} else {
-								
-								// Type is custom
-								absObj = new AbsConcept(xsdType);
-								
-								// Set value to every fields
-								for (int count = 0; count < objParams.size(); ++count) {
-									ParameterInfo paramEi1 = objParams.get(count);
-								
-									// Get parameter and verify...
-									Field declaredField;
-									String paramName = paramEi1.getName();
-									AbsObject paramValue = paramEi1.getAbsValue();
-									
-									// Set value
-									AbsHelper.setAttribute(absObj, paramName, paramValue);
-								}
-							}
-
-							// Remove params level from store
-							params4Level.remove(objParams);
+						// Type is aggregate
+						for (int arrayIndex = 0; arrayIndex < fieldsParameter.size(); arrayIndex++) {
+							
+							// Add parameters to aggregate
+							ParameterInfo fieldPi = fieldsParameter.get(arrayIndex);
+							((AbsAggregate)absObj).add((AbsTerm)fieldPi.getValue());
+							log.debug("Add element "+arrayIndex+" to "+parameterName+" with "+fieldPi.getValue());
 						}
-
-						// Set value in param object
-						paramEi.setAbsValue(absObj);
-					
-						log.debug("End managing parameter "+name);						
+					} else {
+						
+						// Type is complex
+						for (int fieldIndex = 0; fieldIndex < fieldsParameter.size(); fieldIndex++) {
+							ParameterInfo fieldPi = fieldsParameter.get(fieldIndex);
+						
+							// Get field parameter info
+							String fieldName = fieldPi.getName();
+							AbsObject fieldValue = fieldPi.getValue();
+							
+							// Set value
+							AbsHelper.setAttribute(absObj, fieldName, fieldValue);
+						}
 					}
+
+					// Remove parameters of level parameterLevel+1
+					parametersByLevel.remove(parameterLevel+1);
+
+					// Set value in parameter info object
+					pi.setValue(absObj);
+				
+					log.debug("End managing parameter "+parameterName);						
 				}
 			}
 		} catch(Exception e) {
 			level = 0;
-			throw new RuntimeException("Error parsing element "+name+" - "+e.getMessage(), e);
+			throw new RuntimeException("Error parsing element "+parameterName+" - "+e.getMessage(), e);
 		}
 
 		--level;
 	}
 
-	/**
-	 * characters
-	 */
 	public void characters (char ch[], int start, int length) {
-		elContent.append(ch, start, length);
+		elementValue.append(ch, start, length);
 	}
-	
+
+	public void startDocument () {
+	}
+
+	public void endDocument () {
+	}
+
+	public void startPrefixMapping (String prefix, String uri) {
+	}
+
+	public void endPrefixMapping (String prefix) {
+	}
 }
 

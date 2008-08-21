@@ -42,6 +42,8 @@ import org.apache.log4j.Logger;
 
 public class WSIGBehaviour extends AchieveREInitiator {
 
+	private static final long serialVersionUID = 6463142354593931841L;
+
 	private static Logger log = Logger.getLogger(WSIGBehaviour.class.getName());
 	
 	public static final int UNKNOWN_STATUS  = 0;

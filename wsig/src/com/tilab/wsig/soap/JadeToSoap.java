@@ -27,15 +27,11 @@ import jade.content.abs.AbsAggregate;
 import jade.content.abs.AbsPrimitive;
 import jade.content.abs.AbsTerm;
 import jade.content.onto.BasicOntology;
-import jade.content.onto.Ontology;
-import jade.content.onto.OntologyException;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.AggregateSchema;
 import jade.content.schema.ConceptSchema;
-import jade.content.schema.Facet;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
-import jade.content.schema.facets.TypedAggregateFacet;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.Name;
@@ -47,56 +43,47 @@ import javax.xml.soap.SOAPPart;
 
 import org.apache.log4j.Logger;
 
+import com.tilab.wsig.WSIGConfiguration;
+import com.tilab.wsig.WSIGConstants;
 import com.tilab.wsig.store.ActionBuilder;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.wsdl.WSDLConstants;
-import com.tilab.wsig.wsdl.WSDLGeneratorUtils;
+import com.tilab.wsig.wsdl.WSDLUtils;
 
 public class JadeToSoap {
 
 	private static Logger log = Logger.getLogger(JadeToSoap.class.getName());
 	
-	private static final String PREFIX_Q0 = "q0";
-	private static final String PREFIX_Q1 = "q1";
-	
-	private Ontology onto;
 	private SOAPEnvelope envelope;
 	private String tns;
+	private String localNamespacePrefix;
+	private String soapStyle;
 	
 	public JadeToSoap() {
+		localNamespacePrefix = WSIGConfiguration.getInstance().getLocalNamespacePrefix(); 
+		soapStyle = WSIGConfiguration.getInstance().getWsdlStyle();
 	}
 
-	/**
-	 * convert
-	 * @param resultObject
-	 * @param wsigService
-	 * @param operationName
-	 * @return
-	 * @throws Exception
-	 */
 	public SOAPMessage convert(AbsTerm resultAbsObject, WSIGService wsigService, String operationName) throws Exception {
 	
 		// Get tns
-		tns = "urn:" + wsigService.getServicePrefix() + wsigService.getServiceName();
+		tns = WSDLConstants.URN + ":" + wsigService.getServicePrefix() + wsigService.getServiceName();
 			
-		// Get ontology
-		onto = wsigService.getOnto();
-		
 		// Create soap message
         MessageFactory messageFactory = MessageFactory.newInstance();
         SOAPMessage soapResponse = messageFactory.createMessage();
         
-        // Create objects for the message parts            
+        // Create soap part and body            
         SOAPPart soapPart = soapResponse.getSOAPPart();
         envelope = soapPart.getEnvelope();
-        envelope.addNamespaceDeclaration(PREFIX_Q0, WSDLConstants.XSD_URL);
-        envelope.addNamespaceDeclaration(PREFIX_Q1, tns);
-        
+        envelope.addNamespaceDeclaration(WSDLConstants.XSD, WSDLConstants.XSD_URL);
+        envelope.addNamespaceDeclaration(localNamespacePrefix, tns);
         SOAPBody body = envelope.getBody();
 
-        String responseElementName = operationName + "Response";
+        // Create soap element
+        String responseElementName = operationName + WSDLConstants.RESPONSE_SUFFIX;
         SOAPElement responseElement = addSoapElement(body, responseElementName, null, null);
-
+        
         // Get action builder
         log.debug("Operation name: "+operationName);
         ActionBuilder actionBuilder = wsigService.getActionBuilder(operationName);
@@ -105,13 +92,7 @@ public class JadeToSoap {
         }
         
         // Get action schema
-        AgentActionSchema actionSchema;
-        try {
-	        String ontoActionName = actionBuilder.getOntoActionName();
-	        actionSchema = (AgentActionSchema)onto.getSchema(ontoActionName);
-        } catch (OntologyException oe) {
-        	throw new Exception("Operation schema not found for operation "+operationName+" in "+onto.getName()+" ontology", oe);
-        }
+        AgentActionSchema actionSchema = actionBuilder.getOntologyActionSchema();;
 
 		// Get result schema
         ObjectSchema resultSchema = actionSchema.getResultSchema();
@@ -119,7 +100,7 @@ public class JadeToSoap {
         	log.debug("Ontology result type: "+resultSchema.getTypeName());
 
         	// Create soap message
-            convertObjectToSoapElement(actionSchema, resultSchema, resultAbsObject, WSDLGeneratorUtils.getResultName(operationName), responseElement);
+            convertObjectToSoapElement(actionSchema, resultSchema, resultAbsObject, WSDLUtils.getResultName(operationName), responseElement);
         } else {
         	log.debug("Ontology with no result type");
         }
@@ -130,16 +111,6 @@ public class JadeToSoap {
 		return soapResponse;
 	}
 
-	/**
-	 * convertObjectToSoapElement
-	 * @param envelope
-	 * @param resultSchema
-	 * @param resultObj
-	 * @param elementName
-	 * @param rootSoapElement
-	 * @return
-	 * @throws Exception
-	 */
 	private SOAPElement convertObjectToSoapElement(ObjectSchema containerSchema, ObjectSchema resultSchema, AbsTerm resultAbsObj, String elementName, SOAPElement rootSoapElement) throws Exception {
 		
 		SOAPElement soapElement = null;
@@ -153,7 +124,7 @@ public class JadeToSoap {
 
 			// Get type and create soap element
 	        soapType = (String) WSDLConstants.jade2xsd.get(resultSchema.getTypeName());
-			soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD_URL, soapType);
+			soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD, soapType);
 
 			AbsPrimitive primitiveAbsObj = (AbsPrimitive)resultAbsObj;
 			
@@ -161,7 +132,7 @@ public class JadeToSoap {
 	        // Format date objects in ISO8601 format;
 	        // for every other kind of object, just call toString.
 	        if (BasicOntology.DATE.equals(primitiveAbsObj.getTypeName())) {
-	        	soapElement.addTextNode(SoapUtils.ISO8601_DATE_FORMAT.format(primitiveAbsObj.getDate()));
+	        	soapElement.addTextNode(WSIGConstants.ISO8601_DATE_FORMAT.format(primitiveAbsObj.getDate()));
 	        } else {
 	        	soapElement.addTextNode(primitiveAbsObj.toString());
 	        }
@@ -172,7 +143,7 @@ public class JadeToSoap {
 
 			// Get type and create soap element
 	        soapType = resultSchema.getTypeName();
-			soapElement = addSoapElement(rootSoapElement, elementName, tns, soapType);
+			soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType);
 			
 			// Elaborate all sub-schema of current complex schema 
 			for (String conceptSlotName : resultSchema.getNames()) {
@@ -189,24 +160,8 @@ public class JadeToSoap {
 			// AggregateSchema
 			log.debug("Elaborate aggregate schema: "+elementName);
 
-			// Get facets 
-			Facet[] facets;
-			if (containerSchema instanceof AgentActionSchema) {
-				// first level
-				facets = ((AgentActionSchema)containerSchema).getResultFacets();
-			} else {
-				// next level 
-				facets = containerSchema.getFacets(elementName);
-			}
-			
 			// Get aggregate type
-			ObjectSchema aggrSchema = null;
-			for (Facet facet : facets) {
-				if (facet instanceof TypedAggregateFacet) {
-					aggrSchema = ((TypedAggregateFacet) facet).getType();
-					break;
-				}
-			}
+			ObjectSchema aggrSchema = WSDLUtils.getAggregateElementSchema(containerSchema, elementName);
 			
 			// Get slot type
 			soapType = aggrSchema.getTypeName();
@@ -215,10 +170,10 @@ public class JadeToSoap {
 			}
 			String itemName = soapType;
 			String aggrType = resultSchema.getTypeName();
-			soapType = WSDLGeneratorUtils.getAggregateType(soapType, aggrType);
+			soapType = WSDLUtils.getAggregateType(soapType, aggrType);
 			
 			// Create element
-			soapElement = addSoapElement(rootSoapElement, elementName, tns, soapType);
+			soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType);
 			
 			// Elaborate all item of current aggregate schema 
 			AbsAggregate aggregateAbsObj = (AbsAggregate)resultAbsObj;
@@ -228,7 +183,7 @@ public class JadeToSoap {
 					//Get object value of index i
 					AbsTerm itemObject = aggregateAbsObj.get(i);
 	
-					// Do ricorsive call
+					// Do recursive call
 					convertObjectToSoapElement(newContainerSchema, aggrSchema, itemObject, itemName, soapElement);
 				}
 			}
@@ -237,36 +192,21 @@ public class JadeToSoap {
 		return soapElement;
 	}
 
+	private SOAPElement addSoapElement(SOAPElement rootSoapElement, String elementName, String namespace, String soapType) throws Exception {
 
-	/**
-	 * addSoapElement
-	 * @param rootSoapElement
-	 * @param elementName
-	 * @param uri
-	 * @param soapType
-	 * @return
-	 * @throws Exception
-	 */
-	private SOAPElement addSoapElement(SOAPElement rootSoapElement, String elementName, String uri, String soapType) throws Exception {
-		
-		String prefix = PREFIX_Q1;
-		if (uri != null && uri.equals(WSDLConstants.XSD_URL)) {
-			prefix = PREFIX_Q0;
-		}
-			
 		// Create Name and Element
-	    Name soapName = envelope.createName(elementName, "", "");
+	    Name soapName = envelope.createName(elementName, localNamespacePrefix, tns);
 	    SOAPElement soapElement = rootSoapElement.addChildElement(soapName);
 	    
-	    // Add encoding style only to first element
-	    if (rootSoapElement instanceof SOAPBody) {
-	    	soapElement.setEncodingStyle(WSDLConstants.ENCODING_URL);
-	    }
-	    
-	    // Add type
-	    if (soapType != null) {
-		    Name typeName = envelope.createName("type", WSDLConstants.XSI, WSDLConstants.XSI_URL);
-		    soapElement.addAttribute(typeName, prefix+":"+soapType);
+	    // Add encoding style only in result tag and for style rpc
+        if (WSDLConstants.STYLE_RPC.equals(soapStyle) && rootSoapElement instanceof SOAPBody) {
+        	soapElement.setEncodingStyle(WSDLConstants.ENCODING_URL);
+        }
+
+	    // Add type to element
+	    if (WSDLConstants.STYLE_RPC.equals(soapStyle) && namespace != null && soapType != null) {
+		    Name typeName = envelope.createName(WSDLConstants.TYPE, WSDLConstants.XSI, WSDLConstants.XSI_URL);
+		    soapElement.addAttribute(typeName, namespace+":"+soapType);
 	    }
 	    
 	    return soapElement;

@@ -66,6 +66,8 @@ import com.tilab.wsig.store.WSIGStore;
 
 public class WSIGServlet extends HttpServlet {
 	
+	private static final long serialVersionUID = -3447051223821710511L;
+
 	private static Logger log = Logger.getLogger(WSIGServlet.class.getName());
 
 	private WSIGStore wsigStore = new WSIGStore();
@@ -73,9 +75,6 @@ public class WSIGServlet extends HttpServlet {
 	private ServletContext servletContext = null;
 	private String consoleUri;
 
-	/**
-	 * Init wsig servlet
-	 */
 	public void init(ServletConfig servletConfig) throws ServletException {
 		super.init(servletConfig);
 		
@@ -123,9 +122,6 @@ public class WSIGServlet extends HttpServlet {
 		log.info("WSIG Servlet started");
 	}
 
-	/**
-	 * close wsig servlet
-	 */
 	public void destroy() {
 
 		// Close WSIGAgent
@@ -135,17 +131,11 @@ public class WSIGServlet extends HttpServlet {
 		log.info("WSIG Servlet destroied");
 	}
 
-	/**
-	 * Manage get request
-	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		doPost(request, response);
 	}
 	
-	/**
-	 * Manage post request
-	 */
 	protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
 
 		// Check if the request is a WSIG agent command
@@ -270,13 +260,6 @@ public class WSIGServlet extends HttpServlet {
 		log.info("WSIGServlet doPost elaboration terminated");
 	}
 
-	/**
-	 * execute wsig operation
-	 * @param agentAction
-	 * @param wsigService
-	 * @return
-	 * @throws Exception
-	 */
 	private AbsTerm executeOperation(AgentAction agentAction, WSIGService wsigService) throws Exception{
 		
 		AID agentReceiver = wsigService.getAid();
@@ -299,13 +282,6 @@ public class WSIGServlet extends HttpServlet {
 		return absResult;
 	}
 
-	/**
-	 * Elaborate WSIG Agent Command
-	 * @param wsigAgentCommand
-	 * @param httpResponse
-	 * @throws ServletException
-	 * @throws IOException
-	 */
 	private void elaborateWSIGAgentCommand(String wsigAgentCommand, HttpServletResponse httpResponse) throws ServletException, IOException {
 	
 		log.info("WSIG agent command arrived ("+wsigAgentCommand+")");
@@ -326,11 +302,6 @@ public class WSIGServlet extends HttpServlet {
 		httpResponse.sendRedirect(consoleUri);
 	}
 
-	/**
-	 * Elaborate WSDL request
-	 * @param requestURL
-	 * @param httpResponse
-	 */
 	private void elaborateWSDLRequest(String requestURL, HttpServletResponse httpResponse) throws ServletException, IOException {
 		
 		log.info("WSDL request arrived ("+requestURL+")");
@@ -358,11 +329,6 @@ public class WSIGServlet extends HttpServlet {
 		httpResponse.sendRedirect(wsdlUrl);
 	}
 
-	/**
-	 * get operation name from soap body
-	 * @param body
-	 * @return
-	 */
 	private String getOperationName(SOAPBody body) {
 		SOAPElement el;
 		String operationName = null;
@@ -375,11 +341,6 @@ public class WSIGServlet extends HttpServlet {
 		return operationName;
 	}
 
-	/**
-	 * get service name from soap body
-	 * @param body
-	 * @return
-	 */
 	private String getServiceName(SOAPBody body) {
 		SOAPElement el;
 		String serviceName = null;
@@ -393,12 +354,6 @@ public class WSIGServlet extends HttpServlet {
 		return serviceName;
 	}
 	
-	/**
-	 * extract SOAP Message from http request
-	 * @param request
-	 * @return
-	 * @throws Exception
-	 */
 	private Message extractSOAPMessage(HttpServletRequest request) throws Exception {
 		
 		// Get http header
@@ -441,12 +396,6 @@ public class WSIGServlet extends HttpServlet {
 		return soapRequest;
 	}
 	
-	/**
-	 * Fill http response
-	 * @param soapResponse
-	 * @param httpResponse
-	 * @return
-	 */
 	private void fillHttpResponse(SOAPMessage soapResponse, HttpServletResponse httpResponse) throws Exception {
 	
 		byte[] content = null;
@@ -465,9 +414,6 @@ public class WSIGServlet extends HttpServlet {
         responseOutputStream.close();
 	}
 	
-	/**
-	 * Start WSIG Agent
-	 */
 	private void startupWSIGAgent() {
 		try {
 			log.info("Starting WSIG agent...");
@@ -479,9 +425,6 @@ public class WSIGServlet extends HttpServlet {
 		setWSIGStatus();
 	}
 
-	/**
-	 * Close WSIG Agent
-	 */
 	private void shutdownWSIGAgent() {
 	
 		JadeGateway.shutdown();
@@ -489,10 +432,6 @@ public class WSIGServlet extends HttpServlet {
 		log.info("WSIG agent closed");
 	}
 	
-	/**
-	 * Set WSIG agent status
-	 * @param wsigAgentUp
-	 */
 	private void setWSIGStatus() {
 		servletContext.setAttribute("WSIGActive", new Boolean(JadeGateway.isGatewayActive()));
 	}

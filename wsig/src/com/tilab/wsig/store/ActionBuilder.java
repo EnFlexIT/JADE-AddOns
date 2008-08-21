@@ -23,13 +23,50 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.store;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
 import jade.content.AgentAction;
+import jade.content.onto.Ontology;
+import jade.content.onto.OntologyException;
+import jade.content.schema.AgentActionSchema;
+import jade.content.schema.ObjectSchema;
 
-public interface ActionBuilder {
+public abstract class ActionBuilder {
 	
-	public AgentAction getAgentAction(Vector<ParameterInfo> params) throws Exception;
+	protected static Logger log = Logger.getLogger(OntologyBasedActionBuilder.class.getName());
 
-	public String getOntoActionName();
+	private Ontology onto;
+	private String ontoActionName;
+	private Map<String, ObjectSchema> parametersMap = new HashMap<String, ObjectSchema>();
+
+	public abstract AgentAction getAgentAction(Vector<ParameterInfo> params) throws Exception;
+
+	public ActionBuilder(Ontology onto, String ontoActionName) {
+		this.onto = onto;
+		this.ontoActionName = ontoActionName;
+	}
+
+	public Ontology getOntology() {
+		return onto;
+	}
+
+	public String getOntologyActionName() {
+		return ontoActionName;
+	}
+	
+	public Map<String, ObjectSchema> getParametersMap() {
+		return parametersMap;
+	}
+
+	public void setParametersMap(Map<String, ObjectSchema> parametersMap) {
+		this.parametersMap = parametersMap;
+	}
+
+	public AgentActionSchema getOntologyActionSchema() throws OntologyException {
+		return (AgentActionSchema) onto.getSchema(ontoActionName);
+	}
 }

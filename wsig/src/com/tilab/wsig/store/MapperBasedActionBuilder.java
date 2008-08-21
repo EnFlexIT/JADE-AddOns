@@ -24,43 +24,28 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.store;
 
 import jade.content.AgentAction;
-import jade.content.abs.AbsPrimitive;
-import jade.content.abs.AbsTerm;
+import jade.content.abs.AbsObject;
 import jade.content.onto.Ontology;
 
 import java.lang.reflect.Method;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
+import com.tilab.wsig.wsdl.WSDLUtils;
 
-import com.tilab.wsig.wsdl.WSDLGeneratorUtils;
-
-public class MapperBasedActionBuilder implements ActionBuilder {
+public class MapperBasedActionBuilder extends ActionBuilder {
 	
-	private static Logger log = Logger.getLogger(MapperBasedActionBuilder.class.getName());
-
 	private Method method;
 	private Object mapperObj;
-	private String ontoActionName;
 	private String[] methodParameterNames;
-	private Ontology onto;
 
-	/**
-	 * MapperBasedActionBuilder
-	 * @param mapperObj
-	 * @param method
-	 */
 	public MapperBasedActionBuilder(Object mapperObj, Method method, Ontology onto, String ontoActionName) {
+		super(onto, ontoActionName);
+		
 		this.method = method;
 		this.mapperObj = mapperObj;
-		this.ontoActionName = ontoActionName;
-		this.methodParameterNames = WSDLGeneratorUtils.getParameterNames(method);
-		this.onto = onto;
+		this.methodParameterNames = WSDLUtils.getParameterNames(method);
 	}
 
-	/**
-	 * getAgentAction
-	 */
 	public AgentAction getAgentAction(Vector<ParameterInfo> soapParams) throws Exception {
 		
 		Object[] parameterValues = new Object[0];
@@ -76,21 +61,21 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 			if (methodParameterNames == null) {
 				parameterValues = new Object[soapParams.size()];
 				for (int i = 0; i < soapParams.size(); i++) {
-					ParameterInfo objParamEi = soapParams.get(i);
-					AbsTerm absValue = objParamEi.getAbsValue();
-					Object javaValue = onto.toObject(absValue);
+					ParameterInfo pi = soapParams.get(i);
+					AbsObject absValue = pi.getValue();
+					Object javaValue = getOntology().toObject(absValue);
 					parameterValues[i] = javaValue;
-					parameterList += objParamEi.getType()+",";
+					parameterList += pi.getSchema().getTypeName()+",";
 				}
 			} else {
 				parameterValues = new Object[methodParameterNames.length];
 				for (int i = 0; i < methodParameterNames.length; i++) {
 					try {
-						ParameterInfo objParamEi = getSoapParamByName(soapParams, methodParameterNames[i]);
-						AbsTerm absValue = objParamEi.getAbsValue();
-						Object javaValue = onto.toObject(absValue);
+						ParameterInfo pi = getSoapParamByName(soapParams, methodParameterNames[i]);
+						AbsObject absValue = pi.getValue();
+						Object javaValue = getOntology().toObject(absValue);
 						parameterValues[i] = javaValue;
-						parameterList += objParamEi.getType()+",";
+						parameterList += pi.getSchema().getTypeName()+",";
 					} catch(Exception e) {
 						log.error("Method "+method.getName()+", mandatory param "+methodParameterNames[i]+" not found in soap request");
 						throw e;
@@ -111,10 +96,6 @@ public class MapperBasedActionBuilder implements ActionBuilder {
 		}
 		
 		return actionObj;
-	}
-	
-	public String getOntoActionName() {
-		return ontoActionName;
 	}
 	
 	private ParameterInfo getSoapParamByName(Vector<ParameterInfo> soapParams, String methodParamName) throws Exception {

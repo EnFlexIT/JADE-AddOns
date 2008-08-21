@@ -23,13 +23,14 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.store;
 
-import jade.content.abs.AbsTerm;
+import jade.content.abs.AbsObject;
+import jade.content.schema.ObjectSchema;
 
 public class ParameterInfo {
 	
 	private String name;
-	private String type;
-	private AbsTerm absValue;
+	private ObjectSchema schema;
+	private AbsObject value;
 	
 	public String getName() {
 		return name;
@@ -37,16 +38,16 @@ public class ParameterInfo {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getType() {
-		return type;
+	public ObjectSchema getSchema() {
+		return schema;
 	}
-	public void setType(String type) {
-		this.type = type;
+	public void setSchema(ObjectSchema schema) {
+		this.schema = schema;
 	}
-	public AbsTerm getAbsValue() {
-		return absValue;
+	public AbsObject getValue() {
+		return value;
 	}
-	public void setAbsValue(AbsTerm absValue) {
-		this.absValue = absValue;
+	public void setValue(AbsObject value) {
+		this.value = value;
 	}
 }

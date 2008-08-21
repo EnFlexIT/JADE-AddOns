@@ -26,48 +26,29 @@ package com.tilab.wsig.store;
 import jade.content.AgentAction;
 import jade.content.abs.AbsAgentAction;
 import jade.content.abs.AbsHelper;
-import jade.content.abs.AbsTerm;
+import jade.content.abs.AbsObject;
 import jade.content.onto.Ontology;
 import jade.content.schema.AgentActionSchema;
 
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
+public class OntologyBasedActionBuilder extends ActionBuilder {
 
-public class OntologyBasedActionBuilder implements ActionBuilder {
-
-	private static Logger log = Logger.getLogger(OntologyBasedActionBuilder.class.getName());
-	
-	private String ontoActionName;
-	private Ontology onto;
-
-	/**
-	 * ReflectionBasedActionBuilder
-	 * @param actionClass
-	 */
 	public OntologyBasedActionBuilder(Ontology onto, String ontoActionName) {
-		this.onto = onto;
-		this.ontoActionName = ontoActionName;
+		super(onto, ontoActionName);
 	}
 
-	/**
-	 * getAgentAction
-	 */
 	public AgentAction getAgentAction(Vector<ParameterInfo> soapParams) throws Exception {
 
-		AgentActionSchema schema = (AgentActionSchema) onto.getSchema(ontoActionName);
+		AgentActionSchema schema = (AgentActionSchema) getOntology().getSchema(getOntologyActionName());
 		AbsAgentAction actionAbsObj = (AbsAgentAction) schema.newInstance();
 		if (soapParams != null) {
 			for (ParameterInfo param : soapParams) {
 				String slotName = param.getName();
-				AbsTerm slotValue = param.getAbsValue();
+				AbsObject slotValue = param.getValue();
 				AbsHelper.setAttribute(actionAbsObj, slotName, slotValue);
 			}
 		}
 		return actionAbsObj;
 	}
-	
-	public String getOntoActionName() {
-		return ontoActionName;
-	}	
 }

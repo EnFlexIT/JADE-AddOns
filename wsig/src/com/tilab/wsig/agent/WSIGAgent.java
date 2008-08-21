@@ -37,7 +37,6 @@ import jade.lang.acl.ACLMessage;
 import jade.proto.SubscriptionInitiator;
 import jade.wrapper.gateway.GatewayAgent;
 
-import java.io.File;
 import java.net.URL;
 import java.util.Iterator;
 
@@ -49,9 +48,9 @@ import com.tilab.wsig.WSIGConstants;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.store.WSIGStore;
 import com.tilab.wsig.uddi.UDDIManager;
-import com.tilab.wsig.wsdl.SDToWSDL;
+import com.tilab.wsig.wsdl.JadeToWSDL;
 import com.tilab.wsig.wsdl.WSDLConstants;
-import com.tilab.wsig.wsdl.WSDLGeneratorUtils;
+import com.tilab.wsig.wsdl.WSDLUtils;
 
 
 public class WSIGAgent extends GatewayAgent implements WSIGConstants {
@@ -63,13 +62,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 	private WSIGStore wsigStore = null;
 	private UDDIManager uddiManager = null;
 
-
-	/**
-	 * Setup WSIG agent
-	 * Arguments:
-	 * - wsig configuration file (wsig.properties)
-	 * - wsdl path
-	 */
 	protected void setup() {
 		super.setup();
 
@@ -152,21 +144,10 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		log.info("Agent "+getLocalName()+" - started!");
 	}
 
-	/**
-	 * Get wsig store
-	 * @return
-	 */
 	public WSIGStore getWSIGStore() {
 		return wsigStore;
 	}
 
-	/**
-	 * Register a new agent into WSIG 
-	 *
-	 * @param dfad
-	 * @param aid
-	 * @throws Exception
-	 */
 	private synchronized void registerAgent(DFAgentDescription dfad) throws Exception {
 
 		log.info("Start wsigs's registration from agent: " + dfad.getName());
@@ -190,11 +171,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		log.info("End wsigs's registration from agent: " + dfad.getName());
 	}
 
-	/**
-	 * registerService
-	 * @param wsigService
-	 * @throws Exception
-	 */
 	private void registerService(WSIGService wsigService) throws Exception {
 
 		if (null != wsigService) {
@@ -211,13 +187,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		}
 	}
 
-	/**
-	 * Deregister an agent from WSIG 
-	 *
-	 * @param dfad
-	 * @param aid
-	 * @throws Exception
-	 */
 	private synchronized void deregisterAgent(DFAgentDescription dfad) throws Exception {
 
 		log.info("Start wsigs's deregistration from agent: " + dfad.getName());
@@ -236,11 +205,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		log.info("End wsigs's deregistration from agent: " + dfad.getName());
 	}
 
-	/**
-	 * deregisterService
-	 * @param wsigService
-	 * @throws Exception
-	 */
 	private void deregisterService(WSIGService wsigService) throws Exception {
 
 		String serviceName = wsigService.getServiceName();
@@ -260,16 +224,11 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		wsigStore.removeService(serviceName);
 
 		// Delete wsdl
-		String filename = WSDLGeneratorUtils.getWSDLFilename(serviceName);
+		String filename = WSDLUtils.getWSDLFilename(serviceName);
 		log.info("Delete wsdl file "+filename);
-		WSDLGeneratorUtils.deleteWSDL(filename);
+		WSDLUtils.deleteWSDL(filename);
 	}
 
-	/**
-	 * Return true if service is of type wsig
-	 * @param sd
-	 * @return
-	 */
 	private boolean isWSIGService(ServiceDescription sd) {
 
 		Property p = null;
@@ -284,11 +243,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		return false;
 	}
 
-	/**
-	 * Return service prefix
-	 * @param sd
-	 * @return
-	 */
 	private String getServicePrefix(ServiceDescription sd) {
 
 		Property p = null;
@@ -303,13 +257,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		return "";
 	}
 
-	/**
-	 * Create WSIGService for one agent service
-	 * @param agentId
-	 * @param sd
-	 * @return
-	 * @throws Exception
-	 */
 	private WSIGService createWSIGService(AID aid, ServiceDescription sd) throws Exception {
 
 		// Get service prefix & name
@@ -372,18 +319,11 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		wsigService.setMapperClass(mapperClass);
 
 		// Create wsdl
-		SDToWSDL.createWSDLFromSD(this, sd, wsigService);
+		JadeToWSDL.createWSDLFromSD(this, sd, wsigService);
 		
 		return wsigService;
 	}
 
-
-	/**
-	 * getMapperClass
-	 * @param sd
-	 * @return
-	 * @throws Exception
-	 */
 	public Class getMapperClass(ServiceDescription sd) throws Exception{
 		Property p = null;
 		boolean mapperFound = false;
@@ -412,9 +352,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		return mapperClass;
 	}
 
-	/**
-	 * Registers a WSIG into a DF
-	 */
 	private void registerIntoDF() {
 		DFAgentDescription dfad = new DFAgentDescription();
 		dfad.setName(this.getAID());
@@ -431,10 +368,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		}
 	}
 
-	/**
-	 * takes down this agent.
-	 * A configuration used is stored.
-	 */
 	protected void takeDown() {
 
 		// Deregister all service
@@ -458,5 +391,4 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 
 		log.info("Agent "+getLocalName()+" - Taken down now");
 	}
-
 }

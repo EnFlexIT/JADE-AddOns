@@ -102,7 +102,6 @@ public class WSIGService {
 		this.servicePrefix = servicePrefix;
 	}
 	
-	
 	@Override
 	public String toString() {
 		return "WSIGService (name="+serviceName+", onto="+onto.getName()+", wsdl="+wsdl.toExternalForm()+")";

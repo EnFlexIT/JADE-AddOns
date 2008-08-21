@@ -72,5 +72,4 @@ public class WSIGStore {
 		aidServices.addAll(services.values());
 		return aidServices;
 	}
-	
 }

@@ -34,6 +34,7 @@ public class WSDLConstants {
 	public static final String STYLE_DOCUMENT = "document";
 	public static final String USE_ENCODED = "encoded";
 	public static final String USE_LITERAL = "literal";
+	public static final String URN = "urn";
 	public static final String XSI = "xsi";
 	public static final String XSI_URL = "http://www.w3.org/2001/XMLSchema-instance";
 	public static final String XSD = "xsd";
@@ -55,6 +56,7 @@ public class WSDLConstants {
 	public static final String AGGREGATE = "aggregate";
 	public static final String BINDING = "binding";
 	public static final String PARAMETERS = "parameters";
+	public static final String TYPE = "type";
 	public static final String MAPPER_METHOD_PREFIX = "to";
 	public static final String SEPARATOR = "_";
 	
