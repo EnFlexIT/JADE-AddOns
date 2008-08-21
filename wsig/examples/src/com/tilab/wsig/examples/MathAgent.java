@@ -238,7 +238,7 @@ public class MathAgent extends Agent {
 	private void serveConvertDateAction(ConvertDate convertDate, Action actExpr, ACLMessage msg) {
 		log.debug("MathAgent.serveConvertDateAction");
 		long result = convertDate.getDate().getTime();
-		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
+		sendNotification(actExpr, msg, ACLMessage.INFORM, Long.valueOf(result).toString());
 	}
 	
 	private void servePrintComplexAction(PrintComplex printComplex, Action actExpr, ACLMessage msg) {

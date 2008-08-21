@@ -106,7 +106,7 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			
 			as = (AgentActionSchema) getSchema(CONVERTDATE);
 			as.add(DATE, (PrimitiveSchema) getSchema(BasicOntology.DATE));
-			as.setResult((PrimitiveSchema)getSchema(BasicOntology.INTEGER));
+			as.setResult((PrimitiveSchema)getSchema(BasicOntology.STRING));
 
 		} catch (OntologyException oe) {
 			oe.printStackTrace();
