@@ -51,8 +51,8 @@ public class WSIGConfiguration extends Properties {
 	
 	// DF to WSDL converter
 	public final static String KEY_LOCAL_NAMESPACE_PREFIX = "wsdl.localNamespacePrefix";
+	public static final String KEY_WSDL_WRITE_ENABLE = "wsdl.writeEnable";
 	public static final String KEY_WSDL_DIRECTORY = "wsdl.directory";
-	public static final String KEY_WSDL_URI = "wsdl.uri";
 	public static final String KEY_WSDL_STYLE = "wsdl.style";
 	
 	// UDDI repository configuration
@@ -130,8 +130,10 @@ public class WSIGConfiguration extends Properties {
 		setProperty(KEY_WSDL_DIRECTORY, wsdlDirectory);
 	}
 
-	public synchronized String getWsdlUri() {
-		return getProperty(KEY_WSDL_URI);
+	public synchronized boolean isWsdlWriteEnable() {
+		String wsdlWriteEnable = getProperty(KEY_WSDL_WRITE_ENABLE);
+		return "true".equalsIgnoreCase(wsdlWriteEnable);
+		
 	}
 
 	public synchronized String getWsdlStyle() {
@@ -199,7 +201,7 @@ public class WSIGConfiguration extends Properties {
 		setProperty(WSIGConfiguration.KEY_WSIG_CONSOLE_URI, "http://localhost:8080/wsig");
 		setProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT, "30000");
 		setProperty(WSIGConfiguration.KEY_WSDL_DIRECTORY, "wsdl");
-		setProperty(WSIGConfiguration.KEY_WSDL_URI, "http://localhost:8080/wsig/wsdl");
+		setProperty(WSIGConfiguration.KEY_WSDL_WRITE_ENABLE, "false");
 		setProperty(WSIGConfiguration.KEY_WSDL_STYLE, WSDLConstants.STYLE_RPC);
 		setProperty(WSIGConfiguration.KEY_UDDI_ENABLE, "true");
 		setProperty(WSIGConfiguration.KEY_LIFE_CYCLE_MANAGER_URL, "");

@@ -7,7 +7,8 @@ import="jade.content.onto.Ontology,
 	java.util.List,
 	org.uddi4j.util.ServiceKey,
 	com.tilab.wsig.store.WSIGService,
-	com.tilab.wsig.store.WSIGStore"
+	com.tilab.wsig.store.WSIGStore,
+	com.tilab.wsig.wsdl.WSDLUtils"
 %>
 
 
@@ -60,7 +61,7 @@ import="jade.content.onto.Ontology,
 		uddiKeyName = uddiServiceKey.getText();
 	}
 	
-	URL wsdl = service.getWsdl();
+	URL wsdl = WSDLUtils.getWsdlUrl(serviceName);
 	String wsdlUrl = wsdl.toString();
 %>	
 

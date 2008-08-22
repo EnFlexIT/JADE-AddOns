@@ -263,15 +263,18 @@ public class JadeToWSDL {
 				throw new Exception("Error adding type to definition", e);
 			}
 
-			// Write wsdl file
-			try {
-				String filename = WSDLUtils.getWSDLFilename(wsigService.getServicePrefix() + sd.getName());
-				log.info("Write WSDL file: "+filename);
-
-				WSDLUtils.writeWSDL(factory, definition, filename);
-				
-			} catch (Exception e) {
-				log.error("Error in WSDL file writing", e);
+			// Set wsdl definition in wsigService
+			wsigService.setWsdlDefinition(definition);
+			
+			// Write wsdl on file system
+			if (WSIGConfiguration.getInstance().isWsdlWriteEnable()) {
+				try {
+					log.info("Write WSDL for service: "+serviceName);
+					WSDLUtils.writeWSDL(factory, definition, serviceName);
+					
+				} catch (Exception e) {
+					log.error("Error writing WSDL file", e);
+				}
 			}
 		}
 		

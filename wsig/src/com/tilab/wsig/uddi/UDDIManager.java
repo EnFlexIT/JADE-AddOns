@@ -57,6 +57,7 @@ import org.uddi4j.util.TModelKey;
 
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.store.WSIGService;
+import com.tilab.wsig.wsdl.WSDLUtils;
 
 public class UDDIManager {
 
@@ -95,7 +96,7 @@ public class UDDIManager {
 
 			// Create a new tModel
 			TModel tModel;
-			tModel = createTModel(wsigService.getWsdl().toExternalForm(), tName);
+			tModel = createTModel(WSDLUtils.getWsdlUrl(serviceName).toExternalForm(), tName);
 
 			// Generate a category bag with service's names
 			CategoryBag cb = new CategoryBag();

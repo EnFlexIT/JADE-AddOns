@@ -107,11 +107,11 @@ import="jade.content.onto.Ontology,
 		<td class="value"><% out.print(wsigConfig.getAgentClassName()); %></td>
 	</tr>
 	<tr>
-		<td width="30%" class="title">WSIG webservices uri:</td>
+		<td width="30%" class="title">WSIG webservices url:</td>
 		<td class="value"><% out.print(wsigConfig.getWsigUri()); %></td>
 	</tr>
 	<tr>
-		<td width="30%" class="title">WSIG console uri:</td>
+		<td width="30%" class="title">WSIG console url:</td>
 		<td class="value"><% out.print(wsigConfig.getWsigConsoleUri()); %></td>
 	</tr>
 	<tr>
@@ -127,12 +127,12 @@ import="jade.content.onto.Ontology,
 		<td class="value"><% out.print(wsdlStyle); %></td>
 	</tr>
 	<tr>
-		<td width="30%" class="title">WSDL directory:</td>
-		<td class="value"><% out.print(wsigConfig.getWsdlDirectory()); %></td>
+		<td width="30%" class="title">WSDL write enable:</td>
+		<td class="value"><% out.print(wsigConfig.isWsdlWriteEnable()); %></td>
 	</tr>
 	<tr>
-		<td width="30%" class="title">WSDL uri:</td>
-		<td class="value"><% out.print(wsigConfig.getWsdlUri()); %></td>
+		<td width="30%" class="title">WSDL write path:</td>
+		<td class="value"><% out.print(wsigConfig.getWsdlDirectory()); %></td>
 	</tr>
 	<tr>
 		<td width="30%" class="title">UDDI enable:</td>

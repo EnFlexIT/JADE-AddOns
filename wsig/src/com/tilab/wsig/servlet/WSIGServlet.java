@@ -46,6 +46,9 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.wsdl.Definition;
+import javax.wsdl.WSDLException;
+import javax.wsdl.factory.WSDLFactory;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPElement;
@@ -249,7 +252,7 @@ public class WSIGServlet extends HttpServlet {
 		
 		// Fill http response
 		try {
-			fillHttpResponse(soapResponse, httpResponse);
+			fillSoapHttpResponse(soapResponse, httpResponse);
 			
 		} catch(Exception e) {
 			log.error("Error filling http response", e);
@@ -322,11 +325,17 @@ public class WSIGServlet extends HttpServlet {
 			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Service "+serviceName+" not present in wsig");
 			return;
 		}
+		
+		// Get wsdl definition
+		Definition wsdlDefinition = wsigService.getWsdlDefinition();
 
-		// Redirect to wsdl
-		String wsdlUrl = wsigService.getWsdl().toString();
-		log.info("Redirect to " + wsdlUrl);
-		httpResponse.sendRedirect(wsdlUrl);
+		// Send wsdl over http
+		try {
+			WSDLFactory.newInstance().newWSDLWriter().writeWSDL(wsdlDefinition, httpResponse.getOutputStream());
+		} catch (WSDLException e) {
+			log.error("Error sending wsdl of service "+serviceName);
+			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error sending wsdl of service "+serviceName);
+		}
 	}
 
 	private String getOperationName(SOAPBody body) {
@@ -396,18 +405,20 @@ public class WSIGServlet extends HttpServlet {
 		return soapRequest;
 	}
 	
-	private void fillHttpResponse(SOAPMessage soapResponse, HttpServletResponse httpResponse) throws Exception {
-	
+	private void fillSoapHttpResponse(SOAPMessage soapResponse, HttpServletResponse httpResponse) throws Exception {
 		byte[] content = null;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		soapResponse.writeTo(baos);
 		content = baos.toByteArray();
 
-		// Set http response
+		fillHttpResponse(content, "soap+xml", httpResponse);
+	}
+
+	private void fillHttpResponse(byte[] content, String type, HttpServletResponse httpResponse) throws Exception {
 	    httpResponse.setHeader("Cache-Control", "no-store");
 	    httpResponse.setHeader("Pragma", "no-cache");
 	    httpResponse.setDateHeader("Expires", 0);
-	    httpResponse.setContentType("soap+xml; charset=utf-8");
+	    httpResponse.setContentType(type+"; charset=utf-8");
         ServletOutputStream responseOutputStream = httpResponse.getOutputStream();
         responseOutputStream.write(content);
         responseOutputStream.flush();

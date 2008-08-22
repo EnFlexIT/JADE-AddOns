@@ -31,11 +31,12 @@ import jade.content.schema.facets.CardinalityFacet;
 import jade.content.schema.facets.TypedAggregateFacet;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -372,13 +373,6 @@ public class WSDLUtils {
 		return part;
 	}
 	
-	static void writeWSDL(WSDLFactory factory, Definition definition, String fileName) throws FileNotFoundException, WSDLException {
-		WSDLWriter writer = factory.newWSDLWriter();
-		File file = new File(fileName);
-		PrintWriter output = new PrintWriter(file);
-		writer.writeWSDL(definition, output);
-	}
-	
 	static String getResponseName(String operationName) {
 		return operationName+WSDLConstants.RESPONSE_SUFFIX;
 	}
@@ -413,6 +407,14 @@ public class WSDLUtils {
 		return cardMin;
 	}
 
+	static void writeWSDL(WSDLFactory factory, Definition definition, String serviceName) throws Exception {
+		String fileName = WSIGConfiguration.getInstance().getWsdlDirectory() + File.separator + serviceName + ".wsdl";
+		WSDLWriter writer = factory.newWSDLWriter();
+		File file = new File(fileName);
+		PrintWriter output = new PrintWriter(file);
+		writer.writeWSDL(definition, output);
+	}
+	
 	
 	
 	// -----------------------------------------------------------------------------
@@ -475,22 +477,19 @@ public class WSDLUtils {
 
 		return WSDLConstants.ARRAY_OF + new String(uppercaseElementType);
 	}
-	
-	public static String getWSDLFilename(String serviceName) {
-		return WSIGConfiguration.getInstance().getWsdlDirectory() + File.separator + serviceName + ".wsdl";
-	}
 
-	public static void deleteWSDL(String fileName) {
-		
-		File file = new File(fileName);
-		if (!file.exists()) {
-			return;
+	public static URL getWsdlUrl(String serviceName) {
+		URL wsdlUrl = null;
+		try {
+			wsdlUrl = new URL(WSIGConfiguration.getInstance().getWsigUri()+"/"+serviceName+"?WSDL");
+		} catch (MalformedURLException e) {
 		}
-
-		file.delete();
+		return wsdlUrl;
 	}
-	
 
+	
+	
+	
 	
 	// -----------------------------------------------------------------------------
 	// Private methods

@@ -28,12 +28,6 @@ import java.net.*;
 
 public class SoapClient {
 
-	/**
-	 * sendFileMessage
-	 * @param SOAPUrl
-	 * @param fileName
-	 * @return
-	 */
 	public static String sendFileMessage(String SOAPUrl, String fileName) {
 
 		// Read file
@@ -59,12 +53,6 @@ public class SoapClient {
 		return sendMessage(SOAPUrl, byteMessage);
 	}
 
-	/**
-	 * sendStringMessage
-	 * @param SOAPUrl
-	 * @param SOAPmessage
-	 * @return
-	 */
 	public static String sendStringMessage(String SOAPUrl, String SOAPmessage) {
 
 		// Convert in byte array
@@ -74,12 +62,6 @@ public class SoapClient {
 		return sendMessage(SOAPUrl, byteMessage);
 	}
 
-	/**
-	 * sendMessage
-	 * @param SOAPUrl
-	 * @param byteMessage
-	 * @return
-	 */
 	private static String sendMessage(String SOAPUrl, byte[] byteMessage) {
 
 		String resp = null;
@@ -138,12 +120,6 @@ public class SoapClient {
 		return resp;
 	}
 
-	/**
-	 * copy
-	 * @param in
-	 * @param out
-	 * @throws IOException
-	 */
 	private static void copy(InputStream in, OutputStream out) throws IOException {
 		synchronized (in) {
 			synchronized (out) {
@@ -157,12 +133,6 @@ public class SoapClient {
 		}
 	} 
 
-
-	/**
-	 * main
-	 * @param args
-	 * @throws Exception
-	 */
 	public static void main(String[] args) throws Exception {
 		
 		System.out.println("SOAP Client to inwoke a webservice");

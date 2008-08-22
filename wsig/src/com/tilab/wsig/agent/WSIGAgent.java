@@ -37,7 +37,6 @@ import jade.lang.acl.ACLMessage;
 import jade.proto.SubscriptionInitiator;
 import jade.wrapper.gateway.GatewayAgent;
 
-import java.net.URL;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
@@ -50,7 +49,6 @@ import com.tilab.wsig.store.WSIGStore;
 import com.tilab.wsig.uddi.UDDIManager;
 import com.tilab.wsig.wsdl.JadeToWSDL;
 import com.tilab.wsig.wsdl.WSDLConstants;
-import com.tilab.wsig.wsdl.WSDLUtils;
 
 
 public class WSIGAgent extends GatewayAgent implements WSIGConstants {
@@ -90,7 +88,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			String wsdlDirectory = (String)args[1];
 			WSIGConfiguration.getInstance().setWsdlDirectory(wsdlDirectory);
 		}
-
+		
 		// Verify if wsigStore is passed as third agent parameter
 		if (args.length >= 3 && (args[2] instanceof WSIGStore)) {
 			wsigStore = (WSIGStore)args[2];
@@ -222,11 +220,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 
 		// Remove wsigService from WSIGStore
 		wsigStore.removeService(serviceName);
-
-		// Delete wsdl
-		String filename = WSDLUtils.getWSDLFilename(serviceName);
-		log.info("Delete wsdl file "+filename);
-		WSDLUtils.deleteWSDL(filename);
 	}
 
 	private boolean isWSIGService(ServiceDescription sd) {
@@ -314,7 +307,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		wsigService.setServiceName(serviceName);
 		wsigService.setServicePrefix(servicePrefix);
 		wsigService.setAid(aid);
-		wsigService.setWsdl(new URL(WSIGConfiguration.getInstance().getWsdlUri()+"/"+serviceName+".wsdl"));
 		wsigService.setOnto(serviceOnto);
 		wsigService.setMapperClass(mapperClass);
 

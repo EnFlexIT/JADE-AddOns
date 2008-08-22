@@ -26,10 +26,11 @@ package com.tilab.wsig.store;
 import jade.content.onto.Ontology;
 import jade.core.AID;
 
-import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.wsdl.Definition;
 
 import org.uddi4j.util.ServiceKey;
 
@@ -39,7 +40,7 @@ public class WSIGService {
 	private String servicePrefix;
 	private AID aid;
 	private Ontology onto;
-	private URL wsdl;
+	private Definition wsdlDefinition;
 	private ServiceKey uddiServiceKey;
 	private Class mapperClass;
 	private Map<String,ActionBuilder> actionsBuilder = new HashMap<String,ActionBuilder>();
@@ -62,11 +63,11 @@ public class WSIGService {
 	public void setServiceName(String serviceName) {
 		this.serviceName = serviceName;
 	}
-	public URL getWsdl() {
-		return wsdl;
+	public Definition getWsdlDefinition() {
+		return wsdlDefinition;
 	}
-	public void setWsdl(URL wsdl) {
-		this.wsdl = wsdl;
+	public void setWsdlDefinition(Definition wsdlDefinition) {
+		this.wsdlDefinition = wsdlDefinition;
 	}
 	public ServiceKey getUddiServiceKey() {
 		return uddiServiceKey;
@@ -104,6 +105,6 @@ public class WSIGService {
 	
 	@Override
 	public String toString() {
-		return "WSIGService (name="+serviceName+", onto="+onto.getName()+", wsdl="+wsdl.toExternalForm()+")";
+		return "WSIGService (name="+serviceName+", onto="+onto.getName()+", mapper="+mapperClass+")";
 	}
 }
