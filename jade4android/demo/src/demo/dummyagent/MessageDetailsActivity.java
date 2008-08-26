@@ -34,6 +34,7 @@ import android.widget.ListView;
 public class MessageDetailsActivity extends Activity {
 
 	private EditText sender;
+	public static final String SENDER_NAME = "SENDER_NAME";
 	
 	protected void onCreate(Bundle icicle) {
 		
@@ -79,7 +80,9 @@ public class MessageDetailsActivity extends Activity {
 		reply.setOnClickListener(new OnClickListener(){
 			public void onClick(View arg0) {
 				String snd = sender.getText().toString();
-				setResult(Activity.RESULT_OK, snd);
+				Intent data = new Intent();
+				data.putExtra(SENDER_NAME, snd);
+				setResult(Activity.RESULT_OK, data);
 				finish();
 			}
 				

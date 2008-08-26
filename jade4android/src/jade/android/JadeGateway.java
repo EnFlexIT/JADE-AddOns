@@ -101,7 +101,7 @@ public class JadeGateway   {
 	static final String GATEWAY_CLASS_NAME="GATEWAY_CLASS_NAME";
 	static final String GATEWAY_AGENT_ARGS="GATEWAY_AGENT_ARGS";
 	static final String PROPERTIES_BUNDLE="PROPERTIES_BUNDLE";
-	
+	static final String SERVICE_BUNDLE="SERVICE_BUNDLE";
 	
 	private JadeGateway(JadeBinder cmd){
 		jadeBinder = cmd;
@@ -222,9 +222,11 @@ public class JadeGateway   {
 		MicroRuntimeServiceConnection sConn = new MicroRuntimeServiceConnection(list);
 		map.put(ctn, sConn);
 		Bundle b = prepareBundle(agentType,agentArgs,jadeProps);
+		Intent i = new Intent(ctn, MicroRuntimeService.class);
+		i.putExtra(PROPERTIES_BUNDLE, b);
 		
-		ctn.startService(new Intent(ctn, MicroRuntimeService.class), b);
-		ctn.bindService(new Intent(ctn, MicroRuntimeService.class), sConn,Context.BIND_AUTO_CREATE);
+		ctn.startService(i);
+		ctn.bindService(i, sConn,Context.BIND_AUTO_CREATE);
 	
 	}
 	

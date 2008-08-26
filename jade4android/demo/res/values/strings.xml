@@ -33,7 +33,7 @@
 
 	
 	<!-- JADE CONNECTION PROPERTIES -->
-	<string name="host">163.162.244.25</string>
+	<string name="host">10.0.2.2</string>
 	<string name="port">1099</string>
 	<string name="msisdn">android</string>
 	

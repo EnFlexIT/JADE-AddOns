@@ -48,7 +48,7 @@
     <target name="resource-src" depends="init-demo">
         <echo>Generating R.java...</echo>
         <exec executable="${aapt}" failonerror="true" dir="demo" >
-            <arg value="compile" />
+            <arg value="package" />
             <arg value="-m" />
             <arg value="-J" />
             <arg value="${srcdir}" />
@@ -123,11 +123,9 @@
     	<delete dir="${dist}"/>
     	<mkdir dir="${dist}"/>
     	<unjar src="${jade-leap-android-jar}" dest="${demo-classes}" />
-        <exec executable="${dx}" failonerror="true">
+         <exec executable="${dx}" failonerror="true">
             <arg value="--dex" />
             <arg value="--output=${basedir}\${intermediate-dex}" />
-            <arg value="--locals=full" />
-            <arg value="--positions=lines" />
             <arg path="${basedir}\${demo-classes}" />
         </exec>
     </target>
@@ -157,7 +155,6 @@
         <exec executable="${aapt}" failonerror="true" dir="demo">
             <arg value="package" />
             <arg value="-f" />
-            <arg value="-c" />
             <arg value="-M" />
             <arg value="AndroidManifest.xml" />
             <arg value="-S" />
@@ -165,7 +162,8 @@
             <!-- No assets directory -->
             <arg value="-I" />
             <arg value="${android-jar}" />
-            <arg value="dist/${out-package}" />
+            <arg value="-F" />
+			<arg value="dist/${out-package}" />
         </exec>
     </target>
 

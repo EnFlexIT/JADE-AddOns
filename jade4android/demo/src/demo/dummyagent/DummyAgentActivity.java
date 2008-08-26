@@ -18,14 +18,17 @@ import java.util.List;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.Menu.Item;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.View.OnCreateContextMenuListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -34,7 +37,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.Toast;
-import android.widget.AdapterView.ContextMenuInfo;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.TabHost.TabSpec;
 
 /**
@@ -133,20 +136,9 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 		
 		//PREPARE THE CONTEXT MENU IN RECEIVER LIST
 		recvListView = (ListView) findViewById(R.id.receiverList);
-		recvListView.setOnPopulateContextMenuListener(new View.OnPopulateContextMenuListener(){
-			public void  onPopulateContextMenu(ContextMenu menu, View v, Object menuInfo) {
-				ListView myLv = (ListView) v;
-				ContextMenuInfo info = (ContextMenuInfo) menuInfo;
-				myLv.setSelection(info.position);
-				
-				menu.add(0, CONTEXT_MENU_ITEM_ADD, R.string.menu_item_add);
-				menu.add(0, CONTEXT_MENU_ITEM_EDIT, R.string.menu_item_edit);
-				menu.add(0, CONTEXT_MENU_ITEM_REMOVE, R.string.menu_item_remove);
-				menu.add(0, CONTEXT_MENU_ITEM_REMOVEALL, R.string.menu_item_removeall);
-				
-			
-			}
-		});
+		//register this view for context menu
+		registerForContextMenu(recvListView);
+		
 		//Draw the receiver list. 
 		receivers = new ArrayList<AID>();
 		updateReceiverList();
@@ -250,7 +242,7 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
         }
         
         intent.putExtra(DummyAgentActivity.KEY_INTENT_RECEIVER_LIST, recList);
-        startSubActivity(intent,RESCODE_MSG_DETAILS);
+        startActivityForResult(intent,RESCODE_MSG_DETAILS);
 	}
 	
 	
@@ -297,8 +289,11 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 	        CharSequence localName = getResources().getText(R.string.msisdn);
 	        id.setLocalName(localName.toString());
 	        senderText.setText(id.getName());
-
-			Notification notification = new Notification(this,R.drawable.dummyagent,getResources().getText(R.string.statusbar_msg_connected),1000,"Ciao","Anna",null,R.drawable.dummyagent,"DummyAgent",null);
+			
+			Notification notification = new Notification(R.drawable.dummyagent,getResources().getText(R.string.statusbar_msg_connected),System.currentTimeMillis());
+			PendingIntent pi = PendingIntent.getActivity(this, 0, new Intent(Intent.ACTION_DEFAULT), PendingIntent.FLAG_ONE_SHOT);
+			notification.setLatestEventInfo(this, "Dummy Agent", "Dummy agent Content text", pi);
+			
 			nManager.notify(STATUSBAR_NOTIFICATION, notification);
 		}catch(ConnectException ce){
 			Log.e("jade.android", ce.getMessage(), ce);
@@ -329,14 +324,14 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(0, JADE_EXIT_ID, R.string.menu_item_exit);
+		menu.add(Menu.NONE, JADE_EXIT_ID, Menu.NONE, R.string.menu_item_exit);
 		return true;
 	}
 	
-	public boolean onMenuItemSelected(int featureId, Item item) {
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		super.onMenuItemSelected(featureId, item);
 		
-		switch(item.getId()) {
+		switch(item.getItemId()) {
 			case JADE_EXIT_ID:
 				finish();
 				break;
@@ -344,11 +339,13 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 		return true;
 	}
 	
-	protected void onActivityResult(int requestCode, int resultCode, String data, Bundle extras) {         
-		 if (resultCode == Activity.RESULT_OK) {             
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {         
+		
+		if (resultCode == Activity.RESULT_OK) {             
 			 tabHost.setCurrentTab(0);
 			 receivers.clear();
-			 addReceiver(new AID(data,AID.ISGUID));
+			 String senderName = data.getStringExtra(MessageDetailsActivity.SENDER_NAME);
+			 addReceiver(new AID(senderName,AID.ISGUID));
 			 contentText.setText("");
 			 updateReceiverList();
 		 }
@@ -372,10 +369,7 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 				gateway.disconnect(this);
 	}
 	
-	protected void onFreeze(Bundle out) {
-		super.onFreeze(out);
-		myLogger.log(Logger.INFO,"onFreeze() : called");
-	}
+
 	
 	protected void onResume() {
 		super.onResume();
@@ -451,7 +445,7 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 				txt = new IconifiedText(string,null);
 			} else {
 				txt = new IconifiedText(string,d);
-				txt.setTextColor(R.color.listitem_receivers_text_color);
+				txt.setTextColor(getResources().getColor(R.color.listitem_receivers_text_color));
 			}	
 			adapter.addLastItem(txt);
 		}
@@ -460,10 +454,23 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 		recvListView.invalidate();
 	}
 	
-
-	public boolean onContextItemSelected(Item item) {
 	
-		switch(item.getId()) {
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		ListView myLv = (ListView) v;
+		AdapterContextMenuInfo adInfo = (AdapterContextMenuInfo) menuInfo;
+		myLv.setSelection(adInfo.position);
+		
+		menu.add(Menu.NONE, CONTEXT_MENU_ITEM_ADD, Menu.NONE, R.string.menu_item_add);
+		menu.add(Menu.NONE, CONTEXT_MENU_ITEM_EDIT,Menu.NONE, R.string.menu_item_edit);
+		menu.add(Menu.NONE, CONTEXT_MENU_ITEM_REMOVE,Menu.NONE, R.string.menu_item_remove);
+		menu.add(Menu.NONE, CONTEXT_MENU_ITEM_REMOVEALL,Menu.NONE, R.string.menu_item_removeall);
+	}
+
+	public boolean onContextItemSelected(MenuItem item) {
+	
+		AdapterContextMenuInfo menuInfo = null;
+		
+		switch(item.getItemId()) {
 		
 			case CONTEXT_MENU_ITEM_ADD:
 				addrDialog.clear();
@@ -471,12 +478,13 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 			break;
 			
 			case CONTEXT_MENU_ITEM_EDIT:
-				addrDialog.showEdit(recvListView.getSelectedItemPosition());
+				menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
+				addrDialog.showEdit(menuInfo.position);
 			break;
 			
 			case CONTEXT_MENU_ITEM_REMOVE:
-				int selected = recvListView.getSelectedItemPosition();
-				removeReceiver(selected);
+				menuInfo = (AdapterContextMenuInfo) item.getMenuInfo();
+				removeReceiver(menuInfo.position);
 				updateReceiverList();
 			break;
 			

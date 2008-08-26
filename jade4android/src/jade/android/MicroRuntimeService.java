@@ -46,13 +46,14 @@ public class MicroRuntimeService extends Service {
 	private static final Logger myLogger = Logger.getMyLogger(MicroRuntimeService.class.getName()); 
 
 	
-	protected void onCreate() {
+	public void onCreate() {
 		myLogger.log(Logger.INFO, "onCreate(): called");	
 	}
 
 
-	protected void onStart(int startId, Bundle arguments) {
+	public void onStart(Intent i, int startId) {
 		myLogger.log(Logger.INFO, "onStart(): called");
+		Bundle arguments = i.getBundleExtra(JadeGateway.PROPERTIES_BUNDLE);
 		gatewayClassName = arguments.getString(JadeGateway.GATEWAY_CLASS_NAME);
 		ArrayList<String> args = (ArrayList<String>)arguments.getSerializable(JadeGateway.GATEWAY_AGENT_ARGS);
 		if (args != null){
@@ -76,7 +77,7 @@ public class MicroRuntimeService extends Service {
 
 	
 
-	protected void onDestroy() {
+	public void onDestroy() {
 		// stop Jade
 		myLogger.log(Logger.INFO, "onDestroy(): called");
 		if (MicroRuntime.isRunning()) {

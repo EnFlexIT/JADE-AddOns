@@ -4,6 +4,7 @@ package demo.dummyagent;
 import jade.core.AID;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -74,8 +75,22 @@ public class AIDDialog extends Dialog {
 					cancel();				
 				} else {
 					//agent name is empty
-					AlertDialog.show(myActivity,"Error" , android.R.drawable.unknown_image, myActivity.getResources().getText(R.string.error_msg_empty_aid) , "Ok", false);
+					AlertDialog.Builder dlgBuilder = new AlertDialog.Builder(myActivity);
+					dlgBuilder.setCancelable(false)
+							  .setIcon(android.R.drawable.ic_dialog_alert)
+							  .setMessage(myActivity.getText(R.string.error_msg_empty_aid))
+							  .setTitle("Error")
+							  .setPositiveButton("Ok", new OnClickListener(){
+
+								public void onClick(DialogInterface dialog,
+										int which) {
+									dialog.dismiss();
+									
+								}
+								  
+							  });
 					
+					dlgBuilder.show();				
 				}
 				
 			}

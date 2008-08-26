@@ -31,7 +31,7 @@ android:layout_height="fill_parent"
 				android:singleLine="true"
 				android:textSize="15px"
 				android:layout_width="200px"
-				android:background="@android:drawable/editbox_background"
+     			 
 				android:layout_height="wrap_content"
 				android:paddingLeft="5px"/>
 	</LinearLayout>
@@ -49,7 +49,6 @@ android:layout_height="fill_parent"
 		android:singleLine="true"
 		android:textSize="15px"
 		android:layout_width="fill_parent"
-		android:background="@android:drawable/editbox_background"
 		android:padding="5px"
 		android:layout_height="wrap_content"/>
 
@@ -61,14 +60,12 @@ android:layout_height="fill_parent"
 		<Button
 			android:id="@+id/okBtn"
 			android:layout_width="wrap_content"
-			android:background="@android:drawable/button_background"
 			android:layout_height="wrap_content"
 			android:text="Ok"/>
 		
 		<Button
 			android:id="@+id/cancelBtn"
 			android:layout_width="wrap_content"
-			android:background="@android:drawable/button_background"
 			android:layout_height="wrap_content"
 			android:text="Cancel"/>
 
