@@ -292,7 +292,7 @@ public class DummyAgentActivity extends Activity implements ConnectionListener{
 			
 			Notification notification = new Notification(R.drawable.dummyagent,getResources().getText(R.string.statusbar_msg_connected),System.currentTimeMillis());
 			PendingIntent pi = PendingIntent.getActivity(this, 0, new Intent(Intent.ACTION_DEFAULT), PendingIntent.FLAG_ONE_SHOT);
-			notification.setLatestEventInfo(this, "Dummy Agent", "Dummy agent Content text", pi);
+			notification.setLatestEventInfo(this, "Connected to Jade Service", "", pi);
 			
 			nManager.notify(STATUSBAR_NOTIFICATION, notification);
 		}catch(ConnectException ce){

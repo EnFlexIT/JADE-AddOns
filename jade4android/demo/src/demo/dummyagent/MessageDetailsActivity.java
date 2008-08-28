@@ -58,7 +58,7 @@ public class MessageDetailsActivity extends Activity {
 		for (java.util.Iterator<String> iterator = strList.iterator(); iterator.hasNext();) {
 			String string = iterator.next();
 			IconifiedText txt = new IconifiedText(string,icon);
-			txt.setTextColor(R.color.listitem_receivers_text_color);
+			txt.setTextColor(getResources().getColor(R.color.listitem_receivers_text_color));
 			ita.addLastItem(txt);
 		}
 		
