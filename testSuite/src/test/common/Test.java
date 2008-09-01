@@ -266,6 +266,8 @@ public abstract class Test implements Serializable {
 
 		private void stop() {
 			stopped = true;
+			// In case this is called by a separated thread
+			restart();
 		}
 
 		private void pause() {
