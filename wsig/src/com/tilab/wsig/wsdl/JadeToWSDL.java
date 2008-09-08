@@ -180,7 +180,7 @@ public class JadeToWSDL {
 					for (int j = 0; j < subOperationNumber; j++) {
 						
 						// Prepare operation name (add index if there are more operation with same name)
-						String operationName = wsigService.getServicePrefix()+actionName;
+						String operationName = actionName;
 						if (subOperationNumber > 1) {
 							operationName = operationName + WSDLConstants.SEPARATOR + j;
 						}
