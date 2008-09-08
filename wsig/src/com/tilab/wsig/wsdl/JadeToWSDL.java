@@ -179,29 +179,46 @@ public class JadeToWSDL {
 					// Loop all sub operations
 					for (int j = 0; j < subOperationNumber; j++) {
 						
-						// Prepare operation name (add index if there are more operation with same name)
+						// Prepare default operation name
 						String operationName = actionName;
-						if (subOperationNumber > 1) {
-							operationName = operationName + WSDLConstants.SEPARATOR + j;
-						}
 
 						// Create appropriate ActionBuilder
 						ActionBuilder actionBuilder = null;
 						if (operationDefinitedInMapper) {
+							
 							// Mapper
 							Method method = mapperMethodsForAction.get(j);
-							
+
 							// Check is the operation has a specific name
 							OperationName annotationOperationName = method.getAnnotation(OperationName.class);
 							if (annotationOperationName != null) {
 
-								// Set specific operation name
+								// Set specific operation name from annotation
 								operationName = annotationOperationName.name();
+							} else {
+								
+								// No specific name, check operation overloading
+								if (subOperationNumber > 1) {
+									
+									// Use parameter class type to define operation name
+									Class[] parameterTypes = method.getParameterTypes();
+									StringBuffer parameterStrings = new StringBuffer();
+									for (int paramIndex=0; paramIndex<parameterTypes.length; paramIndex++) {
+										parameterStrings.append(parameterTypes[paramIndex].getSimpleName());
+										if (paramIndex<(parameterTypes.length-1)) {
+											parameterStrings.append(WSDLConstants.SEPARATOR);
+										}
+									}
+									
+									operationName = operationName+WSDLConstants.SEPARATOR+parameterStrings.toString(); 
+								}
 							}
 							
+							// Create MapperBased builder
 							actionBuilder = new MapperBasedActionBuilder(mapperObject, method, onto, actionName);
 						} else {
-							// Ontology
+							
+							// Create OntologyBased builder
 							actionBuilder = new OntologyBasedActionBuilder(onto, actionName);
 						}
 
