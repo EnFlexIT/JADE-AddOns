@@ -411,7 +411,7 @@ public class WSIGServlet extends HttpServlet {
 		soapResponse.writeTo(baos);
 		content = baos.toByteArray();
 
-		fillHttpResponse(content, "soap+xml", httpResponse);
+		fillHttpResponse(content, "text/xml", httpResponse);
 	}
 
 	private void fillHttpResponse(byte[] content, String type, HttpServletResponse httpResponse) throws Exception {

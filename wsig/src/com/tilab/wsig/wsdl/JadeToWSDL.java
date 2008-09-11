@@ -404,7 +404,23 @@ public class JadeToWSDL {
 		
 		AgentActionSchema actionSchema = (AgentActionSchema) onto.getSchema(actionName);
 		ObjectSchema resultSchema = actionSchema.getResultSchema();
+
+		// In document style there is only a message part named parameters and an element in types definition
+		XSDModelGroup elementSequence = null;
+		if (WSDLConstants.STYLE_DOCUMENT.equals(soapStyle)) {
+			
+			String responseName = WSDLUtils.getResponseName(operationName); 
+			Part partMessage = WSDLUtils.createElementPart(WSDLConstants.PARAMETERS, responseName, tns);
+			outputMessage.addPart(partMessage);
+			
+			// Add element to type schema
+			String elementName = WSDLUtils.getResponseName(operationName);
+			XSDElementDeclaration element = WSDLUtils.addElementToSchema(tns, wsdlTypeSchema, elementName);
+			XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToElement(element);
+			elementSequence = WSDLUtils.addSequenceToComplexType(complexType);
+		}
 		
+		// Check result schema
 		if (resultSchema != null) {
 			String resultName = WSDLUtils.getResultName(operationName);
 			String resultType = createComplexTypeFromSchema(tns, actionSchema, resultSchema, wsdlTypeSchema, resultSchema.getTypeName(), null, null, null);
@@ -413,21 +429,11 @@ public class JadeToWSDL {
 			Part partMessage;
 			if (WSDLConstants.STYLE_RPC.equals(soapStyle)) {
 				partMessage = WSDLUtils.createTypePart(resultName, resultType, tns);
+				outputMessage.addPart(partMessage);
 				
 			} else {
-				String responseName = WSDLUtils.getResponseName(operationName); 
-				partMessage = WSDLUtils.createElementPart(WSDLConstants.PARAMETERS, responseName, tns);
-				
-				// Add element to type schema
-				String elementName = WSDLUtils.getResponseName(operationName);
-				XSDElementDeclaration element = WSDLUtils.addElementToSchema(tns, wsdlTypeSchema, elementName);
-				XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToElement(element);
-				XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
-
-				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, resultName, resultType, sequence);
+				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, resultName, resultType, elementSequence);
 			}
-
-			outputMessage.addPart(partMessage);
 		}
 	}
 	

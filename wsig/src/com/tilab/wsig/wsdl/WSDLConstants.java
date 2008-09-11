@@ -43,6 +43,7 @@ public class WSDLConstants {
 	public static final String WSDL_SOAP_URL = "http://schemas.xmlsoap.org/wsdl/soap/";
 	public static final String ENCODING_URL = "http://schemas.xmlsoap.org/soap/encoding/";
 	public static final String TRANSPORT_URL = "http://schemas.xmlsoap.org/soap/http";
+	public static final String SOAPENVELOP_PREFIX = "soapenv";
 	public static final String BINDING_SUFFIX = "Binding";
 	public static final String PORT_TYPE_SUFFIX = "Port";
 	public static final String SERVICE_SUFFIX = "Service";
