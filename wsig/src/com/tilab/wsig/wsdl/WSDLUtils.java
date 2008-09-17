@@ -515,6 +515,7 @@ public class WSDLUtils {
 			ArrayList encodingStylesInput = new ArrayList();
 			encodingStylesInput.add(WSDLConstants.ENCODING_URL);
 			soapBody.setEncodingStyles(encodingStylesInput);
+			soapBody.setNamespaceURI(tns);
 		}
 		binding.addExtensibilityElement(soapBody);
 		return binding;
