@@ -82,7 +82,7 @@ public class JadeToSoap {
 
         // Create soap element
         String responseElementName = operationName + WSDLConstants.RESPONSE_SUFFIX;
-        SOAPElement responseElement = addSoapElement(body, responseElementName, null, null, tns);
+        SOAPElement responseElement = addSoapElement(body, responseElementName, localNamespacePrefix, null, tns);
         
         // Get action builder
         log.debug("Operation name: "+operationName);
@@ -195,7 +195,11 @@ public class JadeToSoap {
 	private SOAPElement addSoapElement(SOAPElement rootSoapElement, String elementName, String prefix, String soapType, String tns) throws Exception {
 
 		// Create Name and Element
-		Name soapName = envelope.createName(elementName, null, tns);
+		String elementPrefix = "";
+		if (WSDLConstants.STYLE_RPC.equals(soapStyle) && rootSoapElement instanceof SOAPBody) {
+			elementPrefix = prefix;
+		}
+		Name soapName = envelope.createName(elementName, elementPrefix, tns);
 	    SOAPElement soapElement = rootSoapElement.addChildElement(soapName);
 	    
 	    // Add encoding style only in result tag and for style rpc
