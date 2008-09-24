@@ -380,7 +380,7 @@ public class JadeToWSDL {
 			log.debug("--mapper input parameter: "+parameterName+" ("+parameterType+")");
 
 			// Create virtual schema of java parameter
-			ObjectSchema parameterSchema = GetParameterSchema(onto, parameterClass);
+			ObjectSchema parameterSchema = getParameterSchema(onto, parameterClass);
 			
 			// Add parameter to map
 			inputParametersMap.put(parameterName, parameterSchema);
@@ -437,7 +437,7 @@ public class JadeToWSDL {
 		}
 	}
 	
-	public static ObjectSchema GetParameterSchema(Ontology onto, Class parameterClass) throws OntologyException {
+	public static ObjectSchema getParameterSchema(Ontology onto, Class parameterClass) throws OntologyException {
 
 		ObjectSchema parameterSchema;
 		
@@ -455,7 +455,7 @@ public class JadeToWSDL {
 		else if (parameterClass.isArray()) {
 
 			// Java array
-			ObjectSchema elementSchema = GetParameterSchema(onto, parameterClass.getComponentType());
+			ObjectSchema elementSchema = getParameterSchema(onto, parameterClass.getComponentType());
 			parameterSchema = new TypedAggregateSchema(BasicOntology.SEQUENCE, elementSchema);
 		} 
 		else if (	Collection.class.isAssignableFrom(parameterClass) ||
