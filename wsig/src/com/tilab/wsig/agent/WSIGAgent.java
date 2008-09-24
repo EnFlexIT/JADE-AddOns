@@ -65,6 +65,9 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 
 		// Set non-standard archive scheme called “wsjar" 
 		System.setProperty("org.eclipse.emf.common.util.URI.archiveSchemes", "wsjar wszip jar zip");
+
+		// Set soap message factory library (solve jboss problem)
+		System.setProperty("javax.xml.soap.MessageFactory", "org.apache.axis.soap.MessageFactoryImpl"); 
 		
 		log.info("Agent "+getLocalName()+" - starting...");
 
