@@ -52,6 +52,7 @@ public interface MathVocabulary {
 	public static final String GETCOMPONENTS = "getComponents";
 	public static final String GETRANDOM = "getRandom";
 	public static final String PRINTCOMPLEX = "printComplex";
+	public static final String PRINTTIME = "printTime";
 	public static final String GETAGENTINFO = "getAgentInfo";
 	public static final String CONVERTDATE = "convertDate";
 }

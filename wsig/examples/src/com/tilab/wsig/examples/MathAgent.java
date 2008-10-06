@@ -158,6 +158,8 @@ public class MathAgent extends Agent {
 							serveGetAgentInfoAction((GetAgentInfo) action, actExpr, msg);
 						} else if (action instanceof ConvertDate) {
 							serveConvertDateAction((ConvertDate) action, actExpr, msg);
+						} else if (action instanceof PrintTime) {
+							servePrintTimeAction((PrintTime) action, actExpr, msg);
 						}
 					} catch (Exception e) {
 						log.error("Exception: " + e.getMessage(), e);
@@ -247,6 +249,12 @@ public class MathAgent extends Agent {
 		sendNotification(actExpr, msg, ACLMessage.INFORM, null);
 	}
 
+	private void servePrintTimeAction(PrintTime printTime, Action actExpr, ACLMessage msg) {
+		log.debug("MathAgent.servePrintTimeAction");
+		log.info("Time is "+(new Date()).toString());
+		sendNotification(actExpr, msg, ACLMessage.INFORM, null);
+	}
+	
 	private void sendNotification(Action actExpr, ACLMessage request, int performative, Object result) {
 		// Send back a proper reply to the requester
 		ACLMessage reply = request.createReply();

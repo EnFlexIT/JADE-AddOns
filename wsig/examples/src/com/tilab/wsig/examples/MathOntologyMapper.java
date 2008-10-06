@@ -66,5 +66,8 @@ public class MathOntologyMapper {
 		sum.setSecondElement(secondElement);
 		return sum;
 	}
-	
+
+	public PrintTime toPrintTime(){
+		return new PrintTime();
+	}
 }

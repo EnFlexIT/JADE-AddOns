@@ -57,6 +57,7 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			add(new AgentActionSchema(PRINTCOMPLEX), PrintComplex.class);
 			add(new AgentActionSchema(GETAGENTINFO), GetAgentInfo.class);
 			add(new AgentActionSchema(CONVERTDATE), ConvertDate.class);
+			add(new AgentActionSchema(PRINTTIME), PrintTime.class);
 			add(new ConceptSchema(COMPLEX), Complex.class);
 			add(new ConceptSchema(AGENTINFO), AgentInfo.class);
 
