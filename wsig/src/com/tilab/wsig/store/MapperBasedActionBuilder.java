@@ -82,16 +82,19 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 					}
 				}
 			}
+			if (parameterList.endsWith(",")) {
+				parameterList = parameterList.substring(0, parameterList.length()-1);
+			}
 		}
 		
 		AgentAction actionObj = null;
 		try {
 			// Invoke mapper method
 			actionObj = (AgentAction)method.invoke(mapperObj, parameterValues);
-			log.debug("Invoked method "+method.getName()+"("+parameterList.substring(0,parameterList.length()-1)+") in mapper");
+			log.debug("Invoked method "+method.getName()+"("+parameterList+") in mapper");
 
 		} catch(Exception e) {
-			log.error("Method "+method.getName()+"("+parameterList.substring(0,parameterList.length()-1)+") error invocation");
+			log.error("Method "+method.getName()+"("+parameterList+") error invocation");
 			throw e;
 		}
 		
