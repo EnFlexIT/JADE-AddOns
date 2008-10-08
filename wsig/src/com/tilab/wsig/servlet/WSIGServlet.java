@@ -172,8 +172,8 @@ public class WSIGServlet extends HttpServlet {
 			log.debug("SOAP request:");
 			log.debug(soapRequest.getSOAPPartAsString());
 		} catch(Exception e) {
-			log.error(e.getMessage(), e);
-			httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			log.error("Error extracting SOAP message from http request", e);
+			httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error extracting SOAP message from http request. "+e.getMessage());
 			return;
 		}
 		
@@ -181,7 +181,7 @@ public class WSIGServlet extends HttpServlet {
 		String serviceName = null;
 		String operationName = null;
 		try {
-			SOAPBody body = soapRequest.getSOAPPart().getEnvelope().getBody();
+			SOAPBody body = soapRequest.getSOAPBody();
 			
 			serviceName = getServiceName(body);
 			log.info("Request service: "+serviceName);
@@ -189,8 +189,8 @@ public class WSIGServlet extends HttpServlet {
 			operationName = getOperationName(body);
 			log.info("Request operation: "+operationName);
 		} catch (SOAPException ex) {
-			log.error("Error extracting service and operation name", ex);
-			httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, ex.getMessage());
+			log.error("Error extracting SOAP body message from request", ex);
+			httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error extracting SOAP body message from request. "+ex.getMessage());
 			return;
 		}
 		
@@ -260,7 +260,7 @@ public class WSIGServlet extends HttpServlet {
 			return;
 		}
 		
-		log.info("WSIGServlet doPost elaboration terminated");
+		log.info("WSIG SOAP response sended, stop elaboration.");
 	}
 
 	private AbsTerm executeOperation(AgentAction agentAction, WSIGService wsigService) throws Exception{

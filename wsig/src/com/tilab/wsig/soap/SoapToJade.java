@@ -57,6 +57,8 @@ import com.tilab.wsig.wsdl.WSDLUtils;
 
 public class SoapToJade extends DefaultHandler {
 
+	private static final int PARAMETERS_LEVEL = 3;
+	
 	private static Logger log = Logger.getLogger(SoapToJade.class.getName());
 
 	private XMLReader xmlParser = null;
@@ -101,7 +103,7 @@ public class SoapToJade extends DefaultHandler {
 	public Object convert(Message soapRequest, WSIGService wsigService, String operationName) throws Exception {
 
 		Object actionObj = null;
-		String soapMessage = soapRequest.getSOAPPartAsString();
+		String soapBodyMessage = soapRequest.getSOAPBody().toString();
 		
 		// Verify if parser is ready
 		if (xmlParser == null) {
@@ -115,7 +117,7 @@ public class SoapToJade extends DefaultHandler {
 		parametersSchemaMap = actionBuilder.getParametersMap();
 		
 		// Parse soap to extract parameters value
-		xmlParser.parse(new InputSource(new StringReader(soapMessage)));
+		xmlParser.parse(new InputSource(new StringReader(soapBodyMessage)));
 
 		// Get parameter values
 		Vector<ParameterInfo> params = getParameterValues();
@@ -275,10 +277,10 @@ public class SoapToJade extends DefaultHandler {
 			++level;
 
 			// Manage only parameters levels
-			if (level >= 4) {
+			if (level >= PARAMETERS_LEVEL) {
 
 				// Get  parameter level
-				int parameterLevel = level - 4; 
+				int parameterLevel = level - PARAMETERS_LEVEL; 
 
 				// Get parameter schema
 				ObjectSchema parameterSchema = getParameterSchema(parameterName, parameterLevel);
@@ -304,13 +306,13 @@ public class SoapToJade extends DefaultHandler {
 		
 		try {
 			// Manage only parameters levels
-			if (level >= 4) {
+			if (level >= PARAMETERS_LEVEL) {
 
 				// Get parameter value
 				String parameterValue = elementValue.toString();
 
 				// Get  parameter level
-				int parameterLevel = level - 4; 
+				int parameterLevel = level - PARAMETERS_LEVEL; 
 
 				// Get parameter info & verify...
 				ParameterInfo pi = getLastParameterInfo(parameterLevel, parameterName);
