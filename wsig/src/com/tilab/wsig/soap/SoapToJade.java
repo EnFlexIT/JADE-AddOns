@@ -107,11 +107,16 @@ public class SoapToJade extends DefaultHandler {
 		
 		// Verify if parser is ready
 		if (xmlParser == null) {
-			throw new Exception("Parser not initialized");
+			log.error("XML parser not initialized");
+			throw new Exception("XML parser not initialized");
 		}
 
 		// Get action builder
 		ActionBuilder actionBuilder = wsigService.getActionBuilder(operationName);
+		if (actionBuilder == null) {
+			log.error("Operation "+operationName+" not present in service "+wsigService.getServiceName());
+			throw new Exception("Operation "+operationName+" not present in service "+wsigService.getServiceName()); 
+		}
 		
 		// Get parameters schema map
 		parametersSchemaMap = actionBuilder.getParametersMap();
