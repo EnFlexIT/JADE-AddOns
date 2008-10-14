@@ -147,14 +147,14 @@ public class DFFederatorAgent extends Agent {
 	    	getContentManager().fillContent(request, action);
     		addBehaviour(new AchieveREInitiator(this, request) {
     			protected void handleFailure(ACLMessage failure) {
-    				String msg = new String(df.getName()+" GUI activation failed ["+failure.getContent()+"]"); 
+    				String msg = df.getName()+" GUI activation failed ["+failure.getContent()+"]"; 
     				myGui.notifyFailure(msg);
     			}
     		} );
 			}
 			catch (Exception e) {
 				e.printStackTrace();
-				String msg = new String(df.getName()+" GUI activation failed ["+e.getMessage()+"]"); 
+				String msg = df.getName()+" GUI activation failed ["+e.getMessage()+"]"; 
 				myGui.notifyFailure(msg);
 			}
 		}	
@@ -175,14 +175,14 @@ public class DFFederatorAgent extends Agent {
     				myGui.notifyFederationOK(childDF, parentDF);
     			}
     			protected void handleFailure(ACLMessage failure) {
-						String msg = new String("Federation between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+failure.getContent()+"]");
+						String msg = "Federation between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+failure.getContent()+"]";
     				myGui.notifyFailure(msg);
     			}
     		} );
 			}
 			catch (Exception e) {
 				e.printStackTrace();
-				String msg = new String("Federation between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+e.getMessage()+"]");
+				String msg = "Federation between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+e.getMessage()+"]";
 				myGui.notifyFailure(msg);
 			}
 		}	
@@ -206,14 +206,14 @@ public class DFFederatorAgent extends Agent {
     				myGui.notifyFederationRemoved(childDF, parentDF);
     			}
     			protected void handleFailure(ACLMessage failure) {
-						String msg = new String("Federation removal between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+failure.getContent()+"]");
+						String msg = "Federation removal between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+failure.getContent()+"]";
     				myGui.notifyFailure(msg);
     			}
     		} );
 			}
 			catch (Exception e) {
 				e.printStackTrace();
-				String msg = new String("Federation removal between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+e.getMessage()+"]");
+				String msg = "Federation removal between "+childDF.getName()+" and "+parentDF.getName()+" failed ["+e.getMessage()+"]";
 				myGui.notifyFailure(msg);
 			}
     }

@@ -199,7 +199,7 @@ public class ContainerMonitorAgent extends Agent {
 		return sb.toString();
 	}
 	
-	public String getAgentDump(Agent a, boolean stackTraceMode) {
+	public static String getAgentDump(Agent a, boolean stackTraceMode) {
 		StringBuffer sb = new StringBuffer();
 		if (a != null) {
     		try {
@@ -266,13 +266,13 @@ public class ContainerMonitorAgent extends Agent {
 		return sb.toString();
 	}
 	
-	private String dumpThread(String prefix, Thread t) {
+	private static String dumpThread(String prefix, Thread t) {
 		ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 		ThreadInfo threadInfo = threadMXBean.getThreadInfo(t.getId());
 		return dumpThread(prefix, t, threadInfo);
 	}
 
-	private String dumpThread(String prefix, Thread t, ThreadInfo threadInfo) {
+	private static String dumpThread(String prefix, Thread t, ThreadInfo threadInfo) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(prefix + "\"" + t.getName() + "\"");
 		if(t.isDaemon()) {
@@ -320,7 +320,7 @@ public class ContainerMonitorAgent extends Agent {
 		return sb.toString();
 	}	
 	
-	private void appendBehaviourInfo(Behaviour b, StringBuffer sb, String prefix, boolean stackTraceMode) {
+	private static void appendBehaviourInfo(Behaviour b, StringBuffer sb, String prefix, boolean stackTraceMode) {
 		sb.append(prefix+"- Class = "+b.getClass().getName()+"\n");
 		sb.append(prefix+"- State = "+b.getExecutionState()+"\n");
 		sb.append(prefix+"- Runnable = "+b.isRunnable()+"\n");
@@ -358,7 +358,7 @@ public class ContainerMonitorAgent extends Agent {
 		}
 	}
 	
-	private String getSimpleType(Behaviour b) {
+	private static String getSimpleType(Behaviour b) {
 		if (b instanceof CyclicBehaviour) {
 			return "Cyclic";
 		}
@@ -376,7 +376,7 @@ public class ContainerMonitorAgent extends Agent {
 		}
 	}
 	
-	private String getCompositeType(CompositeBehaviour cb) {
+	private static String getCompositeType(CompositeBehaviour cb) {
 		if (cb instanceof FSMBehaviour) {
 			return "FSM";
 		}
@@ -391,7 +391,7 @@ public class ContainerMonitorAgent extends Agent {
 		}
 	}
 	
-	private Behaviour getCurrent(CompositeBehaviour cb, Class c) {
+	private static Behaviour getCurrent(CompositeBehaviour cb, Class c) {
 		Method getCurrentMethod = null;
 		try {
 			Behaviour b = null;

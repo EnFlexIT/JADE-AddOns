@@ -1,0 +1,128 @@
+<!-- ANT BUILD FILE FOR WADE TESTS -->
+
+<project name="BOB-TESTS" default="compile">
+
+	<property environment="env"/>
+
+	<property name="jade-home" location="../../.."/>
+	<property name="jade-lib" location="${jade-home}/lib"/>
+	<property name="misc-lib" location="../lib"/>
+	<property name="lib" location="lib"/>
+	<property name="src" location="src"/>
+	<property name="classes" location="classes"/>
+
+	<property name="bobtests" location="${lib}/wadeTests.jar"/>
+	<property name="testWorkflows-jar" location="${deploy}/testWorkflows.jar"/>
+
+	<path id="compile-classpath">
+		<fileset dir="${jade-lib}">
+			<include name="jade.jar"/>
+		</fileset>
+		<fileset dir="${misc-lib}">
+			<include name="jadeMisc.jar"/>
+		</fileset>
+		<fileset dir="${lib}">
+			<include name="testSuite.jar"/>
+		</fileset>
+	</path>
+
+	<path id="run-classpath">
+		<path refid="compile-classpath"/>
+		<pathelement location="${classes}"/>
+	</path>
+
+	<!--   _______________________________________________
+	                    INIT
+         _______________________________________________ -->
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<echo>JAVA_HOME = ${env.JAVA_HOME}</echo>
+		<mkdir dir="${classes}"/>
+	</target>
+
+
+	<!--  __________________________________________________
+	                    COMPILE
+        __________________________________________________ -->
+
+	<target name="misc-add-on">
+		<echo>compiling misc add-on</echo>
+		<ant antfile="build.xml" dir="../" inheritAll="false" target="lib"/>
+		<echo>misc add-on compiled</echo>
+	</target>
+
+	<target name="compile" depends="init,misc-add-on" description="compile">
+		<javac srcdir="${src}" destdir="${classes}" debug="on" debuglevel="vars,lines,source" optimize="off" deprecation="true">
+			<classpath refid="compile-classpath"/>
+		</javac>
+
+		<copy todir="${classes}" overwrite="yes">
+			<fileset dir="${src}" includes="**/*.xml"/>
+		</copy>
+		<!-- Copy xml configuration files -->
+		<!--
+		<copy todir="${classes}" overWrite="yes">
+			<fileset dir="${src}" includes="**/*.xml"/>
+			<fileset dir="${src}" includes="**/*.dtd"/>
+			<fileset dir="${src}" includes="**/*.properties"/>
+			<fileset dir="${src}" includes="**/*.wsdd"/>
+		</copy>
+		-->
+	</target>
+
+
+	<!--  __________________________________________________
+	                    CLEAN
+        __________________________________________________ -->
+	<target name="clean" description="clean up">
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset dir="${classes}"/>
+		</delete>
+	</target>
+
+
+	<target name="runOnly" description="run the test suite without recompiling anything">
+		<!--java classname="test.common.testSuite.TestSuiteAgent" fork="true"-->
+		<java classname="jade.Boot" fork="true">
+			<jvmarg line="-Djava.util.logging.config.file=${cfg}/log/main-log.properties"/>
+			<arg line="-conf main.properties"/>
+			<classpath refid="run-classpath"/>
+		</java>
+	</target>
+	<!--   _______________________________________________
+	                    RUN
+	__________________________________________________ -->
+	<target name="run" depends="compile" description="run the test suite">
+		<antcall target="runOnly"/>
+
+		<!--
+		<java classname="jade.Boot" fork="yes">
+			<jvmarg line="-Djava.util.logging.config.file=${cfg}/log/main-log.properties"/>
+			<arg line="-conf main.properties"/>
+			<classpath>
+				<pathelement location="."/>
+				<pathelement location="${cfg}"/>
+				<fileset dir="${lib}">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+		</java>
+		-->
+	</target>
+
+
+	<!--   _______________________________________________
+	                    RUN TSDaemon with DEBUG option
+	__________________________________________________ -->
+	<target name="debugdaemon" >
+		<!-- Start the TS Daemon -->
+		<java classname="test.common.remote.TSDaemon" fork="yes">
+			<jvmarg value="-DDEBUG=true"/>
+			<classpath>
+				<pathelement location="${cfg}"/>
+				<path refid="compile-classpath"/>
+			</classpath>
+		</java>
+	</target>
+</project>

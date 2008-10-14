@@ -171,10 +171,10 @@ public class JADEPlatformTest implements Remote {
 	}
 	/**
 	 * Sets the name to be used for RMI existence testing.
-	 * @param name The name to set
+	 * @param newName The name to set
 	 */
-	public static void setName(String name) {
-		name = name;
+	public static void setName(String newName) {
+		name = newName;
 	}
 
 }
