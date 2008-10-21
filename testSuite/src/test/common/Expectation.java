@@ -36,20 +36,20 @@ public class Expectation implements Serializable {
 	public Expectation(String[] expectedKeys) {
 		if (expectedKeys != null) {
 			for (int i = 0;i < expectedKeys.length; ++i) {
-				expected.put(expectedKeys[i], new Boolean(false));
+				expected.put(expectedKeys[i], Boolean.valueOf(false));
 			}
 		}
 	}
 	
 	public void addExpectedKey(String key) {
-		expected.put(key, new Boolean(false));
+		expected.put(key, Boolean.valueOf(false));
 	}
 	
 	public boolean received(String key) {
 		Object obj = expected.get(key);
 		if (obj != null) {
 			if (!((Boolean) obj).booleanValue()) {
-				expected.put(key, new Boolean(true));
+				expected.put(key, Boolean.valueOf(true));
 				receivedCnt++;
 				return true;
 			}

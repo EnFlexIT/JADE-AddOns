@@ -56,7 +56,7 @@ public class TestIncomingMessageRouting extends Test {
 			// Start a peripheral container in the remote platform
   		String host = TestUtility.getContainerHostName(a, remoteAMS, null);
 			String port = InterPlatformCommunicationTesterAgent.REMOTE_PLATFORM_PORT;
-  		jc = TestUtility.launchJadeInstance("Remote-Container", null, new String("-container -host "+host+" -port "+port), null);
+  		jc = TestUtility.launchJadeInstance("Remote-Container", null, "-container -host "+host+" -port "+port, null);
 			log("Peripheral container correctly created on remote platform");
 
   		// Create a responder agent on the remote container

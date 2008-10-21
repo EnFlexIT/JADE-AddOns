@@ -66,7 +66,7 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 					String addClasspath = "+"+TestUtility.HTTP_MTP_CLASSPATH+System.getProperty("path.separator")+((String) getArgument(ADDITIONAL_CLASSPATH_KEY));
 					
 					// Start the remote platform with the specified MTP
-					jc1 = TestUtility.launchJadeInstance(REMOTE_PLATFORM_NAME, addClasspath, new String("-name "+REMOTE_PLATFORM_NAME+" -port "+REMOTE_PLATFORM_PORT+" -mtp "+mtp+" "+additionalArguments), new String[]{proto}); 
+					jc1 = TestUtility.launchJadeInstance(REMOTE_PLATFORM_NAME, addClasspath, "-name "+REMOTE_PLATFORM_NAME+" -port "+REMOTE_PLATFORM_PORT+" -mtp "+mtp+" "+additionalArguments, new String[]{proto}); 
 		
 					// Construct the AID of the AMS of the remote platform and make it
 					// accessible to the tests as a group argument
@@ -79,7 +79,9 @@ public class InterPlatformCommunicationTesterAgent extends TesterAgent {
 					
 					// Start a local container with the specified MTP
 					String url = (String) getArgument(MTP_URL_KEY);
-					jc2 = TestUtility.launchJadeInstance("Container-mtp", addClasspath, new String("-container -host "+TestUtility.getContainerHostName(a, null)+" -port "+Test.DEFAULT_PORT+" -mtp "+mtp+"("+url+") "+additionalArguments), null);
+					jc2 = TestUtility.launchJadeInstance("Container-mtp", addClasspath,
+							"-container -host "+TestUtility.getContainerHostName(a, null)+" -port "+Test.DEFAULT_PORT+
+							" -mtp "+mtp+"("+url+") "+additionalArguments, null);
 				}
 				catch (TestException te) {
 					throw te;

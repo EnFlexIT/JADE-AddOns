@@ -83,11 +83,11 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 			String port = System.getProperty("tsdaemon.port", String.valueOf(DEFAULT_PORT));
 			String hostName = InetAddress.getLocalHost().getHostName();      
 			Registry theRegistry = getRmiRegistry(hostName, Integer.parseInt(port));
-			String registryID = new String("rmi://"+hostName+":"+port);
+			String registryID = "rmi://"+hostName+":"+port;
 
 			// Bind to the registry
 			additionalArgs = sb.toString();
-			Naming.bind(new String(registryID+"//"+name), this);
+			Naming.bind(registryID+"//"+name, this);
 			printWelcomeMessage(port, name);
 		}
 		catch(Exception e) {

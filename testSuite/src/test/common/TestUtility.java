@@ -377,7 +377,7 @@ public class TestUtility {
 				}
 				classpathOption = "-cp "+classpath;
 			}
-			String commandLine = new String("java "+classpathOption+" "+jvmArgs+" "+mainClass+" "+jadeArgs);
+			String commandLine = "java "+classpathOption+" "+jvmArgs+" "+mainClass+" "+jadeArgs;
 			if ("true".equalsIgnoreCase(System.getProperty("DEBUG"))) {
 				System.out.println("Manual launch!!!!!!!!!!!!!!");
 				jc = new ManualJadeController(instanceName, commandLine, protoNames);
@@ -390,7 +390,7 @@ public class TestUtility {
 	}
 	
 	public static RemoteManager createRemoteManager(String hostName, int port, String managerName) throws TestException {
-		String remoteManagerRMI = new String("rmi://"+hostName+":"+port+"//"+managerName);
+		String remoteManagerRMI = "rmi://"+hostName+":"+port+"//"+managerName;
 		try {
 			return (RemoteManager) Naming.lookup(remoteManagerRMI);
 		}

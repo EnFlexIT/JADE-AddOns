@@ -369,10 +369,8 @@ public class TestSuiteAgent extends GuiAgent {
 	private void loadTester(FunctionalityDescriptor fd) {
 		Logger.getLogger().log("Loading functionality: "+fd);
 		try {
-			TestUtility.createAgent(this, TESTER_NAME, fd.getTesterClassName(), new String[] {
-				new String("true"),
-				getLocalName()
-			}, getAMS(), null);
+			TestUtility.createAgent(this, TESTER_NAME, fd.getTesterClassName(),
+					new String[] {"true", getLocalName()}, getAMS(), null);
 			if (myGui.getStatus() != TestSuiteGui.RUNALL_STATE) {
 				myGui.setStatus(TestSuiteGui.READY_STATE);
 			}
@@ -749,7 +747,8 @@ public class TestSuiteAgent extends GuiAgent {
 	 */
 	private static void waitABit() {
 		try {
-			Thread.sleep(1000);
+			// jjj pac
+			Thread.sleep(100);
 		} 
 		catch (Exception e) {
 			Logger.getLogger().logStackTrace(e);

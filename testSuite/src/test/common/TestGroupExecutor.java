@@ -190,7 +190,9 @@ public class TestGroupExecutor extends FSMBehaviour {
 				int result = Test.NOT_AVAILABLE;
 				try {
 					Integer i = (Integer) getDataStore().get(TEST_RESULT_KEY);
-	  			result = i.intValue();
+					if (i != null) {
+						result = i.intValue();
+					}
 				}
 				catch (Exception e) {
 					System.out.println("TestGroupExecutor exception");
@@ -233,7 +235,7 @@ public class TestGroupExecutor extends FSMBehaviour {
 	  				try {
 	  					Thread.sleep(1000);
 	  				}
-	  				catch (Exception e ) {}
+	  				catch (Exception e ) { e.printStackTrace(); }
 	  			}
 				}
 			}
