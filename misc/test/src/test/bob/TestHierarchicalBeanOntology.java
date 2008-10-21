@@ -1,10 +1,7 @@
 package test.bob;
 
-import jade.content.onto.BasicOntology;
-import jade.content.onto.BeanIntrospector;
-import jade.content.onto.BeanOntologyBuilder;
-import jade.content.onto.BeanOntologyBuilderException;
-import jade.content.onto.Ontology;
+import jade.content.onto.BeanOntology;
+import jade.content.onto.BeanOntologyException;
 
 import java.util.List;
 
@@ -14,48 +11,47 @@ import content.onto.bob.beans.ClassTwo;
 import content.onto.bob.beans.ClassZero;
 import content.onto.bob.beans.ExtendedAction;
 import content.onto.bob.beans.SimpleAction;
+import content.onto.bob.beans.SimplePredicate;
 import content.onto.bob.beans.TestBean;
 import content.onto.bob.beans.TestBeanEx;
 import content.onto.bob.beans.TestBeanOther;
 import content.onto.bob.beans.TestSubBean;
 import content.onto.bob.beans.VeryComplexBean;
 
-public class TestHierarchicalBeanOntology extends Ontology {
+public class TestHierarchicalBeanOntology extends BeanOntology {
 	private static final long serialVersionUID = 1L;
 
 	private static final String ONTOLOGY_NAME = "Hierarchical Test Ontology";
 	private static TestHierarchicalBeanOntology INSTANCE;
 
-	public final static TestHierarchicalBeanOntology getInstance() throws BeanOntologyBuilderException {
+	public final static TestHierarchicalBeanOntology getInstance() throws BeanOntologyException {
 		if (INSTANCE == null) {
 			INSTANCE = new TestHierarchicalBeanOntology();
 		}
 		return INSTANCE;
 	}
 
-	private TestHierarchicalBeanOntology() throws BeanOntologyBuilderException {
-        super(ONTOLOGY_NAME, new Ontology[]{BasicOntology.getInstance()}, new BeanIntrospector());
+	private TestHierarchicalBeanOntology() throws BeanOntologyException {
+        super(ONTOLOGY_NAME);
 
-		BeanOntologyBuilder bob = new BeanOntologyBuilder(this);
+		add(ClassZero.class, true);
+		add(ClassOne.class, true);
+		add(ClassTwo.class, true);
 
-		bob.addSchemas(ClassZero.class, true);
-		bob.addSchemas(ClassOne.class, true);
-		bob.addSchemas(ClassTwo.class, true);
+		add(TestSubBean.class, true);
 
-		bob.addSchemas(TestSubBean.class, true);
+		add(SimpleAction.class, true);
+		add(ExtendedAction.class, true);
 
-		bob.addSchemas(SimpleAction.class, true);
-		bob.addSchemas(ExtendedAction.class, true);
+		add(ClassThree.class, true);
 
-		bob.addSchemas(ClassThree.class, true);
+		add(TestBean.class, true);
+		add(TestBeanEx.class, true);
+		add(TestBeanOther.class, true);
 
-		bob.addSchemas(TestBean.class, true);
-		bob.addSchemas(TestBeanEx.class, true);
-		bob.addSchemas(TestBeanOther.class, true);
+		add(VeryComplexBean.class, true);
 
-		bob.addSchemas(VeryComplexBean.class, true);
-
-	
+		add(SimplePredicate.class, true);
 	}
 
 	@Override

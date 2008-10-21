@@ -1,5 +1,8 @@
 package jade.content.onto.bob;
 
+//#J2ME_EXCLUDE_FILE
+//#APIDOC_EXCLUDE_FILE
+
 import jade.content.schema.ObjectSchema;
 
 import java.lang.annotation.Retention;

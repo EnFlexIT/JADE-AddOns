@@ -25,7 +25,7 @@ package test.bob;
 
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
-import jade.content.onto.BeanOntologyBuilderException;
+import jade.content.onto.BeanOntologyException;
 import jade.content.onto.Ontology;
 import test.common.TestGroup;
 import test.common.TesterAgent;
@@ -47,7 +47,7 @@ public class BeanOntologyBuilderTesterAgent extends TesterAgent {
 		try {
 			flatOntology = TestFlatBeanOntology.getInstance();
 			hierarchicalOntology = TestHierarchicalBeanOntology.getInstance();
-		} catch (BeanOntologyBuilderException e) {
+		} catch (BeanOntologyException e) {
 			e.printStackTrace();
 			doDelete();
 		}

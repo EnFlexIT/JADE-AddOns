@@ -1,5 +1,8 @@
 package jade.content.onto;
 
+//#J2ME_EXCLUDE_FILE
+//#APIDOC_EXCLUDE_FILE
+
 import jade.content.Concept;
 import jade.content.abs.AbsAggregate;
 import jade.content.abs.AbsHelper;
@@ -12,7 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class BeanIntrospector implements Introspector {
+class BeanIntrospector implements Introspector {
 	private static final long serialVersionUID = 1L;
 
 	private static final int ACC_ABSTRACT = 0x0400;
@@ -20,11 +23,11 @@ public class BeanIntrospector implements Introspector {
 	
 	private Map<SlotKey, SlotAccessData> accessors;
 
-	public BeanIntrospector() {
+	BeanIntrospector() {
 		accessors = new HashMap<SlotKey, SlotAccessData>();
 	}
 
-	public void addAccessors(Map<SlotKey, SlotAccessData> accessors) {
+	void addAccessors(Map<SlotKey, SlotAccessData> accessors) {
 		this.accessors.putAll(accessors);
 	}
 
@@ -40,7 +43,7 @@ public class BeanIntrospector implements Introspector {
 		return result;
 	} 
 
-	protected void invokeSetterMethod(Method method, Object obj, Object value) throws OntologyException {
+	private void invokeSetterMethod(Method method, Object obj, Object value) throws OntologyException {
 		try {
 			Object[] params = new Object[] {value};
 			try {
@@ -119,7 +122,7 @@ public class BeanIntrospector implements Introspector {
 		return result;
 	}
 
-	protected Object internaliseAggregateSlot(AbsAggregate absAggregate, Ontology referenceOnto, Class clazz) throws OntologyException {
+	private Object internaliseAggregateSlot(AbsAggregate absAggregate, Ontology referenceOnto, Class clazz) throws OntologyException {
 		Object result;
 		jade.util.leap.Iterator iterator = absAggregate.iterator();
 		try {

@@ -41,12 +41,12 @@
   </target>
 
   <target name="compile" depends="init">
-    <javac srcdir="${src}" 
-           destdir="${build}" 
-           nowarn="off" 
-           optimize="${javac.optimize}" 
-           debug="${javac.debug}" 
-           debuglevel="lines,vars,source" 
+    <javac srcdir="${src}"
+           destdir="${build}"
+           nowarn="off"
+           optimize="${javac.optimize}"
+           debug="${javac.debug}"
+           debuglevel="lines,vars,source"
            deprecation="on">
       <classpath>
         <path refid="jade-classes"/>
@@ -90,10 +90,10 @@
       </fileset>
     </delete>
   </target>
- 
+
   <target name="test" description="test the classes">
     <java classname="jade.Boot" >
-       <arg value="-gui -nomtp subDF:jade.domain.df x:jade.misc.DFFederatorAgent(resources/DFFederatorAgent.properties)"/> 
+       <arg value="-gui -nomtp subDF:jade.domain.df x:jade.misc.DFFederatorAgent(resources/DFFederatorAgent.properties)"/>
        <classpath>
            <pathelement path="${classpath}"/>
        </classpath>
