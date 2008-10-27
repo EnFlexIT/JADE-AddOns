@@ -25,7 +25,7 @@
 package examples.content.eco.elements;
 
 import jade.content.Concept;
-import jade.content.onto.bob.Slot;
+import jade.content.onto.annotations.Slot;
 
 import java.util.Date;
 

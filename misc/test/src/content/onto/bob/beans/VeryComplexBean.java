@@ -2,10 +2,10 @@ package content.onto.bob.beans;
 
 import jade.content.Concept;
 import jade.content.onto.BOUtils;
-import jade.content.onto.bob.AggregateSlot;
-import jade.content.onto.bob.Element;
-import jade.content.onto.bob.Slot;
-import jade.content.onto.bob.SuppressSlot;
+import jade.content.onto.annotations.AggregateSlot;
+import jade.content.onto.annotations.Element;
+import jade.content.onto.annotations.Slot;
+import jade.content.onto.annotations.SuppressSlot;
 
 import java.util.Iterator;
 import java.util.Random;

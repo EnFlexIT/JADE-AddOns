@@ -1,7 +1,7 @@
 package content.onto.bob.beans;
 
 import jade.content.Concept;
-import jade.content.onto.bob.Slot;
+import jade.content.onto.annotations.Slot;
 
 
 public class TestBean implements Concept {

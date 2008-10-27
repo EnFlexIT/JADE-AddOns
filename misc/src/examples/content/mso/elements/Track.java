@@ -25,7 +25,7 @@
 package examples.content.mso.elements;
 
 import jade.content.*;
-import jade.content.onto.bob.Slot;
+import jade.content.onto.annotations.Slot;
 
 public class Track implements Concept {
 	private static final long serialVersionUID = 1L;

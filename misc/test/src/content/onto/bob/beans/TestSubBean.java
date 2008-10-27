@@ -2,7 +2,7 @@ package content.onto.bob.beans;
 
 import jade.content.Concept;
 import jade.content.onto.BOUtils;
-import jade.content.onto.bob.AggregateSlot;
+import jade.content.onto.annotations.AggregateSlot;
 import jade.util.leap.List;
 
 public class TestSubBean implements Concept {

@@ -1,7 +1,7 @@
 package content.onto.bob.beans;
 
 import jade.content.AgentAction;
-import jade.content.onto.bob.Result;
+import jade.content.onto.annotations.Result;
 
 @Result(type=ClassZero.class)
 public class SimpleAction implements AgentAction {

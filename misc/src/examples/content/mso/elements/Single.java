@@ -24,7 +24,7 @@
  */
 package examples.content.mso.elements;
 
-import jade.content.onto.bob.AggregateSlot;
+import jade.content.onto.annotations.AggregateSlot;
 import jade.util.leap.List;
 
 public class Single extends CD {

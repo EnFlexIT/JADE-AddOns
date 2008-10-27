@@ -1,6 +1,6 @@
 package content.onto.bob.beans;
 
-import jade.content.onto.bob.AggregateResult;
+import jade.content.onto.annotations.AggregateResult;
 
 @AggregateResult(type=ClassOne.class,cardMin=1,cardMax=2)
 public class ExtendedAction extends SimpleAction {
