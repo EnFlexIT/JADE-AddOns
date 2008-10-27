@@ -107,7 +107,7 @@ public class CDTrader extends Agent {
 		tracks.add(t);
 		t = new Track();
 		t.setName("King of pain");
-		t.setDuration(new Integer(240));
+		t.setDuration(Integer.valueOf(240));
 		tracks.add(t);
 
 		myCd.setTracks(tracks);

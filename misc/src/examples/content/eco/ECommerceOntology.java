@@ -60,6 +60,6 @@ public class ECommerceOntology extends BeanOntology {
 
 		String pkgname = Costs.class.getName();
 		pkgname = pkgname.substring(0, pkgname.lastIndexOf("."));
-		add(pkgname, true);
+		add(pkgname);
 	}
 }

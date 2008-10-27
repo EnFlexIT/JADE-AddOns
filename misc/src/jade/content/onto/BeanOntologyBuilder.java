@@ -1,3 +1,26 @@
+/*****************************************************************
+JADE - Java Agent DEvelopment Framework is a framework to develop 
+multi-agent systems in compliance with the FIPA specifications.
+Copyright (C) 2000 CSELT S.p.A. 
+
+GNU Lesser General Public License
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation, 
+version 2.1 of the License. 
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA  02111-1307, USA.
+*****************************************************************/
+
 package jade.content.onto;
 
 //#J2ME_EXCLUDE_FILE
@@ -32,7 +55,7 @@ import java.util.Map.Entry;
 
 class BeanOntologyBuilder {
 
-	private Logger logger = Logger.getMyLogger(this.getClass().getName());
+	private final static Logger logger = Logger.getMyLogger(BeanOntologyBuilder.class.getName());
 
 	private static final String GETTER_PREFIX = "get";
 	private static final String SETTER_PREFIX = "set";
@@ -48,7 +71,7 @@ class BeanOntologyBuilder {
 		introspector = (BeanIntrospector)ontoIntrospector;
 	}
 
-	private boolean isGetter(Method method) {
+	private static boolean isGetter(Method method) {
 		/*
 		 * a getter method
 		 *   - takes no parameters
@@ -81,7 +104,7 @@ class BeanOntologyBuilder {
 		return true;
 	}
 
-	private boolean isSetter(Method method) {
+	private static boolean isSetter(Method method) {
 		/*
 		 * a setter method takes one parameter, does not have a return value and its name starts with "set" and its 4th char is uppercase
 		 */
@@ -128,7 +151,7 @@ class BeanOntologyBuilder {
 		return sb.toString();
 	}
 
-	private boolean accessorsAreConsistent(Method getter, Method setter) {
+	private static boolean accessorsAreConsistent(Method getter, Method setter) {
 		/*
 		 *  we have for sure a getter and a setter, so we don't need
 		 *  to check the number of parameters and the existence of the return value
@@ -148,7 +171,7 @@ class BeanOntologyBuilder {
 		return result;
 	}
 
-	private Map<SlotKey, SlotAccessData> buildAccessorsMap(Class clazz, Method[] methodsArray) {
+	private static Map<SlotKey, SlotAccessData> buildAccessorsMap(Class clazz, Method[] methodsArray) {
 		Map<SlotKey, SlotAccessData> result = new HashMap<SlotKey, SlotAccessData>();
 		List<Method> getters = new ArrayList<Method>();
 		Map<String, Method> setters = new HashMap<String, Method>();
@@ -489,26 +512,27 @@ class BeanOntologyBuilder {
 		return schema;
 	}
 
-	private void doAddSchema(Class clazz, boolean buildHierarchy) throws BeanOntologyException {
-		if (!(Concept.class.isAssignableFrom(clazz) || Predicate.class.isAssignableFrom(clazz))) {
-			throw new BeanOntologyException("class "+clazz.getName()+" must implement "+Concept.class);
-		}
-		if (buildHierarchy) {
-			doAddHierarchicalSchema(clazz);
+	private void doAddSchema(Class clazz, boolean buildHierarchy, boolean generateException) throws BeanOntologyException {
+		boolean classIsValid = Concept.class.isAssignableFrom(clazz) || Predicate.class.isAssignableFrom(clazz);
+		if (classIsValid) {
+			if (buildHierarchy) {
+				doAddHierarchicalSchema(clazz);
+			} else {
+				doAddFlatSchema(clazz);
+			}
 		} else {
-			doAddFlatSchema(clazz);
+			if (generateException) {
+				throw new BeanOntologyException("class "+clazz.getName()+" must implement "+Concept.class);
+			}
 		}
 	}
 
-	/*
-	 * public interface
-	 */
 	void addSchema(Class clazz, boolean buildHierarchy) throws BeanOntologyException {
-		doAddSchema(clazz, buildHierarchy);
+		doAddSchema(clazz, buildHierarchy, true);
 	}
 
 	void addSchema(Class clazz) throws BeanOntologyException {
-		doAddSchema(clazz, false);
+		doAddSchema(clazz, false, true);
 	}
 
 	void addSchemas(String pkgname, boolean buildHierarchy) throws BeanOntologyException {
@@ -518,14 +542,14 @@ class BeanOntologyBuilder {
 				throw new BeanOntologyException("no suitable classes found");
 			}
 			for (Class clazz: classesForPackage) {
-				doAddSchema(clazz, buildHierarchy);
+				doAddSchema(clazz, buildHierarchy, false);
 			}
 		} catch (ClassNotFoundException cnfe) {
-			throw new BeanOntologyException(cnfe);
+			throw new BeanOntologyException("Class not found", cnfe);
 		}
 	}
 
-	public void addSchemas(String pkgname) throws BeanOntologyException {
+	void addSchemas(String pkgname) throws BeanOntologyException {
 		addSchemas(pkgname, false);
 	}
 }
