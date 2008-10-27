@@ -1,6 +1,7 @@
 package content.onto.bob.beans;
 
 import jade.content.Concept;
+import jade.content.onto.BOUtils;
 import jade.content.onto.bob.AggregateSlot;
 import jade.content.onto.bob.Element;
 import jade.content.onto.bob.Slot;
@@ -72,9 +73,9 @@ public class VeryComplexBean implements Concept {
 		if (!result) {
 			return false;
 		}
-		result = Utils.leapListsAreEqual(aJadeList, vcb.aJadeList);
+		result = BOUtils.leapListsAreEqual(aJadeList, vcb.aJadeList);
 		if (result) {
-			result = Utils.leapSetsAreEqual(aJadeSet, aJadeSet);
+			result = BOUtils.leapSetsAreEqual(aJadeSet, aJadeSet);
 		}
 		return result;
 	}

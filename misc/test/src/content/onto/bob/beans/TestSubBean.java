@@ -1,6 +1,7 @@
 package content.onto.bob.beans;
 
 import jade.content.Concept;
+import jade.content.onto.BOUtils;
 import jade.content.onto.bob.AggregateSlot;
 import jade.util.leap.List;
 
@@ -53,7 +54,7 @@ public class TestSubBean implements Concept {
 		}
 
 		if (result) {
-			result = Utils.leapListsAreEqual(listField, tsb.getListField());
+			result = BOUtils.leapListsAreEqual(listField, tsb.getListField());
 		}
 		return result;
 	}
