@@ -21,7 +21,7 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package jade.content.onto.bob;
+package jade.content.onto.annotations;
 
 //#J2ME_EXCLUDE_FILE
 
@@ -29,15 +29,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Allows to specify in the ontological schema the <code>mandatory</code> and <code>name</code> attributes of the slot.<br>
+ * Indicates a bean property not to be included in its ontological schema.<br>
  * The annotation is to be applied to the getter method.
  *
  * @author Paolo Cancedda
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Slot {
-	String USE_METHOD_NAME = "__USE_METHOD_NAME__";
+public @interface SuppressSlot {
 
-	String name() default USE_METHOD_NAME;
-	boolean mandatory() default false;
 }

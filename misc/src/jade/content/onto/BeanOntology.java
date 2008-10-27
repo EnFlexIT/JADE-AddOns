@@ -90,12 +90,12 @@ package jade.content.onto;
  * @author Paolo Cancedda
  * @see jade.content.Concept;
  * @see jade.content.Predicate;
- * @see jade.content.onto.bob.Element
- * @see jade.content.onto.bob.Slot
- * @see jade.content.onto.bob.SuppressSlot
- * @see jade.content.onto.bob.AggregateSlot
- * @see jade.content.onto.bob.Result
- * @see jade.content.onto.bob.AggregateResult
+ * @see jade.content.onto.annotations.Element
+ * @see jade.content.onto.annotations.Slot
+ * @see jade.content.onto.annotations.SuppressSlot
+ * @see jade.content.onto.annotations.AggregateSlot
+ * @see jade.content.onto.annotations.Result
+ * @see jade.content.onto.annotations.AggregateResult
  * @see jade.content.onto.Ontology
  * @see jade.content.onto.BasicOntology
  */

@@ -21,26 +21,25 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package jade.content.onto.bob;
+package jade.content.onto.annotations;
 
 //#J2ME_EXCLUDE_FILE
-
-import jade.content.schema.ObjectSchema;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Indicates the aggregate result of an action, allowing at the same time
- * to specify its <code>cardMin</code> (minimum cardinality), <code>cardMax</code>
- * (maximum cardinality) and <code>type</code> (class of the contained elements).<br>
- * The annotation is to be applied to the getter method.
+ * Allows to specify the ontological name of the <code>Concept</code> or <code>Predicate</code>,
+ * to be used in place of the default (the rightmost part of the fully qualified class name).<br>
+ * The annotation is to be applied to the class.
  *
- * @author Paolo Cancedda 
+ * @see jade.content.Concept
+ * @see jade.content.Predicate
+ * @author Paolo Cancedda
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface AggregateResult {
-	Class type();
-	int cardMin() default 0;
-	int cardMax() default ObjectSchema.UNLIMITED;
+public @interface Element {
+	String USE_CLASS_SIMPLE_NAME = "__USE_CLASS_SIMPLE_NAME__";
+
+	String name() default USE_CLASS_SIMPLE_NAME;
 }

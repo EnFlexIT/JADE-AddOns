@@ -21,7 +21,7 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package jade.content.onto.bob;
+package jade.content.onto.annotations;
 
 //#J2ME_EXCLUDE_FILE
 

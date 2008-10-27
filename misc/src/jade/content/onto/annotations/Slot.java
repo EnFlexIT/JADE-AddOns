@@ -21,7 +21,7 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package jade.content.onto.bob;
+package jade.content.onto.annotations;
 
 //#J2ME_EXCLUDE_FILE
 
@@ -29,17 +29,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Allows to specify the ontological name of the <code>Concept</code> or <code>Predicate</code>,
- * to be used in place of the default (the rightmost part of the fully qualified class name).<br>
- * The annotation is to be applied to the class.
+ * Allows to specify in the ontological schema the <code>mandatory</code> and <code>name</code> attributes of the slot.<br>
+ * The annotation is to be applied to the getter method.
  *
- * @see jade.content.Concept
- * @see jade.content.Predicate
  * @author Paolo Cancedda
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Element {
-	String USE_CLASS_SIMPLE_NAME = "__USE_CLASS_SIMPLE_NAME__";
+public @interface Slot {
+	String USE_METHOD_NAME = "__USE_METHOD_NAME__";
 
-	String name() default USE_CLASS_SIMPLE_NAME;
+	String name() default USE_METHOD_NAME;
+	boolean mandatory() default false;
 }

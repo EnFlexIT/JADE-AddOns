@@ -21,20 +21,26 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
 
-package jade.content.onto.bob;
+package jade.content.onto.annotations;
 
 //#J2ME_EXCLUDE_FILE
+
+import jade.content.schema.ObjectSchema;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Indicates a bean property not to be included in its ontological schema.<br>
+ * Allows to specify in the ontological schema the <code>cardMin</code>
+ * (minimum cardinality), <code>cardMax</code> (maximum cardinality) and
+ * <code>type</code> (class of the contained elements) attributes of the aggregate slot.<br>
  * The annotation is to be applied to the getter method.
  *
  * @author Paolo Cancedda
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SuppressSlot {
-
+public @interface AggregateSlot {
+	Class type() default Object.class;
+	int cardMin() default 0;
+	int cardMax() default ObjectSchema.UNLIMITED;
 }
