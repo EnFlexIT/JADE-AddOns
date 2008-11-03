@@ -52,6 +52,8 @@ are:
 - the Java Development Kit version 1.5 (1.4 is enough if the javadoc is not
 compiled),
 - the JADE framework version 3.3 or higher
+Additionally, the JCOMMON and the JFREECHART libraries are needed to build for 
+j2se enviroment (JFREE libraries are available from  http://www.jfree.org)
 Additionally, the ANT program is needed to build (compile the source code and
 generate the javadoc) the Semantics Add-On framework from the build.xml file
 (ANT is available from http://jakarta.apache.org).
@@ -66,6 +68,7 @@ downloaded from the JADE web site
 First, uncompress the archive file in the parent directory of the JADE root
 directory.
 Then, go to the 'jade/add-ons/semantics' subdirectory.
+Modify buildJSA.properties to set the 'jfree-lib' property (only for j2se enviroment)
 The available commands to compile the JSA can be seen by executing 'ant help'.
 For example, execute the 'ant j2se lib' command to compile in a standard Java
 environment.

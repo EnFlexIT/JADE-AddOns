@@ -198,6 +198,7 @@ It is created according a JADE's build.xml.
 	      	     deprecation="on">
 	      <classpath>
 	        <fileset dir="${libJADEDir}" includes="*.jar"/>
+	        <fileset dir="${jfree-lib}" includes="*.jar"/>
 	        <!-- <fileset dir="${lib}" includes="**/*.jar"/> -->
 	      </classpath>
 	    </javac>
