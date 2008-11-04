@@ -10,7 +10,7 @@ It is created according a JADE's build.xml.
 	<description>JSA build file</description>
 	<property environment="env"/>
 	<property file="buildJSA.properties"/>
-	<property name="version" value="1.6"/>
+	<property name="version" value="1.7"/>
 	<property name="build.compiler" value="modern"/>
 	<property name="javac.optimize" value="on"/>
 	<property name="javac.debug" value="on"/>
