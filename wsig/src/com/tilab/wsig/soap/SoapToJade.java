@@ -193,7 +193,7 @@ public class SoapToJade extends DefaultHandler {
 	private Vector<ParameterInfo> getParametersByLevel(int level, boolean addIfNotExist) throws Exception {
 		
 		if (!addIfNotExist && parametersByLevel.size() <= level) {
-			throw new Exception("Parameters not present in store for level "+level);
+			throw new Exception("Parameters not present for level "+level);
 		}
 		
 		Vector<ParameterInfo> parameters = null;
@@ -216,7 +216,7 @@ public class SoapToJade extends DefaultHandler {
 		// Verify...
 		if (verifyName != null) {
 			if (!pi.getName().equals(verifyName)) {
-				throw new Exception("Parameter "+verifyName+" doesn't match with parameter in store ("+pi.getName()+")");
+				throw new Exception("Parameter "+verifyName+" doesn't match with expected parameter ("+pi.getName()+")");
 			}
 		}
 		return pi;
@@ -374,7 +374,7 @@ public class SoapToJade extends DefaultHandler {
 			}
 		} catch(Exception e) {
 			level = 0;
-			throw new RuntimeException("Error parsing element "+parameterName+" - "+e.getMessage(), e);
+			throw new RuntimeException("Error parsing element "+parameterName+". "+e.getMessage(), e);
 		}
 
 		--level;

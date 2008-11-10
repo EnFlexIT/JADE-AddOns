@@ -38,89 +38,67 @@ import jade.proto.AchieveREInitiator;
 import java.util.Date;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
-
 public class WSIGBehaviour extends AchieveREInitiator {
 
 	private static final long serialVersionUID = 6463142354593931841L;
-
-	private static Logger log = Logger.getLogger(WSIGBehaviour.class.getName());
 	
 	public static final int UNKNOWN_STATUS  = 0;
-	public static final int EXECUTED_STATUS = 1;
+	public static final int SUCCESS_STATUS  = 1;
 	public static final int FAILURE_STATUS  = 2;
-	public static final int RUNNING_STATUS  = 3;
-	public static final String TIMEOUT  = "TIMEOUT";
 	
-	private int status = UNKNOWN_STATUS;
-	private AbsTerm result = null;
-	private String error = null;
-
+	private int status;
+	private AbsTerm result;
+	private String error;
 	private SLCodec codec = new SLCodec();
-	private Ontology onto = null;
-	private AgentAction agentAction = null;
-	private AID agentReceiver = null;
+	private Ontology onto;
+	private AgentAction agentAction;
+	private AID agentExecutor;
 	private int timeout = 0;
 
 	
-	public WSIGBehaviour(AID agentReceiver, AgentAction agentAction,  Ontology onto, int timeout) {
+	public WSIGBehaviour(AID agentExecutor, AgentAction agentAction,  Ontology onto, int timeout) {
 		super(null, null);
 		
+		this.status = UNKNOWN_STATUS;
 		this.onto = onto;
 		this.agentAction = agentAction;
 		this.timeout = timeout;
-		this.agentReceiver = agentReceiver;
+		this.agentExecutor = agentExecutor;
 	}
 
 	public void onStart() {
 		super.onStart();
 		
-		log.debug("WSIGBehaviour.onStart start");
-		
 		myAgent.getContentManager().registerOntology(onto);
 		myAgent.getContentManager().registerLanguage(codec);
 	}
 
-	protected ACLMessage prepareRequest(ACLMessage request) {
-		
-		log.debug("WSIGBehaviour.prepareRequest");
-		
-		request = new ACLMessage(ACLMessage.REQUEST);
-		request.setLanguage(codec.getName());
-		request.setOntology(onto.getName());
-		request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-		request.setReplyByDate(new Date(System.currentTimeMillis() + timeout));
+	protected Vector prepareRequests(ACLMessage msg) {
+		Vector v = new Vector(1);
 		try {
-			request.addReceiver(agentReceiver);
-			myAgent.getContentManager().fillContent(request, new Action(agentReceiver, agentAction));
+			ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+			request.setLanguage(codec.getName());
+			request.setOntology(onto.getName());
+			request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+			request.setReplyByDate(new Date(System.currentTimeMillis() + timeout));
+			request.addReceiver(agentExecutor);
+			myAgent.getContentManager().fillContent(request, new Action(agentExecutor, agentAction));
+			
+			v.addElement(request);
 			
 		} catch (Exception e) {
 			status = FAILURE_STATUS;
-			request = null;
-			error = "Action encoding error: "+e.getMessage();
-			log.error(e);
-		}
-		return request;
-	}
-	
-	protected Vector prepareRequests(ACLMessage request) {
-		Vector v = new Vector(1);
-		ACLMessage actualRequest = prepareRequest(request);
-		if (actualRequest != null) {
-			v.addElement(actualRequest);
+			error = e.getMessage();
 		}
 		return v;
 	}
 	
 	protected void handleInform(ACLMessage message)	{
-		
-		log.debug("WSIGBehaviour.handleInform");
-		
-		status = EXECUTED_STATUS;
 		try {
+			status = SUCCESS_STATUS;
+
 			AbsContentElement content = myAgent.getContentManager().extractAbsContent(message);
 			String resultType = content.getTypeName();
-			
 			if (BasicOntology.RESULT.equals(resultType)) {
 				result = ((AbsTerm)content.getAbsObject(BasicOntology.RESULT_VALUE));
 				
@@ -132,26 +110,33 @@ public class WSIGBehaviour extends AchieveREInitiator {
 			}
 		} catch (Exception e) {
 			status = FAILURE_STATUS;
-			error = "Action result decoding error: "+e.getMessage();
+			error = "Extracting result error: "+e.getMessage();
 		}
 	}
 
-	public void handleError(ACLMessage msg)	{
-		
-		log.debug("WSIGBehaviour.handleError");
-		
+	protected void handleFailure(ACLMessage failure)	{
 		status = FAILURE_STATUS;
-		error = msg.getContent();
+		
+		// Check for AMS response
+		if (failure.getSender().equals(myAgent.getAMS())) {
+			// Executor agent unreachable
+			error = "Agent "+agentExecutor.getLocalName()+" UNREACHABLE";
+		} else {
+			// Applicative failure
+			error = failure.getContent();
+		}
 	}
 
-	public void handleTimeout()	{
-		
-		log.debug("WSIGBehaviour.handleTimeout");
-		
+	protected void handleRefuse(ACLMessage refuse) {
 		status = FAILURE_STATUS;
-		error = TIMEOUT;
+		error = "Agent "+refuse.getSender().getLocalName()+" REFUSE request";
 	}
 
+	protected void handleNotUnderstood(ACLMessage notUnderstood) {
+		status = FAILURE_STATUS;
+		error = "Agent "+notUnderstood.getSender().getLocalName()+" NOT_UNDERSTOOD request";
+	}
+	
 	public String getError() {
 		return error;
 	}

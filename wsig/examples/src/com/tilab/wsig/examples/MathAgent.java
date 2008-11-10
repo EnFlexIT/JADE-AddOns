@@ -23,15 +23,12 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.examples;
 
-import java.util.Date;
-
 import jade.content.AgentAction;
 import jade.content.ContentElement;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.content.onto.basic.Done;
 import jade.content.onto.basic.Result;
-import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -45,6 +42,8 @@ import jade.lang.acl.MessageTemplate;
 import jade.util.leap.ArrayList;
 import jade.util.leap.List;
 
+import java.util.Date;
+
 import org.apache.log4j.Logger;
 
 public class MathAgent extends Agent {
@@ -54,12 +53,11 @@ public class MathAgent extends Agent {
 	public static final String WSIG_PREFIX = "wsig-prefix";
 	
 	private Logger log = Logger.getLogger(MathAgent.class.getName());
-	public static AID myAID = null;
 	private SLCodec codec = new SLCodec();
 	private Date startDate;
 
 	protected void setup() {
-		log.info("A MathAgent is starting...");
+		log.info("MathAgent starting...");
 		log.info("Agent name: "+getLocalName());
 
 		// Get agent arguments
@@ -124,7 +122,7 @@ public class MathAgent extends Agent {
 			doDelete();
 		}
 
-		log.debug("A MathAgent is started.");
+		log.info("MathAgent started");
 		startDate = new Date();
 		
 		// Add math behaviour
@@ -138,6 +136,8 @@ public class MathAgent extends Agent {
 					try {
 						actExpr = (Action) myAgent.getContentManager().extractContent(msg);
 						AgentAction action = (AgentAction) actExpr.getAction();
+						
+						log.info("Execute action: "+action.getClass().getSimpleName());
 						if (action instanceof Sum) {
 							serveSumAction((Sum) action, actExpr, msg);
 						} else if (action instanceof Diff) {
@@ -160,20 +160,20 @@ public class MathAgent extends Agent {
 							serveConvertDateAction((ConvertDate) action, actExpr, msg);
 						} else if (action instanceof PrintTime) {
 							servePrintTimeAction((PrintTime) action, actExpr, msg);
+						} else if (action instanceof CompareNumbers) {
+							serveCompareNumbersAction((CompareNumbers) action, actExpr, msg);
 						}
 					} catch (Exception e) {
-						log.error("Exception: " + e.getMessage(), e);
+						log.error("Error serving action", e);
 					}
 				} else {
 					block();
 				}
 			}
-
 		});
 	}
 
 	private void serveAbsAction(Abs abs, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.serveAbsAction");
 		float real = abs.getComplex().getReal();
 		float immaginary = abs.getComplex().getImmaginary();
 		float result = Float.parseFloat(Double.toString(Math.sqrt(Math.pow(real, 2) + Math.pow(immaginary, 2))));
@@ -181,48 +181,38 @@ public class MathAgent extends Agent {
 	}
 
 	private void serveDiffAction(Diff diff, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.serveDiffAction");
 		float result = diff.getFirstElement() - diff.getSecondElement();
 		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
 
 	private void serveSumAction(Sum sum, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.serveSumAction");
 		float result = sum.getFirstElement() + sum.getSecondElement();
 		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
 
 	private void serveMultiplicationAction(Multiplication multiplication, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.serveMultiplicationAction");
 		double result = 1;
 		for (int i=0; i<multiplication.getNumbers().size(); i++){
 			 result *= ((Double)multiplication.getNumbers().get(i));
 		}
-
 		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
 
 	private void serveSumComplexAction(SumComplex sumComplex, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.serveSumComplexAction");
 		Complex result = new Complex();
 		result.setReal(sumComplex.getFirstComplexElement().getReal()+sumComplex.getSecondComplexElement().getReal());
 		result.setImmaginary(sumComplex.getFirstComplexElement().getImmaginary()+sumComplex.getSecondComplexElement().getImmaginary());
-		
 		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
 
 	private void serveGetComponentsAction(GetComponents getComponets, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.serveGetComponentsAction");
-		
 		List result = new ArrayList();
 		result.add(getComponets.getComplex().getReal());
 		result.add(getComponets.getComplex().getImmaginary());
-		
 		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
 
 	private void serveGetRandomAction(GetRandom rnd, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.serveGetRandomAction");
 		Complex result = new Complex();
 		result.setReal((float)Math.random() * 10);
 		result.setImmaginary((float)Math.random() * 10);
@@ -230,7 +220,6 @@ public class MathAgent extends Agent {
 	}
 
 	private void serveGetAgentInfoAction(GetAgentInfo getAgentInfo, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.serveGetAgentInfoAction");
 		AgentInfo result = new AgentInfo();
 		result.setAgentAid(getAID());
 		result.setStartDate(startDate);
@@ -238,21 +227,26 @@ public class MathAgent extends Agent {
 	}
 	
 	private void serveConvertDateAction(ConvertDate convertDate, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.serveConvertDateAction");
 		long result = convertDate.getDate().getTime();
 		sendNotification(actExpr, msg, ACLMessage.INFORM, Long.valueOf(result).toString());
 	}
 	
 	private void servePrintComplexAction(PrintComplex printComplex, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.servePrintComplexAction");
 		log.info("Complex number is "+printComplex.getComplex());
 		sendNotification(actExpr, msg, ACLMessage.INFORM, null);
 	}
 
 	private void servePrintTimeAction(PrintTime printTime, Action actExpr, ACLMessage msg) {
-		log.debug("MathAgent.servePrintTimeAction");
 		log.info("Time is "+(new Date()).toString());
 		sendNotification(actExpr, msg, ACLMessage.INFORM, null);
+	}
+
+	private void serveCompareNumbersAction(CompareNumbers compareNumbers, Action actExpr, ACLMessage msg) {
+		if (compareNumbers.getFirstElement() == compareNumbers.getSecondElement()) {
+			sendNotification(actExpr, msg, ACLMessage.INFORM, true);
+		} else {
+			sendNotification(actExpr, msg, ACLMessage.FAILURE, compareNumbers.getFirstElement()+" not equals to "+compareNumbers.getSecondElement());			
+		}
 	}
 	
 	private void sendNotification(Action actExpr, ACLMessage request, int performative, Object result) {
@@ -276,25 +270,26 @@ public class MathAgent extends Agent {
 				getContentManager().fillContent(reply, ce);
 			}
 			catch (Exception e) {
-				log.error("Agent " + getName() + ": Unable to send notification" + e);
-				e.printStackTrace();
+				log.error("Agent " + getName() + ": Unable to send notification", e);
 			}
 		} else {
 			reply.setPerformative(performative);
-
+			if (result instanceof String) {
+				reply.setContent((String)result);
+			}
 		}
 		reply.addUserDefinedParameter(ACLMessage.IGNORE_FAILURE, "true");
 		send(reply);
 	}
 
 	protected void takeDown() {
-		//deregister itself from the DF
+		// Deregister from the DF
 		try {
 			DFService.deregister(this);
 		} catch (Exception e) {
-			log.error(e);
+			log.error("Error in DF deregistration", e);
 		}
 
-		log.debug("A MathAgent is taken down now.");
+		log.info("MathAgent stopped");
 	}
 }

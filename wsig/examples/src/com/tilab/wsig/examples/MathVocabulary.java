@@ -55,4 +55,5 @@ public interface MathVocabulary {
 	public static final String PRINTTIME = "printTime";
 	public static final String GETAGENTINFO = "getAgentInfo";
 	public static final String CONVERTDATE = "convertDate";
+	public static final String COMPARENUMBERS = "compareNumbers";
 }

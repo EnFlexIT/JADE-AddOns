@@ -58,6 +58,8 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			add(new AgentActionSchema(GETAGENTINFO), GetAgentInfo.class);
 			add(new AgentActionSchema(CONVERTDATE), ConvertDate.class);
 			add(new AgentActionSchema(PRINTTIME), PrintTime.class);
+			add(new AgentActionSchema(COMPARENUMBERS), CompareNumbers.class);
+			
 			add(new ConceptSchema(COMPLEX), Complex.class);
 			add(new ConceptSchema(AGENTINFO), AgentInfo.class);
 
@@ -109,6 +111,11 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			as.add(DATE, (PrimitiveSchema) getSchema(BasicOntology.DATE));
 			as.setResult((PrimitiveSchema)getSchema(BasicOntology.STRING));
 
+			as = (AgentActionSchema) getSchema(COMPARENUMBERS);
+			as.add(FIRST_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
+			as.add(SECOND_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
+			as.setResult((PrimitiveSchema)getSchema(BasicOntology.BOOLEAN));
+			
 		} catch (OntologyException oe) {
 			oe.printStackTrace();
 		}

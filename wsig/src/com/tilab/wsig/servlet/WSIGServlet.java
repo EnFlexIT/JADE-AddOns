@@ -49,11 +49,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.wsdl.Definition;
 import javax.wsdl.WSDLException;
 import javax.wsdl.factory.WSDLFactory;
+import javax.xml.soap.MessageFactory;
 import javax.xml.soap.MimeHeaders;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPPart;
 
 import org.apache.axis.Message;
 import org.apache.axis.transport.http.HTTPConstants;
@@ -61,11 +65,13 @@ import org.apache.log4j.Logger;
 import org.apache.soap.rpc.SOAPContext;
 
 import com.tilab.wsig.WSIGConfiguration;
+import com.tilab.wsig.WSIGException;
 import com.tilab.wsig.agent.WSIGBehaviour;
 import com.tilab.wsig.soap.JadeToSoap;
 import com.tilab.wsig.soap.SoapToJade;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.store.WSIGStore;
+import com.tilab.wsig.wsdl.WSDLConstants;
 
 public class WSIGServlet extends HttpServlet {
 	
@@ -91,8 +97,8 @@ public class WSIGServlet extends HttpServlet {
 		try {
 			props.load(new FileInputStream(wsigPropertyPath));
 		} catch (IOException e) {
-			log.info("Error reading wsig configuration");
-			throw new ServletException(e);
+			log.error("Error reading wsig configuration");
+			throw new ServletException("Error reading wsig configuration", e);
 		}
 		
 		// Get properties
@@ -115,7 +121,6 @@ public class WSIGServlet extends HttpServlet {
 		log.info("Init Jade Gateway...");
 		Object [] wsigArguments = new Object[]{wsigPropertyPath, wsdlPath, wsigStore};
 		props.setProperty(jade.core.Profile.MAIN, "false");
-		
 		JadeGateway.init(gatewayClassName, wsigArguments, props);
 		log.info("Jade Gateway initialized");
 
@@ -126,16 +131,16 @@ public class WSIGServlet extends HttpServlet {
 	}
 
 	public void destroy() {
-
 		// Close WSIGAgent
 		shutdownWSIGAgent();
 
+		// Close servlet
 		super.destroy();
+		
 		log.info("WSIG Servlet destroied");
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
 		doPost(request, response);
 	}
 	
@@ -159,133 +164,137 @@ public class WSIGServlet extends HttpServlet {
 			// Elaborate WSDL request
 			elaborateWSDLRequest(httpRequest.getRequestURL().toString(), httpResponse);
 			return;
-			
 		}
 		
 		// SOAP message elaboration
-		log.info("WSIG SOAP request arrived, start elaboration...");
-
-		// Extract soap messge from http
-		Message soapRequest = null;
 		try {
-			soapRequest = extractSOAPMessage(httpRequest);
-			log.debug("SOAP request:");
-			log.debug(soapRequest.getSOAPPartAsString());
-		} catch(Exception e) {
-			log.error("Error extracting SOAP message from http request", e);
-			httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error extracting SOAP message from http request. "+e.getMessage());
-			return;
-		}
-		
-		// Get wsig service & operation name
-		String serviceName = null;
-		String operationName = null;
-		try {
-			SOAPBody body = soapRequest.getSOAPBody();
-			
-			serviceName = getServiceName(body);
-			log.info("Request service: "+serviceName);
-			
-			operationName = getOperationName(body);
-			log.info("Request operation: "+operationName);
-		} catch (SOAPException ex) {
-			log.error("Error extracting SOAP body message from request", ex);
-			httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error extracting SOAP body message from request. "+ex.getMessage());
-			return;
-		}
-		
-		// Get WSIGService 
-		WSIGService wsigService = wsigStore.getService(serviceName);
-		if (wsigService == null) {
-			log.error("Service "+serviceName+" not present in wsig");
-			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Service "+serviceName+" not present in wsig");
-			return;
-		}
-
-		// Convert soap to jade
-		AgentAction agentAction = null;
-		try {
-			SoapToJade soapToJade = new SoapToJade();
-			agentAction = (AgentAction)soapToJade.convert(soapRequest, wsigService, operationName);
-			log.info("Jade Action: "+agentAction.toString());
-		} catch (Exception e) {
-			log.error("Error in soap to jade conversion", e);
-			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in soap to jade conversion. "+e.getMessage());
-			return;
-		}
-
-		// Execute operation
-		AbsTerm operationAbsResult = null;
-		try {
-			operationAbsResult = executeOperation(agentAction, wsigService);
-			if (operationAbsResult != null) {
-				log.info("operationResult: "+operationAbsResult+", type "+operationAbsResult.getTypeName());
-			} else {
-				log.info("operation without result");
+			log.info("WSIG SOAP request arrived, start elaboration...");
+	
+			// Extract soap message from http
+			Message soapRequest = null;
+			try {
+				soapRequest = extractSOAPMessage(httpRequest);
+				log.debug("SOAP request:");
+				log.debug(soapRequest.getSOAPPartAsString());
+			} catch(Exception e) {
+				log.error("Error extracting SOAP message from http request", e);
+				throw new WSIGException(WSIGException.CLIENT, "Error extracting SOAP message from http request. "+e.getMessage());
 			}
-		} catch (Exception e) {
-			log.error("Error executing operation "+serviceName+"."+operationName);
-			int errorCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-			if (WSIGBehaviour.TIMEOUT.equals(e.getMessage())) {
-				errorCode = HttpServletResponse.SC_REQUEST_TIMEOUT;
+			
+			// Get wsig service and operation name
+			String serviceName;
+			String operationName;
+			try {
+				SOAPBody soapBody = soapRequest.getSOAPBody();
+	
+				serviceName = getServiceName(soapBody);
+				log.info("Request service: "+serviceName);
+				
+				operationName = getOperationName(soapBody);
+				log.info("Request operation: "+operationName);
+			} catch (SOAPException e) {
+				log.error("Error extracting SOAP body message from request", e);
+				throw new WSIGException(WSIGException.CLIENT, "Error extracting SOAP body message from request. "+e.getMessage());
 			}
-			httpResponse.sendError(errorCode, "Error executing operation "+serviceName+"."+operationName+", error: "+e.getMessage());
-			return;
-		}
-		
-		// Convert jade to soap
-		SOAPMessage soapResponse = null;
-		try {
-			JadeToSoap jadeToSoap = new JadeToSoap();
-			soapResponse = jadeToSoap.convert(operationAbsResult, wsigService, operationName);
 			
-			log.debug("SOAP response:");
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			soapResponse.writeTo(baos);
-			log.debug(baos.toString());
-
-		} catch(Exception e) {
-			log.error("Error in jade to soap conversion", e);
-			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error in jade to soap conversion");
-			return;
-		}
-		
-		// Fill http response
-		try {
-			fillSoapHttpResponse(soapResponse, httpResponse);
+			// Get WSIGService 
+			WSIGService wsigService = wsigStore.getService(serviceName);
+			if (wsigService == null) {
+				log.error("Service "+serviceName+" not present in wsig");
+				throw new WSIGException(WSIGException.SERVER, "Service "+serviceName+" not present in wsig");
+			}
+	
+			// Convert soap to jade
+			AgentAction agentAction = null;
+			try {
+				SoapToJade soapToJade = new SoapToJade();
+				agentAction = (AgentAction)soapToJade.convert(soapRequest, wsigService, operationName);
+				log.info("Jade Action: "+agentAction.toString());
+			} catch (Exception e) {
+				log.error("Error in soap to jade conversion", e);
+				throw new WSIGException(WSIGException.SERVER, e.getMessage());
+			}
+	
+			// Execute operation
+			AbsTerm operationAbsResult = null;
+			try {
+				operationAbsResult = executeOperation(agentAction, wsigService);
+				if (operationAbsResult != null) {
+					log.info("operationResult: "+operationAbsResult+", type "+operationAbsResult.getTypeName());
+				} else {
+					log.info("operation without result");
+				}
+			} catch (WSIGException e) {
+				log.error("Error executing operation "+operationName, e);
+				throw e;
+			}
 			
-		} catch(Exception e) {
-			log.error("Error filling http response", e);
-			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error filling http response");
-			return;
+			// Convert jade to soap
+			SOAPMessage soapResponse = null;
+			try {
+				JadeToSoap jadeToSoap = new JadeToSoap();
+				soapResponse = jadeToSoap.convert(operationAbsResult, wsigService, operationName);
+			} catch(Exception e) {
+				log.error("Error in jade to soap conversion", e);
+				throw new WSIGException(WSIGException.SERVER, e.getMessage());
+			}
+			
+			// Send http response
+			try {
+				sendHttpResponse(soapResponse, httpResponse);
+			} catch(Exception e) {
+				log.error("Error sending http response", e);
+				throw new WSIGException(WSIGException.SERVER, "Error sending http response. "+e.getMessage());
+			}
+			
+			log.info("WSIG SOAP response sended, stop elaboration.");
+			
+		} catch (WSIGException e) {
+			// Manage fault
+			try {
+				sendHttpErrorResponse(e, httpResponse);
+			} catch (SOAPException e1) {
+				log.error("Error sending http error response", e1);
+				httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			}
 		}
-		
-		log.info("WSIG SOAP response sended, stop elaboration.");
 	}
 
-	private AbsTerm executeOperation(AgentAction agentAction, WSIGService wsigService) throws Exception{
+	private AbsTerm executeOperation(AgentAction agentAction, WSIGService wsigService) throws WSIGException {
 		
-		AID agentReceiver = wsigService.getAid();
+		AbsTerm absResult;
+		AID agentExecutor = wsigService.getAid();
 		Ontology onto = wsigService.getOnto(); 
-		AbsTerm absResult = null;
-		
-		WSIGBehaviour wsigBh = new WSIGBehaviour(agentReceiver, agentAction, onto, executionTimeout);
+		WSIGBehaviour wsigBehaviour = new WSIGBehaviour(agentExecutor, agentAction, onto, executionTimeout);
 
-		log.debug("Execute action "+agentAction+" on "+agentReceiver.getLocalName());
+		// Execute operation
+		try {
+			log.debug("Execute action "+agentAction+" on agent "+agentExecutor.getLocalName());
+			JadeGateway.execute(wsigBehaviour, executionTimeout);
+		} catch (InterruptedException ie) {
+			// Timeout
+			log.error("Timeout executing action "+agentAction);
+			throw new WSIGException(WSIGException.SERVER, "TIMEOUT");
+		} catch (Exception e) {
+			// Unexpected error
+			log.error("Unexpected error executing action "+agentAction, e);
+			throw new WSIGException(WSIGException.SERVER, e.getMessage());
+		} 
 		
-		JadeGateway.execute(wsigBh, executionTimeout);
-		if (wsigBh.getStatus() == WSIGBehaviour.EXECUTED_STATUS) {
-			log.debug("Behaviour executed");
-			absResult = wsigBh.getAbsResult();
-			
+		// Check result
+		if (wsigBehaviour.getStatus() == WSIGBehaviour.SUCCESS_STATUS) {
+			log.debug("Action "+agentAction+" successfully executed");
+			absResult = wsigBehaviour.getAbsResult();
 		} else {
-			throw new Exception(wsigBh.getError());
+			// Agent error
+			log.error("Error executing action "+agentAction+": "+wsigBehaviour.getError());
+			throw new WSIGException(WSIGException.SERVER, wsigBehaviour.getError());
 		}
 		
 		return absResult;
 	}
 
-	private void elaborateWSIGAgentCommand(String wsigAgentCommand, HttpServletResponse httpResponse) throws ServletException, IOException {
+	private void elaborateWSIGAgentCommand(String wsigAgentCommand, HttpServletResponse httpResponse) throws IOException  {
 	
 		log.info("WSIG agent command arrived ("+wsigAgentCommand+")");
 
@@ -305,7 +314,7 @@ public class WSIGServlet extends HttpServlet {
 		httpResponse.sendRedirect(consoleUri);
 	}
 
-	private void elaborateWSDLRequest(String requestURL, HttpServletResponse httpResponse) throws ServletException, IOException {
+	private void elaborateWSDLRequest(String requestURL, HttpServletResponse httpResponse) throws IOException {
 		
 		log.info("WSDL request arrived ("+requestURL+")");
 
@@ -363,8 +372,7 @@ public class WSIGServlet extends HttpServlet {
 		return serviceName;
 	}
 	
-	private Message extractSOAPMessage(HttpServletRequest request) throws Exception {
-		
+	private Message extractSOAPMessage(HttpServletRequest request) throws IOException, MessagingException {
 		// Get http header
 		String contentLocation = request.getHeader(HTTPConstants.HEADER_CONTENT_LOCATION);
 		log.debug("contentLocation: "+contentLocation);
@@ -373,56 +381,78 @@ public class WSIGServlet extends HttpServlet {
 		log.debug("contentType: "+contentType);
 
 		// Get soap message
-		Message soapRequest = null;
-		try {
-			soapRequest = new Message(request.getInputStream(),
-				false,
-				contentType,
-				contentLocation);
-		} catch(IOException e) {
-			throw new Exception("Error extracting soap message", e);
-		}
+		Message soapRequest = new Message(request.getInputStream(), false, contentType, contentLocation);
 		
 		// Transfer HTTP headers to MIME headers for request message
 		MimeHeaders requestMimeHeaders = soapRequest.getMimeHeaders();
 		SOAPContext soapContext = new SOAPContext();
 		for (Enumeration e = request.getHeaderNames(); e.hasMoreElements();) {
 			String headerName = (String) e.nextElement();
-			for (Enumeration f = request.getHeaders(headerName);
-				 f.hasMoreElements();) {
+			for (Enumeration f = request.getHeaders(headerName); f.hasMoreElements();) {
 				String headerValue = (String) f.nextElement();
 				requestMimeHeaders.addHeader(headerName, headerValue);
 				MimeBodyPart p = new MimeBodyPart();
-				try {
-					p.addHeader(headerName, headerValue);
-					log.debug("headerName: "+headerName+", headerValue: "+headerValue);
-					soapContext.addBodyPart(p);
-				} catch (MessagingException ex) {
-					throw new Exception("Error building soap context", ex);				}
+				p.addHeader(headerName, headerValue);
+				log.debug("headerName: "+headerName+", headerValue: "+headerValue);
+				
+				soapContext.addBodyPart(p);
 			}
 		}
 		
 		return soapRequest;
 	}
 	
-	private void fillSoapHttpResponse(SOAPMessage soapResponse, HttpServletResponse httpResponse) throws Exception {
-		byte[] content = null;
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		soapResponse.writeTo(baos);
-		content = baos.toByteArray();
-
-		fillHttpResponse(content, "text/xml", httpResponse);
-	}
-
-	private void fillHttpResponse(byte[] content, String type, HttpServletResponse httpResponse) throws Exception {
-	    httpResponse.setHeader("Cache-Control", "no-store");
+	private void sendHttpResponse(SOAPMessage soapMessage, HttpServletResponse httpResponse) throws SOAPException, IOException  {
+		// Set http header
+		httpResponse.setHeader("Cache-Control", "no-store");
 	    httpResponse.setHeader("Pragma", "no-cache");
 	    httpResponse.setDateHeader("Expires", 0);
-	    httpResponse.setContentType(type+"; charset=utf-8");
-        ServletOutputStream responseOutputStream = httpResponse.getOutputStream();
+	    httpResponse.setContentType("text/xml; charset=utf-8");
+
+	    // Convert soap message in byte-array
+		byte[] content = null;
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		soapMessage.writeTo(baos);
+		content = baos.toByteArray();
+	    
+		// Write response
+	    ServletOutputStream responseOutputStream = httpResponse.getOutputStream();
         responseOutputStream.write(content);
         responseOutputStream.flush();
         responseOutputStream.close();
+        
+		log.debug("SOAP response:");
+		log.debug(baos.toString());
+	}
+	
+	private void sendHttpErrorResponse(SOAPMessage soapFaultMessage, HttpServletResponse httpResponse) throws SOAPException, IOException {
+		// Set http error (500)
+		httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		
+		// Send response 
+		sendHttpResponse(soapFaultMessage, httpResponse);
+	}
+
+	private void sendHttpErrorResponse(WSIGException e, HttpServletResponse httpResponse) throws SOAPException, IOException {
+		// Create soap message
+        MessageFactory messageFactory = MessageFactory.newInstance();
+        SOAPMessage soapFaultMessage = messageFactory.createMessage();
+        
+        // Create soap part and body            
+        SOAPPart soapPart = soapFaultMessage.getSOAPPart();
+        SOAPEnvelope envelope = soapPart.getEnvelope();
+        envelope.setPrefix(WSDLConstants.SOAPENVELOP_PREFIX);
+        envelope.addNamespaceDeclaration(WSDLConstants.XSD, WSDLConstants.XSD_URL);
+        SOAPBody body = envelope.getBody();
+		
+        // Create soap fault
+        SOAPFault fault = body.addFault();
+        fault.setFaultActor(e.getFaultActor());
+        fault.setFaultCode(e.getFaultCode());
+        fault.setFaultString(e.getFaultString());
+        
+        // Send response
+        sendHttpErrorResponse(soapFaultMessage, httpResponse);
 	}
 	
 	private void startupWSIGAgent() {
@@ -433,14 +463,16 @@ public class WSIGServlet extends HttpServlet {
 		} catch (ControllerException e) {
 			log.warn("Jade platform not present...WSIG agent not started");
 		}
+		
 		setWSIGStatus();
 	}
 
 	private void shutdownWSIGAgent() {
-	
+		log.info("Stopping WSIG agent...");
 		JadeGateway.shutdown();
+		log.info("WSIG agent stopped");
+
 		setWSIGStatus();
-		log.info("WSIG agent closed");
 	}
 	
 	private void setWSIGStatus() {
