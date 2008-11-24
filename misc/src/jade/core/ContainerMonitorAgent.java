@@ -219,6 +219,15 @@ public class ContainerMonitorAgent extends Agent {
 	    			sb.append("  - Agent thread dump\n");
 	    			sb.append(dumpAgentThread);
 	    		}
+	    		try {
+	    			Method dumpMethod = a.getClass().getMethod("dump", new Class[0]);
+	    			String agentSpecificDump = (String) dumpMethod.invoke(a, new Object[0]);
+	    			sb.append("Agent specific dump\n");
+	    			sb.append(agentSpecificDump);
+	    		}
+	    		catch (Throwable t) {
+	    			// dump() method not present --> Just do nothing 
+	    		}
     		}
     		catch (Exception e) {
     			e.printStackTrace();
