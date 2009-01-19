@@ -23,6 +23,8 @@ Boston, MA  02111-1307, USA.
 
 package jade.content.onto;
 
+import jade.content.schema.ObjectSchema;
+
 //#J2ME_EXCLUDE_FILE
 
 /**
