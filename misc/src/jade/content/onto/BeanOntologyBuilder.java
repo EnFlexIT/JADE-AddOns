@@ -79,7 +79,11 @@ class BeanOntologyBuilder {
 		 *   - its 4th char is uppercase
 		 *   - its name is not "getClass" :-)
 		 */
-		String methodName = method.getName(); 
+		String methodName = method.getName();
+		if (methodName.length() < 4) {
+			// it is surely too short
+			return false;
+		}
 		if (!methodName.startsWith(GETTER_PREFIX)) {
 			// it does not start with "get"
 			return false;
