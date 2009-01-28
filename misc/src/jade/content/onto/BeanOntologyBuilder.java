@@ -112,6 +112,10 @@ class BeanOntologyBuilder {
 		 * a setter method takes one parameter, does not have a return value and its name starts with "set" and its 4th char is uppercase
 		 */
 		String methodName = method.getName(); 
+		if (methodName.length() < 4) {
+			// it is surely too short
+			return false;
+		}
 		if (!methodName.startsWith(SETTER_PREFIX)) {
 			// it does not start with "set"
 			return false;
