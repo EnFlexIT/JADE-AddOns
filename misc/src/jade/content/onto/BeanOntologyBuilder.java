@@ -396,6 +396,12 @@ class BeanOntologyBuilder {
 		}
 
 		try {
+			ontology.add(schema, clazz);
+		} catch (OntologyException oe) {
+			throw new BeanOntologyException("error adding empty schema for class "+clazz);
+		}
+
+		try {
 			for (Entry<SlotKey, SlotAccessData> entry: slotAccessorsMap.entrySet()) {
 				slotName = entry.getKey().slotName;
 				sad = entry.getValue();
@@ -417,7 +423,6 @@ class BeanOntologyBuilder {
 					((AgentActionSchema)schema).setResult(ts, ar.cardMin(), ar.cardMax());
 				}
 			}
-			ontology.add(schema, clazz);
 		} catch (OntologyException e) {
 			throw new BeanOntologyException("error getting schema for slot "+slotName);
 		}
@@ -484,6 +489,13 @@ class BeanOntologyBuilder {
 				((PredicateSchema)schema).addSuperSchema((PredicateSchema)superSchema);
 			}
 		}
+
+		try {
+			ontology.add(schema, clazz);
+		} catch (OntologyException oe) {
+			throw new BeanOntologyException("error adding empty schema for class "+clazz);
+		}
+
 		try {
 			for (Entry<SlotKey, SlotAccessData> entry: slotAccessorsMap.entrySet()) {
 				slotName = entry.getKey().slotName;
@@ -506,7 +518,6 @@ class BeanOntologyBuilder {
 					((AgentActionSchema)schema).setResult(ts, ar.cardMin(), ar.cardMax());
 				}
 			}
-			ontology.add(schema, clazz);
 		} catch (OntologyException e) {
 			throw new BeanOntologyException("error getting schema for slot "+slotName);
 		}
@@ -551,5 +562,10 @@ class BeanOntologyBuilder {
 		} catch (ClassNotFoundException cnfe) {
 			throw new BeanOntologyException("Class not found", cnfe);
 		}
+	}
+
+	public static void main(String[] args) throws BeanOntologyException {
+		BeanOntology bo = new BeanOntology("boh");
+		bo.add(java.util.Calendar.class);
 	}
 }
