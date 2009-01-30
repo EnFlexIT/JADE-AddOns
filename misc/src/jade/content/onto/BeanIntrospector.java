@@ -33,6 +33,7 @@ import jade.content.abs.AbsObject;
 import jade.content.abs.AbsTerm;
 import jade.content.schema.ObjectSchema;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -91,23 +92,36 @@ class BeanIntrospector implements Introspector {
 	} 
 
 	private void externaliseAndSetAggregateSlot(AbsObject abs, ObjectSchema schema, String slotName, Object slotValue, ObjectSchema slotSchema, Ontology referenceOnto) throws OntologyException {
-		Iterator iter;
-		if (slotValue instanceof java.util.Collection) {
-			iter = ((java.util.Collection)slotValue).iterator();
-		} else {
-			iter = ((jade.util.leap.Collection)slotValue).iterator();
-		}
-		if (iter.hasNext() || schema.isMandatory(slotName)) {
-			AbsAggregate absSlotValue = new AbsAggregate(slotSchema.getTypeName());
-			try {
-				while (iter.hasNext()) {
-					absSlotValue.add((AbsTerm)referenceOnto.fromObject(iter.next()));
-				}
-			} catch (ClassCastException cce) {
-				throw new OntologyException("Non term object in aggregate");
+		AbsAggregate absSlotValue;
+		Class slotClass = slotValue.getClass();
+		if (slotClass.isArray()) {
+			absSlotValue = new AbsAggregate(slotSchema.getTypeName());
+			for (int i = 0; i < Array.getLength(slotValue); i++) {
+				Object object = Array.get(slotValue, i);
+				absSlotValue.add((AbsTerm)referenceOnto.fromObject(object));
 			}
-
 			AbsHelper.setAttribute(abs, slotName, absSlotValue);
+		} else {
+			Iterator iter;
+			if (slotValue instanceof java.util.Collection) {
+				iter = ((java.util.Collection)slotValue).iterator();
+			} else if (slotValue instanceof jade.util.leap.Collection) {
+				iter = ((jade.util.leap.Collection)slotValue).iterator();
+			} else {
+				throw new OntologyException("Cannot externalise value of class "+slotClass+" for aggregate slot "+slotName);
+			}
+			if (iter.hasNext() || schema.isMandatory(slotName)) {
+				absSlotValue = new AbsAggregate(slotSchema.getTypeName());
+				try {
+					while (iter.hasNext()) {
+						absSlotValue.add((AbsTerm)referenceOnto.fromObject(iter.next()));
+					}
+				} catch (ClassCastException cce) {
+					throw new OntologyException("Non term object in aggregate");
+				}
+	
+				AbsHelper.setAttribute(abs, slotName, absSlotValue);
+			}
 		}
 	}
 
@@ -145,11 +159,18 @@ class BeanIntrospector implements Introspector {
 		return result;
 	}
 
-	private Object internaliseAggregateSlot(AbsAggregate absAggregate, Ontology referenceOnto, Class clazz) throws OntologyException {
+	private Object internaliseAggregateSlot(AbsAggregate absAggregate, ObjectSchema schema, Class clazz, Class elementClazz, Ontology referenceOnto) throws OntologyException {
 		Object result;
 		jade.util.leap.Iterator iterator = absAggregate.iterator();
 		try {
-			if (java.util.Collection.class.isAssignableFrom(clazz)) {
+			if (clazz.isArray()) {
+				int index = 0;
+				result = Array.newInstance(elementClazz, absAggregate.size());
+				while (iterator.hasNext()) {
+					Array.set(result, index, referenceOnto.toObject((AbsTerm)iterator.next()));
+					index++;
+				}
+			} else if (java.util.Collection.class.isAssignableFrom(clazz)) {
 				java.util.Collection javaCollection = createConcreteJavaCollection(clazz);
 				if (javaCollection == null) {
 					throw new OntologyException("cannot create a concrete collection for class "+clazz.getName());
@@ -215,6 +236,8 @@ class BeanIntrospector implements Introspector {
 						AbsObject absSlotValue = referenceOnto.fromObject(slotValue);
 						AbsHelper.setAttribute(abs, slotName, absSlotValue);
 					}
+				} else {
+					abs = null;
 				}
 			} 
 
@@ -258,7 +281,7 @@ class BeanIntrospector implements Introspector {
 					Object slotValue = null;
 					// Agregate slots require a special handling 
 					if (absObj.getAbsType() == AbsObject.ABS_AGGREGATE) {
-						slotValue = internaliseAggregateSlot((AbsAggregate) absObj, referenceOnto, slotAccessData.type);
+						slotValue = internaliseAggregateSlot((AbsAggregate) absObj, schema, slotAccessData.type, slotAccessData.aggregateClass, referenceOnto);
 					}
 					else {
 						slotValue = referenceOnto.toObject(absObj);

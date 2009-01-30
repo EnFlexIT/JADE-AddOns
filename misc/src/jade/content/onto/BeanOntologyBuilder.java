@@ -241,9 +241,13 @@ class BeanOntologyBuilder {
 						}
 						mandatory = slotAnnotation.mandatory();
 					}
+					if (slotType.isArray()) {
+						// extract the type of array elements
+						aggregateType = slotType.getComponentType();
+					}
 					// if present, use getter @AggregateSlot annotation data
 					if (aggregateSlotAnnotation != null) {
-						if (java.util.Collection.class.isAssignableFrom(slotType) || jade.util.leap.Collection.class.isAssignableFrom(slotType)) {
+						if (SlotAccessData.isAggregate(slotType)) {
 							cardMin = aggregateSlotAnnotation.cardMin();
 							cardMax = aggregateSlotAnnotation.cardMax();
 							if (!Object.class.equals(aggregateSlotAnnotation.type())) {
@@ -265,9 +269,9 @@ class BeanOntologyBuilder {
 
 	private static String getAggregateSchemaName(Class clazz) {
 		String result = null;
-		if (jade.util.leap.List.class.isAssignableFrom(clazz) || java.util.List.class.isAssignableFrom(clazz)) {
+		if (SlotAccessData.isSequence(clazz)) {
 			result = BasicOntology.SEQUENCE;
-		} else if (jade.util.leap.Set.class.isAssignableFrom(clazz) || java.util.Set.class.isAssignableFrom(clazz)) {
+		} else if (SlotAccessData.isSet(clazz)) {
 			result = BasicOntology.SET;
 		}
 		return result;
@@ -324,7 +328,7 @@ class BeanOntologyBuilder {
 		return ts;
 	}
 
-	private void addTermSlotToConcept(ConceptSchema schema, String slotName, String schemaName, SlotAccessData sad, boolean skipClassChecking) throws OntologyException, BeanOntologyException {
+	private void addTermSlotToConcept(ConceptSchema schema, String slotName, String schemaName, SlotAccessData sad, boolean skipClassChecking) throws OntologyException {
 		if (logger.isLoggable(Logger.FINE)) {
 			logger.log(Logger.FINE, "concept "+schemaName+": adding slot "+slotName);
 		}
@@ -562,10 +566,5 @@ class BeanOntologyBuilder {
 		} catch (ClassNotFoundException cnfe) {
 			throw new BeanOntologyException("Class not found", cnfe);
 		}
-	}
-
-	public static void main(String[] args) throws BeanOntologyException {
-		BeanOntology bo = new BeanOntology("boh");
-		bo.add(java.util.Calendar.class);
 	}
 }

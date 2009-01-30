@@ -42,11 +42,23 @@ class SlotAccessData {
 		this.type = type;
 		this.getter = getter;
 		this.setter = setter;
-		aggregate = java.util.Collection.class.isAssignableFrom(type) || jade.util.leap.Collection.class.isAssignableFrom(type);
+		aggregate = isAggregate(type);
 		this.mandatory = mandatory;
 		this.aggregateClass = aggregateClass;
 		this.cardMin = cardMin;
 		this.cardMax = cardMax;
+	}
+
+	static boolean isAggregate(Class clazz) {
+		return clazz.isArray() || java.util.Collection.class.isAssignableFrom(clazz) || jade.util.leap.Collection.class.isAssignableFrom(clazz);
+	}
+
+	static boolean isSequence(Class clazz) {
+		return clazz.isArray() || java.util.List.class.isAssignableFrom(clazz) || jade.util.leap.List.class.isAssignableFrom(clazz);
+	}
+
+	static boolean isSet(Class clazz) {
+		return java.util.Set.class.isAssignableFrom(clazz) || jade.util.leap.Set.class.isAssignableFrom(clazz);
 	}
 
 	@Override
