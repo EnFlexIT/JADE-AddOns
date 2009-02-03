@@ -49,6 +49,11 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 	public TSDaemon() throws RemoteException {
 		super();
 	}
+	
+	public TSDaemon(int port) throws RemoteException {
+		super(port);
+	}
+	
 	/**
 	@param port the port where the TSDaemon started
 	@param name the name used for name binding
@@ -59,7 +64,9 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 
 	public static void main(String args[]) {
 		try {
-			TSDaemon daemon = new TSDaemon();
+			int remoteObjectPort = Integer.parseInt(System.getProperty("tsdaemon.remoteobjectport", "0"));
+			System.out.println("PORTA = "+remoteObjectPort);
+			TSDaemon daemon = new TSDaemon(remoteObjectPort);
 			daemon.start(args);
 		}
 		catch (Exception e) {
