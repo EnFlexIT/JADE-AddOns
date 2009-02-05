@@ -1,0 +1,73 @@
+<project name="DynamicClientTest" default="test" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="jade-home" value="../../.."/>
+
+  <property name="src" value="src"/>
+  <property name="build" value="classes"/>
+  <property name="lib" value="lib"/>
+  <property name="dynamicClient-lib-dir" value="../lib"/>
+  <property name="dynamicClient-resource-dir" value="../resources"/>
+  <property name="jade-lib-dir" value="${jade-home}/lib"/>
+
+  <property name="javac.optimize" value="off"/>
+  <property name="javac.debug" value="on"/>
+
+	<path id="dynamicClientTest.classpath">
+		<fileset dir="${lib}">
+			<include name="junit.jar"/>
+		</fileset>
+		<fileset dir="${dynamicClient-lib-dir}">
+			<include name="wsdc.jar"/>
+			<include name="axisPlus.jar"/>
+			<include name="commons-discovery-0.2.jar"/>
+			<include name="commons-logging-1.1.1.jar"/>
+			<include name="jaxrpc-1.1.jar"/>
+			<include name="log4j-1.2.8.jar"/>
+			<include name="saaj-1.2.jar"/>
+			<include name="wsdl4j-1.6.2.jar"/>
+			<include name="jadeMisc.jar"/>
+		</fileset>
+		<fileset dir="${jade-lib-dir}">
+			<include name="jade.jar"/>
+		</fileset>
+	</path>
+
+  <target name="init">
+    <!-- Create the directories structure used to store files -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init" description="compile test">
+    <javac srcdir="${src}"
+           destdir="${build}"
+           nowarn="off"
+           optimize="${javac.optimize}"
+           debug="${javac.debug}"
+           debuglevel="lines,vars,source"
+           deprecation="on">
+      <classpath>
+        <path refid="dynamicClientTest.classpath"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="test" depends="compile" description="execute junit test">
+	  <junit printsummary="yes" haltonfailure="yes" showoutput="false" fork="true">
+  		<test name="jade.webservice.tests.DynamicClientTestCase"/>
+  		<formatter type="plain"/>
+      <classpath>
+      	<pathelement location="${build}"/>
+        <path refid="dynamicClientTest.classpath"/>
+      	<pathelement location="${dynamicClient-resource-dir}"/>
+      </classpath>
+		</junit>
+  </target>
+
+  <target name="clean" description="clean">
+    <!-- Delete the ${build} directory tree -->
+    <delete includeEmptyDirs="true" quiet="true">
+      <fileset dir="${build}"/>
+    </delete>
+  </target>
+
+</project>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file was auto-generated from WSDL -->
+<!-- by the Apache Axis2 version: 1.4.1  Built on : Aug 13, 2008 (05:03:35 LKT) -->
+<serviceGroup>
+    <service name="MathFunctionsService">
+        <messageReceivers>
+            <messageReceiver mep="http://www.w3.org/ns/wsdl/in-out" class="test.webservice.tests.MathFunctionsServiceMessageReceiverInOut"/>
+        </messageReceivers>
+        <parameter name="ServiceClass">test.webservice.tests.MathFunctionsServiceSkeleton</parameter>
+        <parameter name="useOriginalwsdl">true</parameter>
+        <parameter name="modifyUserWSDLPortAddress">true</parameter>
+        <operation name="sum" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:sumResponse</outputActionMapping>
+        </operation>
+        <operation name="getComponents" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:getComponentsResponse</outputActionMapping>
+        </operation>
+        <operation name="printTime" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:printTimeResponse</outputActionMapping>
+        </operation>
+        <operation name="sumComplex" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:sumComplexResponse</outputActionMapping>
+        </operation>
+        <operation name="diff" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:diffResponse</outputActionMapping>
+        </operation>
+        <operation name="multiplication" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:multiplicationResponse</outputActionMapping>
+        </operation>
+        <operation name="abs" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:absResponse</outputActionMapping>
+        </operation>
+        <operation name="getRandom" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:getRandomResponse</outputActionMapping>
+        </operation>
+        <operation name="printComplex" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:printComplexResponse</outputActionMapping>
+        </operation>
+        <operation name="compareNumbers" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:compareNumbersResponse</outputActionMapping>
+        </operation>
+        <operation name="getAgentInfo" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:getAgentInfoResponse</outputActionMapping>
+        </operation>
+        <operation name="convertDate" mep="http://www.w3.org/ns/wsdl/in-out" namespace="urn:tests.webservice.test">
+            <actionMapping>urn:tests.webservice.testAction</actionMapping>
+            <outputActionMapping>urn:tests.webservice.test:MathFunctionsPort:convertDateResponse</outputActionMapping>
+        </operation>
+    </service>
+</serviceGroup>

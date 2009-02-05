@@ -1,0 +1,105 @@
+<project name="DynamicClient" default="compile" basedir=".">
+  <!-- set global properties for this build -->
+  <property name="jade-home" value="../.."/>
+
+  <property name="version" value="1.0"/>
+
+  <property name="src" value="src"/>
+  <property name="build" value="classes"/>
+  <property name="doc" value="doc"/>
+  <property name="lib" value="lib"/>
+  <property name="jade-lib-dir" value="${jade-home}/lib"/>
+
+  <property name="javac.optimize" value="off"/>
+  <property name="javac.debug" value="on"/>
+
+	<path id="dynamicClient.classpath">
+		<fileset dir="${lib}">
+			<include name="axisPlus.jar"/>
+			<include name="commons-discovery-0.2.jar"/>
+			<include name="commons-logging-1.1.1.jar"/>
+			<include name="jaxrpc-1.1.jar"/>
+			<include name="log4j-1.2.8.jar"/>
+			<include name="saaj-1.2.jar"/>
+			<include name="wsdl4j-1.6.2.jar"/>
+			<include name="jadeMisc.jar"/>
+		</fileset>
+		<fileset dir="${jade-lib-dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the directories structure used to store files -->
+    <mkdir dir="${build}"/>
+    <mkdir dir="${lib}"/>
+    <mkdir dir="${doc}/api"/>
+  </target>
+
+  <!-- Compile the javadoc code from ${src} into ${doc} -->
+  <target name="doc" depends="compile" description="generate java doc">
+    <mkdir dir="${doc}/api"/>
+    <javadoc destdir="${doc}/api" author="true" windowtitle="JADE WebService Dynamic Client classes">
+	    <fileset dir="${src}" >
+	      <include name="jade/webservice/**"/>
+	      <exclude name="jade/webservice/dynamicClient/OperationParser.java"/>
+	      <exclude name="jade/webservice/utils/**"/>
+	    </fileset>
+      <classpath>
+        <pathelement location="{build}"/>
+        <path refid="dynamicClient.classpath"/>
+      </classpath>
+    </javadoc>
+  </target>
+
+  <target name="compile" depends="init" description="compile the sources">
+    <javac srcdir="${src}"
+           destdir="${build}"
+           nowarn="off"
+           optimize="${javac.optimize}"
+           debug="${javac.debug}"
+           debuglevel="lines,vars,source"
+           deprecation="on">
+      <classpath>
+        <path refid="dynamicClient.classpath"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="lib" depends="compile" description="generate jar archive">
+    <jar jarfile="${lib}/wsdc.jar">
+      <fileset dir="${build}" includes="**/jade/**"/>
+    </jar>
+  </target>
+
+  <!-- Make distribution zip file and put in ${dist} -->
+  <target name="dist" depends="clean, doc, lib" description="make distribution zip file">
+    <echo message="GENERATE THE PDF FORM OF THE DYNAMIC CLIENT GUIDE, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/dynamicClient) AND THEN PRESS ENTER -->"/>
+    <input/>
+    <mkdir dir="${jade-home}/doc"/>
+    <mkdir dir="${jade-home}/doc/tutorials"/>
+    <copy file="DynamicClientGuide.pdf" todir="${jade-home}/doc/tutorials"/>
+
+    <delete file="../DynamicClientAddOn-${version}.zip" quiet="true"/>
+    <zip zipfile="../DynamicClientAddOn-${version}.zip" basedir="../..">
+      <exclude name="add-ons/dynamicClient/DynamicClientGuide.*"/>
+      <include name="doc/tutorials/DynamicClientGuide.pdf"/>
+      <include name="add-ons/dynamicClient/src/**"/>
+      <include name="add-ons/dynamicClient/doc/**"/>
+      <include name="add-ons/dynamicClient/lib/**"/>
+    </zip>
+  </target>
+
+  <target name="clean" description="clean up">
+    <!-- Delete the ${build} directory tree -->
+    <delete includeEmptyDirs="true" quiet="true">
+      <fileset dir="${build}"/>
+      <fileset dir="${lib}">
+           <include name="wsdc.jar"/>
+      </fileset>
+    </delete>
+  </target>
+
+</project>

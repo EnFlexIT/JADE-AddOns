@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project name="MathFunctions" soapui-version="2.5" xmlns:con="http://eviware.com/soapui/config"><con:settings><con:setting id="ProjectSettings@projectRoot">C:\Users\enrico\Documents\Lavoro\TILab\workspace\MathFunctionsServer</con:setting></con:settings><con:interface xsi:type="con:WsdlInterface" wsaVersion="NONE" name="MathFunctionsBinding" type="wsdl" bindingName="{urn:tests.webservice.test}MathFunctionsBinding" soapVersion="1_1" anonymous="optional" definition="http://localhost:8080/axis2/services/MathFunctionsService?wsdl" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.actions.iface.tools.cxf.CXFAction@values-local"><![CDATA[<xml-fragment xmlns:con="http://eviware.com/soapui/config">
+  <con:entry key="EXSH" value="false"/>
+  <con:entry key="Java Args" value=""/>
+  <con:entry key="Class Folder" value=""/>
+  <con:entry key="Exclude namespaces" value="&lt;xml-fragment/>"/>
+  <con:entry key="build.xml" value="true"/>
+  <con:entry key="Bindings" value=""/>
+  <con:entry key="Implementation" value="true"/>
+  <con:entry key="Server" value="true"/>
+  <con:entry key="Tool Args" value=""/>
+  <con:entry key="Output Packages" value="&lt;xml-fragment/>"/>
+  <con:entry key="All Code" value="false"/>
+  <con:entry key="Use cached WSDL" value="true"/>
+  <con:entry key="DEX" value="true"/>
+  <con:entry key="Output Directory" value="C:\Users\enrico\Documents\Tmp"/>
+  <con:entry key="Validate WSDL" value="false"/>
+  <con:entry key="Compile" value="false"/>
+  <con:entry key="WSDL" value="http://localhost:8080/axis2/services/MathFunctionsService?wsdl"/>
+  <con:entry key="DNS" value="true"/>
+  <con:entry key="Catalog" value=""/>
+  <con:entry key="Package" value=""/>
+  <con:entry key="Client" value="true"/>
+</xml-fragment>]]></con:setting></con:settings><con:definitionCache type="TEXT" rootPart="http://localhost:8080/axis2/services/MathFunctionsService?wsdl"><con:part><con:url>http://localhost:8080/axis2/services/MathFunctionsService?wsdl</con:url><con:content><![CDATA[<wsdl:definitions name="MathFunctions" targetNamespace="urn:tests.webservice.test" xmlns:impl="urn:tests.webservice.test" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="urn:tests.webservice.test">
+      <xsd:annotation/>
+      <xsd:element name="convertDate">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="date" type="xsd:dateTime"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="convertDateResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="convertDateReturn" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="getComponents">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="complex" type="impl:complex"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:complexType name="complex">
+        <xsd:sequence>
+          <xsd:element name="real" type="xsd:float"/>
+          <xsd:element minOccurs="0" name="immaginary" type="xsd:float"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="getComponentsResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="getComponentsReturn" type="impl:ArrayOfComplex"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:complexType name="ArrayOfComplex">
+        <xsd:sequence>
+          <xsd:element maxOccurs="2" minOccurs="2" name="complex" type="impl:complex"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="printComplex">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="complex" type="impl:complex"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="printComplexResponse">
+        <xsd:complexType>
+          <xsd:sequence/>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="sumComplex">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="firstComplexElement" type="impl:complex"/>
+            <xsd:element name="secondComplexElement" type="impl:complex"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="sumComplexResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="sumComplexReturn" type="impl:complex"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="getRandom">
+        <xsd:complexType>
+          <xsd:sequence/>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="getRandomResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="getRandomReturn" type="impl:complex"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="compareNumbers">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="firstElement" type="xsd:float"/>
+            <xsd:element name="secondElement" type="xsd:float"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="compareNumbersResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="compareNumbersReturn" type="xsd:boolean"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="sum">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="firstElement" type="xsd:float"/>
+            <xsd:element minOccurs="0" name="secondElement" type="xsd:float"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="sumResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="sumReturn" type="xsd:float"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="multiplicationHeaderComplex" type="impl:complex"/>
+      <xsd:element name="sumHeaderUsername" type="xsd:string"/>
+      <xsd:element name="sumHeaderPassword" type="xsd:string"/>
+      <xsd:element name="sumHeaderId" type="xsd:int"/>
+      <xsd:element name="diffHeaderUsername" type="xsd:string"/>
+      <xsd:element name="diffHeaderPassword" type="xsd:string"/>
+      <xsd:element name="diffHeaderId" type="xsd:int"/>
+      <xsd:element name="absHeaderAggregate">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="username" type="xsd:string"/>
+            <xsd:element name="password" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="getAgentInfo">
+        <xsd:complexType>
+          <xsd:sequence/>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="getAgentInfoResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="getAgentInfoReturn" type="impl:agentInfo"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:complexType name="agentInfo">
+        <xsd:sequence>
+          <xsd:element name="agentAid" type="impl:agent-identifier"/>
+          <xsd:element name="startDate" type="xsd:dateTime"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="agent-identifier">
+        <xsd:sequence>
+          <xsd:element name="name" type="xsd:string"/>
+          <xsd:element name="addresses" type="impl:ArrayOfString"/>
+          <xsd:element name="resolvers" type="impl:ArrayOfAgent-identifier"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ArrayOfString">
+        <xsd:sequence>
+          <xsd:element maxOccurs="unbounded" minOccurs="0" name="string" type="xsd:string"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="ArrayOfAgent-identifier">
+        <xsd:sequence>
+          <xsd:element maxOccurs="unbounded" minOccurs="0" name="agent-identifier" type="impl:agent-identifier"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="diff">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="firstElement" type="xsd:float"/>
+            <xsd:element name="secondElement" type="xsd:float"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="diffResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="diffReturn" type="xsd:float"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="printTime">
+        <xsd:complexType>
+          <xsd:sequence/>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="printTimeResponse">
+        <xsd:complexType>
+          <xsd:sequence/>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="multiplication">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="numbers" type="impl:ArrayOfFloat"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:complexType name="ArrayOfFloat">
+        <xsd:sequence>
+          <xsd:element maxOccurs="unbounded" minOccurs="2" name="float" type="xsd:float"/>
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:element name="multiplicationResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="multiplicationReturn" type="xsd:float"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="abs">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="complex" type="impl:complex"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="absResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="absReturn" type="xsd:float"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="printComplexRequest">
+    <wsdl:part name="parameters" element="impl:printComplex"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="multiplicationResponse">
+    <wsdl:part name="parameters" element="impl:multiplicationResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="convertDateResponse">
+    <wsdl:part name="parameters" element="impl:convertDateResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="diffResponse">
+    <wsdl:part name="parameters" element="impl:diffResponse"></wsdl:part>
+    <wsdl:part name="id" element="impl:diffHeaderId"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getRandomResponse">
+    <wsdl:part name="parameters" element="impl:getRandomResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="diffRequest">
+    <wsdl:part name="parameters" element="impl:diff"></wsdl:part>
+    <wsdl:part name="username" element="impl:diffHeaderUsername"></wsdl:part>
+    <wsdl:part name="password" element="impl:diffHeaderPassword"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getComponentsRequest">
+    <wsdl:part name="parameters" element="impl:getComponents"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getComponentsResponse">
+    <wsdl:part name="parameters" element="impl:getComponentsResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getRandomRequest">
+    <wsdl:part name="parameters" element="impl:getRandom"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="sumRequest">
+    <wsdl:part name="parameters" element="impl:sum"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="absHeaders">
+    <wsdl:part name="parameters" element="impl:absHeaderAggregate"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="sumComplexResponse">
+    <wsdl:part name="parameters" element="impl:sumComplexResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="printTimeResponse">
+    <wsdl:part name="parameters" element="impl:printTimeResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="absRequest">
+    <wsdl:part name="parameters" element="impl:abs"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="sumResponse">
+    <wsdl:part name="parameters" element="impl:sumResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="sumComplexRequest">
+    <wsdl:part name="parameters" element="impl:sumComplex"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="compareNumbersResponse">
+    <wsdl:part name="parameters" element="impl:compareNumbersResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="multiplicationHeaders">
+    <wsdl:part name="headers" element="impl:multiplicationHeaderComplex"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAgentInfoResponse">
+    <wsdl:part name="parameters" element="impl:getAgentInfoResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="sumHeaders">
+    <wsdl:part name="username" element="impl:sumHeaderUsername"></wsdl:part>
+    <wsdl:part name="password" element="impl:sumHeaderPassword"></wsdl:part>
+    <wsdl:part name="id" element="impl:sumHeaderId"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="multiplicationRequest">
+    <wsdl:part name="parameters" element="impl:multiplication"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="compareNumbersRequest">
+    <wsdl:part name="parameters" element="impl:compareNumbers"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="convertDateRequest">
+    <wsdl:part name="parameters" element="impl:convertDate"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="absResponse">
+    <wsdl:part name="parameters" element="impl:absResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getAgentInfoRequest">
+    <wsdl:part name="parameters" element="impl:getAgentInfo"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="printTimeRequest">
+    <wsdl:part name="parameters" element="impl:printTime"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="printComplexResponse">
+    <wsdl:part name="parameters" element="impl:printComplexResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="MathFunctionsPort">
+    <wsdl:operation name="convertDate">
+      <wsdl:input message="impl:convertDateRequest"></wsdl:input>
+      <wsdl:output message="impl:convertDateResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getComponents">
+      <wsdl:input message="impl:getComponentsRequest"></wsdl:input>
+      <wsdl:output message="impl:getComponentsResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="printComplex">
+      <wsdl:input message="impl:printComplexRequest"></wsdl:input>
+      <wsdl:output message="impl:printComplexResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sumComplex">
+      <wsdl:input message="impl:sumComplexRequest"></wsdl:input>
+      <wsdl:output message="impl:sumComplexResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getRandom">
+      <wsdl:input message="impl:getRandomRequest"></wsdl:input>
+      <wsdl:output message="impl:getRandomResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="compareNumbers">
+      <wsdl:input message="impl:compareNumbersRequest"></wsdl:input>
+      <wsdl:output message="impl:compareNumbersResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sum">
+      <wsdl:input message="impl:sumRequest"></wsdl:input>
+      <wsdl:output message="impl:sumResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAgentInfo">
+      <wsdl:input message="impl:getAgentInfoRequest"></wsdl:input>
+      <wsdl:output message="impl:getAgentInfoResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="diff">
+      <wsdl:input message="impl:diffRequest"></wsdl:input>
+      <wsdl:output message="impl:diffResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="printTime">
+      <wsdl:input message="impl:printTimeRequest"></wsdl:input>
+      <wsdl:output message="impl:printTimeResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="multiplication">
+      <wsdl:input message="impl:multiplicationRequest"></wsdl:input>
+      <wsdl:output message="impl:multiplicationResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="abs">
+      <wsdl:input message="impl:absRequest"></wsdl:input>
+      <wsdl:output message="impl:absResponse"></wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="MathFunctionsBinding" type="impl:MathFunctionsPort">
+    <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="convertDate">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getComponents">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="printComplex">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sumComplex">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getRandom">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="compareNumbers">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sum">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+        <wsdlsoap:header message="impl:sumHeaders" part="username" use="literal"></wsdlsoap:header>
+        <wsdlsoap:header message="impl:sumHeaders" part="password" use="literal"></wsdlsoap:header>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+        <wsdlsoap:header message="impl:sumHeaders" part="id" use="literal"></wsdlsoap:header>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getAgentInfo">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="diff">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body parts="parameters" use="literal"/>
+        <wsdlsoap:header message="impl:diffRequest" part="username" use="literal"></wsdlsoap:header>
+        <wsdlsoap:header message="impl:diffRequest" part="password" use="literal"></wsdlsoap:header>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body parts="parameters" use="literal"/>
+        <wsdlsoap:header message="impl:diffResponse" part="id" use="literal"></wsdlsoap:header>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="printTime">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="multiplication">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+        <wsdlsoap:header message="impl:multiplicationHeaders" part="headers" use="literal"></wsdlsoap:header>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+        <wsdlsoap:header message="impl:multiplicationHeaders" part="headers" use="literal"></wsdlsoap:header>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="abs">
+      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
+      <wsdl:input>
+        <wsdlsoap:body use="literal"/>
+        <wsdlsoap:header message="impl:absHeaders" part="parameters" use="literal"></wsdlsoap:header>
+      </wsdl:input>
+      <wsdl:output>
+        <wsdlsoap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MathFunctionsService">
+    <wsdl:port name="MathFunctionsPort" binding="impl:MathFunctionsBinding">
+      <wsdlsoap:address location="http://163.162.44.8:8080/axis2/services/MathFunctionsService/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>]]></con:content><con:type>http://schemas.xmlsoap.org/wsdl/</con:type></con:part></con:definitionCache><con:endpoints><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:endpoint>http://nikita.cselt.it:8080/axis2/services/MathFunctionsService/</con:endpoint></con:endpoints><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="abs" bindingOperationName="abs" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Body>
+      <urn:abs>
+         <complex>
+            <real>2</real>
+            <!--Optional:-->
+            <immaginary>4</immaginary>
+         </complex>
+      </urn:abs>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/absRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="compareNumbers" bindingOperationName="compareNumbers" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:compareNumbers>
+         <firstElement>2</firstElement>
+         <secondElement>2</secondElement>
+      </urn:compareNumbers>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/compareNumbersRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="convertDate" bindingOperationName="convertDate" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:convertDate>
+         <date>7846873468</date>
+      </urn:convertDate>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/convertDateRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="diff" bindingOperationName="diff" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Body>
+      <urn:diff>
+         <firstElement>10</firstElement>
+         <secondElement>2</secondElement>
+      </urn:diff>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/diffRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="getAgentInfo" bindingOperationName="getAgentInfo" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:getAgentInfo/>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/getAgentInfoRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="getComponents" bindingOperationName="getComponents" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:getComponents>
+         <complex>
+            <real>4</real>
+            <!--Optional:-->
+            <immaginary>6</immaginary>
+         </complex>
+      </urn:getComponents>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/getComponentsRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="getRandom" bindingOperationName="getRandom" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:getRandom/>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/getRandomRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="multiplication" bindingOperationName="multiplication" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Header>
+      <urn:multiplicationHeaderComplex>
+         <real>2</real>
+      </urn:multiplicationHeaderComplex>
+   </soapenv:Header>
+   <soapenv:Body>
+      <urn:multiplication>
+         <numbers>
+            <!--2 or more repetitions:-->
+            <float>3</float>
+            <float>4</float>
+         </numbers>
+      </urn:multiplication>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/multiplicationRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="printComplex" bindingOperationName="printComplex" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:printComplex>
+         <complex>
+            <real>5</real>
+            <!--Optional:-->
+            <immaginary>6</immaginary>
+         </complex>
+      </urn:printComplex>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/printComplexRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="printTime" bindingOperationName="printTime" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:printTime/>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/printTimeRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="sum" bindingOperationName="sum" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://nikita.cselt.it:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Body>
+      <urn:sum>
+         <firstElement>5</firstElement>
+         <!--Optional:-->
+         <secondElement>5</secondElement>
+      </urn:sum>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/sumRequest"/></con:call></con:operation><con:operation isOneWay="false" action="urn:tests.webservice.testAction" name="sumComplex" bindingOperationName="sumComplex" type="Request-Response" inputName="" receivesAttachments="false" sendsAttachments="false" anonymous="optional"><con:settings/><con:call name="Request 1"><con:settings/><con:encoding>UTF-8</con:encoding><con:endpoint>http://163.162.44.8:8080/axis2/services/MathFunctionsService/</con:endpoint><con:request><![CDATA[<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:tests.webservice.test">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:sumComplex>
+         <firstComplexElement>
+            <real>1</real>
+            <!--Optional:-->
+            <immaginary>2</immaginary>
+         </firstComplexElement>
+         <secondComplexElement>
+            <real>4</real>
+            <!--Optional:-->
+            <immaginary>5</immaginary>
+         </secondComplexElement>
+      </urn:sumComplex>
+   </soapenv:Body>
+</soapenv:Envelope>]]></con:request><con:wsaConfig mustUnderstand="NONE" version="200508" action="urn:tests.webservice.test/MathFunctionsPort/sumComplexRequest"/></con:call></con:operation></con:interface><con:properties/><con:wssContainer/></con:soapui-project>
