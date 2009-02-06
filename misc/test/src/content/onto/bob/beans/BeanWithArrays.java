@@ -1,11 +1,13 @@
 package content.onto.bob.beans;
 
+import test.webservice.tests.AgentInfo;
 import jade.content.Concept;
 
 public class BeanWithArrays implements Concept {
 
 	private boolean[] booleans;
 	private ClassOne[] classOnes;
+	private AgentInfo agentInfo;
 
 	public boolean[] getBooleans() {
 		return booleans;
@@ -21,6 +23,14 @@ public class BeanWithArrays implements Concept {
 
 	public void setClassOnes(ClassOne[] classOnes) {
 		this.classOnes = classOnes;
+	}
+
+	public AgentInfo getAgentInfo() {
+		return agentInfo;
+	}
+
+	public void setAgentInfo(AgentInfo agentInfo) {
+		this.agentInfo = agentInfo;
 	}
 
 	@Override
@@ -47,6 +57,8 @@ public class BeanWithArrays implements Concept {
 			}
 			sb.append(']');
 		}
+		sb.append(" agentInfo=");
+		sb.append(agentInfo);
 		sb.append('}');
 		return sb.toString();
 	}
