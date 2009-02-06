@@ -51,6 +51,9 @@ public class ClassZero implements Concept, Comparable<ClassZero> {
 		if (obj == this) {
 			return true;
 		}
+		if (!(obj instanceof ClassZero)) {
+			return false;
+		}
 		return compareTo((ClassZero)obj) == 0;
 	}
 
