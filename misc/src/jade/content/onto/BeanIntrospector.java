@@ -58,7 +58,11 @@ class BeanIntrospector implements Introspector {
 	private Object invokeGetterMethod(Method method, Object obj) throws OntologyException {
 		Object result = null;
 		try {
-			result = method.invoke(obj, (Object[]) null); 
+			result = method.invoke(obj, (Object[]) null);
+			if (result != null && java.util.Calendar.class.isAssignableFrom(result.getClass())) {
+				// ontologically, Calendar is translated into a Date => convert the Calendar into a Date
+				result = ((java.util.Calendar)result).getTime();
+			}
 		} catch (IllegalArgumentException iae) {
 			result = new Object();
 		} catch (Exception e) {
@@ -67,37 +71,41 @@ class BeanIntrospector implements Introspector {
 		return result;
 	} 
 
-	private void invokeSetterMethod(Method method, Object obj, Object value) throws OntologyException {
+	private void invokeSetterMethod(Method method, Object obj, Object value, Class clazz) throws OntologyException {
 		try {
+			if (java.util.Calendar.class.isAssignableFrom(clazz)) {
+				// ontologically, Calendar is translated into a Date => convert the date back into a Calendar
+				java.util.Calendar calendar = new java.util.GregorianCalendar();
+                calendar.setTime((java.util.Date)value);
+                value = calendar;
+			} else if (java.lang.Long.class == clazz) {
+				Integer i = Integer.valueOf((int) ((Long) value).longValue());
+				value = i;
+			} else if (java.lang.Double.class == clazz) {
+				Float f = new Float((float) ((Double) value).doubleValue());
+				value = f;
+			}
 			Object[] params = new Object[] {value};
-			try {
-				method.invoke(obj, params);
-			}
-			catch (IllegalArgumentException iae) {
-				// Maybe the method required an int argument and we supplied 
-				// a Long. Similarly maybe the method required a float and 
-				// we supplied a Double. Try these possibilities
-				if (value instanceof Long) {
-					Integer i = Integer.valueOf((int) ((Long) value).longValue());
-					params[0] = i;
-				} else if (value instanceof Double) {
-					Float f = new Float((float) ((Double) value).doubleValue());
-					params[0] = f;
-				}
-				method.invoke(obj, params);
-			}
+			method.invoke(obj, params);
 		} catch (Exception e) {
 			throw new OntologyException("Error invoking setter method "+method.getName()+" on object "+obj+" with parameter "+value, e);
 		}
-	} 
+	}
 
-	private void externaliseAndSetAggregateSlot(AbsObject abs, ObjectSchema schema, String slotName, Object slotValue, ObjectSchema slotSchema, Ontology referenceOnto) throws OntologyException {
+	private static void disallowRecursion(String slotName, Object container, Object contained) throws OntologyException {
+		if (container.equals(contained)) {
+			throw new OntologyException("cannot recursively externalise slot "+slotName);
+		}
+	}
+
+	private void externaliseAndSetAggregateSlot(Object obj, AbsObject abs, ObjectSchema schema, String slotName, Object slotValue, ObjectSchema slotSchema, Ontology referenceOnto) throws OntologyException {
 		AbsAggregate absSlotValue;
 		Class slotClass = slotValue.getClass();
 		if (slotClass.isArray()) {
 			absSlotValue = new AbsAggregate(slotSchema.getTypeName());
 			for (int i = 0; i < Array.getLength(slotValue); i++) {
 				Object object = Array.get(slotValue, i);
+				disallowRecursion(slotName, obj, object);
 				absSlotValue.add((AbsTerm)referenceOnto.fromObject(object));
 			}
 			AbsHelper.setAttribute(abs, slotName, absSlotValue);
@@ -114,12 +122,14 @@ class BeanIntrospector implements Introspector {
 				absSlotValue = new AbsAggregate(slotSchema.getTypeName());
 				try {
 					while (iter.hasNext()) {
-						absSlotValue.add((AbsTerm)referenceOnto.fromObject(iter.next()));
+						Object object = iter.next();
+						disallowRecursion(slotName, obj, object);
+						absSlotValue.add((AbsTerm)referenceOnto.fromObject(object));
 					}
 				} catch (ClassCastException cce) {
 					throw new OntologyException("Non term object in aggregate");
 				}
-	
+
 				AbsHelper.setAttribute(abs, slotName, absSlotValue);
 			}
 		}
@@ -227,17 +237,17 @@ class BeanIntrospector implements Introspector {
 				Object slotValue = invokeGetterMethod(getter, obj);
 
 				if (slotValue != null) {
+					// basic sanity check: do not try to set a slot that is a reference to self
+					disallowRecursion(slotName, obj, slotValue);
 					// Agregate slots require a special handling 
 					if (slotAccessData.aggregate) {
 						ObjectSchema slotSchema = schema.getSchema(slotName);
-						externaliseAndSetAggregateSlot(abs, schema, slotName, slotValue, slotSchema, referenceOnto);
+						externaliseAndSetAggregateSlot(obj, abs, schema, slotName, slotValue, slotSchema, referenceOnto);
 					}
 					else {
 						AbsObject absSlotValue = referenceOnto.fromObject(slotValue);
 						AbsHelper.setAttribute(abs, slotName, absSlotValue);
 					}
-				} else {
-					abs = null;
 				}
 			} 
 
@@ -287,7 +297,7 @@ class BeanIntrospector implements Introspector {
 						slotValue = referenceOnto.toObject(absObj);
 					}
 
-					invokeSetterMethod(setter, obj, slotValue);
+					invokeSetterMethod(setter, obj, slotValue, slotAccessData.type);
 				}             	
 			}
 
@@ -356,6 +366,6 @@ class BeanIntrospector implements Introspector {
 			}
 		}
 
-		invokeSetterMethod(setter, obj, slotValue);
+		invokeSetterMethod(setter, obj, slotValue, slotAccessData.type);
 	}
 }

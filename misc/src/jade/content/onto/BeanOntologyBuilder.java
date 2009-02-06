@@ -295,7 +295,12 @@ class BeanOntologyBuilder {
 	private TermSchema supplySchemaForClassFlat(Class clazz, boolean skipClassChecking) throws OntologyException, BeanOntologyException {
 		TermSchema ts;
 		ObjectSchema os;
-		os = ontology.getSchema(clazz);
+		if (java.util.Calendar.class.isAssignableFrom(clazz)) {
+			// ontologically, Calendar is translated into a Date
+			os = ontology.getSchema(java.util.Date.class);
+		} else {
+			os = ontology.getSchema(clazz);
+		}
 		if (os == null) {
 			if (!skipClassChecking && !Concept.class.isAssignableFrom(clazz)) {
 				throw new BeanOntologyException("cannot add a slot of class "+clazz.getName()+" since it does not implement Concept");
@@ -313,7 +318,12 @@ class BeanOntologyBuilder {
 	private TermSchema supplySchemaForClassRecursive(Class clazz, boolean skipClassChecking) throws OntologyException, BeanOntologyException {
 		TermSchema ts;
 		ObjectSchema os;
-		os = ontology.getSchema(clazz);
+		if (java.util.Calendar.class.isAssignableFrom(clazz)) {
+			// ontologically, Calendar is translated into a Date
+			os = ontology.getSchema(java.util.Date.class);
+		} else {
+			os = ontology.getSchema(clazz);
+		}
 		if (os == null) {
 			if (!skipClassChecking && !Concept.class.isAssignableFrom(clazz)) {
 				throw new BeanOntologyException("cannot add a slot of class "+clazz.getName()+" since it does not implement Concept");
