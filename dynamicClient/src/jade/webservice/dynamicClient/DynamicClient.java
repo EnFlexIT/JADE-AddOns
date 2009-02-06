@@ -83,7 +83,7 @@ public class DynamicClient {
 	private Map<String, ServiceInfo> servicesInfo = new HashMap<String, ServiceInfo>(); 
 	
 
-	public DynamicClient() throws DynamicClientException {
+	public DynamicClient() {
 		this.tmpDir = System.getProperty("java.io.tmpdir");
 		this.noWrap = false;
 
