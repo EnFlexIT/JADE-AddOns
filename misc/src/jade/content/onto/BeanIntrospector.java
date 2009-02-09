@@ -163,7 +163,7 @@ class BeanIntrospector implements Introspector {
 			if (jade.util.leap.List.class.isAssignableFrom(clazz)) {
 				result = new jade.util.leap.ArrayList(); 
 			} else if (jade.util.leap.Set.class.isAssignableFrom(clazz)) {
-				result = new jade.util.leap.SortedSetImpl();
+				result = new jade.util.leap.HashSet();
 			}
 		}
 		return result;

@@ -97,7 +97,7 @@ public abstract class AbstractBaseTest extends AbstractCheckSendAndReceiveTest {
 			javaList_value.add(cz);
 		}
 
-		jadeSet_value = new jade.util.leap.SortedSetImpl();
+		jadeSet_value = new jade.util.leap.HashSet();
 		for (ClassZero cz: jadeSet_model) {
 			jadeSet_value.add(cz);
 		}
