@@ -73,6 +73,7 @@ public class DynamicClient {
 	private String portName;
 	private int timeout;
 
+	private String packageName;
 	private String tmpDir;
 	private boolean noWrap;
 	private Emitter emitter;
@@ -114,6 +115,10 @@ public class DynamicClient {
 		this.noWrap = noWrap;
 	}
 
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+	
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
 	}
@@ -126,11 +131,13 @@ public class DynamicClient {
 	
 			log("Create Dynamic Client for "+wsdlUrl);
 			log("No-wrap="+noWrap, 1);
+			log("Pck-name="+packageName, 1);
 			log("Tmp-dir="+tmpDir, 1);
 			
 			// Init Axis emitter
 			emitter.setAllWanted(true);
 			emitter.setNowrap(noWrap);
+			emitter.setPackageName(packageName);
 	
 			// Prepare folders 
 			String stem = "DynamicClient-" + System.currentTimeMillis();
