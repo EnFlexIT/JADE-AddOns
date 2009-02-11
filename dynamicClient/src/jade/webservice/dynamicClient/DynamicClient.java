@@ -570,6 +570,7 @@ public class DynamicClient {
 	
 	private AbsObject getHeaderAbsValue(Stub stub, HeaderInfo hi) throws DynamicClientException {
 
+		AbsObject absObject = null;
 		String name = hi.getName();
 		
 		// Try with namespace
@@ -586,10 +587,11 @@ public class DynamicClient {
 			} catch (Exception e) {
 				throw new DynamicClientException("Header "+name+" error getting value");
 			}
+
+			// Convert object in relative abs
+			absObject = convertObjToAbs(hi, headerValue);
 		}
-		
-		// Convert object in relative abs
-		return convertObjToAbs(hi, headerValue);
+		return absObject;
 	}
 
 	private void log(String message) {
