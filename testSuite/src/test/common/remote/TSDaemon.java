@@ -47,7 +47,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 	private String additionalArgs = null;
 
 	public TSDaemon() throws RemoteException {
-		super();
+		super(Integer.parseInt(System.getProperty("tsdaemon.remoteobjectport", "0")));
 	}
 	
 	public TSDaemon(int port) throws RemoteException {
@@ -64,9 +64,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 
 	public static void main(String args[]) {
 		try {
-			int remoteObjectPort = Integer.parseInt(System.getProperty("tsdaemon.remoteobjectport", "0"));
-			System.out.println("PORTA = "+remoteObjectPort);
-			TSDaemon daemon = new TSDaemon(remoteObjectPort);
+			TSDaemon daemon = new TSDaemon();
 			daemon.start(args);
 		}
 		catch (Exception e) {
