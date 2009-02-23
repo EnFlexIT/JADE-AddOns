@@ -32,7 +32,7 @@ import jade.webservice.dynamicClient.DynamicClientException;
 import jade.webservice.dynamicClient.OperationInfo;
 import jade.webservice.dynamicClient.WSData;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Date;
 
 
@@ -50,7 +50,7 @@ public class DynamicClientTestCase extends TestCase {
 			// Create dynamic client
 			try {
 				dynamicClient = new DynamicClient();
-				dynamicClient.initClient(new URL("http://localhost:8080/axis2/services/MathFunctionsService?wsdl"));
+				dynamicClient.initClient(new URI("http://localhost:8080/axis2/services/MathFunctionsService?wsdl"));
 				
 			} catch(DynamicClientException e) {
 				e.printStackTrace();

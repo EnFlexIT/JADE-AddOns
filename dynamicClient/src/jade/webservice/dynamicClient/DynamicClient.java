@@ -37,6 +37,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.RemoteException;
@@ -123,13 +124,13 @@ public class DynamicClient {
 		this.timeout = timeout;
 	}
 	
-	public void initClient(URL wsdlUrl) throws DynamicClientException {
+	public void initClient(URI wsdlUri) throws DynamicClientException {
 
 		File src = null;
 		File classes = null;
 		try{
 	
-			log("Create Dynamic Client for "+wsdlUrl);
+			log("Create Dynamic Client for "+wsdlUri);
 			log("No-wrap="+noWrap, 1);
 			log("Pck-name="+packageName, 1);
 			log("Tmp-dir="+tmpDir, 1);
@@ -153,7 +154,7 @@ public class DynamicClient {
 			// Generate webservice classes
 			try {
 				emitter.setOutputDir(src.getAbsolutePath());
-				emitter.run(wsdlUrl.toExternalForm());
+				emitter.run(wsdlUri.toString());
 			} catch (Exception e) {
 				throw new DynamicClientException("Unable to write generated Java files: " + e.getMessage(), e);
 			}
