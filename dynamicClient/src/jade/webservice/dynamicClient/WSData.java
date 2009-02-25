@@ -36,6 +36,10 @@ public class WSData {
 	private Map<String, AbsObject> parameters = new HashMap<String, AbsObject>();
 	private Map<String, AbsObject> headers = new HashMap<String, AbsObject>();
 
+	public boolean isParameterEmpty(String name) {
+		return !parameters.containsKey(name);
+	}
+	
 	public AbsObject getParameter(String name) {
 		return parameters.get(name);
 	}
@@ -91,7 +95,11 @@ public class WSData {
 	public void setParameter(String name, byte[] value) {
 		setParameter(name, AbsPrimitive.wrap(value));
 	}
-	
+
+	public boolean isHeaderEmpty(String name) {
+		return !headers.containsKey(name);
+	}
+
 	public AbsObject getHeader(String name) {
 		return headers.get(name);
 	}
