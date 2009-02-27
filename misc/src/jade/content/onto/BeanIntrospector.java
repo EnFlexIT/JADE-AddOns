@@ -78,12 +78,9 @@ class BeanIntrospector implements Introspector {
 				java.util.Calendar calendar = new java.util.GregorianCalendar();
                 calendar.setTime((java.util.Date)value);
                 value = calendar;
-			} else if (java.lang.Long.class == clazz) {
-				Integer i = Integer.valueOf((int) ((Long) value).longValue());
-				value = i;
-			} else if (java.lang.Double.class == clazz) {
-				Float f = new Float((float) ((Double) value).doubleValue());
-				value = f;
+			} 
+			else {
+				value = BasicOntology.resolveNumericValue(value, clazz);
 			}
 			Object[] params = new Object[] {value};
 			method.invoke(obj, params);
