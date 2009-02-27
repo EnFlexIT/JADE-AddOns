@@ -16,6 +16,7 @@ import org.xml.sax.InputSource;
 import jade.content.abs.*;
 import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.SL0Vocabulary;
+import jade.content.onto.BasicOntology;
 import jade.content.onto.OntologyException;
 import jade.content.onto.Ontology;
 import jade.content.schema.*;
@@ -86,7 +87,8 @@ class XMLDecoder {
 		for (int i = 0; i < length; ++i) {
 			Node slot = attributes.item(i);
 			String slotName = slot.getNodeName();
-			setPrimitiveSlot(abs, slotName, slot.getNodeValue());
+			String slotTypeName = schema.getSchema(slotName).getTypeName();
+			setPrimitiveSlot(abs, slotName, slotTypeName, slot.getNodeValue());
 		}
 
 		// Handle non-primitive slots
@@ -156,7 +158,8 @@ class XMLDecoder {
 		for (int i = 0; i < length; ++i) {
 			Node slot = attributes.item(i);
 			String slotName = slot.getNodeName();
-			setPrimitiveSlot(slotNames, slotValuesByName, slotName, slot.getNodeValue());
+			String slotTypeName = schema.getSchema(slotName).getTypeName();
+			setPrimitiveSlot(slotNames, slotValuesByName, slotName, slotTypeName, slot.getNodeValue());
 		}
 		NodeList list = n.getChildNodes();
 		length = list.getLength();
@@ -187,23 +190,25 @@ class XMLDecoder {
 
 	private AbsObject decodePrimitive(Node n) throws CodecException {
 		NamedNodeMap attributes = n.getAttributes();
-		int length = attributes.getLength();
-		if (length == 1) {
-			Node attr = attributes.item(0);
-			String attrName = attr.getNodeName();
-			if (attrName.equalsIgnoreCase(XMLCodec.VALUE_ATTR)) {
-				return decodeAbsPrimitive(attr.getNodeValue());
-			}
-			else {
-				throw new CodecException("Unexpected attribute "+attrName+" in primitive element "+n);
-			}
+		Node attrType = attributes.getNamedItem(XMLCodec.TYPE_ATTR);
+		Node attrValue = attributes.getNamedItem(XMLCodec.VALUE_ATTR);
+		if (attrType != null && attrValue != null) {
+			return decodeAbsPrimitive(attrType.getNodeValue(), attrValue.getNodeValue());
 		}
 		else {
-			throw new CodecException("Missing \"value\" attribute in primitive element "+n);
+			throw new CodecException("Missing \"value\" and \"type\" attributes in primitive element "+n);
 		}
 	}
 
-	private AbsPrimitive decodeAbsPrimitive(String value) {
+	private AbsPrimitive decodeAbsPrimitive(String typeName, String value) {
+		// FIXME: with typeName is possible optimize the function
+		
+		// For type string decode xml text in java text  
+		if (BasicOntology.STRING.equals(typeName)) {
+			value = XMLCodec.fromXML(value);
+			return AbsPrimitive.wrap(value);
+		}
+		
 		if (preserveJavaTypes) {
 			int length = value.length();
 			char lastChar = length > 0 ? value.charAt(length-1) : '#'; // '#' is used just as a character different from 'L' and 'F'
@@ -234,16 +239,19 @@ class XMLDecoder {
 			}
 			catch (Exception e) {}
 		}
+		
 		// Try as a Double
 		try {
 			return AbsPrimitive.wrap(Double.parseDouble(value));
 		}
 		catch (Exception e) {}
+		
 		// Try as a Date
 		try {
 			return AbsPrimitive.wrap(ISO8601.toDate(value));
 		}
 		catch (Exception e) {}
+		
 		// Try as a byte[]
 		if (value.startsWith(XMLCodec.BINARY_STARTER)) {
 			try {
@@ -252,6 +260,7 @@ class XMLDecoder {
 			}
 			catch (Exception e) {}
 		}
+		
 		// Try as a Boolean (note that Boolean.parseBoolean() returns false for all strings but "true")
 		if (value.equalsIgnoreCase("true")) {
 			return AbsPrimitive.wrap(true);
@@ -259,12 +268,13 @@ class XMLDecoder {
 		if (value.equalsIgnoreCase("false")) {
 			return AbsPrimitive.wrap(false);
 		}
+		
 		// It must be a String
 		return AbsPrimitive.wrap(value.toString());
 	}
 	
-	private void setPrimitiveSlot(AbsPrimitiveSlotsHolder abs, String slotName, String value) {
-		AbsPrimitive slotValue = decodeAbsPrimitive(value);
+	private void setPrimitiveSlot(AbsPrimitiveSlotsHolder abs, String slotName, String slotTypeName, String value) {
+		AbsPrimitive slotValue = decodeAbsPrimitive(slotTypeName, value);
 		abs.set(slotName, slotValue);
 		/* Try as a Long
 		try {
@@ -306,10 +316,10 @@ class XMLDecoder {
 		abs.set(slotName, value);*/
 	}
 
-	private void setPrimitiveSlot(String[] slotNames, AbsObject[] slotValues, String slotName, String value) throws OntologyException {
+	private void setPrimitiveSlot(String[] slotNames, AbsObject[] slotValues, String slotName, String slotType, String value) throws OntologyException {
 		for (int i = 0; i < slotNames.length; ++i) {
 			if (slotNames[i].equalsIgnoreCase(slotName)) {
-				slotValues[i] = decodeAbsPrimitive(value);
+				slotValues[i] = decodeAbsPrimitive(slotType, value);
 				/* Try as a Long
 				try {
 					slotValues[i] = AbsPrimitive.wrap(Long.parseLong(value));

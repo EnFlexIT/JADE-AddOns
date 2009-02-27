@@ -28,6 +28,8 @@ package jade.content.lang.xml;
 import jade.content.lang.StringCodec;
 
 import java.io.StringReader;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
@@ -46,13 +48,14 @@ public class XMLCodec extends StringCodec {
 	// For instance a slot named foo that is a list of integers is encoded as below
 	// ...
 	// <foo>
-	//   <primitive value="1"/>
-	//   <primitive value="2"/>
+	//   <primitive type="BO_INTEGER" value="1"/>
+	//   <primitive type="BO_INTEGER" value="2"/>
 	//   ...
 	// </foo>
 	// ...
 	public static final String PRIMITIVE_TAG = "primitive";
 	public static final String VALUE_ATTR = "value";
+	public static final String TYPE_ATTR = "type";
 	
 	public static final String AGGREGATE_ATTR = "aggregate";
 	public static final String AGGREGATE_TYPE_ATTR = "aggregate-type";
@@ -169,4 +172,43 @@ public class XMLCodec extends StringCodec {
 		AbsObject abs = decodeAbsObject(ontology, xml);
 		return ontology.toObject(abs);
 	}
+	
+	
+	static String toXML(String javaText){
+		final StringBuilder result = new StringBuilder();
+		final StringCharacterIterator iterator = new StringCharacterIterator(javaText);
+		char character =  iterator.current();
+		while (character != CharacterIterator.DONE ){
+			if (character == '<') {
+				result.append("&lt;");
+			}
+			else if (character == '>') {
+				result.append("&gt;");
+			}
+			else if (character == '\"') {
+				result.append("&quot;");
+			}
+			else if (character == '\'') {
+				result.append("&#039;");
+			}
+			else if (character == '&') {
+				result.append("&amp;");
+			}
+			else {
+				result.append(character);
+			}
+			character = iterator.next();
+		}
+		return result.toString();
+	}
+
+	static String fromXML(String xmlText){
+		xmlText = xmlText.replace("&lt;", "<");
+		xmlText = xmlText.replace("&gt;", ">");
+		xmlText = xmlText.replace("&quot;", "\"");
+		xmlText = xmlText.replace("&#039;", "\'");
+		xmlText = xmlText.replace("&amp;", "&");
+		return xmlText;
+	}
+
 }

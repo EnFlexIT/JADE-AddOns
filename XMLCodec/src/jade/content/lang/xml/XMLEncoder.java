@@ -4,6 +4,7 @@ import java.util.Date;
 
 import jade.content.abs.*;
 import jade.content.schema.*;
+import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
 import jade.content.lang.Codec.CodecException;
@@ -166,41 +167,54 @@ class XMLEncoder {
 	 * have not been encoded yet.
 	 */
 	private List encodeAttributes(AbsPrimitiveSlotsHolder abs, ObjectSchema schema) throws CodecException {
-		String[] slotNames = schema.getNames();
 		List tagSlotNames = new ArrayList();
-		for (int i = 0; i < slotNames.length; ++i) {
-			String slotName = slotNames[i];
-			AbsObject slot = abs.getAbsObject(slotName);
-			if (slot != null && slot instanceof AbsPrimitive) {
-				Object obj = ((AbsPrimitive) slot).getObject();
-				if (obj instanceof String) {
-					// String primitives are encoded as tag
-					tagSlotNames.add(slotName);
+		try {
+			String[] slotNames = schema.getNames();
+			for (int i = 0; i < slotNames.length; ++i) {
+				String slotName = slotNames[i];
+				AbsObject slot = abs.getAbsObject(slotName);
+				if (slot != null && slot instanceof AbsPrimitive) {
+					Object obj = ((AbsPrimitive) slot).getObject();
+					if (obj instanceof String && schema.getSchema(slotName) != BasicOntology.getInstance().getSchema(BasicOntology.STRING)) {
+						// String primitives are encoded as tag
+						tagSlotNames.add(slotName);
+					}
+					else {
+						buffer.append(' ');
+						buffer.append(slotName);
+						buffer.append('=');
+						buffer.append('"');
+						buffer.append(getPrimitiveValue((AbsPrimitive) slot));
+						buffer.append('"');
+					}
 				}
 				else {
-					buffer.append(' ');
-					buffer.append(slotName);
-					buffer.append('=');
-					buffer.append('"');
-					buffer.append(getPrimitiveValue((AbsPrimitive) slot));
-					buffer.append('"');
+					tagSlotNames.add(slotName);
 				}
 			}
-			else {
-				tagSlotNames.add(slotName);
-			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		return tagSlotNames;
 	}
 	
 	
 	/**
-	 * This is used only to encode primitive entities inside aggregates. Normal primitive slots are encoded as XML attributes
+	 * This is used only to encode primitive entities inside aggregates. 
+	 * Such entities will appear as 
+	 * <primitive type="BO_INTEGER" value="5"/>
+	 * Normal primitive slots are encoded as XML attributes
 	 */
 	private void encodePrimitive(AbsPrimitive abs) throws CodecException {
 		insertIndent();
 		buffer.append(OPEN_ANG);
 		buffer.append(XMLCodec.PRIMITIVE_TAG);
+		buffer.append(' ');
+		buffer.append(XMLCodec.TYPE_ATTR);
+		buffer.append('=');
+		buffer.append('"');
+		buffer.append(abs.getTypeName());
+		buffer.append('"');
 		buffer.append(' ');
 		buffer.append(XMLCodec.VALUE_ATTR);
 		buffer.append('=');
@@ -217,18 +231,7 @@ class XMLEncoder {
 		buffer.append(OPEN_ANG);
 		buffer.append(slotName);
 		buffer.append(CLOSE_ANG);
-		for (int i = 0; i < slotValue.length(); ++i) {
-			char c = slotValue.charAt(i);
-			if (c == OPEN_ANG) {
-				buffer.append("&lt;");
-			}
-			else if (c == CLOSE_ANG) {
-				buffer.append("&gt;");
-			}
-			else {
-				buffer.append(c);
-			}
-		}
+		buffer.append(XMLCodec.toXML(slotValue));
 		buffer.append(OPEN_ANG);
 		buffer.append('/');
 		buffer.append(slotName);
@@ -298,7 +301,12 @@ class XMLEncoder {
 			}
 		}
 		else {
-			// Boolean, Integer, Double, String (Long, Float if not preserving Java types) 
+			// String -> encode text
+			if (obj instanceof String) {
+				return XMLCodec.toXML((String)obj);
+			}
+			
+			// Boolean, Integer, Double, (Long, Float if not preserving Java types) 
 			return obj.toString();
 		}
 	}
