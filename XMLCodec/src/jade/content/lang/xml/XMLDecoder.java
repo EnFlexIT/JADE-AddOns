@@ -100,26 +100,26 @@ class XMLDecoder {
 				String slotName = slot.getNodeName();
 				AbsObject slotValue = null;
 				NodeList slotChildList = slot.getChildNodes();
-				// Check if the slot value is a String
-				if (slotChildList.getLength() == 1) {
-					Node strValue = slotChildList.item(0);
-					if (!(strValue instanceof Element)) {
-						slotValue = AbsPrimitive.wrap(strValue.getNodeValue());
+				// Check if the slot value is an aggregate
+				ObjectSchema slotSchema = schema.getSchema(slotName);
+				if (slotSchema instanceof AggregateSchema) {
+					// The slot schema mandates the value to be an aggregate
+					slotValue = decodeAggregate(slotChildList, slot.getAttributes());
+				}
+				else if (AggregateSchema.getBaseSchema().isCompatibleWith(slotSchema)) {
+					// The slot schema allows the value to be an aggregate. If this is the case the "aggregate" attribute is set to true
+					attributes = slot.getAttributes();
+					Node attr = attributes.getNamedItem(XMLCodec.AGGREGATE_ATTR);
+					if (attr != null && attr.getNodeValue().equals("true")) {
+						slotValue = decodeAggregate(slotChildList, attributes);
 					}
 				}
 				if (slotValue == null) {
-					// Check if the slot value is an aggregate
-					ObjectSchema slotSchema = schema.getSchema(slotName);
-					if (slotSchema instanceof AggregateSchema) {
-						// The slot schema mandates the value to be an aggregate
-						slotValue = decodeAggregate(slotChildList, slot.getAttributes());
-					}
-					else if (AggregateSchema.getBaseSchema().isCompatibleWith(slotSchema)) {
-						// The slot schema allows the value to be an aggregate. If this is the case the "aggregate" attribute is set to true
-						attributes = slot.getAttributes();
-						Node attr = attributes.getNamedItem(XMLCodec.AGGREGATE_ATTR);
-						if (attr != null && attr.getNodeValue().equals("true")) {
-							slotValue = decodeAggregate(slotChildList, attributes);
+					// Check if the slot value is a String
+					if (slotChildList.getLength() == 1 && slot.getAttributes().getLength() == 0) {
+						Node strValue = slotChildList.item(0);
+						if (!(strValue instanceof Element)) {
+							slotValue = AbsPrimitive.wrap(strValue.getNodeValue());
 						}
 					}
 				}
@@ -166,8 +166,8 @@ class XMLDecoder {
 		for (int i = 0; i < length; ++i) {
 			Node slot = list.item(i);
 			if (slot instanceof Element) {
-				if (!handleStringSlot(slotNames, slotValuesByName, slot)) {
-					if (!handleAggregateSlot(slotNames, slotValuesByName, slot, schema)) {
+				if (!handleAggregateSlot(slotNames, slotValuesByName, slot, schema)) {
+					if (!handleStringSlot(slotNames, slotValuesByName, slot)) {
 						slotValuesByOrder.add(decodeNode(slot));
 					}
 				}
@@ -181,7 +181,9 @@ class XMLDecoder {
 			}
 			else {
 				// The value was not encoded by name --> it must be encoded by order
-				abs.set(slotNames[i], (AbsObject) slotValuesByOrder.get(k));
+				if (slotValuesByOrder.size() > k) {
+					abs.set(slotNames[i], (AbsObject) slotValuesByOrder.get(k));
+				}
 				k++;
 			}
 		}
@@ -367,7 +369,7 @@ class XMLDecoder {
 		for (int i = 0; i < slotNames.length; ++i) {
 			if (slotNames[i].equalsIgnoreCase(slotName)) {
 				NodeList slotChildList = slot.getChildNodes();
-				if (slotChildList.getLength() == 1) {
+				if (slotChildList.getLength() == 1 && slot.getAttributes().getLength() == 0) {
 					Node strValue = slotChildList.item(0);
 					if (!(strValue instanceof Element)) {
 						slotValues[i] = AbsPrimitive.wrap(strValue.getNodeValue());
