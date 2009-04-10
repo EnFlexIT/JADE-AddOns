@@ -342,6 +342,13 @@ public class ContainerMonitorAgent extends Agent {
 				appendBehaviourInfo(child, sb, prefix+"  ", stackTraceMode);
 			}
 		}
+		else if (b instanceof WrapperBehaviour) {
+			sb.append(prefix+"- Type = Wrapper\n");
+			sb.append(prefix+"- Wrapped-Behaviour Information\n");
+			Behaviour wb = ((WrapperBehaviour) b).getWrappedBehaviour();
+			sb.append(prefix+"  - Name = "+wb.getBehaviourName()+"\n");
+			appendBehaviourInfo(wb, sb, prefix+"  ", stackTraceMode);
+		}
 		else if (b instanceof ThreadedBehaviourFactory.ThreadedBehaviourWrapper) {
 			ThreadedBehaviourFactory.ThreadedBehaviourWrapper w = (ThreadedBehaviourFactory.ThreadedBehaviourWrapper) b;
 			sb.append(prefix+"- Type = Threaded\n");
