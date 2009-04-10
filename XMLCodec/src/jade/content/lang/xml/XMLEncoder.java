@@ -124,14 +124,17 @@ class XMLEncoder {
 							if (slot instanceof AbsAggregate) {
 								// Aggregate slots are always encoded by name. 
 								Map aggregateModifyingAttributes = new HashMap();
-								if (!slot.getTypeName().equals(SL0Vocabulary.SEQUENCE)) {
-									aggregateModifyingAttributes.put(XMLCodec.AGGREGATE_TYPE_ATTR, slot.getTypeName());
-								}
 								ObjectSchema slotSchema = schema.getSchema(slotName);
 								if (!(slotSchema instanceof AggregateSchema)) {
 									// The slot value is an aggregate, but this cannot be desumed from the slot schema -->
 									// Insert an indication to enable correct decoding
 									aggregateModifyingAttributes.put(XMLCodec.AGGREGATE_ATTR, "true");
+
+									// Furthermore if the aggregate type is different than SEQUENCE, insert 
+									// an indication to allow reconstructing it in the decoding phase
+									if (!slot.getTypeName().equals(SL0Vocabulary.SEQUENCE)) {
+										aggregateModifyingAttributes.put(XMLCodec.AGGREGATE_TYPE_ATTR, slot.getTypeName());
+									}
 								}
 								encodeOpenTag(slotName, aggregateModifyingAttributes);
 								closeSlotNameTag = true;

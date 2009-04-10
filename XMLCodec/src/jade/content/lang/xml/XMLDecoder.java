@@ -104,14 +104,14 @@ class XMLDecoder {
 				ObjectSchema slotSchema = schema.getSchema(slotName);
 				if (slotSchema instanceof AggregateSchema) {
 					// The slot schema mandates the value to be an aggregate
-					slotValue = decodeAggregate(slotChildList, slot.getAttributes());
+					slotValue = decodeAggregate(slotChildList, slot.getAttributes(), slotSchema.getTypeName());
 				}
 				else if (AggregateSchema.getBaseSchema().isCompatibleWith(slotSchema)) {
 					// The slot schema allows the value to be an aggregate. If this is the case the "aggregate" attribute is set to true
 					attributes = slot.getAttributes();
 					Node attr = attributes.getNamedItem(XMLCodec.AGGREGATE_ATTR);
 					if (attr != null && attr.getNodeValue().equals("true")) {
-						slotValue = decodeAggregate(slotChildList, attributes);
+						slotValue = decodeAggregate(slotChildList, attributes, null);
 					}
 				}
 				if (slotValue == null) {
@@ -390,7 +390,7 @@ class XMLDecoder {
 					ObjectSchema slotSchema = schema.getSchema(slotName);
 					if (slotSchema instanceof AggregateSchema) {
 						// The slot value is certainly an aggregate
-						slotValues[i] = decodeAggregate(slot.getChildNodes(), slot.getAttributes());
+						slotValues[i] = decodeAggregate(slot.getChildNodes(), slot.getAttributes(), slotSchema.getTypeName());
 						return true;
 					}
 					else if (AggregateSchema.getBaseSchema().isCompatibleWith(slotSchema)) {
@@ -398,7 +398,7 @@ class XMLDecoder {
 						NamedNodeMap attributes = slot.getAttributes();
 						Node attr = attributes.getNamedItem(XMLCodec.AGGREGATE_ATTR);
 						if (attr != null && attr.getNodeValue().equals("true")) {
-							slotValues[i] = decodeAggregate(slot.getChildNodes(), attributes);
+							slotValues[i] = decodeAggregate(slot.getChildNodes(), attributes, null);
 							return true;
 						}
 					}
@@ -412,11 +412,13 @@ class XMLDecoder {
 		return false;
 	}
 
-	private AbsAggregate decodeAggregate(NodeList list, NamedNodeMap attributes) throws CodecException, OntologyException {
-		String typeName = SL0Vocabulary.SEQUENCE;
+	private AbsAggregate decodeAggregate(NodeList list, NamedNodeMap attributes, String typeName) throws CodecException, OntologyException {
 		Node attr = attributes.getNamedItem(XMLCodec.AGGREGATE_TYPE_ATTR);
 		if (attr != null) {
 			typeName = attr.getNodeValue();
+		}
+		if (typeName == null) {
+			typeName = SL0Vocabulary.SEQUENCE;
 		}
 		AbsAggregate abs = new AbsAggregate(typeName);
 		int length = list.getLength();
