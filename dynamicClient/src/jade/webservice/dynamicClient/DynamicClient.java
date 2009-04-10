@@ -135,6 +135,10 @@ public class DynamicClient {
 			log("Pck-name="+packageName, 1);
 			log("Tmp-dir="+tmpDir, 1);
 			
+			// reset service/port
+			serviceName = null;
+			portName = null;
+			
 			// Init Axis emitter
 			emitter.setAllWanted(true);
 			emitter.setNowrap(noWrap);
@@ -265,53 +269,55 @@ public class DynamicClient {
 				String portName = port.getName();
 				log("port "+portName, 1);
 				Stub stub = getStub(port, locator);
-				PortInfo portInfo = new PortInfo(portName, stub);
-				serviceInfo.putPort(portName, portInfo);
-				
-				// Manage operations
-				List<BindingOperation> operations = WSDLUtils.getOperations(port);
-				for (BindingOperation bindingOperation : operations) {
-
-					String operationName = bindingOperation.getName();
-					log("operation "+operationName, 2);
-					OperationInfo operationInfo = new OperationInfo(operationName);
-					portInfo.putOperation(operationName, operationInfo);
-
-					// Manage parameters & headers
-					OperationParser opParser;
-					try {
-						// From axis information -> create ontology types, parameters and headers list  
-						opParser = new OperationParser(bindingOperation, port.getBinding(), emitter, typeOnto, classloader);
-					} catch (ClassNotFoundException e) {
-						throw new DynamicClientException(e);
-					} 
+				if (stub != null) {
+					PortInfo portInfo = new PortInfo(portName, stub);
+					serviceInfo.putPort(portName, portInfo);
 					
-					// Get parameters
-					List<ParameterInfo> parameters = opParser.getParameters();
-					for (ParameterInfo parameterInfo : parameters) {
-						operationInfo.putParameter(parameterInfo.getName(), parameterInfo);
+					// Manage operations
+					List<BindingOperation> operations = WSDLUtils.getOperations(port);
+					for (BindingOperation bindingOperation : operations) {
+	
+						String operationName = bindingOperation.getName();
+						log("operation "+operationName, 2);
+						OperationInfo operationInfo = new OperationInfo(operationName);
+						portInfo.putOperation(operationName, operationInfo);
+	
+						// Manage parameters & headers
+						OperationParser opParser;
+						try {
+							// From axis information -> create ontology types, parameters and headers list  
+							opParser = new OperationParser(bindingOperation, port.getBinding(), emitter, typeOnto, classloader);
+						} catch (ClassNotFoundException e) {
+							throw new DynamicClientException(e);
+						} 
 						
-						log("parameter: "+parameterInfo, 3);
-					}
-					
-					// Get explicit headers
-					Collection<HeaderInfo> explicitHeaders = opParser.getExplicitHeaders();
-					for (HeaderInfo headerInfo : explicitHeaders) {
-						operationInfo.putHeader(headerInfo.getName(), headerInfo);
+						// Get parameters
+						List<ParameterInfo> parameters = opParser.getParameters();
+						for (ParameterInfo parameterInfo : parameters) {
+							operationInfo.putParameter(parameterInfo.getName(), parameterInfo);
+							
+							log("parameter: "+parameterInfo, 3);
+						}
 						
-						log("explicit header: "+headerInfo, 3);
-					}
-					
-					// Get implicit headers
-					Collection<HeaderInfo> implicitHeaders = opParser.getImplicitHeaders();
-					for (HeaderInfo headerInfo : implicitHeaders) {
-						operationInfo.putHeader(headerInfo.getName(), headerInfo);
+						// Get explicit headers
+						Collection<HeaderInfo> explicitHeaders = opParser.getExplicitHeaders();
+						for (HeaderInfo headerInfo : explicitHeaders) {
+							operationInfo.putHeader(headerInfo.getName(), headerInfo);
+							
+							log("explicit header: "+headerInfo, 3);
+						}
 						
-						log("implicit header: "+headerInfo, 3);
+						// Get implicit headers
+						Collection<HeaderInfo> implicitHeaders = opParser.getImplicitHeaders();
+						for (HeaderInfo headerInfo : implicitHeaders) {
+							operationInfo.putHeader(headerInfo.getName(), headerInfo);
+							
+							log("implicit header: "+headerInfo, 3);
+						}
+						
+						// Retrieve and save in operationInfo the stub method associated to operation
+						operationInfo.manageOperationStubMethod(stub);
 					}
-					
-					// Retrieve and save in operationInfo the stub method associated to operation
-					operationInfo.manageOperationStubMethod(stub);
 				}
 			}
 		}
@@ -484,10 +490,16 @@ public class DynamicClient {
 		return (Service)locatorClass.newInstance();
 	}
 	
-	private Stub getStub(Port axisPort, Service locator) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException {
+	private Stub getStub(Port axisPort, Service locator) {
+		Stub stub = null;
 		String portNameJavaId = WSDLUtils.buildPortNameJavaId(emitter.getSymbolTable(), axisPort);
-		Method stubMethod = locator.getClass().getMethod("get"+portNameJavaId, new Class[0]);
-		return (Stub)stubMethod.invoke(locator, new Object[0]);
+		try {
+			Method stubMethod = locator.getClass().getMethod("get"+portNameJavaId, new Class[0]);
+			stub = (Stub)stubMethod.invoke(locator, new Object[0]);
+		} catch(Exception e) {
+			log.warn("Port "+portNameJavaId+" not found in locator");
+		}
+		return stub;
 	}
 	
 	private Object convertAbsToObj(ParameterInfo pi, AbsObject abs) throws DynamicClientException {

@@ -101,38 +101,44 @@ public class OperationParser {
 		}
 
 		Set<QName> inHeaders = new HashSet<QName>();
-		Iterator<Object> iter = bindingOperation.getBindingInput().getExtensibilityElements().iterator();
+		Iterator<Object> iter;
 		SOAPHeader sh;
 		QName shqn;
-		while(iter.hasNext()) {
-			Object o = iter.next();
-			if (o instanceof SOAPHeader) {
-				sh = (SOAPHeader) o;
-				shqn = WSDLUtils.getSOAPHeaderQName(sh, emitter);
-				if (!implicitHeadersMap.keySet().contains(shqn)) {
-					explicitInputWadeHeadersMap.put(shqn, convertToHeaderInfo(sh, emitter, ParameterInfo.IN, -1));
-					inHeaders.add(shqn);
-				}
-			}
-		}
-
-		iter = bindingOperation.getBindingOutput().getExtensibilityElements().iterator();
-		while(iter.hasNext()) {
-			Object o = iter.next();
-			if (o instanceof SOAPHeader) {
-				sh = (SOAPHeader) o;
-				shqn = WSDLUtils.getSOAPHeaderQName(sh, emitter);
-				if (!implicitHeadersMap.keySet().contains(shqn)) {
-					if (inHeaders.contains(shqn)) {
-						HeaderInfo wadeHeader = explicitInputWadeHeadersMap.remove(shqn);
-						wadeHeader.setMode(ParameterInfo.INOUT);
-						explicitHeadersList.add(wadeHeader);
-					} else {
-						explicitHeadersList.add(convertToHeaderInfo(sh, emitter, ParameterInfo.OUT, -1));
+		if (bindingOperation.getBindingInput() != null) {
+			iter = bindingOperation.getBindingInput().getExtensibilityElements().iterator();
+			while(iter.hasNext()) {
+				Object o = iter.next();
+				if (o instanceof SOAPHeader) {
+					sh = (SOAPHeader) o;
+					shqn = WSDLUtils.getSOAPHeaderQName(sh, emitter);
+					if (!implicitHeadersMap.keySet().contains(shqn)) {
+						explicitInputWadeHeadersMap.put(shqn, convertToHeaderInfo(sh, emitter, ParameterInfo.IN, -1));
+						inHeaders.add(shqn);
 					}
 				}
 			}
 		}
+
+		if (bindingOperation.getBindingOutput() != null) {
+			iter = bindingOperation.getBindingOutput().getExtensibilityElements().iterator();
+			while(iter.hasNext()) {
+				Object o = iter.next();
+				if (o instanceof SOAPHeader) {
+					sh = (SOAPHeader) o;
+					shqn = WSDLUtils.getSOAPHeaderQName(sh, emitter);
+					if (!implicitHeadersMap.keySet().contains(shqn)) {
+						if (inHeaders.contains(shqn)) {
+							HeaderInfo wadeHeader = explicitInputWadeHeadersMap.remove(shqn);
+							wadeHeader.setMode(ParameterInfo.INOUT);
+							explicitHeadersList.add(wadeHeader);
+						} else {
+							explicitHeadersList.add(convertToHeaderInfo(sh, emitter, ParameterInfo.OUT, -1));
+						}
+					}
+				}
+			}
+		}
+		
 		explicitHeadersList.addAll(explicitInputWadeHeadersMap.values());
 	}
 	
@@ -141,7 +147,7 @@ public class OperationParser {
 	}
 	
 	private ParameterInfo convertToParameterInfo(Parameter axisParam, Emitter emitter, boolean returnType) throws ClassNotFoundException, OntologyException {
-		String paramType = JavaUtils.getLoadableClassName(axisParam.getType().getName());
+		String paramType = axisParam.getType().getName();
 		if(!returnType && axisParam.getMode() != Parameter.IN) {
 			Boolean holderIsNeeded = (Boolean) axisParam.getType().getDynamicVar(JavaTypeWriter.HOLDER_IS_NEEDED);
 			if(holderIsNeeded != null && holderIsNeeded) {
@@ -165,6 +171,7 @@ public class OperationParser {
 		} else {
 			pi.setMode(ParameterInfo.RETURN);
 		}
+		paramType = JavaUtils.getLoadableClassName(paramType);
 		pi.setTypeClass(getClassFromType(paramType));
 		pi.setSchema(getSchemaFromType(paramType));
 
