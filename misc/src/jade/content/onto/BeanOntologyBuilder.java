@@ -533,7 +533,7 @@ class BeanOntologyBuilder {
 				}
 			}
 		} catch (OntologyException e) {
-			throw new BeanOntologyException("error getting schema for slot "+slotName);
+			throw new BeanOntologyException("error getting schema for slot "+slotName, e);
 		}
 		return schema;
 	}
