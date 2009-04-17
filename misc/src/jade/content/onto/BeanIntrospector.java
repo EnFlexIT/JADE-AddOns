@@ -80,7 +80,7 @@ class BeanIntrospector implements Introspector {
                 value = calendar;
 			} 
 			else {
-				value = BasicOntology.resolveNumericValue(value, clazz);
+				value = BasicOntology.adjustPrimitiveValue(value, clazz);
 			}
 			Object[] params = new Object[] {value};
 			method.invoke(obj, params);
