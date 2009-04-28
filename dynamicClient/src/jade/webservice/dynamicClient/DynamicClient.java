@@ -516,6 +516,7 @@ public class DynamicClient {
 			try {
 				// Convert abs with ontology
 				value = typeOnto.toObject(abs);
+				value = BasicOntology.adjustPrimitiveValue(value, pi.getTypeClass());
 				
 				// Check if value is a Date object and the parameter a Calendar class
 				if (value instanceof Date &&
