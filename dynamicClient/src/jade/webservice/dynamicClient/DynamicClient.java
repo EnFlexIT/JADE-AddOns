@@ -41,6 +41,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -67,6 +68,8 @@ import org.apache.log4j.Logger;
 
 public class DynamicClient {
 
+	public static final SimpleDateFormat ISO8601_DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSS");
+	
 	private static Logger log = Logger.getLogger(DynamicClient.class.getName());
 	
 	private URL endpoint;
@@ -521,9 +524,9 @@ public class DynamicClient {
 				// Check if the parameter is a Calendar class
 				if (Calendar.class.isAssignableFrom(pi.getTypeClass())) {
 
-					// Convert from String to Date
+					// Convert from String (W3C-ISO8601)to Date
 					if (value instanceof String) {
-						value = BasicOntology.ISO8601_DATE_FORMAT.parse((String)value);
+						value = ISO8601_DATE_FORMAT.parse((String)value);
 					}
 					
 					// Convert from Date to Calendar
