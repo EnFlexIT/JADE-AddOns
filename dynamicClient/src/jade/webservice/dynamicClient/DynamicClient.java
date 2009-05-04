@@ -518,14 +518,20 @@ public class DynamicClient {
 				value = typeOnto.toObject(abs);
 				value = BasicOntology.adjustPrimitiveValue(value, pi.getTypeClass());
 				
-				// Check if value is a Date object and the parameter a Calendar class
-				if (value instanceof Date &&
-					Calendar.class.isAssignableFrom(pi.getTypeClass())) {
+				// Check if the parameter is a Calendar class
+				if (Calendar.class.isAssignableFrom(pi.getTypeClass())) {
+
+					// Convert from String to Date
+					if (value instanceof String) {
+						value = BasicOntology.ISO8601_DATE_FORMAT.parse((String)value);
+					}
 					
-					// Convert the Date object into Calendar object
-					Calendar calendar = new GregorianCalendar();
-					calendar.setTime((Date)value);
-					value = calendar;
+					// Convert from Date to Calendar
+					if (value instanceof Date) {
+						Calendar calendar = new GregorianCalendar();
+						calendar.setTime((Date)value);
+						value = calendar;
+					}
 				}
 				
 				// Check if value is a jade list and parameter a java array
