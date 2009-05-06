@@ -57,6 +57,7 @@ import javax.wsdl.BindingOperation;
 import javax.wsdl.Port;
 import javax.xml.rpc.holders.Holder;
 
+import org.apache.axis.AxisProperties;
 import org.apache.axis.client.Service;
 import org.apache.axis.client.Stub;
 import org.apache.axis.message.SOAPHeaderElement;
@@ -76,7 +77,6 @@ public class DynamicClient {
 	private String serviceName;
 	private String portName;
 	private int timeout;
-
 	private String packageName;
 	private String tmpDir;
 	private boolean noWrap;
@@ -125,6 +125,22 @@ public class DynamicClient {
 	
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
+	}
+	
+	public void setTrustStore(String trustStore) {
+		System.setProperty("javax.net.ssl.trustStore", trustStore);
+	}
+
+	public void setTrustStorePassword(String trustStorePassword) {
+		System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+	}
+
+	public void disableCertificateChecking() {
+		AxisProperties.setProperty("axis.socketSecureFactory", "org.apache.axis.components.net.SunFakeTrustSocketFactory");
+	}
+
+	public void enableCertificateChecking() {
+		AxisProperties.setProperty("axis.socketSecureFactory", "");
 	}
 	
 	public void initClient(URI wsdlUri) throws DynamicClientException {
