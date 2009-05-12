@@ -34,6 +34,7 @@ public class JadeActivator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
+
 		try{
 			/*java.util.Properties properties = System.getProperties();
 			Enumeration<Object> itProp = properties.keys();
@@ -47,6 +48,8 @@ public class JadeActivator implements BundleActivator {
 			this.context = context;
 			Properties props = new Properties();
 
+			
+			
 			//find jade properties 
 			Set<Entry<Object, Object>> entrySet = System.getProperties().entrySet();
 			for (Entry<Object,Object> entry : entrySet){
