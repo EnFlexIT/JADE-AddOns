@@ -81,7 +81,7 @@ public class JadeActivator implements BundleActivator {
 			}
 			
 			Profile profile = new ProfileImpl(props);
-			Runtime.instance().setCloseVM(true);
+			Runtime.instance().setCloseVM(false);
 
 			if (profile.getBooleanProperty(Profile.MAIN, true)) {
 				container = Runtime.instance().createMainContainer(profile);

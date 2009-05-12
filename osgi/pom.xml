@@ -28,15 +28,16 @@
               <Bundle-Version>1.0.0</Bundle-Version>
               <Bundle-Activator>jade.osgi.JadeActivator</Bundle-Activator>
               <Import-Package>
-                  org.osgi.framework,
-                  *;resolution:=optional
+                  org.osgi.framework,*;resolution:=optional
               </Import-Package>
 				
+              <!--
               <Private-Package>
                   jade.osgi
               </Private-Package>
+              -->
               <Export-Package>
-                  jade.core.*
+                  jade.*
               </Export-Package>
           
           <Embed-Dependency>JadeLeapJ2se;inline=true,commons-codec;inline=false</Embed-Dependency>
