@@ -50,10 +50,10 @@ public final class FileUtils {
         if (s == null) {
             int x = (int)(Math.random() * 1000000);
             s = System.getProperty("java.io.tmpdir");
-            File f = new File(s, "cxf-tmp-" + x);
+            File f = new File(s, "wsdc-tmp-" + x);
             while (!f.mkdir()) {
                 x = (int)(Math.random() * 1000000);
-                f = new File(s, "cxf-tmp-" + x);
+                f = new File(s, "wsdc-tmp-" + x);
             }
             defaultTempDir = f;
             Thread hook = new Thread() {
@@ -125,9 +125,9 @@ public final class FileUtils {
             suffix = ".tmp";
         }
         if (prefix == null) {
-            prefix = "cxf";
+            prefix = "wsdc";
         } else if (prefix.length() < 3) {
-            prefix = prefix + "cxf";
+            prefix = prefix + "wsdc";
         }
         result = File.createTempFile(prefix, suffix, parent);
 

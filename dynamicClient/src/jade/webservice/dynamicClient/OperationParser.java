@@ -236,7 +236,7 @@ public class OperationParser {
 		if (isArray(paramType)) {
 			String elementType = getArrayElementType(paramType);
 			TermSchema elementSchema = getSchemaFromType(elementType);
-			paramSchema = new AggregateSchema(BasicOntology.SEQUENCE);
+			paramSchema = new AggregateSchema(BasicOntology.SEQUENCE, elementSchema);
 		} else {
 			Class paramClass = getClassFromType(paramType);
 			paramSchema = getTypeSchema(paramClass);

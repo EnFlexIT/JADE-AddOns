@@ -98,7 +98,7 @@ public final class CompilerUtils {
         try {
             if (isLongCommandLines(args) && sourceFileIndex >= 0) {
                 PrintWriter out = null;
-                tmpFile = FileUtils.createTempFile("axis-compiler", null);
+                tmpFile = FileUtils.createTempFile("wsdc-compiler", null);
                 out = new PrintWriter(new FileWriter(tmpFile));
                 for (int i = sourceFileIndex; i < args.length; i++) {
                     if (args[i].indexOf(" ") > -1) {

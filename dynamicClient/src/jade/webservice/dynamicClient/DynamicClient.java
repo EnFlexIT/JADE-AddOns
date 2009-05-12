@@ -179,7 +179,7 @@ public class DynamicClient {
 				emitter.setOutputDir(src.getAbsolutePath());
 				emitter.run(wsdlUri.toString());
 			} catch (Exception e) {
-				throw new DynamicClientException("Unable to write generated Java files: " + e.getMessage(), e);
+				throw new DynamicClientException("Error parsing wsdl: " +wsdlUri.toString()+ ", cause: " + e.getMessage(), e);
 			}
 	
 			// Prapare classpath
@@ -602,7 +602,7 @@ public class DynamicClient {
 			absObject = typeOnto.fromObject(value);
 			
 		} catch (OntologyException e) {
-			throw new DynamicClientException("Header "+pi.getName()+" error converting to abs "+value, e);
+			throw new DynamicClientException("Parameter "+pi.getName()+" error converting to abs "+value, e);
 		}
 		return absObject;
 	}
