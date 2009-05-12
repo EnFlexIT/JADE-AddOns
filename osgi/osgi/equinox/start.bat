@@ -1,0 +1,1 @@
+java -jar org.eclipse.osgi_3.4.0.v20080605-1900.jar -console
