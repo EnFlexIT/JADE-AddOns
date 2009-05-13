@@ -43,6 +43,8 @@
           <Embed-Dependency>JadeLeapJ2se;inline=true,commons-codec;inline=false</Embed-Dependency>
 	      <Embed-Transitive>true</Embed-Transitive>
 		  <Embed-Directory>lib</Embed-Directory>
+		  <Export-Service>jade.osgi.service.runtime.JadeRuntimeService</Export-Service>
+          
           </instructions>
       </configuration>
   </plugin>
@@ -55,7 +57,7 @@
       <version>4.4</version>
       <scope>test</scope>
     </dependency>
- 	<dependency>
+ 	 <dependency>
            <groupId>org.apache.felix</groupId>
            <artifactId>org.osgi.core</artifactId>
 		    <version>1.2.0</version>
