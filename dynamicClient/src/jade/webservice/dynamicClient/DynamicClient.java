@@ -64,6 +64,8 @@ import org.apache.axis.message.SOAPHeaderElement;
 import org.apache.axis.utils.JavaUtils;
 import org.apache.axis.wsdl.symbolTable.ServiceEntry;
 import org.apache.axis.wsdl.toJava.Emitter;
+import org.apache.axis.wsdl.toJava.GeneratedFileInfo;
+import org.apache.axis.wsdl.toJava.GeneratedFileInfo.Entry;
 import org.apache.log4j.Logger;
 
 
@@ -80,7 +82,7 @@ public class DynamicClient {
 	private String packageName;
 	private String tmpDir;
 	private boolean noWrap;
-	private Emitter emitter;
+	private boolean safeMode;
 	private ClassLoader classloader;
 
 	private BeanOntology typeOnto;
@@ -91,9 +93,9 @@ public class DynamicClient {
 	public DynamicClient() {
 		this.tmpDir = System.getProperty("java.io.tmpdir");
 		this.noWrap = false;
+		this.safeMode = true;
 
 		timeout = -1;
-		emitter = new Emitter();
 		classloader = Thread.currentThread().getContextClassLoader();
 		
 		typeOnto = new BeanOntology("WSDL-TYPES");
@@ -119,6 +121,10 @@ public class DynamicClient {
 		this.noWrap = noWrap;
 	}
 
+	public void setSafeMode(boolean safeMode) {
+		this.safeMode = safeMode;
+	}
+	
 	public void setPackageName(String packageName) {
 		this.packageName = packageName;
 	}
@@ -144,21 +150,34 @@ public class DynamicClient {
 	}
 	
 	public void initClient(URI wsdlUri) throws DynamicClientException {
+		boolean localNoWrap = noWrap;
+		Exception compilerException = internalInitClient(wsdlUri, localNoWrap);
+		if (compilerException != null && safeMode && !localNoWrap) {
+			localNoWrap = true;
+			compilerException = internalInitClient(wsdlUri, localNoWrap);
+		}
+		if (compilerException != null) {
+			throw new DynamicClientException("Error compiling wsdl-java source files", compilerException);
+		}
+	}
+	
+	private Exception internalInitClient(URI wsdlUri, boolean noWrap) throws DynamicClientException {
 
 		File src = null;
 		File classes = null;
 		try{
-	
 			log("Create Dynamic Client for "+wsdlUri);
 			log("No-wrap="+noWrap, 1);
 			log("Pck-name="+packageName, 1);
 			log("Tmp-dir="+tmpDir, 1);
+			log("Safe-mode="+safeMode, 1);
 			
 			// reset service/port
 			serviceName = null;
 			portName = null;
 			
 			// Init Axis emitter
+			Emitter emitter = new Emitter();
 			emitter.setAllWanted(true);
 			emitter.setNowrap(noWrap);
 			emitter.setPackageName(packageName);
@@ -195,7 +214,7 @@ public class DynamicClient {
 			try {
 				CompilerUtils.compileJavaSrc(classPath.toString(), srcFiles, classes.toString());
 			} catch (Exception e) {
-				throw new DynamicClientException("Error compiling java source files", e);
+				return e;
 			}
 			
 			// Create new classloader
@@ -206,25 +225,41 @@ public class DynamicClient {
 				throw new DynamicClientException("Error creating classloader, a directory returns a malformed URL: " + e.getMessage(), e);
 			}
 	
-			// Load generated classes
-			log("Classes loaded in classloader");
-			List<String> generatedClassNames = emitter.getGeneratedClassNames();
+			// Load generated classes and create schemas
+			String className = null;
 			try {
-				for (String className : generatedClassNames) {
-					log(className, 1);
-					cl.loadClass(className);
+				log("Classes loaded in classloader");
+				Class clazz;
+				Entry fileInfo;
+				GeneratedFileInfo generatedFileInfo = emitter.getGeneratedFileInfo();
+				for (Object entry: generatedFileInfo.getList()) {
+					fileInfo = (Entry)entry;
+					
+					// Load class in classloader
+					className = fileInfo.className; 
+					log("("+fileInfo.type+") "+className, 1);
+					clazz = cl.loadClass(className);
+					
+					// If class is of type "complexType" create the schema
+					if ("complexType".equals(fileInfo.type)) {
+						if (typeOnto.getSchema(clazz) == null) {
+							typeOnto.add(clazz);
+						}
+					}
 				}
 			} catch (ClassNotFoundException e) {
-				throw new DynamicClientException("Error loading class "+e.getMessage(), e);
+				throw new DynamicClientException("Error loading class "+className, e);
+			} catch (OntologyException e) {
+				throw new DynamicClientException("Error creating schema for class "+className, e);
 			}
 	
 			// Set new classloader as default
 			Thread.currentThread().setContextClassLoader(cl);	       
 			classloader = Thread.currentThread().getContextClassLoader();
-	
+			
 			// Parse wsdl and populate internal structure
 			try {
-				parseWsdl();
+				parseWsdl(emitter);
 			} catch (Exception e) {
 				throw new DynamicClientException("Error parsing wsdl", e);
 			}
@@ -250,6 +285,8 @@ public class DynamicClient {
 				FileUtils.removeDir(src);
 			}
 		}
+		
+		return null;
 	}	
 
 	public Ontology getOntology() {
@@ -268,7 +305,7 @@ public class DynamicClient {
 		return servicesInfo.get(serviceName);
 	}
 
-	private void parseWsdl() throws DynamicClientException, OntologyException, ClassNotFoundException, SecurityException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private void parseWsdl(Emitter emitter) throws DynamicClientException, OntologyException, ClassNotFoundException, SecurityException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		// Manage services
 		servicesInfo.clear();
@@ -287,7 +324,7 @@ public class DynamicClient {
 				
 				String portName = port.getName();
 				log("port "+portName, 1);
-				Stub stub = getStub(port, locator);
+				Stub stub = getStub(emitter, port, locator);
 				if (stub != null) {
 					PortInfo portInfo = new PortInfo(portName, stub);
 					serviceInfo.putPort(portName, portInfo);
@@ -509,7 +546,7 @@ public class DynamicClient {
 		return (Service)locatorClass.newInstance();
 	}
 	
-	private Stub getStub(Port axisPort, Service locator) {
+	private Stub getStub(Emitter emitter, Port axisPort, Service locator) {
 		Stub stub = null;
 		String portNameJavaId = WSDLUtils.buildPortNameJavaId(emitter.getSymbolTable(), axisPort);
 		try {

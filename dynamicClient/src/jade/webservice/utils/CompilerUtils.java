@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
+
 public final class CompilerUtils {
 	
 	public static void compileJavaSrc(String classPath, List<File> srcList, String dest) throws Exception {
@@ -137,10 +138,13 @@ public final class CompilerUtils {
             }
             
             p = Runtime.getRuntime().exec(cmdArray);
-
             if (p != null) {
+            	// Start thread to monitor the compilation
+    			Thread t = new CompilerProcessManager(p);
+    			t.start();
+            	
             	if (p.waitFor() != 0) {
-            		throw new Exception("Error in exec() compilation");
+            		throw new Exception("Compiling error (see log for more detail)");
             	}
             }
         } catch (SecurityException se) {
@@ -199,5 +203,5 @@ public final class CompilerUtils {
 			}
 		}         
 	}
-    
+	
 }
