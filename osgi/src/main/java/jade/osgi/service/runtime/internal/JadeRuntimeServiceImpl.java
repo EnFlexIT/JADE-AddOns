@@ -22,7 +22,7 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 		this.bundle = bundle;
 	}
 	public AgentController createAgent(String name, String className, Object[] args) throws Exception {
-		System.out.println("CreateAgent: Agent Creation requested by bundle "+bundle.getSymbolicName());
+		System.out.println("CreateAgent: Agent Creation requested by agentBundle "+bundle.getSymbolicName());
 		AgentController agent = container.createNewAgent(name, className, args);
 		if(agent != null) {
 			agents.add(agent);
@@ -33,11 +33,11 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 	
 	
 	public AgentController getAgent(String localAgentName) throws Exception {
-		System.out.println("Agent Controller requested by bundle "+bundle.getSymbolicName());
+		System.out.println("Agent Controller requested by agentBundle "+bundle.getSymbolicName());
 		return container.getAgent(localAgentName);
 	}
 	public AgentController acceptAgent(String name, Agent agent) throws Exception {
-		System.out.println("AcceptAgent: Agent Creation requested by bundle "+bundle.getSymbolicName());
+		System.out.println("AcceptAgent: Agent Creation requested by agentBundle "+bundle.getSymbolicName());
 		System.out.println("agent classloader "+agent.getClass().getClassLoader());
 		AgentController myAgent = container.acceptNewAgent(name, agent);
 		System.out.println("AgentController classloader "+myAgent.getClass().getClassLoader());
