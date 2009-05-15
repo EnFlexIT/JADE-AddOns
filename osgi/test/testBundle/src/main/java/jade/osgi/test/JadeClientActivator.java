@@ -16,6 +16,10 @@ public class JadeClientActivator implements BundleActivator {
 	//@Override
 	public void start(BundleContext context) throws Exception {
 		jadeRef = context.getServiceReference(JadeRuntimeService.class.getName());  
+		// Register AgentFactory service
+		Bundle b = context.getBundle();
+		agentFactory = new MyBundleAgentFactory();
+		agentFactory.init(b);
 
 		if (jadeRef != null)
 		{
@@ -23,18 +27,18 @@ public class JadeClientActivator implements BundleActivator {
 		    Agent myAgent = new MyBundleAgent();
 		    AgentController ac = jade.acceptAgent(context.getBundle().getSymbolicName(), myAgent);
 		    ac.start();
+		    
 		    //		    AgentController agent = jade.getAgent("pippo");
 //		    System.out.println("agent name" +agent.getName());
 //		    System.out.println("killing agent "+agent.getName());
 //		    agent.kill();
 		    
+	 	AgentController ac2 = jade.createAgent(context.getBundle().getSymbolicName()+"2", "jade.osgi.test.MyBundleAgent[bundle-name=testBundle.testBundle]",null);
+	  	ac2.start();
+
 		}
 		
-		// Register AgentFactory service
-		Bundle b = context.getBundle();
-		agentFactory = new MyBundleAgentFactory();
-		agentFactory.init(b);
-		
+	
 	}	
 
 	//@Override
