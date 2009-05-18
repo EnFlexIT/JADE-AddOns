@@ -1,28 +1,19 @@
 package jade.osgi.service.runtime.internal;
 
-import jade.security.JADESecurityException;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
+import java.util.EventObject;
 import java.util.concurrent.TimeUnit;
 
 import org.osgi.framework.BundleEvent;
 
-public class BundleEventHandler {
+public class BundleEventHandler extends EventHandler {
 
-	ScheduledExecutorService scheduler =Executors.newScheduledThreadPool(1);
-	ScheduledFuture<?> task;
-	final BundleEvent bundleEvent;
-	final JadeRuntimeServiceImpl jadeService;
-	public BundleEventHandler(BundleEvent bundleEvent,
+	public BundleEventHandler(EventObject event,
 			JadeRuntimeServiceImpl jadeService) {
-		this.bundleEvent = bundleEvent;
-		this.jadeService = jadeService;
-		
-		handleEvent();
+		super(event,jadeService);
 	}
-	private void handleEvent() {
+	protected void handleEvent() {
+		BundleEvent bundleEvent = (BundleEvent) event;
 		System.out.println("Event received from: "+bundleEvent.getBundle());
 
 		switch (bundleEvent.getType()) {
@@ -47,8 +38,8 @@ public class BundleEventHandler {
 
 		case BundleEvent.UPDATED:
 			System.out.println("Bundle "+bundleEvent.getBundle().getSymbolicName()+" UPDATED");
-			System.out.println("task remover to be canceled:  is completed: "+task.isDone());
 			if(task != null) {
+				System.out.println("task remover to be canceled:  is completed: "+task.isDone());
 				task.cancel(true);
 				System.out.println("task remover cancelled");
 			}
@@ -60,17 +51,5 @@ public class BundleEventHandler {
 		}
 	
 	}
-	class AgentRemover implements Runnable {
 
-		public void run() {
-			System.out.println("agentRemover#run for bundle "+bundleEvent.getBundle().getBundleId());
-			try {
-				jadeService.removeAgents();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-	}
 }
