@@ -3,6 +3,7 @@ package jade.osgi;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
+import jade.osgi.service.agentFactory.AgentFactory;
 import jade.osgi.service.agentFactory.AgentFactoryService;
 import jade.osgi.service.runtime.JadeRuntimeService;
 import jade.osgi.service.runtime.internal.JadeRuntimeServiceFactory;
@@ -16,7 +17,10 @@ import java.util.Set;
 import java.util.Map.Entry;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceListener;
 
 public class JadeActivator implements BundleActivator {
 
@@ -39,13 +43,22 @@ public class JadeActivator implements BundleActivator {
 			addJadeFileProperties(props);
 			addAgentFactoryService(props);
 			startJadeContainer(props);
-			registerJadeRuntimeService();
+			ServiceFactory factory = registerJadeRuntimeService();
+			addAgentFactoryListener(factory);
 
 		} catch(Exception e) {
 			e.printStackTrace();
 			stop(context);
 		}
 
+	}
+
+	private void addAgentFactoryListener(ServiceFactory factory) throws InvalidSyntaxException {
+		String filter = "(objectclass=" + AgentFactory.class.getName() + ")";
+
+		context.addServiceListener((ServiceListener) factory,filter);
+		context.addBundleListener((BundleListener)factory);
+		
 	}
 
 	private void addAgentFactoryService(Properties pp) {
@@ -112,9 +125,10 @@ public class JadeActivator implements BundleActivator {
 		}
 	}
 	
-	private void registerJadeRuntimeService() {
+	private ServiceFactory registerJadeRuntimeService() {
 		ServiceFactory factory = new JadeRuntimeServiceFactory(container);
 		context.registerService(JadeRuntimeService.class.getName(), factory, null);
+		return factory;
 	}
 
 }

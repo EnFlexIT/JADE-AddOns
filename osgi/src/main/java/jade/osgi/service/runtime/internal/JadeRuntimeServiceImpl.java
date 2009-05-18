@@ -14,7 +14,8 @@ import org.osgi.framework.Bundle;
 
 public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 
-	private List<AgentController> agents = new ArrayList<AgentController>(); 
+	private List<AgentController> agentsToremove = new ArrayList<AgentController>(); 
+	private List<AgentInfo> agentsTorestart = new ArrayList<AgentInfo>();
 	private ContainerController container;
 	private Bundle bundle;
 	public JadeRuntimeServiceImpl(ContainerController container, Bundle bundle) {
@@ -23,9 +24,11 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 	}
 	public AgentController createAgent(String name, String className, Object[] args) throws Exception {
 		System.out.println("CreateAgent: Agent Creation requested by agentBundle "+bundle.getSymbolicName());
-		AgentController agent = container.createNewAgent(name, className, args);
+		String classNameMod = className+"[bundle-name="+bundle.getSymbolicName()+"]";
+		AgentController agent = container.createNewAgent(name, classNameMod, args);
 		if(agent != null) {
-			agents.add(agent);
+			agentsToremove.add(agent);
+			agentsTorestart.add(new AgentInfo(name,className,args));
 		}
 		return agent;
 	}
@@ -42,7 +45,7 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 		AgentController myAgent = container.acceptNewAgent(name, agent);
 		System.out.println("AgentController classloader "+myAgent.getClass().getClassLoader());
 		if(myAgent!= null) {
-			agents.add(myAgent);
+			agentsToremove.add(myAgent);
 		}
 		return myAgent;
 	}
@@ -57,15 +60,24 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 		
 	}
 	
-	public void removeAgents() throws Exception {
-		System.out.println("JadeRuntimeServiceImpl#removeAgents");
-		for (AgentController agent : agents) {
+	public void killAgents() throws Exception {
+		System.out.println("JadeRuntimeServiceImpl#killAgents");
+		for (AgentController agent : agentsToremove) {
 			System.out.println("Killing agent "+agent.getName());
 			System.out.println("Current ClassLoader "+this.getClass().getClassLoader());
 			agent.kill();
 		}
 	}
+	public void removeAgents() throws Exception {
+		System.out.println("JadeRuntimeServiceImpl#removeAgents");
+		agentsTorestart.clear();
+	}
 	
-	
+	public void restartAgents() throws Exception {
+		System.out.println("JadeRuntimeServiceImpl#restartAgents");
+		for (AgentInfo agentInfo : agentsTorestart) {
+			createAgent(agentInfo.getName(), agentInfo.getClassName(), agentInfo.getArgs());
+		}
+	}
 
 }
