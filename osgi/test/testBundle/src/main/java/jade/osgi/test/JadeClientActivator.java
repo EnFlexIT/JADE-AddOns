@@ -33,7 +33,7 @@ public class JadeClientActivator implements BundleActivator {
 //		    System.out.println("killing agent "+agent.getName());
 //		    agent.kill();
 		    
-	 	AgentController ac2 = jade.createAgent(context.getBundle().getSymbolicName()+"2", "jade.osgi.test.MyBundleAgent[bundle-name=testBundle.testBundle]",null);
+	 	AgentController ac2 = jade.createAgent(context.getBundle().getSymbolicName()+"2", "jade.osgi.test.MyBundleAgent",null);
 	  	ac2.start();
 
 		}

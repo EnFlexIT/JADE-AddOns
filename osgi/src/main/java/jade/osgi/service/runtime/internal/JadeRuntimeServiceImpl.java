@@ -28,11 +28,25 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 		AgentController agent = container.createNewAgent(name, classNameMod, args);
 		if(agent != null) {
 			agentsToremove.add(agent);
-			agentsTorestart.add(new AgentInfo(name,className,args));
+			//agentsTorestart.add(new AgentInfo(name,className,args));
 		}
 		return agent;
 	}
 
+	public AgentController createAgent(String name, String className, String bundleSymbolicName,Object[] args) throws Exception {
+		System.out.println("CreateAgent: Agent Creation requested by agentBundle "+bundle.getSymbolicName());
+		String classNameMod = className+"[bundle-name="+bundleSymbolicName+"]";
+		AgentController agent = container.createNewAgent(name, classNameMod, args);
+		if(agent != null) {
+			agentsToremove.add(agent);
+			if(!bundleSymbolicName.equals(bundle.getSymbolicName())) {
+				//FIXME questo agente viene inserito nel JadeRuntime service del bundle sbagliato (serve un ref alla factory?)
+				System.out.println("Adding "+agent.getName()+"to restart it later");
+				agentsTorestart.add(new AgentInfo(name,className,args));
+			}
+		}
+		return agent;
+	}
 	
 	
 	public AgentController getAgent(String localAgentName) throws Exception {

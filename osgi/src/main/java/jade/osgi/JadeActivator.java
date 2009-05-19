@@ -57,6 +57,15 @@ public class JadeActivator implements BundleActivator {
 		String filter = "(objectclass=" + AgentFactory.class.getName() + ")";
 
 		context.addServiceListener((ServiceListener) factory,filter);
+		//aggiungere pseudoregistrazioni di Agentfactory gia' esistenti
+//		ServiceReference[] refs =
+//	          context.getServiceReferences(null, filter);
+//		if (refs != null) {
+//	        for (ServiceReference r : refs) {
+//	          factory.serviceChanged(
+//	              new ServiceEvent(ServiceEvent.REGISTERED, r));             
+//	        }
+//
 		context.addBundleListener((BundleListener)factory);
 		
 	}

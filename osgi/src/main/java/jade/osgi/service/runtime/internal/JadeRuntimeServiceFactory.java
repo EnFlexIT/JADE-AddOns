@@ -30,7 +30,7 @@ public class JadeRuntimeServiceFactory implements ServiceFactory, ServiceListene
 	}
 
 	public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-		System.out.println("JadeRuntimeServiceFactory#ungetService called: removing agent of bundle " +bundle.getSymbolicName());
+		System.out.println("JadeRuntimeServiceFactory#ungetService called for bundle " +bundle.getSymbolicName());
 		//usedJadeServices.remove(bundle.getBundleId());
 //		if(service instanceof JadeRuntimeServiceImpl) {
 //			JadeRuntimeServiceImpl jadeService = (JadeRuntimeServiceImpl) service;
@@ -42,11 +42,11 @@ public class JadeRuntimeServiceFactory implements ServiceFactory, ServiceListene
 //			}
 //		}
 	}
-	public void serviceChanged(ServiceEvent serviceEvent) {
+	public synchronized void serviceChanged(ServiceEvent serviceEvent) {
 		System.out.println("JadeRuntimeServiceFactory#serviceChanged called: "+serviceEvent.getType());
 		new ServiceEventHandler(serviceEvent, usedJadeServices.get(serviceEvent.getServiceReference().getBundle().getBundleId()));
 	}
-	public void bundleChanged(BundleEvent bundleEvent) {
+	public synchronized void bundleChanged(BundleEvent bundleEvent) {
 		System.out.println("JadeRuntimeServiceFactory#bundleChanged called: " +bundleEvent.getBundle().getBundleId());
 		System.out.println("usedJadeServices count "+usedJadeServices.size());
 		if(usedJadeServices.containsKey(bundleEvent.getBundle().getBundleId())) {
