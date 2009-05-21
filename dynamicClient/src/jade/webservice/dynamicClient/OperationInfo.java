@@ -37,8 +37,10 @@ import org.apache.axis.wsdl.toJava.Utils;
 public class OperationInfo {
 
 	private String name;
-	private Map<String, ParameterInfo> parametersInfoMap = new HashMap<String, ParameterInfo>();
-	private Map<String, HeaderInfo> headersInfoMap = new HashMap<String, HeaderInfo>();
+	private Map<String, ParameterInfo> inputParametersInfoMap = new HashMap<String, ParameterInfo>();
+	private Map<String, ParameterInfo> outputParametersInfoMap = new HashMap<String, ParameterInfo>();
+	private Map<String, HeaderInfo> inputHeadersInfoMap = new HashMap<String, HeaderInfo>();
+	private Map<String, HeaderInfo> outputHeadersInfoMap = new HashMap<String, HeaderInfo>();
 	private List<ParameterInfo> parametersInfoList = new ArrayList<ParameterInfo>();
 	private List<HeaderInfo> headersInfoList = new ArrayList<HeaderInfo>();
 	
@@ -52,30 +54,62 @@ public class OperationInfo {
 		return name;
 	}
 
-	public Set<String> getParameterNames() {
-		return parametersInfoMap.keySet();
+	public Set<String> getInputParameterNames() {
+		return inputParametersInfoMap.keySet();
 	}
 
-	public ParameterInfo getParameter(String parameterName) {
-		return parametersInfoMap.get(parameterName);
+	public ParameterInfo getInputParameter(String parameterName) {
+		return inputParametersInfoMap.get(parameterName);
+	}
+
+	public Set<String> getOutputParameterNames() {
+		return outputParametersInfoMap.keySet();
+	}
+
+	public ParameterInfo getOutputParameter(String parameterName) {
+		return outputParametersInfoMap.get(parameterName);
 	}
 	
 	void putParameter(String parameterName, ParameterInfo parameterInfo) {
 		parametersInfoList.add(parameterInfo);
-		parametersInfoMap.put(parameterName, parameterInfo);
+		if (parameterInfo.getMode() == ParameterInfo.IN ||
+			parameterInfo.getMode() == ParameterInfo.INOUT) {
+			inputParametersInfoMap.put(parameterName, parameterInfo);
+		} 
+		if (parameterInfo.getMode() == ParameterInfo.OUT ||
+			parameterInfo.getMode() == ParameterInfo.INOUT ||
+			parameterInfo.getMode() == ParameterInfo.RETURN) {
+			outputParametersInfoMap.put(parameterName, parameterInfo);
+		}
 	}
 	
-	public Set<String> getHeaderNames() {
-		return headersInfoMap.keySet();
+	public Set<String> getInputHeaderNames() {
+		return inputHeadersInfoMap.keySet();
 	}
 
-	public HeaderInfo getHeader(String headerName) {
-		return headersInfoMap.get(headerName);
+	public HeaderInfo getInputHeader(String headerName) {
+		return inputHeadersInfoMap.get(headerName);
+	}
+
+	public Set<String> getOutputHeaderNames() {
+		return outputHeadersInfoMap.keySet();
+	}
+
+	public HeaderInfo getOutputHeader(String headerName) {
+		return outputHeadersInfoMap.get(headerName);
 	}
 	
 	void putHeader(String headerName, HeaderInfo headerInfo) {
 		headersInfoList.add(headerInfo);
-		headersInfoMap.put(headerName, headerInfo);
+		if (headerInfo.getMode() == ParameterInfo.IN ||
+			headerInfo.getMode() == ParameterInfo.INOUT) {
+			inputHeadersInfoMap.put(headerName, headerInfo);
+		} 
+		if (headerInfo.getMode() == ParameterInfo.OUT ||
+			headerInfo.getMode() == ParameterInfo.INOUT ||
+			headerInfo.getMode() == ParameterInfo.RETURN) {
+			outputHeadersInfoMap.put(headerName, headerInfo);
+		}
 	}
 
 	Method getOperationMethod() {

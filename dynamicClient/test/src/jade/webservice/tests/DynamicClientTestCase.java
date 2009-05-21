@@ -61,14 +61,14 @@ public class DynamicClientTestCase extends TestCase {
 		super.setUp();
 	}
 
-	private static AbsObject putHeader(WSData input, OperationInfo oi, String name) throws OntologyException {
-		AbsObject abs = oi.getHeader(name).getSchema().newInstance();
+	private static AbsObject putInputHeader(WSData input, OperationInfo oi, String name) throws OntologyException {
+		AbsObject abs = oi.getInputHeader(name).getSchema().newInstance();
 		input.setHeader(name, abs);
 		return abs; 
 	}
 	
-	private static AbsObject putParameter(WSData input, OperationInfo oi, String name) throws OntologyException {
-		AbsObject abs = oi.getParameter(name).getSchema().newInstance();
+	private static AbsObject putInputParameter(WSData input, OperationInfo oi, String name) throws OntologyException {
+		AbsObject abs = oi.getInputParameter(name).getSchema().newInstance();
 		input.setParameter(name, abs);
 		return abs; 
 	}
@@ -82,10 +82,10 @@ public class DynamicClientTestCase extends TestCase {
 		WSData input = new WSData();
 		OperationInfo oi = getOperation(operation);
 		
-		AbsAggregate numbers = (AbsAggregate)DynamicClientTestCase.putParameter(input, oi, "numbers");
+		AbsAggregate numbers = (AbsAggregate)DynamicClientTestCase.putInputParameter(input, oi, "numbers");
 		numbers.add(AbsPrimitive.wrap(2.0f));
 		numbers.add(AbsPrimitive.wrap(3.0f));
-		AbsObject headerComplex = DynamicClientTestCase.putHeader(input, oi, "multiplicationHeaderComplex");
+		AbsObject headerComplex = DynamicClientTestCase.putInputHeader(input, oi, "multiplicationHeaderComplex");
 		AbsHelper.setAttribute(headerComplex, "real", AbsPrimitive.wrap(2.0f));
 		AbsHelper.setAttribute(headerComplex, "immaginary", AbsPrimitive.wrap(3.0f));
 
@@ -121,10 +121,10 @@ public class DynamicClientTestCase extends TestCase {
 		WSData input = new WSData();
 		OperationInfo oi = getOperation(operation);
 		
-		AbsObject complex = DynamicClientTestCase.putParameter(input, oi, "complex");
+		AbsObject complex = DynamicClientTestCase.putInputParameter(input, oi, "complex");
 		AbsHelper.setAttribute(complex, "real", AbsPrimitive.wrap(2.0f));
 		AbsHelper.setAttribute(complex, "immaginary", AbsPrimitive.wrap(3.0f));
-		AbsObject headerAggregate = DynamicClientTestCase.putHeader(input, oi, "absHeaderAggregate");
+		AbsObject headerAggregate = DynamicClientTestCase.putInputHeader(input, oi, "absHeaderAggregate");
 		AbsHelper.setAttribute(headerAggregate, "username", AbsPrimitive.wrap("aaa"));
 		AbsHelper.setAttribute(headerAggregate, "password", AbsPrimitive.wrap("bbb"));
 
@@ -163,7 +163,7 @@ public class DynamicClientTestCase extends TestCase {
 		WSData input = new WSData();
 		OperationInfo oi = getOperation(operation);
 		
-		AbsObject complex = DynamicClientTestCase.putParameter(input, oi, "complex");
+		AbsObject complex = DynamicClientTestCase.putInputParameter(input, oi, "complex");
 		AbsHelper.setAttribute(complex, "real", AbsPrimitive.wrap(2.0f));
 		AbsHelper.setAttribute(complex, "immaginary", AbsPrimitive.wrap(3.0f));
 
@@ -188,7 +188,7 @@ public class DynamicClientTestCase extends TestCase {
 		WSData input = new WSData();
 		OperationInfo oi = getOperation(operation);
 		
-		AbsObject complex = DynamicClientTestCase.putParameter(input, oi, "complex");
+		AbsObject complex = DynamicClientTestCase.putInputParameter(input, oi, "complex");
 		AbsHelper.setAttribute(complex, "real", AbsPrimitive.wrap(2.0f));
 		AbsHelper.setAttribute(complex, "immaginary", AbsPrimitive.wrap(3.0f));
 

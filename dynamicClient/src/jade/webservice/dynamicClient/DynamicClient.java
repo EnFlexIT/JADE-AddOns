@@ -435,16 +435,14 @@ public class DynamicClient {
 			
 			// Loop for all explicit headers and set it in the call
 			if (input != null) {
-				java.util.Iterator<String> ith = operationInfo.getHeaderNames().iterator();
+				java.util.Iterator<String> ith = operationInfo.getInputHeaderNames().iterator();
 				while(ith.hasNext()) {
-					HeaderInfo hi = operationInfo.getHeader(ith.next());
+					HeaderInfo hi = operationInfo.getInputHeader(ith.next());
 					String headerName = hi.getName();
 					int signaturePosition = hi.getSignaturePosition();
 		
-					// If header explicit and is of mode IN or IN-OUT
-					if (signaturePosition == HeaderInfo.EXPLICIT_HEADER &&
-						(hi.getMode() == ParameterInfo.IN ||
-						 hi.getMode() == ParameterInfo.INOUT)) {
+					// If header explicit
+					if (signaturePosition == HeaderInfo.EXPLICIT_HEADER) {
 						
 						// If exist header value -> set it in call
 						AbsObject headerAbs = input.getHeader(headerName);
@@ -474,16 +472,14 @@ public class DynamicClient {
 			WSData output = new WSData();
 	
 			// Read explicit headers from webservice call
-			java.util.Iterator<String>ith = operationInfo.getHeaderNames().iterator();
+			java.util.Iterator<String>ith = operationInfo.getOutputHeaderNames().iterator();
 			while(ith.hasNext()) {
-				HeaderInfo hi = operationInfo.getHeader(ith.next());
+				HeaderInfo hi = operationInfo.getOutputHeader(ith.next());
 				String headerName = hi.getName();
 				int signaturePosition = hi.getSignaturePosition();
 				
-				// If header is explicit and of mode OUT or IN-OUT
-				if (signaturePosition == HeaderInfo.EXPLICIT_HEADER &&
-					(hi.getMode() == ParameterInfo.OUT ||
-					 hi.getMode() == ParameterInfo.INOUT)) {
+				// If header is explicit
+				if (signaturePosition == HeaderInfo.EXPLICIT_HEADER) {
 			
 					// Get response header value
 					AbsObject headerAbs = getHeaderAbsValue(stub, hi);
