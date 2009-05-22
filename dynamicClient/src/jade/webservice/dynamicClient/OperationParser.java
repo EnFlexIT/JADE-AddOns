@@ -174,6 +174,7 @@ public class OperationParser {
 		paramType = JavaUtils.getLoadableClassName(paramType);
 		pi.setTypeClass(getClassFromType(paramType));
 		pi.setSchema(getSchemaFromType(paramType));
+		pi.setMandatory(!axisParam.isOmittable());
 
 		return pi;
 	}
@@ -186,6 +187,7 @@ public class OperationParser {
 		String namespace;
 
 		String type;
+		boolean mandatory = false;
 		if (part.getTypeName() == null) {
 			Element element = st.getElement(part.getElementName());
 			QName qname = element.getQName();
@@ -196,6 +198,7 @@ public class OperationParser {
 			name = soapHeader.getPart();
 			namespace = soapHeader.getNamespaceURI();
 			type = JavaUtils.getLoadableClassName(st.getTypeEntry(part.getTypeName(), false).getName());
+			mandatory = soapHeader.getRequired(); 
 		}
 
 		HeaderInfo hi = new HeaderInfo(name);
@@ -204,6 +207,7 @@ public class OperationParser {
 		hi.setTypeClass(getClassFromType(type));
 		hi.setSchema(getSchemaFromType(type));
 		hi.setSignaturePosition(signaturePosition);
+		hi.setMandatory(mandatory);
 		
 		return hi;
 	}
@@ -227,6 +231,7 @@ public class OperationParser {
 		hi.setTypeClass(getClassFromType(paramType));
 		hi.setSchema(getSchemaFromType(paramType));
 		hi.setSignaturePosition(signaturePosition);
+		hi.setMandatory(!param.isOmittable());
 		
 		return hi;
 	}

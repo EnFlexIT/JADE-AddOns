@@ -84,6 +84,7 @@ public class DynamicClient {
 	private boolean noWrap;
 	private boolean safeMode;
 	private ClassLoader classloader;
+	private StringBuilder classPath;
 
 	private BeanOntology typeOnto;
 	
@@ -99,6 +100,10 @@ public class DynamicClient {
 		classloader = Thread.currentThread().getContextClassLoader();
 		
 		typeOnto = new BeanOntology("WSDL-TYPES");
+	}
+
+	public void setClassPath(StringBuilder classPath) {
+		this.classPath = classPath;
 	}
 
 	public void setEndpoint(URL endpoint) {
@@ -181,6 +186,7 @@ public class DynamicClient {
 			emitter.setAllWanted(true);
 			emitter.setNowrap(noWrap);
 			emitter.setPackageName(packageName);
+			emitter.setBobMode(true);
 	
 			// Prepare folders 
 			String stem = "DynamicClient-" + System.currentTimeMillis();
@@ -200,13 +206,15 @@ public class DynamicClient {
 			} catch (Exception e) {
 				throw new DynamicClientException("Error parsing wsdl: " +wsdlUri.toString()+ ", cause: " + e.getMessage(), e);
 			}
-	
+			
 			// Prapare classpath
-			StringBuilder classPath = new StringBuilder();
-			try {
-				CompilerUtils.setupClasspath(classPath, classloader);
-			} catch (Exception e) {
-				throw new DynamicClientException("Unable to create compiler classpath", e);
+			if(classPath == null) {
+				classPath = new StringBuilder();
+    			try {
+    				CompilerUtils.setupClasspath(classPath, classloader);
+    			} catch (Exception e) {
+    				throw new DynamicClientException("Unable to create compiler classpath", e);
+    			}
 			}
 	
 			// Compile files
@@ -304,7 +312,7 @@ public class DynamicClient {
 		
 		return servicesInfo.get(serviceName);
 	}
-
+	
 	private void parseWsdl(Emitter emitter) throws DynamicClientException, OntologyException, ClassNotFoundException, SecurityException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		// Manage services
@@ -696,11 +704,12 @@ public class DynamicClient {
 					String[] names = os.getNames();
 					for (int i = 0; i < names.length; i++) {
 						sb.append("    "+names[i]+": ");
+						boolean mandatory = os.isMandatory(names[i]);
 						ObjectSchema schema = os.getSchema(names[i]);
 						if (schema == null) {
 							sb.append("ERROR: no schema!\n");
 						} else {
-							sb.append(schema.getTypeName()+"\n");
+							sb.append(schema.getTypeName()+ (!mandatory ? " (OPTIONAL)":"") + "\n");
 						}
 					}
 					sb.append("  }\n");

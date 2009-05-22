@@ -35,11 +35,13 @@ public class ParameterInfo {
 	private String name;
 	private Class typeClass;
 	private int mode = UNDEFINED;
+	private boolean mandatory;
 
 	private TermSchema schema; 
 
 	public ParameterInfo(String parameterName) {
 		this.name = parameterName;
+		this.mandatory = true;
 	}
 	
 	public String getName() {
@@ -69,7 +71,15 @@ public class ParameterInfo {
 	void setSchema(TermSchema schema) {
 		this.schema = schema;
 	}
-	
+
+	public boolean isMandatory() {
+		return mandatory;
+	}
+
+	public void setMandatory(boolean mandatory) {
+		this.mandatory = mandatory;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -77,6 +87,7 @@ public class ParameterInfo {
 		sb.append(", class="+typeClass.getCanonicalName());
 		sb.append(", mode="+getStringMode(mode));
 		sb.append(", schema="+schema.getTypeName());
+		sb.append(", mandatory="+mandatory);
 		return sb.toString();
 	}
 	
