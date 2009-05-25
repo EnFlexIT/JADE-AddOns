@@ -46,6 +46,8 @@ import jade.util.Logger;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -199,7 +201,7 @@ class BeanOntologyBuilder {
 		Iterator<Method> gettersIter = getters.iterator();
 		Method getter, setter;
 		String setterName;
-		Class slotType;
+		Class<?> slotClazz;
 		SlotAccessData sad;
 		String propertyName;
 		Slot slotAnnotation;
@@ -211,7 +213,7 @@ class BeanOntologyBuilder {
 
 		while (gettersIter.hasNext()) {
 			getter = gettersIter.next();
-			slotType = getter.getReturnType();
+			slotClazz = getter.getReturnType();
 			mandatory = false;
 			cardMin = 0;
 			cardMax = ObjectSchema.UNLIMITED;
@@ -241,23 +243,34 @@ class BeanOntologyBuilder {
 						}
 						mandatory = slotAnnotation.mandatory();
 					}
-					if (slotType.isArray()) {
-						// extract the type of array elements
-						aggregateType = slotType.getComponentType();
-					}
 					// if present, use getter @AggregateSlot annotation data
-					if (aggregateSlotAnnotation != null) {
-						if (SlotAccessData.isAggregate(slotType)) {
+					if (SlotAccessData.isAggregate(slotClazz)) {
+						if (slotClazz.isArray()) {
+							// extract the type of array elements
+							aggregateType = slotClazz.getComponentType();
+						}
+						Type slotType = getter.getGenericReturnType(); 
+						if (slotType instanceof ParameterizedType) {
+							ParameterizedType slotParameterizedType = (ParameterizedType)slotType;
+							Type[] actuals = slotParameterizedType.getActualTypeArguments();
+							// slotType must be an array or a Collection => we expect only 1 item in actuals
+							// get first element
+							if (actuals.length > 0) {
+								aggregateType = (Class)actuals[0];
+							}
+						}
+//						if (slotType has generics) {
+//							aggregateType = type from generics;
+//						}
+						if (aggregateSlotAnnotation != null) {
 							cardMin = aggregateSlotAnnotation.cardMin();
 							cardMax = aggregateSlotAnnotation.cardMax();
 							if (!Object.class.equals(aggregateSlotAnnotation.type())) {
 								aggregateType = aggregateSlotAnnotation.type();
 							}
-						} else {
-							// FIXME this is not an aggregate!!!
 						}
 					}
-					sad = new SlotAccessData(slotType, getter, setter, mandatory, aggregateType, cardMin, cardMax);
+					sad = new SlotAccessData(slotClazz, getter, setter, mandatory, aggregateType, cardMin, cardMax);
 					result.put(new SlotKey(clazz, slotName), sad);
 				} else {
 					// TODO it's not a bean property, maybe we could generate a warning...

@@ -94,4 +94,8 @@ public class TestHierarchicalBeanOntology extends BeanOntology {
 		sb.append('}');
 		return sb.toString();
 	}
+
+	public static void main(String[] args) throws Exception {
+		getInstance();
+	}
 }

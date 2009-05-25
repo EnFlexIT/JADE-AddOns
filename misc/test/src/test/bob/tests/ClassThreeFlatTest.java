@@ -105,7 +105,7 @@ public class ClassThreeFlatTest extends AbstractCheckSendAndReceiveTest {
 			log("wrong schema name \""+realSchemaName+"\" (expected \""+expectedSchemaName+"\")");
 		}
 		Set<String> slotNames = getSlotNameSet(os);
-		String[] expectedSlotNames = new String[] {"fieldZeroZero", "fieldZeroOne", "fieldOneZero", "fieldOneOne", "fieldOneTwo", "fieldTwoZero", "fieldTwoOne", "fieldTwoTwo", "fieldTwoThree", "fieldThreeZero", "fieldThreeOne", "fieldThreeTwo", "fieldThreeThree", "fieldThreeFour"};
+		String[] expectedSlotNames = new String[] {"fieldZeroZero", "fieldZeroOne", "fieldOneZero", "fieldOneOne", "fieldOneTwo", "fieldTwoZero", "fieldTwoOne", "fieldTwoTwo", "fieldTwoThree", "fieldThreeZero", "fieldThreeOne", "fieldThreeTwo", "fieldThreeThree", "fieldThreeFour", "listOfStrings", "arrayOfStrings"};
 		for (String expectedSlotName: expectedSlotNames) {
 			if (!slotNames.remove(expectedSlotName)) {
 				log("missing field "+expectedSlotName);

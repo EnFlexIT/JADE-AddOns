@@ -1,5 +1,8 @@
 package content.onto.bob.beans;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 public class ClassOne extends ClassZero implements ExtendedConcept {
 	private static final long serialVersionUID = 1L;
@@ -7,6 +10,8 @@ public class ClassOne extends ClassZero implements ExtendedConcept {
 	private String fieldOneZero;
 	private String fieldOneOne;
 	private String fieldOneTwo;
+	private List<String> listOfStrings;
+	private String[] arrayOfStrings;
 
 	public String getFieldOneZero() {
 		return fieldOneZero;
@@ -26,6 +31,18 @@ public class ClassOne extends ClassZero implements ExtendedConcept {
 	public void setFieldOneTwo(String fieldOneTwo) {
 		this.fieldOneTwo = fieldOneTwo;
 	}
+	public List<String> getListOfStrings() {
+		return listOfStrings;
+	}
+	public void setListOfStrings(List<String> listOfStrings) {
+		this.listOfStrings = listOfStrings;
+	}
+	public String[] getArrayOfStrings() {
+		return arrayOfStrings;
+	}
+	public void setArrayOfStrings(String[] arrayOfStrings) {
+		this.arrayOfStrings = arrayOfStrings;
+	}
 
 	@Override
 	protected String innerToString() {
@@ -37,6 +54,10 @@ public class ClassOne extends ClassZero implements ExtendedConcept {
 		sb.append(fieldOneOne);
 		sb.append(" fieldOneTwo=");
 		sb.append(fieldOneTwo);
+		sb.append(" listOfStrings=");
+		sb.append(listOfStrings);
+		sb.append(" arrayOfStrings=");
+		sb.append(Arrays.toString(arrayOfStrings));
 		return sb.toString();
 	}
 
