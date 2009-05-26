@@ -198,7 +198,9 @@ public class OperationParser {
 			name = soapHeader.getPart();
 			namespace = soapHeader.getNamespaceURI();
 			type = JavaUtils.getLoadableClassName(st.getTypeEntry(part.getTypeName(), false).getName());
-			mandatory = soapHeader.getRequired(); 
+			if (soapHeader.getRequired() != null) {
+				mandatory = soapHeader.getRequired().booleanValue();
+			}
 		}
 
 		HeaderInfo hi = new HeaderInfo(name);
