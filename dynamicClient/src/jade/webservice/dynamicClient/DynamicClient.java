@@ -617,33 +617,35 @@ public class DynamicClient {
 	
 	private AbsObject convertObjToAbs(ParameterInfo pi, Object value) throws DynamicClientException {
 		AbsObject absObject = null;
-		try {
-			
-			// Check if value is a Calendar object and the parameter schema a DATE
-			if (value instanceof Calendar &&
-				pi.getSchema().getTypeName().equals(BasicOntology.DATE)) {
+		if (value != null) {
+			try {
 				
-				// Convert the Calendar object into Date object
-				value = ((Calendar) value).getTime();
-			}
-			
-			// Check if value is a java Array object and the parameter schema a SEQUENCE
-			else if (value.getClass().isArray() &&
-				pi.getSchema().getTypeName().equals(BasicOntology.SEQUENCE)) {
-				
-				// Convert the java Array object into jade list object
-				jade.util.leap.List jadeList = new jade.util.leap.ArrayList();
-				for (int i = 0; i < Array.getLength(value) ; i++) {
-					jadeList.add(Array.get(value, i));
+				// Check if value is a Calendar object and the parameter schema a DATE
+				if (value instanceof Calendar &&
+					pi.getSchema().getTypeName().equals(BasicOntology.DATE)) {
+					
+					// Convert the Calendar object into Date object
+					value = ((Calendar) value).getTime();
 				}
-				value = jadeList;
+				
+				// Check if value is a java Array object and the parameter schema a SEQUENCE
+				else if (value.getClass().isArray() &&
+					pi.getSchema().getTypeName().equals(BasicOntology.SEQUENCE)) {
+					
+					// Convert the java Array object into jade list object
+					jade.util.leap.List jadeList = new jade.util.leap.ArrayList();
+					for (int i = 0; i < Array.getLength(value) ; i++) {
+						jadeList.add(Array.get(value, i));
+					}
+					value = jadeList;
+				}
+				
+				// Convert value with ontology
+				absObject = typeOnto.fromObject(value);
+				
+			} catch (OntologyException e) {
+				throw new DynamicClientException("Parameter "+pi.getName()+" error converting to abs "+value, e);
 			}
-			
-			// Convert value with ontology
-			absObject = typeOnto.fromObject(value);
-			
-		} catch (OntologyException e) {
-			throw new DynamicClientException("Parameter "+pi.getName()+" error converting to abs "+value, e);
 		}
 		return absObject;
 	}
