@@ -31,6 +31,7 @@ import org.apache.axis.client.Stub;
 public class PortInfo {
 
 	private String name;
+	private String documentation;
 	private Map<String, OperationInfo> operationsInfo = new HashMap<String, OperationInfo>();
 	private Stub stub;
 	
@@ -41,6 +42,14 @@ public class PortInfo {
 
 	public String getName() {
 		return name;
+	}
+	
+	public String getDocumentation() {
+		return documentation;
+	}
+
+	void setDocumentation(String documentation) {
+		this.documentation = documentation;
 	}
 	
 	public Set<String> getOperationNames() {

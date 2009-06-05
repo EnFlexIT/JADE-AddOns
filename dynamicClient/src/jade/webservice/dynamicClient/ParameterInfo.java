@@ -33,6 +33,7 @@ public class ParameterInfo {
 	public static final int RETURN = 3;
 	
 	private String name;
+	private String documentation;
 	private Class typeClass;
 	private int mode = UNDEFINED;
 	private boolean mandatory;
@@ -48,6 +49,14 @@ public class ParameterInfo {
 		return name;
 	}
 
+	public String getDocumentation() {
+		return documentation;
+	}
+
+	void setDocumentation(String documentation) {
+		this.documentation = documentation;
+	}
+	
 	public Class getTypeClass() {
 		return typeClass;
 	}
@@ -88,6 +97,9 @@ public class ParameterInfo {
 		sb.append(", mode="+getStringMode(mode));
 		sb.append(", schema="+schema.getTypeName());
 		sb.append(", mandatory="+mandatory);
+		if (documentation != null && !documentation.equals("")) {
+			sb.append(", doc="+documentation);
+		}
 		return sb.toString();
 	}
 	

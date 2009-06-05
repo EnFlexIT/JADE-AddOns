@@ -31,6 +31,7 @@ import org.apache.axis.client.Service;
 public class ServiceInfo {
 
 	private String name;
+	private String documentation;
 	private Service locator;
 	
 	private Map<String, PortInfo> portsInfo = new HashMap<String, PortInfo>();
@@ -44,6 +45,14 @@ public class ServiceInfo {
 		return name;
 	}
 	
+	public String getDocumentation() {
+		return documentation;
+	}
+
+	void setDocumentation(String documentation) {
+		this.documentation = documentation;
+	}
+
 	Service getLocator() {
 		return locator;
 	}

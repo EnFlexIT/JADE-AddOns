@@ -37,6 +37,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -55,6 +56,7 @@ import java.util.Vector;
 
 import javax.wsdl.BindingOperation;
 import javax.wsdl.Port;
+import javax.wsdl.WSDLElement;
 import javax.xml.rpc.holders.Holder;
 
 import org.apache.axis.AxisProperties;
@@ -67,6 +69,8 @@ import org.apache.axis.wsdl.toJava.Emitter;
 import org.apache.axis.wsdl.toJava.GeneratedFileInfo;
 import org.apache.axis.wsdl.toJava.GeneratedFileInfo.Entry;
 import org.apache.log4j.Logger;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 
 public class DynamicClient {
@@ -85,6 +89,7 @@ public class DynamicClient {
 	private boolean safeMode;
 	private ClassLoader classloader;
 	private StringBuilder classPath;
+	private String documentation;
 
 	private BeanOntology typeOnto;
 	
@@ -154,6 +159,10 @@ public class DynamicClient {
 		AxisProperties.setProperty("axis.socketSecureFactory", "");
 	}
 	
+	public String getDocumentation() {
+		return documentation;
+	}
+	
 	public void initClient(URI wsdlUri) throws DynamicClientException {
 		boolean localNoWrap = noWrap;
 		Exception compilerException = internalInitClient(wsdlUri, localNoWrap);
@@ -203,8 +212,10 @@ public class DynamicClient {
 			try {
 				emitter.setOutputDir(src.getAbsolutePath());
 				emitter.run(wsdlUri.toString());
+			} catch (SocketException se) {
+				throw new DynamicClientException("Wsdl " +wsdlUri.toString()+ " unreachable" ,se);
 			} catch (Exception e) {
-				throw new DynamicClientException("Error parsing wsdl: " +wsdlUri.toString()+ ", cause: " + e.getMessage(), e);
+				throw new DynamicClientException("Error parsing wsdl " +wsdlUri.toString()+ " Cause: " + e.getMessage(), e);
 			}
 			
 			// Prapare classpath
@@ -315,6 +326,9 @@ public class DynamicClient {
 	
 	private void parseWsdl(Emitter emitter) throws DynamicClientException, OntologyException, ClassNotFoundException, SecurityException, NoSuchMethodException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
+		// Set wsdl definition documentation
+		documentation = getDocumentation(emitter.getSymbolTable().getDefinition());
+		
 		// Manage services
 		servicesInfo.clear();
 		List<ServiceEntry> services = WSDLUtils.getServices(emitter);
@@ -324,6 +338,7 @@ public class DynamicClient {
 			Service locator = getLocator(serviceEntry); 
 			
 			ServiceInfo serviceInfo = new ServiceInfo(serviceName, locator);
+			serviceInfo.setDocumentation(getDocumentation(serviceEntry.getService()));
 			servicesInfo.put(serviceName, serviceInfo);
 
 			// Manage ports
@@ -335,6 +350,7 @@ public class DynamicClient {
 				Stub stub = getStub(emitter, port, locator);
 				if (stub != null) {
 					PortInfo portInfo = new PortInfo(portName, stub);
+					portInfo.setDocumentation(getDocumentation(port));
 					serviceInfo.putPort(portName, portInfo);
 					
 					// Manage operations
@@ -344,6 +360,15 @@ public class DynamicClient {
 						String operationName = bindingOperation.getName();
 						log("operation "+operationName, 2);
 						OperationInfo operationInfo = new OperationInfo(operationName);
+						
+						// Get and add operation documentation from portType and binding 
+						String opDoc = getDocumentation(bindingOperation);
+						String opDoc2 = getDocumentation(bindingOperation.getOperation());
+						if (opDoc2 != null) {
+							opDoc = opDoc + (opDoc != null ? " ": "") + opDoc2; 
+						}
+						operationInfo.setDocumentation(opDoc);
+
 						portInfo.putOperation(operationName, operationInfo);
 	
 						// Manage parameters & headers
@@ -544,6 +569,20 @@ public class DynamicClient {
 		}
 	}
 
+	String getDocumentation(WSDLElement element) {
+		String documentation = null;
+		if (element != null) {
+			Element documentationElement = element.getDocumentationElement();
+			if (documentationElement != null) {
+		        Node child = documentationElement.getFirstChild();
+		        if (child != null) {
+		        	documentation = child.getNodeValue();
+		        }
+			}
+		}
+        return documentation;
+	}
+	
 	private Service getLocator(ServiceEntry axisService) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		String locatorClassName = axisService.getName() + "Locator";
 		Class locatorClass = classloader.loadClass(locatorClassName);

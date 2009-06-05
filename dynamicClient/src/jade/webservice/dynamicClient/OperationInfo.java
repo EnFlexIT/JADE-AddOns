@@ -37,6 +37,7 @@ import org.apache.axis.wsdl.toJava.Utils;
 public class OperationInfo {
 
 	private String name;
+	private String documentation;
 	private Map<String, ParameterInfo> inputParametersInfoMap = new HashMap<String, ParameterInfo>();
 	private Map<String, ParameterInfo> outputParametersInfoMap = new HashMap<String, ParameterInfo>();
 	private Map<String, HeaderInfo> inputHeadersInfoMap = new HashMap<String, HeaderInfo>();
@@ -54,6 +55,14 @@ public class OperationInfo {
 		return name;
 	}
 
+	public String getDocumentation() {
+		return documentation;
+	}
+
+	void setDocumentation(String documentation) {
+		this.documentation = documentation;
+	}
+	
 	public Set<String> getInputParameterNames() {
 		return inputParametersInfoMap.keySet();
 	}

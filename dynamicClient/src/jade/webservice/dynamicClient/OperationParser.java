@@ -50,9 +50,11 @@ import org.apache.axis.utils.JavaUtils;
 import org.apache.axis.wsdl.symbolTable.BindingEntry;
 import org.apache.axis.wsdl.symbolTable.CollectionType;
 import org.apache.axis.wsdl.symbolTable.Element;
+import org.apache.axis.wsdl.symbolTable.ElementDecl;
 import org.apache.axis.wsdl.symbolTable.MessageEntry;
 import org.apache.axis.wsdl.symbolTable.Parameter;
 import org.apache.axis.wsdl.symbolTable.Parameters;
+import org.apache.axis.wsdl.symbolTable.SchemaUtils;
 import org.apache.axis.wsdl.symbolTable.SymbolTable;
 import org.apache.axis.wsdl.toJava.Emitter;
 import org.apache.axis.wsdl.toJava.JavaTypeWriter;
@@ -83,7 +85,7 @@ public class OperationParser {
 		parametersList = new ArrayList<ParameterInfo>();
 		
 		if (parameters.returnParam != null) {
-			parametersList.add(convertToParameterInfo(parameters.returnParam, emitter, true));
+			parametersList.add(convertToParameterInfo(parameters.returnParam, emitter, bEntry, true));
 		}
 
 		Iterator<Parameter> iterator = parameters.list.iterator();
@@ -91,11 +93,12 @@ public class OperationParser {
 		Parameter param;
 		while(iterator.hasNext()) {
 			param = iterator.next();
+
 			if (param.isInHeader() || param.isOutHeader()) {
 				implicitHeadersMap.put(param.getQName(), convertToHeaderInfo(param, emitter, i));
 			} else {
 				// param belongs to operation parameters, it isn't in a header: skip it
-				parametersList.add(convertToParameterInfo(param, emitter));
+				parametersList.add(convertToParameterInfo(param, emitter, bEntry));
 			}
 			i++;
 		}
@@ -142,11 +145,79 @@ public class OperationParser {
 		explicitHeadersList.addAll(explicitInputWadeHeadersMap.values());
 	}
 	
-	private ParameterInfo convertToParameterInfo(Parameter axisParam, Emitter emitter) throws ClassNotFoundException, OntologyException {
-		return convertToParameterInfo(axisParam, emitter, false);
+	private String extractDocumentation(Emitter emitter, String namespace, QName paramQName) {
+		
+//		<xsd:element name="diff">
+//		  <xsd:annotation>
+//				<xsd:documentation>comment diff</xsd:documentation>			<--- first level
+//			</xsd:annotation>
+//		  <xsd:complexType>
+//		    <xsd:sequence>
+//		      <xsd:element name="firstElement" type="xsd:float">
+//		      	<xsd:annotation>
+//		      		<xsd:documentation>comment diff.firstElement</xsd:documentation>	<--- second level
+//		      	</xsd:annotation>
+//		    	</xsd:element>
+//		    </xsd:sequence>
+//		  </xsd:complexType>
+//		</xsd:element>
+//
+//		For de-wrapped params the localPart is in the form '>elementName>paramName' and namespace is null
+//		In this case is necessary extract from localPart the root element name and the param element name 		
+//		
+//		For wrapped params and headers the paramQName is already correct		
+		
+		String comment = null;
+		try {
+			SymbolTable symbolTable = emitter.getSymbolTable();
+			String paramLocalPart = paramQName.getLocalPart();
+
+			// Get parameter root element qname
+			QName elementQname = null;
+			if (paramLocalPart.startsWith(">")) {
+				int pos = paramLocalPart.indexOf('>', 1);
+				if (pos > 1) {
+					String operationElementName = paramLocalPart.substring(1, pos);
+					elementQname = new QName(namespace, operationElementName);
+				}
+			} else {
+				elementQname = paramQName;
+			}
+			
+			if (elementQname != null) {
+				// Get parameter root element 
+				Element operationElement = symbolTable.getElement(elementQname);
+				if (operationElement != null) {
+				
+					// Get first level comment 
+					comment = SchemaUtils.getAnnotationDocumentation(operationElement.getNode());
+		
+					// Get second level comment (only for de-wrapped)
+					if (operationElement.getRefType() != null && operationElement.getRefType().getContainedElements() != null) {
+						for (Object obj : operationElement.getRefType().getContainedElements()) {
+							ElementDecl paramElement = (ElementDecl)obj;
+							if (paramElement.getQName().equals(paramQName)) {
+								if (comment.length() > 0) {
+									comment += ", ";
+								}
+								comment += paramElement.getDocumentation();
+							}
+						}
+					}
+				}
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return comment;
 	}
 	
-	private ParameterInfo convertToParameterInfo(Parameter axisParam, Emitter emitter, boolean returnType) throws ClassNotFoundException, OntologyException {
+	private ParameterInfo convertToParameterInfo(Parameter axisParam, Emitter emitter, BindingEntry bEntry) throws ClassNotFoundException, OntologyException {
+		return convertToParameterInfo(axisParam, emitter, bEntry, false);
+	}
+	
+	private ParameterInfo convertToParameterInfo(Parameter axisParam, Emitter emitter, BindingEntry bEntry, boolean returnType) throws ClassNotFoundException, OntologyException {
 		String paramType = axisParam.getType().getName();
 		if(!returnType && axisParam.getMode() != Parameter.IN) {
 			Boolean holderIsNeeded = (Boolean) axisParam.getType().getDynamicVar(JavaTypeWriter.HOLDER_IS_NEEDED);
@@ -175,6 +246,7 @@ public class OperationParser {
 		pi.setTypeClass(getClassFromType(paramType));
 		pi.setSchema(getSchemaFromType(paramType));
 		pi.setMandatory(!axisParam.isOmittable());
+		pi.setDocumentation(extractDocumentation(emitter, bEntry.getQName().getNamespaceURI(), axisParam.getQName()));
 
 		return pi;
 	}
@@ -187,16 +259,18 @@ public class OperationParser {
 		String namespace;
 
 		String type;
+		QName qname;
 		boolean mandatory = false;
 		if (part.getTypeName() == null) {
 			Element element = st.getElement(part.getElementName());
-			QName qname = element.getQName();
+			qname = element.getQName();
 			name = qname.getLocalPart();
 			namespace = qname.getNamespaceURI();
 			type = JavaUtils.getLoadableClassName(element.getName());
 		} else {
 			name = soapHeader.getPart();
 			namespace = soapHeader.getNamespaceURI();
+			qname = new QName(namespace, name);
 			type = JavaUtils.getLoadableClassName(st.getTypeEntry(part.getTypeName(), false).getName());
 			if (soapHeader.getRequired() != null) {
 				mandatory = soapHeader.getRequired().booleanValue();
@@ -210,6 +284,7 @@ public class OperationParser {
 		hi.setSchema(getSchemaFromType(type));
 		hi.setSignaturePosition(signaturePosition);
 		hi.setMandatory(mandatory);
+		hi.setDocumentation(extractDocumentation(emitter, null, qname));
 		
 		return hi;
 	}
@@ -226,7 +301,7 @@ public class OperationParser {
 				paramType = Utils.holder(param, emitter);
 			}
 		}
-
+		
 		HeaderInfo hi = new HeaderInfo(paramName);
 		hi.setNamespace(paramNamespace);
 		hi.setMode(convertAxisModeToParameterMode(param.getMode()));
@@ -234,6 +309,7 @@ public class OperationParser {
 		hi.setSchema(getSchemaFromType(paramType));
 		hi.setSignaturePosition(signaturePosition);
 		hi.setMandatory(!param.isOmittable());
+		hi.setDocumentation(extractDocumentation(emitter, null, param.getQName()));
 		
 		return hi;
 	}
