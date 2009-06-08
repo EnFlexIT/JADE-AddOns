@@ -36,7 +36,9 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.Authenticator;
 import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
@@ -158,6 +160,22 @@ public class DynamicClient {
 	public void enableCertificateChecking() {
 		AxisProperties.setProperty("axis.socketSecureFactory", "");
 	}
+
+	public void setProxyHost(String proxyHost) {
+		System.setProperty("http.proxyHost", proxyHost);
+	}
+
+	public void setProxyPort(String proxyPort) {
+		System.setProperty("http.proxyPort", proxyPort);
+	}
+
+	public void setProxyAuthentication(final String proxyUser, final String proxyPassword) {
+	    Authenticator.setDefault(new Authenticator() {
+	        protected PasswordAuthentication getPasswordAuthentication() {
+	          return new
+	             PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
+	      }});
+	}
 	
 	public String getDocumentation() {
 		return documentation;
@@ -196,6 +214,7 @@ public class DynamicClient {
 			emitter.setNowrap(noWrap);
 			emitter.setPackageName(packageName);
 			emitter.setBobMode(true);
+			emitter.setAllowInvalidURL(true);
 	
 			// Prepare folders 
 			String stem = "DynamicClient-" + System.currentTimeMillis();
