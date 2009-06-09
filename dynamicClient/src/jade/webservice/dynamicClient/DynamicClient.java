@@ -162,13 +162,17 @@ public class DynamicClient {
 	}
 
 	public void setProxyHost(String proxyHost) {
-		System.setProperty("http.proxyHost", proxyHost);
+		AxisProperties.setProperty("http.proxyHost", proxyHost);
 	}
 
 	public void setProxyPort(String proxyPort) {
-		System.setProperty("http.proxyPort", proxyPort);
+		AxisProperties.setProperty("http.proxyPort", proxyPort);
 	}
 
+	public void setNonProxyHosts(String nonProxyHosts) {
+		AxisProperties.setProperty("http.nonProxyHosts", nonProxyHosts);
+	}
+	
 	public void setProxyAuthentication(final String proxyUser, final String proxyPassword) {
 	    Authenticator.setDefault(new Authenticator() {
 	        protected PasswordAuthentication getPasswordAuthentication() {
@@ -588,7 +592,7 @@ public class DynamicClient {
 		}
 	}
 
-	String getDocumentation(WSDLElement element) {
+	private String getDocumentation(WSDLElement element) {
 		String documentation = null;
 		if (element != null) {
 			Element documentationElement = element.getDocumentationElement();
