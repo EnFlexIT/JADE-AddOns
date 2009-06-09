@@ -226,7 +226,8 @@ class BeanIntrospector implements Introspector {
 
 					// clazz does not have this getter, let's search it on its superclass
 					clazz = clazz.getSuperclass();
-					if (!Concept.class.isAssignableFrom(clazz)) {
+
+					if (Object.class.equals(clazz)) {
 						throw new OntologyException("cannot retrieve a getter for slot "+slotName+", class "+javaClass);
 					}
 				}
@@ -280,7 +281,7 @@ class BeanIntrospector implements Introspector {
 
 						// clazz does not have this setter, let's search it on its superclass
 						clazz = clazz.getSuperclass();
-						if (!Concept.class.isAssignableFrom(clazz)) {
+						if (Object.class.equals(clazz)) {
 							throw new OntologyException("cannot retrieve a setter for slot "+slotName+", class "+javaClass);
 						}
 					}
