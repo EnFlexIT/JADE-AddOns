@@ -28,9 +28,13 @@ public class JadeClientActivator implements BundleActivator {
 			AgentController ac = jade.acceptAgent(context.getBundle().getSymbolicName() + "_accepted", myAgent);
 			ac.start();
 
-			AgentController ac2 = jade.createAgent(context.getBundle().getSymbolicName() + "_created", "jade.osgi.test.MyBundleAgent", null);
-			ac2.start();
-
+			try {
+    			AgentController ac2 = jade.createAgent(context.getBundle().getSymbolicName() + "_created", "jade.osgi.test.MyBundleAgent", null);
+    			ac2.start();
+			} catch(Exception e) {
+				e.printStackTrace();
+				System.out.println("Cannot create agent: "+e);
+			}
 		}
 	}
 

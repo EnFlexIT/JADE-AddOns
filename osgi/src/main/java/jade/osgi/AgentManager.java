@@ -43,11 +43,13 @@ public class AgentManager {
 			while(it.hasNext()) {
 				AgentWrapper aw = it.next();
 				if(aw.agent.getAID().equals(aid)) {
+					System.out.println("Killed agent "+ aw);
 					it.remove();
 					break found;
 				}
 			}
 		}
+		System.out.println("\nagents "+ agents+"\n");
 	}
 	
 	public synchronized Bundle getAgentBundle(AID aid) {
@@ -64,7 +66,8 @@ public class AgentManager {
 		return result;
 	}
 
-	public synchronized void killAgents(String symbolicName) {
+	public synchronized boolean killAgents(String symbolicName) {
+		boolean res = false;
 		agentsToRestart.put(symbolicName, new ArrayList<AgentInfo>());
 		if(agents.containsKey(symbolicName)) {
 			List<AgentWrapper> agentWrappers = agents.get(symbolicName);
@@ -72,12 +75,15 @@ public class AgentManager {
 				Agent a = aw.agent;
 				if(aw.restart) {
 					agentsToRestart.get(symbolicName).add(new AgentInfo(a.getLocalName(), a.getClass().getName(), a.getArguments()));
+					res = true;
 				}
 				System.out.println("Killing agent " + a.getLocalName());
 				a.doDelete();
 			}
 		}
+		System.out.println("\nagentsToRestart " + agentsToRestart);
 		agents.remove(symbolicName);
+		return res;
 	}
 	
 	public synchronized void restartAgents(String symbolicName) {
@@ -86,10 +92,10 @@ public class AgentManager {
 		if(agentsToRestart.containsKey(symbolicName)) {
     		for(AgentInfo ai: agentsToRestart.get(symbolicName)) {
     			try {
-    				System.out.println("JADE_OSGI: restarting agent "+ai.getName());
+    				System.out.println("Restarting agent "+ai.getName());
     				jrs.createAgent(ai.getName(), ai.getClassName(), symbolicName, ai.getArgs());
     			} catch(Exception e) {
-    				System.out.println("JADE_OSGI: agent " + ai.getName() + " cannot be restarted!");
+    				System.out.println("Agent " + ai.getName() + " cannot be restarted!");
     				e.printStackTrace();
     			}
     		}
@@ -100,6 +106,8 @@ public class AgentManager {
 	public synchronized void removeAgents(String symbolicName) throws Exception {
 		System.out.println("Bundle "+symbolicName+" STOPPED ---> clean agentsToRestart list");
 		agentsToRestart.remove(symbolicName);
+		System.out.println("\nagentsToRestart "+ agentsToRestart+"\n");
+		System.out.println("\nagents "+ agents+"\n");
 	}
 	
 	private class AgentWrapper {

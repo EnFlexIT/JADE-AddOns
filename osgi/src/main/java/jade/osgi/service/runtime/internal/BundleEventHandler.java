@@ -27,20 +27,22 @@ public class BundleEventHandler extends EventHandler {
 			case BundleEvent.STOPPED:
 				System.out.println("Bundle " + symbolicName + " STOPPED");
 				try {
-					agentManager.killAgents(symbolicName);
+					if(agentManager.killAgents(symbolicName)) {
+						task = scheduler.schedule(new AgentRemover(symbolicName), 10000, TimeUnit.MILLISECONDS);
+						System.out.println("Task remover scheduled for bundle  " + symbolicName);
+					}
 				} catch(Exception e) {
 					e.printStackTrace();
 				}
-				task = scheduler.schedule(new AgentRemover(symbolicName), 10000, TimeUnit.MILLISECONDS);
-				System.out.println("Task remover scheduled: is completed: " + task.isDone());
 				break;
 
 			case BundleEvent.UPDATED:
 				System.out.println("Bundle " + symbolicName + " UPDATED");
+				System.out.println("task scheduled " + task);
 				if(task != null) {
-					System.out.println("task remover to be canceled:  is completed: " + task.isDone());
+					System.out.println("task remover to be canceled for bundle: " + symbolicName);
 					task.cancel(true);
-					System.out.println("task remover cancelled");
+					System.out.println("task remover cancelled for bundle "+symbolicName);
 				}
 				break;
 				

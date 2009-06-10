@@ -2,7 +2,6 @@ package jade.osgi.service.runtime.internal;
 
 import jade.osgi.AgentManager;
 import java.util.EventObject;
-import java.util.concurrent.TimeUnit;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceEvent;
 
@@ -18,11 +17,6 @@ public class ServiceEventHandler extends EventHandler {
 		switch(serviceEvent.getType()) {
 			case ServiceEvent.REGISTERED:
 				System.out.println(serviceEvent.getServiceReference().getClass().getName()+"("+symbolicName+") REGISTERED");
-				System.out.println("JADE_OSGI: check and eventually cancel agent remover");
-				if(task != null) {
-					task.cancel(true);
-					System.out.println("JADE_OSGI: task remover cancelled");
-				}
 				System.out.println("JADE_OSGI: restarting agents");
 				try {
 					agentManager.restartAgents(symbolicName);
@@ -33,10 +27,6 @@ public class ServiceEventHandler extends EventHandler {
 
 			case ServiceEvent.UNREGISTERING:
 				System.out.println(serviceEvent.getServiceReference().getClass().getName()+"("+symbolicName+") UNREGISTERED");
-				if(symbolicName != null) {
-    				task = scheduler.schedule(new AgentRemover(symbolicName), 10000, TimeUnit.MILLISECONDS);
-    				System.out.println("task remover scheduled: is completed: " + task.isDone());
-				}
 				break;
 			default:
 				break;

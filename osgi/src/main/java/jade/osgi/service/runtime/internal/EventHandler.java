@@ -29,6 +29,7 @@ public abstract class EventHandler {
 		}
 
 		public void run() {
+			System.out.println("agent remover  task  for bundle "+symbolicName);
 			try {
 				agentManager.removeAgents(symbolicName);
 			} catch(Exception e) {
