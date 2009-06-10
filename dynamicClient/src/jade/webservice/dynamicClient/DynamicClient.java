@@ -145,35 +145,35 @@ public class DynamicClient {
 		this.timeout = timeout;
 	}
 	
-	public void setTrustStore(String trustStore) {
+	public static void setTrustStore(String trustStore) {
 		System.setProperty("javax.net.ssl.trustStore", trustStore);
 	}
 
-	public void setTrustStorePassword(String trustStorePassword) {
+	public static void setTrustStorePassword(String trustStorePassword) {
 		System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 	}
 
-	public void disableCertificateChecking() {
+	public static void disableCertificateChecking() {
 		AxisProperties.setProperty("axis.socketSecureFactory", "org.apache.axis.components.net.SunFakeTrustSocketFactory");
 	}
 
-	public void enableCertificateChecking() {
+	public static void enableCertificateChecking() {
 		AxisProperties.setProperty("axis.socketSecureFactory", "");
 	}
 
-	public void setProxyHost(String proxyHost) {
+	public static void setProxyHost(String proxyHost) {
 		AxisProperties.setProperty("http.proxyHost", proxyHost);
 	}
 
-	public void setProxyPort(String proxyPort) {
+	public static void setProxyPort(String proxyPort) {
 		AxisProperties.setProperty("http.proxyPort", proxyPort);
 	}
 
-	public void setNonProxyHosts(String nonProxyHosts) {
+	public static void setNonProxyHosts(String nonProxyHosts) {
 		AxisProperties.setProperty("http.nonProxyHosts", nonProxyHosts);
 	}
 	
-	public void setProxyAuthentication(final String proxyUser, final String proxyPassword) {
+	public static void setProxyAuthentication(final String proxyUser, final String proxyPassword) {
 	    Authenticator.setDefault(new Authenticator() {
 	        protected PasswordAuthentication getPasswordAuthentication() {
 	          return new
