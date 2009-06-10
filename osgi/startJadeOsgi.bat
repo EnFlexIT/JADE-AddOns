@@ -1,0 +1,1 @@
+java -cp D:\projects-Ganymede\jadeosgi\target\jadeOsgi-1.0-SNAPSHOT.jar jade.Boot -gui -port 1199

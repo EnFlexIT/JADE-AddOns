@@ -1,39 +1,40 @@
 package jade.osgi.service.runtime.internal;
 
-
+import jade.osgi.AgentManager;
 import java.util.EventObject;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
-
 public abstract class EventHandler {
-	protected ScheduledExecutorService scheduler =Executors.newScheduledThreadPool(1);
+	protected ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	protected ScheduledFuture<?> task;
 	protected EventObject event;
-	JadeRuntimeServiceImpl jadeService;
- 
-	public EventHandler(EventObject event,
-			JadeRuntimeServiceImpl jadeService) {
+	AgentManager agentManager;
+
+	public EventHandler(EventObject event, AgentManager am) {
 		this.event = event;
-		this.jadeService = jadeService;
-		
+		this.agentManager = am;
 		handleEvent();
 	}
- 
-	protected abstract void handleEvent();
 
+	protected abstract void handleEvent();
+	
 	class AgentRemover implements Runnable {
+		
+		private String symbolicName;
+		
+		public AgentRemover(String symbolicName) {
+			this.symbolicName = symbolicName;
+		}
 
 		public void run() {
-		System.out.println("agentRemover#run ");
 			try {
-				jadeService.removeAgents();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				agentManager.removeAgents(symbolicName);
+			} catch(Exception e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 	}
 }

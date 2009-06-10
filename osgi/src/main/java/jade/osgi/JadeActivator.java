@@ -3,9 +3,10 @@ package jade.osgi;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
-import jade.osgi.service.agentFactory.AgentFactory;
 import jade.osgi.service.agentFactory.AgentFactoryService;
+import jade.osgi.service.agentFactory.OSGIBridgeService;
 import jade.osgi.service.runtime.JadeRuntimeService;
+import jade.osgi.service.runtime.internal.BundleEventHandler;
 import jade.osgi.service.runtime.internal.JadeRuntimeServiceFactory;
 import jade.util.leap.Properties;
 import jade.wrapper.ContainerController;
@@ -17,46 +18,70 @@ import java.util.Set;
 import java.util.Map.Entry;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
 
-public class JadeActivator implements BundleActivator {
+public class JadeActivator implements BundleActivator, BundleListener, ServiceListener {
 
 	public static final String PROFILE_PARAMETER_PREFIX = "jade.";
-
 	public static final String JADE_CONF = PROFILE_PARAMETER_PREFIX + "conf";
 
 	private static BundleContext context;
-
+	private static JadeActivator instance;
 	private ContainerController container;
-
+	private static AgentManager agentManager;
+	
 	public void start(BundleContext context) throws Exception {
-
 		try {
-
+			instance = this;
 			this.context = context;
-
+			this.agentManager = new AgentManager(context);
 			Properties props = new Properties();
 			addJadeSystemProperties(props);
 			addJadeFileProperties(props);
-			addAgentFactoryService(props);
+			addOSGIBridgeService(props);
 			startJadeContainer(props);
 			ServiceFactory factory = registerJadeRuntimeService();
 			addAgentFactoryListener(factory);
-
+			context.addBundleListener(this);
 		} catch(Exception e) {
 			e.printStackTrace();
 			stop(context);
 		}
-
+	}
+	
+	public static JadeActivator getInstance() {
+		return instance;
+	}
+	
+	public static AgentManager getAgentManager() {
+		return agentManager;
+	}
+	
+	public void stop(BundleContext context) throws Exception {
+		container.kill();
 	}
 
+	public static BundleContext getBundleContext() {
+		return context;
+	}
+	
+	public synchronized void bundleChanged(BundleEvent event) {
+		new BundleEventHandler(event, agentManager);
+	}
+	
+	public synchronized void serviceChanged(ServiceEvent event) {
+		//new ServiceEventHandler(event, agentManager);
+	}
+	
 	private void addAgentFactoryListener(ServiceFactory factory) throws InvalidSyntaxException {
-		String filter = "(objectclass=" + AgentFactory.class.getName() + ")";
+		String filter = "(objectclass=" + AgentFactoryService.class.getName() + ")";
 
-		context.addServiceListener((ServiceListener) factory,filter);
+		context.addServiceListener(this, filter);
 		//aggiungere pseudoregistrazioni di Agentfactory gia' esistenti
 //		ServiceReference[] refs =
 //	          context.getServiceReferences(null, filter);
@@ -66,25 +91,18 @@ public class JadeActivator implements BundleActivator {
 //	              new ServiceEvent(ServiceEvent.REGISTERED, r));             
 //	        }
 //
-		context.addBundleListener((BundleListener)factory);
+		context.addBundleListener(this);
 		
 	}
 
-	private void addAgentFactoryService(Properties pp) {
+	private void addOSGIBridgeService(Properties pp) {
 		String services = pp.getProperty(Profile.SERVICES);
+		String serviceName = OSGIBridgeService.class.getName();
 		if(services == null) {
-			pp.setProperty(Profile.SERVICES, AgentFactoryService.NAME);
-		} else if(services.indexOf(AgentFactoryService.NAME) == -1) {
-			pp.setProperty(Profile.SERVICES, services+";"+AgentFactoryService.NAME);
+			pp.setProperty(Profile.SERVICES, serviceName);
+		} else if(services.indexOf(serviceName) == -1) {
+			pp.setProperty(Profile.SERVICES, services+";"+serviceName);
 		}
-	}
-
-	public void stop(BundleContext context) throws Exception {
-		container.kill();
-	}
-
-	public static BundleContext getBundleContext() {
-		return context;
 	}
 
 	private void addJadeSystemProperties(Properties props) {
@@ -135,9 +153,9 @@ public class JadeActivator implements BundleActivator {
 	}
 	
 	private ServiceFactory registerJadeRuntimeService() {
-		ServiceFactory factory = new JadeRuntimeServiceFactory(container);
+		ServiceFactory factory = new JadeRuntimeServiceFactory(container, agentManager);
 		context.registerService(JadeRuntimeService.class.getName(), factory, null);
 		return factory;
 	}
-
+	
 }

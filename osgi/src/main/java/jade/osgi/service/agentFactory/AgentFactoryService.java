@@ -1,37 +1,39 @@
 package jade.osgi.service.agentFactory;
 
-import jade.core.AgentContainer;
-import jade.core.BaseService;
-import jade.core.IMTPException;
-import jade.core.Profile;
-import jade.core.ProfileException;
-import jade.core.ServiceException;
-import jade.core.management.AgentManagementService;
-import jade.osgi.JadeActivator;
+import jade.core.Agent;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
-public class AgentFactoryService extends BaseService {
-	public static final String NAME = AgentFactoryService.class.getName();
+public abstract class AgentFactoryService {
+	
+	public static final String SERVICE_NAME = "SERVICE_NAME";
+	public static final String AFS_PREFIX = "AFS_";
 
-	private AgentContainer myContainer;
+	private Bundle myBundle;
+	private ServiceRegistration serviceRegistration;
 
-	public void init(AgentContainer ac, Profile p) throws ProfileException {
-		super.init(ac, p);
-		myContainer = ac;
+	public void init(Bundle bundle) {
+		this.myBundle = bundle;
+		BundleContext context = myBundle.getBundleContext();
+		Dictionary<String, String> properties = new Hashtable<String, String>();
+		properties.put(SERVICE_NAME, AFS_PREFIX+myBundle.getSymbolicName());
+		this.serviceRegistration = context.registerService(AgentFactoryService.class.getName(), this, properties);
+		System.out.println(myBundle.getSymbolicName()+ ": registered AgentFactoryService");
+	}
+	
+	public void stop() {
+		serviceRegistration.unregister();
 	}
 
-	@Override
-	public void boot(Profile p) throws ServiceException {
-		try {
-			AgentManagementService ams = (AgentManagementService) myContainer.getServiceFinder().findService(AgentManagementService.NAME);
-			ams.addAgentLoader(new OSGIAgentLoader(JadeActivator.getBundleContext()));
-			System.out.println("AgentFactoryService started!");
-		} catch(IMTPException e) {
-			throw new ServiceException("Cannot retrieve AgentManagementService.", e);
-		}
+	Bundle getBundle() {
+		return myBundle;
 	}
 
-	public String getName() {
-		return NAME;
+	public Agent createAgent(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+		Class c = myBundle.loadClass(className);
+		return (Agent) c.newInstance();
 	}
-
 }
