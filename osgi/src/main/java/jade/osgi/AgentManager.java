@@ -25,7 +25,7 @@ public class AgentManager {
 		this.context = context;
 	}
 
-	public void addAgent(Bundle bundle, Agent agent, boolean created) {
+	public synchronized void addAgent(Bundle bundle, Agent agent, boolean created) {
 		System.out.println((created ? "Created" : "Accepted") + " agent " + agent + "(" + bundle.getSymbolicName()+")");
 		String symbolicName = bundle.getSymbolicName();
 		if(!agents.containsKey(symbolicName)) {
@@ -35,7 +35,7 @@ public class AgentManager {
 		System.out.println("\nagents "+ agents+"\n");
 	}
 
-	public void removeAgent(AID aid) {
+	public synchronized void removeAgent(AID aid) {
 		found:
 		for(Entry<String, List<AgentWrapper>> entry: agents.entrySet()) {
 			List<AgentWrapper> agentWrappers = entry.getValue();
@@ -50,7 +50,7 @@ public class AgentManager {
 		}
 	}
 	
-	public Bundle getAgentBundle(AID aid) {
+	public synchronized Bundle getAgentBundle(AID aid) {
 		Bundle result = null;
 		found: 
 		for(Entry<String, List<AgentWrapper>> entry : agents.entrySet()) {
@@ -64,7 +64,7 @@ public class AgentManager {
 		return result;
 	}
 
-	public void killAgents(String symbolicName) {
+	public synchronized void killAgents(String symbolicName) {
 		agentsToRestart.put(symbolicName, new ArrayList<AgentInfo>());
 		if(agents.containsKey(symbolicName)) {
 			List<AgentWrapper> agentWrappers = agents.get(symbolicName);
@@ -80,7 +80,7 @@ public class AgentManager {
 		agents.remove(symbolicName);
 	}
 	
-	public void restartAgents(String symbolicName) {
+	public synchronized void restartAgents(String symbolicName) {
 		ServiceReference jrsReference = context.getServiceReference(JadeRuntimeService.class.getName());
 		JadeRuntimeService jrs = (JadeRuntimeService) context.getService(jrsReference);
 		if(agentsToRestart.containsKey(symbolicName)) {
@@ -97,7 +97,7 @@ public class AgentManager {
 		}
 	}
 	
-	public void removeAgents(String symbolicName) throws Exception {
+	public synchronized void removeAgents(String symbolicName) throws Exception {
 		System.out.println("Bundle "+symbolicName+" STOPPED ---> clean agentsToRestart list");
 		agentsToRestart.remove(symbolicName);
 	}
