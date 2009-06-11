@@ -81,9 +81,9 @@ public class DynamicClient {
 	
 	private static Logger log = Logger.getLogger(DynamicClient.class.getName());
 	
-	private URL endpoint;
-	private String serviceName;
-	private String portName;
+	private URL defaultEndpoint;
+	private String defaultServiceName;
+	private String defaultPortName;
 	private int timeout;
 	private String packageName;
 	private String tmpDir;
@@ -106,23 +106,23 @@ public class DynamicClient {
 		timeout = -1;
 		classloader = Thread.currentThread().getContextClassLoader();
 		
-		typeOnto = new BeanOntology("WSDL-TYPES");
+		typeOnto = new BeanOntology("WSDL-TYPES", new Ontology[]{XsdPrimitivesOntology.getInstance(), BasicOntology.getInstance()});
 	}
 
 	public void setClassPath(StringBuilder classPath) {
 		this.classPath = classPath;
 	}
 
-	public void setEndpoint(URL endpoint) {
-		this.endpoint = endpoint;
+	public void setDefaultEndpoint(URL defaultEndpoint) {
+		this.defaultEndpoint = defaultEndpoint;
 	}
 
-	public void setService(String serviceName) {
-		this.serviceName = serviceName;
+	public void setDefaultService(String defaultServiceName) {
+		this.defaultServiceName = defaultServiceName;
 	}
 
-	public void setPort(String portName) {
-		this.portName = portName;
+	public void setDefaultPort(String defaultPortName) {
+		this.defaultPortName = defaultPortName;
 	}
 
 	public void setTmpDir(String tmpDir) {
@@ -208,9 +208,10 @@ public class DynamicClient {
 			log("Tmp-dir="+tmpDir, 1);
 			log("Safe-mode="+safeMode, 1);
 			
-			// reset service/port
-			serviceName = null;
-			portName = null;
+			// reset default service/port/endpoint
+			defaultServiceName = null;
+			defaultPortName = null;
+			defaultEndpoint = null;
 			
 			// Init Axis emitter
 			Emitter emitter = new Emitter();
@@ -435,12 +436,16 @@ public class DynamicClient {
 		}
 	}
 
-	public WSData invoke(String operation, WSData input) throws DynamicClientException, RemoteException {
+	public synchronized WSData invoke(String operation, WSData input) throws DynamicClientException, RemoteException {
+		return invoke(null, null, operation, null, input);
+	}
+	
+	public synchronized WSData invoke(String serviceName, String portName, String operation, URL endpoint, WSData input) throws DynamicClientException, RemoteException {
 		
 		try {
-			// Get operation information
-			ServiceInfo serviceInfo = getService(serviceName);
-			PortInfo portInfo = serviceInfo.getPort(portName);
+			// Get service/port/operation informations
+			ServiceInfo serviceInfo = getService(serviceName == null ? defaultServiceName : serviceName);
+			PortInfo portInfo = serviceInfo.getPort(portName == null ? defaultPortName : portName);
 			OperationInfo operationInfo = portInfo.getOperation(operation);
 			if (operationInfo == null) {
 				throw new DynamicClientException("Operation "+operation+" not present in service "+serviceInfo.getName()+", port "+portInfo.getName());
@@ -453,6 +458,9 @@ public class DynamicClient {
 			Stub stub = portInfo.getStub();
 			
 			// Set webservice endpoint
+			if (endpoint == null) {
+				endpoint = defaultEndpoint;
+			}
 			if (endpoint != null) {
 				stub._setProperty(Stub.ENDPOINT_ADDRESS_PROPERTY, endpoint.toExternalForm());
 			}
