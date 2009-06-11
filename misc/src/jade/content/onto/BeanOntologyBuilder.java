@@ -78,7 +78,7 @@ class BeanOntologyBuilder {
 		 *   - takes no parameters
 		 *   - has a return value
 		 *   - its name starts with "get"
-		 *   - its 4th char is uppercase
+		 *   - its 4th char is uppercase or is "_"
 		 *   - its name is not "getClass" :-)
 		 */
 		String methodName = method.getName();
@@ -90,7 +90,7 @@ class BeanOntologyBuilder {
 			// it does not start with "get"
 			return false;
 		}
-		if (!Character.isUpperCase(methodName.charAt(3))) {
+		if (!Character.isUpperCase(methodName.charAt(3)) && '_' != methodName.charAt(3)) {
 			// its 4th char is not uppercase
 			return false;
 		}
@@ -111,7 +111,7 @@ class BeanOntologyBuilder {
 
 	private static boolean isSetter(Method method) {
 		/*
-		 * a setter method takes one parameter, does not have a return value and its name starts with "set" and its 4th char is uppercase
+		 * a setter method takes one parameter, does not have a return value and its name starts with "set" and its 4th char is uppercase or is "_"
 		 */
 		String methodName = method.getName(); 
 		if (methodName.length() < 4) {
@@ -122,7 +122,7 @@ class BeanOntologyBuilder {
 			// it does not start with "set"
 			return false;
 		}
-		if (!Character.isUpperCase(methodName.charAt(3))) {
+		if (!Character.isUpperCase(methodName.charAt(3)) && '_' != methodName.charAt(3)) {
 			// its 4th char is not uppercase
 			return false;
 		}
