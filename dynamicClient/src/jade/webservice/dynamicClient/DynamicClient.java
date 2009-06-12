@@ -92,17 +92,16 @@ public class DynamicClient {
 	private ClassLoader classloader;
 	private StringBuilder classPath;
 	private String documentation;
-
+	private boolean inited;
 	private BeanOntology typeOnto;
-	
 	private Map<String, ServiceInfo> servicesInfo = new HashMap<String, ServiceInfo>(); 
 	
 
 	public DynamicClient() {
-		this.tmpDir = System.getProperty("java.io.tmpdir");
-		this.noWrap = false;
-		this.safeMode = true;
-
+		tmpDir = System.getProperty("java.io.tmpdir");
+		noWrap = false;
+		safeMode = true;
+		inited = false;
 		timeout = -1;
 		classloader = Thread.currentThread().getContextClassLoader();
 		
@@ -181,6 +180,10 @@ public class DynamicClient {
 	      }});
 	}
 	
+	public boolean isInited() {
+		return inited;
+	}
+	
 	public String getDocumentation() {
 		return documentation;
 	}
@@ -195,6 +198,7 @@ public class DynamicClient {
 		if (compilerException != null) {
 			throw new DynamicClientException("Error compiling wsdl-java source files", compilerException);
 		}
+		inited = true;
 	}
 	
 	private Exception internalInitClient(URI wsdlUri, boolean noWrap) throws DynamicClientException {
@@ -443,9 +447,23 @@ public class DynamicClient {
 	public synchronized WSData invoke(String serviceName, String portName, String operation, URL endpoint, WSData input) throws DynamicClientException, RemoteException {
 		
 		try {
+			if (!inited) {
+				throw new DynamicClientException("DynamicClient not inited");
+			}
+			
 			// Get service/port/operation informations
-			ServiceInfo serviceInfo = getService(serviceName == null ? defaultServiceName : serviceName);
-			PortInfo portInfo = serviceInfo.getPort(portName == null ? defaultPortName : portName);
+			serviceName = serviceName == null ? defaultServiceName : serviceName;
+			ServiceInfo serviceInfo = getService(serviceName);
+			if (serviceInfo == null) {
+				throw new DynamicClientException("Service "+serviceName+" not present");
+			}
+			
+			portName = portName == null ? defaultPortName : portName;
+			PortInfo portInfo = serviceInfo.getPort(portName);
+			if (portInfo == null) {
+				throw new DynamicClientException("Port "+portName+" not present in service "+serviceInfo.getName());
+			}
+			
 			OperationInfo operationInfo = portInfo.getOperation(operation);
 			if (operationInfo == null) {
 				throw new DynamicClientException("Operation "+operation+" not present in service "+serviceInfo.getName()+", port "+portInfo.getName());
