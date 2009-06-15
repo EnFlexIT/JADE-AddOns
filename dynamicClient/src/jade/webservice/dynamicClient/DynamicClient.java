@@ -80,38 +80,37 @@ public class DynamicClient {
 	public static final SimpleDateFormat ISO8601_DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	
 	private static Logger log = Logger.getLogger(DynamicClient.class.getName());
+
+	public enum State {CREATED, INITIALIZED, INIT_FAILED}
 	
 	private URL defaultEndpoint;
 	private String defaultServiceName;
 	private String defaultPortName;
-	private int timeout;
-	private String packageName;
-	private String tmpDir;
-	private boolean noWrap;
-	private boolean safeMode;
+
+	private DynamicClientProperties properties;
 	private ClassLoader classloader;
-	private StringBuilder classPath;
 	private String documentation;
-	private boolean inited;
+	private State state;
+	private DynamicClientException initializationException;
 	private BeanOntology typeOnto;
-	private Map<String, ServiceInfo> servicesInfo = new HashMap<String, ServiceInfo>(); 
+	private Map<String, ServiceInfo> servicesInfo = new HashMap<String, ServiceInfo>();
 	
 
 	public DynamicClient() {
-		tmpDir = System.getProperty("java.io.tmpdir");
-		noWrap = false;
-		safeMode = true;
-		inited = false;
-		timeout = -1;
+		state = State.CREATED;
 		classloader = Thread.currentThread().getContextClassLoader();
-		
 		typeOnto = new BeanOntology("WSDL-TYPES", new Ontology[]{XsdPrimitivesOntology.getInstance(), BasicOntology.getInstance()});
+		properties = new DynamicClientProperties();
 	}
 
-	public void setClassPath(StringBuilder classPath) {
-		this.classPath = classPath;
+	public DynamicClientProperties getProperties() {
+		return properties;
 	}
 
+	public void setProperties(DynamicClientProperties properties) {
+		this.properties = properties;
+	}
+	
 	public void setDefaultEndpoint(URL defaultEndpoint) {
 		this.defaultEndpoint = defaultEndpoint;
 	}
@@ -124,26 +123,6 @@ public class DynamicClient {
 		this.defaultPortName = defaultPortName;
 	}
 
-	public void setTmpDir(String tmpDir) {
-		this.tmpDir = tmpDir;
-	}
-
-	public void setNoWrap(boolean noWrap) {
-		this.noWrap = noWrap;
-	}
-
-	public void setSafeMode(boolean safeMode) {
-		this.safeMode = safeMode;
-	}
-	
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
-	}
-	
-	public void setTimeout(int timeout) {
-		this.timeout = timeout;
-	}
-	
 	public static void setTrustStore(String trustStore) {
 		System.setProperty("javax.net.ssl.trustStore", trustStore);
 	}
@@ -180,25 +159,38 @@ public class DynamicClient {
 	      }});
 	}
 	
-	public boolean isInited() {
-		return inited;
+	public State getState() {
+		return state;
 	}
 	
 	public String getDocumentation() {
 		return documentation;
 	}
 	
+	DynamicClientException getInitializationExceptionException() {
+		return initializationException;
+	}
+	
 	public void initClient(URI wsdlUri) throws DynamicClientException {
-		boolean localNoWrap = noWrap;
-		Exception compilerException = internalInitClient(wsdlUri, localNoWrap);
-		if (compilerException != null && safeMode && !localNoWrap) {
-			localNoWrap = true;
+		boolean localNoWrap = properties.isNoWrap();
+		Exception compilerException;
+		try {
 			compilerException = internalInitClient(wsdlUri, localNoWrap);
+			if (compilerException != null && properties.isSafeMode() && !localNoWrap) {
+				localNoWrap = true;
+				compilerException = internalInitClient(wsdlUri, localNoWrap);
+			}
+		} catch(DynamicClientException dce) {
+			state = State.INIT_FAILED;
+			initializationException = dce;
+			throw dce;
 		}
 		if (compilerException != null) {
-			throw new DynamicClientException("Error compiling wsdl-java source files", compilerException);
+			state = State.INIT_FAILED;
+			initializationException = new DynamicClientException("Error compiling wsdl-java source files", compilerException); 
+			throw initializationException;
 		}
-		inited = true;
+		state = State.INITIALIZED;
 	}
 	
 	private Exception internalInitClient(URI wsdlUri, boolean noWrap) throws DynamicClientException {
@@ -208,9 +200,9 @@ public class DynamicClient {
 		try{
 			log("Create Dynamic Client for "+wsdlUri);
 			log("No-wrap="+noWrap, 1);
-			log("Pck-name="+packageName, 1);
-			log("Tmp-dir="+tmpDir, 1);
-			log("Safe-mode="+safeMode, 1);
+			log("Pck-name="+properties.getPackageName(), 1);
+			log("Tmp-dir="+properties.getTmpDir(), 1);
+			log("Safe-mode="+properties.isSafeMode(), 1);
 			
 			// reset default service/port/endpoint
 			defaultServiceName = null;
@@ -221,17 +213,17 @@ public class DynamicClient {
 			Emitter emitter = new Emitter();
 			emitter.setAllWanted(true);
 			emitter.setNowrap(noWrap);
-			emitter.setPackageName(packageName);
+			emitter.setPackageName(properties.getPackageName());
 			emitter.setBobMode(true);
 			emitter.setAllowInvalidURL(true);
 	
 			// Prepare folders 
 			String stem = "DynamicClient-" + System.currentTimeMillis();
-			src = new File(tmpDir, stem + "-src");
+			src = new File(properties.getTmpDir(), stem + "-src");
 			if (!src.mkdir()) {
 				throw new DynamicClientException("Unable to create working directory " + src.getAbsolutePath());
 			}
-			classes = new File(tmpDir, stem + "-classes");
+			classes = new File(properties.getTmpDir(), stem + "-classes");
 			if (!classes.mkdir()) {
 				throw new IllegalStateException("Unable to create working directory " + src.getPath());
 			}
@@ -247,6 +239,7 @@ public class DynamicClient {
 			}
 			
 			// Prapare classpath
+			StringBuilder classPath = properties.getClassPath(); 
 			if(classPath == null) {
 				classPath = new StringBuilder();
     			try {
@@ -440,30 +433,33 @@ public class DynamicClient {
 		}
 	}
 
-	public synchronized WSData invoke(String operation, WSData input) throws DynamicClientException, RemoteException {
+	public WSData invoke(String operation, WSData input) throws DynamicClientException, RemoteException {
 		return invoke(null, null, operation, null, input);
 	}
 	
-	public synchronized WSData invoke(String serviceName, String portName, String operation, URL endpoint, WSData input) throws DynamicClientException, RemoteException {
+	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, WSData input) throws DynamicClientException, RemoteException {
 		
 		try {
-			if (!inited) {
-				throw new DynamicClientException("DynamicClient not inited");
+			// Check if is initialized
+			if (state != State.INITIALIZED) {
+				throw new DynamicClientException("DynamicClient not inited, current state="+state);
 			}
 			
-			// Get service/port/operation informations
+			// Get and check service
 			serviceName = serviceName == null ? defaultServiceName : serviceName;
 			ServiceInfo serviceInfo = getService(serviceName);
 			if (serviceInfo == null) {
 				throw new DynamicClientException("Service "+serviceName+" not present");
 			}
 			
+			// Get and check port
 			portName = portName == null ? defaultPortName : portName;
 			PortInfo portInfo = serviceInfo.getPort(portName);
 			if (portInfo == null) {
 				throw new DynamicClientException("Port "+portName+" not present in service "+serviceInfo.getName());
 			}
 			
+			// Get and check operation
 			OperationInfo operationInfo = portInfo.getOperation(operation);
 			if (operationInfo == null) {
 				throw new DynamicClientException("Operation "+operation+" not present in service "+serviceInfo.getName()+", port "+portInfo.getName());
@@ -484,8 +480,8 @@ public class DynamicClient {
 			}
 			
 			// Set webservice call timeout
-			if (timeout >= 0) {
-				stub.setTimeout(timeout);
+			if (properties.getTimeout() >= 0) {
+				stub.setTimeout(properties.getTimeout());
 			}
 			
 			// Get axis-stub method parameters (mix of params & headers) 
