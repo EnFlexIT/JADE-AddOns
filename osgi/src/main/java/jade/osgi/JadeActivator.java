@@ -8,6 +8,8 @@ import jade.osgi.service.agentFactory.OSGIBridgeService;
 import jade.osgi.service.runtime.JadeRuntimeService;
 import jade.osgi.service.runtime.internal.BundleEventHandler;
 import jade.osgi.service.runtime.internal.JadeRuntimeServiceFactory;
+import jade.osgi.service.runtime.internal.OsgiEventHandler;
+import jade.osgi.service.runtime.internal.OsgiEventHandlerFactory;
 import jade.osgi.service.runtime.internal.ServiceEventHandler;
 import jade.util.leap.Properties;
 import jade.wrapper.ContainerController;
@@ -72,11 +74,13 @@ public class JadeActivator implements BundleActivator, BundleListener, ServiceLi
 	}
 	
 	public synchronized void bundleChanged(BundleEvent event) {
-		new BundleEventHandler(event, agentManager);
+		OsgiEventHandler handler =  OsgiEventHandlerFactory.getOsgiEventHandler(event.getBundle().getSymbolicName(), agentManager);
+		handler.handleEvent(event);
 	}
 	
 	public synchronized void serviceChanged(ServiceEvent event) {
-		new ServiceEventHandler(event, agentManager);
+		OsgiEventHandler handler =  OsgiEventHandlerFactory.getOsgiEventHandler(event.getServiceReference().getBundle().getSymbolicName(), agentManager);
+		handler.handleEvent(event);
 	}
 	
 	private void addAgentFactoryListener(ServiceFactory factory) throws InvalidSyntaxException {
