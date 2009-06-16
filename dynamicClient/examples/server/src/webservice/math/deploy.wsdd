@@ -28,10 +28,7 @@
         <parameter qname="firstElement" type="tns:float" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
         <parameter qname="secondElement" type="tns:float" xmlns:tns="http://www.w3.org/2001/XMLSchema"/>
       </operation>
-      <operation name="abs" qname="operNS:abs" xmlns:operNS="urn:tests.webservice.test" returnQName="absReturn" returnType="rtns:float" xmlns:rtns="http://www.w3.org/2001/XMLSchema" soapAction="urn:tests.webservice.testAction" >
-        <parameter qname="complex" type="tns:complex" xmlns:tns="urn:tests.webservice.test"/>
-      </operation>
-      <parameter name="allowedMethods" value="abs sum sumComplex"/>
+      <parameter name="allowedMethods" value="sum sumComplex"/>
 
       <typeMapping
         xmlns:ns="urn:tests.webservice.test"

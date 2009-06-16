@@ -7,7 +7,7 @@
       <xsd:complexType name="complex">
         <xsd:sequence>
           <xsd:element name="real" type="xsd:float"/>
-          <xsd:element name="immaginary" type="xsd:float"/>
+          <xsd:element name="imaginary" type="xsd:float"/>
         </xsd:sequence>
       </xsd:complexType>
       <xsd:element name="sumComplex">
@@ -52,33 +52,10 @@
           </xsd:sequence>
         </xsd:complexType>
       </xsd:element>
-      <xsd:element name="abs">
-        <xsd:annotation>
-      		<xsd:documentation>Operation abs parameters comment</xsd:documentation>
-      	</xsd:annotation>
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element name="complex" type="impl:complex"/>
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
-      <xsd:element name="absResponse">
-        <xsd:complexType>
-          <xsd:sequence>
-            <xsd:element name="absReturn" type="xsd:float"/>
-          </xsd:sequence>
-        </xsd:complexType>
-      </xsd:element>
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="sumResponse">
     <wsdl:part name="parameters" element="impl:sumResponse"/>
-  </wsdl:message>
-  <wsdl:message name="absResponse">
-    <wsdl:part name="parameters" element="impl:absResponse"/>
-  </wsdl:message>
-  <wsdl:message name="absRequest">
-    <wsdl:part name="parameters" element="impl:abs"/>
   </wsdl:message>
   <wsdl:message name="sumRequest">
     <wsdl:part name="parameters" element="impl:sum"/>
@@ -99,11 +76,6 @@
       <wsdl:input message="impl:sumRequest"/>
       <wsdl:output message="impl:sumResponse"/>
     </wsdl:operation>
-    <wsdl:operation name="abs">
-    	<wsdl:documentation>Operation abs documentation (portType)</wsdl:documentation>
-      <wsdl:input message="impl:absRequest"/>
-      <wsdl:output message="impl:absResponse"/>
-    </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="MathFunctionsBinding" type="impl:MathFunctionsPort">
     <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
@@ -118,16 +90,6 @@
     </wsdl:operation>
     <wsdl:operation name="sum">
     	<wsdl:documentation>Operation sum documentation</wsdl:documentation>
-      <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
-      <wsdl:input>
-        <wsdlsoap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output>
-        <wsdlsoap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="abs">
-    	<wsdl:documentation>Operation abs documentation (binding)</wsdl:documentation>
       <wsdlsoap:operation soapAction="urn:tests.webservice.testAction"/>
       <wsdl:input>
         <wsdlsoap:body use="literal"/>

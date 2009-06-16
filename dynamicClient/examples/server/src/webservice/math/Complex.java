@@ -8,19 +8,18 @@
 package webservice.math;
 
 public class Complex  implements java.io.Serializable {
+    private float real;
 
-	private float real;
-
-    private float immaginary;
+    private float imaginary;
 
     public Complex() {
     }
 
     public Complex(
            float real,
-           float immaginary) {
+           float imaginary) {
            this.real = real;
-           this.immaginary = immaginary;
+           this.imaginary = imaginary;
     }
 
 
@@ -45,22 +44,22 @@ public class Complex  implements java.io.Serializable {
 
 
     /**
-     * Gets the immaginary value for this Complex.
+     * Gets the imaginary value for this Complex.
      * 
-     * @return immaginary
+     * @return imaginary
      */
-    public float getImmaginary() {
-        return immaginary;
+    public float getImaginary() {
+        return imaginary;
     }
 
 
     /**
-     * Sets the immaginary value for this Complex.
+     * Sets the imaginary value for this Complex.
      * 
-     * @param immaginary
+     * @param imaginary
      */
-    public void setImmaginary(float immaginary) {
-        this.immaginary = immaginary;
+    public void setImaginary(float imaginary) {
+        this.imaginary = imaginary;
     }
 
     private java.lang.Object __equalsCalc = null;
@@ -76,7 +75,7 @@ public class Complex  implements java.io.Serializable {
         boolean _equals;
         _equals = true && 
             this.real == other.getReal() &&
-            this.immaginary == other.getImmaginary();
+            this.imaginary == other.getImaginary();
         __equalsCalc = null;
         return _equals;
     }
@@ -89,7 +88,7 @@ public class Complex  implements java.io.Serializable {
         __hashCodeCalc = true;
         int _hashCode = 1;
         _hashCode += new Float(getReal()).hashCode();
-        _hashCode += new Float(getImmaginary()).hashCode();
+        _hashCode += new Float(getImaginary()).hashCode();
         __hashCodeCalc = false;
         return _hashCode;
     }
@@ -107,8 +106,8 @@ public class Complex  implements java.io.Serializable {
         elemField.setNillable(false);
         typeDesc.addFieldDesc(elemField);
         elemField = new org.apache.axis.description.ElementDesc();
-        elemField.setFieldName("immaginary");
-        elemField.setXmlName(new javax.xml.namespace.QName("", "immaginary"));
+        elemField.setFieldName("imaginary");
+        elemField.setXmlName(new javax.xml.namespace.QName("", "imaginary"));
         elemField.setXmlType(new javax.xml.namespace.QName("http://www.w3.org/2001/XMLSchema", "float"));
         elemField.setNillable(false);
         typeDesc.addFieldDesc(elemField);
@@ -145,8 +144,4 @@ public class Complex  implements java.io.Serializable {
             _javaType, _xmlType, typeDesc);
     }
 
-    @Override
-	public String toString() {
-		return real+"+j"+immaginary;
-	}
 }

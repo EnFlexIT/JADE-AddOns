@@ -14,9 +14,4 @@ public interface MathFunctionsPort extends java.rmi.Remote {
      */
     public webservice.math.Complex sumComplex(webservice.math.Complex firstComplexElement, webservice.math.Complex secondComplexElement) throws java.rmi.RemoteException;
     public float sum(float firstElement, float secondElement) throws java.rmi.RemoteException;
-
-    /**
-     * Operation abs documentation (portType)
-     */
-    public float abs(webservice.math.Complex complex) throws java.rmi.RemoteException;
 }
