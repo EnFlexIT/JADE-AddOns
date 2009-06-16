@@ -76,6 +76,10 @@
 
   <!-- Make distribution zip file and put in ${dist} -->
   <target name="dist" depends="clean, doc, lib" description="make distribution zip file">
+  	
+  	<ant antfile="build.xml" dir="./examples/server" target="rebuild"/>
+  	<ant antfile="build.xml" dir="./examples/client" target="rebuild"/>
+  	
     <echo message="GENERATE THE PDF FORM OF THE DYNAMIC CLIENT GUIDE, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/dynamicClient) AND THEN PRESS ENTER -->"/>
     <input/>
     <mkdir dir="${jade-home}/doc"/>
@@ -89,6 +93,9 @@
       <include name="add-ons/dynamicClient/src/**"/>
       <include name="add-ons/dynamicClient/doc/**"/>
       <include name="add-ons/dynamicClient/lib/**"/>
+      <include name="add-ons/dynamicClient/examples/**"/>
+      <exclude name="add-ons/dynamicClient/examples/client/classes/**"/>
+      <exclude name="add-ons/dynamicClient/examples/server/classes/**"/>
     </zip>
   </target>
 
