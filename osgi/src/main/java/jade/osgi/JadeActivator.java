@@ -6,19 +6,19 @@ import jade.core.Runtime;
 import jade.osgi.service.agentFactory.AgentFactoryService;
 import jade.osgi.service.agentFactory.OSGIBridgeService;
 import jade.osgi.service.runtime.JadeRuntimeService;
-import jade.osgi.service.runtime.internal.BundleEventHandler;
 import jade.osgi.service.runtime.internal.JadeRuntimeServiceFactory;
 import jade.osgi.service.runtime.internal.OsgiEventHandler;
 import jade.osgi.service.runtime.internal.OsgiEventHandlerFactory;
-import jade.osgi.service.runtime.internal.ServiceEventHandler;
 import jade.util.leap.Properties;
 import jade.wrapper.ContainerController;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Map.Entry;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
