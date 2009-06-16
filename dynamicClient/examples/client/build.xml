@@ -72,7 +72,7 @@
 			<fileset dir="${classes}"/>
 			<fileset dir="${lib}"/>
 			<fileset dir="./">
-				<include name="*.log"/>
+				<include name="wsdc*.*"/>
 			</fileset>			
 		</delete>
 	</target>
