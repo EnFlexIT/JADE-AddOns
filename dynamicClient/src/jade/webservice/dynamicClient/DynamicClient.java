@@ -86,6 +86,7 @@ public class DynamicClient {
 	private URL defaultEndpoint;
 	private String defaultServiceName;
 	private String defaultPortName;
+	private int defaultTimeout;
 
 	private DynamicClientProperties properties;
 	private ClassLoader classloader;
@@ -97,9 +98,11 @@ public class DynamicClient {
 	
 
 	public DynamicClient() {
+		typeOnto = new BeanOntology("WSDL-TYPES", new Ontology[]{XsdPrimitivesOntology.getInstance(), BasicOntology.getInstance()});
+
 		state = State.CREATED;
 		classloader = Thread.currentThread().getContextClassLoader();
-		typeOnto = new BeanOntology("WSDL-TYPES", new Ontology[]{XsdPrimitivesOntology.getInstance(), BasicOntology.getInstance()});
+		defaultTimeout = -1;
 		properties = new DynamicClientProperties();
 	}
 
@@ -123,6 +126,14 @@ public class DynamicClient {
 		this.defaultPortName = defaultPortName;
 	}
 
+	public int getDefaultTimeout() {
+		return defaultTimeout;
+	}
+
+	public void setDefaultTimeout(int defaultTimeout) {
+		this.defaultTimeout = defaultTimeout;
+	}
+	
 	public static void setTrustStore(String trustStore) {
 		System.setProperty("javax.net.ssl.trustStore", trustStore);
 	}
@@ -434,10 +445,10 @@ public class DynamicClient {
 	}
 
 	public WSData invoke(String operation, WSData input) throws DynamicClientException, RemoteException {
-		return invoke(null, null, operation, null, input);
+		return invoke(null, null, operation, null, -1, input);
 	}
 	
-	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, WSData input) throws DynamicClientException, RemoteException {
+	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, WSData input) throws DynamicClientException, RemoteException {
 		
 		try {
 			// Check if is initialized
@@ -480,8 +491,11 @@ public class DynamicClient {
 			}
 			
 			// Set webservice call timeout
-			if (properties.getTimeout() >= 0) {
-				stub.setTimeout(properties.getTimeout());
+			if (timeout < 0) {
+				timeout = defaultTimeout;
+			}
+			if (timeout >= 0) {
+				stub.setTimeout(timeout);
 			}
 			
 			// Get axis-stub method parameters (mix of params & headers) 

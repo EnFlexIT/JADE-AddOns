@@ -29,24 +29,14 @@ public class DynamicClientProperties {
 	private boolean noWrap;
 	private boolean safeMode;
 	private StringBuilder classPath;
-	private int timeout;
 	
 	
 	public DynamicClientProperties() {
 		tmpDir = System.getProperty("java.io.tmpdir");
 		noWrap = false;
 		safeMode = true;
-		timeout = -1;
 		packageName = null;
 		classPath = null;
-	}
-
-	public int getTimeout() {
-		return timeout;
-	}
-
-	public void setTimeout(int timeout) {
-		this.timeout = timeout;
 	}
 
 	public String getPackageName() {
