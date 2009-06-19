@@ -24,7 +24,7 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 	}
 
 	public AgentController createAgent(String name, String className, String bundleSymbolicName, Object[] args) throws Exception {
-		System.out.println("JRS.createAgent(name = "+name+" bundle = "+bundleSymbolicName);
+		System.out.println("createAgent(name = "+name+" bundle = "+bundleSymbolicName+") via JRS");
 		String classNameMod = className + "[bundle-name=" + bundleSymbolicName + "]";
 		return container.createNewAgent(name, classNameMod, args);
 	}
@@ -35,7 +35,7 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 	}
 
 	public AgentController acceptAgent(String name, Agent agent) throws Exception {
-		System.out.println("JRS.acceptAgent(name = "+name+" bundle = "+bundle.getSymbolicName());
+		System.out.println("acceptAgent(name = "+name+" bundle = "+bundle.getSymbolicName() +")");
 		AgentController myAgent = container.acceptNewAgent(name, agent);
 		agentManager.addAgent(bundle, agent, false);
 		return myAgent;

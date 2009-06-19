@@ -4,6 +4,7 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.osgi.service.runtime.JadeRuntimeService;
 import jade.osgi.service.runtime.internal.AgentInfo;
+import jade.wrapper.AgentController;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,13 +27,12 @@ public class AgentManager {
 	}
 
 	public synchronized void addAgent(Bundle bundle, Agent agent, boolean created) {
-		System.out.println((created ? "Created" : "Accepted") + " agent " + agent + "(" + bundle.getSymbolicName()+")");
 		String symbolicName = bundle.getSymbolicName();
 		if(!agents.containsKey(symbolicName)) {
 			agents.put(symbolicName, new ArrayList<AgentWrapper>());
 		}
 		agents.get(symbolicName).add(new AgentWrapper(agent, bundle, created));
-		System.out.println("\nagents "+ agents+"\n");
+		System.out.println("ADDED agent: agents "+ agents);
 	}
 
 	public synchronized void removeAgent(AID aid) {
@@ -49,7 +49,7 @@ public class AgentManager {
 				}
 			}
 		}
-		System.out.println("\nagents "+ agents+"\n");
+		System.out.println("REMOVED agent: agents "+ agents);
 	}
 	
 	public synchronized Bundle getAgentBundle(AID aid) {
@@ -73,53 +73,82 @@ public class AgentManager {
 			List<AgentWrapper> agentWrappers = agents.get(symbolicName);
 			for(AgentWrapper aw: agentWrappers) {
 				Agent a = aw.agent;
-				if(aw.restart) {
+				if(aw.created) {
 					agentsToRestart.get(symbolicName).add(new AgentInfo(a.getLocalName(), a.getClass().getName(), a.getArguments()));
 					res = true;
 				}
-				System.out.println("Killing agent " + a.getLocalName());
+				System.out.println("KILLING " + a.getLocalName());
 				a.doDelete();
 			}
 		}
-		System.out.println("\nagentsToRestart " + agentsToRestart);
+		System.out.println("KILL AGENTS: agentsToRestart " + agentsToRestart);
 		agents.remove(symbolicName);
 		return res;
 	}
 	
-	public synchronized void restartAgents(String symbolicName) {
-		ServiceReference jrsReference = context.getServiceReference(JadeRuntimeService.class.getName());
-		JadeRuntimeService jrs = (JadeRuntimeService) context.getService(jrsReference);
+	public synchronized void bundleUpdated(String symbolicName) {
 		if(agentsToRestart.containsKey(symbolicName)) {
-    		for(AgentInfo ai: agentsToRestart.get(symbolicName)) {
-    			try {
-    				System.out.println("Restarting agent "+ai.getName());
-    				jrs.createAgent(ai.getName(), ai.getClassName(), symbolicName, ai.getArgs());
-    			} catch(Exception e) {
-    				System.out.println("Agent " + ai.getName() + " cannot be restarted!");
-    				e.printStackTrace();
-    			}
-    		}
+			List<AgentInfo> agents = agentsToRestart.get(symbolicName);
+			for(AgentInfo ai: agents) {
+				ai.setUpdated(true);
+			}
+		}
+		System.out.println("BUNDLE UPDATED: agentsToRestart " + agentsToRestart);
+	}
+
+	public synchronized void restartAgents(String symbolicName) {
+		System.out.println("RESTART AGENTS: agentsToRestart " + agentsToRestart);
+		if(agentsToRestart.containsKey(symbolicName)) {
+			ServiceReference jrsReference = context.getServiceReference(JadeRuntimeService.class.getName());
+			JadeRuntimeService jrs = (JadeRuntimeService) context.getService(jrsReference);
+			if(jrs != null) {
+	    		for(AgentInfo ai: agentsToRestart.get(symbolicName)) {
+	    			try {
+	    				if(ai.isUpdated()) {
+	        				System.out.println("RESTARTING agent "+ai);
+	        				AgentController ac = jrs.createAgent(ai.getName(), ai.getClassName(), symbolicName, ai.getArgs());
+	        				ac.start();
+	    				}
+	    			} catch(Exception e) {
+	    				System.out.println("Agent " + ai.getName() + " cannot be restarted!");
+	    				e.printStackTrace();
+	    			}
+	    		}
+			} else {
+				System.out.println("JadeRuntimeService for "+symbolicName+" no more active! Cannot restart agents!");
+			}
     		agentsToRestart.remove(symbolicName);
 		}
 	}
 	
 	public synchronized void removeAgents(String symbolicName) throws Exception {
-		System.out.println("Bundle "+symbolicName+" STOPPED ---> clean agentsToRestart list");
 		agentsToRestart.remove(symbolicName);
-		System.out.println("\nagentsToRestart "+ agentsToRestart+"\n");
-		System.out.println("\nagents "+ agents+"\n");
+		System.out.println("CLEAR AGENTS: agentsToRestart "+ agentsToRestart);
+		System.out.println("CLEAR AGENTS: agents "+ agents);
 	}
 	
 	private class AgentWrapper {
 		private final Agent agent;
 		private final Bundle bundle;
-		private final boolean restart;
+		private final boolean created;
 		
-		public AgentWrapper(Agent agent, Bundle bundle, boolean restart) {
+		public AgentWrapper(Agent agent, Bundle bundle, boolean created) {
 			this.agent = agent;
 			this.bundle = bundle;
-			this.restart = restart;
+			this.created = created;
+		}
+		
+		@Override
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			sb.append("(");
+			sb.append("agent: " + agent.getLocalName());
+			sb.append(" bundle: " + bundle.getSymbolicName());
+			sb.append(" created: " + created);
+			sb.append(")");
+			return sb.toString();
 		}
 	
 	}
+
 }

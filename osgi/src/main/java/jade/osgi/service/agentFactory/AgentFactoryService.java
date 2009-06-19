@@ -21,7 +21,7 @@ public abstract class AgentFactoryService {
 		Dictionary<String, String> properties = new Hashtable<String, String>();
 		properties.put(SERVICE_NAME, AFS_PREFIX+myBundle.getSymbolicName());
 		this.serviceRegistration = context.registerService(AgentFactoryService.class.getName(), this, properties);
-		System.out.println(myBundle.getSymbolicName()+ ": registered AgentFactoryService");
+		System.out.println(myBundle.getSymbolicName()+ " register AFS");
 	}
 	
 	public void stop() {

@@ -1,14 +1,14 @@
 package jade.osgi.service.agentFactory;
 
 import jade.core.Agent;
-import jade.core.management.AgentLoader;
 import jade.osgi.AgentManager;
+import jade.util.ObjectManager;
 import jade.util.leap.Properties;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-public class OSGIAgentLoader implements AgentLoader {
+public class OSGIAgentLoader implements ObjectManager.Loader {
 	
 	private BundleContext context;
 	private AgentManager agentManager;
@@ -20,27 +20,29 @@ public class OSGIAgentLoader implements AgentLoader {
 		this.agentManager = am;
 	}
 
-	public Agent loadAgent(String className, Properties pp) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+	public Object load(String className, Properties pp) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
 		Agent agent = null;
 		String bundleName = pp.getProperty(BUNDLE_NAME_PROPERTY);
 		if(bundleName != null) {
-			AgentFactoryService af = getAgentFactory(bundleName);
-			if(af != null) {
-				agent = af.createAgent(className);
-				System.out.println("AFS("+bundleName+") created agent of class "+className);
-				agentManager.addAgent(af.getBundle(), agent, true);
+			ServiceReference sr = getAgentFactoryService(bundleName);
+			if(sr != null) {
+				AgentFactoryService afs = (AgentFactoryService) context.getService(sr);
+				agent = afs.createAgent(className);
+				// System.out.println("AFS("+bundleName+") created agent of class "+className);
+				agentManager.addAgent(afs.getBundle(), agent, true);
 			}
+			context.ungetService(sr);
 		}
 		return agent;
 	}
 
-	private AgentFactoryService getAgentFactory(String bundleName) throws ClassNotFoundException {
-		AgentFactoryService af = null;
+	private ServiceReference getAgentFactoryService(String bundleName) throws ClassNotFoundException {
+		ServiceReference af = null;
 		try {
 			String filter = "("+AgentFactoryService.SERVICE_NAME+"="+AgentFactoryService.AFS_PREFIX+bundleName+")"; 
 			ServiceReference[] srs = context.getServiceReferences(AgentFactoryService.class.getName(), filter);
 			if(srs != null) {
-				af = (AgentFactoryService) context.getService(srs[0]);
+				af = srs[0];
 			}
 		} catch(InvalidSyntaxException e) {
 			e.printStackTrace();
