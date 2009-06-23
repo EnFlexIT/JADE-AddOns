@@ -1,10 +1,9 @@
-package jade.osgi.service.agentFactory;
+package jade.osgi.internal;
 
 import jade.core.Agent;
 import jade.core.FEService;
 import jade.core.ServiceHelper;
-import jade.osgi.AgentManager;
-import jade.osgi.JadeActivator;
+import jade.osgi.OSGIBridgeHelper;
 
 public class OSGIBridgeFEService extends FEService {
 	

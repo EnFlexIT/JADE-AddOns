@@ -26,8 +26,8 @@ public abstract class AgentFactoryService {
 	
 	public static final String BUNDLE_NAME ="bundle-name";
 	public static final String BUNDLE_VERSION ="bundle-version";
-	static final String AFS_BUNDLE_NAME ="afs-bundle-name";
-	static final String AFS_BUNDLE_VERSION ="afs-bundle-version";
+	public static final String AFS_BUNDLE_NAME ="afs-bundle-name";
+	public static final String AFS_BUNDLE_VERSION ="afs-bundle-version";
 
 	private Bundle myBundle;
 	private ServiceRegistration serviceRegistration;
@@ -55,11 +55,17 @@ public abstract class AgentFactoryService {
 		serviceRegistration.unregister();
 	}
 
-	Bundle getBundle() {
+	/**
+	 * This method is used by the framework. User should not use it.
+	 */
+	public final Bundle getBundle() {
 		return myBundle;
 	}
 
-	Agent createAgent(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+	/**
+	 * This method is used by the framework. User should not use it.
+	 */
+	public final Agent createAgent(String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		Class c = myBundle.loadClass(className);
 		return (Agent) c.newInstance();
 	}

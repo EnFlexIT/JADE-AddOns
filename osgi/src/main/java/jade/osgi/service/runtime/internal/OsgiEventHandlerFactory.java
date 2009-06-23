@@ -1,6 +1,6 @@
 package jade.osgi.service.runtime.internal;
 
-import jade.osgi.AgentManager;
+import jade.osgi.internal.AgentManager;
 import java.util.HashMap;
 import java.util.Map;
 

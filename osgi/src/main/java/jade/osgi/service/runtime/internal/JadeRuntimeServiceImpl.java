@@ -1,7 +1,7 @@
 package jade.osgi.service.runtime.internal;
 
 import jade.core.Agent;
-import jade.osgi.AgentManager;
+import jade.osgi.internal.AgentManager;
 import jade.osgi.service.agentFactory.AgentFactoryService;
 import jade.osgi.service.runtime.JadeRuntimeService;
 import jade.wrapper.AgentController;

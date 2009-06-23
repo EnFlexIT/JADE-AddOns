@@ -1,4 +1,4 @@
-package jade.osgi.service.agentFactory;
+package jade.osgi;
 
 import jade.core.ServiceHelper;
 import org.osgi.framework.BundleContext;

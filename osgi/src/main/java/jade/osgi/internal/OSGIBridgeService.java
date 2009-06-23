@@ -1,4 +1,4 @@
-package jade.osgi.service.agentFactory;
+package jade.osgi.internal;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -11,8 +11,7 @@ import jade.core.ServiceException;
 import jade.core.ServiceHelper;
 import jade.core.VerticalCommand;
 import jade.core.management.AgentManagementSlice;
-import jade.osgi.AgentManager;
-import jade.osgi.JadeActivator;
+import jade.osgi.OSGIBridgeHelper;
 
 public class OSGIBridgeService extends BaseService {
 

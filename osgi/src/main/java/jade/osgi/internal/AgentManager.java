@@ -1,4 +1,4 @@
-package jade.osgi;
+package jade.osgi.internal;
 
 import jade.core.AID;
 import jade.core.Agent;

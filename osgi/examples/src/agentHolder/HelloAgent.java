@@ -2,7 +2,7 @@ package agentHolder;
 
 import jade.core.Agent;
 import jade.core.ServiceException;
-import jade.osgi.service.agentFactory.OSGIBridgeHelper;
+import jade.osgi.OSGIBridgeHelper;
 import org.osgi.framework.BundleContext;
 
 public class HelloAgent extends Agent {

@@ -1,7 +1,7 @@
-package jade.osgi.service.agentFactory;
+package jade.osgi.internal;
 
 import jade.core.Agent;
-import jade.osgi.AgentManager;
+import jade.osgi.service.agentFactory.AgentFactoryService;
 import jade.util.ObjectManager;
 import jade.util.leap.Properties;
 import org.osgi.framework.BundleContext;

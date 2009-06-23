@@ -1,10 +1,8 @@
-package jade.osgi;
+package jade.osgi.internal;
 
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
-import jade.osgi.service.agentFactory.OSGIAgentLoader;
-import jade.osgi.service.agentFactory.OSGIBridgeService;
 import jade.osgi.service.runtime.JadeRuntimeService;
 import jade.osgi.service.runtime.internal.JadeRuntimeServiceFactory;
 import jade.osgi.service.runtime.internal.OsgiEventHandler;
