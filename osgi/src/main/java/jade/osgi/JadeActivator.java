@@ -18,10 +18,12 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Map.Entry;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
 
 public class JadeActivator implements BundleActivator, BundleListener {
@@ -102,7 +104,8 @@ public class JadeActivator implements BundleActivator, BundleListener {
 	}
 	
 	public synchronized void bundleChanged(BundleEvent event) {
-		OsgiEventHandler handler = handlerFactory.getOsgiEventHandler(event.getBundle().getSymbolicName());
+		Bundle b = event.getBundle();
+		OsgiEventHandler handler = handlerFactory.getOsgiEventHandler(b.getSymbolicName(), (String) b.getHeaders().get(Constants.BUNDLE_VERSION));
 		handler.handleEvent(event);
 	}
 	

@@ -10,14 +10,14 @@ import org.osgi.framework.BundleEvent;
 public class OsgiEventHandler {
 
 	private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-	private String symbolicName;
+	private String bundleIdentifier;
 	private AgentManager agentManager;
 	private boolean restartAgents;
 	private long restartAgentsTimeout;
 	private ScheduledFuture<?> task;
 
-	public OsgiEventHandler(String symbolicName, AgentManager am, boolean restartAgents, long restartAgentsTimeout) {
-		this.symbolicName = symbolicName;
+	public OsgiEventHandler(String bundleIdentifier, AgentManager am, boolean restartAgents, long restartAgentsTimeout) {
+		this.bundleIdentifier = bundleIdentifier;
 		this.agentManager = am;
 		this.restartAgents = restartAgents;
 		this.restartAgentsTimeout = restartAgentsTimeout;
@@ -28,16 +28,16 @@ public class OsgiEventHandler {
 
 		switch(eventType) {
 			case BundleEvent.INSTALLED:
-				System.out.println(symbolicName + " INSTALLED");
+				System.out.println(bundleIdentifier + " INSTALLED");
 				break;
 
 			case BundleEvent.STARTED:
-				System.out.println(System.currentTimeMillis()+ " " +symbolicName + " STARTED");
+				System.out.println(System.currentTimeMillis()+ " " +bundleIdentifier + " STARTED");
 				try {
 					if(restartAgents && task != null) { // FIXME task null ? add comment
-						System.out.println("AgentRemover for " + symbolicName + " CANCELED");
+						System.out.println("AgentRemover for " + bundleIdentifier + " CANCELED");
 						task.cancel(true);
-						agentManager.restartAgents(symbolicName);
+						agentManager.restartAgents(bundleIdentifier);
 					}
 				} catch(Exception e) {
 					e.printStackTrace();
@@ -45,12 +45,12 @@ public class OsgiEventHandler {
 				break;
 
 			case BundleEvent.STOPPED:
-				System.out.println(System.currentTimeMillis()+ " " +symbolicName + " STOPPED");
+				System.out.println(System.currentTimeMillis()+ " " +bundleIdentifier + " STOPPED");
 				try {
-					if(agentManager.killAgents(symbolicName)) {
+					if(agentManager.killAgents(bundleIdentifier)) {
 						if(restartAgents) {
 							task = scheduler.schedule(new AgentRemover(), restartAgentsTimeout, TimeUnit.MILLISECONDS);
-							System.out.println("AgentRemover for " + symbolicName + " SCHEDULED");
+							System.out.println("AgentRemover for " + bundleIdentifier + " SCHEDULED");
 						}
 					}
 				} catch(Exception e) {
@@ -59,14 +59,14 @@ public class OsgiEventHandler {
 				break;
 
 			case BundleEvent.UPDATED:
-				System.out.println(System.currentTimeMillis()+ " " +symbolicName + " UPDATED");
+				System.out.println(System.currentTimeMillis()+ " " +bundleIdentifier + " UPDATED");
 				if(restartAgents && task != null) { // FIXME task null ? add comment
-					agentManager.bundleUpdated(symbolicName);
+					agentManager.bundleUpdated(bundleIdentifier);
 				}
 				break;
 
 			default:
-				System.out.println("Bundle " + symbolicName + " EVENT " + eventType);
+				System.out.println("Bundle " + bundleIdentifier + " EVENT " + eventType);
 				break;
 		}
 
@@ -75,9 +75,9 @@ public class OsgiEventHandler {
 	class AgentRemover implements Runnable {
 
 		public void run() {
-			System.out.println("AgentRemover for " + symbolicName + " EXECUTED");
+			System.out.println("AgentRemover for " + bundleIdentifier + " EXECUTED");
 			try {
-				agentManager.removeAgents(symbolicName);
+				agentManager.removeAgents(bundleIdentifier);
 			} catch(Exception e) {
 				e.printStackTrace();
 			}

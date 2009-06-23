@@ -2,10 +2,12 @@ package jade.osgi.service.runtime.internal;
 
 import jade.core.Agent;
 import jade.osgi.AgentManager;
+import jade.osgi.service.agentFactory.AgentFactoryService;
 import jade.osgi.service.runtime.JadeRuntimeService;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 
 public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 
@@ -20,12 +22,19 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 	}
 
 	public AgentController createAgent(String name, String className, Object[] args) throws Exception {
-		return createAgent(name, className, bundle.getSymbolicName(), args);
+		return createAgent(name, className, args, bundle.getSymbolicName(), (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION));
 	}
 
-	public AgentController createAgent(String name, String className, String bundleSymbolicName, Object[] args) throws Exception {
+	public AgentController createAgent(String name, String className, Object[] args, String bundleSymbolicName) throws Exception {
 		System.out.println("createAgent(name = "+name+" bundle = "+bundleSymbolicName+") via JRS");
-		String classNameMod = className + "[bundle-name=" + bundleSymbolicName + "]";
+		String classNameMod = className + "["+AgentFactoryService.BUNDLE_NAME+"=" + bundleSymbolicName + "]";
+		return container.createNewAgent(name, classNameMod, args);
+	}
+	
+	public AgentController createAgent(String name, String className, Object[] args, String bundleSymbolicName, String bundleVersion) throws Exception {
+		System.out.println("createAgent(name = "+name+" bundle = "+bundleSymbolicName+") via JRS");
+		String classNameMod = className + "["+AgentFactoryService.BUNDLE_NAME+"=" + bundleSymbolicName + ";"+
+			AgentFactoryService.BUNDLE_VERSION+"=" + bundleVersion + "]";
 		return container.createNewAgent(name, classNameMod, args);
 	}
 

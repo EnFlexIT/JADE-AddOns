@@ -3,7 +3,6 @@ package jade.osgi;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.osgi.service.runtime.JadeRuntimeService;
-import jade.osgi.service.runtime.internal.AgentInfo;
 import jade.wrapper.AgentController;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,25 +12,27 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 
 public class AgentManager {
 
 	private BundleContext context;
-	
 	private Map<String, List<AgentWrapper>> agents = new HashMap<String, List<AgentWrapper>>();
 	private Map<String, List<AgentInfo>> agentsToRestart = new HashMap<String, List<AgentInfo>>();
+
+	public static final String BUNDLE_NAME_VERSION_SEPARATOR = "_";
 	
 	public AgentManager(BundleContext context) {
 		this.context = context;
 	}
 
 	public synchronized void addAgent(Bundle bundle, Agent agent, boolean created) {
-		String symbolicName = bundle.getSymbolicName();
-		if(!agents.containsKey(symbolicName)) {
-			agents.put(symbolicName, new ArrayList<AgentWrapper>());
+		String bundleIdentifier = bundle.getSymbolicName() + BUNDLE_NAME_VERSION_SEPARATOR + bundle.getHeaders().get(Constants.BUNDLE_VERSION);
+		if(!agents.containsKey(bundleIdentifier)) {
+			agents.put(bundleIdentifier, new ArrayList<AgentWrapper>());
 		}
-		agents.get(symbolicName).add(new AgentWrapper(agent, bundle, created));
+		agents.get(bundleIdentifier).add(new AgentWrapper(agent, bundle, created));
 		System.out.println("ADDED agent: agents "+ agents);
 	}
 
@@ -66,15 +67,18 @@ public class AgentManager {
 		return result;
 	}
 
-	public synchronized boolean killAgents(String symbolicName) {
+	public synchronized boolean killAgents(String bundleIdentifier) {
 		boolean res = false;
-		agentsToRestart.put(symbolicName, new ArrayList<AgentInfo>());
-		if(agents.containsKey(symbolicName)) {
-			List<AgentWrapper> agentWrappers = agents.get(symbolicName);
+		agentsToRestart.put(bundleIdentifier, new ArrayList<AgentInfo>());
+		if(agents.containsKey(bundleIdentifier)) {
+			List<AgentWrapper> agentWrappers = agents.get(bundleIdentifier);
 			for(AgentWrapper aw: agentWrappers) {
 				Agent a = aw.agent;
 				if(aw.created) {
-					agentsToRestart.get(symbolicName).add(new AgentInfo(a.getLocalName(), a.getClass().getName(), a.getArguments()));
+					Bundle b = aw.bundle;
+					AgentInfo ai = new AgentInfo(a.getLocalName(), a.getClass().getName(), a.getArguments(),
+							b.getSymbolicName(), (String) b.getHeaders().get(Constants.BUNDLE_VERSION));
+					agentsToRestart.get(bundleIdentifier).add(ai);
 					res = true;
 				}
 				System.out.println("KILLING " + a.getLocalName());
@@ -82,47 +86,47 @@ public class AgentManager {
 			}
 		}
 		System.out.println("KILL AGENTS: agentsToRestart " + agentsToRestart);
-		agents.remove(symbolicName);
+		agents.remove(bundleIdentifier);
 		return res;
 	}
 	
-	public synchronized void bundleUpdated(String symbolicName) {
-		if(agentsToRestart.containsKey(symbolicName)) {
-			List<AgentInfo> agents = agentsToRestart.get(symbolicName);
+	public synchronized void bundleUpdated(String bundleIdentifier) {
+		if(agentsToRestart.containsKey(bundleIdentifier)) {
+			List<AgentInfo> agents = agentsToRestart.get(bundleIdentifier);
 			for(AgentInfo ai: agents) {
-				ai.setUpdated(true);
+				ai.updated = true;
 			}
 		}
 		System.out.println("BUNDLE UPDATED: agentsToRestart " + agentsToRestart);
 	}
 
-	public synchronized void restartAgents(String symbolicName) {
+	public synchronized void restartAgents(String bundleIdentifier) {
 		System.out.println("RESTART AGENTS: agentsToRestart " + agentsToRestart);
-		if(agentsToRestart.containsKey(symbolicName)) {
+		if(agentsToRestart.containsKey(bundleIdentifier)) {
 			ServiceReference jrsReference = context.getServiceReference(JadeRuntimeService.class.getName());
 			JadeRuntimeService jrs = (JadeRuntimeService) context.getService(jrsReference);
 			if(jrs != null) {
-	    		for(AgentInfo ai: agentsToRestart.get(symbolicName)) {
+	    		for(AgentInfo ai: agentsToRestart.get(bundleIdentifier)) {
 	    			try {
-	    				if(ai.isUpdated()) {
+	    				if(ai.updated) {
 	        				System.out.println("RESTARTING agent "+ai);
-	        				AgentController ac = jrs.createAgent(ai.getName(), ai.getClassName(), symbolicName, ai.getArgs());
+	        				AgentController ac = jrs.createAgent(ai.name, ai.className, ai.args, ai.symbolicName, ai.version);
 	        				ac.start();
 	    				}
 	    			} catch(Exception e) {
-	    				System.out.println("Agent " + ai.getName() + " cannot be restarted!");
+	    				System.out.println("Agent " + ai.name + " cannot be restarted!");
 	    				e.printStackTrace();
 	    			}
 	    		}
 			} else {
-				System.out.println("JadeRuntimeService for "+symbolicName+" no more active! Cannot restart agents!");
+				System.out.println("JadeRuntimeService for "+bundleIdentifier+" no more active! Cannot restart agents!");
 			}
-    		agentsToRestart.remove(symbolicName);
+    		agentsToRestart.remove(bundleIdentifier);
 		}
 	}
 	
-	public synchronized void removeAgents(String symbolicName) throws Exception {
-		agentsToRestart.remove(symbolicName);
+	public synchronized void removeAgents(String bundleIdentifier) throws Exception {
+		agentsToRestart.remove(bundleIdentifier);
 		System.out.println("CLEAR AGENTS: agentsToRestart "+ agentsToRestart);
 		System.out.println("CLEAR AGENTS: agents "+ agents);
 	}
@@ -143,12 +147,41 @@ public class AgentManager {
 			StringBuffer sb = new StringBuffer();
 			sb.append("(");
 			sb.append("agent: " + agent.getLocalName());
-			sb.append(" bundle: " + bundle.getSymbolicName());
+			sb.append(" bundle-name: " + bundle.getSymbolicName());
+			sb.append(" bundle-version: " + bundle.getHeaders().get(Constants.BUNDLE_VERSION));
 			sb.append(" created: " + created);
 			sb.append(")");
 			return sb.toString();
 		}
+	}
 	
+	private class AgentInfo {
+		private final String name;
+		private final String className;
+		private final Object[] args;
+		private boolean updated;
+		private final String symbolicName;
+		private final String version;
+
+		public AgentInfo(String name, String className, Object[] args, String symbolicName, String version) {
+			this.name = name;
+			this.className = className;
+			this.args = args;
+			this.updated = false;
+			this.symbolicName = symbolicName;
+			this.version = version;
+		}
+
+		@Override
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			sb.append("(");
+			sb.append("name: " + name);
+			sb.append(" updated: " + updated);
+			sb.append(")");
+			return sb.toString();
+		}
+		
 	}
 
 }

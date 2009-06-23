@@ -10,20 +10,21 @@ public class OsgiEventHandlerFactory {
 	private long restartAgentsTimeout;
 	private AgentManager agentManager;
 	private Map<String, OsgiEventHandler> handlers = new HashMap<String, OsgiEventHandler>();
-
+	
 	public OsgiEventHandlerFactory(AgentManager am, boolean restartAgents, long restartAgentsTimeout) {
 		this.agentManager = am;
 		this.restartAgents = restartAgents;
 		this.restartAgentsTimeout = restartAgentsTimeout;
 	}
 
-	public OsgiEventHandler getOsgiEventHandler(String symbolicName) {
+	public OsgiEventHandler getOsgiEventHandler(String symbolicName, String bundleVersion) {
 		OsgiEventHandler handler = null;
-		if(!handlers.containsKey(symbolicName)) {
-			handler = new OsgiEventHandler(symbolicName, agentManager, restartAgents, restartAgentsTimeout);
-			handlers.put(symbolicName, handler);
+		String key = symbolicName + AgentManager.BUNDLE_NAME_VERSION_SEPARATOR + bundleVersion;
+		if(!handlers.containsKey(key)) {
+			handler = new OsgiEventHandler(key, agentManager, restartAgents, restartAgentsTimeout);
+			handlers.put(key, handler);
 		} else {
-			handler = handlers.get(symbolicName);
+			handler = handlers.get(key);
 		}
 		return handler;
 	}
