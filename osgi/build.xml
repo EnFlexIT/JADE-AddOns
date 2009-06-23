@@ -54,7 +54,7 @@
 	<!-- Compile the javadoc code from ${src} into ${doc} -->
 	<target name="doc" depends="compile">
 		<mkdir dir="${doc}/api" />
-		<javadoc sourcepath="${src}" packagenames="jade.osgi, jade.osgi.services.agentFactoryService, jade.osgi.services.runtime" destdir="${doc}/api" author="true" windowtitle="JADE OSGI classes">
+		<javadoc sourcepath="${src}" packagenames="jade.osgi, jade.osgi.service.agentFactory, jade.osgi.service.runtime" destdir="${doc}/api" author="true" windowtitle="JADE OSGI classes">
 			<classpath>
 				<path refid="classpath"/>
 			</classpath>
