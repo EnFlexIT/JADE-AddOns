@@ -15,7 +15,7 @@ import jade.wrapper.ContainerController;
  */
 public abstract class RemoteAgentManager extends Agent {
 
-	private static final String REMOTE_AGENT_PROXY_CLASSNAME = "jade.core.RemoteAgentProxy";
+	private static final String REMOTE_AGENT_PROXY_CLASSNAME = "jade.core.remoteAgents.RemoteAgentProxy";
 	
 	private Logger myLogger = Logger.getMyLogger(getClass().getName());
 	
