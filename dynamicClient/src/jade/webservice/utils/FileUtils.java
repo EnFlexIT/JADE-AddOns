@@ -30,6 +30,8 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//#APIDOC_EXCLUDE_FILE
+
 public final class FileUtils {
 	
     private static final int RETRY_SLEEP_MILLIS = 10;

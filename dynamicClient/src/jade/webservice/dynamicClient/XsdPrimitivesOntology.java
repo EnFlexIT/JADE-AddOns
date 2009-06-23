@@ -32,6 +32,7 @@ import jade.content.onto.UngroundedException;
 import jade.content.onto.UnknownSchemaException;
 import jade.content.schema.PrimitiveSchema;
 
+//#APIDOC_EXCLUDE_FILE
 
 /**
  * This class implements an ontology containing schemas for 

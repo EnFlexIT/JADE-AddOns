@@ -43,8 +43,10 @@
     <mkdir dir="${doc}/api"/>
     <javadoc destdir="${doc}/api" author="true" windowtitle="JADE WebService Dynamic Client classes">
 	    <fileset dir="${src}" >
+	      <include name="jade/content/abs/**"/>
 	      <include name="jade/webservice/**"/>
 	      <exclude name="jade/webservice/dynamicClient/OperationParser.java"/>
+	      <exclude name="jade/webservice/dynamicClient/XsdPrimitivesOntology.java"/>
 	      <exclude name="jade/webservice/utils/**"/>
 	    </fileset>
       <classpath>

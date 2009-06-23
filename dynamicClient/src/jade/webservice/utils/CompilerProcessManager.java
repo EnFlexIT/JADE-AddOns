@@ -29,6 +29,8 @@ import java.io.InputStreamReader;
 
 import org.apache.log4j.Logger;
 
+//#APIDOC_EXCLUDE_FILE
+
 class CompilerProcessManager extends Thread {
 	
 	private static Logger log = Logger.getLogger(DynamicClient.class.getName());

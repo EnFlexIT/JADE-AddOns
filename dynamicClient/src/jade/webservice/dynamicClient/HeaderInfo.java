@@ -22,6 +22,12 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package jade.webservice.dynamicClient;
 
+/**
+ * Descriptor of a header exposed by the web-service.
+ * 
+ * @see jade.webservice.dynamicClient.ParameterInfo
+ * @see jade.webservice.dynamicClient.DynamicClient
+ */
 public class HeaderInfo extends ParameterInfo {
 
 	static final int EXPLICIT_HEADER = -1;
@@ -29,7 +35,7 @@ public class HeaderInfo extends ParameterInfo {
 	private int signaturePosition = EXPLICIT_HEADER;
 	private String namespace;
 
-	public HeaderInfo(String headerName) {
+	HeaderInfo(String headerName) {
 		super(headerName);
 	}
 
@@ -41,7 +47,7 @@ public class HeaderInfo extends ParameterInfo {
 		this.signaturePosition = signaturePosition;
 	}
 
-	public String getNamespace() {
+	String getNamespace() {
 		return namespace;
 	}
 

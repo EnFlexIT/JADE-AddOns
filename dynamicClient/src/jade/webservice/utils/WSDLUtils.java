@@ -49,6 +49,8 @@ import org.apache.axis.wsdl.toJava.Emitter;
 import org.apache.axis.wsdl.toJava.JavaServiceWriter;
 import org.apache.axis.wsdl.toJava.Utils;
 
+//#APIDOC_EXCLUDE_FILE
+
 public final class WSDLUtils {
 
 	public static String buildPortNameJavaId(SymbolTable st, Port port) {

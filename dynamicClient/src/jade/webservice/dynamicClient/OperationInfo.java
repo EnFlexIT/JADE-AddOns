@@ -34,6 +34,11 @@ import java.util.Vector;
 import org.apache.axis.client.Stub;
 import org.apache.axis.wsdl.toJava.Utils;
 
+/**
+ * Descriptor of a operation exposed by the web-service.
+ * 
+ * @see jade.webservice.dynamicClient.DynamicClient
+ */
 public class OperationInfo {
 
 	private String name;
@@ -47,14 +52,31 @@ public class OperationInfo {
 	
 	private Method operationMethod;
 
-	public OperationInfo(String operationName) {
+	OperationInfo(String operationName) {
 		this.name = operationName;
 	}
 
+	/**
+	 * Return the name of the operation
+	 * 
+	 * @return the name of operation
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Return the wsdl documentation associated at this operation concatenating the
+	 * documentations contained in <code>portType</code> and <code>bindings</code>.   
+	 * <p>
+	 * <code>
+	 *  &lt;wsdl:operation name="PortName"&gt;<br>
+	 *		&lt;wsdl:documentation&gt;operation documentation&lt;/wsdl:documentation&gt;<br>
+	 *	&lt;/wsdl:operation&gt;<br>
+	 * </code>
+	 *   
+	 * @return wsdl documentation
+	 */
 	public String getDocumentation() {
 		return documentation;
 	}
@@ -63,18 +85,48 @@ public class OperationInfo {
 		this.documentation = documentation;
 	}
 	
+	/**
+	 * Return the list of input parameters associated to this operation
+	 *  
+	 * @return list of parameters 
+	 * 
+	 * @see jade.webservice.dynamicClient.ParameterInfo
+	 */
 	public Set<String> getInputParameterNames() {
 		return inputParametersInfoMap.keySet();
 	}
 
+	/**
+	 * Return the information of specific input parameter
+	 *  
+	 * @param parameterName name of the parameter
+	 * @return parameter informations
+	 * 
+	 * @see jade.webservice.dynamicClient.ParameterInfo
+	 */
 	public ParameterInfo getInputParameter(String parameterName) {
 		return inputParametersInfoMap.get(parameterName);
 	}
 
+	/**
+	 * Return the list of output parameters associated to this operation
+	 *  
+	 * @return list of parameters 
+	 * 
+	 * @see jade.webservice.dynamicClient.ParameterInfo
+	 */
 	public Set<String> getOutputParameterNames() {
 		return outputParametersInfoMap.keySet();
 	}
 
+	/**
+	 * Return the information of specific output parameter
+	 *  
+	 * @param parameterName name of the parameter
+	 * @return parameter informations
+	 * 
+	 * @see jade.webservice.dynamicClient.ParameterInfo
+	 */
 	public ParameterInfo getOutputParameter(String parameterName) {
 		return outputParametersInfoMap.get(parameterName);
 	}
@@ -92,18 +144,48 @@ public class OperationInfo {
 		}
 	}
 	
+	/**
+	 * Return the list of input headers associated to this operation
+	 *  
+	 * @return list of headers 
+	 * 
+	 * @see jade.webservice.dynamicClient.HeaderInfo
+	 */
 	public Set<String> getInputHeaderNames() {
 		return inputHeadersInfoMap.keySet();
 	}
 
+	/**
+	 * Return the information of specific input header
+	 *  
+	 * @param headerName name of the header
+	 * @return header informations
+	 * 
+	 * @see jade.webservice.dynamicClient.HeaderInfo
+	 */
 	public HeaderInfo getInputHeader(String headerName) {
 		return inputHeadersInfoMap.get(headerName);
 	}
 
+	/**
+	 * Return the list of output headers associated to this operation
+	 *  
+	 * @return list of headers 
+	 * 
+	 * @see jade.webservice.dynamicClient.HeaderInfo
+	 */
 	public Set<String> getOutputHeaderNames() {
 		return outputHeadersInfoMap.keySet();
 	}
 
+	/**
+	 * Return the information of specific output header
+	 *  
+	 * @param headerName name of the header
+	 * @return header informations
+	 * 
+	 * @see jade.webservice.dynamicClient.HeaderInfo
+	 */
 	public HeaderInfo getOutputHeader(String headerName) {
 		return outputHeadersInfoMap.get(headerName);
 	}

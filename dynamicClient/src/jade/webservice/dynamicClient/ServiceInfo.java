@@ -28,6 +28,11 @@ import java.util.Set;
 
 import org.apache.axis.client.Service;
 
+/**
+ * Descriptor of a service exposed by the web-service.
+ * 
+ * @see jade.webservice.dynamicClient.DynamicClient
+ */
 public class ServiceInfo {
 
 	private String name;
@@ -36,15 +41,31 @@ public class ServiceInfo {
 	
 	private Map<String, PortInfo> portsInfo = new HashMap<String, PortInfo>();
 	
-	public ServiceInfo(String serviceName, Service locator) {
+	ServiceInfo(String serviceName, Service locator) {
 		this.name = serviceName;
 		this.locator = locator;
 	}
 
+	/**
+	 * Return the name of the service
+	 * 
+	 * @return the name of service
+	 */
 	public String getName() {
 		return name;
 	}
 	
+	/**
+	 * Return the wsdl documentation associated at this service
+	 * <p>
+	 * <code>
+	 *  &lt;wsdl:service name="ServiceName"&gt;<br>
+	 *		&lt;wsdl:documentation&gt;service documentation&lt;/wsdl:documentation&gt;<br>
+	 *	&lt;/wsdl:service&gt;<br>
+	 * </code>
+	 *   
+	 * @return wsdl documentation
+	 */
 	public String getDocumentation() {
 		return documentation;
 	}
@@ -57,10 +78,25 @@ public class ServiceInfo {
 		return locator;
 	}
 
+	/**
+	 * Return the list of ports associated to this service
+	 *  
+	 * @return list of ports 
+	 * 
+	 * @see jade.webservice.dynamicClient.PortInfo
+	 */
 	public Set<String> getPortNames() {
 		return portsInfo.keySet();
 	}
 
+	/**
+	 * Return the information of specific port
+	 *  
+	 * @param portName name of the port
+	 * @return port informations
+	 * 
+	 * @see jade.webservice.dynamicClient.PortInfo
+	 */
 	public PortInfo getPort(String portName) {
 		if (portName == null && portsInfo.values().iterator().hasNext()) {
 			return portsInfo.values().iterator().next();

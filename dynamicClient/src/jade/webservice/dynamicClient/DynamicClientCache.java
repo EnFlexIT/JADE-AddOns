@@ -28,13 +28,34 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * Singleton and thread-safe cache manager of DynamicClients.<br>
+ * Allows the use and reuse of the DynamicClient without 
+ * worrying their initialization.
+ * <p>
+ * A typical example of use is:
+ * <p>
+ * <code>
+ * DynamicClientCache dcc = DynamicClientCache.getInstance();<br>
+ * DynamicClient dc = dcc.get(new URI("http://myWSDL"));<br>
+ * ……<br>
+ * WSData wsOutputData = dc.invoke(“sum”, wsInputData);<br>
+ * </code>
+ * 
+ * @see jade.webservice.dynamicClient.DynamicClient
+ */
 public class DynamicClientCache {
 
 	private static Map<URI, DynamicClient> cachedDynamicClients = new HashMap<URI, DynamicClient>();
 	
 	private final static DynamicClientCache theInstance = new DynamicClientCache();
 	
+	/**
+	 * Get a instance of DynamicClientCache
+	 * (Singleton thread-safe)
+	 * 
+	 * @return a instance of DynamicClientCache
+	 */
     public final static DynamicClientCache getInstance() {
         return theInstance;
     }
@@ -42,10 +63,33 @@ public class DynamicClientCache {
     private DynamicClientCache() {
     }
 
+    /**
+     * Get a initialized DynamicClient for specified wsdl uri.<br>
+     * If the wsdl is alredy present in cache reuse it, 
+     * otherwise initialize and cache it.<br>
+     * This operation is thread-safe.
+
+     * @param wsdl webservice wsdl uri
+     * @return initialized DynamicClient
+     * @throws DynamicClientException
+     */
     public DynamicClient get(URI wsdl) throws DynamicClientException {
     	return get(wsdl, null);
     }
 
+    /**
+     * Get an initialized DynamicClient for specified wsdl uri.<br>
+     * If the wsdl is alredy present in cache reuse it, 
+     * otherwise initialize and cache it.<br>
+     * This operation is thread-safe.     
+     * 
+     * @param wsdl webservice wsdl uri
+     * @param properties configuration properties
+     * @return initialized DynamicClient
+     * @throws DynamicClientException 
+     * 
+     *  @see jade.webservice.dynamicClient.DynamicClientProperties
+     */
     public DynamicClient get(URI wsdl, DynamicClientProperties properties) throws DynamicClientException {
     	
     	DynamicClient dc;
@@ -102,12 +146,20 @@ public class DynamicClientCache {
     	return dc;
     }
     
+    /**
+     * Remove all cached wsdls
+     */
 	public void clear() {
 		synchronized (cachedDynamicClients) {
 			cachedDynamicClients.clear();
 		}
 	}
 	
+	/**
+	 * Remove a cached wsdl
+	 *   
+	 * @param wsdl wsdl uri to remove
+	 */
 	public void remove(URI wsdl) {
 		synchronized (cachedDynamicClients) {
 			cachedDynamicClients.remove(wsdl);

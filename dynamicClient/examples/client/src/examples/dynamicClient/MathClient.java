@@ -54,7 +54,7 @@ public class MathClient {
 
 			
 			// Example of invocation of an operation (sum) with primitive input/output parameters only
-			// ----------------------------------------------
+			// ---------------------------------------------------------------------------------------
 			WSData input = new WSData();
 			input.setParameter("firstElement", 5);
 			input.setParameter("secondElement", 3);
@@ -65,7 +65,7 @@ public class MathClient {
 			
 			// Example of invocation of an operation (sumComplex) with structured input/output parameters
 			// We use Abstract Descriptors (AbsConcept) to represent them.
-			// ---------------------------------------------------
+			// ------------------------------------------------------------------------------------------
 			input = new WSData();
 			// Create an abstract descriptor representing a Complex number
 			AbsConcept absComplex1 = new AbsConcept("Complex");

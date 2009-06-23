@@ -24,6 +24,11 @@ package jade.webservice.dynamicClient;
 
 import jade.content.schema.TermSchema;
 
+/**
+ * Descriptor of a parameter exposed by the web-service.
+ * 
+ * @see jade.webservice.dynamicClient.DynamicClient
+ */
 public class ParameterInfo {
 
 	public static final int UNDEFINED = -1;
@@ -40,11 +45,16 @@ public class ParameterInfo {
 
 	private TermSchema schema; 
 
-	public ParameterInfo(String parameterName) {
+	ParameterInfo(String parameterName) {
 		this.name = parameterName;
 		this.mandatory = true;
 	}
 	
+	/**
+	 * Return the name of the parameter
+	 * 
+	 * @return the name of parameter
+	 */
 	public String getName() {
 		return name;
 	}
@@ -53,10 +63,29 @@ public class ParameterInfo {
 		return documentation;
 	}
 
+	/**
+	 * Return the wsdl documentation associated at this parameter concatenating the
+	 * documentations contained in <code>message element</code> and <code>parameter element</code>.   
+	 * <p>
+	 * <code>
+	 *  &lt;xsd:element name="PortName"&gt;<br>
+	 *  	&lt;xsd:annotation&gt;<br>
+	 *			&lt;wsdl:documentation&gt;parameter documentation&lt;/wsdl:documentation&gt;<br>
+	 *		&lt;/xsd:annotation&gt;<br>
+	 *	&lt;/xsd:element&gt;<br>
+	 * </code>
+	 *   
+	 * @return wsdl documentation
+	 */
 	void setDocumentation(String documentation) {
 		this.documentation = documentation;
 	}
 	
+	/**
+	 * Return the java class associated at this parameter
+	 *  
+	 * @return parameter java class
+	 */
 	public Class getTypeClass() {
 		return typeClass;
 	}
@@ -65,6 +94,17 @@ public class ParameterInfo {
 		this.typeClass = typeClass;
 	}
 
+	/**
+	 * Return the mode of this parameter.
+	 * <p>
+	 * The possible values are (defined as class constants):
+	 * <li> ParameterInfo.IN: input parameter
+	 * <li> ParameterInfo.OUT: output parameter
+	 * <li> ParameterInfo.INOUT: input/output parameter
+	 * <li> ParameterInfo.RETURN: the same of OUT (used internally)  
+	 * 
+	 * @return parameter mode
+	 */
 	public int getMode() {
 		return mode;
 	}
@@ -73,6 +113,13 @@ public class ParameterInfo {
 		this.mode = mode;
 	}
 
+	/**
+	 * Return the JADE schema of this parameter
+	 * 
+	 * @return parameter JADE schema
+	 * 
+	 * @see jade.content.schema.TermSchema
+	 */
 	public TermSchema getSchema() {
 		return schema;
 	}
@@ -81,11 +128,16 @@ public class ParameterInfo {
 		this.schema = schema;
 	}
 
+	/**
+	 * Tests if this parameter is mandatory for the operation
+	 * 
+	 * @return true if the parameter is mandatory, false otherwise
+	 */
 	public boolean isMandatory() {
 		return mandatory;
 	}
 
-	public void setMandatory(boolean mandatory) {
+	void setMandatory(boolean mandatory) {
 		this.mandatory = mandatory;
 	}
 

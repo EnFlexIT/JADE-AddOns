@@ -25,7 +25,8 @@
 package jade.content.abs;
 
 /**
- * 
+ * An extended abstract descriptor that can hold a generic primitive types 
+ * (eg. java.math.BigDecimal) not supported by <code>AbsPrimitive</code>.
  */
 public class AbsExtendedPrimitive implements AbsTerm {
 	
@@ -35,8 +36,8 @@ public class AbsExtendedPrimitive implements AbsTerm {
 	private String typeName = null;
 
 	/**
-	 * 
-	 * 
+	 * Construct an extended abstract descriptor to hold a primitive of
+	 * the proper type (e.g. java.math.BigDecimal...) and set its value.
 	 */
 	private AbsExtendedPrimitive(String typeName, Object value) {
 		this.typeName = typeName;
@@ -46,6 +47,7 @@ public class AbsExtendedPrimitive implements AbsTerm {
 	/**
 	 * Construct an Abstract descriptor to hold a extended-primitive of
 	 * the proper type (e.g. java.math.BigInteger...).
+	 * 
 	 * @param typeName The name of the type of the extended-primitive held by 
 	 * this descriptor.
 	 */
@@ -67,6 +69,7 @@ public class AbsExtendedPrimitive implements AbsTerm {
 
 	/**
 	 * Set the value of this AbsExtendedPrimitive to the given value.
+	 * 
 	 * @param value The new value
 	 * @throws IllegalArgumentException If the type of this AbsExtendedPrimitive 
 	 * is not correct.
@@ -87,7 +90,6 @@ public class AbsExtendedPrimitive implements AbsTerm {
 	/**
 	 * @return The name of the type of the object held by this
 	 * abstract descriptor.
-	 * @see AbsObject#getTypeName()
 	 */
 	public String getTypeName() {
 		return typeName;

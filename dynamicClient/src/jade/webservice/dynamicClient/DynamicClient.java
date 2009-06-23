@@ -74,15 +74,49 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-
+/**
+ * The DynamicClient allows to make calls to web-services without 
+ * create stub, SOAP messages or generate java classes 
+ * but simply providing the url of the WSDL (Web Service Description Language)
+ * and (where necessary) using abstract descriptors (AbsObject) to managing 
+ * the complex parameters.<p>
+ * See the guide for more details.
+ * <p>
+ * This an example of use:
+ * <code>
+ * // Get an instance of DynamicClient<br>
+ * DynamicClient dc = new DynamicClient();<br>
+ * <br>
+ * // Initialize DynamicClient for MathFunctions webservice by file<br>
+ * dc.initClient(new URI("file:./MathFunctions.wsdl"));<br>
+ * <br>
+ * // Example of invocation of an operation (sum) with primitive input/output parameters only<br>
+ * WSData input = new WSData();<br>
+ * input.setParameter("firstElement", 5);<br>
+ * input.setParameter("secondElement", 3);<br>
+ * // Invoke the sum operation<br>
+ * WSData output = dc.invoke("sum", input);<br>
+ * float sum = output.getParameterFloat("sumReturn");<br>
+ * </code>
+ */
 public class DynamicClient {
 
+	/**
+	 * W3C-ISO8601 date format used in conversion from String to Date
+	 */
 	public static final SimpleDateFormat ISO8601_DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSS");
 	
+	/**
+	 * State of DynamicClient.<br>
+	 * Possible values are:
+	 * <li> CREATED: DynamicClient created but not already initialized 
+	 * <li> INITIALIZED: DynamicClient initialized and ready to use
+	 * <li> INIT_FAILED: Some errors occurred during initialization, re-init it
+	 */
+	public enum State {CREATED, INITIALIZED, INIT_FAILED}
+
 	private static Logger log = Logger.getLogger(DynamicClient.class.getName());
 
-	public enum State {CREATED, INITIALIZED, INIT_FAILED}
-	
 	private URL defaultEndpoint;
 	private String defaultServiceName;
 	private String defaultPortName;
@@ -97,6 +131,9 @@ public class DynamicClient {
 	private Map<String, ServiceInfo> servicesInfo = new HashMap<String, ServiceInfo>();
 	
 
+	/**
+	 * Create a new DynamicClient
+	 */
 	public DynamicClient() {
 		typeOnto = new BeanOntology("WSDL-TYPES", new Ontology[]{XsdPrimitivesOntology.getInstance(), BasicOntology.getInstance()});
 
@@ -106,62 +143,173 @@ public class DynamicClient {
 		properties = new DynamicClientProperties();
 	}
 
+	/**
+	 * Get the current DynamicClient configuration properties
+	 *  
+	 * @return configuration properties
+	 * 
+	 * @see jade.webservice.dynamicClient.DynamicClientProperties
+	 */
 	public DynamicClientProperties getProperties() {
 		return properties;
 	}
 
+	/**
+	 * Set the configuration properties of DynamicClient
+	 * 
+	 * @param properties configuration properties 
+	 * 
+	 * @see jade.webservice.dynamicClient.DynamicClientProperties
+	 */
 	public void setProperties(DynamicClientProperties properties) {
 		this.properties = properties;
 	}
-	
+
+	/**
+	 * Get the current default value of wsdl endpoint.
+	 * Null if not set.
+	 * 
+	 * @return default wsdl endpoint
+	 */
+	public URL getDefaultEndpoint() {
+		return defaultEndpoint;
+	}
+
+	/**
+	 * Set the default url of wsdl endpoint.
+	 * 
+	 * @param defaultEndpoint url of default endpoint
+	 */
 	public void setDefaultEndpoint(URL defaultEndpoint) {
 		this.defaultEndpoint = defaultEndpoint;
 	}
 
+	/**
+	 * Get the current default value of wsdl service.
+	 * Null if not set.
+	 * 
+	 * @return default wsdl service
+	 */
+	public String getDefaultService() {
+		return defaultServiceName;
+	}
+
+	/**
+	 * Set the default name of wsdl service.
+	 * 
+	 * @param defaultServiceName name of default service
+	 */
 	public void setDefaultService(String defaultServiceName) {
 		this.defaultServiceName = defaultServiceName;
 	}
 
+	/**
+	 * Get the current default value of wsdl port.
+	 * Null if not set.
+	 * 
+	 * @return default wsdl port
+	 */
+	public String getDefaultPort() {
+		return defaultPortName;
+	}
+	
+	/**
+	 * Set the default value of wsdl port.
+	 * Null if not set.
+	 *  
+	 * @param defaultPortName name of default port
+	 */
 	public void setDefaultPort(String defaultPortName) {
 		this.defaultPortName = defaultPortName;
 	}
 
+	/**
+	 * Get the current default value for timeout call.
+	 * Value in millisecond, 0=no timeout, <0=not set.
+	 * 
+	 * @return default timeout
+	 */
 	public int getDefaultTimeout() {
 		return defaultTimeout;
 	}
 
+	/**
+	 * Set the default value for timeout call.
+	 * Value in millisecond, 0=no timeout
+	 * 
+	 * @param defaultTimeout value of default timeout
+	 */
 	public void setDefaultTimeout(int defaultTimeout) {
 		this.defaultTimeout = defaultTimeout;
 	}
 	
+	/**
+	 * Set the file of the trust-store
+	 * 
+	 * @param trustStore trust-store file
+	 */
 	public static void setTrustStore(String trustStore) {
 		System.setProperty("javax.net.ssl.trustStore", trustStore);
 	}
 
+	/**
+	 * Set the password of the trust-store
+	 * 
+	 * @param trustStorePassword password of trust-store
+	 */
 	public static void setTrustStorePassword(String trustStorePassword) {
 		System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 	}
 
+	/**
+	 * Disable the checking of security certificate 
+	 */
 	public static void disableCertificateChecking() {
 		AxisProperties.setProperty("axis.socketSecureFactory", "org.apache.axis.components.net.SunFakeTrustSocketFactory");
 	}
 
+	/**
+	 * Enable the checking of security certificate 
+	 */
 	public static void enableCertificateChecking() {
 		AxisProperties.setProperty("axis.socketSecureFactory", "");
 	}
 
+	/**
+	 * Set the host of proxy
+	 * 
+	 * @param proxyHost proxy host
+	 */
 	public static void setProxyHost(String proxyHost) {
 		AxisProperties.setProperty("http.proxyHost", proxyHost);
 	}
 
+	/**
+	 * Set the port of proxy
+	 * 
+	 * @param proxyPort proxy port
+	 */
 	public static void setProxyPort(String proxyPort) {
 		AxisProperties.setProperty("http.proxyPort", proxyPort);
 	}
 
+	/**
+	 * Set the list of host excluded from proxy.
+	 * Use <code>|</code> to separate hosts.
+	 * Permitted <code>*</code> as wildcards. 
+	 * 
+	 * @param nonProxyHosts list of hosts
+	 */
 	public static void setNonProxyHosts(String nonProxyHosts) {
 		AxisProperties.setProperty("http.nonProxyHosts", nonProxyHosts);
 	}
 	
+	/**
+	 * Set proxy authentication credentials 
+	 * 
+	 * @param proxyUser authentication proxy user
+	 * @param proxyPassword authentication proxy password
+	 */
 	public static void setProxyAuthentication(final String proxyUser, final String proxyPassword) {
 	    Authenticator.setDefault(new Authenticator() {
 	        protected PasswordAuthentication getPasswordAuthentication() {
@@ -170,10 +318,31 @@ public class DynamicClient {
 	      }});
 	}
 	
+	/**
+	 * Get the current state of DynamicClient
+	 * <p>
+	 * Possible values are:
+	 * <li> CREATED: DynamicClient created but not already initialized 
+	 * <li> INITIALIZED: DynamicClient initialized and ready to use
+	 * <li> INIT_FAILED: Some errors occurred during initialization, re-init it
+	 * 
+	 * @return current state of DynamicClient 
+	 */
 	public State getState() {
 		return state;
 	}
 	
+	/**
+	 * Return the wsdl documentation associated at <code>definition</code> tag.
+	 * <p>
+	 * <code>
+	 *  &lt;wsdl:definition name="WsdlName"&gt;<br>
+	 *		&lt;wsdl:documentation&gt;service documentation&lt;/wsdl:documentation&gt;<br>
+	 *	&lt;/wsdl:service&gt;<br>
+	 * </code>
+	 *   
+	 * @return wsdl documentation
+	 */
 	public String getDocumentation() {
 		return documentation;
 	}
@@ -182,6 +351,14 @@ public class DynamicClient {
 		return initializationException;
 	}
 	
+	/**
+	 * Initialize the DynamicClient with the specified wsdl.<br>
+	 * Only after this operation is possible do web-service call.<br>
+	 * This operation may take a long time.
+	 * 
+	 * @param wsdlUri uri (file or url) of wsdl
+	 * @throws DynamicClientException
+	 */
 	public void initClient(URI wsdlUri) throws DynamicClientException {
 		boolean localNoWrap = properties.isNoWrap();
 		Exception compilerException;
@@ -209,6 +386,10 @@ public class DynamicClient {
 		File src = null;
 		File classes = null;
 		try{
+			if (wsdlUri == null) {
+				throw new DynamicClientException("Wsdl uri not specified");
+			}
+			
 			log("Create Dynamic Client for "+wsdlUri);
 			log("No-wrap="+noWrap, 1);
 			log("Pck-name="+properties.getPackageName(), 1);
@@ -340,14 +521,30 @@ public class DynamicClient {
 		return null;
 	}	
 
+	/**
+	 * Get the JADE ontology of current wsdl 
+	 * 
+	 * @return JADE ontology
+	 */
 	public Ontology getOntology() {
 		return typeOnto;
 	}
 	
+	/**
+	 * Get the set of service names present in current wsdl
+	 *  
+	 * @return set of service names
+	 */
 	public Set<String> getServiceNames() {
 		return servicesInfo.keySet();
 	}
 
+	/**
+	 * Get informations about the service
+	 * 
+	 * @param serviceName name of service
+	 * @return information about service
+	 */
 	public ServiceInfo getService(String serviceName) {
 		if (serviceName == null && servicesInfo.values().iterator().hasNext()) {
 			return servicesInfo.values().iterator().next();
@@ -444,10 +641,41 @@ public class DynamicClient {
 		}
 	}
 
+	/**
+	 * Invoke a web-service operation using default call values.<br>
+	 * This method is very useful in case of web-services with a single service/port.<br>
+	 * If you want specify all call values use the complete invoke method:<br>
+	 * <code>invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, WSData input)</code> 
+	 * 
+	 * @param operation name of operation
+	 * @param input WSData input parameters/headers
+	 * @return WSData output parameters/headers
+	 * @throws DynamicClientException client exception 
+	 * @throws RemoteException server exception
+	 * 
+	 * @see jade.webservice.dynamicClient.DynamicClientProperties
+	 * @see jade.webservice.dynamicClient.WSData
+	 */
 	public WSData invoke(String operation, WSData input) throws DynamicClientException, RemoteException {
 		return invoke(null, null, operation, null, -1, input);
 	}
 	
+	/**
+	 * Invoke a web-service operation.
+	 * 
+	 * @param serviceName name of service (null to use the default) 
+	 * @param portName name of port (null to use the default)
+	 * @param operation name of operation
+	 * @param endpoint webservice endpoint url
+	 * @param timeout call timeout in millisecond (0 no timeout, <0 to use default value)
+	 * @param input WSData input parameters/headers
+	 * @return WSData output parameters/headers
+	 * @throws DynamicClientException client exception 
+	 * @throws RemoteException server exception
+	 * 
+	 * @see jade.webservice.dynamicClient.DynamicClientProperties
+	 * @see jade.webservice.dynamicClient.WSData
+	 */
 	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, WSData input) throws DynamicClientException, RemoteException {
 		
 		try {

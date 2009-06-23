@@ -60,6 +60,8 @@ import org.apache.axis.wsdl.toJava.Emitter;
 import org.apache.axis.wsdl.toJava.JavaTypeWriter;
 import org.apache.axis.wsdl.toJava.Utils;
 
+//#APIDOC_EXCLUDE_FILE
+
 public class OperationParser {
 
 	private List<HeaderInfo> explicitHeadersList;

@@ -22,6 +22,11 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package jade.webservice.dynamicClient;
 
+/**
+ * This class is used for reporting exceptions of <code>DynamicClient</code>.
+ * 
+ * @see jade.webservice.dynamicClient.DynamicClient
+ */
 public class DynamicClientException extends Exception {
 
 	private static final long serialVersionUID = -2784341373430735760L;

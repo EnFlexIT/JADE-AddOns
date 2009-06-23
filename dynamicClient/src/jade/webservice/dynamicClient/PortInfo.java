@@ -28,6 +28,11 @@ import java.util.Set;
 
 import org.apache.axis.client.Stub;
 
+/**
+ * Descriptor of a port exposed by the web-service.
+ * 
+ * @see jade.webservice.dynamicClient.DynamicClient
+ */
 public class PortInfo {
 
 	private String name;
@@ -35,15 +40,31 @@ public class PortInfo {
 	private Map<String, OperationInfo> operationsInfo = new HashMap<String, OperationInfo>();
 	private Stub stub;
 	
-	public PortInfo(String portName, Stub stub) {
+	PortInfo(String portName, Stub stub) {
 		this.name = portName;
 		this.stub = stub;
 	}
 
+	/**
+	 * Return the name of the port
+	 * 
+	 * @return the name of port
+	 */
 	public String getName() {
 		return name;
 	}
 	
+	/**
+	 * Return the wsdl documentation associated at this port
+	 * <p>
+	 * <code>
+	 *  &lt;wsdl:port name="PortName"&gt;<br>
+	 *		&lt;wsdl:documentation&gt;port documentation&lt;/wsdl:documentation&gt;<br>
+	 *	&lt;/wsdl:port&gt;<br>
+	 * </code>
+	 *   
+	 * @return wsdl documentation
+	 */
 	public String getDocumentation() {
 		return documentation;
 	}
@@ -52,10 +73,25 @@ public class PortInfo {
 		this.documentation = documentation;
 	}
 	
+	/**
+	 * Return the list of operations associated to this port
+	 *  
+	 * @return list of operations 
+	 * 
+	 * @see jade.webservice.dynamicClient.OperationInfo
+	 */
 	public Set<String> getOperationNames() {
 		return operationsInfo.keySet();
 	}
 
+	/**
+	 * Return the information of specific operation
+	 *  
+	 * @param operationName name of the operation
+	 * @return operation informations
+	 * 
+	 * @see jade.webservice.dynamicClient.OperationInfo
+	 */
 	public OperationInfo getOperation(String operationName) {
 		return operationsInfo.get(operationName);
 	}

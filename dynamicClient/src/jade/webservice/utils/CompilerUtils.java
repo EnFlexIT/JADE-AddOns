@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
+//#APIDOC_EXCLUDE_FILE
 
 public final class CompilerUtils {
 	
