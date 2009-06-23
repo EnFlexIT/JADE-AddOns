@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Built-By: 00918076
 Created-By: Apache Maven Bundle Plugin
-Bundle-Activator: agentCreator.AgentCreatorActivator
+Bundle-Activator: agentHolder.AgentHolderActivator
 Import-Package: jade;resolution:=optional,jade.content;resolution:=opt
  ional,jade.content.abs;resolution:=optional,jade.content.frame;resolu
  tion:=optional,jade.content.lang;resolution:=optional,jade.content.la

@@ -1,7 +1,7 @@
 <project name="jadeOsgi" default="compile" basedir=".">
 
 	<property file="build.properties"/>
-	<!--property name="version" value="2.0"/-->
+	<property name="version" value="1.0"/>
 	<property name="build" value="classes"/>
 	<property name="doc" value="doc"/>
 	<property name="lib" value="lib"/>
@@ -23,7 +23,7 @@
 		<!-- Create the directories structure used to store files -->
 		<mkdir dir="${build}"/>
 		<mkdir dir="${lib}"/>
-		<!--mkdir dir="${doc}/api"/-->
+		<mkdir dir="${doc}/api"/>
 	</target>
 
 	<target name="compile" depends="init" description="Compile jadeOsgi sources">
@@ -51,57 +51,39 @@
 		</jar>
 	</target>
 
-
-
-
-
-
-
-
-
-
-
 	<!-- Compile the javadoc code from ${src} into ${doc} -->
 	<target name="doc" depends="compile">
-		<mkdir dir="${doc}/api"/>
-		<javadoc sourcepath="${src}" packagenames="jade.misc, examples.misc.FSMMessageExchange" destdir="${doc}/api" author="true" windowtitle="JADE Miscellaneous classes">
+		<mkdir dir="${doc}/api" />
+		<javadoc sourcepath="${src}" packagenames="jade.osgi, jade.osgi.services.agentFactoryService, jade.osgi.services.runtime" destdir="${doc}/api" author="true" windowtitle="JADE OSGI classes">
 			<classpath>
-				<pathelement location="{build}"/>
-				<path refid="jade-classes"/>
+				<path refid="classpath"/>
 			</classpath>
 		</javadoc>
 	</target>
 
-	<!-- Make distribution zip file and put in ${dist} -->
-	<target name="dist" depends="clean, doc, bundle">
-		<echo message="GENERATE THE PDF FORM OF THE BEAN-ONTOLOGY TUTORIAL, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/misc) AND THEN PRESS ENTER -->"/>
-		<input/>
-		<mkdir dir="${jade-home}/doc"/>
-		<mkdir dir="${jade-home}/doc/tutorials"/>
-		<copy file="BeanOntologyTutorial.pdf" todir="${jade-home}/doc/tutorials"/>
+	<target name="dist" depends="clean, doc, bundle, bundle-examples">
+		<echo message="GENERATE THE PDF FORM OF THE JADE-OSGI TUTORIAL, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/osgi) AND THEN PRESS ENTER -->" />
+		<input />
+		<mkdir dir="${jade-home}/doc" />
+		<mkdir dir="${jade-home}/doc/tutorials" />
+		<copy file="JadeOsgiTutorial.pdf" todir="${jade-home}/doc/tutorials" />
 
-		<delete file="../miscAddOn-${version}.zip" quiet="true"/>
-		<zip zipfile="../miscAddOn-${version}.zip" basedir="../..">
-			<include name="add-ons/misc/*"/>
-			<exclude name="add-ons/misc/BeanOntologyTutorial.*"/>
-			<include name="doc/tutorials/BeanOntologyTutorial.pdf"/>
-			<include name="add-ons/misc/src/**"/>
-			<include name="add-ons/misc/doc/**"/>
-			<include name="add-ons/misc/lib/**"/>
-			<include name="add-ons/misc/resources/**"/>
+		<delete file="../jadeOsgiAddOn-${version}.zip" quiet="true" />
+		<zip zipfile="../jadeOsgiAddOn-${version}.zip" basedir="../..">
+			<exclude name="add-ons/osgi/JadeOsgiTutorial.*" />
+			<exclude name="add-ons/osgi/pom.xml" />
+			<exclude name="add-ons/osgi/startJadeOsgi.*" />
+			<exclude name="add-ons/osgi/osgi/**" />
+			<include name="add-ons/osgi/*" />
+			<include name="doc/tutorials/JadeOsgiTutorial.pdf" />
+			<include name="add-ons/osgi/src/**" />
+			<include name="add-ons/osgi/doc/**" />
+			<include name="add-ons/osgi/lib/**" />
+			<include name="add-ons/osgi/resources/**" />
 		</zip>
 	</target>
 
-	<target name="test" description="test the classes">
-		<java classname="jade.Boot" >
-			<arg value="-gui -nomtp subDF:jade.domain.df x:jade.misc.DFFederatorAgent(resources/DFFederatorAgent.properties)"/>
-			<classpath>
-				<pathelement path="${classpath}"/>
-			</classpath>
-		</java>
-	</target>
-
-	<target name="all" depends="clean, init, doc, compile, dist, test"/>
+	<target name="all" depends="clean, init, doc, compile, dist" />
 
 	<!-- EXAMPLES related targets -->
 
@@ -113,12 +95,16 @@
 	</target>
 
 	<target name="bundle-examples" depends="compile-examples" description="Create example bundles">
-		<jar jarfile="${lib}/agentHolderBundle.jar">
+		<copy file="${resources}/AGENT_HOLDER_MANIFEST.MF" tofile="${lib}/MANIFEST.MF"/>
+		<jar jarfile="${lib}/agentHolderBundle.jar" manifest="${lib}/MANIFEST.MF">
 			<fileset dir="${build}" includes="agentHolder/**"/>
 		</jar>
-		<jar jarfile="${lib}/agentCreatorBundle.jar">
+		<delete file="${lib}/MANIFEST.MF"/>
+		<copy file="${resources}/AGENT_CREATOR_MANIFEST.MF" tofile="${lib}/MANIFEST.MF"/>
+		<jar jarfile="${lib}/agentCreatorBundle.jar" manifest="${lib}/MANIFEST.MF">
 			<fileset dir="${build}" includes="agentCreator/**"/>
 		</jar>
+		<delete file="${lib}/MANIFEST.MF"/>
 	</target>
 
 </project>
