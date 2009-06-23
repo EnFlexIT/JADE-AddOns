@@ -1,0 +1,124 @@
+<project name="jadeOsgi" default="compile" basedir=".">
+
+	<property file="build.properties"/>
+	<!--property name="version" value="2.0"/-->
+	<property name="build" value="classes"/>
+	<property name="doc" value="doc"/>
+	<property name="lib" value="lib"/>
+	<property name="resources" value="resources"/>
+	<property name="examplesSrc" location="examples/src"/>
+
+	<path id="classpath">
+		<pathelement location="${build}"/>
+		<fileset file="${jade-home}/leap/j2se/lib/JadeLeap.jar"/>
+		<fileset file="${osgi-framework-jar}"/>
+	</path>
+
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp/>
+		<condition property="src" value="src/main/java" else="src">
+			<available type="dir" file="src/main/java"/>
+		</condition>
+		<!-- Create the directories structure used to store files -->
+		<mkdir dir="${build}"/>
+		<mkdir dir="${lib}"/>
+		<!--mkdir dir="${doc}/api"/-->
+	</target>
+
+	<target name="compile" depends="init" description="Compile jadeOsgi sources">
+		<javac srcdir="${src}"
+           destdir="${build}"
+           nowarn="off"
+           optimize="${optimised-build}"
+           debug="${debug-build}"
+           debuglevel="lines,vars,source"
+           deprecation="on">
+			<classpath>
+				<path refid="classpath"/>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="clean" description="clean up">
+		<delete dir="${build}" quiet="true"/>
+		<delete dir="${lib}"/>
+	</target>
+
+	<target name="bundle" depends="compile" description="Create jadeOsgi bundle">
+		<jar jarfile="${lib}/jadeOsgiBundle.jar" manifest="${resources}/MANIFEST.MF">
+			<fileset dir="${build}" includes="jade/**"/>
+		</jar>
+	</target>
+
+
+
+
+
+
+
+
+
+
+
+	<!-- Compile the javadoc code from ${src} into ${doc} -->
+	<target name="doc" depends="compile">
+		<mkdir dir="${doc}/api"/>
+		<javadoc sourcepath="${src}" packagenames="jade.misc, examples.misc.FSMMessageExchange" destdir="${doc}/api" author="true" windowtitle="JADE Miscellaneous classes">
+			<classpath>
+				<pathelement location="{build}"/>
+				<path refid="jade-classes"/>
+			</classpath>
+		</javadoc>
+	</target>
+
+	<!-- Make distribution zip file and put in ${dist} -->
+	<target name="dist" depends="clean, doc, bundle">
+		<echo message="GENERATE THE PDF FORM OF THE BEAN-ONTOLOGY TUTORIAL, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/misc) AND THEN PRESS ENTER -->"/>
+		<input/>
+		<mkdir dir="${jade-home}/doc"/>
+		<mkdir dir="${jade-home}/doc/tutorials"/>
+		<copy file="BeanOntologyTutorial.pdf" todir="${jade-home}/doc/tutorials"/>
+
+		<delete file="../miscAddOn-${version}.zip" quiet="true"/>
+		<zip zipfile="../miscAddOn-${version}.zip" basedir="../..">
+			<include name="add-ons/misc/*"/>
+			<exclude name="add-ons/misc/BeanOntologyTutorial.*"/>
+			<include name="doc/tutorials/BeanOntologyTutorial.pdf"/>
+			<include name="add-ons/misc/src/**"/>
+			<include name="add-ons/misc/doc/**"/>
+			<include name="add-ons/misc/lib/**"/>
+			<include name="add-ons/misc/resources/**"/>
+		</zip>
+	</target>
+
+	<target name="test" description="test the classes">
+		<java classname="jade.Boot" >
+			<arg value="-gui -nomtp subDF:jade.domain.df x:jade.misc.DFFederatorAgent(resources/DFFederatorAgent.properties)"/>
+			<classpath>
+				<pathelement path="${classpath}"/>
+			</classpath>
+		</java>
+	</target>
+
+	<target name="all" depends="clean, init, doc, compile, dist, test"/>
+
+	<!-- EXAMPLES related targets -->
+
+	<target name="compile-examples" depends="init" description="Compile OSGI examples sources">
+		<javac srcdir="${examplesSrc}" debug="yes" destdir="${build}" encoding="ISO-8859-1" includeAntRuntime="no">
+			<classpath refid="classpath"/>
+		</javac>
+		<echo>Examples compilation complete</echo>
+	</target>
+
+	<target name="bundle-examples" depends="compile-examples" description="Create example bundles">
+		<jar jarfile="${lib}/agentHolderBundle.jar">
+			<fileset dir="${build}" includes="agentHolder/**"/>
+		</jar>
+		<jar jarfile="${lib}/agentCreatorBundle.jar">
+			<fileset dir="${build}" includes="agentCreator/**"/>
+		</jar>
+	</target>
+
+</project>
