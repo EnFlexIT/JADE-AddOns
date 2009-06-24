@@ -183,13 +183,13 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 			open();
 			sendPacket(send);
 			do{
-				//sc.setSoTimeout(5000);
-				sc.setSoTimeout(0); // infinite timeout
+				sc.setSoTimeout(5000);
 				received = receivePacket();
 			}while (received.getPacketType() != RafPacket.JOIN_OK &&
 				   received.getPacketType() != RafPacket.JOIN_NOK);
 			if (received.getPacketType()== RafPacket.JOIN_OK){
 				dev = received.getInfo();
+				sc.setSoTimeout(0); // infinite timeout
 			}
 		}catch (IOException ioe){
 			myLogger.log(Logger.SEVERE,"connection failure in joinPlatform");
