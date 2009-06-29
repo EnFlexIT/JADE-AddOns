@@ -15,16 +15,21 @@ public class AgentCreatorActivator implements BundleActivator {
 		if(jadeRef != null) {
 			JadeRuntimeService jrs = (JadeRuntimeService) context.getService(jadeRef);
 			try {
-				AgentController ac = jrs.createAgent("HelloAgent", "agentHolder.HelloAgent", null, "agentHolderBundle");
+				AgentController ac = jrs.createAgent("HelloAgent", "agentHolder.HelloAgent", null, "agentHolder");
 				ac.start();
 			} catch(Exception e) {
-				System.out.println("Cannot starting HelloAgent");
+				e.printStackTrace();
+				System.out.println("Cannot start HelloAgent");
 			}
+		} else {
+			System.out.println("Cannot start HelloAgent: JadeRuntimeService cannot be found");
 		}
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		context.ungetService(jadeRef);
+		if(jadeRef != null) {
+			context.ungetService(jadeRef);
+		}
 	}
 
 }

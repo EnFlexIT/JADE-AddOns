@@ -26,7 +26,7 @@
               <Bundle-SymbolicName>${pom.groupId}.${pom.artifactId}</Bundle-SymbolicName>
               <Bundle-Name>${pom.artifactId}</Bundle-Name>
               <Bundle-Version>1.0.0</Bundle-Version>
-              <Bundle-Activator>jade.osgi.JadeActivator</Bundle-Activator>
+              <Bundle-Activator>jade.osgi.internal.JadeActivator</Bundle-Activator>
               <Import-Package>
                   org.osgi.framework,*;resolution:=optional
               </Import-Package>

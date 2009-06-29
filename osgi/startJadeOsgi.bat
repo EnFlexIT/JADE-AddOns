@@ -1,1 +1,1 @@
-java -cp .\target\jadeOsgi-1.0-SNAPSHOT.jar jade.Boot -gui -port 1299
+java -cp .\lib\jadeOsgiBundle.jar jade.Boot -gui -port 1299

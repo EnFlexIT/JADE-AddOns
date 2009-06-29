@@ -42,12 +42,18 @@
 
 	<target name="clean" description="clean up">
 		<delete dir="${build}" quiet="true"/>
-		<delete dir="${lib}"/>
+		<delete dir="${doc}" quiet="true"/>
+		<delete dir="${lib}" quiet="true"/>
 	</target>
 
 	<target name="bundle" depends="compile" description="Create jadeOsgi bundle">
+		<unzip dest="${build}" overwrite="false">
+			<fileset file="${jade-home}/leap/j2se/lib/JadeLeap.jar"/>
+		</unzip>
+		<delete dir="${build}/META-INF" quiet="true"/>
+		<copy file="${jade-home}/leap/j2se/lib/commons-codec/commons-codec-1.3.jar" todir="${build}/lib" />
 		<jar jarfile="${lib}/jadeOsgiBundle.jar" manifest="${resources}/MANIFEST.MF">
-			<fileset dir="${build}" includes="jade/**"/>
+			<fileset dir="${build}" includes="lib/**,jade/**,FIPA/**"/>
 		</jar>
 	</target>
 
@@ -61,7 +67,7 @@
 		</javadoc>
 	</target>
 
-	<target name="dist" depends="clean, doc, bundle, bundle-examples">
+	<target name="dist" depends="clean, doc, bundle, bundle-examples" description="create the distribution ZIP file"> 
 		<echo message="GENERATE THE PDF FORM OF THE JADE-OSGI TUTORIAL, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/osgi) AND THEN PRESS ENTER -->" />
 		<input />
 		<mkdir dir="${jade-home}/doc" />
@@ -71,20 +77,23 @@
 		<delete file="../jadeOsgiAddOn-${version}.zip" quiet="true" />
 		<zip zipfile="../jadeOsgiAddOn-${version}.zip" basedir="../..">
 			<exclude name="add-ons/osgi/JadeOsgiTutorial.*" />
-			<exclude name="add-ons/osgi/pom.xml" />
-			<exclude name="add-ons/osgi/startJadeOsgi.*" />
-			<exclude name="add-ons/osgi/osgi/**" />
-			<include name="add-ons/osgi/*" />
+			<exclude name="add-ons/osgi/pom.xml"/>
+			<exclude name="add-ons/osgi/startJadeOsgi.*"/>
+			<exclude name="add-ons/osgi/osgi/**"/>
+			<exclude name="add-ons/${build}/**"/>
+			
+			<include name="add-ons/osgi/build.xml"/>
+			<include name="add-ons/osgi/build.properties"/>
 			<include name="doc/tutorials/JadeOsgiTutorial.pdf" />
-			<include name="add-ons/osgi/src/**" />
+			<zipfileset dir="${src}" prefix="add-ons/osgi/src"/>
 			<include name="add-ons/osgi/doc/**" />
+			<include name="add-ons/osgi/cfg/**" />
 			<include name="add-ons/osgi/lib/**" />
 			<include name="add-ons/osgi/resources/**" />
+			<include name="add-ons/osgi/examples/**" />
 		</zip>
 	</target>
-
-	<target name="all" depends="clean, init, doc, compile, dist" />
-
+	
 	<!-- EXAMPLES related targets -->
 
 	<target name="compile-examples" depends="init" description="Compile OSGI examples sources">
@@ -95,16 +104,12 @@
 	</target>
 
 	<target name="bundle-examples" depends="compile-examples" description="Create example bundles">
-		<copy file="${resources}/AGENT_HOLDER_MANIFEST.MF" tofile="${lib}/MANIFEST.MF"/>
-		<jar jarfile="${lib}/agentHolderBundle.jar" manifest="${lib}/MANIFEST.MF">
+		<jar jarfile="${lib}/agentHolderBundle.jar" manifest="${resources}/AGENT_HOLDER_MANIFEST.MF">
 			<fileset dir="${build}" includes="agentHolder/**"/>
 		</jar>
-		<delete file="${lib}/MANIFEST.MF"/>
-		<copy file="${resources}/AGENT_CREATOR_MANIFEST.MF" tofile="${lib}/MANIFEST.MF"/>
-		<jar jarfile="${lib}/agentCreatorBundle.jar" manifest="${lib}/MANIFEST.MF">
+		<jar jarfile="${lib}/agentCreatorBundle.jar" manifest="${resources}/AGENT_CREATOR_MANIFEST.MF">
 			<fileset dir="${build}" includes="agentCreator/**"/>
 		</jar>
-		<delete file="${lib}/MANIFEST.MF"/>
 	</target>
 
 </project>
