@@ -1,6 +1,7 @@
 package jade.osgi.service.agentFactory;
 
 import jade.core.Agent;
+import jade.util.Logger;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Bundle;
@@ -31,6 +32,8 @@ public abstract class AgentFactoryService {
 
 	private Bundle myBundle;
 	private ServiceRegistration serviceRegistration;
+	
+	private static Logger logger = Logger.getMyLogger(AgentFactoryService.class.getName());
 
 	/**
 	 * Register the AgentFactoryService osgi service specifying
@@ -43,9 +46,11 @@ public abstract class AgentFactoryService {
 		Dictionary<String, String> properties = new Hashtable<String, String>();
 		properties.put(AFS_BUNDLE_NAME, myBundle.getSymbolicName());
 		properties.put(AFS_BUNDLE_VERSION, (String) myBundle.getHeaders().get(Constants.BUNDLE_VERSION));
-		System.out.println("Registering AFS with properties "+ properties);
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "Registering AFS with properties "+ properties);
+		}
 		this.serviceRegistration = context.registerService(AgentFactoryService.class.getName(), this, properties);
-		System.out.println(myBundle.getSymbolicName()+ " register AFS");
+		logger.log(Logger.INFO, myBundle.getSymbolicName()+ " register AFS");
 	}
 	
 	/**

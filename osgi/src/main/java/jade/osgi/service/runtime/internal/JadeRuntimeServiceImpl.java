@@ -4,6 +4,7 @@ import jade.core.Agent;
 import jade.osgi.internal.AgentManager;
 import jade.osgi.service.agentFactory.AgentFactoryService;
 import jade.osgi.service.runtime.JadeRuntimeService;
+import jade.util.Logger;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import org.osgi.framework.Bundle;
@@ -14,6 +15,8 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 	private ContainerController container;
 	private AgentManager agentManager;
 	private Bundle bundle;
+	
+	private static Logger logger = Logger.getMyLogger(JadeRuntimeServiceImpl.class.getName());
 
 	public JadeRuntimeServiceImpl(ContainerController container, AgentManager agentManager, Bundle bundle) {
 		this.container = container;
@@ -26,25 +29,33 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 	}
 
 	public AgentController createAgent(String name, String className, Object[] args, String bundleSymbolicName) throws Exception {
-		System.out.println("createAgent(name = "+name+" bundle = "+bundleSymbolicName+") via JRS");
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "createAgent(name = "+name+" bundle = "+bundleSymbolicName+") via JRS");
+		}
 		String classNameMod = className + "["+AgentFactoryService.BUNDLE_NAME+"=" + bundleSymbolicName + "]";
 		return container.createNewAgent(name, classNameMod, args);
 	}
 	
 	public AgentController createAgent(String name, String className, Object[] args, String bundleSymbolicName, String bundleVersion) throws Exception {
-		System.out.println("createAgent(name = "+name+" bundle = "+bundleSymbolicName+") via JRS");
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "createAgent(name = "+name+" bundle = "+bundleSymbolicName+") via JRS");
+		}
 		String classNameMod = className + "["+AgentFactoryService.BUNDLE_NAME+"=" + bundleSymbolicName + ";"+
 			AgentFactoryService.BUNDLE_VERSION+"=" + bundleVersion + "]";
 		return container.createNewAgent(name, classNameMod, args);
 	}
 
 	public AgentController getAgent(String localAgentName) throws Exception {
-		System.out.println("Agent Controller requested by " + bundle.getSymbolicName());
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "Agent Controller requested by " + bundle.getSymbolicName());
+		}
 		return container.getAgent(localAgentName);
 	}
 
 	public AgentController acceptAgent(String name, Agent agent) throws Exception {
-		System.out.println("acceptAgent(name = "+name+" bundle = "+bundle.getSymbolicName() +")");
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "acceptAgent(name = "+name+" bundle = "+bundle.getSymbolicName() +")");
+		}
 		AgentController myAgent = container.acceptNewAgent(name, agent);
 		agentManager.addAgent(bundle, agent, false);
 		return myAgent;

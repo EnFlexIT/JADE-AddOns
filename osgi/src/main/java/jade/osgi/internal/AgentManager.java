@@ -3,6 +3,7 @@ package jade.osgi.internal;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.osgi.service.runtime.JadeRuntimeService;
+import jade.util.Logger;
 import jade.wrapper.AgentController;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +24,8 @@ public class AgentManager {
 
 	public static final String BUNDLE_NAME_VERSION_SEPARATOR = "_";
 	
+	private static Logger logger = Logger.getMyLogger(AgentManager.class.getName());
+	
 	public AgentManager(BundleContext context) {
 		this.context = context;
 	}
@@ -33,7 +36,9 @@ public class AgentManager {
 			agents.put(bundleIdentifier, new ArrayList<AgentWrapper>());
 		}
 		agents.get(bundleIdentifier).add(new AgentWrapper(agent, bundle, created));
-		System.out.println("ADDED agent: agents "+ agents);
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "ADDED agent: agents "+ agents);
+		}
 	}
 
 	public synchronized void removeAgent(AID aid) {
@@ -44,13 +49,17 @@ public class AgentManager {
 			while(it.hasNext()) {
 				AgentWrapper aw = it.next();
 				if(aw.agent.getAID().equals(aid)) {
-					System.out.println("Killed agent "+ aw);
+					if(logger.isLoggable(Logger.FINE)) {
+						logger.log(Logger.FINE, "Killed agent "+ aw);
+					}
 					it.remove();
 					break found;
 				}
 			}
 		}
-		System.out.println("REMOVED agent: agents "+ agents);
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "REMOVED agent: agents " + agents);
+		}
 	}
 	
 	public synchronized Bundle getAgentBundle(AID aid) {
@@ -81,11 +90,15 @@ public class AgentManager {
 					agentsToRestart.get(bundleIdentifier).add(ai);
 					res = true;
 				}
-				System.out.println("KILLING " + a.getLocalName());
+				if(logger.isLoggable(Logger.FINE)) {
+					logger.log(Logger.FINE, "KILLING " + a.getLocalName());
+				}
 				a.doDelete();
 			}
 		}
-		System.out.println("KILL AGENTS: agentsToRestart " + agentsToRestart);
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "KILL AGENTS: agentsToRestart " + agentsToRestart);
+		}
 		agents.remove(bundleIdentifier);
 		return res;
 	}
@@ -97,11 +110,15 @@ public class AgentManager {
 				ai.updated = true;
 			}
 		}
-		System.out.println("BUNDLE UPDATED: agentsToRestart " + agentsToRestart);
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "BUNDLE UPDATED: agentsToRestart " + agentsToRestart);
+		}
 	}
 
 	public synchronized void restartAgents(String bundleIdentifier) {
-		System.out.println("RESTART AGENTS: agentsToRestart " + agentsToRestart);
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "RESTART AGENTS: agentsToRestart " + agentsToRestart);
+		}
 		if(agentsToRestart.containsKey(bundleIdentifier)) {
 			ServiceReference jrsReference = context.getServiceReference(JadeRuntimeService.class.getName());
 			JadeRuntimeService jrs = (JadeRuntimeService) context.getService(jrsReference);
@@ -109,17 +126,18 @@ public class AgentManager {
 	    		for(AgentInfo ai: agentsToRestart.get(bundleIdentifier)) {
 	    			try {
 	    				if(ai.updated) {
-	        				System.out.println("RESTARTING agent "+ai);
+	    					if(logger.isLoggable(Logger.FINE)) {
+	    						logger.log(Logger.FINE, "RESTARTING agent "+ai);
+	    					}
 	        				AgentController ac = jrs.createAgent(ai.name, ai.className, ai.args, ai.symbolicName, ai.version);
 	        				ac.start();
 	    				}
 	    			} catch(Exception e) {
-	    				System.out.println("Agent " + ai.name + " cannot be restarted!");
-	    				e.printStackTrace();
+	    				logger.log(Logger.SEVERE, "Agent " + ai.name + " cannot be restarted!", e);
 	    			}
 	    		}
 			} else {
-				System.out.println("JadeRuntimeService for "+bundleIdentifier+" no more active! Cannot restart agents!");
+				logger.log(Logger.WARNING, "JadeRuntimeService for "+bundleIdentifier+" no more active! Cannot restart agents!");
 			}
     		agentsToRestart.remove(bundleIdentifier);
 		}
@@ -127,8 +145,10 @@ public class AgentManager {
 	
 	public synchronized void removeAgents(String bundleIdentifier) throws Exception {
 		agentsToRestart.remove(bundleIdentifier);
-		System.out.println("CLEAR AGENTS: agentsToRestart "+ agentsToRestart);
-		System.out.println("CLEAR AGENTS: agents "+ agents);
+		if(logger.isLoggable(Logger.FINE)) {
+			logger.log(Logger.FINE, "CLEAR AGENTS: agentsToRestart "+ agentsToRestart);
+			logger.log(Logger.FINE, "CLEAR AGENTS: agents "+ agents);
+		}
 	}
 	
 	private class AgentWrapper {

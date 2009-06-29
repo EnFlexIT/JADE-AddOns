@@ -7,6 +7,7 @@ import jade.osgi.service.runtime.JadeRuntimeService;
 import jade.osgi.service.runtime.internal.JadeRuntimeServiceFactory;
 import jade.osgi.service.runtime.internal.OsgiEventHandler;
 import jade.osgi.service.runtime.internal.OsgiEventHandlerFactory;
+import jade.util.Logger;
 import jade.util.ObjectManager;
 import jade.util.leap.Properties;
 import jade.wrapper.ContainerController;
@@ -39,6 +40,8 @@ public class JadeActivator implements BundleActivator, BundleListener {
 	private AgentManager agentManager;
 	private OsgiEventHandlerFactory handlerFactory;
 	
+	private static Logger logger = Logger.getMyLogger(JadeActivator.class.getName());
+	
 	public void start(BundleContext context) throws Exception {
 		try {
 			instance = this;
@@ -58,8 +61,8 @@ public class JadeActivator implements BundleActivator, BundleListener {
 					restartTimeout = Long.parseLong(restartAgentsTimeoutS);
 				} catch(NumberFormatException e) {}
 			}
-			System.out.println(RESTART_AGENTS_ON_UPDATE_KEY + " " + restartAgents);
-			System.out.println(RESTART_AGENTS_TIMEOUT_KEY + " " + restartTimeout);
+			logger.log(Logger.CONFIG, RESTART_AGENTS_ON_UPDATE_KEY + " " + restartAgents);
+			logger.log(Logger.CONFIG, RESTART_AGENTS_TIMEOUT_KEY + " " + restartTimeout);
 			this.handlerFactory = new OsgiEventHandlerFactory(agentManager, restartAgents, restartTimeout);
 			
 			// Initialize jade container profile and start it
@@ -79,7 +82,7 @@ public class JadeActivator implements BundleActivator, BundleListener {
 			context.addBundleListener(this);
 
 		} catch(Exception e) {
-			e.printStackTrace();
+			logger.log(Logger.SEVERE, "Error during bundle startup", e);
 			stop(context);
 		}
 	}

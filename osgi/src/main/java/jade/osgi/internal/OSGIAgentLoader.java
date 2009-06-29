@@ -2,6 +2,7 @@ package jade.osgi.internal;
 
 import jade.core.Agent;
 import jade.osgi.service.agentFactory.AgentFactoryService;
+import jade.util.Logger;
 import jade.util.ObjectManager;
 import jade.util.leap.Properties;
 import org.osgi.framework.BundleContext;
@@ -12,6 +13,8 @@ public class OSGIAgentLoader implements ObjectManager.Loader {
 	
 	private BundleContext context;
 	private AgentManager agentManager;
+	
+	private static Logger logger = Logger.getMyLogger(OSGIAgentLoader.class.getName());
 	
 	public OSGIAgentLoader(BundleContext bc, AgentManager am) {
 		this.context = bc;
@@ -27,7 +30,9 @@ public class OSGIAgentLoader implements ObjectManager.Loader {
 			if(sr != null) {
 				AgentFactoryService afs = (AgentFactoryService) context.getService(sr);
 				agent = afs.createAgent(className);
-				// System.out.println("AFS("+bundleName+") created agent of class "+className);
+				if(logger.isLoggable(Logger.FINE)) {
+					logger.log(Logger.FINE, "AFS("+bundleName+") created agent of class "+className);
+				}
 				agentManager.addAgent(afs.getBundle(), agent, true);
 				context.ungetService(sr);
 			}
@@ -48,7 +53,7 @@ public class OSGIAgentLoader implements ObjectManager.Loader {
 				// TODO se non e' specificata la version prendere il piu' recente
 			}
 		} catch(InvalidSyntaxException e) {
-			e.printStackTrace();
+			logger.log(Logger.SEVERE, "Error retrieving AFS for bundle "+bundleName, e);
 		}
 		return af;
 	}

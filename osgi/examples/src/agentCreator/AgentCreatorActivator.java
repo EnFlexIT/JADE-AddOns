@@ -1,6 +1,7 @@
 package agentCreator;
 
 import jade.osgi.service.runtime.JadeRuntimeService;
+import jade.util.Logger;
 import jade.wrapper.AgentController;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -9,6 +10,8 @@ import org.osgi.framework.ServiceReference;
 public class AgentCreatorActivator implements BundleActivator {
 
 	private ServiceReference jadeRef;
+	
+	private static Logger logger = Logger.getMyLogger(AgentCreatorActivator.class.getName());
 
 	public void start(BundleContext context) throws Exception {
 		jadeRef = context.getServiceReference(JadeRuntimeService.class.getName());
@@ -18,11 +21,10 @@ public class AgentCreatorActivator implements BundleActivator {
 				AgentController ac = jrs.createAgent("HelloAgent", "agentHolder.HelloAgent", null, "agentHolder");
 				ac.start();
 			} catch(Exception e) {
-				e.printStackTrace();
-				System.out.println("Cannot start HelloAgent");
+				logger.log(Logger.SEVERE, "Cannot start HelloAgent", e);
 			}
 		} else {
-			System.out.println("Cannot start HelloAgent: JadeRuntimeService cannot be found");
+			logger.log(Logger.WARNING, "Cannot start HelloAgent: JadeRuntimeService cannot be found");
 		}
 	}
 
