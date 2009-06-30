@@ -16,10 +16,7 @@ import jade.wrapper.AgentController;
 public interface JadeRuntimeService {
 
 	/**
-	 * Create an agent owned by the bundle that is calling the method.
-	 * Bundle that wants to start their agents should {@link #acceptAgent(String, Agent)}
-	 * method rather than this, to avoid duplicate creation caused by automatic restart due
-	 * to an update operation.
+	 * Create a jade agent.
 	 * @param name A platform-unique nickname for the newly created agent.
 	 * @param className The fully qualified name of the class that implements the agent.
 	 * @param args An object array, containing initialization parameters to pass to the new agent.

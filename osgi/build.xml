@@ -88,10 +88,12 @@
 			<zipfileset dir="${src}" prefix="add-ons/osgi/src"/>
 			<include name="add-ons/osgi/doc/**" />
 			<include name="add-ons/osgi/cfg/**" />
-			<include name="add-ons/osgi/lib/**" />
+			<include name="add-ons/osgi/lib/agent*" />
 			<include name="add-ons/osgi/resources/**" />
 			<include name="add-ons/osgi/examples/**" />
 		</zip>
+		
+		<copy file="${lib}/jadeOsgiBundle.jar" todir=".." />
 	</target>
 	
 	<!-- EXAMPLES related targets -->

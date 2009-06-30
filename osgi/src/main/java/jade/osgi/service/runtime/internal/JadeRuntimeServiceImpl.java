@@ -8,7 +8,6 @@ import jade.util.Logger;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 
 public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 
@@ -25,7 +24,7 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 	}
 
 	public AgentController createAgent(String name, String className, Object[] args) throws Exception {
-		return createAgent(name, className, args, bundle.getSymbolicName(), (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION));
+		return container.createNewAgent(name, className, args);
 	}
 
 	public AgentController createAgent(String name, String className, Object[] args, String bundleSymbolicName) throws Exception {
