@@ -37,6 +37,7 @@ import jade.lang.acl.ACLMessage;
 import jade.proto.SubscriptionInitiator;
 import jade.wrapper.gateway.GatewayAgent;
 
+import java.lang.reflect.Method;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
@@ -283,22 +284,38 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			return null;
 		}
 
-		// Create ontology instance
+		// Get ontology className
 		String ontoClassname = WSIGConfiguration.getInstance().getOntoClassname(ontoName);
 		if (ontoClassname == null) {
 			log.warn("Ontology "+ontoName+" not present in WSIG configuration file");
 			return null;
 		}
 
-		Ontology serviceOnto = null;
+		// Get ontology class 
+		Class ontoClass;
 		try {
-			Class ontoClass = Class.forName(ontoClassname);
-			serviceOnto = (Ontology)ontoClass.newInstance();
+			ontoClass = Class.forName(ontoClassname);
 		} catch (Exception e) {
 			log.warn("Ontology class "+ontoClassname+" not present in WSIG classpath", e);
 			return null;
 		}
 
+		// Get ontology instance
+		Ontology serviceOnto = null;
+		try {
+			// Try to create by constructor
+			serviceOnto = (Ontology)ontoClass.newInstance();
+		} catch (Exception e) {
+			try {
+				// Try to create by getInstance() method 
+				Method getInstanceMethod = ontoClass.getMethod("getInstance", null);
+				serviceOnto = (Ontology)getInstanceMethod.invoke(null, null);
+			} catch (Exception e1) {
+				log.warn("Ontology class "+ontoClassname+" not instantiable", e);
+				return null;
+			}
+		}
+		
 		// Register new onto in anget
 		getContentManager().registerOntology(serviceOnto);
 

@@ -43,7 +43,7 @@ public class MathOntology extends Ontology implements MathVocabulary{
 	/**
 	 * Constructor
 	 */
-	public MathOntology() {
+	private MathOntology() {
 		super(ONTOLOGY_NAME, BasicOntology.getInstance());
 
 		try {
