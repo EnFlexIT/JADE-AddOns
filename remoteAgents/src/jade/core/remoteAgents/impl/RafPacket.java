@@ -27,15 +27,14 @@ public class RafPacket implements Serializable {
 	
 	public static final int MESSAGE_REMOTE_AGENT_PROXY_DEAD= 6;
 	
-	public static final int LOOKING_FOR_A_REMOTE_AGENT_MANAGER=7;
-	
-	public static final int CONFIRM = 8;
+	public static final int MESSAGE_RECONNECT= 7;
+		
 	
 	private int packetType;
 	
 	//***** NAMES ASSOCIATED WITH THE PACKET TYPE ***********
 	
-	private static final String[] packetTypes = new String[9];
+	private static final String[] packetTypes = new String[8];
 	static { 
 		packetTypes[MESSAGE_JOIN]="MESSAGE_JOIN";
 		packetTypes[JOIN_OK]="JOIN_OK";
@@ -44,8 +43,7 @@ public class RafPacket implements Serializable {
 		packetTypes[MESSAGE_IN]="MESSAGE_IN";
 		packetTypes[MESSAGE_LEAVE]="MESSAGE_LEAVE";
 		packetTypes[MESSAGE_REMOTE_AGENT_PROXY_DEAD]="MESSAGE_REMOTE_AGENT_PROXY_DEAD";
-		packetTypes[LOOKING_FOR_A_REMOTE_AGENT_MANAGER]="LOOKING_FOR_A_REMOTE_AGENT_MANAGER";
-		packetTypes[CONFIRM]="CONFIRM";
+		packetTypes[MESSAGE_RECONNECT]="MESSAGE_RECONNECT";
 	}
 	
 	// array of String

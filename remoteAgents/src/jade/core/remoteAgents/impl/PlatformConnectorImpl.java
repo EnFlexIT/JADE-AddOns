@@ -3,6 +3,7 @@
  */
 package jade.core.remoteAgents.impl;
 
+import jade.core.AgentRuntime;
 import jade.core.remoteAgents.PlatformConnector;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.LEAPACLCodec;
@@ -18,7 +19,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 /**
  * Simple socket based implementation of the PlatformConnector interface
@@ -26,20 +26,29 @@ import java.net.UnknownHostException;
  * @author Telefónica I+D
  */
 public class PlatformConnectorImpl extends RafConnection implements PlatformConnector, Serializable {
+	
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -32828532695493030L;
+	
 	private final int DEFAULT_RAM_PORT = 2500;
 	private final String DEFAULT_RAM_HOST = "localhost";
+	
+	private int timeout = 5000;
+	private int timeReconnect = 2000;
+	
 	private Listener listener = null;
 	private String agentName = null;
 	private String platformName = null;
+		
 	private String remoteAgentManagerHost = DEFAULT_RAM_HOST;
 	private int remoteAgentManagerPort = DEFAULT_RAM_PORT;
-	private boolean joined = false;
-	protected Socket sc;
-	private int timeout =5000;
+	
 	private boolean constructorParameters= false;
 	private boolean connectedBefore = false;
+	private boolean joined = false;
+	
+	protected Socket sc;
+	
 	private ConnectionReader connectionReader= null;
 	
 	private Logger myLogger = Logger.getMyLogger(getClass().getName());
@@ -49,7 +58,6 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 	 * looking for the address and port to connect a remoteAgentManager
 	 */
 	public PlatformConnectorImpl() {
-		
 	}
 
 	/**
@@ -64,6 +72,21 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 		this.constructorParameters = true;
 	}
 	
+	/**
+	 * Set the time will wait to try to reconnect to remoteAgentManager
+	 * @param timeout
+	 */
+	public void setTimeReconnect(int time){
+		this.timeReconnect = time;
+	}
+	
+	/**
+	 * Get the time will wait to try to reconnect to remoteAgentManager
+	 * @return timeout
+	 */
+	public int getTimeReconnect(){
+		return this.timeReconnect;
+	}
 	/**
 	 * Set the time will wait to receive data from a remoteAgentManager
 	 * @param timeout
@@ -100,34 +123,52 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 	 *
 	 */
 	public String[] joinPlatform(String agentName, String platformName) throws Exception {
-		/// cambiar esto
+		
 		if(!constructorParameters && !connectedBefore){
-			myLogger.log(Logger.INFO, "looking for a host to connect");
+			myLogger.log(Logger.INFO, "Looking for a host to connect");
 			lookForAHost();
 			myLogger.log(Logger.INFO, "HOST: " + this.remoteAgentManagerHost + " PORT: " + this.remoteAgentManagerPort);
-			
 		}
+		
 		if (! joined){
 			this.agentName = agentName;
 			this.platformName = platformName;
 			String[] dev=null;
+			
 			try{
 				 dev = join(this.agentName, this.platformName);
 			}catch(Exception e){
-				if(connectedBefore && !constructorParameters){
-					connectedBefore= true;
-					 dev = join(this.agentName, this.platformName);
+				
+				if (e instanceof ClassNotFoundException){
+					myLogger.log(Logger.SEVERE,	"Failure to receive a package");
+				}else if (e instanceof IOException){
+					myLogger.log(Logger.SEVERE,"Connection failure in joinPlatform");
 				}
-			}if (dev == null) {
-				throw new Exception();
+				
+				try{ 
+					Thread.sleep(timeReconnect);
+					dev = join(this.agentName, this.platformName);
+				}catch(Exception ee){
+					myLogger.log(Logger.INFO,"Failure in the second attempt to join");
+				}
+
 			}
-			joined = true;
-			connectionReader = new ConnectionReader(this);
-			connectionReader.start();
+			
+			if (dev != null) {
+				joined = true;
+				connectionReader = new ConnectionReader(this);
+				connectionReader.start();
+				connectedBefore = true;
+			}else{
+				myLogger.log(Logger.SEVERE,"Can't join the platform.");
+				throw new Exception("Can't join the platform.");
+			}
+			
 			return dev;
+			
 		}else{
-			myLogger.log(Logger.WARNING,"no join if you are connected");
-			throw new Exception();	
+			myLogger.log(Logger.WARNING,"Already connected to the platform");
+			throw new Exception("Already connected to the platform");	
 		}
 	}
 
@@ -153,7 +194,7 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 			RafPacket send = new RafPacket(RafPacket.MESSAGE_OUT,bb);
 			sendPacket(send);
 		}else{
-			myLogger.log(Logger.INFO, "There is no connection between AgentConnector and PlatformConnector");
+			myLogger.log(Logger.WARNING, "No connection between AgentConnector and PlatformConnector");
 		}
 	}
 
@@ -173,31 +214,34 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 	 * @param agentName Name of the agent
 	 * @param platformName 	Name of the platform
 	 * @return the information package received
+	 * @throws Exception 
 	 */
-	public String[] join(String agentName, String platformName) {
+	public String[] join(String agentName, String platformName) throws Exception {
+		
 		String[] dev = null;
+		
 		String[] info = {agentName,platformName};
-		RafPacket send = new RafPacket(RafPacket.MESSAGE_JOIN,info);
+		
+		RafPacket send = null;
+		
+		if(!connectedBefore)
+			send = new RafPacket(RafPacket.MESSAGE_JOIN,info);
+		else
+			send = new RafPacket(RafPacket.MESSAGE_RECONNECT,info);
+		
 		RafPacket received;
-		try {
-			open();
-			sendPacket(send);
-			do{
-				sc.setSoTimeout(5000);
-				received = receivePacket();
-			}while (received.getPacketType() != RafPacket.JOIN_OK &&
-				   received.getPacketType() != RafPacket.JOIN_NOK);
-			if (received.getPacketType()== RafPacket.JOIN_OK){
-				dev = received.getInfo();
-				sc.setSoTimeout(0); // infinite timeout
-			}
-		}catch (IOException ioe){
-			myLogger.log(Logger.SEVERE,"connection failure in joinPlatform");
-		}catch (Exception e) {
-			if (e instanceof ClassNotFoundException){
-				myLogger.log(Logger.SEVERE,	"failure to receive a package");
-			}
+		open();
+		sendPacket(send);
+		do{
+			sc.setSoTimeout(5000);
+			received = receivePacket();
+		}while (received.getPacketType() != RafPacket.JOIN_OK &&
+			   received.getPacketType() != RafPacket.JOIN_NOK);
+		if (received.getPacketType()== RafPacket.JOIN_OK){
+			dev = received.getInfo();
+			sc.setSoTimeout(0); // infinite timeout
 		}
+		
 		return dev;
 	}
 	
@@ -216,7 +260,7 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 	 * @throws IOException
 	 */
 	public void open(String host,int port)throws IOException{
-		myLogger.log(Logger.INFO,"open connection with Host: "+ host + " Port: " +port);
+		myLogger.log(Logger.INFO,"Opening connection with Host: "+ host + " Port: " +port);
 		sc = new Socket(host,port);
 		os = sc.getOutputStream();
 		is = sc.getInputStream();
@@ -320,8 +364,18 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 			}catch (IOException ioe) {
 				if(isConnected()){
 					ioe.printStackTrace();
-					myLogger.log(Logger.WARNING,"connection failure");
+					myLogger.log(Logger.WARNING,"Connection failure");
 					handleDisconnection();
+					myLogger.log(Logger.INFO,"Trying to reconnect ...");
+					while(!joined){
+						try {
+							sleep(timeReconnect);
+							AgentRuntime.getInstance().joinPlatform();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					myLogger.log(Logger.INFO,"Connection restored");
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -335,7 +389,7 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 			try {
 				close();
 			} catch (Exception e) {
-				myLogger.log(Logger.WARNING,"failed to close the connection");
+				myLogger.log(Logger.WARNING,"Failed to close the connection");
 				e.printStackTrace();
 			}
 			
@@ -362,7 +416,6 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 			int serverPort = RemoteAgentManagerImp.udpPortNumber;
 			DatagramSocket socketUDP = new DatagramSocket();
 								
-			//InetAddress subnet = InetAddress.getByName(obtainBroadcast());
 			InetAddress subnet = InetAddress.getByName("255.255.255.255");
 			byte[] buffer = new byte[1024];
 			String msg ="LOOKING_FOR_A_REMOTE_AGENT_MANAGER";
@@ -389,45 +442,6 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 		}
 	}
 
-	/**
-	 * Analyze the subnet to see what is the broadcast address
-	 * @return 	the broadcast address for the subnet
-	 */
-	private String obtainBroadcast() {
-		InetAddress myAddress;
-		try {
-			myAddress = InetAddress.getLocalHost();
-			String ip = myAddress.getHostAddress();
-			String[] ips = { new String(), new String(), new String(),	new String() };
-			int pos = 0;
-			for (int i = 0; i < ip.length(); i++) {
-				if (!(ip.charAt(i) == '.')) {
-					ips[pos] = ips[pos] + Character.toString(ip.charAt(i));
-				} else {
-					pos++;
-				}
-			}
-			if (ips[0].equals("10")) {
-				//10.x.x.x
-				ips[1] = "255";
-				ips[2] = "255";
-				ips[3] = "255";
-			} else if (ips[0].equals("172") && Integer.getInteger(ips[1]) >= 16
-					&& Integer.getInteger(ips[1]) <= 31) {
-				// 172.16.x.x .. 172.31.x.x
-				ips[2] = "255";
-				ips[3] = "255";
-			} else if (ips[0].equals("192") && ips[1].equals("168")){
-				//192.168.y.x
-				ips[3] = "255";
-			}
-			return ips[0] + "." + ips[1] + "." + ips[2] + "." + ips[3];
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
 	/**
 	 * Serializes an ACLMessage buscar
 	 * @param msg ACLMessage to serialize

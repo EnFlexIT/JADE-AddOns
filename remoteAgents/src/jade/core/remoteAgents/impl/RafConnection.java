@@ -10,7 +10,7 @@ import java.io.OutputStream;
  * @author Telefónica
  *
  */
-public  class RafConnection {
+public class RafConnection {
 	protected OutputStream  os;
 	protected InputStream is;
 	
@@ -19,15 +19,14 @@ public  class RafConnection {
 	 * @param msg packet to be sent 
 	 * @throws Exception
 	 */
-	public void sendPacket(RafPacket msg)throws Exception{
+	public void sendPacket(RafPacket msg) throws Exception{
 		if (os!=null){
 			ObjectOutputStream oos = new ObjectOutputStream(os);
 			oos.writeObject(msg);
 		}else{
-			System.err.println("I can't send the packet");
+			throw new Exception("Can't send the packet");
 		}
 	}
-		
 	
 	/**
 	 * 
@@ -45,7 +44,7 @@ public  class RafConnection {
 	 * @return packet received
 	 * @throws Exception if we do not receive a packet, throw Exception
 	 */
-	public RafPacket receivePacket()throws Exception{
+	public RafPacket receivePacket() throws Exception{
 		RafPacket received;
 		if (is!= null){
 			ObjectInputStream ois = new ObjectInputStream(is);

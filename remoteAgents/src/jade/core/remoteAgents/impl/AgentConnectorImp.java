@@ -61,7 +61,7 @@ public class AgentConnectorImp extends RafConnection implements AgentConnector {
 			RafPacket send = new RafPacket(RafPacket.MESSAGE_IN, bb);
 			sendPacket(send);
 		}else{
-			myLogger.log(Logger.INFO, "There is no connection between AgentConnector and PlatformConnector");
+			myLogger.log(Logger.WARNING, "No connection between AgentConnector and PlatformConnector");
 		}		
 	}
 
@@ -70,7 +70,6 @@ public class AgentConnectorImp extends RafConnection implements AgentConnector {
 	 * 
 	 * @exception
 	 */
-	
 	synchronized public void notifyDead() throws Exception {
 		RafPacket send = new RafPacket(
 		RafPacket.MESSAGE_REMOTE_AGENT_PROXY_DEAD);
@@ -186,6 +185,7 @@ public class AgentConnectorImp extends RafConnection implements AgentConnector {
 					}
 				}
 			} catch (IOException ioe) {
+				myLogger.log(Logger.WARNING,"Connection failure");
 				if (isConnected()){
 					ioe.printStackTrace();
 					handleDisconnection();

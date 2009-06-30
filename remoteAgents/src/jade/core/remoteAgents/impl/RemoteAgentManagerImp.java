@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.HashMap;
 
 /**
  * Implementation of the RemoteAgentManager interface
@@ -32,6 +33,8 @@ public class RemoteAgentManagerImp extends RemoteAgentManager {
 	
 	public static int portNumber = 2500;
 	public static int udpPortNumber = 2501;
+	
+	private HashMap<String, AgentConnectorImp> connectors = new HashMap<String, AgentConnectorImp>();
 
 	private static final long serialVersionUID = 1L;
 
@@ -133,7 +136,7 @@ public class RemoteAgentManagerImp extends RemoteAgentManager {
 				serverSocket = new ServerSocket(port);
 			} catch (IOException e) {
 				logger.log(Logger.SEVERE,
-					"failed to create the ServerSocket. Another server listening on that port");
+					"Failed to create the ServerSocket. Another server listening on that port");
 				e.printStackTrace();
 				myAgent.doDelete();
 				return;
@@ -173,11 +176,12 @@ public class RemoteAgentManagerImp extends RemoteAgentManager {
 							info = received.getInfo();
 							String agentName = info[0];
 							String platformName = info[1];
-							logger.log(Logger.INFO,	"Revd request to join: " +
+							logger.log(Logger.INFO,	"Received request to join: " +
 									"AgentName = "+ agentName + 
 									", platformName " + platformName);
 							info = handleNewAgent(agentName, platformName,connector);
-
+						
+							connectors.put(agentName, connector);
 						} catch (Exception e) {
 							logger.log(Logger.WARNING,"Error handlingNewAgent " + e.getMessage());
 							establishedConnection = false;
@@ -185,7 +189,35 @@ public class RemoteAgentManagerImp extends RemoteAgentManager {
 						connector.sendResult(establishedConnection, info);
 						if (establishedConnection) {
 							connector.startConnectionReader();
-
+							
+						}
+					}else if (received.getPacketType() == RafPacket.MESSAGE_RECONNECT) {
+						logger.log(Logger.INFO,	"Received RECONNECT message.");
+						establishedConnection = true;
+						try {
+							info = received.getInfo();
+							String agentName = info[0];
+							String platformName = info[1];
+							logger.log(Logger.INFO,	"Received request to reconnect: " +
+									"AgentName = "+ agentName + 
+									", platformName " + platformName);
+							
+							AgentConnectorImp myConnector = connectors.get(agentName);
+							if(myConnector != null){
+								myConnector.listener.handleLeft();
+							}
+							connectors.remove(agentName);
+							
+							info = handleNewAgent(agentName, platformName,connector);
+							connectors.put(agentName, connector);
+						} catch (Exception e) {
+							logger.log(Logger.WARNING,"Error handlingNewAgent " + e.getMessage());
+							establishedConnection = false;
+						}
+						connector.sendResult(establishedConnection, info);
+						if (establishedConnection) {
+							connector.startConnectionReader();
+							
 						}
 					}
 				} catch (IOException con) {
@@ -202,7 +234,7 @@ public class RemoteAgentManagerImp extends RemoteAgentManager {
 						any.printStackTrace();
 					} catch (Exception e) {
 						logger.log(Logger.WARNING,
-								"problems to close the connection");
+								"Problems to close the connection");
 						e.printStackTrace();
 					}
 				}
