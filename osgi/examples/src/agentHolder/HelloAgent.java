@@ -17,9 +17,7 @@ public class HelloAgent extends Agent {
 			OSGIBridgeHelper afHelper = (OSGIBridgeHelper) getHelper(OSGIBridgeHelper.SERVICE_NAME);
 			afHelper.init(this);
 			BundleContext context = afHelper.getBundleContext();
-			if(context != null) {
-				System.out.println(this.getLocalName() +" is packaged in bundle " + context.getBundle().getSymbolicName());
-			}
+			System.out.println(this.getLocalName() +" is packaged in bundle " + context.getBundle().getSymbolicName());
 		} catch(ServiceException e) {
 			logger.log(Logger.SEVERE, "Failure during setup", e);
 		}
