@@ -23,7 +23,7 @@ import org.osgi.framework.ServiceRegistration;
  * @author 00918076
  *
  */
-public abstract class AgentFactoryService {
+public class AgentFactoryService {
 	
 	public static final String BUNDLE_NAME ="bundle-name";
 	public static final String BUNDLE_VERSION ="bundle-version";
@@ -56,7 +56,7 @@ public abstract class AgentFactoryService {
 	/**
 	 * Deregister AgentFactoryService osgi service.
 	 */
-	public void stop() {
+	public void clean() {
 		serviceRegistration.unregister();
 	}
 

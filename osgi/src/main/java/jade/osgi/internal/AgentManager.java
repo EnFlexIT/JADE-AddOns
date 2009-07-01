@@ -129,7 +129,7 @@ public class AgentManager {
 	    					if(logger.isLoggable(Logger.FINE)) {
 	    						logger.log(Logger.FINE, "RESTARTING agent "+ai);
 	    					}
-	        				AgentController ac = jrs.createAgent(ai.name, ai.className, ai.args, ai.symbolicName, ai.version);
+	        				AgentController ac = jrs.createNewAgent(ai.name, ai.className, ai.args, ai.symbolicName, ai.version);
 	        				ac.start();
 	    				}
 	    			} catch(Exception e) {

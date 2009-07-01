@@ -18,7 +18,7 @@ public class AgentCreatorActivator implements BundleActivator {
 		if(jadeRef != null) {
 			JadeRuntimeService jrs = (JadeRuntimeService) context.getService(jadeRef);
 			try {
-				AgentController ac = jrs.createAgent("HelloAgent", "agentHolder.HelloAgent", null, "agentHolder");
+				AgentController ac = jrs.createNewAgent("HelloAgent", "agentHolder.HelloAgent", null, "agentHolder");
 				ac.start();
 			} catch(Exception e) {
 				logger.log(Logger.SEVERE, "Cannot start HelloAgent", e);

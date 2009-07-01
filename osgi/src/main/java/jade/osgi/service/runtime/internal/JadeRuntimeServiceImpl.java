@@ -23,11 +23,11 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 		this.bundle = bundle;
 	}
 
-	public AgentController createAgent(String name, String className, Object[] args) throws Exception {
+	public AgentController createNewAgent(String name, String className, Object[] args) throws Exception {
 		return container.createNewAgent(name, className, args);
 	}
 
-	public AgentController createAgent(String name, String className, Object[] args, String bundleSymbolicName) throws Exception {
+	public AgentController createNewAgent(String name, String className, Object[] args, String bundleSymbolicName) throws Exception {
 		if(logger.isLoggable(Logger.FINE)) {
 			logger.log(Logger.FINE, "createAgent(name = "+name+" bundle = "+bundleSymbolicName+") via JRS");
 		}
@@ -35,7 +35,7 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 		return container.createNewAgent(name, classNameMod, args);
 	}
 	
-	public AgentController createAgent(String name, String className, Object[] args, String bundleSymbolicName, String bundleVersion) throws Exception {
+	public AgentController createNewAgent(String name, String className, Object[] args, String bundleSymbolicName, String bundleVersion) throws Exception {
 		if(logger.isLoggable(Logger.FINE)) {
 			logger.log(Logger.FINE, "createAgent(name = "+name+" bundle = "+bundleSymbolicName+") via JRS");
 		}
@@ -51,7 +51,7 @@ public class JadeRuntimeServiceImpl implements JadeRuntimeService {
 		return container.getAgent(localAgentName);
 	}
 
-	public AgentController acceptAgent(String name, Agent agent) throws Exception {
+	public AgentController acceptNewAgent(String name, Agent agent) throws Exception {
 		if(logger.isLoggable(Logger.FINE)) {
 			logger.log(Logger.FINE, "acceptAgent(name = "+name+" bundle = "+bundle.getSymbolicName() +")");
 		}

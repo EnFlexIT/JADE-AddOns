@@ -3,7 +3,7 @@ Built-By: 00918076
 Created-By: Apache Maven Bundle Plugin
 Bundle-Activator: jade.osgi.internal.JadeActivator
 Bnd-LastModified: 1245689405802
-Import-Package: org.osgi.framework,jade.content.lang.xml;resolution:=optional
+Import-Package: org.osgi.framework,jade.content.lang.xml;resolution:=optional,javax.net,javax.net.ssl,javax.xml.parsers
 Export-Package: jade.osgi.service.runtime,jade.osgi.service.agentFactory,jade.osgi,jade.content,jade.content.abs,jade.content.frame,jade.content.lang,jade.content.onto,jade.content.schema,jade.core,jade.core.behaviours,jade.core.event,jade.core.faultRecovery,jade.core.messaging,jade.core.mobility,jade.domain,jade.domain.FIPAAgentManagement,jade.domain.introspection,jade.domain.JADEAgentManagement,jade.domain.mobility,jade.gui,jade.lang.acl,jade.mtp,jade.proto,jade.security,jade.util,jade.util.leap,jade.wrapper,jade.wrapper.gateway
 Bundle-Version: 1.0.0
 Bundle-Name: jadeOsgi

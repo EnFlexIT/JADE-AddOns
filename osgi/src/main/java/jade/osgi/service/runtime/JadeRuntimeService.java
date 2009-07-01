@@ -23,7 +23,7 @@ public interface JadeRuntimeService {
 	 * @return A proxy object allowing access to the JADE agent
 	 * @throws Exception
 	 */
-	public AgentController createAgent(String name, String className, Object[] args) throws Exception;
+	public AgentController createNewAgent(String name, String className, Object[] args) throws Exception;
 	
 	/**
 	 * Create an agent packaged by the bundle specified as argument. If there are more 
@@ -35,7 +35,7 @@ public interface JadeRuntimeService {
 	 * @return A proxy object allowing access to the JADE agent
 	 * @throws Exception
 	 */
-	public AgentController createAgent(String name, String className, Object [] args, String bundleSymbolicName) throws Exception;
+	public AgentController createNewAgent(String name, String className, Object [] args, String bundleSymbolicName) throws Exception;
 	
 	/**
 	 * Create an agent packaged by the bundle with name and version passed as arguments.
@@ -47,7 +47,7 @@ public interface JadeRuntimeService {
 	 * @return A proxy object allowing access to the JADE agent
 	 * @throws Exception
 	 */
-	public AgentController createAgent(String name, String className, Object [] args, String bundleSymbolicName, String bundleVersion) throws Exception;
+	public AgentController createNewAgent(String name, String className, Object [] args, String bundleSymbolicName, String bundleVersion) throws Exception;
 	
 	/**
 	 * Create an agent owned by the bundle that is calling the method.
@@ -56,7 +56,7 @@ public interface JadeRuntimeService {
 	 * @return A proxy object allowing access to the JADE agent
 	 * @throws Exception
 	 */
-	public AgentController acceptAgent(String name, Agent agent) throws Exception;
+	public AgentController acceptNewAgent(String name, Agent agent) throws Exception;
 	
 	/**
 	 * Get agent proxy to local agent given its name.

@@ -5,7 +5,7 @@ import org.osgi.framework.BundleContext;
 
 public interface OSGIBridgeHelper extends ServiceHelper {
 	
-	public static final String SERVICE_NAME = "jade.osgi.service.agentFactory.OSGIBridge";
+	public static final String SERVICE_NAME = "jade.osgi.internal.OSGIBridge";
 	
 	/**
 	 * Give JADE agents access to OSGI features.

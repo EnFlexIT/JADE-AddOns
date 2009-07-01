@@ -24,6 +24,7 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
 
 public class JadeActivator implements BundleActivator, BundleListener {
 
@@ -41,6 +42,10 @@ public class JadeActivator implements BundleActivator, BundleListener {
 	private OsgiEventHandlerFactory handlerFactory;
 	
 	private static Logger logger = Logger.getMyLogger(JadeActivator.class.getName());
+	
+	private Object terminationLock = new Object();
+	private ServiceRegistration jrs;
+	private OSGIAgentLoader agentLoader;
 	
 	public void start(BundleContext context) throws Exception {
 		try {
@@ -66,7 +71,8 @@ public class JadeActivator implements BundleActivator, BundleListener {
 			this.handlerFactory = new OsgiEventHandlerFactory(agentManager, restartAgents, restartTimeout);
 			
 			// Register an osgi agent loader (do that before starting JADE so that bootstrap agents can be loaded from separated bundles too)
-			ObjectManager.addLoader(ObjectManager.AGENT_TYPE, new OSGIAgentLoader(context, agentManager));
+			agentLoader = new OSGIAgentLoader(context, agentManager);
+			ObjectManager.addLoader(ObjectManager.AGENT_TYPE, agentLoader);
 
 			// Initialize jade container profile and start it
 			Properties jadeProperties = new Properties();
@@ -83,13 +89,27 @@ public class JadeActivator implements BundleActivator, BundleListener {
 
 		} catch(Exception e) {
 			logger.log(Logger.SEVERE, "Error during bundle startup", e);
-			stop(context);
+			throw e;
 		}
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		container.kill();
+		synchronized(terminationLock) {
+			try {
+				// If JADE has already termnated we get an exception and simply ignore it
+				container.kill();
+			}
+			catch (Exception e) {}
+		}
 		handlerFactory.stop();
+		if(jrs != null) {
+			jrs.unregister();
+		}
+		context.removeBundleListener(this);
+		if(agentLoader != null && !ObjectManager.removeLoader(ObjectManager.AGENT_TYPE, agentLoader)) {
+			logger.log(Logger.SEVERE, "Error removing osgi agent loader");
+		}
+		logger.log(Logger.INFO, context.getBundle().getSymbolicName() + " stopped!");
 	}
 
 	public static JadeActivator getInstance() {
@@ -165,11 +185,27 @@ public class JadeActivator implements BundleActivator, BundleListener {
 		} else {
 			container = Runtime.instance().createAgentContainer(profile);
 		}
+		Runtime.instance().invokeOnTermination(new Runnable() {
+			public void run() {
+				synchronized(terminationLock) {
+					Runtime.instance().resetTerminators();
+					System.out.println("JADE termination invoked!");
+					try {
+						Bundle myBundle = context.getBundle();
+						if(myBundle.getState() == Bundle.ACTIVE) {
+							myBundle.stop(Bundle.STOP_TRANSIENT);
+						}
+					} catch(Exception e) {
+						logger.log(Logger.SEVERE, "Error stopping bundle", e);
+					}
+				}
+			}
+		});
 	}
 	
 	private ServiceFactory registerJadeRuntimeService() {
 		ServiceFactory factory = new JadeRuntimeServiceFactory(container, agentManager);
-		context.registerService(JadeRuntimeService.class.getName(), factory, null);
+		jrs = context.registerService(JadeRuntimeService.class.getName(), factory, null);
 		return factory;
 	}
 	
