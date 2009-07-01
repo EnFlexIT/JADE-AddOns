@@ -22,6 +22,8 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package jade.webservice.dynamicClient;
 
+import javax.xml.rpc.holders.Holder;
+
 import org.apache.axis.utils.JavaUtils;
 
 import jade.content.schema.PrimitiveSchema;
@@ -92,7 +94,7 @@ public class ParameterInfo {
 	public Class getPrimitiveTypeClass() {
 		Class primitiveTypeClass = null;
 		if (schema instanceof PrimitiveSchema) {
-			if (mode == OUT || mode == INOUT) {
+			if (Holder.class.isAssignableFrom(typeClass)) {
 				primitiveTypeClass = JavaUtils.getHolderValueType(typeClass);
 			} else {
 				// IN or RETURN mode
@@ -162,6 +164,7 @@ public class ParameterInfo {
 		StringBuilder sb = new StringBuilder();
 		sb.append("name="+name);
 		sb.append(", class="+typeClass.getCanonicalName());
+		sb.append(", primitiveClass="+getPrimitiveTypeClass());
 		sb.append(", mode="+getStringMode(mode));
 		sb.append(", schema="+schema.getTypeName());
 		sb.append(", mandatory="+mandatory);
