@@ -22,6 +22,9 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package jade.webservice.dynamicClient;
 
+import org.apache.axis.utils.JavaUtils;
+
+import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.TermSchema;
 
 /**
@@ -42,7 +45,6 @@ public class ParameterInfo {
 	private Class typeClass;
 	private int mode = UNDEFINED;
 	private boolean mandatory;
-
 	private TermSchema schema; 
 
 	ParameterInfo(String parameterName) {
@@ -82,11 +84,25 @@ public class ParameterInfo {
 	}
 	
 	/**
-	 * Return the java class associated at this parameter
+	 * If parameter is a primitive or an extended-primitive 
+	 * return the java class associated, otherwise return null
 	 *  
 	 * @return parameter java class
 	 */
-	public Class getTypeClass() {
+	public Class getPrimitiveTypeClass() {
+		Class primitiveTypeClass = null;
+		if (schema instanceof PrimitiveSchema) {
+			if (mode == OUT || mode == INOUT) {
+				primitiveTypeClass = JavaUtils.getHolderValueType(typeClass);
+			} else {
+				// IN or RETURN mode
+				primitiveTypeClass = typeClass;
+			}
+		}
+		return primitiveTypeClass;
+	}
+	
+	Class getTypeClass() {
 		return typeClass;
 	}
 
