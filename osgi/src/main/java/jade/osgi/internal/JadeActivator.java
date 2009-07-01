@@ -65,6 +65,9 @@ public class JadeActivator implements BundleActivator, BundleListener {
 			logger.log(Logger.CONFIG, RESTART_AGENTS_TIMEOUT_KEY + " " + restartTimeout);
 			this.handlerFactory = new OsgiEventHandlerFactory(agentManager, restartAgents, restartTimeout);
 			
+			// Register an osgi agent loader (do that before starting JADE so that bootstrap agents can be loaded from separated bundles too)
+			ObjectManager.addLoader(ObjectManager.AGENT_TYPE, new OSGIAgentLoader(context, agentManager));
+
 			// Initialize jade container profile and start it
 			Properties jadeProperties = new Properties();
 			addJadeSystemProperties(jadeProperties);
@@ -72,9 +75,6 @@ public class JadeActivator implements BundleActivator, BundleListener {
 			addOSGIBridgeService(jadeProperties);
 			startJadeContainer(jadeProperties);
 			
-			// Register an osgi agent loader
-			ObjectManager.addLoader(ObjectManager.AGENT_TYPE, new OSGIAgentLoader(context, agentManager));
-
 			// Register JRS service
 			registerJadeRuntimeService();
 
