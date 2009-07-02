@@ -92,9 +92,13 @@
     <zip zipfile="../DynamicClientAddOn-${version}.zip" basedir="../..">
       <exclude name="add-ons/dynamicClient/DynamicClientGuide.*"/>
       <include name="doc/tutorials/DynamicClientGuide.pdf"/>
+      <include name="add-ons/dynamicClient/build.xml"/>
+      <include name="add-ons/dynamicClient/COPYING"/>
+      <include name="add-ons/dynamicClient/License"/>
       <include name="add-ons/dynamicClient/src/**"/>
       <include name="add-ons/dynamicClient/doc/**"/>
       <include name="add-ons/dynamicClient/lib/**"/>
+      <include name="add-ons/dynamicClient/resources/**"/>
       <include name="add-ons/dynamicClient/examples/**"/>
       <exclude name="add-ons/dynamicClient/examples/client/classes/**"/>
       <exclude name="add-ons/dynamicClient/examples/server/classes/**"/>
