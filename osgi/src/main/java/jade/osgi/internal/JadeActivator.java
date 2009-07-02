@@ -134,7 +134,8 @@ public class JadeActivator implements BundleActivator, BundleListener {
 		String services = pp.getProperty(Profile.SERVICES);
 		String serviceName = OSGIBridgeService.class.getName();
 		if(services == null) {
-			pp.setProperty(Profile.SERVICES, serviceName);
+			pp.setProperty(Profile.SERVICES, serviceName+";"+jade.core.mobility.AgentMobilityService.class.getName()+";"+
+				jade.core.event.NotificationService.class.getName());
 		} else if(services.indexOf(serviceName) == -1) {
 			pp.setProperty(Profile.SERVICES, services+";"+serviceName);
 		}
