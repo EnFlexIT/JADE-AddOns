@@ -129,7 +129,7 @@
     <mkdir dir="${jade-doc-dir}"/>
     <mkdir dir="${jade-doc-dir}/tutorials"/>
     <copy file="JADE_TestSuite.pdf" todir="${jade-doc-dir}/tutorials"/>
-    <jar destfile="../testSuiteAddOn${version}.zip" basedir="${jade-home}">
+    <jar destfile="../testSuiteAddOn-${version}.zip" basedir="${jade-home}">
       <include name="add-ons/testSuite/COPYING"/>
       <include name="add-ons/testSuite/ChangeLog"/>
       <include name="add-ons/testSuite/License"/>

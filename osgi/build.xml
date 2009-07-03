@@ -68,15 +68,15 @@
 	</target>
 
 	<target name="dist" depends="clean, doc, bundle, bundle-examples" description="create the distribution ZIP file"> 
-		<echo message="GENERATE THE PDF FORM OF THE JADE-OSGI TUTORIAL, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/osgi) AND THEN PRESS ENTER -->" />
+		<echo message="GENERATE THE PDF FORM OF THE JADE-OSGI GUIDE, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/osgi) AND THEN PRESS ENTER -->" />
 		<input />
 		<mkdir dir="${jade-home}/doc" />
 		<mkdir dir="${jade-home}/doc/tutorials" />
-		<copy file="JadeOsgiTutorial.pdf" todir="${jade-home}/doc/tutorials" />
+		<copy file="JadeOsgiGuide.pdf" todir="${jade-home}/doc/tutorials" />
 
 		<delete file="../jadeOsgiAddOn-${version}.zip" quiet="true" />
 		<zip zipfile="../jadeOsgiAddOn-${version}.zip" basedir="../..">
-			<exclude name="add-ons/osgi/JadeOsgiTutorial.*" />
+			<exclude name="add-ons/osgi/JadeOsgiGuide.*" />
 			<exclude name="add-ons/osgi/pom.xml"/>
 			<exclude name="add-ons/osgi/startJadeOsgi.*"/>
 			<exclude name="add-ons/osgi/osgi/**"/>
@@ -84,7 +84,7 @@
 			
 			<include name="add-ons/osgi/build.xml"/>
 			<include name="add-ons/osgi/build.properties"/>
-			<include name="doc/tutorials/JadeOsgiTutorial.pdf" />
+			<include name="doc/tutorials/JadeOsgiGuide.pdf" />
 			<zipfileset dir="${src}" prefix="add-ons/osgi/src"/>
 			<include name="add-ons/osgi/doc/**" />
 			<include name="add-ons/osgi/cfg/**" />
