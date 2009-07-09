@@ -11,7 +11,7 @@ public class RafPacket implements Serializable {
 
 	private static final long serialVersionUID = -8889137455646658025L;
 
-	//************** TYPES OS PACKETS *********************
+	//************** TYPES OF PACKETS *********************
 	
 	public static final int MESSAGE_JOIN = 0;
 

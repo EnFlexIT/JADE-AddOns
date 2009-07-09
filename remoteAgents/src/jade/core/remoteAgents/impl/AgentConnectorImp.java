@@ -46,8 +46,7 @@ public class AgentConnectorImp extends RafConnection implements AgentConnector {
 	}
 
 	/**
-	 * Serializes an ACLMessage and send it in a packet
-	 * 
+	 * Serializes an ACLMessage and send it in a RafPacket
 	 * @param msn: ACLMessage
 	 */
 	public void msgIn(ACLMessage msg) throws Exception {
@@ -66,8 +65,7 @@ public class AgentConnectorImp extends RafConnection implements AgentConnector {
 	}
 
 	/**
-	 * When remoteAgentProxy dead a notification message
-	 * 
+	 * When remoteAgentProxy dead send a notification message
 	 * @exception
 	 */
 	synchronized public void notifyDead() throws Exception {
@@ -90,7 +88,7 @@ public class AgentConnectorImp extends RafConnection implements AgentConnector {
 	/**
 	 * Send the result of the JOIN
 	 * 
-	 * @param establishedConnection : true if the type of packet is JOIN_OK
+	 * @param establishedConnection : true --> the type of packet is JOIN_OK
 	 * @param info : Information received in the packet
 	 * @throws Exception
 	 */

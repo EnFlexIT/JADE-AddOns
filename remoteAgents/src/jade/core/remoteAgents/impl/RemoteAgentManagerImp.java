@@ -27,12 +27,15 @@ public class RemoteAgentManagerImp extends RemoteAgentManager {
 	}
 
 	private final Logger logger = Logger.getMyLogger(getClass().getName());
-
-	private JoinPlatformListener joinListener;
-	private UDPListener udpListener; 
 	
-	public static int portNumber = 2500;
-	public static int udpPortNumber = 2501;
+	public static int DEFAULT_PORT = 2500;
+	public static int DEFAULT_UDP_PORT = 2501;
+
+	private JoinPlatformListener joinListener; // Waiting for join requests
+	private UDPListener udpListener; // Waiting for RemoteAgentManager search requests
+	
+	private int portNumber = DEFAULT_PORT;
+	private int udpPortNumber = DEFAULT_UDP_PORT;
 	
 	private HashMap<String, AgentConnectorImp> connectors = new HashMap<String, AgentConnectorImp>();
 
@@ -52,6 +55,8 @@ public class RemoteAgentManagerImp extends RemoteAgentManager {
 
 		// Printout a welcome message
 		logger.log(Logger.INFO, "RemoteAgentManagerImp startup");
+		
+		assignedParameters((String[])getArguments());
 		
 		try {
 			// Start Server Listener
@@ -106,8 +111,6 @@ public class RemoteAgentManagerImp extends RemoteAgentManager {
 	 * Private thread to wait for JOIN REQUESTS
 	 */
 	private class JoinPlatformListener extends Thread {
-
-		private static final int DEFAULT_PORT = 2500;
 
 		/** my logger */
 		private Logger logger = Logger.getMyLogger(JoinPlatformListener.class
@@ -343,4 +346,31 @@ public class RemoteAgentManagerImp extends RemoteAgentManager {
 		}
 
 	}// end of UDPListener
+	
+	private void assignedParameters(String[] args) {
+		if (args != null&& args.length!= 0){
+			for(String argu : args){
+				try{
+					String[] par = argu.split(":");
+					if(par.length==2){
+						if(par[0].compareTo("tcpport") == 0){
+							try{
+								portNumber = Integer.parseInt(par[1]);
+							}catch(Exception e){
+								// Do nothing
+								logger.log(Logger.WARNING, "Invalid parameter tcpport");
+							}
+						}else if(par[0].compareTo("udpport") == 0){
+							try{
+								udpPortNumber = Integer.parseInt(par[1]);
+							}catch(Exception e){
+								// Do nothing
+								logger.log(Logger.WARNING, "Invalid parameter udpport");
+							}
+						}
+					}
+				}catch(Exception e){}
+			}
+		}
+	}
 }

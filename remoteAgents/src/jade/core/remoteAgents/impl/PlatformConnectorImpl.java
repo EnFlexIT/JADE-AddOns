@@ -8,6 +8,7 @@ import jade.core.remoteAgents.PlatformConnector;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.LEAPACLCodec;
 import jade.util.Logger;
+import jade.util.leap.HashMap;
 import jade.util.leap.Serializable;
 
 import java.io.ByteArrayInputStream;
@@ -30,11 +31,14 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 
 	private static final long serialVersionUID = -32828532695493030L;
 	
-	private final int DEFAULT_RAM_PORT = 2500;
+	private final int DEFAULT_RAM_PORT = RemoteAgentManagerImp.DEFAULT_PORT;
 	private final String DEFAULT_RAM_HOST = "localhost";
 	
-	private int timeout = 5000;
-	private int timeReconnect = 2000;
+	private int joinTimeout = 5000;
+	private int timeReconnect = 3000;
+	private int ramSearchingTimeout = 5000;
+	
+	private int udpPortNumber = RemoteAgentManagerImp.DEFAULT_UDP_PORT;
 	
 	private Listener listener = null;
 	private String agentName = null;
@@ -55,14 +59,26 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 	
 	/**
 	 * Constructor of the class.
-	 * looking for the address and port to connect a remoteAgentManager
+	 * use the discovery protocol to find a remoteAgentManager
+	 *  and the  value of the attributes is the value for fault.
 	 */
 	public PlatformConnectorImpl() {
 	}
+	/**
+	 * use the discovery protocol to find a remoteAgentManager and the value 
+	 * of some parameters is indicated in arg.
+	 * @param arg "parameter:value (, parameter:value)* "
+	 */
+	public PlatformConnectorImpl(String arg){
+		HashMap argu = splitArguments(arg);
+		assignedParameters(argu);
+	}
+
 
 	/**
 	 * Constructor of the class. 
-	 * 
+	 * Whenever we connect to a specific remoteAgentManager and the value of the 
+	 * attributes is the value for fault.
 	 * @param port is the port number to listen for. 
 	 * @param host is the host that is going to connect
 	 */
@@ -70,6 +86,21 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 		this.remoteAgentManagerHost = host;
 		this.remoteAgentManagerPort = port;
 		this.constructorParameters = true;
+	}
+
+	/**
+	* Whenever we connect to a specific remoteAgentManager and the value of some parameters
+	*  is indicated in arg.
+	* @param port is the port number to listen for. 
+	* @param host is the host that is going to connect
+	* @param arg "parameter:value (, parameter:value)* "
+	*/
+	public PlatformConnectorImpl(String host, int port, String arg){
+		this.remoteAgentManagerHost = host;
+		this.remoteAgentManagerPort = port;
+		this.constructorParameters = true;
+		HashMap argu = splitArguments(arg);
+		assignedParameters(argu);
 	}
 	
 	/**
@@ -92,16 +123,32 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 	 * @param timeout
 	 */
 	public void setTimeOut(int timeout){
-		this.timeout=timeout;
+		this.joinTimeout=timeout;
 	}
 	
 	/**
 	 * Get the time will wait to receive data from a remoteAgentManager
 	 * @return timeout
 	 */
-	public int getTimeOut(){
-		return this.timeout;
+	public int getTimeOutDataRequest(){
+		return this.ramSearchingTimeout;
 	}
+	/**
+	 * Set the time will wait to receive a response to a request for data of a remoteAgentManager
+	 * @param timeout
+	 */
+	public void setTimeOutDataRequest(int timeout){
+		this.ramSearchingTimeout=timeout;
+	}
+	
+	/**
+	 * Get the time will wait to receive a response to a request for data of a remoteAgentManager
+	 * @return timeout
+	 */
+	public int getTimeOut(){
+		return this.joinTimeout;
+	}
+	
 	
 	/**
 	 *  Initialize the listener
@@ -112,7 +159,7 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 	}
 	
 	/**	
-	 *	Sends a JOIN request and awaits a response. If that answer is JOIN_OK returns the 
+	 *	Sends a JOIN or RECONNECT request and awaits a response. If that answer is JOIN_OK returns the 
 	 *   information that comes with the packet. If an exception raises JOIN_NOK.
 	 *   It creates a listening thread
 	 *   If we do not have the data from remoteAgentManager, look for them
@@ -134,7 +181,6 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 			this.agentName = agentName;
 			this.platformName = platformName;
 			String[] dev=null;
-			
 			try{
 				 dev = join(this.agentName, this.platformName);
 			}catch(Exception e){
@@ -195,6 +241,7 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 			sendPacket(send);
 		}else{
 			myLogger.log(Logger.WARNING, "No connection between AgentConnector and PlatformConnector");
+			throw new Exception("No connection between AgentConnector and PlatformConnector");
 		}
 	}
 
@@ -210,7 +257,8 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 	/**
 	 * sends a packet with type MESSAGE_JOIN and information agenteName 
 	 * and platformName and expects to receive a JOIN_OK or JOIN_NOK
-	 * 
+	 * if connected before --> RafPacket.type = MESSAGE_RECONNECT
+	 * if no connected before --> RafPacket.type = MESSAGE_JOIN
 	 * @param agentName Name of the agent
 	 * @param platformName 	Name of the platform
 	 * @return the information package received
@@ -233,7 +281,7 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 		open();
 		sendPacket(send);
 		do{
-			sc.setSoTimeout(5000);
+			sc.setSoTimeout(joinTimeout);
 			received = receivePacket();
 		}while (received.getPacketType() != RafPacket.JOIN_OK &&
 			   received.getPacketType() != RafPacket.JOIN_NOK);
@@ -336,6 +384,8 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 		/**
 		 * Listener thread. when a packet is received, look at the 
 		 * type of model and perform an action or another depending on this
+		 * if the connection fails, try to reconnect with a joinPlatform every
+		 * timeReconnect seconds.
 		 */
 		public void run() {
 			myId = cnt++;
@@ -413,7 +463,7 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 	 */
 	private void lookForAHost(){
 		try {
-			int serverPort = RemoteAgentManagerImp.udpPortNumber;
+			int serverPort = udpPortNumber;
 			DatagramSocket socketUDP = new DatagramSocket();
 								
 			InetAddress subnet = InetAddress.getByName("255.255.255.255");
@@ -428,7 +478,7 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 			DatagramPacket dataRecieved = new DatagramPacket(buffer2,buffer2.length);
 			String[] info;
 			do{
-				socketUDP.setSoTimeout(5000);
+				socketUDP.setSoTimeout(ramSearchingTimeout);
 				socketUDP.receive(dataRecieved);
 				msg = (String) new String(dataRecieved.getData()).subSequence(0,dataRecieved.getLength());
 				info=msg.split(":");
@@ -443,7 +493,7 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 	}
 
 	/**
-	 * Serializes an ACLMessage buscar
+	 * Serializes an ACLMessage
 	 * @param msg ACLMessage to serialize
 	 * @return ACLMessage serialized
 	 * @throws IOException
@@ -454,5 +504,50 @@ public class PlatformConnectorImpl extends RafConnection implements PlatformConn
 		LEAPACLCodec.serializeACL(msg, dos);
 		byte[] bb = baos.toByteArray();
 		return bb;
+	}
+	
+	/**
+	 * 	assigned to the parameters that exist in argu the associated value.
+	 * @param argu HashMap<parameter,value>
+	 */
+	private void assignedParameters(HashMap argu) {
+		if (argu.containsKey("timeReconnect")){
+			this.timeReconnect = Integer.parseInt((String)argu.get("timeReconnect"));
+			myLogger.log(Logger.INFO,"Set timeReconnect = " +this.timeReconnect);
+		}
+		if (argu.containsKey("joinTimeout")){
+			this.joinTimeout =Integer.parseInt((String)argu.get("joinTimeout"));
+			myLogger.log(Logger.INFO,"Set joinTimeout = "+ this.joinTimeout);
+		}
+		if (argu.containsKey("ramSearchingT")){
+			this.ramSearchingTimeout = Integer.parseInt((String)argu.get("ramSearchingT"));
+			myLogger.log(Logger.INFO,"Set ramSearchingTimeout = "+ this.ramSearchingTimeout);
+		}
+		if (argu.containsKey("udpPort")){
+			this.udpPortNumber = Integer.parseInt((String)argu.get("udpPort"));
+			myLogger.log(Logger.INFO,"Set udpPort = " + this.udpPortNumber);
+		}
+	}
+	
+	/**
+	 * Split the Arguments and create and HashMap <parameter,value>
+	 * @param arg (parameter:value)(,parameter:value)*
+	 * @return HashMap = (<parameter,value>)+
+	 */
+	private HashMap splitArguments(String arg) {
+		String [] info = null;
+		HashMap dev = new HashMap();
+		try{
+			info = arg.split(",");
+		}catch(Exception e){}
+		if (info != null){
+			for(String acc : info){
+				try{
+					String[] aux = acc.split(":");
+					dev.put(aux[0], aux[1]);
+				}catch(Exception e){}
+			}
+		}
+		return dev;
 	}
 }
