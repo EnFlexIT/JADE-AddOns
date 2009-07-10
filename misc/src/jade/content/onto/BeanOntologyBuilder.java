@@ -60,6 +60,7 @@ class BeanOntologyBuilder {
 	private final static Logger logger = Logger.getMyLogger(BeanOntologyBuilder.class.getName());
 
 	private static final String GETTER_PREFIX = "get";
+	private static final String BOOLEAN_GETTER_PREFIX = "is";
 	private static final String SETTER_PREFIX = "set";
 	private static final Object GET_CLASS_METHOD = "getClass";
 
@@ -78,20 +79,25 @@ class BeanOntologyBuilder {
 		 *   - takes no parameters
 		 *   - has a return value
 		 *   - its name starts with "get"
+		 *   - its name starts with "is"
 		 *   - its 4th char is uppercase or is "_"
 		 *   - its name is not "getClass" :-)
 		 */
 		String methodName = method.getName();
-		if (methodName.length() < 4) {
+		if (methodName.length() < 3) {
 			// it is surely too short
 			return false;
 		}
-		if (!methodName.startsWith(GETTER_PREFIX)) {
-			// it does not start with "get"
+		if (!methodName.startsWith(GETTER_PREFIX) && !methodName.startsWith(BOOLEAN_GETTER_PREFIX)) {
+			// it does not start with "get" or "is"
 			return false;
 		}
-		if (!Character.isUpperCase(methodName.charAt(3)) && '_' != methodName.charAt(3)) {
-			// its 4th char is not uppercase
+		char c = methodName.charAt(3);
+		if (methodName.startsWith(BOOLEAN_GETTER_PREFIX)) {
+			c = methodName.charAt(2);
+		}
+		if (!Character.isUpperCase(c) && '_' != c) {
+			// its 3th (isXXX) or 4th (getXXX) char is not uppercase or is not '_'
 			return false;
 		}
 		if (void.class.equals(method.getReturnType())) {
@@ -139,17 +145,22 @@ class BeanOntologyBuilder {
 
 	private static String buildPropertyNameFromGetter(Method getter) {
 		/*
-		 * 1) rip of the "get" prefix from method's name
+		 * 1) rip of the "get" or "is" prefix from method's name
 		 * 2) make lower case the 1st char of the result
 		 * 
 		 * method name       slot name
 		 * --------------    ---------
 		 * getThatThing() -> thatThing
+		 * isThatThing()  -> thatThing
 		 */
 		String getterName = getter.getName();
 		StringBuilder sb = new StringBuilder();
-		sb.append(Character.toLowerCase(getterName.charAt(3)));
-		sb.append(getterName.substring(4));
+		int pos = 3;
+		if (getterName.startsWith(BOOLEAN_GETTER_PREFIX)) {
+			pos = 2;
+		}
+		sb.append(Character.toLowerCase(getterName.charAt(pos)));
+		sb.append(getterName.substring(pos+1));
 		return sb.toString();
 	}
 
