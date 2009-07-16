@@ -22,6 +22,7 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package jade.webservice.dynamicClient;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -38,11 +39,11 @@ public class PortInfo {
 	private String name;
 	private String documentation;
 	private Map<String, OperationInfo> operationsInfo = new HashMap<String, OperationInfo>();
-	private Stub stub;
+	private Method stubMethod;
 	
-	PortInfo(String portName, Stub stub) {
+	PortInfo(String portName, Method stubMethod) {
 		this.name = portName;
-		this.stub = stub;
+		this.stubMethod = stubMethod;
 	}
 
 	/**
@@ -100,8 +101,8 @@ public class PortInfo {
 		operationsInfo.put(operationName, operationInfo);
 	}
 
-	Stub getStub() {
-		return stub;
+	Method getStubMethod() {
+		return stubMethod;
 	}
 
 }

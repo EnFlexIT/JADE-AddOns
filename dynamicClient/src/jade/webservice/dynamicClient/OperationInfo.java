@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.apache.axis.client.Stub;
 import org.apache.axis.wsdl.toJava.Utils;
 
 /**
@@ -207,10 +206,10 @@ public class OperationInfo {
 		return operationMethod;
 	}
 	
-	void manageOperationStubMethod(Stub stub) throws SecurityException, NoSuchMethodException {
+	void manageOperationStubMethod(Class stubClass) throws SecurityException, NoSuchMethodException {
 		Class[] stubMethodClasses = getStubMethodClasses();
 		String methodName = Utils.xmlNameToJava(name);
-		operationMethod = stub.getClass().getMethod(methodName, stubMethodClasses);
+		operationMethod = stubClass.getMethod(methodName, stubMethodClasses);
 	}
 
 	ParameterInfo getStubMethodReturnParameter() {

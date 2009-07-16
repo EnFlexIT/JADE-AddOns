@@ -121,6 +121,8 @@ public class DynamicClient {
 	private String defaultServiceName;
 	private String defaultPortName;
 	private int defaultTimeout;
+	private String defaultHttpUsername;
+	private String defaultHttpPassword;
 
 	private DynamicClientProperties properties;
 	private ClassLoader classloader;
@@ -241,6 +243,42 @@ public class DynamicClient {
 	 */
 	public void setDefaultTimeout(int defaultTimeout) {
 		this.defaultTimeout = defaultTimeout;
+	}
+
+	/**
+	 * Get the current default username per HTTP Basic Authentication
+	 *  
+	 * @return default http username
+	 */
+	public String getDefaultHttpUsername() {
+		return defaultHttpUsername;
+	}
+	
+	/**
+	 * Set the current default username per HTTP Basic Authentication
+	 * 
+	 * @param defaultHttpUsername value of default http username
+	 */
+	public void setDefaultHttpUsername(String defaultHttpUsername) {
+		this.defaultHttpUsername = defaultHttpUsername;
+	}
+
+	/**
+	 * Get the current default password per HTTP Basic Authentication
+	 *  
+	 * @return default http password
+	 */
+	public String getDefaultHttpPassword() {
+		return defaultHttpPassword;
+	}
+	
+	/**
+	 * Set the current default password per HTTP Basic Authentication
+	 * 
+	 * @param defaultHttpUsername value of default http password
+	 */
+	public void setDefaultHttpPassword(String defaultHttpPassword) {
+		this.defaultHttpPassword = defaultHttpPassword;
 	}
 	
 	/**
@@ -564,7 +602,7 @@ public class DynamicClient {
 		for (ServiceEntry serviceEntry : services) {
 			String serviceName = serviceEntry.getOriginalServiceName();
 			log("Parse service "+serviceName);
-			Service locator = getLocator(serviceEntry); 
+			Service locator = createLocator(serviceEntry); 
 			
 			ServiceInfo serviceInfo = new ServiceInfo(serviceName, locator);
 			serviceInfo.setDocumentation(getDocumentation(serviceEntry.getService()));
@@ -576,9 +614,9 @@ public class DynamicClient {
 				
 				String portName = port.getName();
 				log("port "+portName, 1);
-				Stub stub = getStub(emitter, port, locator);
-				if (stub != null) {
-					PortInfo portInfo = new PortInfo(portName, stub);
+				Method stubMethod = getStubMethod(emitter, port, locator);
+				if (stubMethod != null) {
+					PortInfo portInfo = new PortInfo(portName, stubMethod);
 					portInfo.setDocumentation(getDocumentation(port));
 					serviceInfo.putPort(portName, portInfo);
 					
@@ -634,7 +672,8 @@ public class DynamicClient {
 						}
 						
 						// Retrieve and save in operationInfo the stub method associated to operation
-						operationInfo.manageOperationStubMethod(stub);
+						Class stubClass = stubMethod.getReturnType();
+						operationInfo.manageOperationStubMethod(stubClass);
 					}
 				}
 			}
@@ -657,9 +696,9 @@ public class DynamicClient {
 	 * @see jade.webservice.dynamicClient.WSData
 	 */
 	public WSData invoke(String operation, WSData input) throws DynamicClientException, RemoteException {
-		return invoke(null, null, operation, null, -1, input);
+		return invoke(null, null, operation, null, -1, null, null, input);
 	}
-	
+
 	/**
 	 * Invoke a web-service operation.
 	 * 
@@ -676,7 +715,30 @@ public class DynamicClient {
 	 * @see jade.webservice.dynamicClient.DynamicClientProperties
 	 * @see jade.webservice.dynamicClient.WSData
 	 */
+	@Deprecated
 	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, WSData input) throws DynamicClientException, RemoteException {
+		return invoke(serviceName, portName, operation, endpoint, timeout, null, null, input); 
+	}
+	
+	/**
+	 * Invoke a web-service operation.
+	 * 
+	 * @param serviceName name of service (null to use the default) 
+	 * @param portName name of port (null to use the default)
+	 * @param operation name of operation
+	 * @param endpoint webservice endpoint url
+	 * @param timeout call timeout in millisecond (0 no timeout, <0 to use default value)
+	 * @param httpUsername HTTP Basic Authentication username
+	 * @param httpPassword HTTP Basic Authentication password
+	 * @param input WSData input parameters/headers
+	 * @return WSData output parameters/headers
+	 * @throws DynamicClientException client exception 
+	 * @throws RemoteException server exception
+	 * 
+	 * @see jade.webservice.dynamicClient.DynamicClientProperties
+	 * @see jade.webservice.dynamicClient.WSData
+	 */
+	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, String httpUsername, String httpPassword, WSData input) throws DynamicClientException, RemoteException {
 		
 		try {
 			// Check if is initialized
@@ -704,11 +766,14 @@ public class DynamicClient {
 				throw new DynamicClientException("Operation "+operation+" not present in service "+serviceInfo.getName()+", port "+portInfo.getName());
 			}
 			
-			log("Invoke "+serviceInfo.getName()+"->"+portInfo.getName()+"->"+operationInfo.getName());
-			log("Input\n"+input, 1);
-			
-			// Get axis stub
-			Stub stub = portInfo.getStub();
+			// Create axis stub
+			Method stubMethod = portInfo.getStubMethod();
+			Stub stub;
+			try {
+				stub = createStub(stubMethod, serviceInfo.getLocator());
+			} catch (Exception e) {
+				throw new DynamicClientException("Error creating service stub for service "+serviceInfo.getName()+", port "+portInfo.getName());
+			} 
 			
 			// Set webservice endpoint
 			if (endpoint == null) {
@@ -725,6 +790,25 @@ public class DynamicClient {
 			if (timeout >= 0) {
 				stub.setTimeout(timeout);
 			}
+
+			// Set HTTP Basic Authentication username
+			if (httpUsername == null) {
+				httpUsername = defaultHttpUsername;
+			}
+			if (httpUsername != null) {
+				stub.setUsername(httpUsername);
+			}
+
+			// Set HTTP Basic Authentication password
+			if (httpPassword == null) {
+				httpPassword = defaultHttpPassword;
+			}
+			if (httpPassword != null) {
+				stub.setPassword(httpPassword);
+			}
+			
+			log("Invoke "+serviceInfo.getName()+"->"+portInfo.getName()+"->"+operationInfo.getName());
+			log("Input\n"+input, 1);
 			
 			// Get axis-stub method parameters (mix of params & headers) 
 			Vector<ParameterInfo> methodParams = operationInfo.getStubMethodParameters();
@@ -870,22 +954,25 @@ public class DynamicClient {
         return documentation;
 	}
 	
-	private Service getLocator(ServiceEntry axisService) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+	private Service createLocator(ServiceEntry axisService) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
 		String locatorClassName = axisService.getName() + "Locator";
 		Class locatorClass = classloader.loadClass(locatorClassName);
 		return (Service)locatorClass.newInstance();
 	}
 	
-	private Stub getStub(Emitter emitter, Port axisPort, Service locator) {
-		Stub stub = null;
+	private Method getStubMethod(Emitter emitter, Port axisPort, Service locator) {
+		Method stubMethod = null;
 		String portNameJavaId = WSDLUtils.buildPortNameJavaId(emitter.getSymbolTable(), axisPort);
 		try {
-			Method stubMethod = locator.getClass().getMethod("get"+portNameJavaId, new Class[0]);
-			stub = (Stub)stubMethod.invoke(locator, new Object[0]);
+			stubMethod = locator.getClass().getMethod("get"+portNameJavaId, new Class[0]);
 		} catch(Exception e) {
 			log.warn("Port "+portNameJavaId+" not found in locator");
 		}
-		return stub;
+		return stubMethod;
+	}
+
+	private Stub createStub(Method stubMethod, Service locator) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+		return (Stub)stubMethod.invoke(locator, new Object[0]);
 	}
 	
 	private Object convertAbsToObj(ParameterInfo pi, AbsObject abs) throws DynamicClientException {
