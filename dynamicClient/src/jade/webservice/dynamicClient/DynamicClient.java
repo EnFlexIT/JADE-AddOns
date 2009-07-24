@@ -57,8 +57,9 @@ import java.util.Set;
 import java.util.Vector;
 
 import javax.wsdl.BindingOperation;
+import javax.wsdl.Definition;
+import javax.wsdl.Operation;
 import javax.wsdl.Port;
-import javax.wsdl.WSDLElement;
 import javax.xml.rpc.holders.Holder;
 
 import org.apache.axis.AxisProperties;
@@ -940,18 +941,50 @@ public class DynamicClient {
 		}
 	}
 
-	private String getDocumentation(WSDLElement element) {
+	private String getDocumentation(Element documentationElement) {
 		String documentation = null;
-		if (element != null) {
-			Element documentationElement = element.getDocumentationElement();
-			if (documentationElement != null) {
-		        Node child = documentationElement.getFirstChild();
-		        if (child != null) {
-		        	documentation = child.getNodeValue();
-		        }
-			}
+		if (documentationElement != null) {
+	        Node child = documentationElement.getFirstChild();
+	        if (child != null) {
+	        	documentation = child.getNodeValue();
+	        }
 		}
         return documentation;
+	}
+	
+	private String getDocumentation(Definition definition) {
+		if (definition == null) {
+			return null;
+		}
+		return getDocumentation(definition.getDocumentationElement());
+	}
+
+	private String getDocumentation(Port port) {
+		if (port == null) {
+			return null;
+		}
+		return getDocumentation(port.getDocumentationElement());
+	}
+
+	private String getDocumentation(BindingOperation bindingOperation) {
+		if (bindingOperation == null) {
+			return null;
+		}
+		return getDocumentation(bindingOperation.getDocumentationElement());
+	}
+	
+	private String getDocumentation(Operation operation) {
+		if (operation == null) {
+			return null;
+		}
+		return getDocumentation(operation.getDocumentationElement());
+	}
+	
+	private String getDocumentation(javax.wsdl.Service service) {
+		if (service == null) {
+			return null;
+		}
+		return getDocumentation(service.getDocumentationElement());
 	}
 	
 	private Service createLocator(ServiceEntry axisService) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
