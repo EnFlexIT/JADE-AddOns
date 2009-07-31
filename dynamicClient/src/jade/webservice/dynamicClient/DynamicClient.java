@@ -772,7 +772,7 @@ public class DynamicClient {
 	 * @see jade.webservice.dynamicClient.WSData
 	 */
 	public WSData invoke(String operation, WSData input) throws DynamicClientException, RemoteException {
-		return invoke(null, null, operation, null, -1, input, null);
+		return invoke(null, null, operation, null, -1, null, input);
 	}
 
 	/**
@@ -792,7 +792,7 @@ public class DynamicClient {
 	 * @see jade.webservice.dynamicClient.WSData
 	 */
 	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, WSData input) throws DynamicClientException, RemoteException {
-		return invoke(serviceName, portName, operation, endpoint, timeout, input, null); 
+		return invoke(serviceName, portName, operation, endpoint, timeout, null, input); 
 	}
 	
 	/**
@@ -812,7 +812,7 @@ public class DynamicClient {
 	 * @see jade.webservice.dynamicClient.DynamicClientProperties
 	 * @see jade.webservice.dynamicClient.WSData
 	 */
-	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, WSData input, SecurityProperties securityProperties) throws DynamicClientException, RemoteException {
+	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, SecurityProperties securityProperties, WSData input) throws DynamicClientException, RemoteException {
 		
 		try {
 			// Check if is initialized
