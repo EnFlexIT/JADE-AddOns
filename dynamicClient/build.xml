@@ -22,6 +22,7 @@
 			<include name="log4j-1.2.8.jar"/>
 			<include name="saaj-1.2.jar"/>
 			<include name="wsdl4j-1.5.1.jar"/>
+			<include name="wss4j-1.5.1.jar"/>
 			<include name="jadeMisc.jar"/>
 		</fileset>
 		<fileset dir="${jade-lib-dir}">

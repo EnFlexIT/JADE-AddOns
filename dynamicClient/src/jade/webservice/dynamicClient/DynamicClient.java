@@ -33,6 +33,7 @@ import jade.webservice.utils.FileUtils;
 import jade.webservice.utils.WSDLUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -56,6 +57,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.wsdl.BindingOperation;
 import javax.wsdl.Definition;
 import javax.wsdl.Operation;
@@ -63,15 +67,27 @@ import javax.wsdl.Port;
 import javax.xml.rpc.holders.Holder;
 
 import org.apache.axis.AxisProperties;
+import org.apache.axis.Handler;
+import org.apache.axis.SimpleChain;
+import org.apache.axis.SimpleTargetedChain;
+import org.apache.axis.client.AxisClient;
 import org.apache.axis.client.Service;
 import org.apache.axis.client.Stub;
+import org.apache.axis.configuration.SimpleProvider;
+import org.apache.axis.handlers.SimpleSessionHandler;
 import org.apache.axis.message.SOAPHeaderElement;
+import org.apache.axis.transport.http.HTTPSender;
+import org.apache.axis.transport.http.HTTPTransport;
 import org.apache.axis.utils.JavaUtils;
 import org.apache.axis.wsdl.symbolTable.ServiceEntry;
 import org.apache.axis.wsdl.toJava.Emitter;
 import org.apache.axis.wsdl.toJava.GeneratedFileInfo;
 import org.apache.axis.wsdl.toJava.GeneratedFileInfo.Entry;
 import org.apache.log4j.Logger;
+import org.apache.ws.axis.security.WSDoAllSender;
+import org.apache.ws.security.WSPasswordCallback;
+import org.apache.ws.security.handler.WSHandlerConstants;
+import org.apache.ws.security.message.token.UsernameToken;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
@@ -124,6 +140,9 @@ public class DynamicClient {
 	private int defaultTimeout;
 	private String defaultHttpUsername;
 	private String defaultHttpPassword;
+	private String defaultWSSUsername;
+	private String defaultWSSPassword;
+	private String defaultWSSPasswordType;
 
 	private DynamicClientProperties properties;
 	private ClassLoader classloader;
@@ -247,7 +266,7 @@ public class DynamicClient {
 	}
 
 	/**
-	 * Get the current default username per HTTP Basic Authentication
+	 * Get the current default username for HTTP Basic Authentication
 	 *  
 	 * @return default http username
 	 */
@@ -256,7 +275,7 @@ public class DynamicClient {
 	}
 	
 	/**
-	 * Set the current default username per HTTP Basic Authentication
+	 * Set the current default username for HTTP Basic Authentication
 	 * 
 	 * @param defaultHttpUsername value of default http username
 	 */
@@ -265,7 +284,7 @@ public class DynamicClient {
 	}
 
 	/**
-	 * Get the current default password per HTTP Basic Authentication
+	 * Get the current default password for HTTP Basic Authentication
 	 *  
 	 * @return default http password
 	 */
@@ -274,12 +293,68 @@ public class DynamicClient {
 	}
 	
 	/**
-	 * Set the current default password per HTTP Basic Authentication
+	 * Set the current default password for HTTP Basic Authentication
 	 * 
-	 * @param defaultHttpUsername value of default http password
+	 * @param defaultHttpPassword value of default http password
 	 */
 	public void setDefaultHttpPassword(String defaultHttpPassword) {
 		this.defaultHttpPassword = defaultHttpPassword;
+	}
+	
+	/**
+	 * Get the current default username for WS Security specifications - UsernameToken profile
+	 *  
+	 * @return default wss username
+	 */
+	public String getDefaultWSSUsername() {
+		return defaultWSSUsername;
+	}
+	
+	/**
+	 * Set the current default username for WS Security specifications - UsernameToken profile
+	 * 
+	 * @param defaultHttpUsername value of default wss username
+	 */
+	public void setDefaultWSSUsername(String defaultWSSUsername) {
+		this.defaultWSSUsername = defaultWSSUsername;
+	}
+
+	/**
+	 * Get the current default password for WS Security specifications - UsernameToken profile
+	 *  
+	 * @return default wss password
+	 */
+	public String getDefaultWSSPassword() {
+		return defaultWSSPassword;
+	}
+	
+	/**
+	 * Set the current default password for WS Security specifications - UsernameToken profile
+	 * 
+	 * @param defaultWSSPassword value of default wss password
+	 */
+	public void setDefaultWSSPassword(String defaultWSSPassword) {
+		this.defaultWSSPassword = defaultWSSPassword;
+	}
+
+	/**
+	 * Get the current default password type for WS Security specifications - UsernameToken profile
+	 * @see jade.webservice.dynamicClient.SecurityProperties
+	 *  
+	 * @return default wss password type
+	 */
+	public String getDefaultWSSPasswordType() {
+		return defaultWSSPasswordType;
+	}
+	
+	/**
+	 * Set the current default password type for WS Security specifications - UsernameToken profile
+	 * @see jade.webservice.dynamicClient.SecurityProperties
+	 * 
+	 * @param defaultWSSPasswordType value of default wss password
+	 */
+	public void setDefaultWSSPasswordType(String defaultWSSPasswordType) {
+		this.defaultWSSPasswordType = defaultWSSPasswordType;
 	}
 	
 	/**
@@ -697,7 +772,7 @@ public class DynamicClient {
 	 * @see jade.webservice.dynamicClient.WSData
 	 */
 	public WSData invoke(String operation, WSData input) throws DynamicClientException, RemoteException {
-		return invoke(null, null, operation, null, -1, null, null, input);
+		return invoke(null, null, operation, null, -1, input, null);
 	}
 
 	/**
@@ -716,9 +791,8 @@ public class DynamicClient {
 	 * @see jade.webservice.dynamicClient.DynamicClientProperties
 	 * @see jade.webservice.dynamicClient.WSData
 	 */
-	@Deprecated
 	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, WSData input) throws DynamicClientException, RemoteException {
-		return invoke(serviceName, portName, operation, endpoint, timeout, null, null, input); 
+		return invoke(serviceName, portName, operation, endpoint, timeout, input, null); 
 	}
 	
 	/**
@@ -729,9 +803,8 @@ public class DynamicClient {
 	 * @param operation name of operation
 	 * @param endpoint webservice endpoint url
 	 * @param timeout call timeout in millisecond (0 no timeout, <0 to use default value)
-	 * @param httpUsername HTTP Basic Authentication username
-	 * @param httpPassword HTTP Basic Authentication password
 	 * @param input WSData input parameters/headers
+	 * @param securityProperties security configuration (HTTP, WSS,...)
 	 * @return WSData output parameters/headers
 	 * @throws DynamicClientException client exception 
 	 * @throws RemoteException server exception
@@ -739,7 +812,7 @@ public class DynamicClient {
 	 * @see jade.webservice.dynamicClient.DynamicClientProperties
 	 * @see jade.webservice.dynamicClient.WSData
 	 */
-	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, String httpUsername, String httpPassword, WSData input) throws DynamicClientException, RemoteException {
+	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, WSData input, SecurityProperties securityProperties) throws DynamicClientException, RemoteException {
 		
 		try {
 			// Check if is initialized
@@ -747,15 +820,52 @@ public class DynamicClient {
 				throw new DynamicClientException("DynamicClient not inited, current state="+state);
 			}
 			
+			// If not specified create a default SecurityProperties 
+			if (securityProperties == null) {
+				securityProperties = new SecurityProperties(); 
+			}
+
+			// Manage default values
+			if (serviceName == null) {
+				serviceName = defaultServiceName;
+			}
+			if (portName == null) {
+				portName = defaultPortName;
+			}
+			if (endpoint == null) {
+				endpoint = defaultEndpoint;
+			}
+			if (timeout < 0) {
+				timeout = defaultTimeout;
+			}
+			String httpUsername = securityProperties.getHttpUsername();
+			if (httpUsername == null) {
+				httpUsername = defaultHttpUsername;
+			}
+			String httpPassword = securityProperties.getHttpPassword();
+			if (httpPassword == null) {
+				httpPassword = defaultHttpPassword;
+			}
+			String wssUsername = securityProperties.getWSSUsername();
+			if (wssUsername == null) {
+				wssUsername = defaultWSSUsername;
+			}
+			String wssPassword = securityProperties.getWSSPassword();
+			if (wssPassword == null) {
+				wssPassword = defaultWSSPassword;
+			}
+			String wssPasswordType = securityProperties.getWSSPasswordType();
+			if (wssPasswordType == null) {
+				wssPasswordType = defaultWSSPasswordType;
+			}
+			
 			// Get and check service
-			serviceName = serviceName == null ? defaultServiceName : serviceName;
 			ServiceInfo serviceInfo = getService(serviceName);
 			if (serviceInfo == null) {
 				throw new DynamicClientException("Service "+serviceName+" not present");
 			}
 			
 			// Get and check port
-			portName = portName == null ? defaultPortName : portName;
 			PortInfo portInfo = serviceInfo.getPort(portName);
 			if (portInfo == null) {
 				throw new DynamicClientException("Port "+portName+" not present in service "+serviceInfo.getName());
@@ -771,41 +881,58 @@ public class DynamicClient {
 			Method stubMethod = portInfo.getStubMethod();
 			Stub stub;
 			try {
-				stub = createStub(stubMethod, serviceInfo.getLocator());
+				Service service = serviceInfo.getLocator(); 
+				
+				// Only for WSS security, create a custom configuration to add WSS handler
+				if (wssUsername != null && wssPassword != null) {
+					Handler sessionHandler = (Handler)new SimpleSessionHandler(); 
+					SimpleChain reqHandler = new SimpleChain(); 
+					SimpleChain respHandler = new SimpleChain(); 
+					reqHandler.addHandler(sessionHandler); 
+					respHandler.addHandler(sessionHandler); 
+	
+					WSDoAllSender wsDoAllSender = new WSDoAllSender();
+					reqHandler.addHandler(wsDoAllSender);
+					
+					Handler pivot = (Handler)new HTTPSender(); 
+					Handler transport = new SimpleTargetedChain(reqHandler, pivot, respHandler);
+					
+					SimpleProvider clientConfig = new SimpleProvider();
+					clientConfig.deployTransport(HTTPTransport.DEFAULT_TRANSPORT_NAME, transport); 
+	
+					service.setEngineConfiguration(clientConfig); 
+					service.setEngine(new AxisClient(clientConfig)); 
+				}
+				
+				stub = createStub(stubMethod, service);
 			} catch (Exception e) {
 				throw new DynamicClientException("Error creating service stub for service "+serviceInfo.getName()+", port "+portInfo.getName());
 			} 
 			
 			// Set webservice endpoint
-			if (endpoint == null) {
-				endpoint = defaultEndpoint;
-			}
 			if (endpoint != null) {
 				stub._setProperty(Stub.ENDPOINT_ADDRESS_PROPERTY, endpoint.toExternalForm());
 			}
 			
 			// Set webservice call timeout
-			if (timeout < 0) {
-				timeout = defaultTimeout;
-			}
 			if (timeout >= 0) {
 				stub.setTimeout(timeout);
 			}
 
-			// Set HTTP Basic Authentication username
-			if (httpUsername == null) {
-				httpUsername = defaultHttpUsername;
-			}
-			if (httpUsername != null) {
+			// Set HTTP Basic Authentication
+			if (httpUsername != null && httpPassword != null) {
 				stub.setUsername(httpUsername);
-			}
-
-			// Set HTTP Basic Authentication password
-			if (httpPassword == null) {
-				httpPassword = defaultHttpPassword;
-			}
-			if (httpPassword != null) {
 				stub.setPassword(httpPassword);
+			}
+			
+			// Set WS-Security Username Token
+			if (wssUsername != null && wssPassword != null) {
+				WSSPasswordCallback passwordCallback = new WSSPasswordCallback(wssPassword);
+				 
+				stub._setProperty(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
+	            stub._setProperty(UsernameToken.PASSWORD_TYPE, wssPasswordType);
+	            stub._setProperty(WSHandlerConstants.USER, wssUsername);
+	            stub._setProperty(WSHandlerConstants.PW_CALLBACK_REF, passwordCallback);
 			}
 			
 			log("Invoke "+serviceInfo.getName()+"->"+portInfo.getName()+"->"+operationInfo.getName());
@@ -1169,4 +1296,26 @@ public class DynamicClient {
 		}
 	}
 	
+	
+	// Inner class to manage WS-Security Username token
+	private class WSSPasswordCallback implements CallbackHandler {
+		
+		private String password;
+
+		public WSSPasswordCallback(String password) {
+			this.password = password;
+		}
+		
+		public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+			for (int i = 0; i < callbacks.length; i++) {
+				if (callbacks[i] instanceof WSPasswordCallback) {
+					WSPasswordCallback pc = (WSPasswordCallback) callbacks[i];
+					pc.setPassword(password);
+				} else {
+					throw new UnsupportedCallbackException(callbacks[i], "Unrecognized Callback");
+				}
+			}
+		}
+	}
+
 }
