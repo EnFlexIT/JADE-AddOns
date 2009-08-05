@@ -883,26 +883,27 @@ public class DynamicClient {
 			try {
 				Service service = serviceInfo.getLocator(); 
 				
-				// Only for WSS security, create a custom configuration to add WSS handler
+				// Create custom client configuration
+				Handler sessionHandler = (Handler)new SimpleSessionHandler(); 
+				SimpleChain reqHandler = new SimpleChain(); 
+				SimpleChain respHandler = new SimpleChain(); 
+				reqHandler.addHandler(sessionHandler); 
+				respHandler.addHandler(sessionHandler); 
+
+				// Only for WSS security add WSS handler
 				if (wssUsername != null && wssPassword != null) {
-					Handler sessionHandler = (Handler)new SimpleSessionHandler(); 
-					SimpleChain reqHandler = new SimpleChain(); 
-					SimpleChain respHandler = new SimpleChain(); 
-					reqHandler.addHandler(sessionHandler); 
-					respHandler.addHandler(sessionHandler); 
-	
 					WSDoAllSender wsDoAllSender = new WSDoAllSender();
 					reqHandler.addHandler(wsDoAllSender);
-					
-					Handler pivot = (Handler)new HTTPSender(); 
-					Handler transport = new SimpleTargetedChain(reqHandler, pivot, respHandler);
-					
-					SimpleProvider clientConfig = new SimpleProvider();
-					clientConfig.deployTransport(HTTPTransport.DEFAULT_TRANSPORT_NAME, transport); 
-	
-					service.setEngineConfiguration(clientConfig); 
-					service.setEngine(new AxisClient(clientConfig)); 
 				}
+				
+				Handler pivot = (Handler)new HTTPSender(); 
+				Handler transport = new SimpleTargetedChain(reqHandler, pivot, respHandler);
+				
+				SimpleProvider clientConfig = new SimpleProvider();
+				clientConfig.deployTransport(HTTPTransport.DEFAULT_TRANSPORT_NAME, transport); 
+
+				service.setEngineConfiguration(clientConfig); 
+				service.setEngine(new AxisClient(clientConfig)); 
 				
 				stub = createStub(stubMethod, service);
 			} catch (Exception e) {
