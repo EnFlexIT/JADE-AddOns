@@ -36,6 +36,8 @@ import jade.content.schema.TermSchema;
  */
 public class ParameterInfo {
 
+	public static final int UNBOUNDED = -1;
+	
 	public static final int UNDEFINED = -1;
 	public static final int IN = 0;
 	public static final int OUT = 1;
@@ -48,6 +50,12 @@ public class ParameterInfo {
 	private int mode = UNDEFINED;
 	private boolean mandatory;
 	private TermSchema schema; 
+
+	private Object defaultValue;
+	private String regex;
+	private int cardMin;
+	private int cardMax;
+	
 
 	ParameterInfo(String parameterName) {
 		this.name = parameterName;
@@ -159,6 +167,58 @@ public class ParameterInfo {
 		this.mandatory = mandatory;
 	}
 
+	/**
+	 * Get default value
+	 * 
+	 * @return default value
+	 */
+	public Object getDefaultValue() {
+		return defaultValue;
+	}
+
+	void setDefaultValue(Object defaultValue) {
+		this.defaultValue = defaultValue;
+	}
+
+	/**
+	 * Get regular expression with permitted value of parameter
+	 * 
+	 * @return regular expression
+	 */
+	public String getRegex() {
+		return regex;
+	}
+
+	void setRegex(String regex) {
+		this.regex = regex;
+	}
+
+	/**
+	 * Get min cardinality, valid only if parameter is an array
+	 *    
+	 * @param cardMin min cardinality
+	 */
+	public int getCardMin() {
+		return cardMin;
+	}
+
+	void setCardMin(int cardMin) {
+		this.cardMin = cardMin;
+	}
+
+	/**
+	 * Get max cardinality, valid only if parameter is an array
+	 *    
+	 * @param cardMin max cardinality (UNBOUNDED if there is no limits)
+	 */
+	public int getCardMax() {
+		return cardMax;
+	}
+
+	public void setCardMax(int cardMax) {
+		this.cardMax = cardMax;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
