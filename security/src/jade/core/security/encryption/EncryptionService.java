@@ -42,6 +42,7 @@ import jade.core.security.SecurityService;
 import jade.core.security.SecuritySlice;
 import jade.domain.FIPAAgentManagement.Envelope;
 import jade.domain.FIPAAgentManagement.InternalError;
+import jade.domain.FIPAAgentManagement.Property;
 import jade.domain.FIPAAgentManagement.SecurityObject;
 import jade.lang.acl.ACLMessage;
 import jade.security.JADEPrincipal;
@@ -108,7 +109,7 @@ public class EncryptionService extends BaseService {
 
 		public Out(){
 			// sets the relative position of the filter in the filter chain.
-			setPreferredPosition(30);
+			setPreferredPosition(50);
 		}
 
 		/**
@@ -129,29 +130,62 @@ public class EncryptionService extends BaseService {
 				try {
 					Object[] params = cmd.getParams();
 					msg = (GenericMessage)params[1];
-					SecurityObject so;
 					Envelope env = msg.getEnvelope();
-					if ((env != null)&&((so=SecurityService.getSecurityObject(env,SecurityObject.ENCRYPT)) != null)) {
-						if (myLogger.isLoggable(Logger.FINE)) {
-							myLogger.log(Logger.FINE, "Encrypting message");
+					if (env != null) {
+						Property securityObjectsProp = SecurityService.getSecurityObjectsProperty(env);
+						if (securityObjectsProp != null) {
+							// Security information present
+							SecurityObject[] sos = (SecurityObject[]) securityObjectsProp.getValue();
+							SecurityObject so = SecurityService.getSecurityObject(sos, SecurityObject.ENCRYPT);
+							if (so != null) {
+								// Encryption SecurityObject present
+								if (myLogger.isLoggable(Logger.FINE)) {
+									myLogger.log(Logger.FINE, "Encrypting message");
+								}
+								sender = (AID)params[0];
+								Agent agt = myContainer.acquireLocalAgent(sender);
+								SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
+								myContainer.releaseLocalAgent(sender);
+		
+								// Encrypts the message payload and update the security object.
+								// NOTE: Since the message may have more than one receiver, for receivers 2, 3... we must 
+								// clone the encryption SecurityObject and therefore the whole SecurityObject-s array (Envelope 
+								// cloning does not deep-clone envelope properties). This is because the
+								// SecurityData included in the encryption SecurityObject is different for each receiver
+								// as it holds a new symmetric key encrypted with the receiver's public key.
+								boolean needClone = so.getEncoded() instanceof byte[]; // If at this stage SecurityData is already encoded, we are processing the message for receiver 2, 3... --> Need clone
+								SecurityObject actualSo = so;
+								if (needClone) {
+									actualSo = (SecurityObject) so.clone();
+									ss.decode(actualSo);
+								}
+								JADEPrincipal receiverPrincipal = sh.getPrincipal(((AID)params[2]).getName());
+								byte[] enc = sh.getAuthority().encrypt(actualSo, msg.getPayload(), receiverPrincipal);
+								// Obfuscate some fields in the ACLMessage
+								ACLMessage acl = msg.getACLMessage();
+								if (acl != null) { 
+									acl.setContent(null);
+									actualSo.setConversationId(acl.getConversationId());
+								}
+								ss.encode(actualSo);
+								if (needClone) {
+									SecurityObject[] clonedSos = new SecurityObject[sos.length];
+									for (int i = 0; i < sos.length; ++i) {
+										if (sos[i] == so) {
+											// Replace the original SecurityObject with the modified one 
+											clonedSos[i] = actualSo;
+										}
+										else {
+											clonedSos[i] = sos[i];
+										}
+									}
+									securityObjectsProp.setValue(clonedSos);
+								}
+								// update the Generic Message in the command
+								msg.update(acl, env, enc);
+								
+							}
 						}
-						sender = (AID)params[0];
-						Agent agt = myContainer.acquireLocalAgent(sender);
-						SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
-						myContainer.releaseLocalAgent(sender);
-
-						// encrypts the message payload and update the security object
-						JADEPrincipal principal = sh.getPrincipal(((AID)params[2]).getName());
-						byte[] enc = sh.getAuthority().encrypt(so,msg.getPayload(),principal);
-						// Obfuscate some fields in the ACLMessage
-						ACLMessage acl = msg.getACLMessage();
-						if (acl != null) { 
-							acl.setContent(null);
-							so.setConversationId(acl.getConversationId());
-						}
-						ss.encode(so);
-						// update the Generic Message in the command
-						msg.update(acl, env, enc);
 					}
 				}
 				catch(Exception e) {
@@ -180,7 +214,7 @@ public class EncryptionService extends BaseService {
 
 		public In(){
 			// sets the relative position of the filter in the filter chain.
-			setPreferredPosition(30);
+			setPreferredPosition(10);
 		}
 
 		/**

@@ -19,7 +19,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
-*****************************************************************/
+ *****************************************************************/
 
 package jade.domain.FIPAAgentManagement;
 
@@ -43,59 +43,66 @@ import jade.util.leap.Serializable;
 
 public class SecurityObject implements Serializable {
 
-  private int     type;
-  private String  format;
-  private Object  encoded;
-  private String  convId;
-  
-  /**
-   * Name of the Envelope slot containing SecurityObjects
-   */
-  public static String NAME = "X-security";
-  
-  /**
-   * The SecurityObject contains a signature
-   */
-  public static int SIGN = 1;
-  
-  /**
-   * The SecurityObject refers to an encryption
-   */
-  public static int ENCRYPT = 2;
-  
-  /**
-   * The constructor creates a SecurityObject for the given type
-   **/
-  public SecurityObject(int t) {
+	private int     type;
+	private String  format;
+	private Object  encoded;
+	private String  convId;
+
+	/**
+	 * Name of the Envelope slot containing SecurityObjects
+	 */
+	public static String NAME = "X-security";
+
+	/**
+	 * The SecurityObject contains a signature
+	 */
+	public static int SIGN = 1;
+
+	/**
+	 * The SecurityObject refers to an encryption
+	 */
+	public static int ENCRYPT = 2;
+
+	/**
+	 * The constructor creates a SecurityObject for the given type
+	 **/
+	public SecurityObject(int t) {
 		type = t;
-  }
-  
-  public int getType() {
-    return type;
-  }
-  
-  public String getFormat() {
-    return format;
-  }
-  
-  public void setFormat(String f) {
-    format = f;
-  }
+	}
 
-  public Object getEncoded() {
-    return encoded;
-  }
-  
-  public void setEncoded(Object e) {
-    encoded = e;
-  }
- 
-  public String getConversationId(){
-    return convId;
-  }
+	public int getType() {
+		return type;
+	}
 
-  public void setConversationId(String c){
-    convId = c;
-  }
+	public String getFormat() {
+		return format;
+	}
 
+	public void setFormat(String f) {
+		format = f;
+	}
+
+	public Object getEncoded() {
+		return encoded;
+	}
+
+	public void setEncoded(Object e) {
+		encoded = e;
+	}
+
+	public String getConversationId(){
+		return convId;
+	}
+
+	public void setConversationId(String c){
+		convId = c;
+	}
+
+	public Object clone() {
+		SecurityObject cloned = new SecurityObject(type);
+		cloned.format = format;
+		cloned.encoded = encoded;
+		cloned.convId = convId;
+		return cloned;
+	}
 }

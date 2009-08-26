@@ -107,7 +107,7 @@ public class SignatureService extends BaseService {
 	class Out extends Filter {
 
 		public Out() {
-			setPreferredPosition(50);
+			setPreferredPosition(30);
 		}
 
 		/**
@@ -136,15 +136,24 @@ public class SignatureService extends BaseService {
 								myLogger.log(Logger.FINE, "Signing message");
 							}
 							sender = (AID)params[0];
-							SecurityData sd = (SecurityData)so.getEncoded();
-							Agent agt = myContainer.acquireLocalAgent(sender);
-							SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
-							myContainer.releaseLocalAgent(sender);
-							sd = sh.getAuthority().sign(sd.algorithm,msg.getPayload());
-							so.setEncoded(sd);
-							ACLMessage acl = msg.getACLMessage();
-							if (acl!=null) so.setConversationId(acl.getConversationId());
-							ss.encode(so);   
+							Object obj = so.getEncoded();
+							// Sign the message payload and update the security object with the signature unless already done.
+							// Note in facts that if a message is sent to more than one receiver, when processing the message
+							// for receivers number 2, 3... the signature has already been computed and stored in the SecurityData 
+							// (Envelope cloning does not deep-clone envelope properties). As long as the payload does not change from 
+							// receiver to receiver in facts the signature remains the same.
+							if (obj instanceof SecurityData) {
+								// SecurityData not yet prepared and encoded --> do the job
+								SecurityData sd = (SecurityData)obj;
+								Agent agt = myContainer.acquireLocalAgent(sender);
+								SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
+								myContainer.releaseLocalAgent(sender);
+								sd = sh.getAuthority().sign(sd.algorithm,msg.getPayload());
+								so.setEncoded(sd);
+								ACLMessage acl = msg.getACLMessage();
+								if (acl!=null) so.setConversationId(acl.getConversationId());
+								ss.encode(so);
+							}
 						}
 					}
 					else {
@@ -186,7 +195,7 @@ public class SignatureService extends BaseService {
 	class In extends Filter {
 
 		public In() {
-			setPreferredPosition(10);
+			setPreferredPosition(30);
 		}
 
 		/**
@@ -219,7 +228,7 @@ public class SignatureService extends BaseService {
 						Agent agt = myContainer.acquireLocalAgent(receiver);
 						SecurityHelper sh = (SecurityHelper)agt.getHelper(SecurityService.NAME);
 						myContainer.releaseLocalAgent(receiver);
-						if (! sh.getAuthority().verifySignature(sd,msg.getPayload())) {
+						if (! sh.getAuthority().verifySignature(sd, msg.getPayload())) {
 							throw new JADESecurityException("Invalid signature");
 						}
 					}

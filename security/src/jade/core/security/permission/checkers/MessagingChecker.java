@@ -19,7 +19,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
-*****************************************************************/
+ *****************************************************************/
 
 package jade.core.security.permission.checkers;
 
@@ -51,166 +51,162 @@ import java.security.Permission;
    @author Giosue Vitaglione - Telecom Italia LAB
 
    @see jade.core.security.permission.PermissionService
-*/
+ */
 public class MessagingChecker extends BaseJADEChecker {
 
-    /**
+	/**
        Perform the authorization check on the received command.
-    */
-    public void check(Command cmd) throws JADESecurityException {
-    String name = cmd.getName();
+	 */
+	public void check(Command cmd) throws JADESecurityException {
+		String name = cmd.getName();
 
-    //if (cmd!=null) return; // always return, ---checker disabled---
+		//if (cmd!=null) return; // always return, ---checker disabled---
 
-    //jade.core.security.permission.PermissionFilter.log(direction,  cmd );
-    
-      // get data from cmd
-      Object[] params = cmd.getParams();
+		//jade.core.security.permission.PermissionFilter.log(direction,  cmd );
 
-//      for (int i=0; i<params.length; i++)
-//        System.out.println("     ["+i+"] "+params[i]);
+		// get data from cmd
+		Object[] params = cmd.getParams();
 
-      // prepare parameters for the check
-      JADEPrincipal requester = cmd.getPrincipal();
-      Credentials creds = cmd.getCredentials();
-      Permission permission = null;
-      JADEPrincipal target = null; 
+		//      for (int i=0; i<params.length; i++)
+		//        System.out.println("     ["+i+"] "+params[i]);
 
-
-
-//----------
-    if (name.equals(MessagingSlice.SEND_MESSAGE)) {
+		// prepare parameters for the check
+		JADEPrincipal requester = cmd.getPrincipal();
+		Credentials creds = cmd.getCredentials();
+		Permission permission = null;
+		JADEPrincipal target = null; 
 
 
 
-      AID sender = (AID)params[0];
-      GenericMessage msg = (GenericMessage)params[1];
-      AID receiver = (AID)params[2];
+		//----------
+		if (name.equals(MessagingSlice.SEND_MESSAGE)) {
+			AID sender = (AID)params[0];
+			GenericMessage msg = (GenericMessage)params[1];
+			AID receiver = (AID)params[2];
 
-      // handle failure messages
-      if (msg.isAMSFailure()) {
-        // Let it pass, it was a FAILURE_NOTIFY converted to SEND_MESSAGE
-        // the MessagingService will check: 
-        // if this is really a failure => deliver it
-        return;
-      }
+			// handle failure messages
+			if (msg.isAMSFailure()) {
+				// Let it pass, it was a FAILURE_NOTIFY converted to SEND_MESSAGE
+				// the MessagingService will check: 
+				// if this is really a failure => deliver it
+				return;
+			}
 
-      // handle "sign by defalut" for certain special cases
-      String rec = receiver.getLocalName();
-      if ( 
-          ( direction==Filter.OUTGOING) && 
-          ( 
-           (rec.equals( "ams" )) || 
-           (rec.equals( "df" ))  
-          )) {
-          Agent sen = myContainer.acquireLocalAgent(sender);
-          try {
-            ((SecurityHelper)sen.getHelper(SecurityService.NAME)).setUseSignature( msg.getACLMessage() );
-          }
-          catch (ServiceException ex) { 
-            // something went wrong, msg will not be signed
-          }
-          myContainer.releaseLocalAgent(sender);
-      }
+			// handle "sign by defalut" for certain special cases
+			String rec = receiver.getLocalName();
+			if ( 
+					( direction==Filter.OUTGOING) && 
+					( 
+							(rec.equals( "ams" )) || 
+							(rec.equals( "df" ))  
+					)) {
+				Agent sen = myContainer.acquireLocalAgent(sender);
+				try {
+					((SecurityHelper)sen.getHelper(SecurityService.NAME)).setUseSignature( msg.getACLMessage() );
+				}
+				catch (ServiceException ex) { 
+					// something went wrong, msg will not be signed
+				}
+				myContainer.releaseLocalAgent(sender);
+			}
 
-      //String ontology= msg.getACLMessage().getOntology();
+			//String ontology= msg.getACLMessage().getOntology();
 
-      String receiverOwner=null;
-      OwnershipCertificate oc = (OwnershipCertificate) 
-          service.getOwnershipCertificate(receiver.getName());
-      if (oc!=null) receiverOwner=oc.getOwner().getName();
+			String receiverOwner=null;
+			OwnershipCertificate oc = (OwnershipCertificate) service.getOwnershipCertificate(receiver.getName());
+			if (oc!=null) receiverOwner=oc.getOwner().getName();
 
 
-      permission = new MessagePermission( 
-                    MessagePermission.AGENT_NAME+"="+receiver.getName()+AuthPermission.SEP+
-                    MessagePermission.AGENT_OWNER+"="+receiverOwner 
-                    , "send-to");
-      // add two checks?: AGENT_SEND_AS and AGENT_SEND_FROM
+			permission = new MessagePermission( 
+					MessagePermission.AGENT_NAME+"="+receiver.getName()+AuthPermission.SEP+
+					MessagePermission.AGENT_OWNER+"="+receiverOwner 
+					, "send-to");
+			// add two checks?: AGENT_SEND_AS and AGENT_SEND_FROM
 
-      JADESecurityException ae;
-      try {
-        checkAction( requester, permission, target, creds);
-      } catch(JADESecurityException e) {
-        ae=e; // exception to re-throw
+			JADESecurityException ae;
+			try {
+				checkAction( requester, permission, target, creds);
+			} catch(JADESecurityException e) {
+				ae=e; // exception to re-throw
 
-        //- send failure vertical command
-        try {
-          Service ms = myContainer.getServiceFinder().findService(jade.core.messaging.
-              MessagingSlice.NAME);
+				//- send failure vertical command
+				try {
+					Service ms = myContainer.getServiceFinder().findService(jade.core.messaging.
+							MessagingSlice.NAME);
 
-          // Create a failure message
-          GenericCommand failurecmd = new GenericCommand( 
-              MessagingSlice.NOTIFY_FAILURE, MessagingSlice.NAME, null  );
-          //0- generic message (the same as the blocked one)
-          failurecmd.addParam( (GenericMessage) params[1] );
-          //1- receiver (is the sender of the message was attempting to go)
-          failurecmd.addParam( sender );
-          //2- reason why it failed: jade.domain.FIPAAgentManagement.InternalError(String aaa)
-          failurecmd.addParam( new jade.domain.FIPAAgentManagement.InternalError(
-              "NOT AUTHORIZED") );
+					// Create a failure message
+					GenericCommand failurecmd = new GenericCommand( 
+							MessagingSlice.NOTIFY_FAILURE, MessagingSlice.NAME, null  );
+					//0- generic message (the same as the blocked one)
+					failurecmd.addParam( (GenericMessage) params[1] );
+					//1- receiver (is the sender of the message was attempting to go)
+					failurecmd.addParam( sender );
+					//2- reason why it failed: jade.domain.FIPAAgentManagement.InternalError(String aaa)
+					failurecmd.addParam( new jade.domain.FIPAAgentManagement.InternalError(
+					"NOT AUTHORIZED") );
 
-          // this failure message should be signed by the local container 
-          // since it is "a part" of the ams, and can sing on his behalf.
-          // The SignatureFilter has to perform the by getting a special 
-          // container's SecurityHelper when the sender is the AMS.
+					// this failure message should be signed by the local container 
+					// since it is "a part" of the ams, and can sing on his behalf.
+					// The SignatureFilter has to perform the by getting a special 
+					// container's SecurityHelper when the sender is the AMS.
 
-          ms.submit( failurecmd );
-        }
-        catch (ServiceException ex) {
-          // could not send the failure notification
-        }
-        catch (IMTPException ex) {
-          // could not send the failure notification
-        }
-        //- end send failure vertical command
+					ms.submit( failurecmd );
+				}
+				catch (ServiceException ex) {
+					// could not send the failure notification
+				}
+				catch (IMTPException ex) {
+					// could not send the failure notification
+				}
+				//- end send failure vertical command
 
-        // report authorization exception, normally
-        if (ae instanceof JADESecurityException) throw ae;
-      }
-      
-    }
-    else
-//----------
-    if (name.equals(MessagingSlice.DEAD_MTP)) {
+				// report authorization exception, normally
+				if (ae instanceof JADESecurityException) throw ae;
+			}
 
-      //jade.core.security.permission.PermissionFilter.log( cmd );
+		}
+		else
+			//----------
+			if (name.equals(MessagingSlice.DEAD_MTP)) {
 
-      //String agentName = (String) params[0];
-      //String className = (String) params[1];
+				//jade.core.security.permission.PermissionFilter.log( cmd );
 
-      // permission 
-      /*
+				//String agentName = (String) params[0];
+				//String className = (String) params[1];
+
+				// permission 
+				/*
       permission = new MessagePermission( "class="+className , "create");
       checkAction( requester, 
                    permission, 
                    target, 
                    creds
           );
-      */
-    }
-    else 
-//----------
-    if (name.equals(MessagingSlice.INSTALL_MTP)) {
-    }
-    else
-//----------
-    if (name.equals(MessagingSlice.NEW_MTP)) {
-    }
-    else
-//----------
-    if (name.equals(MessagingSlice.NOTIFY_FAILURE)) {
-    }
-    else
-//----------
-    if (name.equals(MessagingSlice.SET_PLATFORM_ADDRESSES)) {
-    }
-    else
-//----------
-    if (name.equals(MessagingSlice.UNINSTALL_MTP)) {
-    }
+				 */
+			}
+			else 
+				//----------
+				if (name.equals(MessagingSlice.INSTALL_MTP)) {
+				}
+				else
+					//----------
+					if (name.equals(MessagingSlice.NEW_MTP)) {
+					}
+					else
+						//----------
+						if (name.equals(MessagingSlice.NOTIFY_FAILURE)) {
+						}
+						else
+							//----------
+							if (name.equals(MessagingSlice.SET_PLATFORM_ADDRESSES)) {
+							}
+							else
+								//----------
+								if (name.equals(MessagingSlice.UNINSTALL_MTP)) {
+								}
 
 
-    } // end method check()
+	} // end method check()
 
 } // end checker class
 
