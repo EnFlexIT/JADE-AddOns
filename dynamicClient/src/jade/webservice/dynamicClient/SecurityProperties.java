@@ -41,6 +41,7 @@ public class SecurityProperties {
 	private String WSSUsername;
 	private String WSSPassword;
 	private String WSSPasswordType;
+	private Boolean WSSMustUnderstand;
 
 	/**
 	 * Create a SecurityProperties
@@ -138,5 +139,22 @@ public class SecurityProperties {
 	public void setWSSPasswordType(String WSSPasswordType) {
 		this.WSSPasswordType = WSSPasswordType;
 	}
-	
+
+	/**
+	 * Get mustUnderstand flag for WS Security specifications - UsernameToken profile
+	 * 
+	 * @return mustUnderstand flag
+	 */
+	public Boolean isWSSMustUnderstand() {
+		return WSSMustUnderstand;
+	}
+
+	/**
+	 * Set mustUnderstand flag for WS Security specifications - UsernameToken profile
+	 * 
+	 * @param wSSMustUnderstand mustUnderstand flag
+	 */
+	public void setWSSMustUnderstand(boolean WSSMustUnderstand) {
+		this.WSSMustUnderstand = Boolean.valueOf(WSSMustUnderstand);
+	}
 }

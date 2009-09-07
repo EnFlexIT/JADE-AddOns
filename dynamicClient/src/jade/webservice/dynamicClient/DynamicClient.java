@@ -143,6 +143,7 @@ public class DynamicClient {
 	private String defaultWSSUsername;
 	private String defaultWSSPassword;
 	private String defaultWSSPasswordType;
+	private Boolean defaultWSSMustUnderstand;
 
 	private DynamicClientProperties properties;
 	private ClassLoader classloader;
@@ -355,6 +356,26 @@ public class DynamicClient {
 	 */
 	public void setDefaultWSSPasswordType(String defaultWSSPasswordType) {
 		this.defaultWSSPasswordType = defaultWSSPasswordType;
+	}
+	
+	/**
+	 * Get mustUnderstand flag for WS Security specifications - UsernameToken profile
+	 * @see jade.webservice.dynamicClient.SecurityProperties
+	 * 
+	 * @return mustUnderstand flag
+	 */
+	public Boolean isDefaultWSSMustUnderstand() {
+		return defaultWSSMustUnderstand;
+	}
+
+	/**
+	 * Set mustUnderstand flag for WS Security specifications - UsernameToken profile
+	 * @see jade.webservice.dynamicClient.SecurityProperties
+	 * 
+	 * @param wSSMustUnderstand mustUnderstand flag
+	 */
+	public void setDefaultWSSMustUnderstand(boolean defaultWSSMustUnderstand) {
+		this.defaultWSSMustUnderstand = Boolean.valueOf(defaultWSSMustUnderstand);
 	}
 	
 	/**
@@ -859,6 +880,11 @@ public class DynamicClient {
 				wssPasswordType = defaultWSSPasswordType;
 			}
 			
+			Boolean wssMustUnderstand = securityProperties.isWSSMustUnderstand();
+			if (wssMustUnderstand == null) {
+				wssMustUnderstand = defaultWSSMustUnderstand;
+			}
+			
 			// Get and check service
 			ServiceInfo serviceInfo = getService(serviceName);
 			if (serviceInfo == null) {
@@ -934,6 +960,9 @@ public class DynamicClient {
 	            stub._setProperty(UsernameToken.PASSWORD_TYPE, wssPasswordType);
 	            stub._setProperty(WSHandlerConstants.USER, wssUsername);
 	            stub._setProperty(WSHandlerConstants.PW_CALLBACK_REF, passwordCallback);
+	            if (wssMustUnderstand != null) {
+	            	stub._setProperty(WSHandlerConstants.MUST_UNDERSTAND, wssMustUnderstand.toString());
+	            }
 			}
 			
 			log("Invoke "+serviceInfo.getName()+"->"+portInfo.getName()+"->"+operationInfo.getName());
