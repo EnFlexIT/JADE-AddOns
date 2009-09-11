@@ -27,7 +27,11 @@ import jade.content.onto.BasicOntology;
 import jade.content.onto.BeanOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
+import jade.content.schema.Facet;
 import jade.content.schema.ObjectSchema;
+import jade.content.schema.facets.CardinalityFacet;
+import jade.content.schema.facets.DefaultValueFacet;
+import jade.content.schema.facets.PermittedValuesFacet;
 import jade.webservice.utils.CompilerUtils;
 import jade.webservice.utils.FileUtils;
 import jade.webservice.utils.WSDLUtils;
@@ -1314,7 +1318,38 @@ public class DynamicClient {
 						if (schema == null) {
 							sb.append("ERROR: no schema!\n");
 						} else {
-							sb.append(schema.getTypeName()+ (!mandatory ? " (OPTIONAL)":"") + "\n");
+							Object defaultValue = null;
+							Object regex = null;
+							Integer cardMin = null;
+							Integer cardMax = null;
+							Facet[] facets = os.getFacets(names[i]);
+							if (facets != null) {
+								for (Facet facet : facets) {
+									if (facet instanceof DefaultValueFacet) {
+										DefaultValueFacet dvf = (DefaultValueFacet)facet;
+										defaultValue = dvf.getDefaultValue();
+									} else if (facet instanceof PermittedValuesFacet) {
+										PermittedValuesFacet pvf = (PermittedValuesFacet)facet;
+										regex = pvf.getRegex();
+									} else if (facet instanceof CardinalityFacet) {
+										CardinalityFacet cf = (CardinalityFacet)facet;
+										cardMin = cf.getCardMin();
+										cardMax = cf.getCardMax();
+									}
+								}
+							}
+							
+							sb.append(schema.getTypeName()+ (!mandatory ? " (OPTIONAL)":""));
+							if (defaultValue != null) {
+								sb.append(" (DEFAULT="+defaultValue+")");
+							}
+							if (regex != null) {
+								sb.append(" (REGEX="+regex+")");
+							}
+							if (cardMin != null && cardMax != null) {
+								sb.append(" (["+cardMin+","+(cardMax!=-1?cardMax:"unbounded")+"])");
+							}
+							sb.append("\n");
 						}
 					}
 					sb.append("  }\n");

@@ -50,11 +50,10 @@ public class ParameterInfo {
 	private int mode = UNDEFINED;
 	private boolean mandatory;
 	private TermSchema schema; 
-
 	private Object defaultValue;
 	private String regex;
-	private int cardMin;
-	private int cardMax;
+	private Integer cardMin;
+	private Integer cardMax;
 	
 
 	ParameterInfo(String parameterName) {
@@ -198,12 +197,12 @@ public class ParameterInfo {
 	 *    
 	 * @param cardMin min cardinality
 	 */
-	public int getCardMin() {
+	public Integer getCardMin() {
 		return cardMin;
 	}
 
 	void setCardMin(int cardMin) {
-		this.cardMin = cardMin;
+		this.cardMin = Integer.valueOf(cardMin);
 	}
 
 	/**
@@ -211,12 +210,12 @@ public class ParameterInfo {
 	 *    
 	 * @param cardMin max cardinality (UNBOUNDED if there is no limits)
 	 */
-	public int getCardMax() {
+	public Integer getCardMax() {
 		return cardMax;
 	}
 
-	public void setCardMax(int cardMax) {
-		this.cardMax = cardMax;
+	void setCardMax(int cardMax) {
+		this.cardMax = Integer.valueOf(cardMax);
 	}
 	
 	@Override
@@ -228,8 +227,17 @@ public class ParameterInfo {
 		sb.append(", mode="+getStringMode(mode));
 		sb.append(", schema="+schema.getTypeName());
 		sb.append(", mandatory="+mandatory);
+		if (cardMin != null) {
+			sb.append(", cardMin="+cardMin);
+		}
+		if (cardMax != null) {
+			sb.append(", cardMax="+cardMax);
+		}
 		if (documentation != null && !documentation.equals("")) {
 			sb.append(", doc="+documentation);
+		}
+		if (regex != null && !regex.equals("")) {
+			sb.append(", regex="+regex);
 		}
 		return sb.toString();
 	}

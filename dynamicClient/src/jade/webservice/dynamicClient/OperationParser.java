@@ -246,10 +246,23 @@ public class OperationParser {
 		}
 		paramType = JavaUtils.getLoadableClassName(paramType);
 		pi.setTypeClass(getClassFromType(paramType));
-		pi.setSchema(getSchemaFromType(paramType));
+		TermSchema schema = getSchemaFromType(paramType);
+		pi.setSchema(schema);
 		pi.setMandatory(!axisParam.isOmittable());
 		pi.setDocumentation(extractDocumentation(emitter, bEntry.getQName().getNamespaceURI(), axisParam.getQName()));
-
+		pi.setRegex(axisParam.getRegex());
+		pi.setDefaultValue(axisParam.getDefaultValue());
+		if (schema instanceof AggregateSchema) {
+			Integer cardMin = axisParam.getMinOccurs();
+			if (cardMin != null) {
+				pi.setCardMin(cardMin);
+			}
+			Integer cardMax = axisParam.getMaxOccurs();
+			if (cardMax != null) {
+				pi.setCardMax(cardMax);
+			}
+		}
+		
 		return pi;
 	}
 
@@ -263,8 +276,9 @@ public class OperationParser {
 		String type;
 		QName qname;
 		boolean mandatory = false;
+		Element element;
 		if (part.getTypeName() == null) {
-			Element element = st.getElement(part.getElementName());
+			element = st.getElement(part.getElementName());
 			qname = element.getQName();
 			name = qname.getLocalPart();
 			namespace = qname.getNamespaceURI();
@@ -273,10 +287,8 @@ public class OperationParser {
 			name = soapHeader.getPart();
 			namespace = soapHeader.getNamespaceURI();
 			qname = new QName(namespace, name);
+			element = st.getElement(qname);
 			type = JavaUtils.getLoadableClassName(st.getTypeEntry(part.getTypeName(), false).getName());
-			if (soapHeader.getRequired() != null) {
-				mandatory = soapHeader.getRequired().booleanValue();
-			}
 		}
 
 		HeaderInfo hi = new HeaderInfo(name);
@@ -285,8 +297,25 @@ public class OperationParser {
 		hi.setTypeClass(getClassFromType(type));
 		hi.setSchema(getSchemaFromType(type));
 		hi.setSignaturePosition(signaturePosition);
-		hi.setMandatory(mandatory);
 		hi.setDocumentation(extractDocumentation(emitter, null, qname));
+
+		try {
+			ElementDecl elementDecl = SchemaUtils.processChildElementNode(element.getNode(), st);
+			elementDecl = SchemaUtils.getSanedElement(elementDecl);
+			hi.setMandatory(!elementDecl.getMinOccursIs0());
+			hi.setRegex(elementDecl.getRegex());
+			hi.setDefaultValue(elementDecl.getDefaultValue());
+			Integer cardMin = elementDecl.getMinOccurs();
+			if (cardMin != null) {
+				hi.setCardMin(cardMin);
+			}
+			Integer cardMax = elementDecl.getMaxOccurs();
+			if (cardMax != null) {
+				hi.setCardMax(cardMax);
+			}
+		} catch(Throwable t) {
+			// ENRICO: non si sa mai!
+		}
 		
 		return hi;
 	}
@@ -312,6 +341,16 @@ public class OperationParser {
 		hi.setSignaturePosition(signaturePosition);
 		hi.setMandatory(!param.isOmittable());
 		hi.setDocumentation(extractDocumentation(emitter, null, param.getQName()));
+		hi.setRegex(param.getRegex());
+		hi.setDefaultValue(param.getDefaultValue());
+		Integer cardMin = param.getMinOccurs();
+		if (cardMin != null) {
+			hi.setCardMin(cardMin);
+		}
+		Integer cardMax = param.getMaxOccurs();
+		if (cardMax != null) {
+			hi.setCardMax(cardMax);
+		}
 		
 		return hi;
 	}
