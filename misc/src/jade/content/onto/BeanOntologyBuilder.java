@@ -41,6 +41,8 @@ import jade.content.schema.ConceptSchema;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PredicateSchema;
 import jade.content.schema.TermSchema;
+import jade.content.schema.facets.DefaultValueFacet;
+import jade.content.schema.facets.PermittedValuesFacet;
 import jade.util.Logger;
 
 import java.lang.annotation.Annotation;
@@ -221,6 +223,8 @@ class BeanOntologyBuilder {
 		boolean mandatory;
 		int cardMin;
 		int cardMax;
+		String defaultValue;
+		String regex;
 
 		while (gettersIter.hasNext()) {
 			getter = gettersIter.next();
@@ -228,6 +232,8 @@ class BeanOntologyBuilder {
 			mandatory = false;
 			cardMin = 0;
 			cardMax = ObjectSchema.UNLIMITED;
+			defaultValue = null;
+			regex = null;
 			aggregateType = null;
 			slotAnnotation = getter.getAnnotation(Slot.class);
 			aggregateSlotAnnotation = getter.getAnnotation(AggregateSlot.class);
@@ -251,6 +257,12 @@ class BeanOntologyBuilder {
 						 */
 						if (!Slot.USE_METHOD_NAME.equals(slotAnnotation.name())) {
 							slotName = slotAnnotation.name();
+						}
+						if (!Slot.NULL.equals(slotAnnotation.defaultValue())) {
+							defaultValue = slotAnnotation.defaultValue();
+						}
+						if (!Slot.NULL.equals(slotAnnotation.regex())) {
+							regex = slotAnnotation.regex();
 						}
 						mandatory = slotAnnotation.mandatory();
 					}
@@ -281,7 +293,7 @@ class BeanOntologyBuilder {
 							}
 						}
 					}
-					sad = new SlotAccessData(slotClazz, getter, setter, mandatory, aggregateType, cardMin, cardMax);
+					sad = new SlotAccessData(slotClazz, getter, setter, mandatory, aggregateType, cardMin, cardMax, defaultValue, regex);
 					result.put(new SlotKey(clazz, slotName), sad);
 				} else {
 					// TODO it's not a bean property, maybe we could generate a warning...
@@ -370,6 +382,13 @@ class BeanOntologyBuilder {
 			if (!sad.aggregate) {
 				TermSchema ts = supplySchemaForClassFlat(sad.type, skipClassChecking);
 				schema.add(slotName, ts, sad.mandatory ? ObjectSchema.MANDATORY : ObjectSchema.OPTIONAL);
+				
+				if (sad.defaultValue != null) {
+					schema.addFacet(slotName, new DefaultValueFacet(sad.defaultValue));
+				}
+				if (sad.regex != null) {
+					schema.addFacet(slotName, new PermittedValuesFacet(sad.regex));
+				}
 			} else {
 				TermSchema ats = null;
 				if (sad.aggregateClass != null) {

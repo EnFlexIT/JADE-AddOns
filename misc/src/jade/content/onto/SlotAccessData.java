@@ -37,8 +37,10 @@ class SlotAccessData {
 	Class aggregateClass;
 	int cardMin;
 	int cardMax;
+	Object defaultValue; 
+	String regex;
 
-	SlotAccessData(Class type, Method getter, Method setter, boolean mandatory, Class aggregateClass, int cardMin, int cardMax) {
+	SlotAccessData(Class type, Method getter, Method setter, boolean mandatory, Class aggregateClass, int cardMin, int cardMax, Object defaultValue, String regex) {
 		this.type = type;
 		this.getter = getter;
 		this.setter = setter;
@@ -47,6 +49,8 @@ class SlotAccessData {
 		this.aggregateClass = aggregateClass;
 		this.cardMin = cardMin;
 		this.cardMax = cardMax;
+		this.defaultValue = defaultValue;
+		this.regex = regex;
 	}
 
 	static boolean isAggregate(Class clazz) {
@@ -80,6 +84,14 @@ class SlotAccessData {
 		sb.append(cardMin);
 		sb.append(" cardMax=");
 		sb.append(cardMax);
+		if (defaultValue != null) {
+			sb.append(" defaultValue=");
+			sb.append(defaultValue);
+		}
+		if (regex != null) {
+			sb.append(" regex=");
+			sb.append(regex);
+		}
 		sb.append('}');
 		return sb.toString();
 	}

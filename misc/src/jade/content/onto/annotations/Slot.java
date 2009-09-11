@@ -37,7 +37,10 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Slot {
 	String USE_METHOD_NAME = "__USE_METHOD_NAME__";
+	String NULL = "__NULL__";
 
 	String name() default USE_METHOD_NAME;
 	boolean mandatory() default false;
+	String defaultValue() default NULL; 
+	String regex() default NULL;
 }
