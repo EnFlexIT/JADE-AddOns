@@ -165,4 +165,16 @@ public class DynamicClientCache {
 			cachedDynamicClients.remove(wsdl);
 		}
 	}
+	
+	/**
+	 * Update a DynamicClient for specified wsdl uri.
+	 * @param wsdl webservice wsdl uri
+	 * @param properties configuration properties
+	 * @return initialized DynamicClient
+	 * @throws DynamicClientException
+	 */
+	public DynamicClient update(URI wsdl, DynamicClientProperties properties) throws DynamicClientException {
+		remove(wsdl);
+		return get(wsdl, properties);
+	}
 }
