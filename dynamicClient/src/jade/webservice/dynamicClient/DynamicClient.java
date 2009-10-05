@@ -729,13 +729,22 @@ public class DynamicClient {
 						log("operation "+operationName, 2);
 						OperationInfo operationInfo = new OperationInfo(operationName);
 						
-						// Get and add operation documentation from portType and binding 
-						String opDoc = getDocumentation(bindingOperation);
+						// Get and add operation documentation from portType and binding
+						String opDoc1 = getDocumentation(bindingOperation);
 						String opDoc2 = getDocumentation(bindingOperation.getOperation());
-						if (opDoc2 != null) {
-							opDoc = opDoc + (opDoc != null ? " ": "") + opDoc2; 
+						if (opDoc1 != null || opDoc2 != null) {
+							String opDoc = "";
+							if (opDoc1 != null) {
+								opDoc += opDoc1;
+							}
+							if (opDoc2 != null) {
+								if (opDoc.length() > 0 && opDoc2.length() > 0) {
+									opDoc += ", ";
+								}
+								opDoc += opDoc2;
+							}
+							operationInfo.setDocumentation(opDoc);	
 						}
-						operationInfo.setDocumentation(opDoc);
 
 						portInfo.putOperation(operationName, operationInfo);
 	
