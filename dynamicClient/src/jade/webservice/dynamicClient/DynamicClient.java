@@ -32,6 +32,7 @@ import jade.content.schema.ObjectSchema;
 import jade.content.schema.facets.CardinalityFacet;
 import jade.content.schema.facets.DefaultValueFacet;
 import jade.content.schema.facets.PermittedValuesFacet;
+import jade.content.schema.facets.RegexFacet;
 import jade.webservice.utils.CompilerUtils;
 import jade.webservice.utils.FileUtils;
 import jade.webservice.utils.WSDLUtils;
@@ -1329,6 +1330,7 @@ public class DynamicClient {
 						} else {
 							Object defaultValue = null;
 							Object regex = null;
+							String pValues = null;
 							Integer cardMin = null;
 							Integer cardMax = null;
 							Facet[] facets = os.getFacets(names[i]);
@@ -1337,9 +1339,12 @@ public class DynamicClient {
 									if (facet instanceof DefaultValueFacet) {
 										DefaultValueFacet dvf = (DefaultValueFacet)facet;
 										defaultValue = dvf.getDefaultValue();
+									} else if (facet instanceof RegexFacet) {
+										RegexFacet rf = (RegexFacet)facet;
+										regex = rf.getRegex();
 									} else if (facet instanceof PermittedValuesFacet) {
 										PermittedValuesFacet pvf = (PermittedValuesFacet)facet;
-										regex = pvf.getRegex();
+										pValues = pvf.getPermittedValuesAsString();
 									} else if (facet instanceof CardinalityFacet) {
 										CardinalityFacet cf = (CardinalityFacet)facet;
 										cardMin = cf.getCardMin();
@@ -1354,6 +1359,9 @@ public class DynamicClient {
 							}
 							if (regex != null) {
 								sb.append(" (REGEX="+regex+")");
+							}
+							if (pValues != null && pValues.length() > 0) {
+								sb.append(" (VALUES="+pValues+")");
 							}
 							if (cardMin != null && cardMax != null) {
 								sb.append(" (["+cardMin+","+(cardMax!=-1?cardMax:"unbounded")+"])");

@@ -251,6 +251,7 @@ public class OperationParser {
 		pi.setMandatory(!axisParam.isOmittable());
 		pi.setDocumentation(extractDocumentation(emitter, bEntry.getQName().getNamespaceURI(), axisParam.getQName()));
 		pi.setRegex(axisParam.getRegex());
+		pi.setPermittedValues(axisParam.getPermittedValues());
 		pi.setDefaultValue(axisParam.getDefaultValue());
 		if (schema instanceof AggregateSchema) {
 			Integer cardMin = axisParam.getMinOccurs();
@@ -304,6 +305,7 @@ public class OperationParser {
 			elementDecl = SchemaUtils.getSanedElement(elementDecl);
 			hi.setMandatory(!elementDecl.getMinOccursIs0());
 			hi.setRegex(elementDecl.getRegex());
+			hi.setPermittedValues(elementDecl.getPermittedValues());
 			hi.setDefaultValue(elementDecl.getDefaultValue());
 			Integer cardMin = elementDecl.getMinOccurs();
 			if (cardMin != null) {
@@ -342,6 +344,7 @@ public class OperationParser {
 		hi.setMandatory(!param.isOmittable());
 		hi.setDocumentation(extractDocumentation(emitter, null, param.getQName()));
 		hi.setRegex(param.getRegex());
+		hi.setPermittedValues(param.getPermittedValues());
 		hi.setDefaultValue(param.getDefaultValue());
 		Integer cardMin = param.getMinOccurs();
 		if (cardMin != null) {

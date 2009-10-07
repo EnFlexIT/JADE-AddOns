@@ -51,9 +51,10 @@ public class ParameterInfo {
 	private boolean mandatory;
 	private TermSchema schema; 
 	private Object defaultValue;
-	private String regex;
 	private Integer cardMin;
 	private Integer cardMax;
+	private String regex;
+	private Object[] permittedValues;
 	
 
 	ParameterInfo(String parameterName) {
@@ -193,6 +194,19 @@ public class ParameterInfo {
 	}
 
 	/**
+	 * Get array with permitted values of parameter
+	 * 
+	 * @return regular expression
+	 */
+	public Object[] getPermittedValues() {
+		return permittedValues;
+	}
+
+	void setPermittedValues(Object[] permittedValues) {
+		this.permittedValues = permittedValues;
+	}
+	
+	/**
 	 * Get min cardinality, valid only if parameter is an array
 	 *    
 	 * @param cardMin min cardinality
@@ -238,6 +252,18 @@ public class ParameterInfo {
 		}
 		if (regex != null && !regex.equals("")) {
 			sb.append(", regex="+regex);
+		}
+		if (permittedValues != null && permittedValues.length > 0) {
+			StringBuilder pvsb = new StringBuilder();
+			if (permittedValues != null) {
+				for (int i=0; i<permittedValues.length; i++) {
+					if (pvsb.length() > 0) {
+						pvsb.append(", ");
+					}
+					pvsb.append(permittedValues[i]);
+				}
+			}
+			sb.append(", values={"+pvsb.toString()+"}");
 		}
 		return sb.toString();
 	}
