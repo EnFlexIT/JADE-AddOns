@@ -43,6 +43,7 @@ import jade.content.schema.PredicateSchema;
 import jade.content.schema.TermSchema;
 import jade.content.schema.facets.DefaultValueFacet;
 import jade.content.schema.facets.PermittedValuesFacet;
+import jade.content.schema.facets.RegexFacet;
 import jade.util.Logger;
 
 import java.lang.annotation.Annotation;
@@ -227,6 +228,7 @@ class BeanOntologyBuilder {
 		int cardMax;
 		String defaultValue;
 		String regex;
+		String[] permittedValues;
 
 		while (gettersIter.hasNext()) {
 			getter = gettersIter.next();
@@ -236,6 +238,7 @@ class BeanOntologyBuilder {
 			cardMax = ObjectSchema.UNLIMITED;
 			defaultValue = null;
 			regex = null;
+			permittedValues = null;
 			aggregateType = null;
 			slotAnnotation = getter.getAnnotation(Slot.class);
 			aggregateSlotAnnotation = getter.getAnnotation(AggregateSlot.class);
@@ -266,6 +269,10 @@ class BeanOntologyBuilder {
 						if (!Slot.NULL.equals(slotAnnotation.regex())) {
 							regex = slotAnnotation.regex();
 						}
+						if (!Slot.NULL.equals(slotAnnotation.permittedValues())) {
+							permittedValues = slotAnnotation.permittedValues();
+						}
+						
 						mandatory = slotAnnotation.mandatory();
 					}
 					// if present, use getter @AggregateSlot annotation data
@@ -295,7 +302,7 @@ class BeanOntologyBuilder {
 							}
 						}
 					}
-					sad = new SlotAccessData(slotClazz, getter, setter, mandatory, aggregateType, cardMin, cardMax, defaultValue, regex);
+					sad = new SlotAccessData(slotClazz, getter, setter, mandatory, aggregateType, cardMin, cardMax, defaultValue, regex, permittedValues);
 					result.put(new SlotKey(clazz, slotName), sad);
 				} else {
 					// TODO it's not a bean property, maybe we could generate a warning...
@@ -389,7 +396,10 @@ class BeanOntologyBuilder {
 					schema.addFacet(slotName, new DefaultValueFacet(sad.defaultValue));
 				}
 				if (sad.regex != null) {
-					schema.addFacet(slotName, new PermittedValuesFacet(sad.regex));
+					schema.addFacet(slotName, new RegexFacet(sad.regex));
+				}
+				if (sad.permittedValues != null) {
+					schema.addFacet(slotName, new PermittedValuesFacet(sad.permittedValues));
 				}
 			} else {
 				TermSchema ats = null;
