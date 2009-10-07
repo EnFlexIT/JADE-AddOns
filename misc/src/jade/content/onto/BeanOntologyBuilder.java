@@ -269,7 +269,7 @@ class BeanOntologyBuilder {
 						if (!Slot.NULL.equals(slotAnnotation.regex())) {
 							regex = slotAnnotation.regex();
 						}
-						if (!Slot.NULL.equals(slotAnnotation.permittedValues())) {
+						if (slotAnnotation.permittedValues().length > 0) {
 							permittedValues = slotAnnotation.permittedValues();
 						}
 						

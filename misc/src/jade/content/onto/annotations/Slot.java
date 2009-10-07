@@ -43,5 +43,5 @@ public @interface Slot {
 	boolean mandatory() default false;
 	String defaultValue() default NULL; 
 	String regex() default NULL;
-	String[] permittedValues() default NULL;
+	String[] permittedValues() default {};
 }
