@@ -42,6 +42,11 @@ public class OSGIBridgeService extends BaseService {
 		}
 	}
 	
+	// Redefine this method to avoid requiring the OSGiBridgeService class in the Main Container classpath
+	public  boolean isLocal() {
+		return true;
+	}
+	
 	private class CommandIncomingFilter extends Filter {
 		public boolean accept(VerticalCommand cmd) {
 			if(cmd.getName().equals(AgentManagementSlice.INFORM_KILLED)) {
