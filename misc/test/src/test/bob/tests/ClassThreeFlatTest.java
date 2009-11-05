@@ -30,12 +30,14 @@ import jade.content.schema.ObjectSchema;
 import java.util.Set;
 
 import content.onto.bob.beans.ClassThree;
+import content.onto.bob.beans.ClassZero.EnumNumber;
 
 public class ClassThreeFlatTest extends AbstractCheckSendAndReceiveTest {
 	private static final long serialVersionUID = 1L;
 
 	private static final int F00_VALUE = 900;
 	private static final int F01_VALUE = 901;
+	private static final EnumNumber F0E_VALUE = EnumNumber.One; 
 	private static final String F10_VALUE = "10";
 	private static final String F11_VALUE = "11";
 	private static final String F12_VALUE = "12";
@@ -54,6 +56,7 @@ public class ClassThreeFlatTest extends AbstractCheckSendAndReceiveTest {
 		ClassThree cz = new ClassThree();
 		cz.setFieldZeroZero(F00_VALUE);
 		cz.setFieldZeroOne(F01_VALUE);
+		cz.setFieldZeroEnum(F0E_VALUE);
 		cz.setFieldOneZero(F10_VALUE);
 		cz.setFieldOneOne(F11_VALUE);
 		cz.setFieldOneTwo(F12_VALUE);
@@ -75,6 +78,7 @@ public class ClassThreeFlatTest extends AbstractCheckSendAndReceiveTest {
 		boolean result =
 			cz.getFieldZeroZero() == F00_VALUE &&
 			cz.getFieldZeroOne() == F01_VALUE &&
+			cz.getFieldZeroEnum() == F0E_VALUE &&
 			F10_VALUE.equals(cz.getFieldOneZero()) &&
 			F11_VALUE.equals(cz.getFieldOneOne()) &&
 			F12_VALUE.equals(cz.getFieldOneTwo()) &&
@@ -105,7 +109,7 @@ public class ClassThreeFlatTest extends AbstractCheckSendAndReceiveTest {
 			log("wrong schema name \""+realSchemaName+"\" (expected \""+expectedSchemaName+"\")");
 		}
 		Set<String> slotNames = getSlotNameSet(os);
-		String[] expectedSlotNames = new String[] {"fieldZeroZero", "fieldZeroOne", "fieldOneZero", "fieldOneOne", "fieldOneTwo", "fieldTwoZero", "fieldTwoOne", "fieldTwoTwo", "fieldTwoThree", "fieldThreeZero", "fieldThreeOne", "fieldThreeTwo", "fieldThreeThree", "fieldThreeFour", "listOfStrings", "arrayOfStrings"};
+		String[] expectedSlotNames = new String[] {"fieldZeroZero", "fieldZeroOne", "fieldZeroEnum", "fieldOneZero", "fieldOneOne", "fieldOneTwo", "fieldTwoZero", "fieldTwoOne", "fieldTwoTwo", "fieldTwoThree", "fieldThreeZero", "fieldThreeOne", "fieldThreeTwo", "fieldThreeThree", "fieldThreeFour", "listOfStrings", "arrayOfStrings"};
 		for (String expectedSlotName: expectedSlotNames) {
 			if (!slotNames.remove(expectedSlotName)) {
 				log("missing field "+expectedSlotName);

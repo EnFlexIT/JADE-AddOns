@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import content.onto.bob.beans.ClassOne;
 import content.onto.bob.beans.ClassZero;
 import content.onto.bob.beans.VeryComplexBean;
+import content.onto.bob.beans.ClassZero.EnumNumber;
 
 public abstract class AbstractBaseTest extends AbstractCheckSendAndReceiveTest {
 	private static final long serialVersionUID = 1L;
@@ -51,6 +52,9 @@ public abstract class AbstractBaseTest extends AbstractCheckSendAndReceiveTest {
 		ClassZero cz = new ClassZero();
 		cz.setFieldZeroZero(counter++);
 		cz.setFieldZeroOne(counter++);
+		EnumNumber[] values = EnumNumber.values();
+		EnumNumber fieldZeroEnum = values[counter++ % values.length];
+		cz.setFieldZeroEnum(fieldZeroEnum);
 		return cz;
 	}
 

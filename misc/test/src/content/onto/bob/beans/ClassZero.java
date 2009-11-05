@@ -4,18 +4,23 @@ import jade.content.Concept;
 
 public class ClassZero implements Concept, Comparable<ClassZero> {
 	private static final long serialVersionUID = 1L;
+	
+	public enum EnumNumber { Zero, One, Two, Three };
 
 	private int fieldZeroZero;
 	private int fieldZeroOne;
+	private EnumNumber fieldZeroEnum;
 
 	public ClassZero() {
 		fieldZeroZero = -19;
 		fieldZeroOne = -79;
+		fieldZeroEnum = EnumNumber.Two;
 	}
 
-	public ClassZero(int fieldZeroOne, int fieldZeroZero) {
+	public ClassZero(int fieldZeroOne, int fieldZeroZero, EnumNumber fieldZeroEnum) {
 		this.fieldZeroOne = fieldZeroOne;
 		this.fieldZeroZero = fieldZeroZero;
+		this.fieldZeroEnum = fieldZeroEnum;
 	}
 
 	public int getFieldZeroZero() {
@@ -34,11 +39,22 @@ public class ClassZero implements Concept, Comparable<ClassZero> {
 		this.fieldZeroOne = fieldZeroOne;
 	}
 
+	public EnumNumber getFieldZeroEnum() {
+		return fieldZeroEnum;
+	}
+
+	public void setFieldZeroEnum(EnumNumber fieldZeroEnum) {
+		this.fieldZeroEnum = fieldZeroEnum;
+	}
+	
 	/* needs to be Comparable in order to be put into a jade Set */
 	public int compareTo(ClassZero o) {
 		int result = fieldZeroZero-o.fieldZeroZero;
 		if (result == 0) {
 			result = fieldZeroOne-o.fieldZeroOne;
+			if (result == 0) {
+				result = fieldZeroEnum.compareTo(o.fieldZeroEnum);
+			}
 		}
 		return result;
 	}
@@ -59,7 +75,7 @@ public class ClassZero implements Concept, Comparable<ClassZero> {
 
 	@Override
 	public int hashCode() {
-		return fieldZeroZero ^ fieldZeroOne;
+		return fieldZeroZero ^ fieldZeroOne ^ fieldZeroEnum.ordinal();
 	}
 
 	protected String innerToString() {
@@ -68,6 +84,8 @@ public class ClassZero implements Concept, Comparable<ClassZero> {
 		sb.append(fieldZeroZero);
 		sb.append(" fieldZeroOne=");
 		sb.append(fieldZeroOne);
+		sb.append(" fieldZeroEnum=");
+		sb.append(fieldZeroEnum);
 		return sb.toString();
 	}
 

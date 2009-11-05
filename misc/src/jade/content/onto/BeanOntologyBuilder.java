@@ -62,6 +62,7 @@ class BeanOntologyBuilder {
 
 	private final static Logger logger = Logger.getMyLogger(BeanOntologyBuilder.class.getName());
 
+	public static final String ENUM_SLOT_VALUE_NAME = "value";
 	private static final String GETTER_PREFIX = "get";
 	private static final String BOOLEAN_GETTER_PREFIX = "is";
 	private static final String SETTER_PREFIX = "set";
@@ -444,9 +445,6 @@ class BeanOntologyBuilder {
 	}
 
 	private ObjectSchema doAddFlatSchema(Class clazz, boolean skipClassChecking) throws BeanOntologyException {
-		Map<SlotKey, SlotAccessData> slotAccessorsMap = buildAccessorsMap(clazz, clazz.getMethods());
-		String slotName = null;
-		SlotAccessData sad;
 
 		String schemaName = getSchemaNameFromClass(clazz);
 		if (logger.isLoggable(Logger.FINE)) {
@@ -461,6 +459,11 @@ class BeanOntologyBuilder {
 				schema = new PredicateSchema(schemaName);
 			} else {
 				schema = new ConceptSchema(schemaName);
+				
+				// If the class is a enum type add a string slot for the enum value 
+				if (clazz.isEnum()) {
+					doAddEnumSlotSchema(clazz, schema, schemaName);
+				}
 			}
 		}
 
@@ -470,31 +473,38 @@ class BeanOntologyBuilder {
 			throw new BeanOntologyException("error adding empty schema for class "+clazz);
 		}
 
-		try {
-			for (Entry<SlotKey, SlotAccessData> entry: slotAccessorsMap.entrySet()) {
-				slotName = entry.getKey().slotName;
-				sad = entry.getValue();
-				if (schema instanceof ConceptSchema) {
-					addTermSlotToConcept((ConceptSchema)schema, slotName, schemaName, sad, skipClassChecking);
-				} else {
-					addTermSlotToPredicate((PredicateSchema)schema, slotName, schemaName, sad, skipClassChecking);
+		// If the class is a enum type skip the accessors-map building (emun not have fields)
+		if (!clazz.isEnum()) {
+			Map<SlotKey, SlotAccessData> slotAccessorsMap = buildAccessorsMap(clazz, clazz.getMethods());
+			String slotName = null;
+			SlotAccessData sad;
+			try {
+				for (Entry<SlotKey, SlotAccessData> entry: slotAccessorsMap.entrySet()) {
+					slotName = entry.getKey().slotName;
+					sad = entry.getValue();
+					if (schema instanceof ConceptSchema) {
+						addTermSlotToConcept((ConceptSchema)schema, slotName, schemaName, sad, skipClassChecking);
+					} else {
+						addTermSlotToPredicate((PredicateSchema)schema, slotName, schemaName, sad, skipClassChecking);
+					}
 				}
-			}
-			introspector.addAccessors(slotAccessorsMap);
-			if (isAction) {
-				Annotation annotation;
-				if ((annotation = clazz.getAnnotation(Result.class)) != null) {
-					TermSchema ts = supplySchemaForClassFlat(((Result)annotation).type(), skipClassChecking);
-					((AgentActionSchema)schema).setResult(ts);
-				} else if ((annotation = clazz.getAnnotation(AggregateResult.class)) != null) {
-					AggregateResult ar = (AggregateResult)annotation;
-					TermSchema ts = supplySchemaForClassFlat(ar.type(), skipClassChecking);
-					((AgentActionSchema)schema).setResult(ts, ar.cardMin(), ar.cardMax());
+				introspector.addAccessors(slotAccessorsMap);
+				if (isAction) {
+					Annotation annotation;
+					if ((annotation = clazz.getAnnotation(Result.class)) != null) {
+						TermSchema ts = supplySchemaForClassFlat(((Result)annotation).type(), skipClassChecking);
+						((AgentActionSchema)schema).setResult(ts);
+					} else if ((annotation = clazz.getAnnotation(AggregateResult.class)) != null) {
+						AggregateResult ar = (AggregateResult)annotation;
+						TermSchema ts = supplySchemaForClassFlat(ar.type(), skipClassChecking);
+						((AgentActionSchema)schema).setResult(ts, ar.cardMin(), ar.cardMax());
+					}
 				}
+			} catch (OntologyException e) {
+				throw new BeanOntologyException("error getting schema for slot "+slotName);
 			}
-		} catch (OntologyException e) {
-			throw new BeanOntologyException("error getting schema for slot "+slotName);
 		}
+		
 		return schema;
 	}
 
@@ -529,9 +539,6 @@ class BeanOntologyBuilder {
 		for (int i = 0; i < publicDeclaredMethods.length; i++) {
 			publicDeclaredMethods[i] = publicDeclaredMethodsList.get(i);
 		}
-		Map<SlotKey, SlotAccessData> slotAccessorsMap = buildAccessorsMap(clazz, publicDeclaredMethods);
-		String slotName = null;
-		SlotAccessData sad;
 
 		String schemaName = getSchemaNameFromClass(clazz);
 		if (logger.isLoggable(Logger.FINE)) {
@@ -546,6 +553,11 @@ class BeanOntologyBuilder {
 				schema = new PredicateSchema(schemaName);
 			} else {
 				schema = new ConceptSchema(schemaName);
+				
+				// If the class is a enum type add a string slot for the enum value 
+				if (clazz.isEnum()) {
+					doAddEnumSlotSchema(clazz, schema, schemaName);
+				}
 			}
 		}
 		if (superSchema != null) {
@@ -565,34 +577,61 @@ class BeanOntologyBuilder {
 			throw new BeanOntologyException("error adding empty schema for class "+clazz);
 		}
 
-		try {
-			for (Entry<SlotKey, SlotAccessData> entry: slotAccessorsMap.entrySet()) {
-				slotName = entry.getKey().slotName;
-				sad = entry.getValue();
-				if (schema instanceof ConceptSchema) {
-					addTermSlotToConcept((ConceptSchema)schema, slotName, schemaName, sad, skipClassChecking);
-				} else {
-					addTermSlotToPredicate((PredicateSchema)schema, slotName, schemaName, sad, skipClassChecking);
+		
+		// If the class is a enum type skip the accessors-map building (emun not have fields)
+		if (!clazz.isEnum()) {
+			Map<SlotKey, SlotAccessData> slotAccessorsMap = buildAccessorsMap(clazz, publicDeclaredMethods);
+			String slotName = null;
+			SlotAccessData sad;
+			try {
+				for (Entry<SlotKey, SlotAccessData> entry: slotAccessorsMap.entrySet()) {
+					slotName = entry.getKey().slotName;
+					sad = entry.getValue();
+					if (schema instanceof ConceptSchema) {
+						addTermSlotToConcept((ConceptSchema)schema, slotName, schemaName, sad, skipClassChecking);
+					} else {
+						addTermSlotToPredicate((PredicateSchema)schema, slotName, schemaName, sad, skipClassChecking);
+					}
 				}
-			}
-			introspector.addAccessors(slotAccessorsMap);
-			if (isAction) {
-				Annotation annotation;
-				if ((annotation = clazz.getAnnotation(Result.class)) != null) {
-					TermSchema ts = supplySchemaForClassRecursive(((Result)annotation).type(), skipClassChecking);
-					((AgentActionSchema)schema).setResult(ts);
-				} else if ((annotation = clazz.getAnnotation(AggregateResult.class)) != null) {
-					AggregateResult ar = (AggregateResult)annotation;
-					TermSchema ts = supplySchemaForClassRecursive(ar.type(), skipClassChecking);
-					((AgentActionSchema)schema).setResult(ts, ar.cardMin(), ar.cardMax());
+				introspector.addAccessors(slotAccessorsMap);
+				if (isAction) {
+					Annotation annotation;
+					if ((annotation = clazz.getAnnotation(Result.class)) != null) {
+						TermSchema ts = supplySchemaForClassRecursive(((Result)annotation).type(), skipClassChecking);
+						((AgentActionSchema)schema).setResult(ts);
+					} else if ((annotation = clazz.getAnnotation(AggregateResult.class)) != null) {
+						AggregateResult ar = (AggregateResult)annotation;
+						TermSchema ts = supplySchemaForClassRecursive(ar.type(), skipClassChecking);
+						((AgentActionSchema)schema).setResult(ts, ar.cardMin(), ar.cardMax());
+					}
 				}
+			} catch (OntologyException e) {
+				throw new BeanOntologyException("error getting schema for slot "+slotName, e);
 			}
-		} catch (OntologyException e) {
-			throw new BeanOntologyException("error getting schema for slot "+slotName, e);
 		}
+		
 		return schema;
 	}
 
+	private void doAddEnumSlotSchema(Class clazz, ObjectSchema schema, String schemaName) throws BeanOntologyException {
+		try {
+			ConceptSchema cs = (ConceptSchema)schema;
+			
+			cs.add(ENUM_SLOT_VALUE_NAME, (TermSchema)ontology.getSchema(String.class));
+
+			// Add enum permitted values
+			Enum[] enumValues = ((Class<? extends Enum>)clazz).getEnumConstants();
+			String[] enumStrValues = new String[enumValues.length]; 
+			for(int i=0; i<enumValues.length; i++) {
+				enumStrValues[i] = enumValues[i].toString(); 
+			}
+			cs.addFacet(ENUM_SLOT_VALUE_NAME, new PermittedValuesFacet(enumStrValues));
+			
+		} catch (OntologyException e) {
+			throw new BeanOntologyException("error adding slot value to enum-schema "+schemaName, e);
+		}
+	}
+	
 	private void doAddSchema(Class clazz, boolean buildHierarchy, boolean skipClassChecking) throws BeanOntologyException {
 		boolean classIsValid = skipClassChecking || (Concept.class.isAssignableFrom(clazz) || Predicate.class.isAssignableFrom(clazz));
 

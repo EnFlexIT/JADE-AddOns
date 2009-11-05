@@ -30,6 +30,7 @@ import jade.content.Concept;
 import jade.content.abs.AbsAggregate;
 import jade.content.abs.AbsHelper;
 import jade.content.abs.AbsObject;
+import jade.content.abs.AbsPrimitive;
 import jade.content.abs.AbsTerm;
 import jade.content.schema.ObjectSchema;
 
@@ -44,6 +45,8 @@ class BeanIntrospector implements Introspector {
 
 	private static final int ACC_ABSTRACT = 0x0400;
 	private static final int ACC_INTERFACE = 0x0200;
+
+	private static final String ENUM_SLOT_VALUE_NAME = BeanOntologyBuilder.ENUM_SLOT_VALUE_NAME;
 	
 	private Map<SlotKey, SlotAccessData> accessors;
 
@@ -205,49 +208,55 @@ class BeanIntrospector implements Introspector {
 
 	public AbsObject externalise(Object obj, ObjectSchema schema, Class javaClass, Ontology referenceOnto) throws OntologyException {
 		try {
-			AbsObject abs = schema.newInstance();            
-			String[] names = schema.getNames();
-
-			// loop over slots
-			for (int i = 0; i < names.length; ++i) {
-				String slotName = names[i];
-
-				Method getter;
-				Class clazz = javaClass;
-				SlotAccessData slotAccessData;
-
-				// search for the getter of this slot through clazz hierarchy
-				while(true) {
-					slotAccessData = accessors.get(new SlotKey(clazz, slotName));
-					if (slotAccessData != null) {
-						getter = slotAccessData.getter;
-						break;
+			AbsObject abs = schema.newInstance();
+			
+			if (javaClass.isEnum()) {
+				AbsHelper.setAttribute(abs, ENUM_SLOT_VALUE_NAME, AbsPrimitive.wrap(obj.toString()));
+			}
+			else {
+				String[] names = schema.getNames();
+	
+				// loop over slots
+				for (int i = 0; i < names.length; ++i) {
+					String slotName = names[i];
+	
+					Method getter;
+					Class clazz = javaClass;
+					SlotAccessData slotAccessData;
+	
+					// search for the getter of this slot through clazz hierarchy
+					while(true) {
+						slotAccessData = accessors.get(new SlotKey(clazz, slotName));
+						if (slotAccessData != null) {
+							getter = slotAccessData.getter;
+							break;
+						}
+	
+						// clazz does not have this getter, let's search it on its superclass
+						clazz = clazz.getSuperclass();
+	
+						if (Object.class.equals(clazz)) {
+							throw new OntologyException("cannot retrieve a getter for slot "+slotName+", class "+javaClass);
+						}
 					}
-
-					// clazz does not have this getter, let's search it on its superclass
-					clazz = clazz.getSuperclass();
-
-					if (Object.class.equals(clazz)) {
-						throw new OntologyException("cannot retrieve a getter for slot "+slotName+", class "+javaClass);
+	
+					Object slotValue = invokeGetterMethod(getter, obj);
+	
+					if (slotValue != null) {
+						// basic sanity check: do not try to set a slot that is a reference to self
+						disallowRecursion(slotName, obj, slotValue);
+						// Agregate slots require a special handling 
+						if (slotAccessData.aggregate) {
+							ObjectSchema slotSchema = schema.getSchema(slotName);
+							externaliseAndSetAggregateSlot(obj, abs, schema, slotName, slotValue, slotSchema, referenceOnto);
+						}
+						else {
+							AbsObject absSlotValue = referenceOnto.fromObject(slotValue);
+							AbsHelper.setAttribute(abs, slotName, absSlotValue);
+						}
 					}
 				}
-
-				Object slotValue = invokeGetterMethod(getter, obj);
-
-				if (slotValue != null) {
-					// basic sanity check: do not try to set a slot that is a reference to self
-					disallowRecursion(slotName, obj, slotValue);
-					// Agregate slots require a special handling 
-					if (slotAccessData.aggregate) {
-						ObjectSchema slotSchema = schema.getSchema(slotName);
-						externaliseAndSetAggregateSlot(obj, abs, schema, slotName, slotValue, slotSchema, referenceOnto);
-					}
-					else {
-						AbsObject absSlotValue = referenceOnto.fromObject(slotValue);
-						AbsHelper.setAttribute(abs, slotName, absSlotValue);
-					}
-				}
-			} 
+			}
 
 			return abs;
 		} catch (OntologyException oe) {
@@ -259,46 +268,53 @@ class BeanIntrospector implements Introspector {
 
 	public Object internalise(AbsObject abs, ObjectSchema schema, Class javaClass, Ontology referenceOnto) throws UngroundedException, OntologyException {
 		try {
-			Object       obj = javaClass.newInstance();            
-			String[]     names = schema.getNames();
-
-			// loop over slots 
-			for (int i = 0; i < names.length; ++i) {
-				String slotName = names[i];
-				AbsObject absObj = abs.getAbsObject(slotName);
-				if (absObj != null) {
-					Method setter;
-					Class clazz = javaClass;
-					SlotAccessData slotAccessData;
-
-					// search for the setter of this slot trough clazz hierarchy
-					while(true) {
-						slotAccessData = accessors.get(new SlotKey(clazz, slotName));
-						if (slotAccessData != null) {
-							setter = slotAccessData.setter;
-							break;
-						}
-
-						// clazz does not have this setter, let's search it on its superclass
-						clazz = clazz.getSuperclass();
-						if (Object.class.equals(clazz)) {
-							throw new OntologyException("cannot retrieve a setter for slot "+slotName+", class "+javaClass);
-						}
-					}
-
-					Object slotValue = null;
-					// Agregate slots require a special handling 
-					if (absObj.getAbsType() == AbsObject.ABS_AGGREGATE) {
-						slotValue = internaliseAggregateSlot((AbsAggregate) absObj, schema, slotAccessData.type, slotAccessData.aggregateClass, referenceOnto);
-					}
-					else {
-						slotValue = referenceOnto.toObject(absObj);
-					}
-
-					invokeSetterMethod(setter, obj, slotValue, slotAccessData.type);
-				}             	
+			Object obj = null;
+			if (javaClass.isEnum()) {
+				AbsPrimitive absEnumValue = (AbsPrimitive)abs.getAbsObject(ENUM_SLOT_VALUE_NAME);
+				String strEnumValue = absEnumValue.getString();
+				obj = Enum.valueOf(javaClass, strEnumValue);
 			}
-
+			else {
+				obj = javaClass.newInstance();            
+				String[] names = schema.getNames();
+	
+				// loop over slots 
+				for (int i = 0; i < names.length; ++i) {
+					String slotName = names[i];
+					AbsObject absObj = abs.getAbsObject(slotName);
+					if (absObj != null) {
+						Method setter;
+						Class clazz = javaClass;
+						SlotAccessData slotAccessData;
+	
+						// search for the setter of this slot trough clazz hierarchy
+						while(true) {
+							slotAccessData = accessors.get(new SlotKey(clazz, slotName));
+							if (slotAccessData != null) {
+								setter = slotAccessData.setter;
+								break;
+							}
+	
+							// clazz does not have this setter, let's search it on its superclass
+							clazz = clazz.getSuperclass();
+							if (Object.class.equals(clazz)) {
+								throw new OntologyException("cannot retrieve a setter for slot "+slotName+", class "+javaClass);
+							}
+						}
+	
+						Object slotValue = null;
+						// Agregate slots require a special handling 
+						if (absObj.getAbsType() == AbsObject.ABS_AGGREGATE) {
+							slotValue = internaliseAggregateSlot((AbsAggregate) absObj, schema, slotAccessData.type, slotAccessData.aggregateClass, referenceOnto);
+						}
+						else {
+							slotValue = referenceOnto.toObject(absObj);
+						}
+	
+						invokeSetterMethod(setter, obj, slotValue, slotAccessData.type);
+					}             	
+				}
+			}
 			return obj;
 		} 
 		catch (OntologyException oe) {
