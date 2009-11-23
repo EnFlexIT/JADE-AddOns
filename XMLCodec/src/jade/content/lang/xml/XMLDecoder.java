@@ -205,8 +205,8 @@ class XMLDecoder {
 	private AbsPrimitive decodeAbsPrimitive(String typeName, String value) {
 		// FIXME: with typeName is possible optimize the function
 		
-		// For type string decode xml text in java text  
-		if (BasicOntology.STRING.equals(typeName)) {
+		// For type string decode xml text in java text (second equals is for backward compatibility) 
+		if (XMLCodec.STRING.equals(typeName) || BasicOntology.STRING.equals(typeName)) {
 			value = XMLCodec.fromXML(value);
 			return AbsPrimitive.wrap(value);
 		}

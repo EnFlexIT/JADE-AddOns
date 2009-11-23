@@ -30,7 +30,10 @@ import jade.content.lang.StringCodec;
 import java.io.StringReader;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.util.HashMap;
+import java.util.Map;
 
+import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
 import jade.content.abs.AbsContentElement;
@@ -47,11 +50,11 @@ public class XMLCodec extends StringCodec {
 	// Tag and attribute for aggregates of primitives:
 	// For instance a slot named foo that is a list of integers is encoded as below
 	// ...
-	// <foo>
+	// <foos>
 	//   <primitive type="BO_INTEGER" value="1"/>
 	//   <primitive type="BO_INTEGER" value="2"/>
 	//   ...
-	// </foo>
+	// </foos>
 	// ...
 	public static final String PRIMITIVE_TAG = "primitive";
 	public static final String VALUE_ATTR = "value";
@@ -63,6 +66,28 @@ public class XMLCodec extends StringCodec {
 	
 
 	private boolean preserveJavaTypes;
+
+	static final String STRING = "STRING";
+	static final String INTEGER = "INTEGER";
+	static final String BOOLEAN = "BOOLEAN";
+	static final String DATE = "DATE";
+	static final String BYTE_SEQUENCE = "BYTE_SEQUENCE";
+	static final String FLOAT = "FLOAT";
+	
+	private static Map<String, String> primitiveTypeNames = new HashMap<String, String>();
+	static {
+		primitiveTypeNames.put(BasicOntology.STRING, STRING);
+		primitiveTypeNames.put(BasicOntology.INTEGER, INTEGER);
+		primitiveTypeNames.put(BasicOntology.BOOLEAN, BOOLEAN);
+		primitiveTypeNames.put(BasicOntology.DATE, DATE);
+		primitiveTypeNames.put(BasicOntology.BYTE_SEQUENCE, BYTE_SEQUENCE);
+		primitiveTypeNames.put(BasicOntology.FLOAT, FLOAT);
+	}
+	
+	static String getPrimitiveTypeName(String basicOntoPrimitiveTypeName) {
+		return primitiveTypeNames.get(basicOntoPrimitiveTypeName);
+	}
+	
 
 	/**
 	 * Create an XMLCodec that preserves java primitive types (long, int, float, double).

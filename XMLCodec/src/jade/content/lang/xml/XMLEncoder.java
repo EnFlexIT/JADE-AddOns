@@ -216,7 +216,7 @@ class XMLEncoder {
 		buffer.append(XMLCodec.TYPE_ATTR);
 		buffer.append('=');
 		buffer.append('"');
-		buffer.append(abs.getTypeName());
+		buffer.append(XMLCodec.getPrimitiveTypeName(abs.getTypeName()));
 		buffer.append('"');
 		buffer.append(' ');
 		buffer.append(XMLCodec.VALUE_ATTR);
