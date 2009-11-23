@@ -377,7 +377,7 @@ public class TestUtility {
 				}
 				classpathOption = "-cp "+classpath;
 			}
-			String commandLine = "java "+classpathOption+" "+jvmArgs+" "+mainClass+" "+jadeArgs;
+			String commandLine = "java "+classpathOption+" "+jvmArgs+" -DTSDaemon=true "+mainClass+" "+jadeArgs;
 			if ("true".equalsIgnoreCase(System.getProperty("DEBUG"))) {
 				System.out.println("Manual launch!!!!!!!!!!!!!!");
 				jc = new ManualJadeController(instanceName, commandLine, protoNames);
