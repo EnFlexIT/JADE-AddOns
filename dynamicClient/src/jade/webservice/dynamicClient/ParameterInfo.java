@@ -26,6 +26,7 @@ import javax.xml.rpc.holders.Holder;
 
 import org.apache.axis.utils.JavaUtils;
 
+import jade.content.onto.BasicOntology;
 import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.TermSchema;
 
@@ -203,6 +204,13 @@ public class ParameterInfo {
 	}
 
 	void setPermittedValues(Object[] permittedValues) {
+		// Adjust permitted values in correct class type 
+		// This is necessary because in the wsdl the permitted values are string 
+		if (permittedValues != null && typeClass != null) {
+			for(int i=0; i<permittedValues.length; i++) {
+				permittedValues[i] = BasicOntology.adjustPrimitiveValue(permittedValues[i], typeClass);
+			}
+		}
 		this.permittedValues = permittedValues;
 	}
 	
