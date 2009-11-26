@@ -400,7 +400,15 @@ class BeanOntologyBuilder {
 					schema.addFacet(slotName, new RegexFacet(sad.regex));
 				}
 				if (sad.permittedValues != null) {
-					schema.addFacet(slotName, new PermittedValuesFacet(sad.permittedValues));
+					// Adjust permitted values in correct class type 
+					// This is necessary because in the annotation the permitted values are string
+					Object[] typizedPermittedValues = new Object[sad.permittedValues.length]; 
+					if (sad.type != null) {
+						for(int i=0; i<sad.permittedValues.length; i++) {
+							typizedPermittedValues[i] = BasicOntology.adjustPrimitiveValue(sad.permittedValues[i], sad.type);
+						}
+					}
+					schema.addFacet(slotName, new PermittedValuesFacet(typizedPermittedValues));
 				}
 			} else {
 				TermSchema ats = null;
