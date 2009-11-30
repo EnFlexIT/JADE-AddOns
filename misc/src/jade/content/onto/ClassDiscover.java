@@ -27,6 +27,7 @@ package jade.content.onto;
 //#APIDOC_EXCLUDE_FILE
 
 import jade.content.Concept;
+import jade.util.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 class ClassDiscover {
+	private static Logger myLogger = Logger.getMyLogger(ClassDiscover.class.getName());
+	
 	static List<Class> getClassesForPackage(String pkgname) throws ClassNotFoundException {
 		// This will hold a list of directories matching the pckgname.
 		// There may be more than one if a package is split over multiple
@@ -65,7 +68,7 @@ class ClassDiscover {
 
 						if (e.getName().startsWith(pkgname.replace('.', '/')) && e.getName().endsWith(".class") && !e.getName().contains("$")) {
 							String className = e.getName().replace("/", ".").substring(0, e.getName().length() - 6);
-							System.out.println(className);
+							myLogger.log(Logger.CONFIG, "Adding class "+className);
 							classes.add(Class.forName(className));
 						}
 					}
