@@ -54,8 +54,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 
 class BeanOntologyBuilder {
@@ -197,8 +199,8 @@ class BeanOntologyBuilder {
 		return result;
 	}
 
-	private static Map<SlotKey, SlotAccessData> buildAccessorsMap(Class clazz, Method[] methodsArray) {
-		Map<SlotKey, SlotAccessData> result = new HashMap<SlotKey, SlotAccessData>();
+	private static Map<SlotKey, SlotAccessData> buildAccessorsMap(Class clazz, Method[] methodsArray) throws BeanOntologyException {
+		Map<SlotKey, SlotAccessData> result = new TreeMap<SlotKey, SlotAccessData>();
 		List<Method> getters = new ArrayList<Method>();
 		Map<String, Method> setters = new HashMap<String, Method>();
 		for (Method method: methodsArray) {
@@ -230,6 +232,8 @@ class BeanOntologyBuilder {
 		String defaultValue;
 		String regex;
 		String[] permittedValues;
+		int position;
+		boolean orderByPosition = false;
 
 		while (gettersIter.hasNext()) {
 			getter = gettersIter.next();
@@ -241,6 +245,7 @@ class BeanOntologyBuilder {
 			regex = null;
 			permittedValues = null;
 			aggregateType = null;
+			position = -1;
 			slotAnnotation = getter.getAnnotation(Slot.class);
 			aggregateSlotAnnotation = getter.getAnnotation(AggregateSlot.class);
 
@@ -263,6 +268,10 @@ class BeanOntologyBuilder {
 						 */
 						if (!Slot.USE_METHOD_NAME.equals(slotAnnotation.name())) {
 							slotName = slotAnnotation.name();
+						}
+						if (slotAnnotation.position() != -1) {
+							position = slotAnnotation.position();
+							orderByPosition = true;
 						}
 						if (!Slot.NULL.equals(slotAnnotation.defaultValue())) {
 							defaultValue = slotAnnotation.defaultValue();
@@ -304,11 +313,59 @@ class BeanOntologyBuilder {
 						}
 					}
 					sad = new SlotAccessData(slotClazz, getter, setter, mandatory, aggregateType, cardMin, cardMax, defaultValue, regex, permittedValues);
-					result.put(new SlotKey(clazz, slotName), sad);
+					result.put(new SlotKey(clazz, slotName, position), sad);
 				} else {
 					// TODO it's not a bean property, maybe we could generate a warning...
 				}
 			}
+		}
+		
+		// If exists at least one annotation with position setted
+		// entire map should be sorted by position.
+		// Slots without position (but in alphabetical order) are used to fill holes.
+		// Position are zero-based.
+		// In a class the positions are unique.
+		// If a class extends another and ontology is flat the positions must be global and unique.
+		// If a class extends another and ontology is hierarchical the positions must be local to the single classes.
+		if (orderByPosition) {
+			
+			SlotKey[] positionedSK = new SlotKey[result.size()];
+			List<SlotKey> nonPositionedSAD = new ArrayList<SlotKey>();  
+			for (SlotKey key : result.keySet()) {
+				position = key.position;
+				if (position != -1) {
+					
+					// Check position validity
+					if (position < 0 || position >= result.size()) {
+						throw new BeanOntologyException("not valid position #" + position + " in slot " + key.slotName);
+					}
+					
+					// Check position duplication
+					if (positionedSK[position] != null) {
+						throw new BeanOntologyException("duplicated position #" + position + " in slot " + key.slotName);
+					}
+					
+					positionedSK[position] = key;
+				} else {
+					nonPositionedSAD.add(key);
+				}
+			}
+			
+			int nonPositionedSADIndex = 0;
+			Map<SlotKey, SlotAccessData> orderedMap = new LinkedHashMap<SlotKey, SlotAccessData>();
+			for (int i=0; i<result.size(); i++) {
+				
+				SlotKey key;
+				if (positionedSK[i] != null) {
+					key = positionedSK[i];
+				} else {
+					key = nonPositionedSAD.get(nonPositionedSADIndex);
+					nonPositionedSADIndex++;
+				}
+				orderedMap.put(key, result.get(key));
+			}
+			
+			result = orderedMap;
 		}
 		return result;
 	}

@@ -26,14 +26,20 @@ package jade.content.onto;
 //#J2ME_EXCLUDE_FILE
 //#APIDOC_EXCLUDE_FILE
 
-class SlotKey {
+class SlotKey implements Comparable<SlotKey> {
 	Class clazz;
 	String slotName;
+	int position;
 	private int hashcode;
 
 	SlotKey(Class clazz, String slotName) {
+		this(clazz, slotName, -1);
+	}
+	
+	SlotKey(Class clazz, String slotName, int position) {
 		this.clazz = clazz;
 		this.slotName = slotName;
+		this.position = position;
 		calcHashcode();
 	}
 
@@ -71,12 +77,18 @@ class SlotKey {
 		return hashcode;
 	}
 
+	public int compareTo(SlotKey o) {
+		return slotName.compareTo(o.slotName);
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder("SlotKey {clazz=");
 		sb.append(clazz != null ? clazz.getSimpleName() : null);
 		sb.append(" slotName=");
 		sb.append(slotName);
+		sb.append(" position=");
+		sb.append(position);
 		return sb.toString();
 	}
 }
