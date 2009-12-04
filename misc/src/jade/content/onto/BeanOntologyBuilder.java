@@ -557,11 +557,11 @@ class BeanOntologyBuilder {
 				if (isAction) {
 					Annotation annotation;
 					if ((annotation = clazz.getAnnotation(Result.class)) != null) {
-						TermSchema ts = supplySchemaForClassFlat(((Result)annotation).type(), skipClassChecking);
+						TermSchema ts = supplySchemaForClassFlat(((Result)annotation).type(), true);
 						((AgentActionSchema)schema).setResult(ts);
 					} else if ((annotation = clazz.getAnnotation(AggregateResult.class)) != null) {
 						AggregateResult ar = (AggregateResult)annotation;
-						TermSchema ts = supplySchemaForClassFlat(ar.type(), skipClassChecking);
+						TermSchema ts = supplySchemaForClassFlat(ar.type(), true);
 						((AgentActionSchema)schema).setResult(ts, ar.cardMin(), ar.cardMax());
 					}
 				}
@@ -580,7 +580,8 @@ class BeanOntologyBuilder {
 			if ((skipClassChecking && !Object.class.equals(superClazz)) || Concept.class.isAssignableFrom(superClazz)) {
 				int scms = superClazz.getModifiers();
 				if (!Modifier.isAbstract(scms) && !Modifier.isInterface(scms) && !Modifier.isPrivate(scms)) {
-					doAddHierarchicalSchema(superClazz, skipClassChecking);
+					// classes referenced as slots do not need to be Concept, Predicate or AgentAction
+					doAddHierarchicalSchema(superClazz, true);
 					try {
 						superSchema = ontology.getSchema(superClazz);
 					} catch (OntologyException oe) {
@@ -653,20 +654,20 @@ class BeanOntologyBuilder {
 					slotName = entry.getKey().slotName;
 					sad = entry.getValue();
 					if (schema instanceof ConceptSchema) {
-						addTermSlotToConcept((ConceptSchema)schema, slotName, schemaName, sad, skipClassChecking);
+						addTermSlotToConcept((ConceptSchema)schema, slotName, schemaName, sad, true);
 					} else {
-						addTermSlotToPredicate((PredicateSchema)schema, slotName, schemaName, sad, skipClassChecking);
+						addTermSlotToPredicate((PredicateSchema)schema, slotName, schemaName, sad, true);
 					}
 				}
 				introspector.addAccessors(slotAccessorsMap);
 				if (isAction) {
 					Annotation annotation;
 					if ((annotation = clazz.getAnnotation(Result.class)) != null) {
-						TermSchema ts = supplySchemaForClassRecursive(((Result)annotation).type(), skipClassChecking);
+						TermSchema ts = supplySchemaForClassRecursive(((Result)annotation).type(), true);
 						((AgentActionSchema)schema).setResult(ts);
 					} else if ((annotation = clazz.getAnnotation(AggregateResult.class)) != null) {
 						AggregateResult ar = (AggregateResult)annotation;
-						TermSchema ts = supplySchemaForClassRecursive(ar.type(), skipClassChecking);
+						TermSchema ts = supplySchemaForClassRecursive(ar.type(), true);
 						((AgentActionSchema)schema).setResult(ts, ar.cardMin(), ar.cardMax());
 					}
 				}
