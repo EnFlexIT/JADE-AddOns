@@ -377,7 +377,13 @@ public class TestUtility {
 				}
 				classpathOption = "-cp "+classpath;
 			}
-			String commandLine = "java "+classpathOption+" "+jvmArgs+" -DTSDaemon=true "+mainClass+" "+jadeArgs;
+			String javaHome = System.getenv("JAVA_HOME");
+			if(javaHome != null){
+				javaHome = javaHome + System.getProperty("file.separator")+ "bin" + System.getProperty("file.separator")+"java ";
+			}else{
+				javaHome= "java ";
+			}
+			String commandLine = javaHome+classpathOption+" "+jvmArgs+" -DTSDaemon=true "+mainClass+" "+jadeArgs;
 			if ("true".equalsIgnoreCase(System.getProperty("DEBUG"))) {
 				System.out.println("Manual launch!!!!!!!!!!!!!!");
 				jc = new ManualJadeController(instanceName, commandLine, protoNames);
