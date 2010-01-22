@@ -72,17 +72,11 @@
 
   <!-- Make distribution zip file and put in ${dist} -->
   <target name="dist" depends="clean, doc, lib">
-    <echo message="GENERATE THE PDF FORM OF THE BEAN-ONTOLOGY TUTORIAL, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/misc) AND THEN PRESS ENTER -->"/>
-    <input/>
     <mkdir dir="${jade-home}/doc"/>
-    <mkdir dir="${jade-home}/doc/tutorials"/>
-    <copy file="BeanOntologyTutorial.pdf" todir="${jade-home}/doc/tutorials"/>
 
     <delete file="../miscAddOn-${version}.zip" quiet="true"/>
     <zip zipfile="../miscAddOn-${version}.zip" basedir="../..">
       <include name="add-ons/misc/*"/>
-      <exclude name="add-ons/misc/BeanOntologyTutorial.*"/>
-      <include name="doc/tutorials/BeanOntologyTutorial.pdf"/>
       <include name="add-ons/misc/src/**"/>
       <include name="add-ons/misc/doc/**"/>
       <include name="add-ons/misc/lib/**"/>
