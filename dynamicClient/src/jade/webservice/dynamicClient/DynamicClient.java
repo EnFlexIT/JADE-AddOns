@@ -149,6 +149,7 @@ public class DynamicClient {
 	private String defaultWSSPassword;
 	private String defaultWSSPasswordType;
 	private Boolean defaultWSSMustUnderstand;
+	private Integer defaultWSSTimeToLive;
 
 	private DynamicClientProperties properties;
 	private ClassLoader classloader;
@@ -381,6 +382,26 @@ public class DynamicClient {
 	 */
 	public void setDefaultWSSMustUnderstand(boolean defaultWSSMustUnderstand) {
 		this.defaultWSSMustUnderstand = Boolean.valueOf(defaultWSSMustUnderstand);
+	}
+		
+	/**
+	 * Get defaultWSSTimeToLive value in second for WS Security specifications - Timestamp
+	 * @see jade.webservice.dynamicClient.SecurityProperties
+	 * 
+	 * @return defaultWSSTimeToLive value
+	 */
+	public Integer getDefaultWSSTimeToLive() {
+		return defaultWSSTimeToLive;
+	}
+
+	/**
+	 * Set defaultWSSTimeToLive value in second for WS Security specifications - Timestamp
+	 * @see jade.webservice.dynamicClient.SecurityProperties
+	 * 
+	 * @param defaultWSSTimeToLive defaultWSSTimeToLive value
+	 */
+	public void setDefaultWSSTimeToLive(int defaultWSSTimeToLive) {
+		this.defaultWSSTimeToLive = Integer.valueOf(defaultWSSTimeToLive);
 	}
 	
 	/**
@@ -899,6 +920,11 @@ public class DynamicClient {
 				wssMustUnderstand = defaultWSSMustUnderstand;
 			}
 			
+			Integer wssTimeToLive = securityProperties.getWSSTimeToLive();
+			if (wssTimeToLive == null) {
+				wssTimeToLive = defaultWSSTimeToLive;
+			}
+			
 			// Get and check service
 			ServiceInfo serviceInfo = getService(serviceName);
 			if (serviceInfo == null) {
@@ -969,8 +995,7 @@ public class DynamicClient {
 			// Set WS-Security Username Token
 			if (wssUsername != null && wssPassword != null) {
 				WSSPasswordCallback passwordCallback = new WSSPasswordCallback(wssPassword);
-				 
-				stub._setProperty(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
+				addStubAction(stub, WSHandlerConstants.USERNAME_TOKEN);
 	            stub._setProperty(UsernameToken.PASSWORD_TYPE, wssPasswordType);
 	            stub._setProperty(WSHandlerConstants.USER, wssUsername);
 	            stub._setProperty(WSHandlerConstants.PW_CALLBACK_REF, passwordCallback);
@@ -979,6 +1004,12 @@ public class DynamicClient {
 	            }
 			}
 			
+			// Set WS-Security Timestamp
+            if (wssTimeToLive != null) {
+            	addStubAction(stub, WSHandlerConstants.TIMESTAMP);
+            	stub._setProperty(WSHandlerConstants.TTL_TIMESTAMP, wssTimeToLive.toString());
+            }
+            
 			log("Invoke "+serviceInfo.getName()+"->"+portInfo.getName()+"->"+operationInfo.getName());
 			log("Input\n"+input, 1);
 			
@@ -1112,6 +1143,15 @@ public class DynamicClient {
 		}
 	}
 
+	private static void addStubAction(Stub stub, String action) {
+    	String prevAction = (String)stub._getProperty(WSHandlerConstants.ACTION);
+    	if (prevAction != null) {
+    		action = prevAction + " " + action;
+    	}
+    	
+    	stub._setProperty(WSHandlerConstants.ACTION, action);
+	}
+	
 	private String getDocumentation(Element documentationElement) {
 		String documentation = null;
 		if (documentationElement != null) {

@@ -42,6 +42,7 @@ public class SecurityProperties {
 	private String WSSPassword;
 	private String WSSPasswordType;
 	private Boolean WSSMustUnderstand;
+	private Integer WSSTimeToLive;
 
 	/**
 	 * Create a SecurityProperties
@@ -156,5 +157,23 @@ public class SecurityProperties {
 	 */
 	public void setWSSMustUnderstand(boolean WSSMustUnderstand) {
 		this.WSSMustUnderstand = Boolean.valueOf(WSSMustUnderstand);
+	}
+
+	/**
+	 * Get LifeTime in seconds for WS Security specifications - Timestamp
+	 * 
+	 * @return LifeTime in seconds
+	 */
+	public Integer getWSSTimeToLive() {
+		return WSSTimeToLive;
+	}
+
+	/**
+	 * Set LifeTime in seconds for WS Security specifications - Timestamp
+	 * 
+	 * @param wSSLifeTime in seconds
+	 */
+	public void setWSSTimeToLive(int WSSTimeToLive) {
+		this.WSSTimeToLive = Integer.valueOf(WSSTimeToLive);
 	}
 }
