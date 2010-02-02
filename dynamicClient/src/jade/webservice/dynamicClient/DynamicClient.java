@@ -957,7 +957,7 @@ public class DynamicClient {
 				respHandler.addHandler(sessionHandler); 
 
 				// Only for WSS security add WSS handler
-				if (wssUsername != null && wssPassword != null) {
+				if ((wssUsername != null && wssPassword != null) || wssTimeToLive != null) {
 					WSDoAllSender wsDoAllSender = new WSDoAllSender();
 					reqHandler.addHandler(wsDoAllSender);
 				}
