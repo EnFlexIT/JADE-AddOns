@@ -89,7 +89,9 @@ import org.apache.axis.wsdl.toJava.Emitter;
 import org.apache.axis.wsdl.toJava.GeneratedFileInfo;
 import org.apache.axis.wsdl.toJava.GeneratedFileInfo.Entry;
 import org.apache.log4j.Logger;
+import org.apache.ws.axis.security.WSDoAllReceiver;
 import org.apache.ws.axis.security.WSDoAllSender;
+import org.apache.ws.axis.security.handler.WSDoAllHandler;
 import org.apache.ws.security.WSPasswordCallback;
 import org.apache.ws.security.handler.WSHandlerConstants;
 import org.apache.ws.security.message.token.UsernameToken;
@@ -943,9 +945,12 @@ public class DynamicClient {
 				throw new DynamicClientException("Operation "+operation+" not present in service "+serviceInfo.getName()+", port "+portInfo.getName());
 			}
 			
-			// Create axis stub
+			// Create axis stub and handlers
 			Method stubMethod = portInfo.getStubMethod();
+			WSDoAllSender senderHandler = new WSDoAllSender();
+			WSDoAllReceiver receiverHandler = new WSDoAllReceiver();
 			Stub stub;
+			
 			try {
 				Service service = serviceInfo.getLocator(); 
 				
@@ -956,10 +961,15 @@ public class DynamicClient {
 				reqHandler.addHandler(sessionHandler); 
 				respHandler.addHandler(sessionHandler); 
 
-				// Only for WSS security add WSS handler
+				// Only for WSS security add WSS handlers
 				if ((wssUsername != null && wssPassword != null) || wssTimeToLive != null) {
-					WSDoAllSender wsDoAllSender = new WSDoAllSender();
-					reqHandler.addHandler(wsDoAllSender);
+					// Sender handler for username-token and/or timestamp
+					reqHandler.addHandler(senderHandler);
+					
+					// Receiver handler only for timestamp
+					if (wssTimeToLive != null) {
+						respHandler.addHandler(receiverHandler);
+					}
 				}
 				
 				Handler pivot = (Handler)new HTTPSender(); 
@@ -991,22 +1001,33 @@ public class DynamicClient {
 				stub.setUsername(httpUsername);
 				stub.setPassword(httpPassword);
 			}
-			
-			// Set WS-Security Username Token
-			if (wssUsername != null && wssPassword != null) {
-				WSSPasswordCallback passwordCallback = new WSSPasswordCallback(wssPassword);
-				addStubAction(stub, WSHandlerConstants.USERNAME_TOKEN);
-	            stub._setProperty(UsernameToken.PASSWORD_TYPE, wssPasswordType);
-	            stub._setProperty(WSHandlerConstants.USER, wssUsername);
-	            stub._setProperty(WSHandlerConstants.PW_CALLBACK_REF, passwordCallback);
+
+			// Set global WS-Security  
+			if ((wssUsername != null && wssPassword != null) || wssTimeToLive != null) {
 	            if (wssMustUnderstand != null) {
 	            	stub._setProperty(WSHandlerConstants.MUST_UNDERSTAND, wssMustUnderstand.toString());
 	            }
 			}
+
+			// Set WS-Security Username Token
+			if (wssUsername != null && wssPassword != null) {
+			
+				// Add Username Token management only in sender handler
+				addHandlerAction(senderHandler, WSHandlerConstants.USERNAME_TOKEN);
+				stub._setProperty(UsernameToken.PASSWORD_TYPE, wssPasswordType);
+				stub._setProperty(WSHandlerConstants.USER, wssUsername);
+				
+				WSSPasswordCallback passwordCallback = new WSSPasswordCallback(wssPassword);
+				stub._setProperty(WSHandlerConstants.PW_CALLBACK_REF, passwordCallback);
+			}
 			
 			// Set WS-Security Timestamp
             if (wssTimeToLive != null) {
-            	addStubAction(stub, WSHandlerConstants.TIMESTAMP);
+            	
+            	// Add timestamp management in sender & receiver handlers
+            	addHandlerAction(senderHandler, WSHandlerConstants.TIMESTAMP);
+            	addHandlerAction(receiverHandler, WSHandlerConstants.TIMESTAMP);
+            	
             	stub._setProperty(WSHandlerConstants.TTL_TIMESTAMP, wssTimeToLive.toString());
             }
             
@@ -1143,13 +1164,13 @@ public class DynamicClient {
 		}
 	}
 
-	private static void addStubAction(Stub stub, String action) {
-    	String prevAction = (String)stub._getProperty(WSHandlerConstants.ACTION);
+	private static void addHandlerAction(WSDoAllHandler handler, String action) {
+    	String prevAction = (String)handler.getOption(WSHandlerConstants.ACTION);
     	if (prevAction != null) {
     		action = prevAction + " " + action;
     	}
     	
-    	stub._setProperty(WSHandlerConstants.ACTION, action);
+    	handler.setOption(WSHandlerConstants.ACTION, action);
 	}
 	
 	private String getDocumentation(Element documentationElement) {
