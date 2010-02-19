@@ -1,7 +1,6 @@
 package jade.content.lang.xml;
 
 import java.io.StringReader;
-import java.net.URL;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,6 +20,7 @@ import jade.content.onto.OntologyException;
 import jade.content.onto.Ontology;
 import jade.content.schema.*;
 import jade.lang.acl.ISO8601;
+import jade.util.leap.Iterator;
 import jade.util.leap.List;
 import jade.util.leap.ArrayList;
 
@@ -146,7 +146,8 @@ class XMLDecoder {
 	 * - slots with aggregate values. These are encoded as <slot-name><item1..><item2..>..</slot-name>
 	 * Therefore we first fill an array of AbsObject with the slots encoded by name each one in its correct position, plus
 	 * a list with the slots encoded by order. Then we assign the slots to the frame that is being decoded taking
-	 * slot values either from the slotValuesByName array or from the slotValuesByOrder list.
+	 * slot values either from the slotValuesByName array or from the slotValuesByOrder list. In the latter case we 
+	 * get the first element that is compatible with the schema of the slot to be filled.
 	 */
 	private AbsObject decodeNodeByOrder(Node n, ObjectSchema schema) throws CodecException, OntologyException {
 		AbsPrimitiveSlotsHolder abs = (AbsPrimitiveSlotsHolder) schema.newInstance();
@@ -174,22 +175,41 @@ class XMLDecoder {
 			}
 		}
 
-		int k = 0;
 		for (int i = 0; i < slotNames.length; ++i) {
 			if (slotValuesByName[i] != null) {
 				abs.set(slotNames[i], slotValuesByName[i]);
 			}
 			else {
 				// The value was not encoded by name --> it must be encoded by order
-				if (slotValuesByOrder.size() > k) {
-					abs.set(slotNames[i], (AbsObject) slotValuesByOrder.get(k));
+				ObjectSchema slotSchema = schema.getSchema(slotNames[i]);
+				
+				// Find the first element in the slotValuesByOrder list 
+				// with type and slotSchema compatible 
+				AbsObject slotValue = findValueByType(slotValuesByOrder, slotSchema);
+				if (slotValue != null) {
+					// Set value 
+					abs.set(slotNames[i], slotValue);
+					
+					// Remove used slotValue from list
+					slotValuesByOrder.remove(slotValue);
 				}
-				k++;
 			}
 		}
 		return abs;
 	}
 
+	private AbsObject findValueByType(List slotValues, ObjectSchema slotSchema) throws OntologyException {
+		Iterator it = slotValues.iterator();
+		while(it.hasNext()) {
+			AbsObject slotValue = (AbsObject)it.next();
+			ObjectSchema valueSchema = ontology.getSchema(slotValue.getTypeName());
+			if (valueSchema.isCompatibleWith(slotSchema)) {
+				return slotValue;
+			}
+		}
+		return null;
+	}
+	
 	private AbsObject decodePrimitive(Node n) throws CodecException {
 		NamedNodeMap attributes = n.getAttributes();
 		Node attrType = attributes.getNamedItem(XMLCodec.TYPE_ATTR);
