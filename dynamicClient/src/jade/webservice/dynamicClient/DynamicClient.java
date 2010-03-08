@@ -1273,6 +1273,8 @@ public class DynamicClient {
 				}
 				
 				// Check if value is a jade list and parameter a java array
+				// (Gli aggregati sono gestiti da Axis come array, mentre il BOB 
+				// li gestisce come liste -> conversione implicita)
 				else if (value instanceof jade.util.leap.List &&
 					pi.getTypeClass().isArray()) {
 					
