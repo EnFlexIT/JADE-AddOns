@@ -17,7 +17,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.Map.Entry;
 
 import jade.util.leap.Iterator;
 import jade.util.leap.Map;
@@ -34,6 +33,7 @@ public class ContainerMonitorAgent extends Agent {
 	public static final String DUMP_SERVICES_MAP_ACTION = "DUMP-SERVICES-MAP";
 	public static final String DUMP_SERVICE_ACTION = "DUMP-SERVICE";
 	public static final String DUMP_THREADS_ACTION = "DUMP-THREADS";
+	public static final String DUMP_SERVICES_ACTION = "DUMP-SERVICES";
 	
 	private AgentContainerImpl myContainer;
 	private LADT myLADT;
@@ -99,6 +99,9 @@ public class ContainerMonitorAgent extends Agent {
 						else if (contentUC.startsWith(DUMP_SERVICES_MAP_ACTION)) {
 							reply.setContent(getServicesMapDump());
 						}
+						else if (contentUC.startsWith(DUMP_SERVICES_ACTION)){
+							reply.setContent(getServicesDump());
+						}
 						else if (contentUC.startsWith(DUMP_SERVICE_ACTION)) {
 							String serviceName = getParameter(content);
 							BaseService srv = getService(serviceName);
@@ -161,6 +164,7 @@ public class ContainerMonitorAgent extends Agent {
 		sb.append(DUMP_LADT_ACTION).append('\n');
 		sb.append(DUMP_MESSAGEMANAGER_ACTION).append('\n');
 		sb.append(DUMP_SERVICES_MAP_ACTION).append('\n');
+		sb.append(DUMP_SERVICES_ACTION).append('\n');
 		sb.append(DUMP_SERVICE_ACTION).append(" <service-name>").append('\n');
 		sb.append(DUMP_THREADS_ACTION).append('\n');
 		return sb.toString();
@@ -562,6 +566,17 @@ public class ContainerMonitorAgent extends Agent {
 		catch (Exception e) {
 			e.printStackTrace();
 			sb.append(e.toString());
+		}
+		return sb.toString();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public String getServicesDump() {
+		ServiceManager serviceManager = myContainer.getServiceManager();
+		Vector<ServiceDescriptor> localServices = serviceManager.getLocalServices();
+		StringBuffer sb = new StringBuffer();
+		for (ServiceDescriptor ls : localServices) {
+			sb.append(ls.getName()+ "\n");
 		}
 		return sb.toString();
 	}
