@@ -35,6 +35,7 @@ import jade.content.schema.facets.PermittedValuesFacet;
 import jade.content.schema.facets.RegexFacet;
 import jade.webservice.utils.CompilerUtils;
 import jade.webservice.utils.FileUtils;
+import jade.webservice.utils.SSLUtils;
 import jade.webservice.utils.WSDLUtils;
 
 import java.io.File;
@@ -412,7 +413,7 @@ public class DynamicClient {
 	 * @param trustStore trust-store file
 	 */
 	public static void setTrustStore(String trustStore) {
-		System.setProperty("javax.net.ssl.trustStore", trustStore);
+		SSLUtils.setTrustStore(trustStore);
 	}
 
 	/**
@@ -421,21 +422,29 @@ public class DynamicClient {
 	 * @param trustStorePassword password of trust-store
 	 */
 	public static void setTrustStorePassword(String trustStorePassword) {
-		System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+		SSLUtils.setTrustStorePassword(trustStorePassword);
 	}
 
 	/**
 	 * Disable the checking of security certificate 
 	 */
 	public static void disableCertificateChecking() {
+		// Set trust socket used in soap invoke
 		AxisProperties.setProperty("axis.socketSecureFactory", "org.apache.axis.components.net.SunFakeTrustSocketFactory");
+		
+		// Set trust socket used in download wsdl 
+		SSLUtils.trustAll();
 	}
 
 	/**
 	 * Enable the checking of security certificate 
 	 */
 	public static void enableCertificateChecking() {
+		// Reset trust socket used in soap invoke
 		AxisProperties.setProperty("axis.socketSecureFactory", "");
+		
+		// Reset trust socket used in download wsdl
+		SSLUtils.resetTrustAll();
 	}
 
 	/**
