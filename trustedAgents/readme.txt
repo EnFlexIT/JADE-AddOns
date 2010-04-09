@@ -1,4 +1,4 @@
-This simple SecurityService fascilitates making sure only agents with a token that can be validated will be allowed to join the Jade Platform.
+This simple SecurityService facilitates making sure only agents with a token that can be validated will be allowed to join the Jade Platform.
 The way it works is that at a regular container a token is retrieved and connected to an agent AID, at the Main-Container (or mediator) the token
 is extracted from the AID and validated. Retreiving a token and validating is a matter of implementing two very simple interfaces. Validating can
 be done using for exmaple an external LDAP. The Service can contain a TokenProvider or a TokenValidator.

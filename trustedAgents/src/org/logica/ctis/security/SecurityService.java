@@ -90,7 +90,7 @@ public class SecurityService extends BaseService {
         if (p.getParameter(CTIS_TRUSTED_AGENT_NAMES,null) != null) {
             for (Object o : Specifier.parseList(p.getParameter(CTIS_TRUSTED_AGENT_NAMES, null), ';')) {
                 String s = (String) o;
-                if (!s.isEmpty()) {
+                if (s.length() > 0) {
                     if (log.isLoggable(Level.FINE)) {
                         log.fine("trusting: " + s);
                     }
