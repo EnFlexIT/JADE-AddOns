@@ -177,4 +177,75 @@ public class DynamicClientCache {
 		remove(wsdl);
 		return get(wsdl, properties);
 	}
+	
+	/**
+	 * Set the file of the trust-store
+	 * 
+	 * @param trustStore trust-store file
+	 */
+	public static void setTrustStore(String trustStore) {
+		DynamicClient.setTrustStore(trustStore);
+	}
+
+	/**
+	 * Set the password of the trust-store
+	 * 
+	 * @param trustStorePassword password of trust-store
+	 */
+	public static void setTrustStorePassword(String trustStorePassword) {
+		DynamicClient.setTrustStorePassword(trustStorePassword);
+	}
+
+	/**
+	 * Disable the checking of security certificate 
+	 */
+	public static void disableCertificateChecking() {
+		DynamicClient.disableCertificateChecking();
+	}
+
+	/**
+	 * Enable the checking of security certificate 
+	 */
+	public static void enableCertificateChecking() {
+		DynamicClient.enableCertificateChecking();
+	}
+
+	/**
+	 * Set the host of proxy
+	 * 
+	 * @param proxyHost proxy host
+	 */
+	public static void setProxyHost(String proxyHost) {
+		DynamicClient.setProxyHost(proxyHost);
+	}
+
+	/**
+	 * Set the port of proxy
+	 * 
+	 * @param proxyPort proxy port
+	 */
+	public static void setProxyPort(String proxyPort) {
+		DynamicClient.setProxyPort(proxyPort);
+	}
+
+	/**
+	 * Set the list of host excluded from proxy.
+	 * Use <code>|</code> to separate hosts.
+	 * Permitted <code>*</code> as wildcards. 
+	 * 
+	 * @param nonProxyHosts list of hosts
+	 */
+	public static void setNonProxyHosts(String nonProxyHosts) {
+		DynamicClient.setNonProxyHosts(nonProxyHosts);
+	}
+	
+	/**
+	 * Set proxy authentication credentials 
+	 * 
+	 * @param proxyUser authentication proxy user
+	 * @param proxyPassword authentication proxy password
+	 */
+	public static void setProxyAuthentication(final String proxyUser, final String proxyPassword) {
+		DynamicClient.setProxyAuthentication(proxyUser, proxyPassword);
+	}
 }
