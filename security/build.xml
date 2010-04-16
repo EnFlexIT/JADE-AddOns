@@ -7,6 +7,7 @@
 
 <project name="jade-s" default="compile" basedir=".">
   <!-- set global properties for this build -->
+  <property name="version" value="3.7"/>
   <property name="optimised-build" value="off"/>
   <property name="debug-build" value="on"/>
   <property name="jade-root" value="../.."/>
@@ -33,11 +34,6 @@
   <property file="${leap-dir}/buildLEAP.properties"/>
 
 
-  <property name="j2se-classes" value="j2se/classes"/>
-  <property name="j2se-src" value="j2se/src"/>
-  <property name="j2se-lib" value="j2se/lib"/>
-  <property name="leap-j2se" value="${jaderoot}/add-ons/leap/j2se/lib/JadeLeap.jar"/>
-  
   <property name="pjava-classes" value="pjava/classes"/>
   <property name="pjava-src" value="pjava/src"/>
   <property name="pjava-lib" value="pjava/lib"/>
@@ -111,9 +107,16 @@
   <!-- Compile the security add-on -->
   <target name="compile" depends="init" description="Compile JADE security add-on classes.">
   <echo>--- Compiling JADE Security ---</echo>
-    <javac srcdir="${src}" destdir="${classes}" debug="${debug-build}" debuglevel="lines,vars,source" optimize="${optimised-build}" deprecation="on" includes="jade/**">
+    <javac srcdir="${src}" 
+           destdir="${classes}" 
+           debug="${debug-build}" 
+           debuglevel="lines,vars,source" 
+           optimize="${optimised-build}" 
+           deprecation="on" 
+           includes="jade/**">
       <compilerarg value="-source" />
       <compilerarg value="1.4" />
+      
       <classpath>
         <pathelement path="${bc.jar}"/>
         <path refid="jade-classes"/>
@@ -178,7 +181,7 @@
     <mkdir dir="${jade-doc-dir}"/>
     <mkdir dir="${jade-doc-dir}/tutorials"/>
     <copy file="JADE_Security.pdf" todir="${jade-doc-dir}/tutorials"/>
-    <zip zipfile="../securityAddOn.zip" basedir="../..">
+    <zip zipfile="../securityAddOn-${version}.zip" basedir="../..">
       <include name="add-ons/security/*"/>
       <exclude name="add-ons/security/JADE_Security.*"/>
       <include name="add-ons/security/src/**"/>
@@ -192,54 +195,7 @@
 
 
 
-  <!-- J2SE -->
-  <target name="init-j2se">
-    <!-- Create the time stamp -->
-    <tstamp/>
-    <!-- Create the directories structure used to store files -->
-    <mkdir dir="${j2se-classes}"/>
-  </target>
-  
-  <target name="j2se-clean"
-	        description="Clean class files">
-		<delete dir = "${j2se-src}"/>	        
-		<delete dir = "${j2se-classes}"/>
-		<delete dir = "${j2se-lib}"/>
-		<mkdir dir = "${j2se-src}"/>	        
-		<mkdir dir="${j2se-classes}"/>
-		<mkdir dir="${j2se-lib}"/>
-	</target>
-  
-  
-  <target name="compile-j2se" depends="init-j2se" description="Compile JADE security add-on classes.">
-  <echo>--- Compiling JADE Security for J2se---</echo>
-	  <!-- 1) Copy JADE-S sources -->
-	  <copy todir="${j2se-src}" overwrite="yes">
-			<fileset dir="${src}">
-				<exclude name="**/jade/imtp/rmi/**"/>
-			</fileset>
-		</copy>
-	  <!-- 2) Preprocess the whole -->
-		<pproc basedir="${j2se-src}" type="j2se"/>
-    
-    <!-- classpath="${classpath}" -->
-     <javac srcdir="${j2se-src}" destdir="${j2se-classes}" 
-        nowarn="off" target="1.4" optimize="${javac.optimize}" debug="${javac.debug}" 
-        deprecation="on" excludes="test/**">
-      <classpath>
-        <fileset dir="${jade-root}/leap/j2se/lib" includes="*.jar"/>
-      </classpath>
-    </javac>     
-  </target>
-  
-  <target name="j2se" depends="compile-j2se" description="Create '.jar' file in the lib/ directory. ">
-    <echo>--- Creating JadeSecurity.jar for J2se ---</echo>
-    <mkdir dir="${j2se-lib}"/>
-    <jar jarFile="${j2se-lib}/jadeSecurity.jar" 
-                 basedir="${j2se-classes}" 
-		 includes="jade/**" 
-		 excludes=""/>
-  </target>
+  <!-- ####################### Other LEAP related stuff ################# --> 
 
   <!-- PJAVA -->
   <target name="init-pjava">
@@ -270,8 +226,8 @@
     </javac>     
   </target>
  
- <!-- Make the jar file in ${lib} -->
- <target name="pjava" depends="compile-pjava" description="Create '.jar' file in the lib/ directory. ">
+  <!-- Make the jar file in ${lib} -->
+  <target name="pjava" depends="compile-pjava" description="Create '.jar' file in the lib/ directory. ">
     <echo>--- Creating JadeSecurity.jar for PJava ---</echo>
     <mkdir dir="${pjava-lib}"/>
     <jar jarFile="${pjava-lib}/jadeSecurity.jar" 
@@ -279,14 +235,16 @@
 		 includes="jade/**" 
 		 excludes=""/>
   </target>
+
   
-	<!-- MIDP -->
+  <!-- MIDP -->
     <target name="init-midp">
       <!-- Create the time stamp -->
       <tstamp/>
       <!-- Create the directories structure used to store files -->
       <mkdir dir="${midp-classes}"/>
     </target>
+
 	<target name="midp" depends="init-midp"
 	        description="Build jadeSecurity for MIDP">
 		<delete dir = "${midp-unverified}" quiet="true"/>
@@ -301,9 +259,8 @@
 		       deprecation="off"
 		       bootclasspath="${boot-midp-classes}"
 		       target="1.1"
-               includes="jade/**"
-               excludes=""
-        />
+                       includes="jade/**"
+                       excludes=""/>
 		       
 		<preverify unverified="${midp-unverified}" verified="${midp-classes}" classpath="${leap-midp}"/>		
 	  
@@ -315,10 +272,6 @@
 		<delete file="${lib}/jadeSecurity-midp.jar" quiet="true"/>
 		<jar jarfile="${lib}/jadeSecurity-midp.jar" basedir="${midp-classes}" manifest="${midp}/jade-s-midp.manifest"/>
 	</target>
-
-
-
-
 
 
   <!-- Create the zip file -->
@@ -348,11 +301,4 @@
     <antcall target="examples" />
   </target>
   
-  <!-- HELP -->
-  <target name="help" description="Show the usage of the most frequently used targets of this ant file">
-   <echo message="ant java (to compile security add-on for JADE classic)"/>
-   <echo message="ant j2se (to compile security add-on for JADELEAP j2se)"/>
-   <echo message="ant pjava (to compile security add-on for JADELEAP pjava)"/>
-  </target>
-
 </project>
