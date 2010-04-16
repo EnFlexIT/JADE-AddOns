@@ -196,6 +196,10 @@ public class JadeActivator implements BundleActivator, BundleListener {
 						if(myBundle.getState() == Bundle.ACTIVE) {
 							myBundle.stop(Bundle.STOP_TRANSIENT);
 						}
+					} catch(IllegalStateException ise) {
+						// This exception is thrown when jadeOsgi bundle is invalid. This case happens
+						// when user stop the bundle from the osgi ui. Depends on the execution time of the
+						// thread listening jade termination, jadeOsgi bundle can be already stopped.
 					} catch(Exception e) {
 						logger.log(Logger.SEVERE, "Error stopping bundle", e);
 					}

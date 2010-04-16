@@ -10,7 +10,7 @@
 
 	<path id="classpath">
 		<pathelement location="${build}"/>
-		<fileset file="${jade-home}/leap/j2se/lib/JadeLeap.jar"/>
+		<fileset file="${jade-home}/lib/jade.jar"/>
 		<fileset file="${osgi-framework-jar}"/>
 	</path>
 
@@ -48,10 +48,10 @@
 
 	<target name="bundle" depends="compile" description="Create jadeOsgi bundle">
 		<unzip dest="${build}" overwrite="false">
-			<fileset file="${jade-home}/leap/j2se/lib/JadeLeap.jar"/>
+			<fileset file="${jade-home}/lib/jade.jar"/>
 		</unzip>
 		<delete dir="${build}/META-INF" quiet="true"/>
-		<copy file="${jade-home}/leap/j2se/lib/commons-codec/commons-codec-1.3.jar" todir="${build}/lib" />
+		<copy file="${jade-home}/lib/commons-codec/commons-codec-1.3.jar" todir="${build}/lib" />
 		<jar jarfile="${lib}/jadeOsgiBundle.jar" manifest="${resources}/MANIFEST.MF">
 			<fileset dir="${build}" includes="lib/**,jade/**,FIPA/**"/>
 		</jar>
