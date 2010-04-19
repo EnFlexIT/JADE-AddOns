@@ -64,7 +64,7 @@ private void setup() {
 // ---------------  ----------------
 
         // --- initialize SecurityFactory
-        Profile prof = new ProfileImpl( new jade.util.BasicProperties() );
+        Profile prof = new ProfileImpl( new jade.util.ExtendedProperties() );
         prof.setParameter(SecurityFactory.SECURITY_FACTORY_CLASS_KEY, 
                          "jade.security.impl.JADESecurityFactory");
         sf = SecurityFactory.getSecurityFactory( prof );
@@ -179,7 +179,7 @@ private void ins() {
    // --- set Java crypto providers ---
    //java.security.Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
    // --- initialize SecurityFactory
-   Profile prof = new ProfileImpl( new jade.util.BasicProperties() );
+   Profile prof = new ProfileImpl( new jade.util.ExtendedProperties() );
    prof.setParameter(SecurityFactory.SECURITY_FACTORY_CLASS_KEY,
                      "jade.security.impl.JADESecurityFactory");
    SecurityFactory sf = SecurityFactory.getSecurityFactory(prof);

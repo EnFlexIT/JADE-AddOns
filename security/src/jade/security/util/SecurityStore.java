@@ -441,54 +441,5 @@ public class SecurityStore {
   public java.util.Enumeration getAllPrincipals() {
     return principals.keys();
   }
-  
-  // (NL) Don't know if this still works so commented out
-  /*
-    public static void main (String[] args) {
-    // --- set Java crypto providers ---
-    //java.security.Security.addProvider( new org.bouncycastle.jce.provider.BouncyCastleProvider() );
-
-    // --------------- TEST SecurityStore class ----------------
-
-    // --- initialize SecurityFactory
-    Profile prof = new ProfileImpl( new jade.util.BasicProperties() );
-    prof.setParameter(SecurityFactory.SECURITY_FACTORY_CLASS_KEY, 
-    "jade.security.impl.JADESecurityFactory");
-    SecurityFactory sf = SecurityFactory.getSecurityFactory( prof );
-
-    {
-    System.out.println("\n\n --- store creation ---");
-    SecurityStore ss = new SecurityStore("giosue");
-    ss.open("secret".getBytes());
-    ss.generateNewMyKeyPair(512, "RSA");
-    
-    // --- Create a JADEPrincipal ---
-    KeyPair requester_keypair=generateNewMyKeyPair(512, "RSA");
-    // SDSIName is composed by the pubkey with the local identifier
-    SDSIName sdsiname = new SDSINameImpl( requester_keypair.getPublic() );
-    // create the JADEPrincipal
-    JADEPrincipal principal = sf.newJADEPrincipal( "noncemale", sdsiname );
-    System.out.println( "\n--- principal = "+principal);
-    System.out.println( "\n--- encoded principal = "+new String(principal.getEncoded()) );
-    
-    // insert the JADEPrincipal into the table: LoacalName<->principal
-    ss.setPrincipal("noncemale", principal);
-    
-    
-    ss.flush("secret".getBytes());
-    ss=null;
-    }  
-    {
-    System.out.println("\n\n --- store opening ---");
-    SecurityStore ss = new SecurityStore("giosue");
-    ss.open("secret".getBytes());
-    System.out.println( " ss.hasMyKeyPair() = "+ss.hasMyKeyPair() );
-    System.out.println( " ss.getMyKeyPair() = "+ss.getMyKeyPair().getPublic() );
-    System.out.println( " ss.getPrincipal(\"noncemale\")=\n"+ss.getPrincipal("noncemale") );
-    }
-    
-    } // end main
-  */
-
 } // end class
 
