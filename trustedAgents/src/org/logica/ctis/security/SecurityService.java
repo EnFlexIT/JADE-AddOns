@@ -104,23 +104,23 @@ public class SecurityService extends BaseService {
                 validator = (TokenValidator) validatorClass.newInstance();
                 log.info("using token validator: " + p.getParameter(CTIS_TOKEN_VALIDATOR_CLASS, null));
             } catch (ClassNotFoundException ex) {
-                throw new ProfileException("error loading validtor", ex);
+                throw new ProfileException("error loading validator", ex);
             } catch (InstantiationException ex) {
-                throw new ProfileException("error loading validtor", ex);
+                throw new ProfileException("error loading validator", ex);
             } catch (IllegalAccessException ex) {
-                throw new ProfileException("error loading validtor", ex);
+                throw new ProfileException("error loading validator", ex);
             }
         } else if (p.getParameter(CTIS_TOKEN_PROVIDER_CLASS, null)!=null) {
             try {
-                Class validatorClass = Class.forName(p.getParameter(CTIS_TOKEN_PROVIDER_CLASS, null));
-                provider = (TokenProvider) validatorClass.newInstance();
+                Class providerClass = Class.forName(p.getParameter(CTIS_TOKEN_PROVIDER_CLASS, null));
+                provider = (TokenProvider) providerClass.newInstance();
                 log.info("using token provider: " + p.getParameter(CTIS_TOKEN_PROVIDER_CLASS, null));
             } catch (ClassNotFoundException ex) {
-                throw new ProfileException("error loading validtor", ex);
+                throw new ProfileException("error loading provider", ex);
             } catch (InstantiationException ex) {
-                throw new ProfileException("error loading validtor", ex);
+                throw new ProfileException("error loading provider", ex);
             } catch (IllegalAccessException ex) {
-                throw new ProfileException("error loading validtor", ex);
+                throw new ProfileException("error loading provider", ex);
             }
         } else {
             throw new ProfileException("need to provide either " + CTIS_TOKEN_PROVIDER_CLASS + " or " + CTIS_TOKEN_VALIDATOR_CLASS);
@@ -185,9 +185,9 @@ public class SecurityService extends BaseService {
 
     @Override
     public Filter getCommandFilter(boolean direction) {
-        if (validator != null) {
+        if (validator != null && direction == Filter.INCOMING) {
             return inFilter;
-        } else if (provider != null) {
+        } else if (provider != null && Filter.OUTGOING) {
             return outFilter;
         } else {
             return null;
