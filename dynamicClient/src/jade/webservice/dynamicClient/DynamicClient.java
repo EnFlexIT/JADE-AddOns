@@ -669,7 +669,7 @@ public class DynamicClient {
 			}
 			
 			// Log ontology
-			logOntology();
+			typeOnto.dump();
 
 			log("Dymanic client ready!");
 			
@@ -1258,8 +1258,21 @@ public class DynamicClient {
 			} catch (Exception e) {
 				throw new DynamicClientException("Parameter "+pi.getName()+" error creating instance of "+pi.getTypeClass());
 			}
+		} else if (pi.getMode() == ParameterInfo.INOUT && pi.getPrimitiveTypeClass() != null) { 
+			// Parameter is a INOUT primitive -> create holder object and set value 
+			try {
+				// Convert abs with ontology
+				Object holderValue = typeOnto.toObject(abs);
+				holderValue = BasicOntology.adjustPrimitiveValue(holderValue, pi.getPrimitiveTypeClass());
+				
+				// Create holder object
+				value = pi.getTypeClass().newInstance();
+				JavaUtils.setHolderValue(value, holderValue);
+			} catch (Exception e) {
+				throw new DynamicClientException("Parameter "+pi.getName()+" error creating instance of "+pi.getTypeClass());
+			}
 		} else {
-			// Assigned input or in-out value
+			// Assigned input or in-out (not primitive) value
 			try {
 				// Convert abs with ontology
 				value = typeOnto.toObject(abs);
@@ -1380,76 +1393,6 @@ public class DynamicClient {
 		}		
 	}
 
-	private void logOntology() {
-		if (log.isDebugEnabled()) {
-			try {
-				StringBuilder sb = new StringBuilder();
-				sb.append("Ontology "+typeOnto.getName()+"\n");
-				Iterator iter = typeOnto.getConceptNames().iterator();
-				String conceptName;
-				ObjectSchema os;
-				while (iter.hasNext()) {
-					conceptName = (String)iter.next();
-					os = typeOnto.getSchema(conceptName);
-					sb.append("  concept "+conceptName+" ::= {\n");
-					String[] names = os.getNames();
-					for (int i = 0; i < names.length; i++) {
-						sb.append("    "+names[i]+": ");
-						boolean mandatory = os.isMandatory(names[i]);
-						ObjectSchema schema = os.getSchema(names[i]);
-						if (schema == null) {
-							sb.append("ERROR: no schema!\n");
-						} else {
-							Object defaultValue = null;
-							Object regex = null;
-							String pValues = null;
-							Integer cardMin = null;
-							Integer cardMax = null;
-							Facet[] facets = os.getFacets(names[i]);
-							if (facets != null) {
-								for (Facet facet : facets) {
-									if (facet instanceof DefaultValueFacet) {
-										DefaultValueFacet dvf = (DefaultValueFacet)facet;
-										defaultValue = dvf.getDefaultValue();
-									} else if (facet instanceof RegexFacet) {
-										RegexFacet rf = (RegexFacet)facet;
-										regex = rf.getRegex();
-									} else if (facet instanceof PermittedValuesFacet) {
-										PermittedValuesFacet pvf = (PermittedValuesFacet)facet;
-										pValues = pvf.getPermittedValuesAsString();
-									} else if (facet instanceof CardinalityFacet) {
-										CardinalityFacet cf = (CardinalityFacet)facet;
-										cardMin = cf.getCardMin();
-										cardMax = cf.getCardMax();
-									}
-								}
-							}
-							
-							sb.append(schema.getTypeName()+ (!mandatory ? " (OPTIONAL)":""));
-							if (defaultValue != null) {
-								sb.append(" (DEFAULT="+defaultValue+")");
-							}
-							if (regex != null) {
-								sb.append(" (REGEX="+regex+")");
-							}
-							if (pValues != null && pValues.length() > 0) {
-								sb.append(" (VALUES="+pValues+")");
-							}
-							if (cardMin != null && cardMax != null) {
-								sb.append(" (["+cardMin+","+(cardMax!=-1?cardMax:"unbounded")+"])");
-							}
-							sb.append("\n");
-						}
-					}
-					sb.append("  }\n");
-				}
-				log(sb.toString());
-				
-			} catch(Exception e) {
-			}
-		}
-	}
-	
 	
 	// Inner class to manage WS-Security Username token
 	private class WSSPasswordCallback implements CallbackHandler {

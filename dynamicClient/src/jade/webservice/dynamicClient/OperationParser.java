@@ -359,26 +359,31 @@ public class OperationParser {
 	}
 	
 	private TermSchema getSchemaFromType(String paramType) throws ClassNotFoundException, OntologyException {
+		// Get type class 
+		Class paramClass = getClassFromType(paramType);
+
+		// Check if class is a holder -> get the schema of holder value
+		Class holderValueClass = JavaUtils.getHolderValueType(paramClass);
+		if (holderValueClass != null) {
+			String holderValueType = JavaUtils.getLoadableClassName(holderValueClass.getName());
+			return getSchemaFromType(holderValueType);
+		}
+		
+		// Get schema
 		TermSchema paramSchema;
 		if (isArray(paramType)) {
+			// Array
 			String elementType = getArrayElementType(paramType);
 			TermSchema elementSchema = getSchemaFromType(elementType);
 			paramSchema = new AggregateSchema(BasicOntology.SEQUENCE, elementSchema);
 		} else {
-			Class paramClass = getClassFromType(paramType);
+			// Non array
 			paramSchema = getTypeSchema(paramClass);
 		}
 		return paramSchema;
 	}
 
 	private TermSchema getTypeSchema(Class typeClass) throws OntologyException {
-
-		// Check if is a holder -> create the schema of holder value
-		Class holderValueType = JavaUtils.getHolderValueType(typeClass);
-		if (holderValueType != null) {
-			typeClass = holderValueType; 
-		}
-		
 		TermSchema typeSchema;
 		// In Axis 1.x the wsdl type dateTime is associated to java.util.Calendar class
 		// In jade dateTime is managed with DATE schema associated to Date class
