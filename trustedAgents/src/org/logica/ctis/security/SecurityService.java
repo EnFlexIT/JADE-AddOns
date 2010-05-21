@@ -143,7 +143,7 @@ public class SecurityService extends BaseService {
                     return true;
                 }
                 try {
-                    return validator.isValid(a.getAllUserDefinedSlot().getProperty(TOKENKEY), name, a.getName());
+                    return validator.isValid(a.getAllUserDefinedSlot().getProperty(TOKENKEY), name, ln);
                 } catch (JADESecurityException ex) {
                     log.log(Level.SEVERE,"error during token validation", ex);
                     return false;
