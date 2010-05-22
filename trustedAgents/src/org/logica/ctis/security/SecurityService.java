@@ -143,7 +143,7 @@ public class SecurityService extends BaseService {
                     return true;
                 }
                 try {
-                    return validator.isValid(a.getAllUserDefinedSlot().getProperty(TOKENKEY), name, ln);
+                    return validator.isValid(a.getAllUserDefinedSlot().getProperty(TOKENKEY), name, a.getName());
                 } catch (JADESecurityException ex) {
                     log.log(Level.SEVERE,"error during token validation", ex);
                     return false;
@@ -165,7 +165,7 @@ public class SecurityService extends BaseService {
             if (name.equals(AgentManagementSlice.INFORM_CREATED)) {
                 try {
                     AID a = (AID) cmd.getParam(FIRST);
-                    a.addUserDefinedSlot(TOKENKEY, provider.getToken(a.getLocalName()));
+                    a.addUserDefinedSlot(TOKENKEY, provider.getToken(a.getName()));
                 } catch (JADESecurityException ex) {
                     log.log(Level.SEVERE,"error providing token", ex);
                     return false;
