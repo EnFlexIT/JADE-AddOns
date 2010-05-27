@@ -74,7 +74,7 @@ public class DynamicClientCache {
      * @throws DynamicClientException
      */
     public DynamicClient get(URI wsdl) throws DynamicClientException {
-    	return get(wsdl, null);
+    	return get(wsdl, null, null, null);
     }
 
     /**
@@ -91,6 +91,25 @@ public class DynamicClientCache {
      *  @see jade.webservice.dynamicClient.DynamicClientProperties
      */
     public DynamicClient get(URI wsdl, DynamicClientProperties properties) throws DynamicClientException {
+    	return get(wsdl, null, null, properties);
+    }
+    
+    /**
+     * Get an initialized DynamicClient for specified wsdl uri.<br>
+     * If the wsdl is alredy present in cache reuse it, 
+     * otherwise initialize and cache it.<br>
+     * This operation is thread-safe.     
+     * 
+     * @param wsdl webservice wsdl uri
+	 * @param username http username authentication to access wsdl  
+	 * @param password http password authentication to access wsdl
+     * @param properties configuration properties
+     * @return initialized DynamicClient
+     * @throws DynamicClientException 
+     * 
+     *  @see jade.webservice.dynamicClient.DynamicClientProperties
+     */
+    public DynamicClient get(URI wsdl, String username, String password, DynamicClientProperties properties) throws DynamicClientException {
     	
     	DynamicClient dc;
     	Thread owner = null;
@@ -120,7 +139,7 @@ public class DynamicClientCache {
 			// This initialization is out of synchronization block because is an operation very long
 			// Only the threads that request this wsdl wait, other get directly the dynamic client
 			try {
-				dc.initClient(wsdl);
+				dc.initClient(wsdl, username, password);
 			} catch(DynamicClientException dce) {
 				// If init failed remove from map
 				remove(wsdl);
@@ -165,6 +184,16 @@ public class DynamicClientCache {
 			cachedDynamicClients.remove(wsdl);
 		}
 	}
+
+	/**
+	 * Update a DynamicClient for specified wsdl uri.
+	 * @param wsdl webservice wsdl uri
+	 * @return initialized DynamicClient
+	 * @throws DynamicClientException
+	 */
+	public DynamicClient update(URI wsdl) throws DynamicClientException {
+		return update(wsdl, null, null, null);
+	}
 	
 	/**
 	 * Update a DynamicClient for specified wsdl uri.
@@ -174,8 +203,21 @@ public class DynamicClientCache {
 	 * @throws DynamicClientException
 	 */
 	public DynamicClient update(URI wsdl, DynamicClientProperties properties) throws DynamicClientException {
+		return update(wsdl, null, null, properties);
+	}
+	
+	/**
+	 * Update a DynamicClient for specified wsdl uri.
+	 * @param wsdl webservice wsdl uri
+	 * @param username http username authentication to access wsdl  
+	 * @param password http password authentication to access wsdl
+	 * @param properties configuration properties
+	 * @return initialized DynamicClient
+	 * @throws DynamicClientException
+	 */
+	public DynamicClient update(URI wsdl, String username, String password, DynamicClientProperties properties) throws DynamicClientException {
 		remove(wsdl);
-		return get(wsdl, properties);
+		return get(wsdl, username, password, properties);
 	}
 	
 	/**

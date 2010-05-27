@@ -25,6 +25,7 @@ package jade.webservice.dynamicClient;
 import jade.content.abs.AbsObject;
 import jade.content.abs.AbsPrimitive;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,7 +41,7 @@ import java.util.Map.Entry;
  * @see jade.webservice.dynamicClient.DynamicClient
  * @see jade.content.abs.AbsObject
  */
-public class WSData {
+public class WSData implements Serializable {
 
 	private Map<String, AbsObject> parameters = new HashMap<String, AbsObject>();
 	private Map<String, AbsObject> headers = new HashMap<String, AbsObject>();

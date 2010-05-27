@@ -27,12 +27,6 @@ import jade.content.onto.BasicOntology;
 import jade.content.onto.BeanOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
-import jade.content.schema.Facet;
-import jade.content.schema.ObjectSchema;
-import jade.content.schema.facets.CardinalityFacet;
-import jade.content.schema.facets.DefaultValueFacet;
-import jade.content.schema.facets.PermittedValuesFacet;
-import jade.content.schema.facets.RegexFacet;
 import jade.webservice.utils.CompilerUtils;
 import jade.webservice.utils.FileUtils;
 import jade.webservice.utils.SSLUtils;
@@ -57,7 +51,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -532,13 +525,27 @@ public class DynamicClient {
 	 * @throws DynamicClientException
 	 */
 	public void initClient(URI wsdlUri) throws DynamicClientException {
+		initClient(wsdlUri, defaultHttpUsername, defaultHttpPassword);
+	}
+	
+	/**
+	 * Initialize the DynamicClient with the specified wsdl.<br>
+	 * Only after this operation is possible do web-service call.<br>
+	 * This operation may take a long time.
+	 * 
+	 * @param wsdlUri uri (file or url) of wsdl
+	 * @param username http username authentication to access wsdl  
+	 * @param password http password authentication to access wsdl
+	 * @throws DynamicClientException
+	 */
+	public void initClient(URI wsdlUri, String username, String password) throws DynamicClientException {
 		boolean localNoWrap = properties.isNoWrap();
 		Exception compilerException;
 		try {
-			compilerException = internalInitClient(wsdlUri, localNoWrap);
+			compilerException = internalInitClient(wsdlUri, username, password, localNoWrap);
 			if (compilerException != null && properties.isSafeMode() && !localNoWrap) {
 				localNoWrap = true;
-				compilerException = internalInitClient(wsdlUri, localNoWrap);
+				compilerException = internalInitClient(wsdlUri, username, password, localNoWrap);
 			}
 		} catch(DynamicClientException dce) {
 			state = State.INIT_FAILED;
@@ -553,7 +560,7 @@ public class DynamicClient {
 		state = State.INITIALIZED;
 	}
 	
-	private Exception internalInitClient(URI wsdlUri, boolean noWrap) throws DynamicClientException {
+	private Exception internalInitClient(URI wsdlUri, String username, String password, boolean noWrap) throws DynamicClientException {
 
 		File src = null;
 		File classes = null;
@@ -580,6 +587,12 @@ public class DynamicClient {
 			emitter.setPackageName(properties.getPackageName());
 			emitter.setBobMode(true);
 			emitter.setAllowInvalidURL(true);
+			if (username != null) {
+				emitter.setUsername(username);
+			}
+			if (password != null) {
+				emitter.setPassword(password);
+			}
 	
 			// Prepare folders 
 			String stem = "DynamicClient-" + System.currentTimeMillis();
