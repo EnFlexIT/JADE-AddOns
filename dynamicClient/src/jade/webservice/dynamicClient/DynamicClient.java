@@ -569,7 +569,10 @@ public class DynamicClient {
 				throw new DynamicClientException("Wsdl uri not specified");
 			}
 			
-			log("Create Dynamic Client for "+wsdlUri);
+			log("Create Dynamic Client");
+			log("Wsdl="+wsdlUri, 1);
+			log("Username="+username, 1);
+			log("Password="+password, 1);
 			log("No-wrap="+noWrap, 1);
 			log("Pck-name="+properties.getPackageName(), 1);
 			log("Tmp-dir="+properties.getTmpDir(), 1);
@@ -682,13 +685,15 @@ public class DynamicClient {
 			}
 			
 			// Log ontology
-			typeOnto.dump();
+			if (log.isDebugEnabled()) {
+				typeOnto.dump();
+			}
 
 			log("Dymanic client ready!");
 			
 		} 
 		catch(DynamicClientException e) {
-			log.debug("", e);
+			log.error("Error discovering wsdl "+wsdlUri, e);
 			throw e;
 		}		
 		finally {
@@ -1181,7 +1186,7 @@ public class DynamicClient {
 			return output;
 			
 		} catch(DynamicClientException e) {
-			log.debug("", e);
+			log.error("Error invoking operation "+operation, e);
 			throw e;
 		}
 	}
