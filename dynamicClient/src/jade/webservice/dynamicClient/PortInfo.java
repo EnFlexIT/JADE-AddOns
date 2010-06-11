@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.axis.client.Stub;
-
 /**
  * Descriptor of a port exposed by the web-service.
  * 

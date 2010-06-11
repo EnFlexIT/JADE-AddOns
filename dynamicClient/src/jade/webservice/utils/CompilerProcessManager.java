@@ -22,18 +22,17 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package jade.webservice.utils;
 
-import jade.webservice.dynamicClient.DynamicClient;
+import jade.util.Logger;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
-import org.apache.log4j.Logger;
 
 //#APIDOC_EXCLUDE_FILE
 
 class CompilerProcessManager extends Thread {
 	
-	private static Logger log = Logger.getLogger(DynamicClient.class.getName());
+	private static Logger logger = Logger.getMyLogger(CompilerProcessManager.class.getName());;
 
 	private Process subProc;
 	private BufferedReader br;
@@ -70,7 +69,7 @@ class CompilerProcessManager extends Thread {
 
 	private void handleLine(String line) {
 		if (line != null) {
-			log.debug("compiler: "+line);
+			logger.log(Logger.FINE, "compiler: "+line);
 		}
 	}
 	
@@ -99,6 +98,7 @@ class CompilerProcessManager extends Thread {
 			errorManager.interrupt();
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 		}
 	}			
 }

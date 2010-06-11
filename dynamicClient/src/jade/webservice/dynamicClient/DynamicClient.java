@@ -27,13 +27,16 @@ import jade.content.onto.BasicOntology;
 import jade.content.onto.BeanOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
+import jade.util.Logger;
 import jade.webservice.utils.CompilerUtils;
 import jade.webservice.utils.FileUtils;
 import jade.webservice.utils.SSLUtils;
 import jade.webservice.utils.WSDLUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -82,7 +85,6 @@ import org.apache.axis.wsdl.symbolTable.ServiceEntry;
 import org.apache.axis.wsdl.toJava.Emitter;
 import org.apache.axis.wsdl.toJava.GeneratedFileInfo;
 import org.apache.axis.wsdl.toJava.GeneratedFileInfo.Entry;
-import org.apache.log4j.Logger;
 import org.apache.ws.axis.security.WSDoAllReceiver;
 import org.apache.ws.axis.security.WSDoAllSender;
 import org.apache.ws.axis.security.handler.WSDoAllHandler;
@@ -133,7 +135,7 @@ public class DynamicClient {
 	 */
 	public enum State {CREATED, INITIALIZED, INIT_FAILED}
 
-	private static Logger log = Logger.getLogger(DynamicClient.class.getName());
+	private static Logger logger = Logger.getMyLogger(DynamicClient.class.getName());;
 
 	private URL defaultEndpoint;
 	private String defaultServiceName;
@@ -155,6 +157,7 @@ public class DynamicClient {
 	private BeanOntology typeOnto;
 	private Map<String, ServiceInfo> servicesInfo = new HashMap<String, ServiceInfo>();
 	
+	private StringBuilder sbReport;
 
 	/**
 	 * Create a new DynamicClient
@@ -550,13 +553,17 @@ public class DynamicClient {
 		} catch(DynamicClientException dce) {
 			state = State.INIT_FAILED;
 			initializationException = dce;
+			logger.log(Logger.WARNING, "Error discovering "+wsdlUri, dce);
 			throw dce;
 		}
 		if (compilerException != null) {
 			state = State.INIT_FAILED;
-			initializationException = new DynamicClientException("Error compiling wsdl-java source files", compilerException); 
+			initializationException = new DynamicClientException("Error compiling wsdl-java source files", compilerException);
+			logger.log(Logger.WARNING, "Error discovering "+wsdlUri, initializationException);
 			throw initializationException;
 		}
+		
+		logger.info("Wsdl "+wsdlUri+" discovered, dynamic-client ready to invoke");
 		state = State.INITIALIZED;
 	}
 	
@@ -569,14 +576,14 @@ public class DynamicClient {
 				throw new DynamicClientException("Wsdl uri not specified");
 			}
 			
-			log("Create Dynamic Client");
-			log("Wsdl="+wsdlUri, 1);
-			log("Username="+username, 1);
-			log("Password="+password, 1);
-			log("No-wrap="+noWrap, 1);
-			log("Pck-name="+properties.getPackageName(), 1);
-			log("Tmp-dir="+properties.getTmpDir(), 1);
-			log("Safe-mode="+properties.isSafeMode(), 1);
+			resetReport();
+			addToReport("-- Dynamic Client Report --");
+			addToReport("Wsdl:     "+wsdlUri, 1);
+			addToReport("Username: "+(username!=null?username:""), 1);
+			addToReport("Password: "+(password!=null?password:""), 1);
+			addToReport("Wrapped:  "+(!noWrap), 1);
+			
+			logger.log(Logger.FINE, "Tmp-dir:  "+properties.getTmpDir());
 			
 			// reset default service/port/endpoint
 			defaultServiceName = null;
@@ -648,7 +655,7 @@ public class DynamicClient {
 			// Load generated classes and create schemas
 			String className = null;
 			try {
-				log("Classes loaded in classloader");
+				logger.log(Logger.FINE, "Classes loaded in classloader");
 				Class clazz;
 				Entry fileInfo;
 				GeneratedFileInfo generatedFileInfo = emitter.getGeneratedFileInfo();
@@ -657,7 +664,7 @@ public class DynamicClient {
 					
 					// Load class in classloader
 					className = fileInfo.className; 
-					log("("+fileInfo.type+") "+className, 1);
+					logger.log(Logger.FINE, "\t("+fileInfo.type+") "+className);
 					clazz = cl.loadClass(className);
 					
 					// If class is of type "complexType" create the schema
@@ -685,15 +692,13 @@ public class DynamicClient {
 			}
 			
 			// Log ontology
-			if (log.isDebugEnabled()) {
-				typeOnto.dump();
-			}
-
-			log("Dymanic client ready!");
-			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			PrintStream ps = new PrintStream(out);
+			typeOnto.dump(ps);
+			addToReport(out.toString());
 		} 
 		catch(DynamicClientException e) {
-			log.error("Error discovering wsdl "+wsdlUri, e);
+			logger.log(Logger.SEVERE, "Error discovering wsdl "+wsdlUri, e);
 			throw e;
 		}		
 		finally {
@@ -753,7 +758,7 @@ public class DynamicClient {
 		List<ServiceEntry> services = WSDLUtils.getServices(emitter);
 		for (ServiceEntry serviceEntry : services) {
 			String serviceName = serviceEntry.getOriginalServiceName();
-			log("Parse service "+serviceName);
+			addToReport("Service: "+serviceName);
 			Service locator = createLocator(serviceEntry); 
 			
 			ServiceInfo serviceInfo = new ServiceInfo(serviceName, locator);
@@ -765,7 +770,7 @@ public class DynamicClient {
 			for (Port port : ports) {
 				
 				String portName = port.getName();
-				log("port "+portName, 1);
+				addToReport("Port: "+portName, 1);
 				Method stubMethod = getStubMethod(emitter, port, locator);
 				if (stubMethod != null) {
 					PortInfo portInfo = new PortInfo(portName, stubMethod);
@@ -777,7 +782,7 @@ public class DynamicClient {
 					for (BindingOperation bindingOperation : operations) {
 	
 						String operationName = bindingOperation.getName();
-						log("operation "+operationName, 2);
+						addToReport("Operation: "+operationName, 2);
 						OperationInfo operationInfo = new OperationInfo(operationName);
 						
 						// Get and add operation documentation from portType and binding
@@ -813,7 +818,7 @@ public class DynamicClient {
 						for (ParameterInfo parameterInfo : parameters) {
 							operationInfo.putParameter(parameterInfo.getName(), parameterInfo);
 							
-							log("parameter: "+parameterInfo, 3);
+							addToReport("Parameter: "+parameterInfo, 3);
 						}
 						
 						// Get explicit headers
@@ -821,7 +826,7 @@ public class DynamicClient {
 						for (HeaderInfo headerInfo : explicitHeaders) {
 							operationInfo.putHeader(headerInfo.getName(), headerInfo);
 							
-							log("explicit header: "+headerInfo, 3);
+							addToReport("Explicit header: "+headerInfo, 3);
 						}
 						
 						// Get implicit headers
@@ -829,7 +834,7 @@ public class DynamicClient {
 						for (HeaderInfo headerInfo : implicitHeaders) {
 							operationInfo.putHeader(headerInfo.getName(), headerInfo);
 							
-							log("implicit header: "+headerInfo, 3);
+							addToReport("Implicit header: "+headerInfo, 3);
 						}
 						
 						// Retrieve and save in operationInfo the stub method associated to operation
@@ -1058,8 +1063,8 @@ public class DynamicClient {
             	stub._setProperty(WSHandlerConstants.TTL_TIMESTAMP, wssTimeToLive.toString());
             }
             
-			log("Invoke "+serviceInfo.getName()+"->"+portInfo.getName()+"->"+operationInfo.getName());
-			log("Input\n"+input, 1);
+            logger.info("Invoke "+serviceInfo.getName()+"->"+portInfo.getName()+"->"+operationInfo.getName());
+            logger.info("Input\n"+input);
 			
 			// Get axis-stub method parameters (mix of params & headers) 
 			Vector<ParameterInfo> methodParams = operationInfo.getStubMethodParameters();
@@ -1181,12 +1186,12 @@ public class DynamicClient {
 				output.setParameter(returnParameter.getName(), absValue);
 			}
 				
-			log("Output\n"+output, 1);
+			logger.info("Output\n"+output);
 			
 			return output;
 			
 		} catch(DynamicClientException e) {
-			log.error("Error invoking operation "+operation, e);
+			logger.log(Logger.WARNING, "Error invoking operation "+operation, e);
 			throw e;
 		}
 	}
@@ -1258,7 +1263,7 @@ public class DynamicClient {
 		try {
 			stubMethod = locator.getClass().getMethod("get"+portNameJavaId, new Class[0]);
 		} catch(Exception e) {
-			log.warn("Port "+portNameJavaId+" not found in locator");
+			logger.log(Logger.WARNING, "Port "+portNameJavaId+" not found in locator");
 		}
 		return stubMethod;
 	}
@@ -1396,21 +1401,37 @@ public class DynamicClient {
 		return absObject;
 	}
 
-	private void log(String message) {
-		log(message, 0);
+	private void resetReport() {
+		sbReport = new StringBuilder();
 	}
 	
-	private void log(String message, int tabNumber) {
-		if (log.isDebugEnabled()) {
-			StringBuilder sb = new StringBuilder(); 
-			for(int i = 0; i < tabNumber; i++) {
-				sb.append("\t");
-			}
-			sb.append(message);
-			log.debug(sb.toString());
-		}		
+	private void addToReport(String line) {
+		addToReport(line, 0);
+	}
+	
+	private void addToReport(String line, int tabs) {
+		StringBuilder sbLine = new StringBuilder(); 
+		for(int i = 0; i < tabs; i++) {
+			sbLine.append("\t");
+		}
+		sbLine.append(line);
+		sbReport.append(sbLine);
+		sbReport.append("\n");
+		
+		logger.log(Logger.FINE, sbLine.toString());
 	}
 
+	/**
+	 * Get the dynamic-client report of discovered wsdl 
+	 */
+	public String getReport() {
+		if (state == State.INITIALIZED) {
+			return sbReport.toString();
+		} else {
+			return "Dynamic client not yet initialized";
+		}
+	}
+	
 	
 	// Inner class to manage WS-Security Username token
 	private class WSSPasswordCallback implements CallbackHandler {
@@ -1432,5 +1453,4 @@ public class DynamicClient {
 			}
 		}
 	}
-
 }

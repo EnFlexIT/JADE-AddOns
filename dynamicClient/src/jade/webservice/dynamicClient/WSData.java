@@ -437,18 +437,18 @@ public class WSData implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\t\tParameters\n");
+		sb.append("Parameters\n");
 		Iterator<Entry<String, AbsObject>> itp = parameters.entrySet().iterator();
 		while(itp.hasNext()){
 			Entry<String, AbsObject> entry = itp.next();
-			sb.append("\t\t\t"+entry.getKey()+"="+entry.getValue()+"\n");
+			sb.append("\t"+entry.getKey()+"="+entry.getValue()+"\n");
 		}
 
-		sb.append("\t\tHeaders\n");
+		sb.append("Headers\n");
 		Iterator<Entry<String, AbsObject>> ith = headers.entrySet().iterator();
 		while(ith.hasNext()){
 			Entry<String, AbsObject> entry = ith.next();
-			sb.append("\t\t\t"+entry.getKey()+"="+entry.getValue()+"\n");
+			sb.append("\t"+entry.getKey()+"="+entry.getValue()+"\n");
 		}
 		
 		return sb.toString();

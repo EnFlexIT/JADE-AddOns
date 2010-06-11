@@ -27,6 +27,7 @@ import javax.xml.rpc.holders.Holder;
 import org.apache.axis.utils.JavaUtils;
 
 import jade.content.onto.BasicOntology;
+import jade.content.schema.AggregateSchema;
 import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.TermSchema;
 
@@ -240,20 +241,48 @@ public class ParameterInfo {
 		this.cardMax = Integer.valueOf(cardMax);
 	}
 	
+	private String getStringMode(int mode) {
+		switch(mode) {
+		case IN:
+			return "IN";
+		case OUT:
+			return "OUT";
+		case INOUT:
+			return "INOUT";
+		case RETURN:
+			return "RETURN";
+		}
+		return "UNDEFINED";
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("name="+name);
-		sb.append(", class="+typeClass.getCanonicalName());
-		sb.append(", primitiveClass="+getPrimitiveTypeClass());
 		sb.append(", mode="+getStringMode(mode));
 		sb.append(", schema="+schema.getTypeName());
-		sb.append(", mandatory="+mandatory);
-		if (cardMin != null) {
-			sb.append(", cardMin="+cardMin);
+		if (schema instanceof AggregateSchema) {
+			sb.append(", elementsSchema="+((AggregateSchema)schema).getElementsSchema().getTypeName());
 		}
-		if (cardMax != null) {
-			sb.append(", cardMax="+cardMax);
+		sb.append(", mandatory="+mandatory);
+		if (cardMin != null || cardMax != null) {
+			String min = "";
+			if (cardMin != null) {
+				if (cardMin == -1) {
+					min = "unbounded";
+				} else {
+					min = cardMin.toString(); 
+				}
+			}
+			String max = "";
+			if (cardMax != null) {
+				if (cardMax == -1) {
+					max = "unbounded";
+				} else {
+					max = cardMax.toString(); 
+				}
+			}
+			sb.append(", card=["+min+","+max+"]");
 		}
 		if (documentation != null && !documentation.equals("")) {
 			sb.append(", doc="+documentation);
@@ -275,19 +304,4 @@ public class ParameterInfo {
 		}
 		return sb.toString();
 	}
-	
-	private String getStringMode(int mode) {
-		switch(mode) {
-		case IN:
-			return "IN";
-		case OUT:
-			return "OUT";
-		case INOUT:
-			return "INOUT";
-		case RETURN:
-			return "RETURN";
-		}
-		return "UNDEFINED";
-	}
-
 }
