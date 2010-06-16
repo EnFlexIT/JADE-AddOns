@@ -101,6 +101,8 @@
       <include name="add-ons/dynamicClient/lib/**"/>
       <include name="add-ons/dynamicClient/resources/**"/>
       <include name="add-ons/dynamicClient/examples/**"/>
+	  <include name="add-ons/dynamicClient/bin/*.bat"/>
+	  <include name="add-ons/dynamicClient/bin/*.sh"/>
       <exclude name="add-ons/dynamicClient/examples/client/classes/**"/>
       <exclude name="add-ons/dynamicClient/examples/server/classes/**"/>
     </zip>
@@ -115,5 +117,5 @@
       </fileset>
     </delete>
   </target>
-
+  
 </project>

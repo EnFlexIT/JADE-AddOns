@@ -578,10 +578,10 @@ public class DynamicClient {
 			
 			resetReport();
 			addToReport("-- Dynamic Client Report --");
-			addToReport("Wsdl:     "+wsdlUri, 1);
-			addToReport("Username: "+(username!=null?username:""), 1);
-			addToReport("Password: "+(password!=null?password:""), 1);
-			addToReport("Wrapped:  "+(!noWrap), 1);
+			addToReport("Wsdl:     "+wsdlUri);
+			addToReport("Username: "+(username!=null?username:""));
+			addToReport("Password: "+(password!=null?password:""));
+			addToReport("Wrapped:  "+(!noWrap));
 			
 			logger.log(Logger.FINE, "Tmp-dir:  "+properties.getTmpDir());
 			
