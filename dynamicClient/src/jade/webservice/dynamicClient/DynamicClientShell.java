@@ -403,7 +403,6 @@ public class DynamicClientShell {
 		}
 		
 		sb.append("\n");
-		sb.append("\t\t\tSystem.out.println(output);\n");
 		
 		sb.append("\t\t} catch(Exception e) {\n");
 		sb.append("\t\t\te.printStackTrace();\n");

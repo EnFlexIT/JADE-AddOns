@@ -8,6 +8,7 @@
   <property name="build" value="classes"/>
   <property name="doc" value="doc"/>
   <property name="lib" value="lib"/>
+  <property name="bin" value="bin"/>
   <property name="jade-lib-dir" value="${jade-home}/lib"/>
 
   <property name="javac.optimize" value="off"/>
@@ -114,6 +115,10 @@
       <fileset dir="${build}"/>
       <fileset dir="${lib}">
            <include name="wsdc.jar"/>
+      </fileset>
+      <fileset dir="${bin}">
+           <include name="*.java"/>
+		   <include name="*.class"/>
       </fileset>
     </delete>
   </target>
