@@ -59,7 +59,7 @@ public class DynamicClientShell {
 				writeLine();
 				writeLine();
 				writeLine("---------------------------");
-				writeLine("-- DynamicClient Console --");
+				writeLine("-- DynamicClient Shell --");
 				writeLine("---------------------------");
 				
 				mainMenu();
@@ -337,7 +337,7 @@ public class DynamicClientShell {
 			ParameterInfo parameter = operation.getInputParameter(parameterName);
 
 			StringBuilder sbAbs = new StringBuilder(); 
-			String paramValue = getCode4Schema(parameter.getSchema(), sbAbs, true);
+			String paramValue = getCode4Schema(parameter.getSchema(), sbAbs);
 			
 			if (sbAbs.length() > 0) {
 				sb.append(sbAbs);
@@ -360,7 +360,7 @@ public class DynamicClientShell {
 			HeaderInfo header = operation.getInputHeader(headerName);
 
 			StringBuilder sbAbs = new StringBuilder(); 
-			String headerValue = getCode4Schema(header.getSchema(), sbAbs, true);
+			String headerValue = getCode4Schema(header.getSchema(), sbAbs);
 			
 			if (sbAbs.length() > 0) {
 				sb.append(sbAbs);
@@ -428,7 +428,7 @@ public class DynamicClientShell {
 		writeLine("<Test.java> successfully written");
 	}
 	
-	private static String getCode4Schema(TermSchema schema, StringBuilder sbAbs, boolean firstLevel) throws OntologyException {
+	private static String getCode4Schema(TermSchema schema, StringBuilder sbAbs) throws OntologyException {
 		
 		// Primitive
 		if (schema instanceof PrimitiveSchema) {
@@ -438,7 +438,7 @@ public class DynamicClientShell {
 			} else if (schema.getTypeName() == BasicOntology.INTEGER) {
 				value = "999";
 			} else if (schema.getTypeName() == BasicOntology.FLOAT) {
-				value = "999.9";
+				value = "999.9f";
 			} else if (schema.getTypeName() == BasicOntology.BOOLEAN) {
 				value = "true";
 			} else if (schema.getTypeName() == BasicOntology.DATE) {
@@ -446,11 +446,6 @@ public class DynamicClientShell {
 			} else if (schema.getTypeName() == BasicOntology.BYTE_SEQUENCE) {
 				value = "new byte[] {0,1}";
 			}
-			
-			if (!firstLevel) {
-				value = "AbsPrimitive.wrap("+value+")";
-			}
-			
 			return value;
 		}
 		
@@ -458,8 +453,12 @@ public class DynamicClientShell {
 
 		// Aggregate
 		if (schema instanceof AggregateSchema) {
-			StringBuilder sbAgg = new StringBuilder(); 
-			String aggElem = getCode4Schema(((AggregateSchema)schema).getElementsSchema(), sbAgg, false);
+			StringBuilder sbAgg = new StringBuilder();
+			TermSchema elementsSchema = ((AggregateSchema)schema).getElementsSchema();
+			String aggElem = getCode4Schema(elementsSchema, sbAgg);
+			if (elementsSchema instanceof PrimitiveSchema) {
+				aggElem = "AbsPrimitive.wrap("+aggElem+")";
+			}
 			
 			if (sbAgg.length() > 0) {
 				sbAbs.append(sbAgg);
@@ -477,7 +476,7 @@ public class DynamicClientShell {
 		
 		for (String slotName : schema.getNames()) {
 			StringBuilder sbSlot = new StringBuilder(); 
-			String slotValue = getCode4Schema((TermSchema)schema.getSchema(slotName), sbSlot, false);
+			String slotValue = getCode4Schema((TermSchema)schema.getSchema(slotName), sbSlot);
 			
 			String opt = "";
 			if (schema.isMandatory(slotName)) {
