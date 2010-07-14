@@ -1,82 +1,42 @@
 <?xml version="1.0" ?>
 <project name="JadeAndroid" default="dist">
     <property file="build.properties" />	
-    <property name="android-tools" value="${android-sdk-folder}/tools" />
     <property name="leap-home-dir" value="${jade-home-dir}/leap" />
 	
     <!-- Input directories -->
-    <property name="resource-dir" value="res" />
-    <property name="asset-dir" value="assets" />
     <property name="srcdir" value="src" />
     <property name="docdir" value="doc" />
-
+	<property name="demo-src" value="demo/src" />
+	
     <!-- Output directories -->
     <property name="lib" value="lib" />
 	<property name="dist" value="demo/dist" />
-    <property name="classes" value="classes" />
-	<property name="demo-classes" value="demo/classes" />
-
-    <!-- Create R.java in the source directory -->
-    <property name="demo-src" value="demo/src" />
-
-    <!-- Intermediate files -->
-    <property name="dex-file" value="classes.dex" />
-    <property name="intermediate-dex" value="${dist}/${dex-file}" />
-
+	<property name="demolibs" value="demo/libs" />
+    <property name="classes" value="classes" />  
+	
     <!-- The final package file to generate -->
-    <property name="out-package" value="DummyAgent.apk" />
     <property name="addon-name" value="../${ant.project.name}AddOn.zip" />
 	<property name="jade-leap-android-jar" value="${lib}/JadeLeapAndroid.jar" />
 	
-    <!-- Tools -->
-    <property name="aapt" value="${android-tools}/aapt.exe" />
-    <property name="aidl" value="${android-tools}/aidl.exe" />
-    <property name="dx" value="${android-tools}/dx.bat" />
-    <property name="android-jar" value="${android-sdk-folder}/android.jar" />
+    <property name="android-jar" value="${android-sdk-folder}/platforms/${android-target}/android.jar" />
     
-    <!-- Create the output directories if they don't exist yet. -->
     <target name="dirs">
-        <delete dir="${classes}" />   
         <mkdir dir="${classes}" />
     </target>
-	<target name="init-demo">
-		<delete dir="${demo-classes}" />   
-	    <mkdir dir="${demo-classes}" />
+	
+	<target name="clean">
+		<delete dir="${lib}" />
+		<delete dir="${classes}" />
 	</target>
-
-    <!-- Generate the R.java file for this project's resources. -->
-    <target name="resource-src" depends="init-demo">
-        <echo>Generating R.java...</echo>
-        <exec executable="${aapt}" failonerror="true" dir="demo" >
-            <arg value="package" />
-            <arg value="-m" />
-            <arg value="-J" />
-            <arg value="${srcdir}" />
-            <arg value="-M" />
-            <arg value="AndroidManifest.xml" />
-            <arg value="-S" />
-            <arg value="${resource-dir}" />
-            <arg value="-I" />
-            <arg value="${android-jar}" />
-        </exec>
-    </target>
-
- 
-    <!-- Compile this project's .java files into .class files. -->
-    <target name="compile-demo" depends="resource-src">
-        <javac encoding="ascii" target="1.5" debug="true" extdirs=""
-                destdir="${demo-classes}"
-                bootclasspath="${android-jar}">
-          <classpath>
-            <fileset dir="${lib}" >
-              <include name="*.jar"/>
-            </fileset>
-          </classpath>
-          <src path="${demo-src}"/>
-        </javac>
-    </target>
-    	
-	<target name="compile-leap-pjava" depends="dirs">
+	
+	<target name="clean-demo">
+		<delete dir="${demolibs}" />
+		<delete dir="demo/gen" />
+		<delete dir="demo/bin" />
+		<delete dir="demo/doc" />
+	</target>
+	
+	<target name="compile-leap-pjava" depends="clean, dirs" >
 		<delete dir="${lib}"/>  
 		<mkdir dir="${lib}" />
 		<ant dir="${leap-home-dir}" target="setup" inheritAll="false">
@@ -108,126 +68,62 @@
 	</target>
 
 	<!-- Compile this project's .java files into .class files. -->
-	<target name="compile" depends="compile-leap-pjava">
+	<target name="compile" depends="compile-leap-pjava" >
 		<javac encoding="ascii" target="1.5" debug="true" extdirs=""
 	                destdir="${classes}"
 	                bootclasspath="${android-jar}" srcdir="${srcdir}"/>
 	</target>
 	
-	<target name="jar" depends="compile">
+	<target name="jar" depends="compile" description="Create the jar of the Jade4Android add-on" >
+		
 		<jar destfile="${jade-leap-android-jar}" basedir="${classes}" />
 	</target>
 	
-    <!-- Convert this project's .class files into .dex files. -->
-    <target name="dex" depends="compile-demo">
-    	<delete dir="${dist}"/>
-    	<mkdir dir="${dist}"/>
-    	<unjar src="${jade-leap-android-jar}" dest="${demo-classes}" />
-         <exec executable="${dx}" failonerror="true">
-            <arg value="--dex" />
-            <arg value="--output=${basedir}\${intermediate-dex}" />
-            <arg path="${basedir}\${demo-classes}" />
-        </exec>
-    </target>
-
-    <!-- Put the project's resources into the output package file. -->
-    <target name="package-res-and-assets">
-        <echo>Packaging resources and assets...</echo>
-        <exec executable="${aapt}" failonerror="true" dir="demo">
-            <arg value="package" />
-            <arg value="-f" />
-            <arg value="-c" />
-            <arg value="-M" />
-            <arg value="AndroidManifest.xml" />
-            <arg value="-S" />
-            <arg value="${resource-dir}" />
-            <arg value="-A" />
-            <arg value="${asset-dir}" />
-            <arg value="-I" />
-            <arg value="${android-jar}" />
-            <arg value="dist/${out-package}" />
-        </exec>
-    </target>
-
-    <!-- Same as package-res-and-assets, but without "-A ${asset-dir}" -->
-    <target name="package-res-no-assets">
-        <echo>Packaging resources...</echo>
-        <exec executable="${aapt}" failonerror="true" dir="demo">
-            <arg value="package" />
-            <arg value="-f" />
-            <arg value="-M" />
-            <arg value="AndroidManifest.xml" />
-            <arg value="-S" />
-            <arg value="${resource-dir}" />
-            <!-- No assets directory -->
-            <arg value="-I" />
-            <arg value="${android-jar}" />
-            <arg value="-F" />
-			<arg value="dist/${out-package}" />
-        </exec>
-    </target>
-
-    <!-- Invoke the proper target depending on whether or not
-         an assets directory is present. -->
-    <!-- TODO: find a nicer way to include the "-A ${asset-dir}" argument
-         only when the assets dir exists. -->
-    <target name="package-res">
-        <available file="${asset-dir}" type="dir"
-                property="res-target" value="and-assets" />
-        <property name="res-target" value="no-assets" />
-        <antcall target="package-res-${res-target}" />
-    </target>
-
-    <!-- Put the project's .dex files into the output package file. -->
-    <target name="package-dex" depends="dex, package-res">
-        <echo>Packaging dex...</echo>
-        <zip destfile="${out-package}.tmp">
-            <zipfileset file="${intermediate-dex}" fullpath="${dex-file}" />
-            <zipfileset src="demo/dist/${out-package}" />
-        </zip>
-    	<move file="${out-package}.tmp" tofile="demo/dist/${out-package}" />
-    </target>
-
-    <!-- Create the package file for this project from the sources. -->
-    <target name="demo" depends="package-dex" />
+    <!-- Create the .apk file to the DummyAgent demo -->
+    <target name="demo" depends="clean-demo" description="Create the .apk file of the DummyAgent Demo (signed with debug key).">
+		<mkdir dir="${demolibs}" />
+		<copy overwrite="true" file="${jade-leap-android-jar}" todir="${demolibs}"/>
+		
+		<propertyfile file="demo/local.properties">
+			<entry  key="sdk.dir" value="${android-sdk-folder}"/>
+		</propertyfile>
+		<propertyfile file="demo/default.properties">
+			<entry  key="target" value="${android-target}"/>
+		</propertyfile>
+		<ant antfile="demo/build.xml" target="debug" inheritAll="false"/>
+	</target>
     
-    <target name="dist" depends="jar, demo">
+
+    <target name="dist" depends="clean-demo, jar" description="Create the distribution file of the Jade4Android add-on">
      <echo>Create distribution files for Jade Android Add-on</echo>
    
-      
      <zip destfile="${addon-name}" basedir="../..">
-       <include name="add-ons/android/*"/>
-       <include name="add-ons/android/src/**"/>
-       <include name="add-ons/android/doc/**"/>
-       <include name="add-ons/android/lib/**"/>
-       <include name="add-ons/android/demo/**"/> 
-       <exclude name="add-ons/android/${classes}/**"/>
-       <exclude name="add-ons/android/${demo-classes}/**"/>
-    
-
+       <include name="add-ons/jade4android/*"/>
+       <include name="add-ons/jade4android/src/**"/>
+       <include name="add-ons/jade4android/doc/**"/>
+       <include name="add-ons/jade4android/lib/**"/>
+       <include name="add-ons/jade4android/demo/**"/> 
+	   <exclude name="add-ons/jade4android/classes/**"/> 
+	   <exclude name="add-ons/jade4android/examples/**"/> 
      </zip>
     </target>
     	
-	
-    
-    	<target name="apidoc"
-    	        description="Generate javadoc for both android add-on and dummy agent demo">
-    		<javadoc sourcepath="${srcdir}"
-    		         destdir="${docdir}/API"
-    		         bootclasspath="${android-sdk-folder}/android.jar"
+
+    <target name="apidoc" description="Generate javadoc for both android add-on and dummy agent demo">
+    	<javadoc sourcepath="${srcdir}"
+    		     destdir="${docdir}/API"
+    		     bootclasspath="${android-jar}"
     			 classpath="${jade-leap-android-jar} "
-    		         verbose="false"
-    		         packagenames="jade.android.*"
-                         />
-                <javadoc sourcepath="${demo-src}"
-    		         destdir="demo/doc/API"
-    		         classpath="${jade-leap-android-jar}"
-                	 bootclasspath="${android-sdk-folder}/android.jar"
-    		         verbose="false"
-    		         packagenames="demo.dummyagent.*"
-                         />
+    		     verbose="false"
+    		     packagenames="jade.android.*"
+        />
+        <javadoc sourcepath="${demo-src}"
+    		     destdir="demo/doc/API"
+    		     classpath="${jade-leap-android-jar}"
+                 bootclasspath="${android-jar}"
+    		     verbose="false"
+    		     packagenames="demo.dummyagent.*"
+        />
                 	 
-    	</target>
-    	
-	
+	</target>
 </project>
