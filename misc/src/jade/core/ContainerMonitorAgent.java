@@ -65,7 +65,7 @@ public class ContainerMonitorAgent extends Agent {
 							reply.setContent(getAgentsDump());
 						}
 						else if (contentUC.startsWith(DUMP_AGENT_ACTION)) {
-							String agentName = getParameter(content);
+							String agentName = getParameter(content, 0, false); // MANDATORY
 							Agent a = getAgentFromLADT(agentName);
 							String replyContent = null;
 							if(a != null) {
@@ -78,7 +78,7 @@ public class ContainerMonitorAgent extends Agent {
 							reply.setContent(replyContent);
 						}
 						else if (contentUC.startsWith(DUMP_MESSAGEQUEUE_ACTION)) {
-							String agentName = getParameter(content);
+							String agentName = getParameter(content, 0, false); // MANDATORY
 							Agent a = getAgentFromLADT(agentName);
 							String replyContent = null;
 							if(a != null) {
@@ -103,10 +103,11 @@ public class ContainerMonitorAgent extends Agent {
 							reply.setContent(getServicesDump());
 						}
 						else if (contentUC.startsWith(DUMP_SERVICE_ACTION)) {
-							String serviceName = getParameter(content);
+							String serviceName = getParameter(content, 0, false); // MANDATORY
+							String key = getParameter(content, 1, true); // OPTIONAL
 							BaseService srv = getService(serviceName);
 							if (srv != null) {
-								reply.setContent(getServiceDump(srv, null));
+								reply.setContent(getServiceDump(srv, key));
 							}
 							else {
 								reply.setPerformative(ACLMessage.FAILURE);
@@ -170,15 +171,24 @@ public class ContainerMonitorAgent extends Agent {
 		return sb.toString();
 	}
 	
-	private String getParameter(String content) throws Exception {
+	private String getParameter(String content, int index, boolean optional) throws Exception {
 		String action = null;
 		StringTokenizer st = new StringTokenizer(content, " ");
 		try {
 			action = st.nextToken();
+			// Skip parameters before the one we want (first parameter is at index 0: no skip)
+			for (int i = 0; i < index; ++i) {
+				st.nextToken();
+			}
 			return st.nextToken();
 		}
 		catch (NoSuchElementException nsee) {
-			throw new Exception("Missing parameter for action "+action);
+			if (optional) {
+				return null;
+			}
+			else {
+				throw new Exception("Missing parameter for action "+action);
+			}
 		}
 	}
 	
