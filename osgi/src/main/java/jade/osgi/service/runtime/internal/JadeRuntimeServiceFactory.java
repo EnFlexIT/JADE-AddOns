@@ -1,6 +1,7 @@
 package jade.osgi.service.runtime.internal;
 
 import jade.osgi.internal.AgentManager;
+import jade.osgi.service.runtime.JadeRuntimeService;
 import jade.wrapper.ContainerController;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,22 +13,34 @@ public class JadeRuntimeServiceFactory implements ServiceFactory {
 
 	private ContainerController container;
 	private AgentManager agentManager;
-	private Map<Long,JadeRuntimeServiceImpl> usedJadeServices = new HashMap<Long, JadeRuntimeServiceImpl>();
+	private Map<Long,JadeRuntimeService> usedJadeServices = new HashMap<Long, JadeRuntimeService>();
+	private boolean split;
 
 	public JadeRuntimeServiceFactory(ContainerController container, AgentManager agentManager) {
 		this.container = container;
 		this.agentManager = agentManager;
+		this.split = false;
+	}
+	
+	public JadeRuntimeServiceFactory(AgentManager agentManager) {
+		this.agentManager = agentManager;
+		this.split = true;
 	}
 
 	public Object getService(Bundle bundle, ServiceRegistration registration) {
-		JadeRuntimeServiceImpl jadeService = new JadeRuntimeServiceImpl(container, agentManager, bundle);
+		JadeRuntimeService jadeService;
+		if(split) {
+			jadeService = new JadeMicroRuntimeServiceImpl(bundle);
+		} else {
+			jadeService = new JadeRuntimeServiceImpl(container, agentManager, bundle);
+		}
 		usedJadeServices.put(bundle.getBundleId(), jadeService);
 		return jadeService;
 	}
 
 	public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
 		usedJadeServices.remove(bundle.getBundleId());
-		if(service instanceof JadeRuntimeServiceImpl) {
+		if(service instanceof JadeRuntimeService) {
 			// FIXME do something?
 //			JadeRuntimeServiceImpl jadeService = (JadeRuntimeServiceImpl) service;
 //			try {

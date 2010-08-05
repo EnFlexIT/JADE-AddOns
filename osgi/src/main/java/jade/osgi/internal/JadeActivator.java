@@ -1,5 +1,6 @@
 package jade.osgi.internal;
 
+import jade.core.MicroRuntime;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
@@ -32,6 +33,8 @@ public class JadeActivator implements BundleActivator, BundleListener {
 	private static final String JADE_CONF = PROFILE_PARAMETER_PREFIX + "conf";
 	private static final String RESTART_AGENTS_ON_UPDATE_KEY = "restart-agents-on-update";
 	private static final String RESTART_AGENTS_TIMEOUT_KEY = "restart-agents-timeout";
+	private static final String SPLIT_CONTAINER_KEY = "split-container";
+	
 	private static final boolean RESTART_AGENTS_ON_UPDATE_DEFAULT = true;
 	private static final long RESTART_AGENTS_TIMEOUT_DEFAULT = 10000;
 
@@ -46,6 +49,7 @@ public class JadeActivator implements BundleActivator, BundleListener {
 	private Object terminationLock = new Object();
 	private ServiceRegistration jrs;
 	private OSGIAgentLoader agentLoader;
+
 	
 	public void start(BundleContext context) throws Exception {
 		try {
@@ -79,7 +83,11 @@ public class JadeActivator implements BundleActivator, BundleListener {
 			addJadeSystemProperties(jadeProperties);
 			addJadeFileProperties(jadeProperties);
 			addOSGIBridgeService(jadeProperties);
-			startJadeContainer(jadeProperties);
+			if(isSplitContainer()) {
+				startJadeSplitContainer(jadeProperties);
+			} else {
+				startJadeContainer(jadeProperties);
+			}
 			
 			// Register JRS service
 			registerJadeRuntimeService();
@@ -95,11 +103,15 @@ public class JadeActivator implements BundleActivator, BundleListener {
 
 	public void stop(BundleContext context) throws Exception {
 		synchronized(terminationLock) {
-			try {
-				// If JADE has already termnated we get an exception and simply ignore it
-				container.kill();
+			if(isSplitContainer()) {
+				MicroRuntime.stopJADE();
+			} else {
+				try {
+					// If JADE has already termnated we get an exception and simply ignore it
+					container.kill();
+				}
+				catch (Exception e) {}
 			}
-			catch (Exception e) {}
 		}
 		handlerFactory.stop();
 		if(jrs != null) {
@@ -132,10 +144,11 @@ public class JadeActivator implements BundleActivator, BundleListener {
 	
 	private void addOSGIBridgeService(Properties pp) {
 		String services = pp.getProperty(Profile.SERVICES);
-		String serviceName = OSGIBridgeService.class.getName();
+		String defaultServices = isSplitContainer() ? "" : ";"+jade.core.mobility.AgentMobilityService.class.getName()+";"+
+				jade.core.event.NotificationService.class.getName();
+		String serviceName = isSplitContainer() ? OSGIBridgeFEService.class.getName() : OSGIBridgeService.class.getName();
 		if(services == null) {
-			pp.setProperty(Profile.SERVICES, serviceName+";"+jade.core.mobility.AgentMobilityService.class.getName()+";"+
-				jade.core.event.NotificationService.class.getName());
+			pp.setProperty(Profile.SERVICES, serviceName+defaultServices);
 		} else if(services.indexOf(serviceName) == -1) {
 			pp.setProperty(Profile.SERVICES, services+";"+serviceName);
 		}
@@ -186,32 +199,48 @@ public class JadeActivator implements BundleActivator, BundleListener {
 		} else {
 			container = Runtime.instance().createAgentContainer(profile);
 		}
-		Runtime.instance().invokeOnTermination(new Runnable() {
-			public void run() {
-				synchronized(terminationLock) {
-					Runtime.instance().resetTerminators();
-					System.out.println("JADE termination invoked!");
-					try {
-						Bundle myBundle = context.getBundle();
-						if(myBundle.getState() == Bundle.ACTIVE) {
-							myBundle.stop(Bundle.STOP_TRANSIENT);
-						}
-					} catch(IllegalStateException ise) {
-						// This exception is thrown when jadeOsgi bundle is invalid. This case happens
-						// when user stop the bundle from the osgi ui. Depends on the execution time of the
-						// thread listening jade termination, jadeOsgi bundle can be already stopped.
-					} catch(Exception e) {
-						logger.log(Logger.SEVERE, "Error stopping bundle", e);
-					}
-				}
-			}
-		});
+		Runtime.instance().invokeOnTermination(new Terminator());
 	}
 	
-	private ServiceFactory registerJadeRuntimeService() {
-		ServiceFactory factory = new JadeRuntimeServiceFactory(container, agentManager);
+	private void startJadeSplitContainer(Properties jadeProperties) {
+		MicroRuntime.startJADE(jadeProperties, new Terminator());
+	}
+
+	private void registerJadeRuntimeService() {
+		ServiceFactory factory;
+		if(isSplitContainer()) {
+			factory = new JadeRuntimeServiceFactory(agentManager);
+		} else {
+			factory = new JadeRuntimeServiceFactory(container, agentManager);
+		}
 		jrs = context.registerService(JadeRuntimeService.class.getName(), factory, null);
-		return factory;
+	}
+	
+	private boolean isSplitContainer() {
+		return "true".equalsIgnoreCase(System.getProperty(SPLIT_CONTAINER_KEY));
+	}
+	
+	private class Terminator implements Runnable {
+		public void run() {
+			synchronized(terminationLock) {
+				if(!isSplitContainer()) {
+					Runtime.instance().resetTerminators();
+				}
+				System.out.println("JADE termination invoked!");
+				try {
+					Bundle myBundle = context.getBundle();
+					if(myBundle.getState() == Bundle.ACTIVE) {
+						myBundle.stop(Bundle.STOP_TRANSIENT);
+					}
+				} catch(IllegalStateException ise) {
+					// This exception is thrown when jadeOsgi bundle is invalid. This case happens
+					// when user stop the bundle from the osgi ui. Depends on the execution time of the
+					// thread listening jade termination, jadeOsgi bundle can be already stopped.
+				} catch(Exception e) {
+					logger.log(Logger.SEVERE, "Error stopping bundle", e);
+				}
+			}
+		}
 	}
 	
 }
