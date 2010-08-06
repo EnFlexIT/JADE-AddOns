@@ -1,0 +1,83 @@
+<project name="DistilledStateChartBehaviour" default="compile" basedir=".">
+
+  <property name="version" value="1.0"/>
+
+  <property name="jade-home" value="../.."/>
+  <property name="src" location="src"/>
+  <property name="classes" location="classes"/>
+  <property name="doc" location="doc"/>
+  <property name="lib" location="lib"/>
+  <property name="jade-lib-dir" value="${jade-home}/lib"/>
+
+  <property name="javac.optimize" value="off"/>
+  <property name="javac.debug" value="on"/>
+
+  <path id="jade-classes">
+    <fileset dir="${jade-lib-dir}">
+      <include name="commons-codec/*.jar"/>
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+  </target>
+
+  <target name="compile" depends="init">
+    <mkdir dir="${classes}"/>
+    <echo>compile java files...</echo>
+    <javac srcdir="${src}"
+           destdir="${classes}"
+           nowarn="off"
+           optimize="${javac.optimize}"
+           debug="${javac.debug}"
+           debuglevel="lines,vars,source"
+           deprecation="on">
+      <classpath>
+        <path refid="jade-classes"/>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="lib" depends="compile">
+    <mkdir dir="${lib}"/>
+    <echo>generate jar archive...</echo>
+    <jar jarfile="${lib}/DistilledStateChartBehaviour.jar">
+      <fileset dir="${classes}" />
+    </jar>
+  </target>
+  
+  <target name="doc" depends="compile">
+      <mkdir dir="${doc}/api"/>
+      <echo>generate javadoc...</echo>
+      <javadoc sourcepath="${src}" packagenames="jade.core.behaviours" destdir="${doc}/api">
+        <classpath>
+          <pathelement location="${classes}"/>
+          <path refid="jade-classes"/>
+        </classpath>
+      </javadoc>
+  </target>
+
+  <target name="clean" description="clean up">
+    <delete includeEmptyDirs="true" quiet="true">
+      <fileset dir="${classes}"/>
+      <fileset dir=".">
+           <include name="APDescription.txt"/>
+	   <include name="MTPs-Main-Container.txt"/>
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="dist" depends="clean, compile, lib, doc">
+    <echo>make distribution zip file and put it inside the jade/add-ons directory...</echo>
+    <delete file="../DistilledStateChartBehaviourAddOn-${version}.zip"/>
+    <zip zipfile="../DistilledStateChartBehaviourAddOn-${version}.zip" basedir="../..">
+      <include name="add-ons/dsc/*"/>
+      <include name="add-ons/dsc/src/**"/>
+      <include name="add-ons/dsc/doc/**"/>
+      <include name="add-ons/dsc/lib/**"/>
+    </zip>
+  </target>
+
+</project>
