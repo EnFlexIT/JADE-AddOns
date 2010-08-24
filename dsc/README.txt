@@ -1,5 +1,5 @@
 
-README - DistilledStateChartBehaviour
+README - DistilledStateChartBehaviour (v 10-07-2010)
 
 G. Fortino, F. Rango
 
