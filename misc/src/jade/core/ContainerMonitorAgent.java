@@ -31,6 +31,7 @@ public class ContainerMonitorAgent extends Agent {
 	public static final String DUMP_MESSAGEMANAGER_ACTION = "DUMP-MESSAGEMANAGER";
 	public static final String DUMP_LADT_ACTION = "DUMP-LADT";
 	public static final String DUMP_SERVICES_MAP_ACTION = "DUMP-SERVICES-MAP";
+	public static final String DUMP_PLATFORM_MANAGER_ACTION = "DUMP-PLATFORM-MANAGER";
 	public static final String DUMP_SERVICE_ACTION = "DUMP-SERVICE";
 	public static final String DUMP_THREADS_ACTION = "DUMP-THREADS";
 	public static final String DUMP_SERVICES_ACTION = "DUMP-SERVICES";
@@ -99,6 +100,9 @@ public class ContainerMonitorAgent extends Agent {
 						else if (contentUC.startsWith(DUMP_SERVICES_MAP_ACTION)) {
 							reply.setContent(getServicesMapDump());
 						}
+						else if (contentUC.startsWith(DUMP_PLATFORM_MANAGER_ACTION)) {
+							reply.setContent(getPlatformManagerDump());
+						}
 						else if (contentUC.startsWith(DUMP_SERVICES_ACTION)){
 							reply.setContent(getServicesDump());
 						}
@@ -164,10 +168,11 @@ public class ContainerMonitorAgent extends Agent {
 		sb.append(DUMP_MESSAGEQUEUE_ACTION).append(" <agent-local-name>").append('\n');
 		sb.append(DUMP_LADT_ACTION).append('\n');
 		sb.append(DUMP_MESSAGEMANAGER_ACTION).append('\n');
-		sb.append(DUMP_SERVICES_MAP_ACTION).append('\n');
+		sb.append(DUMP_SERVICES_MAP_ACTION).append("(only available on Main-Containers)").append('\n');
 		sb.append(DUMP_SERVICES_ACTION).append('\n');
 		sb.append(DUMP_SERVICE_ACTION).append(" <service-name>").append('\n');
 		sb.append(DUMP_THREADS_ACTION).append('\n');
+		sb.append(DUMP_PLATFORM_MANAGER_ACTION).append("(only available on Main-Containers)").append('\n');
 		return sb.toString();
 	}
 	
@@ -566,6 +571,62 @@ public class ContainerMonitorAgent extends Agent {
 					PlatformManagerImpl.ServiceEntry se = (PlatformManagerImpl.ServiceEntry) services.get(serviceName);
 					sb.append("Service entry "+serviceName+"\n");
 					dumpServiceEntry(se, sb);
+				}
+				sb.append("-------------------------------------------------------------\n");
+			}
+			else {
+				sb.append("Container "+myContainer.getID().getName()+" is not a Main!");
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			sb.append(e.toString());
+		}
+		return sb.toString();
+	}
+	
+	public String getPlatformManagerDump() {
+		StringBuffer sb = new StringBuffer();
+		try {
+			MainContainerImpl mc = (MainContainerImpl) myContainer.getMain();
+			if (mc != null) {
+				PlatformManagerImpl pm = (PlatformManagerImpl) mc.getPlatformManager();
+				sb.append("-------------------------------------------------------------\n");
+				sb.append("PlatformManager DUMP\n");
+				sb.append("-------------------------------------------------------------\n");
+				sb.append("NODES\n");
+				Map nodes = pm.getNodesMap();
+				Map monitors = pm.getMonitorsMap();
+				Iterator it = nodes.keySet().iterator();
+				while (it.hasNext()) {
+					NodeDescriptor dsc = (NodeDescriptor) nodes.get(it.next());
+					sb.append("- "+dsc.getName()+": ");
+					Node n = dsc.getNode();
+					if (n.hasPlatformManager()) {
+						sb.append("PlatformManager-node, ");
+					}
+					else {
+						Node parent = dsc.getParentNode();
+						if (parent != null) {
+							sb.append("child-node ["+parent.getName()+"], ");
+						}
+						else {
+							sb.append("normal-node, ");
+						}
+					}
+					if (monitors.get(dsc.getName()) != null) {
+						sb.append("monitored\n");
+					}
+					else {
+						sb.append("not-monitored\n");
+					}
+				}
+				sb.append("\n");
+				sb.append("REPLICAS\n");
+				Map replicas = pm.getReplicasMap();
+				it = replicas.keySet().iterator();
+				while (it.hasNext()) {
+					sb.append("- "+it.next()+"\n");
 				}
 				sb.append("-------------------------------------------------------------\n");
 			}
