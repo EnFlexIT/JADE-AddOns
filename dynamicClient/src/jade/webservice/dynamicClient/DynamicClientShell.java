@@ -479,7 +479,7 @@ public class DynamicClientShell {
 			String slotValue = getCode4Schema((TermSchema)schema.getSchema(slotName), sbSlot);
 			
 			String opt = "";
-			if (schema.isMandatory(slotName)) {
+			if (!schema.isMandatory(slotName)) {
 				opt = "  // Optional";
 			}
 			sbCon.append("\t\t\t"+varName+".set(\""+slotName+"\", "+slotValue+");"+opt+"\n");

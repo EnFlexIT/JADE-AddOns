@@ -592,6 +592,7 @@ public class DynamicClient {
 			
 			// Init Axis emitter
 			Emitter emitter = new Emitter();
+			emitter.setTimeout(properties.getDiscoverTimeout());
 			emitter.setAllWanted(true);
 			emitter.setNowrap(noWrap);
 			emitter.setPackageName(properties.getPackageName());

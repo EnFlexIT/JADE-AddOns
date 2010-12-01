@@ -41,6 +41,7 @@ public class DynamicClientProperties {
 	private boolean noWrap;
 	private boolean safeMode;
 	private StringBuilder classPath;
+	private long discoverTimeout;
 	
 	/**
 	 * Create a DynamicClientProperties
@@ -51,6 +52,7 @@ public class DynamicClientProperties {
 		safeMode = true;
 		packageName = null;
 		classPath = null;
+		setDiscoverTimeout(45000);
 	}
 
 	/**
@@ -141,5 +143,25 @@ public class DynamicClientProperties {
 	 */
 	public void setClassPath(StringBuilder classPath) {
 		this.classPath = classPath;
+	}
+
+	/**
+	 * Get the discover timeout (in ms) used to initialize the DynamicClient
+	 * Default is 45s
+	 * 
+	 * @return discover timeout
+	 */
+	public long getDiscoverTimeout() {
+		return discoverTimeout;
+	}
+
+	/**
+	 * Set the discover timeout (in ms) used to initialize the DynamicClient
+	 * Default is 45s 
+	 * 
+	 * @param discoverTimeout
+	 */
+	public void setDiscoverTimeout(long discoverTimeout) {
+		this.discoverTimeout = discoverTimeout;
 	}
 }
