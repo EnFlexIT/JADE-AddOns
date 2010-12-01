@@ -16,15 +16,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This simple SecurityService fascilitates making sure only agents with a token that can be validated will be allowed to join the Jade Platform. The way it works is
- * that at a regular container a token is retrieved and connected to an agent AID, at the Main-Container (or mediator) the token is extracted from the AID and validated. Retreiving
- * a token and validating is a matter of implementing two very simple interfaces. Validating can be done using for exmaple an external LDAP.
+ * This simple SecurityService facilitates making sure only agents with a token that can be validated will be allowed to join the Jade Platform. The way it works is
+ * that at a regular container a token is retrieved and connected to an agent AID, at the Main-Container (or mediator) the token is extracted from the AID and validated. Retrieving
+ * a token and validating is a matter of implementing two very simple interfaces. Validating can be done using for example an external LDAP.
  * The Service can contain a {@link TokenProvider} or a {@link TokenValidator}.
  * <ul>
  * <li>A TokenProvider provides a token for a GenericCommand, the service then connects the token to the command</li>
  *
  *
- * <li>A TokenValidator retreives a token from a GenericCommand, the service then calls validate with the token, command and objectName ({@link AID#getName() }) as arguments</li>
+ * <li>A TokenValidator retrieves a token from a GenericCommand, the service then calls validate with the token, command and objectName ({@link AID#getName() }) as arguments</li>
  * </ul>
  * Building a TokenProvider or a Validator is left to users of this security service.
  * <ul>
@@ -103,6 +103,9 @@ public class SecurityService extends BaseService {
                 Class validatorClass = Class.forName(p.getParameter(CTIS_TOKEN_VALIDATOR_CLASS, null));
                 validator = (TokenValidator) validatorClass.newInstance();
                 log.info("using token validator: " + p.getParameter(CTIS_TOKEN_VALIDATOR_CLASS, null));
+                if (validator instanceof ConfigurableTokenValidator) {
+                	((ConfigurableTokenValidator) validator).init(p);
+                }
             } catch (ClassNotFoundException ex) {
                 throw new ProfileException("error loading validator", ex);
             } catch (InstantiationException ex) {
@@ -115,6 +118,9 @@ public class SecurityService extends BaseService {
                 Class providerClass = Class.forName(p.getParameter(CTIS_TOKEN_PROVIDER_CLASS, null));
                 provider = (TokenProvider) providerClass.newInstance();
                 log.info("using token provider: " + p.getParameter(CTIS_TOKEN_PROVIDER_CLASS, null));
+                if (provider instanceof ConfigurableTokenProvider) {
+                	((ConfigurableTokenProvider) provider).init(p);
+                }
             } catch (ClassNotFoundException ex) {
                 throw new ProfileException("error loading provider", ex);
             } catch (InstantiationException ex) {
@@ -187,7 +193,7 @@ public class SecurityService extends BaseService {
     public Filter getCommandFilter(boolean direction) {
         if (validator != null && direction == Filter.INCOMING) {
             return inFilter;
-        } else if (provider != null && Filter.OUTGOING) {
+        } else if (provider != null && direction == Filter.OUTGOING) {
             return outFilter;
         } else {
             return null;
