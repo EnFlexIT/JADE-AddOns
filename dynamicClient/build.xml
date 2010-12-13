@@ -65,6 +65,7 @@
            optimize="${javac.optimize}"
            debug="${javac.debug}"
            debuglevel="lines,vars,source"
+		   target="1.5"
            deprecation="on">
       <classpath>
         <path refid="dynamicClient.classpath"/>
