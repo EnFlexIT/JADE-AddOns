@@ -1090,6 +1090,11 @@ public class DynamicClient {
 				// Convert abs into object
 				Object methodParamValue = convertAbsToObj(methodParam, methodParamAbs);
 				
+				// Convert value in Holder if required
+				if (javax.xml.rpc.holders.Holder.class.isAssignableFrom(methodParam.getTypeClass())) {				
+					methodParamValue = JavaUtils.convert(methodParamValue, methodParam.getTypeClass());
+				}
+				
 				// Add method parameter value to array
 				methodValuesObj[index] = methodParamValue;
 			}
