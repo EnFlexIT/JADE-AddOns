@@ -120,9 +120,6 @@ public abstract class TesterAgent extends Agent {
 
 		if (remoteControlMode) {
 			// REMOTE CONTROL EXECUTION MODE
-			getContentManager().registerLanguage(codec);
-			getContentManager().registerOntology(onto);
-			
 			// Add the behaviour that handles commands from a remote 
 			// controller agent (usually the JADE TestSuiteAgent)
 			addBehaviour(new Controller(this));
@@ -140,6 +137,9 @@ public abstract class TesterAgent extends Agent {
 				}
 			} );
 		}
+		
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(onto);
 	}	
 		
 	protected void takeDown() {
