@@ -98,6 +98,9 @@ public abstract class TesterAgent extends Agent {
 	private ACLMessage exitNotification = null;
 	
 	protected void setup() {	
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(onto);
+		
 		// Get the execution mode (passed as agent parameter)
 		Object[] args = getArguments();
 		try {
@@ -112,7 +115,7 @@ public abstract class TesterAgent extends Agent {
 			// Just do nothing --> stand-alone execution mode
 			System.out.println("TesterAgent "+getLocalName()+" running in stand-alone mode");
 		}
-		
+
 		// Load the TestGroup to execute
 		theTestGroup = getTestGroup();
 
@@ -137,9 +140,6 @@ public abstract class TesterAgent extends Agent {
 				}
 			} );
 		}
-		
-		getContentManager().registerLanguage(codec);
-		getContentManager().registerOntology(onto);
 	}	
 		
 	protected void takeDown() {
