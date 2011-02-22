@@ -107,6 +107,10 @@ import="jade.content.onto.Ontology,
 		<td class="value"><% out.print(wsigConfig.getAgentClassName()); %></td>
 	</tr>
 	<tr>
+		<td width="30%" class="title">WSIG version:</td>
+		<td class="value"><% out.print(wsigConfig.getWsigVersion()); %></td>
+	</tr>
+	<tr>
 		<td width="30%" class="title">WSIG webservices url:</td>
 		<td class="value"><% out.print(wsigConfig.getWsigUri()); %></td>
 	</tr>
@@ -117,6 +121,10 @@ import="jade.content.onto.Ontology,
 	<tr>
 		<td width="30%" class="title">WSIG timeout (ms):</td>
 		<td class="value"><% out.print(wsigConfig.getWsigTimeout()); %></td>
+	</tr>
+	<tr>
+		<td width="30%" class="title">WSIG java type preservation:</td>
+		<td class="value"><% out.print(wsigConfig.isPreserveJavaType()); %></td>
 	</tr>
 	<tr>
 		<td width="30%" class="title">WSDL local namespace:</td>

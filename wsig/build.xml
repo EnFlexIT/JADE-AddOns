@@ -5,12 +5,11 @@
 	<property file="build.properties"/>
 	<property environment="env"/>
 
-	<property name="wsig.version" value="2.3"/>
-
 	<property name="jade-home" value="../.."/>
 	<property name="wsigSrc.dir" location="src"/>
 	<property name="wsigDoc.dir" location="doc"/>
 	<property name="wsigBin.dir" location="bin"/>
+	<property name="wsigDist.dir" location="dist"/>
 	<property name="wsigExamplesSrc.dir" location="examples/src"/>
 	<property name="wsigExamplesBuild.dir" location="examples/classes"/>
 	<property name="wsigExamplesLib.dir" location="examples/lib"/>
@@ -25,7 +24,9 @@
 	<property name="wsig.name" value="wsig"/>
 	<property name="wsigWar.name" value="${wsig.name}"/>
 	<property name="wsigZip.name" value="${wsig.name}"/>
+	<property name="wsigJarAnnotation.name" value="wsigAnnotation"/>
 	<property name="warfile.path" location="${wsigWebapps.dir}/${wsigWar.name}"/>
+	<property name="jarfile.path" location="${wsigDist.dir}/${wsigJarAnnotation.name}"/>
 	<!--<property name="tomcat.dir" location="${env.CATALINA_BASE}"/>-->
 	<property name="tomcat.dir" location="${env.CATALINA_HOME}"/>
 
@@ -62,10 +63,28 @@
 		<echo>source dir ${wsigSrc.dir}</echo>
 		<echo>build dir ${wsigBuild.dir}</echo>
 		<echo>OS platform is ${os.name}</echo>
+		
+		<!-- SVN revision and date will be updated if the SubWCRev executable is specified in the build.properties file and is available on the disk -->
+		<condition property="EXECSubWCRev">
+			<available file="${SubWCRev.exe}"/>
+		</condition>
 	</target>
+	
+	<target name="SubWCRev" depends="init" if="EXECSubWCRev">
+		<echo>executing SUBWCRev to set revision number and date for this WSIG</echo>
+		<exec dir="." executable="${SubWCRev.exe}">
+			<arg line=". src\com\tilab\wsig\VersionManager.java_template src\com\tilab\wsig\VersionManager.java"/>
+		</exec>
+		<replace file="src/com/tilab/wsig/VersionManager.java" token="$Version$" value="${version}" summary="yes"/>
+	</target>	
 
-	<target name="compile" depends="init" description="Compile WSIG sources">
-		<javac srcdir="${wsigSrc.dir}" debug="yes" destdir="${wsigBuild.dir}" encoding="ISO-8859-1" includeAntRuntime="no">
+	<target name="compile" depends="init,SubWCRev" description="Compile WSIG sources">
+		<javac 	srcdir="${wsigSrc.dir}" 
+				debug="${debug-build}"
+				destdir="${wsigBuild.dir}" 
+				encoding="ISO-8859-1"
+				optimize="${optimised-build}"
+				includeAntRuntime="no">
 			<classpath refid="wsigCompile.classpath"/>
 		</javac>
 		<echo>Compilation complete</echo>
@@ -102,6 +121,17 @@
 	<target name="war" depends="build, createWar" description="create the WSIG web application (war file)">
 	</target>
 
+	<target name="jarAnnotation" depends="compile" description="create the WSIG annotation JAR">
+		<mkdir dir="${wsigDist.dir}"/>
+		<jar destfile="${jarfile.path}.jar" compress="false">
+			<fileset dir="${wsigBuild.dir}">
+				<include name="com/tilab/wsig/store/OperationName.class"/>
+				<include name="com/tilab/wsig/store/SuppressOperation.class"/>
+			</fileset>
+		</jar>
+	</target>
+	
+	
 	<target name="deploy0" depends="createWar">
 		<fail unless="env.CATALINA_HOME" message="CATALINA_HOME environment variable not set. Check the Tomcat installation"/>
 		<delete file="${tomcat.dir}/webapps/${wsigWar.name}.war"/>
@@ -162,6 +192,7 @@
 	<target name="clean" description="clean the WSIG environment">
 		<delete dir="${wsigBuild.dir}/com" quiet="true"/>
 		<delete dir="${wsigWebapps.dir}" quiet="true"/>
+		<delete dir="${wsigDist.dir}" quiet="true"/>
 		<delete includeemptydirs="true" quiet="true">
 			<fileset dir="${wsigWebLib.dir}" includes="**/*"/>
 		</delete>
@@ -185,8 +216,8 @@
 		<mkdir dir="${jade-home}/doc/tutorials"/>
 		<copy file="WSIG_Guide.pdf" todir="${jade-home}/doc/tutorials"/>
 
-		<delete file="../wsigAddOn-${wsig.version}.zip" quiet="true"/>
-		<zip zipfile="../wsigAddOn-${wsig.version}.zip" basedir="${jade-home}">
+		<delete file="../wsigAddOn-${version}.zip" quiet="true"/>
+		<zip zipfile="../wsigAddOn-${version}.zip" basedir="${jade-home}">
 			<include name="add-ons/wsig/**"/>
 			<exclude name="add-ons/wsig/WSIG_Guide.*"/>
 			<include name="doc/tutorials/WSIG_Guide.pdf"/>

@@ -54,8 +54,8 @@ import javax.wsdl.Port;
 import javax.wsdl.PortType;
 import javax.wsdl.Service;
 import javax.wsdl.Types;
-import javax.wsdl.WSDLElement;
 import javax.wsdl.WSDLException;
+import javax.wsdl.extensions.ElementExtensible;
 import javax.wsdl.extensions.ExtensionRegistry;
 import javax.wsdl.extensions.schema.Schema;
 import javax.wsdl.extensions.soap.SOAPAddress;
@@ -494,10 +494,10 @@ public class WSDLUtils {
 	// -----------------------------------------------------------------------------
 	// Private methods
 	
-	private static WSDLElement createBinding(ExtensionRegistry registry, String tns, String soapUse, String type) throws Exception{
+	private static ElementExtensible createBinding(ExtensionRegistry registry, String tns, String soapUse, String type) throws Exception{
 
 		SOAPBody soapBody;
-		WSDLElement binding;
+		ElementExtensible binding;
 		if (INPUT.equals(type)) {
 			binding = new BindingInputImpl();
 		} else {

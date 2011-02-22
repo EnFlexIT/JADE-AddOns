@@ -25,10 +25,12 @@ package com.tilab.wsig.servlet;
 
 import jade.content.AgentAction;
 import jade.content.abs.AbsTerm;
+import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
 import jade.core.AID;
 import jade.util.leap.Properties;
 import jade.wrapper.ControllerException;
+import jade.wrapper.gateway.GatewayListener;
 import jade.wrapper.gateway.JadeGateway;
 
 import java.io.ByteArrayOutputStream;
@@ -73,7 +75,7 @@ import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.store.WSIGStore;
 import com.tilab.wsig.wsdl.WSDLConstants;
 
-public class WSIGServlet extends HttpServlet {
+public class WSIGServlet extends HttpServlet implements GatewayListener {
 	
 	private static final long serialVersionUID = -3447051223821710511L;
 
@@ -116,12 +118,17 @@ public class WSIGServlet extends HttpServlet {
 		// Init configuration
 		WSIGConfiguration.init(wsigPropertyPath);
 		servletContext.setAttribute("WSIGConfiguration", WSIGConfiguration.getInstance());
+
+		// Java type preservation
+		String preserveJavaType = props.getProperty(WSIGConfiguration.KEY_WSIG_PRESERVE_JAVA_TYPE, "false");
+		System.setProperty(SLCodec.PRESERVE_JAVA_TYPES, preserveJavaType);
 		
 		// Init Jade Gateway
 		log.info("Init Jade Gateway...");
 		Object [] wsigArguments = new Object[]{wsigPropertyPath, wsdlPath, wsigStore};
 		props.setProperty(jade.core.Profile.MAIN, "false");
 		JadeGateway.init(gatewayClassName, wsigArguments, props);
+		JadeGateway.addListener(this);
 		log.info("Jade Gateway initialized");
 
 		// Start WSIGAgent
@@ -301,6 +308,10 @@ public class WSIGServlet extends HttpServlet {
 		if (wsigAgentCommand.equalsIgnoreCase("start")) {
 			// Start WSIGAgent
 			startupWSIGAgent();
+			try {
+				// Wait a bit for the registration of services before refreshing the page
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {}
 		} else if (wsigAgentCommand.equalsIgnoreCase("stop")) {
 			// Stop WSIGAgent
 			shutdownWSIGAgent();				
@@ -459,23 +470,25 @@ public class WSIGServlet extends HttpServlet {
 		try {
 			log.info("Starting WSIG agent...");
 			JadeGateway.checkJADE();
-			log.info("WSIG agent started");
 		} catch (ControllerException e) {
 			log.warn("Jade platform not present...WSIG agent not started");
 		}
-		
-		setWSIGStatus();
 	}
 
 	private void shutdownWSIGAgent() {
 		log.info("Stopping WSIG agent...");
 		JadeGateway.shutdown();
-		log.info("WSIG agent stopped");
-
-		setWSIGStatus();
 	}
-	
-	private void setWSIGStatus() {
-		servletContext.setAttribute("WSIGActive", new Boolean(JadeGateway.isGatewayActive()));
+
+	@Override
+	public void handleGatewayConnected() {
+		servletContext.setAttribute("WSIGActive", true);
+		log.info("WSIG agent started");
+	}
+
+	@Override
+	public void handleGatewayDisconnected() {
+		servletContext.setAttribute("WSIGActive", false);
+		log.info("WSIG agent stopped");
 	}
 }

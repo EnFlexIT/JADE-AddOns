@@ -23,6 +23,8 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig;
 
+import jade.content.lang.sl.SLCodec;
+
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -42,12 +44,16 @@ public class WSIGConfiguration extends Properties {
 
 	public static final String WSIG_DEFAULT_CONFIGURATION_FILE = "conf/wsig.properties";
 	private static String wsigConfPath;
+	
+	private static VersionManager versionManager = new VersionManager(); 
+
 
 	// AGENT CONFIGURATION FOR SERVLET
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
 	public static final String KEY_WSIG_URI = "wsig.uri";
 	public static final String KEY_WSIG_CONSOLE_URI = "wsig.console.uri";
 	public static final String KEY_WSIG_TIMEOUT = "wsig.timeout";
+	public static final String KEY_WSIG_PRESERVE_JAVA_TYPE = SLCodec.PRESERVE_JAVA_TYPES;
 	
 	// DF to WSDL converter
 	public final static String KEY_LOCAL_NAMESPACE_PREFIX = "wsdl.localNamespacePrefix";
@@ -90,7 +96,11 @@ public class WSIGConfiguration extends Properties {
 		wsigConfPath = _wsigConfPath;
    	}
 
-
+   	// WSIG CONFIGURATION
+	public synchronized String getWsigVersion() {
+		return versionManager.getVersion()+" - revision "+versionManager.getRevision()+" of "+versionManager.getDate();
+	}
+   	
 	// AGENT CONFIGURATION FOR SERVLET
 	public synchronized String getMainHost() {
 		return getProperty(jade.core.Profile.MAIN_HOST);
@@ -103,6 +113,10 @@ public class WSIGConfiguration extends Properties {
 	}
 	public synchronized String getLocalPort() {
 		return getProperty(jade.core.Profile.LOCAL_PORT);
+	}
+	public synchronized boolean isPreserveJavaType() {
+		String preserveJavaType = getProperty(KEY_WSIG_PRESERVE_JAVA_TYPE);
+		return "true".equalsIgnoreCase(preserveJavaType);
 	}
 	public synchronized String getAgentClassName() {
 		return getProperty(KEY_WSIG_AGENT_CLASS_NAME);
@@ -133,7 +147,6 @@ public class WSIGConfiguration extends Properties {
 	public synchronized boolean isWsdlWriteEnable() {
 		String wsdlWriteEnable = getProperty(KEY_WSDL_WRITE_ENABLE);
 		return "true".equalsIgnoreCase(wsdlWriteEnable);
-		
 	}
 
 	public synchronized String getWsdlStyle() {

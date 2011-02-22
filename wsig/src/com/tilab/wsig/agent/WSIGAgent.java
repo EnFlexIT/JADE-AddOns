@@ -401,6 +401,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			log.error("Agent "+getLocalName()+" - Error during DF deregistration", e);
 		}
 
+		super.takeDown();
 		log.info("Agent "+getLocalName()+" - Taken down now");
 	}
 }
