@@ -36,6 +36,8 @@ import jade.wrapper.gateway.JadeGateway;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.Iterator;
 
@@ -81,53 +83,45 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 
 	private static Logger log = Logger.getLogger(WSIGServlet.class.getName());
 
-	private WSIGStore wsigStore = new WSIGStore();
-	private int executionTimeout = 0;
-	private ServletContext servletContext = null;
-	private String consoleUri;
+	private WSIGStore wsigStore;
+	private ServletContext servletContext;
 
 	public void init(ServletConfig servletConfig) throws ServletException {
 		super.init(servletConfig);
 		
 		log.info("Starting WSIG Servlet...");
+
+		// Get configuration file path
 		servletContext = servletConfig.getServletContext();
 		String wsigPropertyPath = servletContext.getRealPath(WSIGConfiguration.WSIG_DEFAULT_CONFIGURATION_FILE);
 		log.info("Configuration file= " + wsigPropertyPath);
 
-		// Read WSIG property
-		Properties props = new Properties();
-		try {
-			props.load(new FileInputStream(wsigPropertyPath));
-		} catch (IOException e) {
-			log.error("Error reading wsig configuration");
-			throw new ServletException("Error reading wsig configuration", e);
-		}
+		// Init configuration
+		WSIGConfiguration.init(wsigPropertyPath);
+		WSIGConfiguration wsigConfiguration = WSIGConfiguration.getInstance();
 		
-		// Get properties
-		consoleUri = props.getProperty(WSIGConfiguration.KEY_WSIG_CONSOLE_URI);
-		String gatewayClassName = props.getProperty(WSIGConfiguration.KEY_WSIG_AGENT_CLASS_NAME);
-		String wsdlDirectory = props.getProperty(WSIGConfiguration.KEY_WSDL_DIRECTORY);
-		String wsdlPath = servletContext.getRealPath(wsdlDirectory);
-		String timeout = props.getProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT);
-		executionTimeout = Integer.parseInt(timeout);
+		// Set WSDL directory (convert relative to absolute path)
+		String wsdlRelativeDirectory = wsigConfiguration.getWsdlDirectory();
+		String wsdlAbsolutePath = servletContext.getRealPath(wsdlRelativeDirectory);
+		wsigConfiguration.setWsdlDirectory(wsdlAbsolutePath);
+		
+		// Set WSIGConfiguration into servlet context 
+		servletContext.setAttribute("WSIGConfiguration", wsigConfiguration);
 		
 		// Create a wsig store
 		wsigStore = new WSIGStore();
 		servletContext.setAttribute("WSIGStore", wsigStore);
 		
-		// Init configuration
-		WSIGConfiguration.init(wsigPropertyPath);
-		servletContext.setAttribute("WSIGConfiguration", WSIGConfiguration.getInstance());
-
 		// Java type preservation
-		String preserveJavaType = props.getProperty(WSIGConfiguration.KEY_WSIG_PRESERVE_JAVA_TYPE, "false");
-		System.setProperty(SLCodec.PRESERVE_JAVA_TYPES, preserveJavaType);
+		String preserveJavaType = wsigConfiguration.getPreserveJavaType();
+		if (preserveJavaType != null) {
+			System.setProperty(SLCodec.PRESERVE_JAVA_TYPES, preserveJavaType);
+		}
 		
 		// Init Jade Gateway
 		log.info("Init Jade Gateway...");
-		Object [] wsigArguments = new Object[]{wsigPropertyPath, wsdlPath, wsigStore};
-		props.setProperty(jade.core.Profile.MAIN, "false");
-		JadeGateway.init(gatewayClassName, wsigArguments, props);
+		Object [] wsigAgentArguments = new Object[]{wsigStore};
+		JadeGateway.init(wsigConfiguration.getAgentClassName(), wsigAgentArguments, wsigConfiguration);
 		JadeGateway.addListener(this);
 		log.info("Jade Gateway initialized");
 
@@ -158,7 +152,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		if (wsigAgentCommand != null && !wsigAgentCommand.equals("")) {
 
 			// Elaborate WSIG agent command
-			elaborateWSIGAgentCommand(wsigAgentCommand, httpResponse);
+			elaborateWSIGAgentCommand(wsigAgentCommand, httpRequest, httpResponse);
 			return;
 		}
 		
@@ -169,7 +163,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		if (httpRequest.getParameterMap().containsKey("WSDL") ||
 			httpRequest.getParameterMap().containsKey("wsdl")) {
 			// Elaborate WSDL request
-			elaborateWSDLRequest(httpRequest.getRequestURL().toString(), httpResponse);
+			elaborateWSDLRequest(httpRequest, httpResponse);
 			return;
 		}
 		
@@ -270,14 +264,15 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 	private AbsTerm executeOperation(AgentAction agentAction, WSIGService wsigService) throws WSIGException {
 		
 		AbsTerm absResult;
+		int timeout = WSIGConfiguration.getInstance().getWsigTimeout();
 		AID agentExecutor = wsigService.getAid();
 		Ontology onto = wsigService.getOnto(); 
-		WSIGBehaviour wsigBehaviour = new WSIGBehaviour(agentExecutor, agentAction, onto, executionTimeout);
+		WSIGBehaviour wsigBehaviour = new WSIGBehaviour(agentExecutor, agentAction, onto, timeout);
 
 		// Execute operation
 		try {
 			log.debug("Execute action "+agentAction+" on agent "+agentExecutor.getLocalName());
-			JadeGateway.execute(wsigBehaviour, executionTimeout);
+			JadeGateway.execute(wsigBehaviour, timeout);
 		} catch (InterruptedException ie) {
 			// Timeout
 			log.error("Timeout executing action "+agentAction);
@@ -301,7 +296,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		return absResult;
 	}
 
-	private void elaborateWSIGAgentCommand(String wsigAgentCommand, HttpServletResponse httpResponse) throws IOException  {
+	private void elaborateWSIGAgentCommand(String wsigAgentCommand, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException  {
 	
 		log.info("WSIG agent command arrived ("+wsigAgentCommand+")");
 
@@ -322,13 +317,15 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		log.info("WSIG agent command elaborated");
 
 		// Redirect to console home page
-		httpResponse.sendRedirect(consoleUri);
+		URL consoleUrl = WSIGConfiguration.getAdminUrl(httpRequest);
+		httpResponse.sendRedirect(consoleUrl.toString());
 	}
 
-	private void elaborateWSDLRequest(String requestURL, HttpServletResponse httpResponse) throws IOException {
-		
-		log.info("WSDL request arrived ("+requestURL+")");
+	private void elaborateWSDLRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
 
+		String requestURL = httpRequest.getRequestURL().toString();
+		log.info("WSDL request arrived ("+requestURL+")");
+		
 		int pos = requestURL.lastIndexOf('/');
 		if (pos == -1) {
 			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "WSDL request " + requestURL + " not correct");
@@ -346,8 +343,8 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 			return;
 		}
 		
-		// Get wsdl definition
-		Definition wsdlDefinition = wsigService.getWsdlDefinition();
+		// Get wsdl definition (and update soap endpoint)
+		Definition wsdlDefinition = wsigService.getWsdlDefinition(httpRequest);
 
 		// Send wsdl over http
 		try {

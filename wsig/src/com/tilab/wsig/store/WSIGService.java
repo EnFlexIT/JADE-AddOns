@@ -26,13 +26,18 @@ package com.tilab.wsig.store;
 import jade.content.onto.Ontology;
 import jade.core.AID;
 
+import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.wsdl.Definition;
+import javax.wsdl.extensions.soap.SOAPAddress;
 
 import org.uddi4j.util.ServiceKey;
+
+import com.tilab.wsig.WSIGConfiguration;
 
 public class WSIGService {
 
@@ -41,6 +46,7 @@ public class WSIGService {
 	private AID aid;
 	private Ontology onto;
 	private Definition wsdlDefinition;
+	private SOAPAddress soapAddress;
 	private ServiceKey uddiServiceKey;
 	private Class mapperClass;
 	private Map<String,ActionBuilder> actionsBuilder = new HashMap<String,ActionBuilder>();
@@ -63,7 +69,11 @@ public class WSIGService {
 	public void setServiceName(String serviceName) {
 		this.serviceName = serviceName;
 	}
-	public Definition getWsdlDefinition() {
+	public Definition getWsdlDefinition(HttpServletRequest httpRequest) throws MalformedURLException {
+		if (httpRequest != null) {
+			// Update soap endpoint
+			soapAddress.setLocationURI(WSIGConfiguration.getInstance().getServicesUrl(httpRequest)+"/"+serviceName);
+		}
 		return wsdlDefinition;
 	}
 	public void setWsdlDefinition(Definition wsdlDefinition) {
@@ -101,6 +111,12 @@ public class WSIGService {
 	}
 	public void setServicePrefix(String servicePrefix) {
 		this.servicePrefix = servicePrefix;
+	}
+	public SOAPAddress getSOAPAddress() {
+		return soapAddress;
+	}
+	public void setSOAPAddress(SOAPAddress soapAddress) {
+		this.soapAddress = soapAddress;
 	}
 	
 	@Override

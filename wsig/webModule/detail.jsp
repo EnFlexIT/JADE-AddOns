@@ -61,8 +61,7 @@ import="jade.content.onto.Ontology,
 		uddiKeyName = uddiServiceKey.getText();
 	}
 	
-	URL wsdl = WSDLUtils.getWsdlUrl(serviceName);
-	String wsdlUrl = wsdl.toString();
+	String wsdlUrl = WSDLUtils.getWsdlUrl(serviceName, request);
 %>	
 
 <table width="80%" border="1">

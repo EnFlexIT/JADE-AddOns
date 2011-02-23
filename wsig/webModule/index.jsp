@@ -35,10 +35,10 @@ import="jade.content.onto.Ontology,
 	Boolean wsigActive = (Boolean)application.getAttribute("WSIGActive");
 	if (wsigActive.booleanValue() == true) {
 		wsigAgentStatus = "<font color='green'>Active</font>";
-		wsigAgentStatus += " ( <a href='"+wsigConfig.getWsigUri()+"?WSIGAgentCommand=stop'>STOP</a> )";
+		wsigAgentStatus += " ( <a href='"+wsigConfig.getServicesUrl(request)+"?WSIGAgentCommand=stop'>STOP</a> )";
 	} else {
 		wsigAgentStatus = "<font color='red'><b>Down</b></font>";
-		wsigAgentStatus += " ( <a href='"+wsigConfig.getWsigUri()+"?WSIGAgentCommand=start'>START</a> )";
+		wsigAgentStatus += " ( <a href='"+wsigConfig.getServicesUrl(request)+"?WSIGAgentCommand=start'>START</a> )";
 	}
 
 	// WSDL style
@@ -111,12 +111,12 @@ import="jade.content.onto.Ontology,
 		<td class="value"><% out.print(wsigConfig.getWsigVersion()); %></td>
 	</tr>
 	<tr>
-		<td width="30%" class="title">WSIG webservices url:</td>
-		<td class="value"><% out.print(wsigConfig.getWsigUri()); %></td>
+		<td width="30%" class="title">WSIG services url:</td>
+		<td class="value"><% out.print(wsigConfig.getServicesUrl(request)); %></td>
 	</tr>
 	<tr>
-		<td width="30%" class="title">WSIG console url:</td>
-		<td class="value"><% out.print(wsigConfig.getWsigConsoleUri()); %></td>
+		<td width="30%" class="title">WSIG admin url:</td>
+		<td class="value"><% out.print(wsigConfig.getAdminUrl(request)); %></td>
 	</tr>
 	<tr>
 		<td width="30%" class="title">WSIG timeout (ms):</td>
@@ -124,7 +124,7 @@ import="jade.content.onto.Ontology,
 	</tr>
 	<tr>
 		<td width="30%" class="title">WSIG java type preservation:</td>
-		<td class="value"><% out.print(wsigConfig.isPreserveJavaType()); %></td>
+		<td class="value"><% out.print(wsigConfig.getPreserveJavaType()!=null?wsigConfig.getPreserveJavaType():""); %></td>
 	</tr>
 	<tr>
 		<td width="30%" class="title">WSDL local namespace:</td>

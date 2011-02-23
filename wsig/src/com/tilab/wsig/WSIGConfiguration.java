@@ -24,14 +24,18 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig;
 
 import jade.content.lang.sl.SLCodec;
+import jade.util.leap.Properties;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Iterator;
-import java.util.Properties;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 
@@ -50,8 +54,7 @@ public class WSIGConfiguration extends Properties {
 
 	// AGENT CONFIGURATION FOR SERVLET
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
-	public static final String KEY_WSIG_URI = "wsig.uri";
-	public static final String KEY_WSIG_CONSOLE_URI = "wsig.console.uri";
+	public static final String KEY_WSIG_SERVICES_URL = "wsig.servicesURL";
 	public static final String KEY_WSIG_TIMEOUT = "wsig.timeout";
 	public static final String KEY_WSIG_PRESERVE_JAVA_TYPE = SLCodec.PRESERVE_JAVA_TYPES;
 	
@@ -105,28 +108,42 @@ public class WSIGConfiguration extends Properties {
 	public synchronized String getMainHost() {
 		return getProperty(jade.core.Profile.MAIN_HOST);
 	}
+	
 	public synchronized String getMainPort() {
 		return getProperty(jade.core.Profile.MAIN_PORT);
 	}
+	
 	public synchronized String getContainerName() {
 		return getProperty(jade.core.Profile.CONTAINER_NAME);
 	}
+	
 	public synchronized String getLocalPort() {
 		return getProperty(jade.core.Profile.LOCAL_PORT);
 	}
-	public synchronized boolean isPreserveJavaType() {
-		String preserveJavaType = getProperty(KEY_WSIG_PRESERVE_JAVA_TYPE);
-		return "true".equalsIgnoreCase(preserveJavaType);
+	
+	public synchronized String getPreserveJavaType() {
+		return getProperty(KEY_WSIG_PRESERVE_JAVA_TYPE);
 	}
+	
 	public synchronized String getAgentClassName() {
 		return getProperty(KEY_WSIG_AGENT_CLASS_NAME);
 	}
-	public synchronized String getWsigUri() {
-		return getProperty(KEY_WSIG_URI);
+	
+	public synchronized String getServicesUrl(HttpServletRequest request) throws MalformedURLException {
+		// Try to read from configuration file 
+		String servicesUrl = getProperty(KEY_WSIG_SERVICES_URL);
+		if (servicesUrl == null) {
+			// Try to get from request
+			if (request != null) {
+				String webappUrl = getWebappUrl(request).toString();
+				servicesUrl = webappUrl + "/ws";
+			} else {
+				servicesUrl = "$ENDPOINT$";
+			}
+		}
+		return servicesUrl;
 	}
-	public synchronized String getWsigConsoleUri() {
-		return getProperty(KEY_WSIG_CONSOLE_URI);
-	}
+	
 	public synchronized int getWsigTimeout() {
 		String timeout = getProperty(KEY_WSIG_TIMEOUT);
 		return Integer.parseInt(timeout);
@@ -206,17 +223,30 @@ public class WSIGConfiguration extends Properties {
 		return null;
 	}
 	
+	private static URL getWebappUrl(HttpServletRequest request) throws MalformedURLException {
+		String protocol = request.getScheme();
+		String serverName = request.getServerName();
+		int serverPort = request.getServerPort();
+		String contextPath = request.getContextPath();
+		return new URL(protocol, serverName, serverPort, contextPath);
+	}
+
+	public static URL getAdminUrl(HttpServletRequest request) throws MalformedURLException {
+		return getWebappUrl(request);
+	}
+	
 	/**
 	 * adds properties missed.
 	 */
 	private void setDefaultProperties() {
-		setProperty(WSIGConfiguration.KEY_WSIG_URI, "http://localhost:8080/wsig/ws");
-		setProperty(WSIGConfiguration.KEY_WSIG_CONSOLE_URI, "http://localhost:8080/wsig");
+		setProperty(jade.core.Profile.MAIN, "false");
+		
+		setProperty(WSIGConfiguration.KEY_WSIG_AGENT_CLASS_NAME, "com.tilab.wsig.agent.WSIGAgent");
 		setProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT, "30000");
 		setProperty(WSIGConfiguration.KEY_WSDL_DIRECTORY, "wsdl");
 		setProperty(WSIGConfiguration.KEY_WSDL_WRITE_ENABLE, "false");
-		setProperty(WSIGConfiguration.KEY_WSDL_STYLE, WSDLConstants.STYLE_RPC);
-		setProperty(WSIGConfiguration.KEY_UDDI_ENABLE, "true");
+		setProperty(WSIGConfiguration.KEY_WSDL_STYLE, WSDLConstants.STYLE_DOCUMENT);
+		setProperty(WSIGConfiguration.KEY_UDDI_ENABLE, "false");
 		setProperty(WSIGConfiguration.KEY_LIFE_CYCLE_MANAGER_URL, "");
 		setProperty(WSIGConfiguration.KEY_QUERY_MANAGER_URL, "");
 		setProperty(WSIGConfiguration.KEY_USER_NAME, "");
@@ -225,14 +255,14 @@ public class WSIGConfiguration extends Properties {
 		setProperty(WSIGConfiguration.KEY_LOCAL_NAMESPACE_PREFIX, "impl");
 		setProperty(WSIGConfiguration.KEY_UDDI4J_LOG_ENABLED, "false");
 		setProperty(WSIGConfiguration.KEY_UDDI4J_TRANSPORT_CLASS, "org.uddi4j.transport.ApacheAxisTransport");
-		setProperty(WSIGConfiguration.KEY_UDDI_TMODEL, "uuid:A035A07C-F362-44dd-8F95-E2B134BF43B4");
+		setProperty(WSIGConfiguration.KEY_UDDI_TMODEL, "");
 	}
 
 	/**
 	 * Retrieves configuration.
 	 * An internal instance is loaded.
 	 */
-	public static void load() {
+	private static void load() {
 		
 		log.info("Loading WSIG configuration file...");
 		WSIGConfiguration c = getInstance();

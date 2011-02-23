@@ -58,8 +58,8 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 
 	private static Logger log = Logger.getLogger(WSIGAgent.class.getName());
 
-	private WSIGStore wsigStore = null;
-	private UDDIManager uddiManager = null;
+	private WSIGStore wsigStore;
+	private UDDIManager uddiManager;
 
 	protected void setup() {
 		super.setup();
@@ -78,24 +78,9 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			log.info("arg[" + i + "]" + args[i]);
 		}
 
-		// Verify if config file is passed as first agent parameter
-		String confFile = null; 
-		if (args.length >= 1 && !("".equals((String)args[0]))) {
-			confFile = (String)args[0];
-		}
-
-		// Init agent configuration
-		WSIGConfiguration.init(confFile);
-
-		// Verify if wsdlDirectory is passed as second agent parameter
-		if (args.length >= 2 && !("".equals((String)args[1]))) {
-			String wsdlDirectory = (String)args[1];
-			WSIGConfiguration.getInstance().setWsdlDirectory(wsdlDirectory);
-		}
-		
-		// Verify if wsigStore is passed as third agent parameter
-		if (args.length >= 3 && (args[2] instanceof WSIGStore)) {
-			wsigStore = (WSIGStore)args[2];
+		// Verify if wsigStore is passed as agent parameter
+		if (args.length == 1 && (args[0] instanceof WSIGStore)) {
+			wsigStore = (WSIGStore)args[0];
 		}
 		if (wsigStore == null) {
 			wsigStore = new WSIGStore();

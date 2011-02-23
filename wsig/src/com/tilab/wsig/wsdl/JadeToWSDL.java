@@ -58,6 +58,7 @@ import javax.wsdl.PortType;
 import javax.wsdl.Service;
 import javax.wsdl.WSDLException;
 import javax.wsdl.extensions.ExtensionRegistry;
+import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.wsdl.factory.WSDLFactory;
 
 import org.apache.log4j.Logger;
@@ -131,8 +132,10 @@ public class JadeToWSDL {
 
 		Port port = WSDLUtils.createPort(tns);
 		try {
-			port.addExtensibilityElement(WSDLUtils.createSOAPAddress(registry, serviceName));
-		} catch (WSDLException e) {
+			SOAPAddress soapAddress = WSDLUtils.createSOAPAddress(registry, serviceName);
+			wsigService.setSOAPAddress(soapAddress);
+			port.addExtensibilityElement(soapAddress);
+		} catch (Exception e) {
 			throw new Exception("Error in SOAPAddress Handling", e);
 		}
 

@@ -24,7 +24,7 @@ import="com.tilab.wsig.WSIGConfiguration,
 	// Get parameters
 	String SOAPUrl = request.getParameter("soapurl");
 	if (SOAPUrl == null) {
-		SOAPUrl = wsigConfig.getWsigUri();
+		SOAPUrl = wsigConfig.getServicesUrl(request);
 	}
 
 	String SOAPRequest = request.getParameter("soaprequest");

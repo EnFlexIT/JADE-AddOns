@@ -40,7 +40,7 @@ public class WSIGException extends Exception {
 	}
 	
 	public WSIGException(String faultCode, String faultString) {
-		this(WSIGConfiguration.getInstance().getWsigUri(), faultCode, faultString); 
+		this("WSIG", faultCode, faultString); 
 	}
 	
 	public String getFaultString() {

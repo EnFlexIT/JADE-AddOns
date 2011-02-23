@@ -96,7 +96,7 @@ public class UDDIManager {
 
 			// Create a new tModel
 			TModel tModel;
-			tModel = createTModel(WSDLUtils.getWsdlUrl(serviceName).toExternalForm(), tName);
+			tModel = createTModel(WSDLUtils.getWsdlUrl(serviceName, null), tName);
 
 			// Generate a category bag with service's names
 			CategoryBag cb = new CategoryBag();
@@ -138,7 +138,7 @@ public class UDDIManager {
 
 			// Create bindingTemplate
 			createBindingTemplate(
-				new AccessPoint(WSIGConfiguration.getInstance().getWsigUri(), "http"),					
+				new AccessPoint(WSIGConfiguration.getInstance().getServicesUrl(null), "http"),					
 				serviceKey,
 				new TModelKey(tModel.getTModelKey()));
 

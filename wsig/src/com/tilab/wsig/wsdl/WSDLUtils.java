@@ -38,8 +38,10 @@ import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
 import javax.wsdl.BindingOperation;
@@ -289,10 +291,10 @@ public class WSDLUtils {
 		return port;
 	}
 	
-	static SOAPAddress createSOAPAddress(ExtensionRegistry registry, String serviceName) throws WSDLException {
+	static SOAPAddress createSOAPAddress(ExtensionRegistry registry, String serviceName) throws WSDLException, MalformedURLException {
 		SOAPAddress soapAddress = null;
 		soapAddress = (SOAPAddress)registry.createExtension(Port.class,new QName(WSDLConstants.WSDL_SOAP_URL, "address"));		
-		soapAddress.setLocationURI(WSIGConfiguration.getInstance().getWsigUri()+"/"+serviceName);
+		soapAddress.setLocationURI(WSIGConfiguration.getInstance().getServicesUrl(null)+"/"+serviceName);
 		return soapAddress;
 	}
 	
@@ -478,17 +480,13 @@ public class WSDLUtils {
 		return WSDLConstants.ARRAY_OF + new String(uppercaseElementType);
 	}
 
-	public static URL getWsdlUrl(String serviceName) {
-		URL wsdlUrl = null;
+	public static String getWsdlUrl(String serviceName, HttpServletRequest request) {
+		String wsdlUrl = null;
 		try {
-			wsdlUrl = new URL(WSIGConfiguration.getInstance().getWsigUri()+"/"+serviceName+"?WSDL");
-		} catch (MalformedURLException e) {
-		}
+			wsdlUrl = WSIGConfiguration.getInstance().getServicesUrl(request)+"/"+serviceName+"?WSDL";
+		} catch (MalformedURLException e) {}
 		return wsdlUrl;
 	}
-
-	
-	
 	
 	
 	// -----------------------------------------------------------------------------
