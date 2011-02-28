@@ -644,7 +644,7 @@ public class JadeToWSDL {
 				XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
 				if (parentComponent != null) {
 					log.debug("------add array-type "+slotName+" ("+slotType+") ["+cardMin+","+cardMax+"]");
-					WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent);
+					WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin==0?cardMin:null, null);
 				}
 				createComplexTypeFromSchema(tns, containerSchema, aggregateSchema, wsdlTypeSchema, itemName, sequence, cardMin, cardMax);
 			}

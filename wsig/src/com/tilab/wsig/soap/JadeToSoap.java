@@ -114,81 +114,83 @@ public class JadeToSoap {
 	private SOAPElement convertObjectToSoapElement(ObjectSchema containerSchema, ObjectSchema resultSchema, AbsTerm resultAbsObj, String elementName, SOAPElement rootSoapElement) throws Exception {
 		
 		SOAPElement soapElement = null;
-		String soapType = null;
-		ObjectSchema newContainerSchema = resultSchema;
-		
-		if (resultSchema instanceof PrimitiveSchema) {
+		if (resultAbsObj != null) {
+			String soapType = null;
+			ObjectSchema newContainerSchema = resultSchema;
 			
-			// PrimitiveSchema
-			log.debug("Elaborate primitive schema: "+elementName+" of type: "+resultSchema.getTypeName());
-
-			// Get type and create soap element
-	        soapType = (String) WSDLConstants.jade2xsd.get(resultSchema.getTypeName());
-			soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD, soapType, "");
-
-			AbsPrimitive primitiveAbsObj = (AbsPrimitive)resultAbsObj;
-			
-	        // Create a text node which contains the value of the object.
-	        // Format date objects in ISO8601 format;
-	        // for every other kind of object, just call toString.
-	        if (BasicOntology.DATE.equals(primitiveAbsObj.getTypeName())) {
-	        	soapElement.addTextNode(WSIGConstants.ISO8601_DATE_FORMAT.format(primitiveAbsObj.getDate()));
-	        } else {
-	        	soapElement.addTextNode(primitiveAbsObj.toString());
-	        }
-		} else if (resultSchema instanceof ConceptSchema) {
-			
-			// ConceptSchema
-			log.debug("Elaborate concept schema: "+elementName+" of type: "+resultSchema.getTypeName());
-
-			// Get type and create soap element
-	        soapType = resultSchema.getTypeName();
-			soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType, "");
-			
-			// Elaborate all sub-schema of current complex schema 
-			for (String conceptSlotName : resultSchema.getNames()) {
-				ObjectSchema slotSchema = resultSchema.getSchema(conceptSlotName);
-			
-				// Get sub-object value 
-				AbsTerm subAbsObject = (AbsTerm)resultAbsObj.getAbsObject(conceptSlotName);
+			if (resultSchema instanceof PrimitiveSchema) {
 				
-				// Do recursive call
-				convertObjectToSoapElement(newContainerSchema, slotSchema, subAbsObject, conceptSlotName, soapElement);
-			}
-		} else if (resultSchema instanceof AggregateSchema) {
-			
-			// AggregateSchema
-			log.debug("Elaborate aggregate schema: "+elementName);
-
-			// Get aggregate type
-			ObjectSchema aggrSchema = WSDLUtils.getAggregateElementSchema(containerSchema, elementName);
-			
-			// Get slot type
-			soapType = aggrSchema.getTypeName();
-			if (aggrSchema instanceof PrimitiveSchema) {
-				soapType = WSDLConstants.jade2xsd.get(soapType);
-			}
-			String itemName = soapType;
-			String aggrType = resultSchema.getTypeName();
-			soapType = WSDLUtils.getAggregateType(soapType, aggrType);
-			
-			// Create element
-			soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType, "");
-			
-			// Elaborate all item of current aggregate schema 
-			AbsAggregate aggregateAbsObj = (AbsAggregate)resultAbsObj;
-			if (aggregateAbsObj != null) {
-				for (int i=0; i<aggregateAbsObj.size(); i++) {
-					
-					//Get object value of index i
-					AbsTerm itemObject = aggregateAbsObj.get(i);
+				// PrimitiveSchema
+				log.debug("Elaborate primitive schema: "+elementName+" of type: "+resultSchema.getTypeName());
 	
+				// Get type and create soap element
+		        soapType = (String) WSDLConstants.jade2xsd.get(resultSchema.getTypeName());
+				soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD, soapType, "");
+	
+				AbsPrimitive primitiveAbsObj = (AbsPrimitive)resultAbsObj;
+				
+		        // Create a text node which contains the value of the object.
+		        // Format date objects in ISO8601 format;
+		        // for every other kind of object, just call toString.
+		        if (BasicOntology.DATE.equals(primitiveAbsObj.getTypeName())) {
+		        	soapElement.addTextNode(WSIGConstants.ISO8601_DATE_FORMAT.format(primitiveAbsObj.getDate()));
+		        } else {
+		        	soapElement.addTextNode(primitiveAbsObj.toString());
+		        }
+			} else if (resultSchema instanceof ConceptSchema) {
+				
+				// ConceptSchema
+				log.debug("Elaborate concept schema: "+elementName+" of type: "+resultSchema.getTypeName());
+	
+				// Get type and create soap element
+		        soapType = resultSchema.getTypeName();
+				soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType, "");
+				
+				// Elaborate all sub-schema of current complex schema 
+				for (String conceptSlotName : resultSchema.getNames()) {
+					ObjectSchema slotSchema = resultSchema.getSchema(conceptSlotName);
+				
+					// Get sub-object value 
+					AbsTerm subAbsObject = (AbsTerm)resultAbsObj.getAbsObject(conceptSlotName);
+					
 					// Do recursive call
-					convertObjectToSoapElement(newContainerSchema, aggrSchema, itemObject, itemName, soapElement);
+					convertObjectToSoapElement(newContainerSchema, slotSchema, subAbsObject, conceptSlotName, soapElement);
+				}
+			} else if (resultSchema instanceof AggregateSchema) {
+				
+				// AggregateSchema
+				log.debug("Elaborate aggregate schema: "+elementName);
+	
+				// Get aggregate type
+				ObjectSchema aggrSchema = WSDLUtils.getAggregateElementSchema(containerSchema, elementName);
+				
+				// Get slot type
+				soapType = aggrSchema.getTypeName();
+				if (aggrSchema instanceof PrimitiveSchema) {
+					soapType = WSDLConstants.jade2xsd.get(soapType);
+				}
+				String itemName = soapType;
+				String aggrType = resultSchema.getTypeName();
+				soapType = WSDLUtils.getAggregateType(soapType, aggrType);
+				
+				// Create element
+				soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType, "");
+				
+				// Elaborate all item of current aggregate schema 
+				AbsAggregate aggregateAbsObj = (AbsAggregate)resultAbsObj;
+				if (aggregateAbsObj != null) {
+					for (int i=0; i<aggregateAbsObj.size(); i++) {
+						
+						//Get object value of index i
+						AbsTerm itemObject = aggregateAbsObj.get(i);
+		
+						// Do recursive call
+						convertObjectToSoapElement(newContainerSchema, aggrSchema, itemObject, itemName, soapElement);
+					}
 				}
 			}
 		}
-					
+		
 		return soapElement;
 	}
 
