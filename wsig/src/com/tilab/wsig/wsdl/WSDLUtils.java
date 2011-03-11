@@ -23,11 +23,14 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.wsdl;
 
+import jade.content.lang.sl.SLCodec;
 import jade.content.onto.OntologyException;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.Facet;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.facets.CardinalityFacet;
+import jade.content.schema.facets.JavaTypeFacet;
+import jade.content.schema.facets.PermittedValuesFacet;
 import jade.content.schema.facets.TypedAggregateFacet;
 
 import java.io.File;
@@ -36,9 +39,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -73,12 +74,13 @@ import org.eclipse.xsd.XSDAnnotation;
 import org.eclipse.xsd.XSDComplexTypeDefinition;
 import org.eclipse.xsd.XSDCompositor;
 import org.eclipse.xsd.XSDElementDeclaration;
+import org.eclipse.xsd.XSDEnumerationFacet;
 import org.eclipse.xsd.XSDFactory;
 import org.eclipse.xsd.XSDModelGroup;
 import org.eclipse.xsd.XSDParticle;
 import org.eclipse.xsd.XSDSchema;
+import org.eclipse.xsd.XSDSimpleTypeDefinition;
 import org.eclipse.xsd.XSDTypeDefinition;
-import org.eclipse.xsd.impl.XSDComplexTypeDefinitionImpl;
 
 import com.ibm.wsdl.BindingImpl;
 import com.ibm.wsdl.BindingInputImpl;
@@ -124,7 +126,7 @@ public class WSDLUtils {
 		return xsd;
 	}
 
-	static XSDTypeDefinition getComplexType(XSDSchema schema, String targetNameSpace, String typeName) {
+	static XSDTypeDefinition getSimpleOrComplexType(XSDSchema schema, String targetNameSpace, String typeName) {
 		XSDTypeDefinition result = null;
 		for (XSDTypeDefinition type : schema.getTypeDefinitions()) {
 			if (type.hasNameAndTargetNamespace(typeName, targetNameSpace)) {
@@ -136,7 +138,7 @@ public class WSDLUtils {
 	}
 
 	static XSDComplexTypeDefinition createComplexType(String tns, String name) {
-		XSDComplexTypeDefinition complexType = (XSDComplexTypeDefinitionImpl) XSDFactory.eINSTANCE.createXSDComplexTypeDefinition();
+		XSDComplexTypeDefinition complexType = XSDFactory.eINSTANCE.createXSDComplexTypeDefinition();
 		if (name != null) {
 			complexType.setName(name);
 		}
@@ -147,6 +149,23 @@ public class WSDLUtils {
 		return complexType;
 	}
 
+	static XSDSimpleTypeDefinition createSimpleType(String tns, String name, XSDSimpleTypeDefinition simpleTypeDefinition) {
+		XSDSimpleTypeDefinition simpleType = XSDFactory.eINSTANCE.createXSDSimpleTypeDefinition();
+		
+		if (simpleTypeDefinition != null) {
+			simpleType.setBaseTypeDefinition(simpleTypeDefinition);
+		}
+
+		if (name != null) {
+			simpleType.setName(name);
+		}
+		if (tns != null) {
+			simpleType.setTargetNamespace(tns);
+		}
+		
+		return simpleType;
+	}
+	
 	static XSDElementDeclaration createElement(String tns, String name) {
 		XSDElementDeclaration element = XSDFactory.eINSTANCE.createXSDElementDeclaration();
 		if (name != null) {
@@ -157,6 +176,23 @@ public class WSDLUtils {
 		}
 		
 		return element;
+	}
+
+	static XSDSimpleTypeDefinition addSimpleTypeToSchema(String tns, XSDSchema schema, String simpleTypeName, XSDSimpleTypeDefinition simpleTypeDefinition) {
+		XSDSimpleTypeDefinition simpleType = createSimpleType(tns, simpleTypeName, simpleTypeDefinition);
+		schema.getContents().add(simpleType);
+
+		return simpleType;
+	}
+	
+	static XSDSimpleTypeDefinition addRestrictionToSimpleType(XSDSimpleTypeDefinition simpleType, Object[] permittedValues) {
+		for(int i=0; i<permittedValues.length; i++) {
+			XSDEnumerationFacet xsdEnumerationFacet = XSDFactory.eINSTANCE.createXSDEnumerationFacet();
+			xsdEnumerationFacet.setLexicalValue((permittedValues[i]).toString());
+			simpleType.getFacetContents().add(xsdEnumerationFacet);
+		}
+			
+		return simpleType;
 	}
 	
 	static XSDComplexTypeDefinition addComplexTypeToSchema(String tns, XSDSchema schema, String complexTypeName) {
@@ -196,10 +232,10 @@ public class WSDLUtils {
 		XSDElementDeclaration element = createElement(null, elementName);
 		
 		XSDTypeDefinition complexType;
-		if (WSDLConstants.jade2xsd.values().contains(elementType)) {
+		if (isPrimitiveType(elementType)) {
 			complexType = schema.resolveSimpleTypeDefinition(WSDLConstants.XSD_URL, elementType);
 		} else {
-			complexType = getComplexType(schema, tns, elementType);
+			complexType = getSimpleOrComplexType(schema, tns, elementType);
 			
 			if (complexType == null) {
 				// Not already present in definition type
@@ -355,7 +391,7 @@ public class WSDLUtils {
 	static Part createTypePart(String name, String type, String tns) {
 		Part part = new PartImpl();
 		String namespaceURI;
-		if (WSDLConstants.jade2xsd.values().contains(type)) {
+		if (isPrimitiveType(type)) {
 			namespaceURI = WSDLConstants.XSD_URL;
 		} else {
 			namespaceURI = tns;
@@ -382,11 +418,24 @@ public class WSDLUtils {
 	static String getRequestName(String operationName) {
 		return operationName+WSDLConstants.REQUEST_SUFFIX;
 	}
+
+	static Object[] getPermittedValues(ObjectSchema containerSchema, String slotName) {
+		
+		Object[] permittedValues = null;
+		Facet[] facets = getSlotFacets(containerSchema, slotName);
+		for (Facet facet : facets) {
+			if (facet instanceof PermittedValuesFacet) {
+				permittedValues = ((PermittedValuesFacet) facet).getPermittedValues();
+			} 
+		}
+		
+		return permittedValues;
+	}
 	
 	static int getAggregateCardMin(ObjectSchema containerSchema, String slotName) {
 		
 		int cardMin = 0;
-		Facet[] facets = getAggregateFacet(containerSchema, slotName);
+		Facet[] facets = getSlotFacets(containerSchema, slotName);
 		for (Facet facet : facets) {
 			if (facet instanceof CardinalityFacet) {
 				cardMin = ((CardinalityFacet) facet).getCardMin();
@@ -399,7 +448,7 @@ public class WSDLUtils {
 	static int getAggregateCardMax(ObjectSchema containerSchema, String slotName) {
 		
 		int cardMin = 0;
-		Facet[] facets = getAggregateFacet(containerSchema, slotName);
+		Facet[] facets = getSlotFacets(containerSchema, slotName);
 		for (Facet facet : facets) {
 			if (facet instanceof CardinalityFacet) {
 				cardMin = ((CardinalityFacet) facet).getCardMax();
@@ -409,6 +458,19 @@ public class WSDLUtils {
 		return cardMin;
 	}
 
+	static String getJavaType(ObjectSchema containerSchema, String slotName) {
+		
+		String javaType = null;
+		Facet[] facets = getSlotFacets(containerSchema, slotName);
+		for (Facet facet : facets) {
+			if (facet instanceof JavaTypeFacet) {
+				javaType = ((JavaTypeFacet) facet).getJavaType();
+			} 
+		}
+		
+		return javaType;
+	}
+	
 	static void writeWSDL(WSDLFactory factory, Definition definition, String serviceName) throws Exception {
 		String fileName = WSIGConfiguration.getInstance().getWsdlDirectory() + File.separator + serviceName + ".wsdl";
 		WSDLWriter writer = factory.newWSDLWriter();
@@ -461,7 +523,7 @@ public class WSDLUtils {
 	public static ObjectSchema getAggregateElementSchema(ObjectSchema containerSchema, String slotName) {
 		
 		ObjectSchema elementSchema = null;
-		Facet[] facets = getAggregateFacet(containerSchema, slotName);
+		Facet[] facets = getSlotFacets(containerSchema, slotName);
 		for (Facet facet : facets) {
 			if (facet instanceof TypedAggregateFacet) {
 				elementSchema = ((TypedAggregateFacet) facet).getType();
@@ -487,10 +549,34 @@ public class WSDLUtils {
 		} catch (MalformedURLException e) {}
 		return wsdlUrl;
 	}
+
+	public static String getPrimitiveType(ObjectSchema objSchema, ObjectSchema containerSchema, String slotName) {
+		String slotType = WSDLConstants.jade2xsd.get(objSchema.getTypeName());
 	
-	
+		if (containerSchema != null) {
+			// Check java-type to preserve the type
+			String javaType = WSDLUtils.getJavaType(containerSchema, slotName);
+			if (javaType != null && "true".equalsIgnoreCase(System.getProperty(SLCodec.PRESERVE_JAVA_TYPES))) {
+				if (long.class.getName().equals(javaType) || Long.class.getName().equals(javaType)) {
+					slotType = WSDLConstants.XSD_LONG;
+				}
+				else if (double.class.getName().equals(javaType) || Double.class.getName().equals(javaType)) {
+					slotType = WSDLConstants.XSD_DOUBLE;
+				}
+			}
+		}
+		
+		return slotType;
+	}	
+
 	// -----------------------------------------------------------------------------
 	// Private methods
+
+	private static boolean isPrimitiveType(String type) {
+		return 	WSDLConstants.jade2xsd.values().contains(type) || 
+				WSDLConstants.XSD_LONG.equals(type) ||
+				WSDLConstants.XSD_DOUBLE.equals(type);
+	}
 	
 	private static ElementExtensible createBinding(ExtensionRegistry registry, String tns, String soapUse, String type) throws Exception{
 
@@ -535,7 +621,7 @@ public class WSDLUtils {
 		return getLocalPart(tns)+WSDLConstants.PORT_TYPE_SUFFIX;
 	}
 
-	private static Facet[] getAggregateFacet(ObjectSchema containerSchema, String slotName) {
+	private static Facet[] getSlotFacets(ObjectSchema containerSchema, String slotName) {
 		
 		Facet[] facets = containerSchema.getFacets(slotName);
 		

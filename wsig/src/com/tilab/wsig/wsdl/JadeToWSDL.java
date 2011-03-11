@@ -67,6 +67,7 @@ import org.eclipse.xsd.XSDComponent;
 import org.eclipse.xsd.XSDElementDeclaration;
 import org.eclipse.xsd.XSDModelGroup;
 import org.eclipse.xsd.XSDSchema;
+import org.eclipse.xsd.XSDSimpleTypeDefinition;
 
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.store.ActionBuilder;
@@ -80,7 +81,7 @@ import com.tilab.wsig.store.WSIGService;
 public class JadeToWSDL {
 	
 	private static Logger log = Logger.getLogger(JadeToWSDL.class.getName());
-
+	
 	public static Definition createWSDLFromSD(Agent agent, ServiceDescription sd, WSIGService wsigService) throws Exception {
 
 		// Create mapper object
@@ -249,11 +250,11 @@ public class JadeToWSDL {
 						if (operationDefinitedInMapper) {
 							// Mapper
 							Method mapperMethod = mapperMethodsForAction.get(j);
-							inputParametersMap = manageInputParameters(tns, operationName, soapStyle, wsdlTypeSchema, inputMessage, actionName, onto, mapperMethod);
+							inputParametersMap = manageInputParameters(onto, tns, operationName, soapStyle, wsdlTypeSchema, inputMessage, actionName, mapperMethod);
 
 						} else {
 							// Ontology
-							inputParametersMap = manageInputParameters(tns, operationName, soapStyle, wsdlTypeSchema, inputMessage, actionName, onto, null);
+							inputParametersMap = manageInputParameters(onto, tns, operationName, soapStyle, wsdlTypeSchema, inputMessage, actionName, null);
 						}
 						
 						// Set input parameters map to action builder
@@ -268,7 +269,7 @@ public class JadeToWSDL {
 						BindingOutput outputBinding = WSDLUtils.createBindingOutput(registry, tns, soapUse);
 						operationBinding.setBindingOutput(outputBinding);
 
-						manageOutputParameter(tns, operationName, soapStyle, wsdlTypeSchema, outputMessage, actionName, onto);
+						manageOutputParameter(onto, tns, operationName, soapStyle, wsdlTypeSchema, outputMessage, actionName);
 						
 					}
 				} catch (Exception e) {
@@ -301,7 +302,7 @@ public class JadeToWSDL {
 		return definition;
 	}
 	
-	private static Map<String, ObjectSchema> manageInputParameters(String tns, String operationName, String soapStyle, XSDSchema wsdlTypeSchema, Message inputMessage, String actionName, Ontology onto, Method mapperMethod) throws Exception {
+	private static Map<String, ObjectSchema> manageInputParameters(Ontology onto, String tns, String operationName, String soapStyle, XSDSchema wsdlTypeSchema, Message inputMessage, String actionName, Method mapperMethod) throws Exception {
 
 		AgentActionSchema actionSchema = (AgentActionSchema) onto.getSchema(actionName);
 
@@ -319,17 +320,17 @@ public class JadeToWSDL {
 		Map<String, ObjectSchema> inputParametersMap;
 		if (mapperMethod != null) {
 			// Mapper
-			inputParametersMap = manageMapperInputParameters(tns, soapStyle, wsdlTypeSchema, elementSequence, inputMessage, actionSchema, onto, mapperMethod);
+			inputParametersMap = manageMapperInputParameters(onto, tns, soapStyle, wsdlTypeSchema, elementSequence, inputMessage, actionSchema, mapperMethod);
 			
 		} else {
 			// Ontology
-			inputParametersMap = manageOntologyInputParameters(tns, soapStyle, wsdlTypeSchema, elementSequence, inputMessage, actionSchema);
+			inputParametersMap = manageOntologyInputParameters(onto, tns, soapStyle, wsdlTypeSchema, elementSequence, inputMessage, actionSchema);
 		}
 		
 		return inputParametersMap;
 	}
 	
-	private static Map<String, ObjectSchema> manageOntologyInputParameters(String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema) throws Exception {
+	private static Map<String, ObjectSchema> manageOntologyInputParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema) throws Exception {
 
 		String[] slotNames = actionSchema.getNames();
 		Map<String, ObjectSchema> inputParametersMap = new HashMap<String, ObjectSchema>();
@@ -337,7 +338,7 @@ public class JadeToWSDL {
 		// Loop for all slot of action schema
 		for (String slotName : slotNames) {
 			ObjectSchema slotSchema = actionSchema.getSchema(slotName);
-			String slotType = createComplexTypeFromSchema(tns, actionSchema, slotSchema, wsdlTypeSchema, slotName, null, null, null);
+			String slotType = createComplexTypeFromSchema(onto, tns, actionSchema, slotSchema, wsdlTypeSchema, slotName, null, null, null);
 			log.debug("--ontology input slot: "+slotName+" ("+slotType+")");
 
 			// For aggregate create the relative TypedAggregateSchema
@@ -364,7 +365,7 @@ public class JadeToWSDL {
 		return inputParametersMap;
 	}
 	
-	private static Map<String, ObjectSchema> manageMapperInputParameters(String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema, Ontology onto, Method mapperMethod) throws Exception {
+	private static Map<String, ObjectSchema> manageMapperInputParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema, Method mapperMethod) throws Exception {
 		
 		Class[] parameterTypes = mapperMethod.getParameterTypes();
 		String[] parameterNames = WSDLUtils.getParameterNames(mapperMethod);
@@ -403,7 +404,7 @@ public class JadeToWSDL {
 		return inputParametersMap;
 	}
 	
-	private static void manageOutputParameter(String tns, String operationName, String soapStyle, XSDSchema wsdlTypeSchema, Message outputMessage, String actionName, Ontology onto) throws Exception {
+	private static void manageOutputParameter(Ontology onto, String tns, String operationName, String soapStyle, XSDSchema wsdlTypeSchema, Message outputMessage, String actionName) throws Exception {
 		
 		AgentActionSchema actionSchema = (AgentActionSchema) onto.getSchema(actionName);
 		ObjectSchema resultSchema = actionSchema.getResultSchema();
@@ -426,7 +427,7 @@ public class JadeToWSDL {
 		// Check result schema
 		if (resultSchema != null) {
 			String resultName = WSDLUtils.getResultName(operationName);
-			String resultType = createComplexTypeFromSchema(tns, actionSchema, resultSchema, wsdlTypeSchema, resultSchema.getTypeName(), null, null, null);
+			String resultType = createComplexTypeFromSchema(onto, tns, actionSchema, resultSchema, wsdlTypeSchema, resultSchema.getTypeName(), null, null, null);
 			log.debug("--ontology output result: "+resultName+" ("+resultType+")");
 
 			Part partMessage;
@@ -539,15 +540,30 @@ public class JadeToWSDL {
 				log.debug("------add primitive-type "+paramName+" ("+slotType+")");
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, paramName, slotType, (XSDModelGroup) parentComponent, null, null);
 			}
-
 		} 
+		else if (parameterClass.isEnum()) {
+			
+			// Enum
+			slotType = parameterClass.getSimpleName();
+			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
+				log.debug("----create simple-type "+slotType);
+				XSDSimpleTypeDefinition simpleTypeDefinition = wsdlTypeSchema.resolveSimpleTypeDefinition(WSDLConstants.XSD_URL, WSDLConstants.XSD_STRING);
+				Object[] enumValues = parameterClass.getEnumConstants();
+				Object[] permittedValues = new Object[enumValues.length]; 
+				for (int i=0; i<enumValues.length; i++) {
+					permittedValues[i] = enumValues[i].toString(); 
+				}
+				XSDSimpleTypeDefinition enumType = WSDLUtils.addSimpleTypeToSchema(tns, wsdlTypeSchema, slotType, simpleTypeDefinition);
+				WSDLUtils.addRestrictionToSimpleType(enumType, permittedValues);
+			}
+		}
 		else if (parameterClass.isArray()) {
 
 			// Java array
 			Class aggrType = parameterClass.getComponentType();
 			paramName = aggrType.getSimpleName().toLowerCase();
 			slotType = WSDLUtils.getAggregateType(paramName, BasicOntology.SEQUENCE);
-			if (WSDLUtils.getComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
+			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
 				log.debug("----create array-type "+slotType);
 				XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType);
 				XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
@@ -562,62 +578,64 @@ public class JadeToWSDL {
 			throw new Exception("Collection NOT supported");
 
 		} else {
-			
 			// Java custom type (work with concept schema of type paramType)
 			// Search a schema of this type
-			String[] conceptSchemaNames = containerSchema.getNames();
-			String conceptSchemaName = null;
-			for (String name : conceptSchemaNames) {
-				if (parameterClass.equals(onto.getClassForElement(name))) {
-					conceptSchemaName = name;
-					break;
-				}
-			}
-			if (conceptSchemaName == null) {
+			ObjectSchema conceptSchema = onto.getSchema(parameterClass);
+			if (conceptSchema == null) {
 				throw new Exception("ConceptSchema of type "+parameterClass.getSimpleName()+" doesn't exist in "+ onto.getName());
 			}
-			ObjectSchema conceptSchema = containerSchema.getSchema(conceptSchemaName);
-			slotType = createComplexTypeFromSchema(tns, containerSchema, conceptSchema, wsdlTypeSchema, conceptSchemaName, parentComponent, null, null);
+			
+			String conceptSchemaName = conceptSchema.getTypeName();
+			slotType = createComplexTypeFromSchema(onto, tns, containerSchema, conceptSchema, wsdlTypeSchema, conceptSchemaName, parentComponent, null, null);
 		}
 		
 		return slotType;
 	}
 
-	private static String createComplexTypeFromSchema(String tns, ConceptSchema containerSchema, ObjectSchema objSchema, XSDSchema wsdlTypeSchema, String slotName, XSDComponent parentComponent, Integer cardMin, Integer cardMax) throws Exception {
+	private static String createComplexTypeFromSchema(Ontology onto, String tns, ConceptSchema containerSchema, ObjectSchema objSchema, XSDSchema wsdlTypeSchema, String slotName, XSDComponent parentComponent, Integer cardMin, Integer cardMax) throws Exception {
 		
 		String slotType = null;
 		if (objSchema instanceof PrimitiveSchema) {
-			
 			// Get type from PrimitiveSchema
-			slotType = WSDLConstants.jade2xsd.get(objSchema.getTypeName());
+			slotType = WSDLUtils.getPrimitiveType(objSchema, containerSchema, slotName);
+			
 			if (parentComponent != null) {
 				if (cardMin == null && !containerSchema.isMandatory(slotName)) {
 					cardMin = new Integer(0);
 				}
+				
 				log.debug("------add primitive-type "+slotName+" ("+slotType+") "+((cardMin!=null && cardMin==0)?"OPTIONAL":""));
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
-
 		} 
 		else if (objSchema instanceof ConceptSchema) {
-			
 			// Get type from ConceptSchema (if not found in wsdlTypeSchema create it)
 			slotType = objSchema.getTypeName();
 			if (parentComponent != null) {
 				if (cardMin == null && !containerSchema.isMandatory(slotName)) {
 					cardMin = new Integer(0);
 				}
-				log.debug("------add complex-type "+slotName+" ("+slotType+") "+((cardMin!=null && cardMin==0)?"OPTIONAL":""));
+				log.debug("------add defined-type "+slotName+" ("+slotType+") "+((cardMin!=null && cardMin==0)?"OPTIONAL":""));
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
 			
-			if (WSDLUtils.getComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
-				log.debug("----create complex-type "+slotType);
-				XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType);
-				XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
-				for (String conceptSlotName : objSchema.getNames()) {
-					ObjectSchema slotSchema = objSchema.getSchema(conceptSlotName);
-					createComplexTypeFromSchema(tns, (ConceptSchema) objSchema, slotSchema, wsdlTypeSchema, conceptSlotName, sequence, null, null);
+			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
+				Class slotClass = onto.getClassForElement(slotType);
+				if (slotClass != null && slotClass.isEnum()) {
+					log.debug("----create simple-type "+slotType);
+					XSDSimpleTypeDefinition simpleTypeDefinition = wsdlTypeSchema.resolveSimpleTypeDefinition(WSDLConstants.XSD_URL, WSDLConstants.XSD_STRING);
+					Object[] permittedValues = WSDLUtils.getPermittedValues(objSchema, WSDLConstants.ENUM_SLOT_NAME);
+					XSDSimpleTypeDefinition enumType = WSDLUtils.addSimpleTypeToSchema(tns, wsdlTypeSchema, slotType, simpleTypeDefinition);
+					WSDLUtils.addRestrictionToSimpleType(enumType, permittedValues);
+				}
+				else {
+					log.debug("----create complex-type "+slotType);
+					XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType);
+					XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
+					for (String conceptSlotName : objSchema.getNames()) {
+						ObjectSchema slotSchema = objSchema.getSchema(conceptSlotName);
+						createComplexTypeFromSchema(onto, tns, (ConceptSchema) objSchema, slotSchema, wsdlTypeSchema, conceptSlotName, sequence, null, null);
+					}
 				}
 			}
 		} 
@@ -632,13 +650,13 @@ public class JadeToWSDL {
 			// Get array type 
 			slotType = aggregateSchema.getTypeName();
 			if (aggregateSchema instanceof PrimitiveSchema) {
-				slotType = WSDLConstants.jade2xsd.get(slotType);
+				slotType = WSDLUtils.getPrimitiveType(aggregateSchema, containerSchema, slotName);
 			}
 			String itemName = slotType;
 			String aggregateType = objSchema.getTypeName();
 			slotType = WSDLUtils.getAggregateType(slotType, aggregateType);
 			
-			if (WSDLUtils.getComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
+			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
 				log.debug("----create array-type "+slotType);
 				XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType);
 				XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
@@ -646,7 +664,7 @@ public class JadeToWSDL {
 					log.debug("------add array-type "+slotName+" ("+slotType+") ["+cardMin+","+cardMax+"]");
 					WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin==0?cardMin:null, null);
 				}
-				createComplexTypeFromSchema(tns, containerSchema, aggregateSchema, wsdlTypeSchema, itemName, sequence, cardMin, cardMax);
+				createComplexTypeFromSchema(onto, tns, containerSchema, aggregateSchema, wsdlTypeSchema, itemName, sequence, cardMin, cardMax);
 			}
 		}
 		

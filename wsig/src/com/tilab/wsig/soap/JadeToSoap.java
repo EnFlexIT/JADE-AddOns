@@ -27,6 +27,7 @@ import jade.content.abs.AbsAggregate;
 import jade.content.abs.AbsPrimitive;
 import jade.content.abs.AbsTerm;
 import jade.content.onto.BasicOntology;
+import jade.content.onto.Ontology;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.AggregateSchema;
 import jade.content.schema.ConceptSchema;
@@ -58,6 +59,7 @@ public class JadeToSoap {
 	private String tns;
 	private String localNamespacePrefix;
 	private String soapStyle;
+	private Ontology onto;
 	
 	public JadeToSoap() {
 		localNamespacePrefix = WSIGConfiguration.getInstance().getLocalNamespacePrefix(); 
@@ -69,6 +71,9 @@ public class JadeToSoap {
 		// Get tns
 		tns = WSDLConstants.URN + ":" + wsigService.getServicePrefix() + wsigService.getServiceName();
 			
+		// Get ontology
+		onto = wsigService.getOnto();
+
 		// Create soap message
         MessageFactory messageFactory = MessageFactory.newInstance();
         SOAPMessage soapResponse = messageFactory.createMessage();
@@ -124,7 +129,7 @@ public class JadeToSoap {
 				log.debug("Elaborate primitive schema: "+elementName+" of type: "+resultSchema.getTypeName());
 	
 				// Get type and create soap element
-		        soapType = (String) WSDLConstants.jade2xsd.get(resultSchema.getTypeName());
+		        soapType = WSDLUtils.getPrimitiveType(resultSchema, containerSchema, elementName);
 				soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD, soapType, "");
 	
 				AbsPrimitive primitiveAbsObj = (AbsPrimitive)resultAbsObj;
@@ -141,20 +146,30 @@ public class JadeToSoap {
 				
 				// ConceptSchema
 				log.debug("Elaborate concept schema: "+elementName+" of type: "+resultSchema.getTypeName());
-	
+
 				// Get type and create soap element
 		        soapType = resultSchema.getTypeName();
 				soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType, "");
 				
-				// Elaborate all sub-schema of current complex schema 
-				for (String conceptSlotName : resultSchema.getNames()) {
-					ObjectSchema slotSchema = resultSchema.getSchema(conceptSlotName);
-				
-					// Get sub-object value 
-					AbsTerm subAbsObject = (AbsTerm)resultAbsObj.getAbsObject(conceptSlotName);
+				Class parameterClass = onto.getClassForElement(resultSchema.getTypeName());
+				if (parameterClass != null && parameterClass.isEnum()) {
+					// Enum type
+
+					// Get enum-object value and set into soap message 
+					AbsPrimitive enumAbsObject = (AbsPrimitive)resultAbsObj.getAbsObject(WSDLConstants.ENUM_SLOT_NAME);
+					soapElement.addTextNode(enumAbsObject.toString());
+				}
+				else {
+					// Elaborate all sub-schema of current complex schema 
+					for (String conceptSlotName : resultSchema.getNames()) {
+						ObjectSchema slotSchema = resultSchema.getSchema(conceptSlotName);
 					
-					// Do recursive call
-					convertObjectToSoapElement(newContainerSchema, slotSchema, subAbsObject, conceptSlotName, soapElement);
+						// Get sub-object value 
+						AbsTerm subAbsObject = (AbsTerm)resultAbsObj.getAbsObject(conceptSlotName);
+						
+						// Do recursive call
+						convertObjectToSoapElement(newContainerSchema, slotSchema, subAbsObject, conceptSlotName, soapElement);
+					}
 				}
 			} else if (resultSchema instanceof AggregateSchema) {
 				
@@ -167,7 +182,7 @@ public class JadeToSoap {
 				// Get slot type
 				soapType = aggrSchema.getTypeName();
 				if (aggrSchema instanceof PrimitiveSchema) {
-					soapType = WSDLConstants.jade2xsd.get(soapType);
+					soapType = WSDLUtils.getPrimitiveType(aggrSchema, containerSchema, elementName);
 				}
 				String itemName = soapType;
 				String aggrType = resultSchema.getTypeName();

@@ -72,6 +72,9 @@ public class WSDLConstants {
 	public static final String XSD_BYTE = "byte";
 	public static final String XSD_SHORT = "short";
 	
+	// BOB enum slot
+	public static final String ENUM_SLOT_NAME = "name";
+	
 	// Primitive conversion types from jade to xsd (used for ontologies)
 	public static final Hashtable<String, String> jade2xsd = new Hashtable<String, String>();
 	static {

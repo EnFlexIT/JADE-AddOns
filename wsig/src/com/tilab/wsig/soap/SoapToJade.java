@@ -29,6 +29,7 @@ import jade.content.abs.AbsObject;
 import jade.content.abs.AbsPrimitive;
 import jade.content.abs.AbsTerm;
 import jade.content.onto.BasicOntology;
+import jade.content.onto.Ontology;
 import jade.content.schema.AggregateSchema;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
@@ -61,9 +62,10 @@ public class SoapToJade extends DefaultHandler {
 	
 	private static Logger log = Logger.getLogger(SoapToJade.class.getName());
 
-	private XMLReader xmlParser = null;
+	private XMLReader xmlParser;
 	private int level = 0;
-	private StringBuffer elementValue = new StringBuffer();;
+	private Ontology onto;
+	private StringBuffer elementValue = new StringBuffer();
 	private Vector<Vector<ParameterInfo>> parametersByLevel = new Vector<Vector<ParameterInfo>>();
 	private Vector<ObjectSchema> schemaByLevel = new Vector<ObjectSchema>();
 	private Map<String, ObjectSchema> parametersSchemaMap;
@@ -117,6 +119,9 @@ public class SoapToJade extends DefaultHandler {
 			log.error("Operation "+operationName+" not present in service "+wsigService.getServiceName());
 			throw new Exception("Operation "+operationName+" not present in service "+wsigService.getServiceName()); 
 		}
+		
+		// Get ontology
+		onto = wsigService.getOnto();
 		
 		// Get parameters schema map
 		parametersSchemaMap = actionBuilder.getParametersMap();
@@ -335,41 +340,52 @@ public class SoapToJade extends DefaultHandler {
 					// Complex type -> create abs object from schema
 					AbsObject absObj = parameterSchema.newInstance();
 					
-					// Get parameters for complex/aggregate type 
-					Vector<ParameterInfo> fieldsParameter = getParametersByLevel(parameterLevel+1, false);
-
-					if (absObj instanceof AbsAggregate) {
-
-						// Type is aggregate
-						for (int arrayIndex = 0; arrayIndex < fieldsParameter.size(); arrayIndex++) {
-							
-							// Add parameters to aggregate
-							ParameterInfo fieldPi = fieldsParameter.get(arrayIndex);
-							((AbsAggregate)absObj).add((AbsTerm)fieldPi.getValue());
-							log.debug("Add element "+arrayIndex+" to "+parameterName+" with "+fieldPi.getValue());
-						}
-					} else {
+					Class parameterClass = onto.getClassForElement(parameterSchema.getTypeName());
+					if (parameterClass != null && parameterClass.isEnum()) {
+						// Enum type
+						AbsPrimitive enumValue = getPrimitiveAbsValue(new PrimitiveSchema(WSDLConstants.XSD_STRING), parameterValue);
+						AbsHelper.setAttribute(absObj, WSDLConstants.ENUM_SLOT_NAME, enumValue);
+						pi.setValue(absObj);
+						log.debug("Set "+parameterName+" with " + parameterValue);
 						
-						// Type is complex
-						for (int fieldIndex = 0; fieldIndex < fieldsParameter.size(); fieldIndex++) {
-							ParameterInfo fieldPi = fieldsParameter.get(fieldIndex);
-						
-							// Get field parameter info
-							String fieldName = fieldPi.getName();
-							AbsObject fieldValue = fieldPi.getValue();
-							
-							// Set value
-							AbsHelper.setAttribute(absObj, fieldName, fieldValue);
-						}
 					}
-
-					// Remove parameters of level parameterLevel+1
-					parametersByLevel.remove(parameterLevel+1);
-
-					// Set value in parameter info object
-					pi.setValue(absObj);
-				
-					log.debug("End managing parameter "+parameterName);						
+					else {
+						// Get parameters for complex/aggregate type 
+						Vector<ParameterInfo> fieldsParameter = getParametersByLevel(parameterLevel+1, false);
+	
+						if (absObj instanceof AbsAggregate) {
+	
+							// Type is aggregate
+							for (int arrayIndex = 0; arrayIndex < fieldsParameter.size(); arrayIndex++) {
+								
+								// Add parameters to aggregate
+								ParameterInfo fieldPi = fieldsParameter.get(arrayIndex);
+								((AbsAggregate)absObj).add((AbsTerm)fieldPi.getValue());
+								log.debug("Add element "+arrayIndex+" to "+parameterName+" with "+fieldPi.getValue());
+							}
+						} else {
+							
+							// Type is complex
+							for (int fieldIndex = 0; fieldIndex < fieldsParameter.size(); fieldIndex++) {
+								ParameterInfo fieldPi = fieldsParameter.get(fieldIndex);
+							
+								// Get field parameter info
+								String fieldName = fieldPi.getName();
+								AbsObject fieldValue = fieldPi.getValue();
+								
+								// Set value
+								AbsHelper.setAttribute(absObj, fieldName, fieldValue);
+							}
+						}
+	
+						// Remove parameters of level parameterLevel+1
+						parametersByLevel.remove(parameterLevel+1);
+	
+						// Set value in parameter info object
+						pi.setValue(absObj);
+					
+						log.debug("End managing parameter "+parameterName);
+					}
 				}
 			}
 		} catch(Exception e) {
