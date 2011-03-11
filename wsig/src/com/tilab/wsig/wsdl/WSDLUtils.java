@@ -462,10 +462,12 @@ public class WSDLUtils {
 		
 		String javaType = null;
 		Facet[] facets = getSlotFacets(containerSchema, slotName);
-		for (Facet facet : facets) {
-			if (facet instanceof JavaTypeFacet) {
-				javaType = ((JavaTypeFacet) facet).getJavaType();
-			} 
+		if (facets != null) {
+			for (Facet facet : facets) {
+				if (facet instanceof JavaTypeFacet) {
+					javaType = ((JavaTypeFacet) facet).getJavaType();
+				} 
+			}
 		}
 		
 		return javaType;
