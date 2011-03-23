@@ -613,7 +613,7 @@ public class DynamicClient {
 			}
 			classes = new File(properties.getTmpDir(), stem + "-classes");
 			if (!classes.mkdir()) {
-				throw new IllegalStateException("Unable to create working directory " + src.getPath());
+				throw new DynamicClientException("Unable to create working directory " + classes.getAbsolutePath());
 			}
 	
 			// Generate webservice classes
