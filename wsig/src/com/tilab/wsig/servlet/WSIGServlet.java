@@ -28,15 +28,12 @@ import jade.content.abs.AbsTerm;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
 import jade.core.AID;
-import jade.util.leap.Properties;
 import jade.wrapper.ControllerException;
 import jade.wrapper.gateway.GatewayListener;
 import jade.wrapper.gateway.JadeGateway;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Iterator;
