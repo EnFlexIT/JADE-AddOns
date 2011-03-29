@@ -423,10 +423,12 @@ public class WSDLUtils {
 		
 		Object[] permittedValues = null;
 		Facet[] facets = getSlotFacets(containerSchema, slotName);
-		for (Facet facet : facets) {
-			if (facet instanceof PermittedValuesFacet) {
-				permittedValues = ((PermittedValuesFacet) facet).getPermittedValues();
-			} 
+		if (facets != null) {
+			for (Facet facet : facets) {
+				if (facet instanceof PermittedValuesFacet) {
+					permittedValues = ((PermittedValuesFacet) facet).getPermittedValues();
+				} 
+			}
 		}
 		
 		return permittedValues;
@@ -436,10 +438,12 @@ public class WSDLUtils {
 		
 		int cardMin = 0;
 		Facet[] facets = getSlotFacets(containerSchema, slotName);
-		for (Facet facet : facets) {
-			if (facet instanceof CardinalityFacet) {
-				cardMin = ((CardinalityFacet) facet).getCardMin();
-			} 
+		if (facets != null) {
+			for (Facet facet : facets) {
+				if (facet instanceof CardinalityFacet) {
+					cardMin = ((CardinalityFacet) facet).getCardMin();
+				} 
+			}
 		}
 		
 		return cardMin;
@@ -449,10 +453,12 @@ public class WSDLUtils {
 		
 		int cardMin = 0;
 		Facet[] facets = getSlotFacets(containerSchema, slotName);
-		for (Facet facet : facets) {
-			if (facet instanceof CardinalityFacet) {
-				cardMin = ((CardinalityFacet) facet).getCardMax();
-			} 
+		if (facets != null) {
+			for (Facet facet : facets) {
+				if (facet instanceof CardinalityFacet) {
+					cardMin = ((CardinalityFacet) facet).getCardMax();
+				} 
+			}
 		}
 		
 		return cardMin;
@@ -526,9 +532,11 @@ public class WSDLUtils {
 		
 		ObjectSchema elementSchema = null;
 		Facet[] facets = getSlotFacets(containerSchema, slotName);
-		for (Facet facet : facets) {
-			if (facet instanceof TypedAggregateFacet) {
-				elementSchema = ((TypedAggregateFacet) facet).getType();
+		if (facets != null) {
+			for (Facet facet : facets) {
+				if (facet instanceof TypedAggregateFacet) {
+					elementSchema = ((TypedAggregateFacet) facet).getType();
+				}
 			}
 		}
 		
