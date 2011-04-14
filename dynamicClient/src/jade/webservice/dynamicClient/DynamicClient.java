@@ -78,8 +78,17 @@ import org.apache.axis.client.Stub;
 import org.apache.axis.configuration.SimpleProvider;
 import org.apache.axis.handlers.SimpleSessionHandler;
 import org.apache.axis.message.SOAPHeaderElement;
+import org.apache.axis.message.addressing.AddressingHeaders;
+import org.apache.axis.message.addressing.AttributedURI;
+import org.apache.axis.message.addressing.EndpointReference;
+import org.apache.axis.message.addressing.MessageID;
+import org.apache.axis.message.addressing.ReferenceParametersType;
+import org.apache.axis.message.addressing.ReferencePropertiesType;
+import org.apache.axis.message.addressing.RelatesTo;
+import org.apache.axis.message.addressing.handler.AddressingHandler;
 import org.apache.axis.transport.http.HTTPSender;
 import org.apache.axis.transport.http.HTTPTransport;
+import org.apache.axis.types.URI.MalformedURIException;
 import org.apache.axis.utils.JavaUtils;
 import org.apache.axis.wsdl.symbolTable.ServiceEntry;
 import org.apache.axis.wsdl.toJava.Emitter;
@@ -885,7 +894,7 @@ public class DynamicClient {
 	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, WSData input) throws DynamicClientException, RemoteException {
 		return invoke(serviceName, portName, operation, endpoint, timeout, null, input); 
 	}
-	
+
 	/**
 	 * Invoke a web-service operation.
 	 * 
@@ -904,6 +913,28 @@ public class DynamicClient {
 	 * @see jade.webservice.dynamicClient.WSData
 	 */
 	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, SecurityProperties securityProperties, WSData input) throws DynamicClientException, RemoteException {
+		return invoke(serviceName, portName, operation, endpoint, timeout, securityProperties, null, input);
+	}
+	
+	/**
+	 * Invoke a web-service operation.
+	 * 
+	 * @param serviceName name of service (null to use the default) 
+	 * @param portName name of port (null to use the default)
+	 * @param operation name of operation
+	 * @param endpoint webservice endpoint url
+	 * @param timeout call timeout in millisecond (0 no timeout, <0 to use default value)
+	 * @param input WSData input parameters/headers
+	 * @param securityProperties security configuration (HTTP, WSS,...)
+	 * @param addressingProperties WS-A configuration
+	 * @return WSData output parameters/headers
+	 * @throws DynamicClientException client exception 
+	 * @throws RemoteException server exception
+	 * 
+	 * @see jade.webservice.dynamicClient.DynamicClientProperties
+	 * @see jade.webservice.dynamicClient.WSData
+	 */
+	public WSData invoke(String serviceName, String portName, String operation, URL endpoint, int timeout, SecurityProperties securityProperties, AddressingProperties addressingProperties, WSData input) throws DynamicClientException, RemoteException {
 		
 		try {
 			// Check if is initialized
@@ -911,62 +942,19 @@ public class DynamicClient {
 				throw new DynamicClientException("DynamicClient not inited, current state="+state);
 			}
 			
-			// If not specified create a default SecurityProperties 
-			if (securityProperties == null) {
-				securityProperties = new SecurityProperties(); 
-			}
-
-			// Manage default values
+			// Get and check service
 			if (serviceName == null) {
 				serviceName = defaultServiceName;
 			}
-			if (portName == null) {
-				portName = defaultPortName;
-			}
-			if (endpoint == null) {
-				endpoint = defaultEndpoint;
-			}
-			if (timeout < 0) {
-				timeout = defaultTimeout;
-			}
-			String httpUsername = securityProperties.getHttpUsername();
-			if (httpUsername == null) {
-				httpUsername = defaultHttpUsername;
-			}
-			String httpPassword = securityProperties.getHttpPassword();
-			if (httpPassword == null) {
-				httpPassword = defaultHttpPassword;
-			}
-			String wssUsername = securityProperties.getWSSUsername();
-			if (wssUsername == null) {
-				wssUsername = defaultWSSUsername;
-			}
-			String wssPassword = securityProperties.getWSSPassword();
-			if (wssPassword == null) {
-				wssPassword = defaultWSSPassword;
-			}
-			String wssPasswordType = securityProperties.getWSSPasswordType();
-			if (wssPasswordType == null) {
-				wssPasswordType = defaultWSSPasswordType;
-			}
-			
-			Boolean wssMustUnderstand = securityProperties.isWSSMustUnderstand();
-			if (wssMustUnderstand == null) {
-				wssMustUnderstand = defaultWSSMustUnderstand;
-			}
-			
-			Integer wssTimeToLive = securityProperties.getWSSTimeToLive();
-			if (wssTimeToLive == null) {
-				wssTimeToLive = defaultWSSTimeToLive;
-			}
-			
-			// Get and check service
 			ServiceInfo serviceInfo = getService(serviceName);
 			if (serviceInfo == null) {
 				throw new DynamicClientException("Service "+serviceName+" not present");
 			}
 			
 			// Get and check port
+			if (portName == null) {
+				portName = defaultPortName;
+			}
 			PortInfo portInfo = serviceInfo.getPort(portName);
 			if (portInfo == null) {
 				throw new DynamicClientException("Port "+portName+" not present in service "+serviceInfo.getName());
@@ -978,91 +966,58 @@ public class DynamicClient {
 				throw new DynamicClientException("Operation "+operation+" not present in service "+serviceInfo.getName()+", port "+portInfo.getName());
 			}
 			
-			// Create axis stub and handlers
+			// Create axis client configuration and handlers
 			Method stubMethod = portInfo.getStubMethod();
-			WSDoAllSender senderHandler = new WSDoAllSender();
-			WSDoAllReceiver receiverHandler = new WSDoAllReceiver();
-			Stub stub;
+			Service service = serviceInfo.getLocator(); 
 			
+			Handler sessionHandler = (Handler)new SimpleSessionHandler(); 
+			SimpleChain requestHandlers = new SimpleChain(); 
+			SimpleChain responseHandlers = new SimpleChain(); 
+			requestHandlers.addHandler(sessionHandler); 
+			responseHandlers.addHandler(sessionHandler); 
+			
+			Handler pivot = (Handler)new HTTPSender(); 
+			Handler transport = new SimpleTargetedChain(requestHandlers, pivot, responseHandlers);
+			
+			SimpleProvider clientConfig = new SimpleProvider();
+			clientConfig.deployTransport(HTTPTransport.DEFAULT_TRANSPORT_NAME, transport); 
+
+			service.setEngineConfiguration(clientConfig); 
+			service.setEngine(new AxisClient(clientConfig)); 
+			
+			// Create and check stub
+			Stub stub;
 			try {
-				Service service = serviceInfo.getLocator(); 
-				
-				// Create custom client configuration
-				Handler sessionHandler = (Handler)new SimpleSessionHandler(); 
-				SimpleChain reqHandler = new SimpleChain(); 
-				SimpleChain respHandler = new SimpleChain(); 
-				reqHandler.addHandler(sessionHandler); 
-				respHandler.addHandler(sessionHandler); 
-
-				// Only for WSS security add WSS handlers
-				if ((wssUsername != null && wssPassword != null) || wssTimeToLive != null) {
-					// Sender handler for username-token and/or timestamp
-					reqHandler.addHandler(senderHandler);
-					
-					// Receiver handler only for timestamp
-					if (wssTimeToLive != null) {
-						respHandler.addHandler(receiverHandler);
-					}
-				}
-				
-				Handler pivot = (Handler)new HTTPSender(); 
-				Handler transport = new SimpleTargetedChain(reqHandler, pivot, respHandler);
-				
-				SimpleProvider clientConfig = new SimpleProvider();
-				clientConfig.deployTransport(HTTPTransport.DEFAULT_TRANSPORT_NAME, transport); 
-
-				service.setEngineConfiguration(clientConfig); 
-				service.setEngine(new AxisClient(clientConfig)); 
-				
 				stub = createStub(stubMethod, service);
 			} catch (Exception e) {
 				throw new DynamicClientException("Error creating service stub for service "+serviceInfo.getName()+", port "+portInfo.getName());
 			} 
 			
 			// Set webservice endpoint
+			if (endpoint == null) {
+				endpoint = defaultEndpoint;
+			}
 			if (endpoint != null) {
 				stub._setProperty(Stub.ENDPOINT_ADDRESS_PROPERTY, endpoint.toExternalForm());
 			}
 			
 			// Set webservice call timeout
+			if (timeout < 0) {
+				timeout = defaultTimeout;
+			}
 			if (timeout >= 0) {
 				stub.setTimeout(timeout);
 			}
 
-			// Set HTTP Basic Authentication
-			if (httpUsername != null && httpPassword != null) {
-				stub.setUsername(httpUsername);
-				stub.setPassword(httpPassword);
-			}
-
-			// Set global WS-Security  
-			if ((wssUsername != null && wssPassword != null) || wssTimeToLive != null) {
-	            if (wssMustUnderstand != null) {
-	            	stub._setProperty(WSHandlerConstants.MUST_UNDERSTAND, wssMustUnderstand.toString());
-	            }
-			}
-
-			// Set WS-Security Username Token
-			if (wssUsername != null && wssPassword != null) {
+			// Apply security properties
+			applySecurity(stub, requestHandlers, responseHandlers, securityProperties);
 			
-				// Add Username Token management only in sender handler
-				addHandlerAction(senderHandler, WSHandlerConstants.USERNAME_TOKEN);
-				stub._setProperty(UsernameToken.PASSWORD_TYPE, wssPasswordType);
-				stub._setProperty(WSHandlerConstants.USER, wssUsername);
-				
-				WSSPasswordCallback passwordCallback = new WSSPasswordCallback(wssPassword);
-				stub._setProperty(WSHandlerConstants.PW_CALLBACK_REF, passwordCallback);
-			}
-			
-			// Set WS-Security Timestamp
-            if (wssTimeToLive != null) {
-            	
-            	// Add timestamp management in sender & receiver handlers
-            	addHandlerAction(senderHandler, WSHandlerConstants.TIMESTAMP);
-            	addHandlerAction(receiverHandler, WSHandlerConstants.TIMESTAMP);
-            	
-            	stub._setProperty(WSHandlerConstants.TTL_TIMESTAMP, wssTimeToLive.toString());
-            }
+			// Apply addressing properties
+			try {
+				applyAddressing(stub, requestHandlers, responseHandlers, addressingProperties);
+			} catch (Exception e) {
+				throw new DynamicClientException("Error apply addressing for service "+serviceInfo.getName());
+			} 
             
             logger.info("Invoke "+serviceInfo.getName()+"->"+portInfo.getName()+"->"+operationInfo.getName());
             logger.info("Input\n"+input);
@@ -1202,6 +1157,176 @@ public class DynamicClient {
 		}
 	}
 
+	private void applySecurity(Stub stub, SimpleChain requestHandlers, SimpleChain responseHandlers, SecurityProperties securityProperties) {
+		
+		// If not specified create a default SecurityProperties 
+		if (securityProperties == null) {
+			securityProperties = new SecurityProperties(); 
+		}
+
+		// Check properties
+		String httpUsername = securityProperties.getHttpUsername();
+		if (httpUsername == null) {
+			httpUsername = defaultHttpUsername;
+		}
+		String httpPassword = securityProperties.getHttpPassword();
+		if (httpPassword == null) {
+			httpPassword = defaultHttpPassword;
+		}
+		String wssUsername = securityProperties.getWSSUsername();
+		if (wssUsername == null) {
+			wssUsername = defaultWSSUsername;
+		}
+		String wssPassword = securityProperties.getWSSPassword();
+		if (wssPassword == null) {
+			wssPassword = defaultWSSPassword;
+		}
+		String wssPasswordType = securityProperties.getWSSPasswordType();
+		if (wssPasswordType == null) {
+			wssPasswordType = defaultWSSPasswordType;
+		}
+		Boolean wssMustUnderstand = securityProperties.isWSSMustUnderstand();
+		if (wssMustUnderstand == null) {
+			wssMustUnderstand = defaultWSSMustUnderstand;
+		}
+		Integer wssTimeToLive = securityProperties.getWSSTimeToLive();
+		if (wssTimeToLive == null) {
+			wssTimeToLive = defaultWSSTimeToLive;
+		}
+
+		// Set HTTP Basic Authentication
+		if (httpUsername != null && httpPassword != null) {
+			stub.setUsername(httpUsername);
+			stub.setPassword(httpPassword);
+		}
+
+		// Set all WS-Security
+		if ((wssUsername != null && wssPassword != null) || wssTimeToLive != null) {
+
+			// Set WS-Security MustUnderstand
+            if (wssMustUnderstand != null) {
+            	stub._setProperty(WSHandlerConstants.MUST_UNDERSTAND, wssMustUnderstand.toString());
+            }
+
+            // Set sender handler for username-token and/or timestamp
+    		WSDoAllSender wssSenderHandler = new WSDoAllSender();
+    		requestHandlers.addHandler(wssSenderHandler);
+
+    		// Set WS-Security Username Token
+    		if (wssUsername != null && wssPassword != null) {
+    		
+    			// Add Username Token management only in sender handler
+    			addHandlerAction(wssSenderHandler, WSHandlerConstants.USERNAME_TOKEN);
+    			stub._setProperty(UsernameToken.PASSWORD_TYPE, wssPasswordType);
+    			stub._setProperty(WSHandlerConstants.USER, wssUsername);
+    			
+    			WSSPasswordCallback passwordCallback = new WSSPasswordCallback(wssPassword);
+    			stub._setProperty(WSHandlerConstants.PW_CALLBACK_REF, passwordCallback);
+    		}
+            
+    		// Set WS-Security Timestamp
+    		if (wssTimeToLive != null) {
+    			
+    			// Add receiver handler only for timestamp
+    			WSDoAllReceiver wssReceiverHandler = new WSDoAllReceiver();	
+    			responseHandlers.addHandler(wssReceiverHandler);
+
+            	addHandlerAction(wssSenderHandler, WSHandlerConstants.TIMESTAMP);
+            	addHandlerAction(wssReceiverHandler, WSHandlerConstants.TIMESTAMP);
+            	
+            	stub._setProperty(WSHandlerConstants.TTL_TIMESTAMP, wssTimeToLive.toString());
+    		}
+		}
+	}
+	
+	private void applyAddressing(Stub stub, SimpleChain requestHandlers, SimpleChain responseHandlers, AddressingProperties addressingProperties) throws Exception {
+		
+		// Check if AddressingProperties are present
+		if (addressingProperties == null) {
+			return;
+		}
+		
+		// Add handler in service
+		AddressingHandler addressingHandler = new AddressingHandler();
+		requestHandlers.addHandler(addressingHandler);
+		responseHandlers.addHandler(addressingHandler);
+		
+		// Prepare header
+		AddressingHeaders addressingHeaders = new AddressingHeaders();
+		
+		Boolean mustUnderstand = addressingProperties.isMustUnderstand();
+		if (mustUnderstand != null) {
+			stub._setProperty(org.apache.axis.message.addressing.Constants.ENV_ADDRESSING_SET_MUST_UNDERSTAND, mustUnderstand.toString());
+		}
+
+		Boolean sendDefaultMessageID = addressingProperties.isSendDefaultMessageID();
+		if (sendDefaultMessageID != null) {
+			stub._setProperty(org.apache.axis.message.addressing.Constants.SEND_DEFAULT_MESSAGEID, sendDefaultMessageID.toString());
+		}
+		
+		Boolean sendDefaultFrom = addressingProperties.isSendDefaultFrom();
+		if (sendDefaultFrom != null) {
+			stub._setProperty(org.apache.axis.message.addressing.Constants.SEND_DEFAULT_FROM, sendDefaultFrom.toString());
+		}
+		
+		Boolean sendDefaultTo = addressingProperties.isSendDefaultTo();
+		if (sendDefaultTo != null) {
+			stub._setProperty(org.apache.axis.message.addressing.Constants.SEND_DEFAULT_TO, sendDefaultTo.toString());
+		}
+
+		String version = addressingProperties.getVersion();
+		if (version != null) {
+			stub._setProperty(org.apache.axis.message.addressing.Constants.ENV_ADDRESSING_NAMESPACE_URI, version);
+		}
+		
+		String messageID = addressingProperties.getMessageID();
+		if (messageID != null) {
+			addressingHeaders.setMessageID(new MessageID(new org.apache.axis.types.URI(messageID)));
+		}
+		
+		String action = addressingProperties.getAction();
+		if (action != null) {
+			addressingHeaders.setAction(action);
+		}
+		
+		String from = addressingProperties.getFrom();
+		if (from != null) {
+			addressingHeaders.setFrom(new EndpointReference(from));
+		}
+		
+		String to = addressingProperties.getTo();
+		if (to != null) {
+			addressingHeaders.setTo(new AttributedURI(to));
+		}
+		
+		String replyTo = addressingProperties.getReplyTo();
+		if (replyTo != null) {
+			addressingHeaders.setReplyTo(new EndpointReference(replyTo));
+		}
+		
+		String faultTo = addressingProperties.getFaultTo();
+		if (faultTo != null) {
+			addressingHeaders.setFaultTo(new EndpointReference(faultTo));
+		}
+		
+		ReferenceParametersType referenceParameters = addressingProperties.getReferenceParametersType();
+		if (referenceParameters != null) {
+			addressingHeaders.setReferenceParameters(referenceParameters);
+		}
+		
+		ReferencePropertiesType referenceProperties = addressingProperties.getReferencePropertiesType();
+		if (referenceProperties != null) {
+			addressingHeaders.setReferenceProperties(referenceProperties);
+		}
+		
+		List<RelatesTo> relatesTo = addressingProperties.getRelatesTo();
+		if (relatesTo != null) {
+			addressingHeaders.setRelatesTo(relatesTo);
+		}
+		
+		stub._setProperty(org.apache.axis.message.addressing.Constants.ENV_ADDRESSING_REQUEST_HEADERS, addressingHeaders);		
+	}
+	
 	private static void addHandlerAction(WSDoAllHandler handler, String action) {
     	String prevAction = (String)handler.getOption(WSHandlerConstants.ACTION);
     	if (prevAction != null) {

@@ -25,6 +25,7 @@
 			<include name="wsdl4j-1.5.1.jar"/>
 			<include name="wss4j-1.5.1.jar"/>
 			<include name="xmlsec-1.3.0.jar"/>
+			<include name="addressing-1.1.1.jar"/>
 		</fileset>
 		<fileset dir="${jade-lib-dir}">
 			<include name="**/*.jar"/>
