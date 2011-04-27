@@ -27,6 +27,7 @@ import jade.content.ContentManager;
 import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
+import jade.content.onto.annotations.Slot;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.AggregateSchema;
 import jade.content.schema.ConceptSchema;
@@ -35,6 +36,7 @@ import jade.content.schema.PrimitiveSchema;
 import jade.core.Agent;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -366,7 +368,7 @@ public class JadeToWSDL {
 	}
 	
 	private static Map<String, ObjectSchema> manageMapperInputParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema, Method mapperMethod) throws Exception {
-		
+		Annotation[][] parameterAnnotations = mapperMethod.getParameterAnnotations();
 		Class[] parameterTypes = mapperMethod.getParameterTypes();
 		String[] parameterNames = WSDLUtils.getParameterNames(mapperMethod);
 		Map<String, ObjectSchema> inputParametersMap = new HashMap<String, ObjectSchema>();
@@ -374,12 +376,31 @@ public class JadeToWSDL {
 		// Loop for all parameters of mapper method
 		for (int k = 0; k < parameterTypes.length; k++) {
 			Class parameterClass = parameterTypes[k];
+			Annotation[] annotations = parameterAnnotations[k];
+
+			// Get parameter name
 			String parameterName;
 			if (parameterNames != null) {
 				parameterName = parameterNames[k];
 			} else {
 				parameterName = parameterClass.getSimpleName() + WSDLConstants.SEPARATOR + k;
 			}
+
+			// Try to get @Slot annotation
+			Integer cardMin = null;
+			Slot slotAnnotation = WSDLUtils.getSlotAnnotation(annotations);
+			if (slotAnnotation != null) {
+				if (!Slot.USE_METHOD_NAME.equals(slotAnnotation.name())) {
+					parameterName = slotAnnotation.name();
+				}
+				cardMin = slotAnnotation.mandatory() ? null : 0;
+			}
+			
+			// If parameter is a primitive OPTIONALITY is not permitted
+			if (parameterClass.isPrimitive() && cardMin != null) {
+				throw new Exception("Optionality not permitted in primitive parameter "+parameterName);
+			}
+			
 			String parameterType = createComplexTypeFromClass(tns, onto, actionSchema, parameterClass, wsdlTypeSchema, parameterName, null);
 			log.debug("--mapper input parameter: "+parameterName+" ("+parameterType+")");
 
@@ -397,7 +418,7 @@ public class JadeToWSDL {
 			} else {
 				
 				// Add a element in complex type definition for all parameters
-				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, parameterName, parameterType, elementSequence);
+				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, parameterName, parameterType, elementSequence, cardMin, null);
 			}
 		}
 		

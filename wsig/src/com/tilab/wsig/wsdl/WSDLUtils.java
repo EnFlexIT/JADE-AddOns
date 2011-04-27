@@ -25,6 +25,7 @@ package com.tilab.wsig.wsdl;
 
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.OntologyException;
+import jade.content.onto.annotations.Slot;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.Facet;
 import jade.content.schema.ObjectSchema;
@@ -36,6 +37,7 @@ import jade.content.schema.facets.TypedAggregateFacet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.MalformedURLException;
@@ -492,6 +494,17 @@ public class WSDLUtils {
 	// -----------------------------------------------------------------------------
 	// Public methods
 	
+	public static Slot getSlotAnnotation(Annotation[] annotations) {
+		if (annotations != null) {
+			for (Annotation annotation : annotations) {
+				if (annotation instanceof Slot) {
+					return (Slot)annotation;
+				}
+			}
+		}
+		return null;
+	}
+	
     public static String[] getParameterNames(Method method) {
         // Don't worry about it if there are no params.
         int numParams = method.getParameterTypes().length;
@@ -510,7 +523,7 @@ public class WSDLUtils {
             // Get a parameter reader
             ParamReader pr = new ParamReader(c);
 
-            // Get the paramter names
+            // Get the parameter names
             return pr.getParameterNames(method);
             
         } catch (IOException e) {

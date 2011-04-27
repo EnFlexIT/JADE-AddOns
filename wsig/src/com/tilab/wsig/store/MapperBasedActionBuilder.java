@@ -26,7 +26,9 @@ package com.tilab.wsig.store;
 import jade.content.AgentAction;
 import jade.content.abs.AbsObject;
 import jade.content.onto.Ontology;
+import jade.content.onto.annotations.Slot;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Vector;
 
@@ -37,6 +39,7 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 	private Method method;
 	private Object mapperObj;
 	private String[] methodParameterNames;
+	private Annotation[][] methodParameterAnnotations;
 
 	public MapperBasedActionBuilder(Object mapperObj, Method method, Ontology onto, String ontoActionName) {
 		super(onto, ontoActionName);
@@ -44,10 +47,10 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 		this.method = method;
 		this.mapperObj = mapperObj;
 		this.methodParameterNames = WSDLUtils.getParameterNames(method);
+		this.methodParameterAnnotations = method.getParameterAnnotations();
 	}
 
 	public AgentAction getAgentAction(Vector<ParameterInfo> soapParams) throws Exception {
-		
 		Object[] parameterValues = new Object[0];
 		String parameterList = "";
 
@@ -70,12 +73,24 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 			} else {
 				parameterValues = new Object[methodParameterNames.length];
 				for (int i = 0; i < methodParameterNames.length; i++) {
+					ParameterInfo pi;
 					try {
-						ParameterInfo pi = getSoapParamByName(soapParams, methodParameterNames[i]);
-						AbsObject absValue = pi.getValue();
-						Object javaValue = getOntology().toObject(absValue);
+						pi = getSoapParamByName(soapParams, methodParameterNames[i], methodParameterAnnotations[i]);
+					} catch(Exception e) {
+						log.error("Method "+method.getName()+", mandatory param "+methodParameterNames[i]+" not found in soap request");
+						throw e;
+					}
+					
+					try {
+						Object javaValue;
+						if (pi != null) {
+							parameterList += pi.getSchema().getTypeName()+",";
+							javaValue = getOntology().toObject(pi.getValue());
+						} else {
+							parameterList += "null,";
+							javaValue = null;
+						}
 						parameterValues[i] = javaValue;
-						parameterList += pi.getSchema().getTypeName()+",";
 					} catch(Exception e) {
 						log.error("Method "+method.getName()+", mandatory param "+methodParameterNames[i]+" not found in soap request");
 						throw e;
@@ -101,13 +116,32 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 		return actionObj;
 	}
 	
-	private ParameterInfo getSoapParamByName(Vector<ParameterInfo> soapParams, String methodParamName) throws Exception {
+	private ParameterInfo getSoapParamByName(Vector<ParameterInfo> soapParams, String methodParamName, Annotation[] methodParamAnnotations) throws Exception {
+		
+		// Check parameter annotation (if present)
+		String parameterName = methodParamName;
+		boolean mandatory = false;
+		Slot slotAnnotation = WSDLUtils.getSlotAnnotation(methodParamAnnotations);
+		if (slotAnnotation != null) {
+			if (!Slot.USE_METHOD_NAME.equals(slotAnnotation.name())) {
+				parameterName = slotAnnotation.name();
+			}
+			mandatory = slotAnnotation.mandatory();
+		}
+		
+		// Try to get soap parameter
 		for (ParameterInfo param : soapParams) {
-			if (param.getName().equalsIgnoreCase(methodParamName)) {
+			if (param.getName().equalsIgnoreCase(parameterName)) {
 				return param;
 			}
 		}
+
+		// If not found check mandatory
+		if (mandatory) {
+			throw new Exception();
+		}
 		
-		throw new Exception();
+		// Optional parameter not found 
+		return null;
 	}
 }
