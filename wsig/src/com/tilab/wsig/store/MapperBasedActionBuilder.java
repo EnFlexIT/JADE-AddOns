@@ -40,6 +40,7 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 	private Object mapperObj;
 	private String[] methodParameterNames;
 	private Annotation[][] methodParameterAnnotations;
+	private Class<?>[] methodParameterTypes;
 
 	public MapperBasedActionBuilder(Object mapperObj, Method method, Ontology onto, String ontoActionName) {
 		super(onto, ontoActionName);
@@ -48,6 +49,7 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 		this.mapperObj = mapperObj;
 		this.methodParameterNames = WSDLUtils.getParameterNames(method);
 		this.methodParameterAnnotations = method.getParameterAnnotations();
+		this.methodParameterTypes = method.getParameterTypes();
 	}
 
 	public AgentAction getAgentAction(Vector<ParameterInfo> soapParams) throws Exception {
@@ -75,9 +77,9 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 				for (int i = 0; i < methodParameterNames.length; i++) {
 					ParameterInfo pi;
 					try {
-						pi = getSoapParamByName(soapParams, methodParameterNames[i], methodParameterAnnotations[i]);
+						pi = getSoapParamByName(soapParams, methodParameterNames[i], methodParameterTypes[i], methodParameterAnnotations[i]);
 					} catch(Exception e) {
-						log.error("Method "+method.getName()+", mandatory param "+methodParameterNames[i]+" not found in soap request");
+						log.error(e.getMessage());
 						throw e;
 					}
 					
@@ -92,7 +94,7 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 						}
 						parameterValues[i] = javaValue;
 					} catch(Exception e) {
-						log.error("Method "+method.getName()+", mandatory param "+methodParameterNames[i]+" not found in soap request");
+						log.error("Method "+method.getName()+", param "+methodParameterNames[i]+" error decoding value");
 						throw e;
 					}
 				}
@@ -116,11 +118,11 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 		return actionObj;
 	}
 	
-	private ParameterInfo getSoapParamByName(Vector<ParameterInfo> soapParams, String methodParamName, Annotation[] methodParamAnnotations) throws Exception {
+	private ParameterInfo getSoapParamByName(Vector<ParameterInfo> soapParams, String methodParamName, Class methodParamClass, Annotation[] methodParamAnnotations) throws Exception {
 		
 		// Check parameter annotation (if present)
 		String parameterName = methodParamName;
-		boolean mandatory = false;
+		boolean mandatory = methodParamClass.isPrimitive() ? true : false;
 		Slot slotAnnotation = WSDLUtils.getSlotAnnotation(methodParamAnnotations);
 		if (slotAnnotation != null) {
 			if (!Slot.USE_METHOD_NAME.equals(slotAnnotation.name())) {
@@ -138,7 +140,7 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 
 		// If not found check mandatory
 		if (mandatory) {
-			throw new Exception();
+			throw new Exception("Mapper method "+method.getName()+", mandatory param "+methodParamName+" not found in soap request");
 		}
 		
 		// Optional parameter not found 

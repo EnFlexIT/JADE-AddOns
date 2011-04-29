@@ -453,17 +453,17 @@ public class WSDLUtils {
 
 	static int getAggregateCardMax(ObjectSchema containerSchema, String slotName) {
 		
-		int cardMin = 0;
+		int cardMax = 0;
 		Facet[] facets = getSlotFacets(containerSchema, slotName);
 		if (facets != null) {
 			for (Facet facet : facets) {
 				if (facet instanceof CardinalityFacet) {
-					cardMin = ((CardinalityFacet) facet).getCardMax();
+					cardMax = ((CardinalityFacet) facet).getCardMax();
 				} 
 			}
 		}
 		
-		return cardMin;
+		return cardMax;
 	}
 
 	static String getJavaType(ObjectSchema containerSchema, String slotName) {

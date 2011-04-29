@@ -84,6 +84,9 @@ public class JadeToWSDL {
 	
 	private static Logger log = Logger.getLogger(JadeToWSDL.class.getName());
 	
+	private static Integer MANDATORY = null;
+	private static Integer OPTIONAL = Integer.valueOf(0);
+	
 	public static Definition createWSDLFromSD(Agent agent, ServiceDescription sd, WSIGService wsigService) throws Exception {
 
 		// Create mapper object
@@ -359,7 +362,7 @@ public class JadeToWSDL {
 			} else {
 				
 				// Add a element in complex type definition for all parameters
-				Integer cardMin = actionSchema.isMandatory(slotName) ? null : 0;
+				Integer cardMin = actionSchema.isMandatory(slotName) ? MANDATORY : OPTIONAL;
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, elementSequence, cardMin, null);
 			}
 		}
@@ -386,18 +389,20 @@ public class JadeToWSDL {
 				parameterName = parameterClass.getSimpleName() + WSDLConstants.SEPARATOR + k;
 			}
 
+			// Default cardMin: primitive parameters -> MANDATORY, others OPTIONAL
+			Integer cardMin = parameterClass.isPrimitive() ? MANDATORY : OPTIONAL;
+
 			// Try to get @Slot annotation
-			Integer cardMin = null;
 			Slot slotAnnotation = WSDLUtils.getSlotAnnotation(annotations);
 			if (slotAnnotation != null) {
 				if (!Slot.USE_METHOD_NAME.equals(slotAnnotation.name())) {
 					parameterName = slotAnnotation.name();
 				}
-				cardMin = slotAnnotation.mandatory() ? null : 0;
+				cardMin = slotAnnotation.mandatory() ? MANDATORY : OPTIONAL;
 			}
 			
 			// If parameter is a primitive OPTIONALITY is not permitted
-			if (parameterClass.isPrimitive() && cardMin != null) {
+			if (parameterClass.isPrimitive() && OPTIONAL.equals(cardMin)) {
 				throw new Exception("Optionality not permitted in primitive parameter "+parameterName);
 			}
 			
@@ -621,11 +626,11 @@ public class JadeToWSDL {
 			slotType = WSDLUtils.getPrimitiveType(objSchema, containerSchema, slotName);
 			
 			if (parentComponent != null) {
-				if (cardMin == null && !containerSchema.isMandatory(slotName)) {
-					cardMin = new Integer(0);
+				if (cardMin == MANDATORY && !containerSchema.isMandatory(slotName)) {
+					cardMin = OPTIONAL;
 				}
 				
-				log.debug("------add primitive-type "+slotName+" ("+slotType+") "+((cardMin!=null && cardMin==0)?"OPTIONAL":""));
+				log.debug("------add primitive-type "+slotName+" ("+slotType+") "+(OPTIONAL.equals(cardMin)?"OPTIONAL":""));
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
 		} 
@@ -633,10 +638,10 @@ public class JadeToWSDL {
 			// Get type from ConceptSchema (if not found in wsdlTypeSchema create it)
 			slotType = objSchema.getTypeName();
 			if (parentComponent != null) {
-				if (cardMin == null && !containerSchema.isMandatory(slotName)) {
-					cardMin = new Integer(0);
+				if (cardMin == MANDATORY && !containerSchema.isMandatory(slotName)) {
+					cardMin = OPTIONAL;
 				}
-				log.debug("------add defined-type "+slotName+" ("+slotType+") "+((cardMin!=null && cardMin==0)?"OPTIONAL":""));
+				log.debug("------add defined-type "+slotName+" ("+slotType+") "+(OPTIONAL.equals(cardMin)?"OPTIONAL":""));
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
 			
@@ -683,7 +688,7 @@ public class JadeToWSDL {
 				XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
 				if (parentComponent != null) {
 					log.debug("------add array-type "+slotName+" ("+slotType+") ["+cardMin+","+cardMax+"]");
-					WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin==0?cardMin:null, null);
+					WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, OPTIONAL.equals(cardMin)?cardMin:null, null);
 				}
 				createComplexTypeFromSchema(onto, tns, containerSchema, aggregateSchema, wsdlTypeSchema, itemName, sequence, cardMin, cardMax);
 			}
