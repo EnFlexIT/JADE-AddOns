@@ -22,7 +22,7 @@
  * Boston, MA  02111-1307, USA.
  * **************************************************************
  */
-package jade.webservice.dynamicClient;
+package jade.webservice;
 
 import jade.content.abs.AbsExtendedPrimitive;
 import jade.content.abs.AbsObject;

@@ -28,6 +28,7 @@ import jade.content.onto.BeanOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
 import jade.util.Logger;
+import jade.webservice.XsdPrimitivesOntology;
 import jade.webservice.utils.CompilerUtils;
 import jade.webservice.utils.FileUtils;
 import jade.webservice.utils.SSLUtils;
