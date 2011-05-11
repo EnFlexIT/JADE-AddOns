@@ -24,13 +24,17 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.examples;
 
 import jade.content.AgentAction;
+import jade.content.onto.annotations.Result;
+import jade.content.onto.annotations.Slot;
 
+@Result(type=boolean.class)
 public class CompareNumbers implements AgentAction {
 
 	private float firstElement;
 
 	private float secondElement;
 
+	@Slot(mandatory=true)
 	public float getFirstElement() {
 		return firstElement;
 	}
@@ -39,6 +43,7 @@ public class CompareNumbers implements AgentAction {
 		this.firstElement = firstElement;
 	}
 
+	@Slot(mandatory=true)
 	public float getSecondElement() {
 		return secondElement;
 	}

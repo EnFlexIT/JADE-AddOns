@@ -24,7 +24,9 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.examples;
 
 import jade.content.AgentAction;
+import jade.content.onto.annotations.Result;
 
+@Result(type=AgentInfo.class)
 public class GetAgentInfo implements AgentAction {
 
 }

@@ -25,6 +25,7 @@ package com.tilab.wsig.wsdl;
 
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.OntologyException;
+import jade.content.onto.annotations.AggregateSlot;
 import jade.content.onto.annotations.Slot;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.Facet;
@@ -453,7 +454,7 @@ public class WSDLUtils {
 
 	static int getAggregateCardMax(ObjectSchema containerSchema, String slotName) {
 		
-		int cardMax = 0;
+		int cardMax = -1;
 		Facet[] facets = getSlotFacets(containerSchema, slotName);
 		if (facets != null) {
 			for (Facet facet : facets) {
@@ -499,6 +500,17 @@ public class WSDLUtils {
 			for (Annotation annotation : annotations) {
 				if (annotation instanceof Slot) {
 					return (Slot)annotation;
+				}
+			}
+		}
+		return null;
+	}
+
+	public static AggregateSlot getAggregateSlotAnnotation(Annotation[] annotations) {
+		if (annotations != null) {
+			for (Annotation annotation : annotations) {
+				if (annotation instanceof AggregateSlot) {
+					return (AggregateSlot)annotation;
 				}
 			}
 		}

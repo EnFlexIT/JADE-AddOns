@@ -24,18 +24,23 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.examples;
 
 import jade.content.AgentAction;
+import jade.content.onto.annotations.Result;
+import jade.content.onto.annotations.Slot;
 
+@Result(type=Complex.class)
 public class SumComplex implements AgentAction {
 
 	private Complex firstComplexElement;
 	private Complex secondComplexElement;
 	
+	@Slot(mandatory=true)
 	public Complex getFirstComplexElement() {
 		return firstComplexElement;
 	}
 	public void setFirstComplexElement(Complex firstComplexElement) {
 		this.firstComplexElement = firstComplexElement;
 	}
+	@Slot(mandatory=true)
 	public Complex getSecondComplexElement() {
 		return secondComplexElement;
 	}

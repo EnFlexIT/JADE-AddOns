@@ -26,6 +26,7 @@ package com.tilab.wsig.examples;
 import jade.content.AgentAction;
 import jade.content.ContentElement;
 import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
 import jade.content.onto.basic.Action;
 import jade.content.onto.basic.Done;
 import jade.content.onto.basic.Result;
@@ -40,6 +41,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.util.leap.ArrayList;
+import jade.util.leap.Iterator;
 import jade.util.leap.List;
 
 import java.util.Date;
@@ -55,6 +57,7 @@ public class MathAgent extends Agent {
 	private Logger log = Logger.getLogger(MathAgent.class.getName());
 	private SLCodec codec = new SLCodec();
 	private Date startDate;
+	private Ontology onto;
 
 	protected void setup() {
 		log.info("MathAgent starting...");
@@ -62,11 +65,6 @@ public class MathAgent extends Agent {
 
 		// Get agent arguments
 		Object[] args = getArguments();
-
-		// Register codec/onto
-		getContentManager().registerLanguage(codec);
-		getContentManager().registerOntology(FIPAManagementOntology.getInstance());
-		getContentManager().registerOntology(MathOntology.getInstance());
 
 		// Prepare a DFAgentDescription
 		DFAgentDescription dfad = new DFAgentDescription();
@@ -79,7 +77,6 @@ public class MathAgent extends Agent {
 		sd.addProtocols(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		sd.setType("MathAgent");
 		sd.setOwnership("MathOwner");
-		sd.addOntologies(MathOntology.getInstance().getName());
 
 		// WSIG properties
 		sd.addProperties(new Property(WSIG_FLAG, "true"));
@@ -95,25 +92,47 @@ public class MathAgent extends Agent {
 		// Mapper
 		boolean isMapperPresent = false; 
 		if (args.length >= 2) {
-			isMapperPresent = Boolean.parseBoolean((String)args[1]);
+			if (!"".equals((String)args[1])) {
+				isMapperPresent = Boolean.parseBoolean((String)args[1]);
+			}
 		}
 		log.info("Mapper present: "+isMapperPresent);
 		if (isMapperPresent) {
 			sd.addProperties(new Property(WSIG_MAPPER, "com.tilab.wsig.examples.MathOntologyMapper"));
 		}
 		
+		// Ontology
+		boolean beanOnto = false;
+		if (args.length >= 3) {
+			if (!"".equals((String)args[2])) {
+				beanOnto = Boolean.parseBoolean((String)args[2]);
+			}
+		}
+		log.info("Use bean-ontology: "+beanOnto);
+		if (beanOnto) {
+			onto = MathBeanOntology.getInstance();
+		} else {
+			onto = MathOntology.getInstance();
+		}
+		sd.addOntologies(onto.getName());
+
 		// Prefix
 		String wsigPrefix = ""; 
-		if (args.length >= 3) {
-			wsigPrefix = (String)args[2];
+		if (args.length >= 4) {
+			wsigPrefix = (String)args[3];
 		}
 		log.info("Prefix: "+wsigPrefix);
 		if (wsigPrefix != null && !wsigPrefix.equals("")) {
 			sd.addProperties(new Property(WSIG_PREFIX, wsigPrefix));
 		}
-
+		
 		dfad.addServices(sd);
 
+		// Register codec/onto
+		getContentManager().registerLanguage(codec);
+		getContentManager().registerOntology(FIPAManagementOntology.getInstance());
+		getContentManager().registerOntology(onto);
+		
 		// DF registration
 		try {
 			DFService.register(this, dfad);
@@ -127,7 +146,7 @@ public class MathAgent extends Agent {
 		
 		// Add math behaviour
 		this.addBehaviour(new CyclicBehaviour(this) {
-			private MessageTemplate template = MessageTemplate.MatchOntology(MathOntology.getInstance().getName());
+			private MessageTemplate template = MessageTemplate.MatchOntology(onto.getName());
 
 			public void action() {
 				ACLMessage msg = myAgent.receive(template);
@@ -192,9 +211,14 @@ public class MathAgent extends Agent {
 
 	private void serveMultiplicationAction(Multiplication multiplication, Action actExpr, ACLMessage msg) {
 		double result = 1;
-		for (int i=0; i<multiplication.getNumbers().size(); i++){
-			 result *= ((Double)multiplication.getNumbers().get(i));
+		Iterator it = multiplication.getNumbers().iterator();
+		while(it.hasNext()) {
+			Object num = it.next(); 
+			result *= (((Number)num).doubleValue());
 		}
+//		for (Object num : multiplication.getNumbers()) {
+//			result *= (((Number)num).doubleValue());
+//		}
 		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
 

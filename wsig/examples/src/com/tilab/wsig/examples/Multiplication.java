@@ -26,12 +26,16 @@ package com.tilab.wsig.examples;
 import java.util.Iterator;
 
 import jade.content.AgentAction;
+import jade.content.onto.annotations.AggregateSlot;
+import jade.content.onto.annotations.Result;
 import jade.util.leap.List;
 
+@Result(type=float.class)
 public class Multiplication implements AgentAction {
 
 	private List numbers;
 
+	@AggregateSlot(type=float.class, cardMin=2)
 	public List getNumbers() {
 		return numbers;
 	}
@@ -55,5 +59,4 @@ public class Multiplication implements AgentAction {
 		s += ")";
 		return s;
 	}
-
 }

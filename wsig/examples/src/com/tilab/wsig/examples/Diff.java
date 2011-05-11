@@ -24,13 +24,17 @@
 package com.tilab.wsig.examples;
 
 import jade.content.AgentAction;
+import jade.content.onto.annotations.Result;
+import jade.content.onto.annotations.Slot;
 
+@Result(type=float.class)
 public class Diff implements AgentAction {
 
 	private float firstElement;
 
 	private float secondElement;
 
+	@Slot(mandatory=true)
 	public float getFirstElement() {
 		return firstElement;
 	}
@@ -39,6 +43,7 @@ public class Diff implements AgentAction {
 		this.firstElement = firstElement;
 	}
 
+	@Slot(mandatory=true)
 	public float getSecondElement() {
 		return secondElement;
 	}

@@ -24,6 +24,7 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.examples;
 
 import jade.content.Concept;
+import jade.content.onto.annotations.Slot;
 
 public class Complex implements Concept {
 	
@@ -35,12 +36,14 @@ public class Complex implements Concept {
 		immaginary = 0;
 	}
 
+	@Slot(mandatory=true)
 	public float getReal() {
 		return real;
 	}
 	public void setReal(float real) {
 		this.real = real;
 	}
+	
 	public float getImmaginary() {
 		return immaginary;
 	}

@@ -26,11 +26,15 @@ package com.tilab.wsig.examples;
 import java.util.Date;
 
 import jade.content.AgentAction;
+import jade.content.onto.annotations.Result;
+import jade.content.onto.annotations.Slot;
 
+@Result(type=String.class)
 public class ConvertDate implements AgentAction {
 
 	private Date date;
 
+	@Slot(mandatory=true)
 	public Date getDate() {
 		return date;
 	}

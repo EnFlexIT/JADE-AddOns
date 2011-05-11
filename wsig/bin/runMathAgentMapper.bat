@@ -1,3 +1,3 @@
-.\runMathAgentAux.bat MathAgent3 MathFunctionsMapper true
+.\runMathAgentAux.bat MathAgent3 MathFunctionsMapper true false
 
 

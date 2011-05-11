@@ -27,6 +27,7 @@ import jade.content.ContentManager;
 import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
+import jade.content.onto.annotations.AggregateSlot;
 import jade.content.onto.annotations.Slot;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.AggregateSchema;
@@ -282,6 +283,11 @@ public class JadeToWSDL {
 				}
 			}
 			
+			// Log ontology
+			if (log.isDebugEnabled()) {
+				onto.dump();
+			}
+			
 			// Add complex type to wsdl definition
 			try {
 				definition.setTypes(WSDLUtils.createTypes(registry, wsdlTypeSchema));
@@ -372,13 +378,13 @@ public class JadeToWSDL {
 	
 	private static Map<String, ObjectSchema> manageMapperInputParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema, Method mapperMethod) throws Exception {
 		Annotation[][] parameterAnnotations = mapperMethod.getParameterAnnotations();
-		Class[] parameterTypes = mapperMethod.getParameterTypes();
+		Class[] parameterClasses = mapperMethod.getParameterTypes();
 		String[] parameterNames = WSDLUtils.getParameterNames(mapperMethod);
 		Map<String, ObjectSchema> inputParametersMap = new HashMap<String, ObjectSchema>();
 		
 		// Loop for all parameters of mapper method
-		for (int k = 0; k < parameterTypes.length; k++) {
-			Class parameterClass = parameterTypes[k];
+		for (int k = 0; k < parameterClasses.length; k++) {
+			Class parameterClass = parameterClasses[k];
 			Annotation[] annotations = parameterAnnotations[k];
 
 			// Get parameter name
@@ -391,6 +397,8 @@ public class JadeToWSDL {
 
 			// Default cardMin: primitive parameters -> MANDATORY, others OPTIONAL
 			Integer cardMin = parameterClass.isPrimitive() ? MANDATORY : OPTIONAL;
+			Integer mandatory = cardMin; 
+			Integer cardMax = null;
 
 			// Try to get @Slot annotation
 			Slot slotAnnotation = WSDLUtils.getSlotAnnotation(annotations);
@@ -398,19 +406,31 @@ public class JadeToWSDL {
 				if (!Slot.USE_METHOD_NAME.equals(slotAnnotation.name())) {
 					parameterName = slotAnnotation.name();
 				}
-				cardMin = slotAnnotation.mandatory() ? MANDATORY : OPTIONAL;
+				mandatory = slotAnnotation.mandatory() ? MANDATORY : OPTIONAL;
 			}
-			
+
 			// If parameter is a primitive OPTIONALITY is not permitted
 			if (parameterClass.isPrimitive() && OPTIONAL.equals(cardMin)) {
 				throw new Exception("Optionality not permitted in primitive parameter "+parameterName);
 			}
+
+			// Try to get @AggregateSlot annotation
+			Class aggregateElementClass = null;
+			AggregateSlot aggregateSlotAnnotation = WSDLUtils.getAggregateSlotAnnotation(annotations);
+			if (aggregateSlotAnnotation != null) {
+				cardMin = aggregateSlotAnnotation.cardMin();
+				if (cardMin > 0) {
+					mandatory = MANDATORY;
+				}
+				cardMax = aggregateSlotAnnotation.cardMax();
+				aggregateElementClass = aggregateSlotAnnotation.type();
+			}
 			
-			String parameterType = createComplexTypeFromClass(tns, onto, actionSchema, parameterClass, wsdlTypeSchema, parameterName, null);
-			log.debug("--mapper input parameter: "+parameterName+" ("+parameterType+")");
+			String parameterComplexType = createComplexTypeFromClass(tns, onto, actionSchema, parameterClass, wsdlTypeSchema, parameterName, null, cardMin, cardMax, aggregateElementClass);
+			log.debug("--mapper input parameter: "+parameterName+" ("+parameterComplexType+")");
 
 			// Create virtual schema of java parameter
-			ObjectSchema parameterSchema = getParameterSchema(onto, parameterClass);
+			ObjectSchema parameterSchema = getParameterSchema(onto, parameterClass, aggregateElementClass);
 			
 			// Add parameter to map
 			inputParametersMap.put(parameterName, parameterSchema);
@@ -418,12 +438,12 @@ public class JadeToWSDL {
 			if (WSDLConstants.STYLE_RPC.equals(soapStyle)) {
 
 				// Add a part message for all parameters
-				Part partMessage = WSDLUtils.createTypePart(parameterName, parameterType, tns);
+				Part partMessage = WSDLUtils.createTypePart(parameterName, parameterComplexType, tns);
 				inputMessage.addPart(partMessage);
 			} else {
 				
 				// Add a element in complex type definition for all parameters
-				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, parameterName, parameterType, elementSequence, cardMin, null);
+				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, parameterName, parameterComplexType, elementSequence, mandatory, null);
 			}
 		}
 		
@@ -467,7 +487,7 @@ public class JadeToWSDL {
 		}
 	}
 	
-	public static ObjectSchema getParameterSchema(Ontology onto, Class parameterClass) throws OntologyException {
+	public static ObjectSchema getParameterSchema(Ontology onto, Class parameterClass, Class aggregateElementClass) throws OntologyException {
 
 		ObjectSchema parameterSchema;
 		
@@ -482,18 +502,28 @@ public class JadeToWSDL {
 			}
 			parameterSchema = new PrimitiveSchema(typeName);
 		} 
-		else if (parameterClass.isArray()) {
+		else if (parameterClass.isArray() ||
+				 Collection.class.isAssignableFrom(parameterClass) ||
+				 jade.util.leap.Collection.class.isAssignableFrom(parameterClass)) {
 
-			// Java array
-			ObjectSchema elementSchema = getParameterSchema(onto, parameterClass.getComponentType());
-			parameterSchema = new TypedAggregateSchema(BasicOntology.SEQUENCE, elementSchema);
-		} 
-		else if (	Collection.class.isAssignableFrom(parameterClass) ||
-					jade.util.leap.Collection.class.isAssignableFrom(parameterClass)) {
+			if (parameterClass.isArray()) {
+				// Overwrite aggregateType from Java Array
+				aggregateElementClass = parameterClass.getComponentType();
+			}
 			
-			// Java collection not supported
-			parameterSchema = null;
-		} else {
+			String typeName;
+			if (parameterClass.isArray() || 
+				List.class.isAssignableFrom(parameterClass) ||
+				jade.util.leap.List.class.isAssignableFrom(parameterClass)) {
+				typeName = BasicOntology.SEQUENCE;
+			} else {
+				typeName = BasicOntology.SET;
+			}
+			
+			ObjectSchema elementSchema = getParameterSchema(onto, aggregateElementClass, null);
+			parameterSchema = new TypedAggregateSchema(typeName, elementSchema);
+		} 
+		else {
 			
 			// Search a schema of this parameterClass
 			String conceptSchemaName = null;
@@ -551,7 +581,7 @@ public class JadeToWSDL {
 		return isSuppressed;
 	}
 	
-	private static String createComplexTypeFromClass(String tns, Ontology onto, ConceptSchema containerSchema, Class parameterClass, XSDSchema wsdlTypeSchema, String paramName, XSDComponent parentComponent) throws Exception {
+	private static String createComplexTypeFromClass(String tns, Ontology onto, ConceptSchema containerSchema, Class parameterClass, XSDSchema wsdlTypeSchema, String paramName, XSDComponent parentComponent, Integer cardMin, Integer cardMax, Class aggregateElementClass) throws Exception {
 		
 		String slotType = null;
 		if (parameterClass.isPrimitive() || WSDLConstants.java2xsd.get(parameterClass) != null) {
@@ -564,7 +594,7 @@ public class JadeToWSDL {
 			}
 			if (parentComponent != null) {
 				log.debug("------add primitive-type "+paramName+" ("+slotType+")");
-				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, paramName, slotType, (XSDModelGroup) parentComponent, null, null);
+				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, paramName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
 		} 
 		else if (parameterClass.isEnum()) {
@@ -583,27 +613,34 @@ public class JadeToWSDL {
 				WSDLUtils.addRestrictionToSimpleType(enumType, permittedValues);
 			}
 		}
-		else if (parameterClass.isArray()) {
+		else if (parameterClass.isArray() || 
+				 Collection.class.isAssignableFrom(parameterClass) ||
+				 jade.util.leap.Collection.class.isAssignableFrom(parameterClass)) {
 
-			// Java array
-			Class aggrType = parameterClass.getComponentType();
-			paramName = aggrType.getSimpleName().toLowerCase();
+			if (parameterClass.isArray()) {
+				// Overwrite aggregateType from Java Array
+				aggregateElementClass = parameterClass.getComponentType();
+			}
+			
+			if (aggregateElementClass == null) {
+				throw new Exception("Collection class "+parameterClass.getSimpleName()+" without specified element type");
+			}
+			
+			paramName = aggregateElementClass.getSimpleName().toLowerCase();
 			slotType = WSDLUtils.getAggregateType(paramName, BasicOntology.SEQUENCE);
 			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
 				log.debug("----create array-type "+slotType);
 				XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType);
 				XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
-				createComplexTypeFromClass(tns, onto, containerSchema, aggrType, wsdlTypeSchema, paramName, sequence);
+				
+				if (cardMax == null) {
+					// If not specified, default card-max is UNBOUNDED
+					cardMax = Integer.valueOf(ObjectSchema.UNLIMITED);
+				}
+				createComplexTypeFromClass(tns, onto, containerSchema, aggregateElementClass, wsdlTypeSchema, paramName, sequence, cardMin, cardMax, null);
 			}
 		} 
-		else if (	Collection.class.isAssignableFrom(parameterClass) ||
-					jade.util.leap.Collection.class.isAssignableFrom(parameterClass)) {
-			// TODO Java collection
-			// Manage collection element type with a specif annotation associated to mapper method
-			// es. @CollectionElementType (parameter=xxx, type=java.util.String)
-			throw new Exception("Collection NOT supported");
-
-		} else {
+		else {
 			// Java custom type (work with concept schema of type paramType)
 			// Search a schema of this type
 			ObjectSchema conceptSchema = onto.getSchema(parameterClass);
@@ -669,8 +706,8 @@ public class JadeToWSDL {
 
 			// Get type from AggregateSchema (if array type not present in wsdlTypeSchema create it)
 			// Get cardinality and aggregate type
-			cardMax = WSDLUtils.getAggregateCardMax(containerSchema, slotName);
 			cardMin = WSDLUtils.getAggregateCardMin(containerSchema, slotName);
+			cardMax = WSDLUtils.getAggregateCardMax(containerSchema, slotName);
 			ObjectSchema aggregateSchema = WSDLUtils.getAggregateElementSchema(containerSchema, slotName);
 			
 			// Get array type 

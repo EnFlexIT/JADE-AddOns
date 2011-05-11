@@ -1,3 +1,3 @@
-.\runMathAgentAux.bat MathAgent2 MathFunctions false second
+.\runMathAgentAux.bat MathAgent2 MathFunctions false false second
 
 

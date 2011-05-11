@@ -23,6 +23,12 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.examples;
 
+import jade.content.onto.annotations.AggregateSlot;
+import jade.content.onto.annotations.Slot;
+
+import java.util.List;
+import java.util.Set;
+
 import com.tilab.wsig.store.OperationName;
 import com.tilab.wsig.store.SuppressOperation;
 
@@ -59,7 +65,7 @@ public class MathOntologyMapper {
 	}
 
 	// The web service operation corresponding to the sum ontology action will be called add
-	@OperationName(name="add")
+	@OperationName(name="Add")
 	public Sum toSum(float firstElement, float secondElement){
 		Sum sum = new Sum();
 		sum.setFirstElement(firstElement);
@@ -67,7 +73,47 @@ public class MathOntologyMapper {
 		return sum;
 	}
 
+	@OperationName(name="Add2")
+	public Sum toSum(
+			@Slot(name="a", mandatory=true) float firstElement, 
+			@Slot(name="b", mandatory=true) float secondElement, 
+			@Slot(name="c", mandatory=false) Float thirdElement){
+		Sum sum = new Sum();
+		sum.setFirstElement(firstElement);
+		sum.setSecondElement(secondElement+((thirdElement!=null)?thirdElement.floatValue():0));
+		return sum;
+	}
+	
 	public PrintTime toPrintTime(){
 		return new PrintTime();
+	}
+	
+	public Multiplication toMultiplication(
+			@AggregateSlot(cardMin=1, cardMax=5, type=Float.class) List numbers1,
+			@AggregateSlot(cardMin=2, cardMax=3, type=String.class) jade.util.leap.List numbers2,
+			int[] numbers3,
+			@AggregateSlot(cardMin=0, cardMax=5, type=Double.class) Set numbers4) {
+
+		jade.util.leap.List numbers = new jade.util.leap.ArrayList();
+		
+		for (Object number1 : numbers1) {
+			numbers.add((Float)number1);
+		}
+		
+		for (Object number2 : ((jade.util.leap.ArrayList)numbers2).toList()) {
+			numbers.add(Float.parseFloat((String)number2));
+		}
+
+		for (Object number3 : numbers3) {
+			numbers.add(Float.valueOf((Integer)number3));
+		}
+
+		for (Object number4 : numbers4) {
+			numbers.add(((Double)number4).floatValue());
+		}
+		
+		Multiplication mul = new Multiplication();
+		mul.setNumbers(numbers);
+		return mul;
 	}
 }

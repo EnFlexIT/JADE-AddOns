@@ -1,4 +1,4 @@
 
-.\runMathAgentAux.bat MathAgent1 MathFunctions false 
+.\runMathAgentAux.bat MathAgent1 MathFunctions false false
 
 

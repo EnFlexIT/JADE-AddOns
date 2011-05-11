@@ -174,7 +174,10 @@
 
 		<copy overwrite="true" file="${wsigWeb.dir}/conf/wsig-template.properties" tofile="${wsigWeb.dir}/conf/wsig.properties"/>
 		<replace file="${wsigWeb.dir}/conf/wsig.properties" value="onto.math-ontology=com.tilab.wsig.examples.MathOntology">
-			<replacetoken>#MyOntologies#</replacetoken>
+			<replacetoken>#MyOntologies1#</replacetoken>
+		</replace>
+		<replace file="${wsigWeb.dir}/conf/wsig.properties" value="onto.math-bean-ontology=com.tilab.wsig.examples.MathBeanOntology">
+			<replacetoken>#MyOntologies2#</replacetoken>
 		</replace>
 
 		<echo>Examples build complete</echo>

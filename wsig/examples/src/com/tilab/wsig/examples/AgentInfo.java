@@ -26,6 +26,7 @@ package com.tilab.wsig.examples;
 import java.util.Date;
 
 import jade.content.Concept;
+import jade.content.onto.annotations.Slot;
 import jade.core.AID;
 
 public class AgentInfo implements Concept {
@@ -35,6 +36,7 @@ public class AgentInfo implements Concept {
 
 	public AgentInfo(){}
 
+	@Slot(mandatory=true)
 	public AID getAgentAid() {
 		return agentAid;
 	}
@@ -43,6 +45,7 @@ public class AgentInfo implements Concept {
 		this.agentAid = agentAid;
 	}
 
+	@Slot(mandatory=true)
 	public Date getStartDate() {
 		return startDate;
 	}
