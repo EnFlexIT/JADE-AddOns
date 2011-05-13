@@ -627,7 +627,7 @@ public class JadeToWSDL {
 			}
 			
 			paramName = aggregateElementClass.getSimpleName().toLowerCase();
-			slotType = WSDLUtils.getAggregateType(paramName, BasicOntology.SEQUENCE);
+			slotType = WSDLUtils.getAggregateType(paramName, cardMin, cardMax);
 			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
 				log.debug("----create array-type "+slotType);
 				XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType);
@@ -717,7 +717,7 @@ public class JadeToWSDL {
 			}
 			String itemName = slotType;
 			String aggregateType = objSchema.getTypeName();
-			slotType = WSDLUtils.getAggregateType(slotType, aggregateType);
+			slotType = WSDLUtils.getAggregateType(slotType, cardMin, cardMax);
 			
 			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
 				log.debug("----create array-type "+slotType);

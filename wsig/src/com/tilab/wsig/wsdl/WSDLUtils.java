@@ -437,7 +437,7 @@ public class WSDLUtils {
 		return permittedValues;
 	}
 	
-	static int getAggregateCardMin(ObjectSchema containerSchema, String slotName) {
+	public static int getAggregateCardMin(ObjectSchema containerSchema, String slotName) {
 		
 		int cardMin = 0;
 		Facet[] facets = getSlotFacets(containerSchema, slotName);
@@ -452,7 +452,7 @@ public class WSDLUtils {
 		return cardMin;
 	}
 
-	static int getAggregateCardMax(ObjectSchema containerSchema, String slotName) {
+	public static int getAggregateCardMax(ObjectSchema containerSchema, String slotName) {
 		
 		int cardMax = -1;
 		Facet[] facets = getSlotFacets(containerSchema, slotName);
@@ -568,13 +568,24 @@ public class WSDLUtils {
 		return elementSchema;
 	}
 
-	public static String getAggregateType(String elementType, String aggregateType) {
-		// aggregateType (SET, SEQUENCE,...) no more used
-		
+	public static String getAggregateType(String elementType, Integer cardMin, Integer cardMax) {
 		char[] uppercaseElementType = elementType.toCharArray();
 		uppercaseElementType[0] = Character.toUpperCase(uppercaseElementType[0]);
 
-		return WSDLConstants.ARRAY_OF + new String(uppercaseElementType);
+		String min = "0";
+		if (cardMin != null) {
+			min = cardMin.toString(); 
+		}
+		String max = "U";
+		if (cardMax != null && cardMax.intValue() != -1) {
+			max = cardMax.toString(); 
+		}
+		String cardinality = "";
+		if (!min.equals("0") || !max.equals("U")) {
+			cardinality = "_"+min+"_"+max;
+		}
+		
+		return WSDLConstants.ARRAY_OF + String.valueOf(uppercaseElementType) + cardinality;
 	}
 
 	public static String getWsdlUrl(String serviceName, HttpServletRequest request) {

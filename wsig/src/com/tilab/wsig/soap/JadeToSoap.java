@@ -176,8 +176,10 @@ public class JadeToSoap {
 				// AggregateSchema
 				log.debug("Elaborate aggregate schema: "+elementName);
 	
-				// Get aggregate type
+				// Get aggregate type and cardinality
 				ObjectSchema aggrSchema = WSDLUtils.getAggregateElementSchema(containerSchema, elementName);
+				Integer cardMin = WSDLUtils.getAggregateCardMin(containerSchema, elementName);
+				Integer cardMax = WSDLUtils.getAggregateCardMax(containerSchema, elementName);
 				
 				// Get slot type
 				soapType = aggrSchema.getTypeName();
@@ -186,7 +188,8 @@ public class JadeToSoap {
 				}
 				String itemName = soapType;
 				String aggrType = resultSchema.getTypeName();
-				soapType = WSDLUtils.getAggregateType(soapType, aggrType);
+
+				soapType = WSDLUtils.getAggregateType(soapType, cardMin, cardMax);
 				
 				// Create element
 				soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType, "");

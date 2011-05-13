@@ -58,6 +58,19 @@ public class MathOntologyMapper {
 		return abs;
 	}
 
+	private class AbsResultConverter {
+		private String stringAbs;
+
+		public AbsResultConverter(float abs) {
+			stringAbs = Float.toString(abs);
+		}
+		
+		@Slot(mandatory=true)
+		public String getStringAbs() {
+			return stringAbs;
+		}  
+	}
+	
 	// DO not expose a web service operation corresponding to the Diff ontology action
 	@SuppressOperation
 	public Abs toDiff(){
@@ -75,9 +88,9 @@ public class MathOntologyMapper {
 
 	@OperationName(name="Add2")
 	public Sum toSum(
-			@Slot(name="a", mandatory=true) float firstElement, 
-			@Slot(name="b", mandatory=true) float secondElement, 
-			@Slot(name="c", mandatory=false) Float thirdElement){
+			@Slot(mandatory=true) float firstElement, 
+			@Slot(mandatory=true) float secondElement, 
+			@Slot(mandatory=false) Float thirdElement){
 		Sum sum = new Sum();
 		sum.setFirstElement(firstElement);
 		sum.setSecondElement(secondElement+((thirdElement!=null)?thirdElement.floatValue():0));
@@ -91,8 +104,8 @@ public class MathOntologyMapper {
 	public Multiplication toMultiplication(
 			@AggregateSlot(cardMin=1, cardMax=5, type=Float.class) List numbers1,
 			@AggregateSlot(cardMin=2, cardMax=3, type=String.class) jade.util.leap.List numbers2,
-			int[] numbers3,
-			@AggregateSlot(cardMin=0, cardMax=5, type=Double.class) Set numbers4) {
+			float[] numbers3,
+			@AggregateSlot(cardMin=0, cardMax=5, type=float.class) Set numbers4) {
 
 		jade.util.leap.List numbers = new jade.util.leap.ArrayList();
 		
@@ -105,11 +118,11 @@ public class MathOntologyMapper {
 		}
 
 		for (Object number3 : numbers3) {
-			numbers.add(Float.valueOf((Integer)number3));
+			numbers.add((Float)number3);
 		}
 
 		for (Object number4 : numbers4) {
-			numbers.add(((Double)number4).floatValue());
+			numbers.add((Float)number4);
 		}
 		
 		Multiplication mul = new Multiplication();
