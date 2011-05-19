@@ -50,6 +50,7 @@ public class WSIGService {
 	private ServiceKey uddiServiceKey;
 	private Class mapperClass;
 	private Map<String,ActionBuilder> actionsBuilder = new HashMap<String,ActionBuilder>();
+	private Map<String,ResultBuilder> resultsBuilder = new HashMap<String,ResultBuilder>();
 	
 	public AID getAid() {
 		return aid;
@@ -94,17 +95,17 @@ public class WSIGService {
 	public void setMapperClass(Class mapperClass) {
 		this.mapperClass = mapperClass; 
 	}
-	public Map<String, ActionBuilder> getActionsBuilder() {
-		return actionsBuilder;
-	}
-	public void setActionsBuilder(Map<String, ActionBuilder> actionsBuilder) {
-		this.actionsBuilder = actionsBuilder;
-	}
 	public void addActionBuilder(String operationName, ActionBuilder actionBuilder) {
 		actionsBuilder.put(operationName, actionBuilder);
 	}
 	public ActionBuilder getActionBuilder(String operationName) {
 		return actionsBuilder.get(operationName);
+	}
+	public void addResultBuilder(String operationName, ResultBuilder resultBuilder) {
+		resultsBuilder.put(operationName, resultBuilder);
+	}
+	public ResultBuilder getResultBuilder(String operationName) {
+		return resultsBuilder.get(operationName);
 	}
 	public String getServicePrefix() {
 		return servicePrefix;

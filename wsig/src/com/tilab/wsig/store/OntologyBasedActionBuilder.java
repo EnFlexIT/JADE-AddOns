@@ -20,7 +20,6 @@ License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
-
 package com.tilab.wsig.store;
 
 import jade.content.AgentAction;
@@ -34,13 +33,13 @@ import java.util.Vector;
 
 public class OntologyBasedActionBuilder extends ActionBuilder {
 
-	public OntologyBasedActionBuilder(Ontology onto, String ontoActionName) {
-		super(onto, ontoActionName);
+	public OntologyBasedActionBuilder(Ontology onto, String actionName) {
+		super(onto, actionName);
 	}
 
 	public AgentAction getAgentAction(Vector<ParameterInfo> soapParams) throws Exception {
 
-		AgentActionSchema schema = (AgentActionSchema) getOntology().getSchema(getOntologyActionName());
+		AgentActionSchema schema = (AgentActionSchema)onto.getSchema(getActionName());
 		AbsAgentAction actionAbsObj = (AbsAgentAction) schema.newInstance();
 		if (soapParams != null) {
 			for (ParameterInfo param : soapParams) {

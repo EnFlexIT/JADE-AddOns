@@ -23,12 +23,14 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.soap;
 
+import java.util.List;
+
 import jade.content.abs.AbsAggregate;
+import jade.content.abs.AbsObject;
 import jade.content.abs.AbsPrimitive;
 import jade.content.abs.AbsTerm;
 import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
-import jade.content.schema.AgentActionSchema;
 import jade.content.schema.AggregateSchema;
 import jade.content.schema.ConceptSchema;
 import jade.content.schema.ObjectSchema;
@@ -46,7 +48,8 @@ import org.apache.log4j.Logger;
 
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.WSIGConstants;
-import com.tilab.wsig.store.ActionBuilder;
+import com.tilab.wsig.store.ParameterInfo;
+import com.tilab.wsig.store.ResultBuilder;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.wsdl.WSDLConstants;
 import com.tilab.wsig.wsdl.WSDLUtils;
@@ -66,7 +69,7 @@ public class JadeToSoap {
 		soapStyle = WSIGConfiguration.getInstance().getWsdlStyle();
 	}
 
-	public SOAPMessage convert(AbsTerm resultAbsObject, WSIGService wsigService, String operationName) throws Exception {
+	public SOAPMessage convert(AbsTerm actionResultValue, WSIGService wsigService, String operationName) throws Exception {
 	
 		// Get tns
 		tns = WSDLConstants.URN + ":" + wsigService.getServicePrefix() + wsigService.getServiceName();
@@ -91,24 +94,27 @@ public class JadeToSoap {
         
         // Get action builder
         log.debug("Operation name: "+operationName);
-        ActionBuilder actionBuilder = wsigService.getActionBuilder(operationName);
-        if (actionBuilder == null) {
-			throw new Exception("Action builder not found for operation "+operationName+" in WSIG");
+        ResultBuilder resultBuilder = wsigService.getResultBuilder(operationName);
+        if (resultBuilder == null) {
+			throw new Exception("Result builder not found for operation "+operationName+" in WSIG");
         }
         
-        // Get action schema
-        AgentActionSchema actionSchema = actionBuilder.getOntologyActionSchema();;
+        // Get response schema
+    	ObjectSchema responseSchema = resultBuilder.getResponseSchema();
+    	log.debug("Ontology result type: "+responseSchema.getTypeName());
+    	
+    	// Loop all element parameters
+    	List<ParameterInfo> operationResultValues = resultBuilder.getOperationResultValues(actionResultValue);
+    	for (ParameterInfo parameterInfo : operationResultValues) {
+    		
+    		String elementName = parameterInfo.getName();
+    		AbsObject elementValue = parameterInfo.getValue();
+    		ObjectSchema elementSchema = parameterInfo.getSchema();
 
-		// Get result schema
-        ObjectSchema resultSchema = actionSchema.getResultSchema();
-        if (resultSchema != null) {
-        	log.debug("Ontology result type: "+resultSchema.getTypeName());
-
-        	// Create soap message
-            convertObjectToSoapElement(actionSchema, resultSchema, resultAbsObject, WSDLUtils.getResultName(operationName), responseElement);
-        } else {
-        	log.debug("Ontology with no result type");
-        }
+    		// Create soap element
+    		log.debug("Add element type: "+elementSchema.getTypeName());
+            convertObjectToSoapElement(responseSchema, elementSchema, elementValue, elementName, responseElement);
+		}
 
         // Save all modifies of soap message
         soapResponse.saveChanges();
@@ -116,7 +122,7 @@ public class JadeToSoap {
 		return soapResponse;
 	}
 
-	private SOAPElement convertObjectToSoapElement(ObjectSchema containerSchema, ObjectSchema resultSchema, AbsTerm resultAbsObj, String elementName, SOAPElement rootSoapElement) throws Exception {
+	private SOAPElement convertObjectToSoapElement(ObjectSchema containerSchema, ObjectSchema resultSchema, AbsObject resultAbsObj, String elementName, SOAPElement rootSoapElement) throws Exception {
 		
 		SOAPElement soapElement = null;
 		if (resultAbsObj != null) {

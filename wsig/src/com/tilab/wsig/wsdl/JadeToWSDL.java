@@ -34,17 +34,19 @@ import jade.content.schema.AggregateSchema;
 import jade.content.schema.ConceptSchema;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
+import jade.content.schema.TermSchema;
 import jade.core.Agent;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
+import java.util.Map.Entry;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
@@ -74,9 +76,16 @@ import org.eclipse.xsd.XSDSimpleTypeDefinition;
 
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.store.ActionBuilder;
+import com.tilab.wsig.store.ApplyTo;
+import com.tilab.wsig.store.Builder;
 import com.tilab.wsig.store.MapperBasedActionBuilder;
+import com.tilab.wsig.store.MapperBasedResultConverter;
 import com.tilab.wsig.store.OntologyBasedActionBuilder;
+import com.tilab.wsig.store.OntologyBasedResultConverter;
 import com.tilab.wsig.store.OperationName;
+import com.tilab.wsig.store.ParameterInfo;
+import com.tilab.wsig.store.ResultBuilder;
+import com.tilab.wsig.store.ResultConverter;
 import com.tilab.wsig.store.SuppressOperation;
 import com.tilab.wsig.store.TypedAggregateSchema;
 import com.tilab.wsig.store.WSIGService;
@@ -85,23 +94,11 @@ public class JadeToWSDL {
 	
 	private static Logger log = Logger.getLogger(JadeToWSDL.class.getName());
 	
-	private static Integer MANDATORY = null;
-	private static Integer OPTIONAL = Integer.valueOf(0);
+	public static Integer MANDATORY = null;
+	public static Integer OPTIONAL = Integer.valueOf(0);
 	
 	public static Definition createWSDLFromSD(Agent agent, ServiceDescription sd, WSIGService wsigService) throws Exception {
 
-		// Create mapper object
-		Object mapperObject = null;
-		Class mapperClass = wsigService.getMapperClass();
-		if (mapperClass != null) {
-			try {
-				mapperObject = mapperClass.newInstance();
-			} catch (Exception e) {
-				log.error("Mapper class "+mapperClass.getName()+" not found", e);
-				throw e;
-			}
-		}
-		
 		// Get soap style & use
 		String soapStyle = WSIGConfiguration.getInstance().getWsdlStyle();
 		String soapUse;
@@ -151,84 +148,74 @@ public class JadeToWSDL {
 		service.addPort(port);
 		definition.addService(service);
 
+		// Create mapper object (if any)
+		Object mapperObject = null;
+		Class mapperClass = wsigService.getMapperClass();
+		if (mapperClass != null) {
+			try {
+				mapperObject = mapperClass.newInstance();
+			} catch (Exception e) {
+				log.error("Mapper class "+mapperClass.getName()+" not found", e);
+				throw e;
+			}
+		}
+
+		// Get mapper actions and converters
+		Map<String, Map<String, Method>> mapperActions = getMapperActions(mapperClass);
+		Map<String, Map<String, Class>> mapperResultConverters = getMapperResultConverters(mapperClass);
+		
 		// Manage Ontologies
 		Iterator ontologies = sd.getAllOntologies();
 		ContentManager cntManager = agent.getContentManager();
 		
-		// TODO Manage only FIRST ontology for ServiceDescription   
+		// TODO: Actually manage only FIRST ontology in ServiceDescription   
 		if (ontologies.hasNext()) {
 			String ontoName = (String) ontologies.next();
 			log.debug("Elaborate ontology: "+ontoName);		
 			
+			// Get Ontology and list of actions
 			Ontology onto = cntManager.lookupOntology(ontoName);
-			java.util.List actionNames = onto.getActionNames();
+			List actionNames = onto.getActionNames();
 
-			// Manage Actions
+			// Manage actions
 			for (int i = 0; i < actionNames.size(); i++) {
 				try {
 					String actionName = (String) actionNames.get(i);
 					log.debug("Elaborate operation: "+ actionName);		
 
-					// Check if action is suppressed (only for mapper)
-					if (mapperClass != null && isActionSuppressed(mapperClass, actionName)) {
+					// Check if action is suppressed (valid only if mapper is present)
+					if (isActionSuppressed(mapperClass, actionName)) {
 						log.debug("--operation "+actionName+" suppressed");
 						continue;
 					}
 					
-					// Sub operation (operation with same name, >1 only for mapper) 
-					int subOperationNumber = 1;
-					boolean operationDefinitedInMapper = false;
+					int operationsForAction = 1;
 					
-					// Get action methods of mapper
-					Vector<Method> mapperMethodsForAction = getMapperMethodsForAction(mapperClass, actionName);
-					if (mapperMethodsForAction.size() > 0) {
-						subOperationNumber = mapperMethodsForAction.size();
-						operationDefinitedInMapper = true;
+					// Get action methods declared in mapper (if any)
+					Map<String, Method> mapperMethodsForAction = mapperActions.get(actionName.toLowerCase());
+					Iterator<Entry<String, Method>> mapperMethodsForActionIt = null;
+					if (mapperMethodsForAction != null) {
+						operationsForAction = mapperMethodsForAction.size();
+						mapperMethodsForActionIt = mapperMethodsForAction.entrySet().iterator();
 					}
 					
-					// Loop all sub operations
-					for (int j = 0; j < subOperationNumber; j++) {
+					// Loop all operations
+					for (int j = 0; j < operationsForAction; j++) {
 						
 						// Prepare default operation name
 						String operationName = actionName;
 
 						// Create appropriate ActionBuilder
 						ActionBuilder actionBuilder = null;
-						if (operationDefinitedInMapper) {
+						Method mapperActionMethod = null;
+						if (mapperMethodsForAction != null) {
+							Entry<String, Method> mapperMethodForAction = mapperMethodsForActionIt.next();
+							operationName = mapperMethodForAction.getKey();
+							mapperActionMethod = mapperMethodForAction.getValue();
 							
-							// Mapper
-							Method method = mapperMethodsForAction.get(j);
-
-							// Check is the operation has a specific name
-							OperationName annotationOperationName = method.getAnnotation(OperationName.class);
-							if (annotationOperationName != null) {
-
-								// Set specific operation name from annotation
-								operationName = annotationOperationName.name();
-							} else {
-								
-								// No specific name, check operation overloading
-								if (subOperationNumber > 1) {
-									
-									// Use parameter class type to define operation name
-									Class[] parameterTypes = method.getParameterTypes();
-									StringBuffer parameterStrings = new StringBuffer();
-									for (int paramIndex=0; paramIndex<parameterTypes.length; paramIndex++) {
-										parameterStrings.append(parameterTypes[paramIndex].getSimpleName());
-										if (paramIndex<(parameterTypes.length-1)) {
-											parameterStrings.append(WSDLConstants.SEPARATOR);
-										}
-									}
-									
-									operationName = operationName+WSDLConstants.SEPARATOR+parameterStrings.toString(); 
-								}
-							}
-							
-							// Create MapperBased builder
-							actionBuilder = new MapperBasedActionBuilder(mapperObject, method, onto, actionName);
+							actionBuilder = new MapperBasedActionBuilder(onto, actionName, mapperObject, mapperActionMethod);
 						} else {
 							
-							// Create OntologyBased builder
 							actionBuilder = new OntologyBasedActionBuilder(onto, actionName);
 						}
 
@@ -252,19 +239,30 @@ public class JadeToWSDL {
 						BindingInput inputBinding = WSDLUtils.createBindingInput(registry, tns, soapUse);
 						operationBinding.setBindingInput(inputBinding);
 						
-						Map<String, ObjectSchema> inputParametersMap;
-						if (operationDefinitedInMapper) {
-							// Mapper
-							Method mapperMethod = mapperMethodsForAction.get(j);
-							inputParametersMap = manageInputParameters(onto, tns, operationName, soapStyle, wsdlTypeSchema, inputMessage, actionName, mapperMethod);
-
-						} else {
-							// Ontology
-							inputParametersMap = manageInputParameters(onto, tns, operationName, soapStyle, wsdlTypeSchema, inputMessage, actionName, null);
-						}
+						Map<String, ParameterInfo> inputParameters = manageInputParameters(onto, tns, operationName, soapStyle, wsdlTypeSchema, inputMessage, actionName, mapperActionMethod);
 						
 						// Set input parameters map to action builder
-						actionBuilder.setParametersMap(inputParametersMap);
+						actionBuilder.setParameters(inputParameters);
+						
+						// Get result converter class declared in mapper (if any)
+						Class mapperResultConverterClass = null;
+						Map<String, Class> mapperResultConvertersForAction = mapperResultConverters.get(actionName.toLowerCase());
+						if (mapperResultConvertersForAction != null) {
+							mapperResultConverterClass = mapperResultConvertersForAction.get(operationName);
+						}
+						
+						// Create appropriate ResultBuilder
+						ResultBuilder resultBuilder;
+						if (mapperResultConverterClass != null) {
+							
+							resultBuilder = new MapperBasedResultConverter(mapperObject, mapperResultConverterClass, onto, actionName);
+						} else {
+							
+							resultBuilder = new OntologyBasedResultConverter(onto, actionName);
+						}
+
+						// Add ResultBuilder to wsigService 
+						wsigService.addResultBuilder(operationName, resultBuilder);
 						
 						// Output parameters		
 						Message outputMessage = WSDLUtils.createMessage(tns, WSDLUtils.getResponseName(operationName));
@@ -275,8 +273,8 @@ public class JadeToWSDL {
 						BindingOutput outputBinding = WSDLUtils.createBindingOutput(registry, tns, soapUse);
 						operationBinding.setBindingOutput(outputBinding);
 
-						manageOutputParameter(onto, tns, operationName, soapStyle, wsdlTypeSchema, outputMessage, actionName);
-						
+						Map<String, ParameterInfo> outputParameters = manageOutputParameters(onto, tns, operationName, soapStyle, wsdlTypeSchema, outputMessage, actionName, mapperResultConverterClass);
+						resultBuilder.setParameters(outputParameters);
 					}
 				} catch (Exception e) {
 					throw new Exception("Error in Agent Action Handling", e);
@@ -313,7 +311,7 @@ public class JadeToWSDL {
 		return definition;
 	}
 	
-	private static Map<String, ObjectSchema> manageInputParameters(Ontology onto, String tns, String operationName, String soapStyle, XSDSchema wsdlTypeSchema, Message inputMessage, String actionName, Method mapperMethod) throws Exception {
+	private static Map<String, ParameterInfo> manageInputParameters(Ontology onto, String tns, String operationName, String soapStyle, XSDSchema wsdlTypeSchema, Message inputMessage, String actionName, Method mapperMethod) throws Exception {
 
 		AgentActionSchema actionSchema = (AgentActionSchema) onto.getSchema(actionName);
 
@@ -328,7 +326,7 @@ public class JadeToWSDL {
 			elementSequence = WSDLUtils.addSequenceToComplexType(complexType);
 		}
 
-		Map<String, ObjectSchema> inputParametersMap;
+		Map<String, ParameterInfo> inputParametersMap;
 		if (mapperMethod != null) {
 			// Mapper
 			inputParametersMap = manageMapperInputParameters(onto, tns, soapStyle, wsdlTypeSchema, elementSequence, inputMessage, actionSchema, mapperMethod);
@@ -341,14 +339,14 @@ public class JadeToWSDL {
 		return inputParametersMap;
 	}
 	
-	private static Map<String, ObjectSchema> manageOntologyInputParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema) throws Exception {
+	private static Map<String, ParameterInfo> manageOntologyInputParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema) throws Exception {
 
 		String[] slotNames = actionSchema.getNames();
-		Map<String, ObjectSchema> inputParametersMap = new HashMap<String, ObjectSchema>();
+		Map<String, ParameterInfo> inputParametersMap = new HashMap<String, ParameterInfo>();
 
 		// Loop for all slot of action schema
 		for (String slotName : slotNames) {
-			ObjectSchema slotSchema = actionSchema.getSchema(slotName);
+			TermSchema slotSchema = (TermSchema)actionSchema.getSchema(slotName);
 			String slotType = createComplexTypeFromSchema(onto, tns, actionSchema, slotSchema, wsdlTypeSchema, slotName, null, null, null);
 			log.debug("--ontology input slot: "+slotName+" ("+slotType+")");
 
@@ -358,7 +356,7 @@ public class JadeToWSDL {
 			}
 			
 			// Add parameter to map
-			inputParametersMap.put(slotName, slotSchema);
+			inputParametersMap.put(slotName, new ParameterInfo(slotName, slotSchema));
 			
 			if (WSDLConstants.STYLE_RPC.equals(soapStyle)) {
 
@@ -375,18 +373,32 @@ public class JadeToWSDL {
 		
 		return inputParametersMap;
 	}
-	
-	private static Map<String, ObjectSchema> manageMapperInputParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema, Method mapperMethod) throws Exception {
-		Annotation[][] parameterAnnotations = mapperMethod.getParameterAnnotations();
-		Class[] parameterClasses = mapperMethod.getParameterTypes();
+
+	private static Map<String, ParameterInfo> manageMapperInputParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema, Method mapperMethod) throws Exception {
 		String[] parameterNames = WSDLUtils.getParameterNames(mapperMethod);
-		Map<String, ObjectSchema> inputParametersMap = new HashMap<String, ObjectSchema>();
+		Class[] parameterClasses = mapperMethod.getParameterTypes();
+		Annotation[][] parameterAnnotations = mapperMethod.getParameterAnnotations();
+		
+		return manageMapperParameters(onto, tns, soapStyle, wsdlTypeSchema, elementSequence, inputMessage, actionSchema, parameterNames, parameterClasses, parameterAnnotations, null);
+	}
+
+	private static Map<String, ParameterInfo> manageMapperParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message message, AgentActionSchema actionSchema, String[] parameterNames, Class[] parameterClasses, Annotation[][] parameterAnnotations, Method[] parameterMethods) throws Exception {
+		Map<String, ParameterInfo> parametersMap = new LinkedHashMap<String, ParameterInfo>();
 		
 		// Loop for all parameters of mapper method
 		for (int k = 0; k < parameterClasses.length; k++) {
+			Method parameterMethod = null;
+			if (parameterMethods != null) {
+				parameterMethod = parameterMethods[k];
+			}
 			Class parameterClass = parameterClasses[k];
 			Annotation[] annotations = parameterAnnotations[k];
 
+			// Skip all suppressed methods
+			if (WSDLUtils.getSuppressSlotAnnotation(annotations) != null) {
+				continue;
+			}
+			
 			// Get parameter name
 			String parameterName;
 			if (parameterNames != null) {
@@ -430,16 +442,26 @@ public class JadeToWSDL {
 			log.debug("--mapper input parameter: "+parameterName+" ("+parameterComplexType+")");
 
 			// Create virtual schema of java parameter
-			ObjectSchema parameterSchema = getParameterSchema(onto, parameterClass, aggregateElementClass);
+			TermSchema parameterSchema = getParameterSchema(onto, parameterClass, aggregateElementClass);
 			
 			// Add parameter to map
-			inputParametersMap.put(parameterName, parameterSchema);
+			ParameterInfo pi = new ParameterInfo(parameterName, parameterSchema);
+			pi.setMapperMethod(parameterMethod);
+			pi.setMinCard(cardMin);
+			if (parameterSchema instanceof TypedAggregateSchema) {
+				pi.setMaxCard(cardMax);
+				
+				TypedAggregateSchema aggregateSchema = (TypedAggregateSchema)parameterSchema; 
+				pi.setElementsSchema((TermSchema)aggregateSchema.getElementSchema());
+			}
+			
+			parametersMap.put(parameterName, pi);
 			
 			if (WSDLConstants.STYLE_RPC.equals(soapStyle)) {
 
 				// Add a part message for all parameters
 				Part partMessage = WSDLUtils.createTypePart(parameterName, parameterComplexType, tns);
-				inputMessage.addPart(partMessage);
+				message.addPart(partMessage);
 			} else {
 				
 				// Add a element in complex type definition for all parameters
@@ -447,13 +469,12 @@ public class JadeToWSDL {
 			}
 		}
 		
-		return inputParametersMap;
+		return parametersMap;
 	}
 	
-	private static void manageOutputParameter(Ontology onto, String tns, String operationName, String soapStyle, XSDSchema wsdlTypeSchema, Message outputMessage, String actionName) throws Exception {
+	private static Map<String, ParameterInfo> manageOutputParameters(Ontology onto, String tns, String operationName, String soapStyle, XSDSchema wsdlTypeSchema, Message outputMessage, String actionName, Class mapperResultConverterClass) throws Exception {
 		
 		AgentActionSchema actionSchema = (AgentActionSchema) onto.getSchema(actionName);
-		ObjectSchema resultSchema = actionSchema.getResultSchema();
 
 		// In document style there is only a message part named parameters and an element in types definition
 		XSDModelGroup elementSequence = null;
@@ -470,12 +491,56 @@ public class JadeToWSDL {
 			elementSequence = WSDLUtils.addSequenceToComplexType(complexType);
 		}
 		
-		// Check result schema
+		Map<String, ParameterInfo> outputParametersMap;
+		if (mapperResultConverterClass != null) {
+			// Mapper
+			outputParametersMap = manageMapperOutputParameters(onto, tns, soapStyle, wsdlTypeSchema, elementSequence, outputMessage, actionSchema, operationName, mapperResultConverterClass);
+			
+		} else {
+			// Ontology
+			outputParametersMap = manageOntologyOutputParameters(onto, tns, soapStyle, wsdlTypeSchema, elementSequence, outputMessage, actionSchema, operationName);
+		}
+		
+		return outputParametersMap;
+	}
+	
+	private static Map<String, ParameterInfo> manageMapperOutputParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message outputMessage, AgentActionSchema actionSchema, String operationName, Class resultConverterClass) throws Exception {
+		
+		ArrayList<Method> parameterMethods = new ArrayList<Method>();
+		ArrayList<String> parameterNames = new ArrayList<String>();
+		ArrayList<Class> parameterClasses = new ArrayList<Class>();
+		ArrayList<Annotation[]> parameterAnnotations = new ArrayList<Annotation[]>();
+		Method[] classMethods = resultConverterClass.getDeclaredMethods();
+		for (int j = 0; j < classMethods.length; j++) {
+			Method method = classMethods[j];
+			if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
+				parameterMethods.add(method);
+				parameterNames.add(method.getName().substring(3));
+				parameterClasses.add(method.getReturnType());
+				parameterAnnotations.add(method.getAnnotations());
+			} 
+		}
+		
+		Method[] methods = parameterMethods.toArray(new Method[parameterMethods.size()]);
+		String[] names = parameterNames.toArray(new String[parameterNames.size()]);
+		Class[] classes = parameterClasses.toArray(new Class[parameterClasses.size()]);
+		Annotation[][] annotations = parameterAnnotations.toArray(new Annotation[parameterAnnotations.size()][]);
+		 
+		return manageMapperParameters(onto, tns, soapStyle, wsdlTypeSchema, elementSequence, outputMessage, actionSchema, names, classes, annotations, methods);
+	}
+
+	private static Map<String, ParameterInfo> manageOntologyOutputParameters(Ontology onto, String tns, String soapStyle, XSDSchema wsdlTypeSchema, XSDModelGroup elementSequence, Message outputMessage, AgentActionSchema actionSchema, String operationName) throws Exception {
+		
+		Map<String, ParameterInfo> outputParametersMap = new HashMap<String, ParameterInfo>();
+		
+		TermSchema resultSchema = actionSchema.getResultSchema();
 		if (resultSchema != null) {
 			String resultName = WSDLUtils.getResultName(operationName);
 			String resultType = createComplexTypeFromSchema(onto, tns, actionSchema, resultSchema, wsdlTypeSchema, resultSchema.getTypeName(), null, null, null);
 			log.debug("--ontology output result: "+resultName+" ("+resultType+")");
 
+			outputParametersMap.put(resultName, new ParameterInfo(resultName, resultSchema));
+			
 			Part partMessage;
 			if (WSDLConstants.STYLE_RPC.equals(soapStyle)) {
 				partMessage = WSDLUtils.createTypePart(resultName, resultType, tns);
@@ -485,11 +550,13 @@ public class JadeToWSDL {
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, resultName, resultType, elementSequence);
 			}
 		}
+		
+		return outputParametersMap;
 	}
-	
-	public static ObjectSchema getParameterSchema(Ontology onto, Class parameterClass, Class aggregateElementClass) throws OntologyException {
 
-		ObjectSchema parameterSchema;
+	public static TermSchema getParameterSchema(Ontology onto, Class parameterClass, Class aggregateElementClass) throws OntologyException {
+
+		TermSchema parameterSchema;
 		
 		if (parameterClass.isPrimitive() || WSDLConstants.java2xsd.get(parameterClass) != null) {
 
@@ -502,9 +569,7 @@ public class JadeToWSDL {
 			}
 			parameterSchema = new PrimitiveSchema(typeName);
 		} 
-		else if (parameterClass.isArray() ||
-				 Collection.class.isAssignableFrom(parameterClass) ||
-				 jade.util.leap.Collection.class.isAssignableFrom(parameterClass)) {
+		else if (Builder.isCollection(parameterClass)) {
 
 			if (parameterClass.isArray()) {
 				// Overwrite aggregateType from Java Array
@@ -512,9 +577,7 @@ public class JadeToWSDL {
 			}
 			
 			String typeName;
-			if (parameterClass.isArray() || 
-				List.class.isAssignableFrom(parameterClass) ||
-				jade.util.leap.List.class.isAssignableFrom(parameterClass)) {
+			if (Builder.isSequence(parameterClass)) {
 				typeName = BasicOntology.SEQUENCE;
 			} else {
 				typeName = BasicOntology.SET;
@@ -535,33 +598,97 @@ public class JadeToWSDL {
 					break;
 				}
 			}
-			parameterSchema = onto.getSchema(conceptSchemaName);
+			parameterSchema = (TermSchema)onto.getSchema(conceptSchemaName);
 		}
 
 		return parameterSchema;
 	}
 	
-	private static Vector<Method> getMapperMethodsForAction(Class mapperClass, String actionName) {
-
-		Vector<Method> methodsAction = new Vector<Method>();
+	private static Map<String, Map<String, Method>> getMapperActions(Class mapperClass) {
+		Map<String, Map<String, Method>> mapperActions = new HashMap<String, Map<String, Method>>();
 
 		if (mapperClass != null) {
-			Method[] methods = mapperClass.getDeclaredMethods();
-		
-			Method method = null;
-			String methodNameToCheck = WSDLConstants.MAPPER_METHOD_PREFIX + actionName;
-			for (int j = 0; j < methods.length; j++) {
-				method = methods[j];
-				if (method.getName().equalsIgnoreCase(methodNameToCheck)) {
-					methodsAction.add(method);
+			Method[] mapperMethods = mapperClass.getDeclaredMethods();
+			for (Method mapperMethod : mapperMethods) {
+				String mapperMethodName = mapperMethod.getName();
+				if (mapperMethodName.startsWith(WSDLConstants.MAPPER_METHOD_PREFIX)) {
+					// Remove prefix to from method name toXXX()
+					String actionName = mapperMethodName.substring(2);
+					
+					Map<String,Method> operationMethods = mapperActions.get(actionName.toLowerCase());
+					if (operationMethods == null) {
+						operationMethods = new HashMap<String, Method>();
+						mapperActions.put(actionName.toLowerCase(), operationMethods);
+					}
+					
+					String operationName = actionName;
+
+					// Check is the operation has a specific name specified with annotation @OperationName
+					OperationName annotationOperationName = mapperMethod.getAnnotation(OperationName.class);
+					if (annotationOperationName != null) {
+						operationName = annotationOperationName.name();
+					}
+					else {
+						// If there are more operations (without annotation) modify the operationName that must be unique 
+						if (operationMethods.size() > 0) {
+							// Use parameter class type to define operation name
+							Class[] parameterTypes = mapperMethod.getParameterTypes();
+							StringBuffer parameterStrings = new StringBuffer();
+							for (int paramIndex=0; paramIndex<parameterTypes.length; paramIndex++) {
+								parameterStrings.append(parameterTypes[paramIndex].getSimpleName());
+								if (paramIndex<(parameterTypes.length-1)) {
+									parameterStrings.append(WSDLConstants.SEPARATOR);
+								}
+							}
+						
+							operationName = operationName+WSDLConstants.SEPARATOR+parameterStrings.toString();
+						}
+					}					
+					
+					operationMethods.put(operationName, mapperMethod);
 				} 
 			}
 		}
-		return methodsAction;
+		
+		return mapperActions;
 	}
 
-	private static boolean isActionSuppressed(Class mapperClass, String actionName) {
+	private static Map<String, Map<String, Class>> getMapperResultConverters(Class mapperClass) {
+		Map<String, Map<String, Class>> mapperResultConverters = new HashMap<String, Map<String, Class>>();
 
+		if (mapperClass != null) {
+			Class[] mapperInnerClasses = mapperClass.getDeclaredClasses();
+			for (Class mapperInnerClass : mapperInnerClasses) {
+				
+				ResultConverter annotationResultConverter = (ResultConverter)mapperInnerClass.getAnnotation(ResultConverter.class);
+				if (annotationResultConverter != null) {
+					ApplyTo[] appliesTo = annotationResultConverter.value();
+					if (appliesTo != null) {
+						for (ApplyTo applyTo : appliesTo) {
+
+							String actionName = applyTo.action();
+							String operationName = applyTo.operation();
+							if (operationName.equals(ApplyTo.NULL)) {
+								operationName = actionName;
+							}
+							
+							Map<String,Class> operationClasses = mapperResultConverters.get(actionName.toLowerCase());
+							if (operationClasses == null) {
+								operationClasses = new HashMap<String, Class>();
+								mapperResultConverters.put(actionName.toLowerCase(), operationClasses);
+							}
+
+							operationClasses.put(operationName, mapperInnerClass);
+						}
+					}
+				}
+			}
+		}
+		
+		return mapperResultConverters;
+	}
+	
+	private static boolean isActionSuppressed(Class mapperClass, String actionName) {
 		boolean isSuppressed = false;
 		if (mapperClass != null) {
 			Method[] methods = mapperClass.getDeclaredMethods();
@@ -613,9 +740,7 @@ public class JadeToWSDL {
 				WSDLUtils.addRestrictionToSimpleType(enumType, permittedValues);
 			}
 		}
-		else if (parameterClass.isArray() || 
-				 Collection.class.isAssignableFrom(parameterClass) ||
-				 jade.util.leap.Collection.class.isAssignableFrom(parameterClass)) {
+		else if (Builder.isCollection(parameterClass)) {
 
 			if (parameterClass.isArray()) {
 				// Overwrite aggregateType from Java Array

@@ -25,11 +25,15 @@ package com.tilab.wsig.examples;
 
 import jade.content.onto.annotations.AggregateSlot;
 import jade.content.onto.annotations.Slot;
+import jade.content.onto.annotations.SuppressSlot;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.tilab.wsig.store.ApplyTo;
 import com.tilab.wsig.store.OperationName;
+import com.tilab.wsig.store.ResultConverter;
 import com.tilab.wsig.store.SuppressOperation;
 
 public class MathOntologyMapper {
@@ -43,12 +47,14 @@ public class MathOntologyMapper {
 		return abs;
 	}
 	
+	@OperationName(name="AbsComplex")
 	public Abs toAbs(Complex complex){
 		Abs abs = new Abs();
 		abs.setComplex(complex);
 		return abs;
 	}
 	
+	@OperationName(name="AbsString")
 	public Abs toAbs(String real,String immaginary){
 		Abs abs = new Abs();
 		Complex complex = new Complex();
@@ -58,17 +64,42 @@ public class MathOntologyMapper {
 		return abs;
 	}
 
-	private class AbsResultConverter {
-		private String stringAbs;
+	@ResultConverter({
+		@ApplyTo(action="abs", operation="AbsString"),
+		@ApplyTo(action="abs", operation="AbsComplex")
+	})
+	public class AbsResultConverter {
+		private float abs;
 
 		public AbsResultConverter(float abs) {
-			stringAbs = Float.toString(abs);
+			this.abs = abs;
 		}
 		
 		@Slot(mandatory=true)
 		public String getStringAbs() {
-			return stringAbs;
+			return Float.toString(abs);
 		}  
+
+		public Complex getComplex() {
+			Complex complex = new Complex();
+			complex.setImmaginary(abs-(int)abs);
+			complex.setReal((int)abs);
+			return complex;
+		}  
+
+		@AggregateSlot(cardMin=3, cardMax=3, type=String.class)
+		public List getMultiplier() {
+			List list = new ArrayList();
+			list.add(Float.toString(abs));
+			list.add(Float.toString(abs*2));
+			list.add(Float.toString(abs*3));
+			return list;
+		}
+		
+		@SuppressSlot()
+		public int getDummy() {
+			return 0;
+		}
 	}
 	
 	// DO not expose a web service operation corresponding to the Diff ontology action
@@ -128,5 +159,41 @@ public class MathOntologyMapper {
 		Multiplication mul = new Multiplication();
 		mul.setNumbers(numbers);
 		return mul;
+	}
+	
+	@OperationName(name="GetComponents")
+	public GetComponents toGetComponents(Complex complex) {
+		GetComponents getComponents = new GetComponents();
+		getComponents.setComplex(complex);
+		return getComponents;
+	}
+
+	@OperationName(name="GetComponents2")
+	public GetComponents toGetComponents(double d1, double d2) {
+		Complex complex = new Complex();
+		complex.setReal((float)d1);
+		complex.setImmaginary((float)d2);
+		GetComponents getComponents = new GetComponents();
+		getComponents.setComplex(complex);
+		return getComponents;
+	}
+	
+	@ResultConverter({
+		@ApplyTo(action="GetComponents", operation="GetComponents2")
+	})
+	public class GetComponentsResultConverter {
+		private List components;
+		
+		public GetComponentsResultConverter(List components) {
+			this.components = components;
+		}
+		
+		public double getFirst() {
+			return (Float)components.get(0);
+		}
+
+		public double getSecond() {
+			return (Float)components.get(1);
+		}
 	}
 }

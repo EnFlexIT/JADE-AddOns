@@ -27,6 +27,7 @@ import jade.content.lang.sl.SLCodec;
 import jade.content.onto.OntologyException;
 import jade.content.onto.annotations.AggregateSlot;
 import jade.content.onto.annotations.Slot;
+import jade.content.onto.annotations.SuppressSlot;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.Facet;
 import jade.content.schema.ObjectSchema;
@@ -506,6 +507,17 @@ public class WSDLUtils {
 		return null;
 	}
 
+	public static SuppressSlot getSuppressSlotAnnotation(Annotation[] annotations) {
+		if (annotations != null) {
+			for (Annotation annotation : annotations) {
+				if (annotation instanceof SuppressSlot) {
+					return (SuppressSlot)annotation;
+				}
+			}
+		}
+		return null;
+	}
+	
 	public static AggregateSlot getAggregateSlotAnnotation(Annotation[] annotations) {
 		if (annotations != null) {
 			for (Annotation annotation : annotations) {
@@ -598,6 +610,9 @@ public class WSDLUtils {
 
 	public static String getPrimitiveType(ObjectSchema objSchema, ObjectSchema containerSchema, String slotName) {
 		String slotType = WSDLConstants.jade2xsd.get(objSchema.getTypeName());
+		if (slotType == null) {
+			slotType = objSchema.getTypeName();
+		}
 	
 		if (containerSchema != null) {
 			// Check java-type to preserve the type

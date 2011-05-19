@@ -33,6 +33,7 @@ import jade.content.onto.Ontology;
 import jade.content.schema.AggregateSchema;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
+import jade.content.schema.TermSchema;
 
 import java.io.StringReader;
 import java.util.Map;
@@ -68,7 +69,7 @@ public class SoapToJade extends DefaultHandler {
 	private StringBuffer elementValue = new StringBuffer();
 	private Vector<Vector<ParameterInfo>> parametersByLevel = new Vector<Vector<ParameterInfo>>();
 	private Vector<ObjectSchema> schemaByLevel = new Vector<ObjectSchema>();
-	private Map<String, ObjectSchema> parametersSchemaMap;
+	private Map<String, ParameterInfo> parametersInfo;
 	
 	public SoapToJade() {
 		
@@ -124,7 +125,7 @@ public class SoapToJade extends DefaultHandler {
 		onto = wsigService.getOnto();
 		
 		// Get parameters schema map
-		parametersSchemaMap = actionBuilder.getParametersMap();
+		parametersInfo = actionBuilder.getParameters();
 		
 		// Parse soap to extract parameters value
 		xmlParser.parse(new InputSource(new StringReader(soapBodyMessage)));
@@ -157,14 +158,14 @@ public class SoapToJade extends DefaultHandler {
 		return params;
 	}
 
-	private ObjectSchema getParameterSchema(String elementName, int level) throws Exception {
+	private TermSchema getParameterSchema(String elementName, int level) throws Exception {
 
 		try {
-			ObjectSchema schema = null;
+			TermSchema schema = null;
 			if (level == 0) {
 				
 				// First level -> get schema from map (Primitive, Concept or TypedAggregate)
-				schema = parametersSchemaMap.get(elementName);
+				schema = parametersInfo.get(elementName).getSchema();
 			} else {
 				
 				// Other level -> get schema from parent
@@ -172,10 +173,10 @@ public class SoapToJade extends DefaultHandler {
 
 				if (parentSchema instanceof TypedAggregateSchema) {
 					// If is an aggregate get schema of content element
-					schema = ((TypedAggregateSchema)parentSchema).getElementSchema();
+					schema = (TermSchema)((TypedAggregateSchema)parentSchema).getElementSchema();
 				} else {
 					// If is a Concept or a Primitive get schema of the slot
-					schema = parentSchema.getSchema(elementName);
+					schema = (TermSchema)parentSchema.getSchema(elementName);
 				}
 				
 				// For aggregate wrap schema with TypedAggregateSchema  
@@ -293,17 +294,14 @@ public class SoapToJade extends DefaultHandler {
 				int parameterLevel = level - PARAMETERS_LEVEL; 
 
 				// Get parameter schema
-				ObjectSchema parameterSchema = getParameterSchema(parameterName, parameterLevel);
+				TermSchema parameterSchema = getParameterSchema(parameterName, parameterLevel);
 				log.debug("Start managing parameter "+parameterName+" of type "+parameterSchema.getTypeName());
 
 				// Get parameters vector for this level
 				Vector<ParameterInfo> parameters = getParametersByLevel(parameterLevel, true);
 
 				// Create new ParameterInfo for this soap parameter
-				ParameterInfo pi = new ParameterInfo();
-				pi.setName(parameterName);
-				pi.setSchema(parameterSchema);
-				parameters.add(pi);
+				parameters.add(new ParameterInfo(parameterName, parameterSchema));
 			}
 
 		} catch(Exception e) {

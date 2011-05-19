@@ -25,16 +25,11 @@ package com.tilab.wsig.store;
 
 import jade.content.AgentAction;
 import jade.content.abs.AbsObject;
-import jade.content.onto.AggregateHelper;
-import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.annotations.Slot;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Vector;
 
 import com.tilab.wsig.wsdl.WSDLUtils;
@@ -47,8 +42,8 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 	private Annotation[][] methodParameterAnnotations;
 	private Class<?>[] methodParameterTypes;
 
-	public MapperBasedActionBuilder(Object mapperObj, Method method, Ontology onto, String ontoActionName) {
-		super(onto, ontoActionName);
+	public MapperBasedActionBuilder(Ontology onto, String actionName, Object mapperObj, Method method) {
+		super(onto, actionName);
 		
 		this.method = method;
 		this.mapperObj = mapperObj;
@@ -92,7 +87,7 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 						Object javaValue;
 						if (pi != null) {
 							parameterList += pi.getSchema().getTypeName()+",";
-							javaValue = getOntology().toObject(pi.getValue());
+							javaValue = onto.toObject(pi.getValue());
 						} else {
 							parameterList += "null,";
 							javaValue = null;
@@ -123,12 +118,6 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 		return actionObj;
 	}
 		
-	private Object adjustValue(Object value, Class<?> destClass) throws Exception {
-		value = BasicOntology.adjustPrimitiveValue(value, destClass);
-		value = AggregateHelper.adjustAggregateValue(value, destClass);
-		return value;
-	}
-
 	private ParameterInfo getSoapParamByName(Vector<ParameterInfo> soapParams, String methodParamName, Class methodParamClass, Annotation[] methodParamAnnotations) throws Exception {
 		
 		// Check parameter annotation (if present)

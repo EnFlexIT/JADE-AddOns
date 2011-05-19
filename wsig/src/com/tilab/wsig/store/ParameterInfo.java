@@ -23,31 +23,93 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.store;
 
+import java.lang.reflect.Method;
+
+import com.tilab.wsig.wsdl.JadeToWSDL;
+
 import jade.content.abs.AbsObject;
 import jade.content.schema.ObjectSchema;
+import jade.content.schema.TermSchema;
 
 public class ParameterInfo {
 	
 	private String name;
-	private ObjectSchema schema;
+	private TermSchema schema;
+	private TermSchema elementsSchema;
 	private AbsObject value;
+	private Method mapperMethod;
+	private Integer minCard;
+	private Integer maxCard;
+	
+	public ParameterInfo(String name, TermSchema schema) {
+		this.name = name;
+		this.schema = schema;
+	}
 	
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	public ObjectSchema getSchema() {
+	
+	public TermSchema getSchema() {
 		return schema;
 	}
-	public void setSchema(ObjectSchema schema) {
+	
+	public void setSchema(TermSchema schema) {
 		this.schema = schema;
 	}
+	
 	public AbsObject getValue() {
 		return value;
 	}
+	
 	public void setValue(AbsObject value) {
 		this.value = value;
+	}
+	
+	public void setMapperMethod(Method mapperMethod) {
+		this.mapperMethod = mapperMethod;
+	}
+
+	public Method getMapperMethod() {
+		return mapperMethod;
+	}
+
+	public void setMinCard(Integer minCard) {
+		this.minCard = minCard;
+	}
+
+	public int getMinCard() {
+		// null -> mandatory -> 1
+		if (minCard == JadeToWSDL.MANDATORY) {
+			return 1;
+		}
+		return minCard.intValue();
+	}
+
+	public void setMaxCard(Integer maxCard) {
+		this.maxCard = maxCard;
+	}
+
+	public int getMaxCard() {
+		if (maxCard == null) {
+			return Integer.valueOf(ObjectSchema.UNLIMITED).intValue();
+		}
+		return maxCard.intValue();
+	}
+	
+	public boolean isMandatory() {
+		return getMinCard() > 0;
+	}
+
+	public void setElementsSchema(TermSchema elementsSchema) {
+		this.elementsSchema = elementsSchema;
+	}
+
+	public TermSchema getElementsSchema() {
+		return elementsSchema;
 	}
 }

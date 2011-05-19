@@ -127,6 +127,8 @@
 			<fileset dir="${wsigBuild.dir}">
 				<include name="com/tilab/wsig/store/OperationName.class"/>
 				<include name="com/tilab/wsig/store/SuppressOperation.class"/>
+				<include name="com/tilab/wsig/store/ApplyTo.class"/>
+				<include name="com/tilab/wsig/store/ResultConverter.class"/>
 			</fileset>
 		</jar>
 	</target>
