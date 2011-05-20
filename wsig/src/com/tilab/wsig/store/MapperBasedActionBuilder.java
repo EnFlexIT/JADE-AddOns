@@ -20,85 +20,64 @@ License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
-
 package com.tilab.wsig.store;
 
 import jade.content.AgentAction;
-import jade.content.abs.AbsObject;
 import jade.content.onto.Ontology;
-import jade.content.onto.annotations.Slot;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Vector;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 
-import com.tilab.wsig.wsdl.WSDLUtils;
 
 public class MapperBasedActionBuilder extends ActionBuilder {
 	
 	private Method method;
 	private Object mapperObj;
-	private String[] methodParameterNames;
-	private Annotation[][] methodParameterAnnotations;
-	private Class<?>[] methodParameterTypes;
 
 	public MapperBasedActionBuilder(Ontology onto, String actionName, Object mapperObj, Method method) {
 		super(onto, actionName);
 		
 		this.method = method;
 		this.mapperObj = mapperObj;
-		this.methodParameterNames = WSDLUtils.getParameterNames(method);
-		this.methodParameterAnnotations = method.getParameterAnnotations();
-		this.methodParameterTypes = method.getParameterTypes();
 	}
 
-	public AgentAction getAgentAction(Vector<ParameterInfo> soapParams) throws Exception {
+	public AgentAction getAgentAction(LinkedHashMap<String, ParameterInfo> soapParams) throws Exception {
 		Object[] parameterValues = new Object[0];
 		String parameterList = "";
 
-		// Prepare mapper parameter
+		// Prepare mapper-method parameters
 		if (soapParams != null) {
-			
-	        // If the mapper class is a Java dynamic proxy is not possible to have 
-			// the name of the parameters of the methods (methodParameterNames == null)
-			// Use SOAP parameters as master and apply it in the order of vector   
-			// See: WSDLGeneratorUtils.getParameterNames(method)
-			if (methodParameterNames == null) {
-				parameterValues = new Object[soapParams.size()];
-				for (int i = 0; i < soapParams.size(); i++) {
-					ParameterInfo pi = soapParams.get(i);
-					AbsObject absValue = pi.getValue();
-					Object javaValue = getOntology().toObject(absValue);
-					parameterValues[i] = javaValue;
-					parameterList += pi.getSchema().getTypeName()+",";
+				
+			Collection<ParameterInfo> parametersInfo = getParameters().values();
+			parameterValues = new Object[parametersInfo.size()];
+			int index = 0;
+			for (ParameterInfo parameterInfo : parametersInfo) {
+				
+				ParameterInfo soapParameter;
+				try {
+					soapParameter = getSoapParameter(soapParams, parameterInfo);
+				} catch(Exception e) {
+					log.error(e.getMessage());
+					throw e;
 				}
-			} else {
-				parameterValues = new Object[methodParameterNames.length];
-				for (int i = 0; i < methodParameterNames.length; i++) {
-					ParameterInfo pi;
-					try {
-						pi = getSoapParamByName(soapParams, methodParameterNames[i], methodParameterTypes[i], methodParameterAnnotations[i]);
-					} catch(Exception e) {
-						log.error(e.getMessage());
-						throw e;
+				
+				try {
+					Object javaValue;
+					if (soapParameter != null) {
+						parameterList += parameterInfo.getSchema().getTypeName()+",";
+						javaValue = onto.toObject(soapParameter.getValue());
+					} else {
+						parameterList += "null,";
+						javaValue = null;
 					}
-					
-					try {
-						Object javaValue;
-						if (pi != null) {
-							parameterList += pi.getSchema().getTypeName()+",";
-							javaValue = onto.toObject(pi.getValue());
-						} else {
-							parameterList += "null,";
-							javaValue = null;
-						}
-						parameterValues[i] = adjustValue(javaValue, methodParameterTypes[i]);
-					} catch(Exception e) {
-						log.error("Method "+method.getName()+", param "+methodParameterNames[i]+" error decoding value");
-						throw e;
-					}
+					parameterValues[index++] = adjustValue(javaValue, parameterInfo.getParameterClass());
+				} catch(Exception e) {
+					log.error("Method "+method.getName()+", param "+parameterInfo.getName()+" error decoding value");
+					throw e;
 				}
 			}
+			
 			if (parameterList.endsWith(",")) {
 				parameterList = parameterList.substring(0, parameterList.length()-1);
 			}
@@ -117,30 +96,18 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 		
 		return actionObj;
 	}
-		
-	private ParameterInfo getSoapParamByName(Vector<ParameterInfo> soapParams, String methodParamName, Class methodParamClass, Annotation[] methodParamAnnotations) throws Exception {
-		
-		// Check parameter annotation (if present)
-		String parameterName = methodParamName;
-		boolean mandatory = methodParamClass.isPrimitive() ? true : false;
-		Slot slotAnnotation = WSDLUtils.getSlotAnnotation(methodParamAnnotations);
-		if (slotAnnotation != null) {
-			if (!Slot.USE_METHOD_NAME.equals(slotAnnotation.name())) {
-				parameterName = slotAnnotation.name();
-			}
-			mandatory = slotAnnotation.mandatory();
-		}
-		
+
+	private ParameterInfo getSoapParameter(LinkedHashMap<String, ParameterInfo> soapParams, ParameterInfo operationParam) throws Exception {
+
 		// Try to get soap parameter
-		for (ParameterInfo param : soapParams) {
-			if (param.getName().equalsIgnoreCase(parameterName)) {
-				return param;
-			}
+		ParameterInfo soapParam = soapParams.get(operationParam.getName());
+		if (soapParam != null) {
+			return soapParam;
 		}
 
 		// If not found check mandatory
-		if (mandatory) {
-			throw new Exception("Mapper method "+method.getName()+", mandatory param "+methodParamName+" not found in soap request");
+		if (operationParam.isMandatory()) {
+			throw new Exception("Mapper method "+method.getName()+", mandatory param "+operationParam.getName()+" not found in soap request");
 		}
 		
 		// Optional parameter not found 

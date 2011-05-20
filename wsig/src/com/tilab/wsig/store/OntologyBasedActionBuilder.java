@@ -29,7 +29,7 @@ import jade.content.abs.AbsObject;
 import jade.content.onto.Ontology;
 import jade.content.schema.AgentActionSchema;
 
-import java.util.Vector;
+import java.util.LinkedHashMap;
 
 public class OntologyBasedActionBuilder extends ActionBuilder {
 
@@ -37,12 +37,12 @@ public class OntologyBasedActionBuilder extends ActionBuilder {
 		super(onto, actionName);
 	}
 
-	public AgentAction getAgentAction(Vector<ParameterInfo> soapParams) throws Exception {
+	public AgentAction getAgentAction(LinkedHashMap<String, ParameterInfo> soapParams) throws Exception {
 
 		AgentActionSchema schema = (AgentActionSchema)onto.getSchema(getActionName());
 		AbsAgentAction actionAbsObj = (AbsAgentAction) schema.newInstance();
 		if (soapParams != null) {
-			for (ParameterInfo param : soapParams) {
+			for (ParameterInfo param : soapParams.values()) {
 				String slotName = param.getName();
 				AbsObject slotValue = param.getValue();
 				AbsHelper.setAttribute(actionAbsObj, slotName, slotValue);

@@ -36,6 +36,7 @@ import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.TermSchema;
 
 import java.io.StringReader;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
 
@@ -130,25 +131,21 @@ public class SoapToJade extends DefaultHandler {
 		// Parse soap to extract parameters value
 		xmlParser.parse(new InputSource(new StringReader(soapBodyMessage)));
 
-		// Get parameter values
-		Vector<ParameterInfo> params = getParameterValues();
-		
 		// Prepare jade action
-		actionObj = actionBuilder.getAgentAction(params);
+		actionObj = actionBuilder.getAgentAction(getParameterValues());
 		
 		return actionObj;
 	}
 	
-	private Vector<ParameterInfo> getParameterValues() {
-		
+	private LinkedHashMap<String, ParameterInfo> getParameterValues() {
 		log.debug("Begin parameters list");
-		Vector<ParameterInfo> params = null;
+
+		LinkedHashMap<String, ParameterInfo> params = new LinkedHashMap<String, ParameterInfo>();
 		if (parametersByLevel.size() >= 1) {
-			params = parametersByLevel.get(0);
-			if (log.isDebugEnabled()) {
-				for (ParameterInfo param : params) {
-					log.debug("   "+param.getName()+"= "+param.getValue());
-				}
+			Vector<ParameterInfo> soapParams = parametersByLevel.get(0);
+			for (ParameterInfo soapParam : soapParams) {
+				params.put(soapParam.getName(), soapParam);
+				log.debug("   "+soapParam.getName()+"= "+soapParam.getValue());
 			}
 		} else {
 			log.debug("   No parameters");

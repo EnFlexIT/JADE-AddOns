@@ -404,6 +404,10 @@ public class JadeToWSDL {
 			if (parameterNames != null) {
 				parameterName = parameterNames[k];
 			} else {
+		        // If the mapper class is a Java dynamic proxy is not possible to have 
+				// the name of the parameters of the methods (methodParameterNames == null)
+				// Use SOAP parameters as master and apply it in the order of vector   
+				// See: WSDLUtils.getParameterNames(method)
 				parameterName = parameterClass.getSimpleName() + WSDLConstants.SEPARATOR + k;
 			}
 
@@ -446,6 +450,7 @@ public class JadeToWSDL {
 			
 			// Add parameter to map
 			ParameterInfo pi = new ParameterInfo(parameterName, parameterSchema);
+			pi.setParameterClass(parameterClass);
 			pi.setMapperMethod(parameterMethod);
 			pi.setMinCard(cardMin);
 			if (parameterSchema instanceof TypedAggregateSchema) {
@@ -511,11 +516,10 @@ public class JadeToWSDL {
 		ArrayList<Class> parameterClasses = new ArrayList<Class>();
 		ArrayList<Annotation[]> parameterAnnotations = new ArrayList<Annotation[]>();
 		Method[] classMethods = resultConverterClass.getDeclaredMethods();
-		for (int j = 0; j < classMethods.length; j++) {
-			Method method = classMethods[j];
-			if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
+		for (Method method : classMethods) {
+			if (WSDLUtils.isGetter(method)) {
 				parameterMethods.add(method);
-				parameterNames.add(method.getName().substring(3));
+				parameterNames.add(WSDLUtils.buildNameFromGetterMethod(method));
 				parameterClasses.add(method.getReturnType());
 				parameterAnnotations.add(method.getAnnotations());
 			} 

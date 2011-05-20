@@ -34,6 +34,7 @@ import jade.content.schema.TermSchema;
 public class ParameterInfo {
 	
 	private String name;
+	private Class parameterClass;
 	private TermSchema schema;
 	private TermSchema elementsSchema;
 	private AbsObject value;
@@ -111,5 +112,13 @@ public class ParameterInfo {
 
 	public TermSchema getElementsSchema() {
 		return elementsSchema;
+	}
+
+	public void setParameterClass(Class parameterClass) {
+		this.parameterClass = parameterClass;
+	}
+
+	public Class getParameterClass() {
+		return parameterClass;
 	}
 }

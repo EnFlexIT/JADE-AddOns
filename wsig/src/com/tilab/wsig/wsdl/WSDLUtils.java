@@ -106,6 +106,9 @@ public class WSDLUtils {
 	
 	private static final String INPUT = "INPUT";
 	private static final String OUTPUT = "OUTPUT";
+	private static final String GETTER_PREFIX = "get";
+	private static final String BOOLEAN_GETTER_PREFIX = "is";
+	private static final Object GET_CLASS_METHOD = "getClass";
 	
 	// -----------------------------------------------------------------------------
 	// Package-scope methods
@@ -692,5 +695,70 @@ public class WSDLUtils {
 		}
 		
 		return facets;
+	}
+	
+	public static String buildNameFromGetterMethod(Method getter) {
+		/*
+		 * 1) rip of the "get" or "is" prefix from method's name
+		 * 2) make lower case the 1st char of the result
+		 * 
+		 * method name       slot name
+		 * --------------    ---------
+		 * getThatThing() -> thatThing
+		 * isThatThing()  -> thatThing
+		 */
+		String getterName = getter.getName();
+		StringBuilder sb = new StringBuilder();
+		int pos = 3;
+		if (getterName.startsWith(BOOLEAN_GETTER_PREFIX)) {
+			pos = 2;
+		}
+		sb.append(Character.toLowerCase(getterName.charAt(pos)));
+		sb.append(getterName.substring(pos+1));
+		return sb.toString();
+	}
+	
+	public static boolean isGetter(Method method) {
+		/*
+		 * a getter method
+		 *   - takes no parameters
+		 *   - has a return value
+		 *   - its name starts with "get"
+		 *   - its name starts with "is"
+		 *   - its 4th char is uppercase or is "_"
+		 *   - its name is not "getClass" :-)
+		 */
+		String methodName = method.getName();
+		if (methodName.length() < 3) {
+			// it is surely too short
+			return false;
+		}
+		if (!methodName.startsWith(GETTER_PREFIX) && !methodName.startsWith(BOOLEAN_GETTER_PREFIX)) {
+			// it does not start with "get" or "is"
+			return false;
+		}
+		char c;
+		if (methodName.startsWith(BOOLEAN_GETTER_PREFIX)) {
+			c = methodName.charAt(2);
+		} else {
+			c = methodName.charAt(3);
+		}
+		if (!Character.isUpperCase(c) && '_' != c) {
+			// its 3th (isXXX) or 4th (getXXX) char is not uppercase or is not '_'
+			return false;
+		}
+		if (void.class.equals(method.getReturnType())) {
+			// it does not have a return value
+			return false;
+		}
+		if (method.getParameterTypes().length > 0) {
+			// it takes some parameters
+			return false;
+		}
+		if (methodName.equals(GET_CLASS_METHOD)) {
+			// it is "getClass", to be discarded
+			return false;
+		}
+		return true;
 	}
 }
