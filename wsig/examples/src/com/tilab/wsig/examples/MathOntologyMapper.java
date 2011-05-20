@@ -195,5 +195,9 @@ public class MathOntologyMapper {
 		public double getSecond() {
 			return (Float)components.get(1);
 		}
+		
+		public boolean isEquals() {
+			return getFirst() == getSecond();
+		}
 	}
 }
