@@ -24,6 +24,15 @@
  */
 package jade.webservice;
 
+import java.io.StringReader;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.axis.message.MessageElement;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
 import jade.content.abs.AbsExtendedPrimitive;
 import jade.content.abs.AbsObject;
 import jade.content.onto.Ontology;
@@ -67,6 +76,9 @@ public class XsdPrimitivesOntology extends Ontology {
 			add(short.class);
 			add(byte.class);
 			add(java.sql.Date.class);
+			
+			// Schema for wsdl <Any/> tag 
+			add(org.apache.axis.message.MessageElement.class);
 		} 
 		catch (OntologyException oe) {
 			oe.printStackTrace();
@@ -113,5 +125,23 @@ public class XsdPrimitivesOntology extends Ontology {
 		} 
 
 		throw new UnknownSchemaException();
+	}
+	
+	/**
+	 * Convert a string containing a xml into a org.apache.axis.message.MessageElement
+	 * Used to manage the wsdl tag <Any/>  
+	 */
+	public static MessageElement xml2MessageElement(String xml) throws Exception {
+		DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		Document XMLDoc = documentBuilder.parse(new InputSource(new StringReader(xml)));
+		return new MessageElement(XMLDoc.getDocumentElement());
+	}
+
+	/**
+	 * Convert a org.apache.axis.message.MessageElement into string containing an xml 
+	 * Used to manage the wsdl tag <Any/>  
+	 */
+	public static String messageElement2Xml(MessageElement messageElement) throws Exception {
+		return messageElement.getAsString();
 	}
 }
