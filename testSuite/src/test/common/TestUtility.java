@@ -389,7 +389,12 @@ public class TestUtility {
 				jc = new ManualJadeController(instanceName, commandLine, protoNames);
 			}
 			else {
-				jc = new LocalJadeController(instanceName, commandLine, protoNames, outHandler);
+				try {
+					jc = new LocalJadeController(instanceName, commandLine, protoNames, outHandler);
+				} catch(ExecException e) {
+					System.out.println("Error launching JADE. Check the JAVA_HOME environment variable (JAVA_HOME="+javaHome+")");
+					throw e;
+				}
 			}
 		}
 		return jc;

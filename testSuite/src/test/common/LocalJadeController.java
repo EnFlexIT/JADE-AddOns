@@ -58,8 +58,10 @@ class LocalJadeController implements JadeController, OutputHandler {
 			waitForJadeStartup();
 		}
 		catch (Exception e) {
-			proc.destroy();
-			throw new TestException("Error launching remote JADE", e); 
+			if (proc != null) {
+				proc.destroy();
+			}
+			throw new ExecException("Error launching remote JADE", e); 
 		}
 		
 		if (!ready) {
