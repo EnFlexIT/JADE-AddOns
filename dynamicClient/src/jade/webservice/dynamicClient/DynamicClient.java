@@ -89,7 +89,6 @@ import org.apache.axis.message.addressing.RelatesTo;
 import org.apache.axis.message.addressing.handler.AddressingHandler;
 import org.apache.axis.transport.http.HTTPSender;
 import org.apache.axis.transport.http.HTTPTransport;
-import org.apache.axis.types.URI.MalformedURIException;
 import org.apache.axis.utils.JavaUtils;
 import org.apache.axis.wsdl.symbolTable.ServiceEntry;
 import org.apache.axis.wsdl.toJava.Emitter;
