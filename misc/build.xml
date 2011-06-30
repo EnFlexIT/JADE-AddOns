@@ -48,7 +48,8 @@
            optimize="${javac.optimize}"
            debug="${javac.debug}"
            debuglevel="lines,vars,source"
-           deprecation="on">
+           deprecation="on"
+		   target="1.5">
       <classpath>
         <path refid="jade-classes"/>
       </classpath>
