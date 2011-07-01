@@ -128,6 +128,15 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 		return rmiRegistry;
 	}
 
+	protected int localLaunchJadeInstance(String instanceName, String classpath, String jvmArgs, String mainClass, String jadeArgs, String[] protoNames, OutputHandler outputHandler, String workingDir) throws TestException {
+		instanceCnt++;
+		jadeArgs = additionalArgs + jadeArgs;
+		JadeController jc = null;
+		jc = TestUtility.localLaunch(instanceName, classpath, jvmArgs, mainClass, jadeArgs, protoNames, outputHandler, workingDir);
+		controllers.put(new Integer(instanceCnt), jc);
+		return instanceCnt;
+	}
+	
 	//////////////////////////////////////////
 	// RemoteManager INTERFACE IMPLEMENTATION
 	//////////////////////////////////////////

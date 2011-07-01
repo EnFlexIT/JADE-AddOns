@@ -357,49 +357,58 @@ public class TestUtility {
 		}
 		else {
 			// Otherwise launch the JADE instance locally
-			if (jvmArgs == null) {
-				jvmArgs = "";
-			}
-			// FIXME: We should propagate all -Dkey=value properties...
-			if (System.getProperty("project-home") != null) {
-				jvmArgs = jvmArgs + " -Dproject-home="+System.getProperty("project-home");
-			}
-			String classpathOption = "";
-			if (jvmArgs.indexOf("-cp ") < 0 && jvmArgs.indexOf("-classpath ") < 0) {
-				if (classpath == null || classpath.startsWith("+")) {
-					String currentCp = System.getProperty("java.class.path");
-					if (classpath == null) {
-						classpath = currentCp;
-					}
-					else {
-						classpath = classpath.substring(1)+System.getProperty("path.separator")+currentCp;
-					}
-				}
-				classpathOption = "-cp "+classpath;
-			}
-			String javaHome = System.getenv("JAVA_HOME");
-			if(javaHome != null){
-				javaHome = javaHome + System.getProperty("file.separator")+ "bin" + System.getProperty("file.separator")+"java ";
-			}else{
-				javaHome= "java ";
-			}
-			String commandLine = javaHome+classpathOption+" "+jvmArgs+" -DTSDaemon=true "+mainClass+" "+jadeArgs;
-			if ("true".equalsIgnoreCase(System.getProperty("DEBUG"))) {
-				System.out.println("Manual launch!!!!!!!!!!!!!!");
-				jc = new ManualJadeController(instanceName, commandLine, protoNames);
-			}
-			else {
-				try {
-					jc = new LocalJadeController(instanceName, commandLine, protoNames, outHandler);
-				} catch(ExecException e) {
-					System.out.println("Error launching JADE. Check the JAVA_HOME environment variable (JAVA_HOME="+javaHome+")");
-					throw e;
-				}
-			}
+			jc = localLaunch(instanceName, classpath, jvmArgs, mainClass, jadeArgs, protoNames, outHandler, null);
 		}
 		return jc;
 	}
-	
+
+	public static JadeController localLaunch(String instanceName, String classpath, String jvmArgs, String mainClass, String jadeArgs, String[] protoNames, OutputHandler outputHandler, String workingDir) throws TestException {
+		JadeController jc;
+		
+		if (jvmArgs == null) {
+			jvmArgs = "";
+		}
+		// FIXME: We should propagate all -Dkey=value properties...
+		if (System.getProperty("project-home") != null) {
+			jvmArgs = jvmArgs + " -Dproject-home="+System.getProperty("project-home");
+		}
+		String classpathOption = "";
+		if (jvmArgs.indexOf("-cp ") < 0 && jvmArgs.indexOf("-classpath ") < 0) {
+			if (classpath == null || classpath.startsWith("+")) {
+				String currentCp = System.getProperty("java.class.path");
+				if (classpath == null) {
+					classpath = currentCp;
+				}
+				else {
+					classpath = classpath.substring(1)+System.getProperty("path.separator")+currentCp;
+				}
+			}
+			classpathOption = "-cp "+classpath;
+		}
+		String javaHome = System.getenv("JAVA_HOME");
+		if(javaHome != null){
+			javaHome = javaHome + System.getProperty("file.separator")+ "bin" + System.getProperty("file.separator")+"java ";
+		}else{
+			javaHome= "java ";
+		}
+		String commandLine = javaHome+classpathOption+" "+jvmArgs+" -DTSDaemon=true "+mainClass+" "+jadeArgs;
+		if ("true".equalsIgnoreCase(System.getProperty("DEBUG"))) {
+			System.out.println("Manual launch!!!!!!!!!!!!!!");
+			jc = new ManualJadeController(instanceName, commandLine, protoNames);
+		}
+		else {
+			try {
+				jc = new LocalJadeController(instanceName, commandLine, protoNames, outputHandler, workingDir);
+			} catch(ExecException e) {
+				System.out.println("Error launching JADE. Check the JAVA_HOME environment variable (JAVA_HOME="+javaHome+")");
+				throw e;
+			}
+		}
+		
+		return jc;
+	}
+
+
 	public static RemoteManager createRemoteManager(String hostName, int port, String managerName) throws TestException {
 		String remoteManagerRMI = "rmi://"+hostName+":"+port+"//"+managerName;
 		try {
@@ -579,7 +588,6 @@ public class TestUtility {
 			doDelete();
 		}
 	} // END of inner class HostSpyAgent
-	
 }
 
 

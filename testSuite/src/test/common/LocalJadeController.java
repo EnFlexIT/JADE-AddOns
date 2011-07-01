@@ -44,13 +44,14 @@ class LocalJadeController implements JadeController, OutputHandler {
 	private Process proc;
 	private OutputHandler outHandler;
 	
-	public LocalJadeController(String instanceName, String cmdLine, String[] protoNames, OutputHandler handler) throws TestException {
+	public LocalJadeController(String instanceName, String cmdLine, String[] protoNames, OutputHandler handler, String workingDir) throws TestException {
 		outHandler = (handler != null ? handler : this);
+		workingDir = (workingDir != null ? workingDir : ".");
 		try {
 			// Start a JADE instance in a different Process
 			System.out.println("Starting JADE with command line: "+cmdLine);
 			//System.out.println("Environment: "+System.getenv());
-			proc = java.lang.Runtime.getRuntime().exec(cmdLine);
+			proc = java.lang.Runtime.getRuntime().exec(cmdLine, null, new File(workingDir).getCanonicalFile());
 			
 			Thread t = new SubProcessManager(instanceName, proc, protoNames);
 			t.start();
