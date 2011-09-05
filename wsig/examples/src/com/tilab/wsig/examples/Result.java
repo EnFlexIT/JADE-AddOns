@@ -20,36 +20,29 @@ License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
-package com.tilab.wsig.store;
+package com.tilab.wsig.examples;
 
-import java.util.ArrayList;
-import java.util.List;
+public class Result {
 
-import jade.content.abs.AbsTerm;
-import jade.content.onto.Ontology;
-import jade.content.schema.ObjectSchema;
+	private float result;
 
-
-public class OntologyBasedResultConverter extends ResultBuilder {
-
-	public OntologyBasedResultConverter(Ontology onto, String actionName) {
-		super(onto, actionName);
+	public Result() {
+	}
+	
+	public Result(float result) {
+		this.result = result;
 	}
 
-	public List<ParameterInfo> getOperationResultValues(AbsTerm actionResultValue) throws Exception {
-		List<ParameterInfo> operationResultValues = new ArrayList<ParameterInfo>();
-
-		if (parameters.size() > 0) {
-			ParameterInfo returnParam = parameters.values().iterator().next();
-			returnParam.setValue(actionResultValue);
-			
-			operationResultValues.add(returnParam);
-		}
-		
-		return operationResultValues;
+	public float getResult() {
+		return result;
 	}
 
-	public ObjectSchema getResponseSchema() throws Exception {
-		return getActionSchema();
+	public void setResult(float result) {
+		this.result = result;
+	}
+
+	@Override
+	public String toString() {
+		return "Result [result=" + result + "]";
 	}
 }

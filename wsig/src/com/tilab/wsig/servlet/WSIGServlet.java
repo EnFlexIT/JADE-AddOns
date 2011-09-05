@@ -263,7 +263,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		AbsTerm absResult;
 		int timeout = WSIGConfiguration.getInstance().getWsigTimeout();
 		AID agentExecutor = wsigService.getAid();
-		Ontology onto = wsigService.getOnto(); 
+		Ontology onto = wsigService.getAgentOntology(); 
 		WSIGBehaviour wsigBehaviour = new WSIGBehaviour(agentExecutor, agentAction, onto, timeout);
 
 		// Execute operation

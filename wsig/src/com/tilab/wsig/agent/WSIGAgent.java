@@ -258,7 +258,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		}
 
 		// Get ontology
-		// FIX-ME elaborate only first ontology
+		// FIX-ME: elaborate only first ontology
 		String ontoName = null;
 		Iterator ontoIt = sd.getAllOntologies();
 		if (ontoIt.hasNext()) {
@@ -286,23 +286,23 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		}
 
 		// Get ontology instance
-		Ontology serviceOnto = null;
+		Ontology onto = null;
 		try {
 			// Try to create by constructor
-			serviceOnto = (Ontology)ontoClass.newInstance();
+			onto = (Ontology)ontoClass.newInstance();
 		} catch (Exception e) {
 			try {
 				// Try to create by getInstance() method 
 				Method getInstanceMethod = ontoClass.getMethod("getInstance", null);
-				serviceOnto = (Ontology)getInstanceMethod.invoke(null, null);
+				onto = (Ontology)getInstanceMethod.invoke(null, null);
 			} catch (Exception e1) {
 				log.warn("Ontology class "+ontoClassname+" not instantiable", e);
 				return null;
 			}
 		}
 		
-		// Register new onto in anget
-		getContentManager().registerOntology(serviceOnto);
+		// Register new onto in agent
+		getContentManager().registerOntology(onto);
 
 		// Get mapper class
 		Class mapperClass = getMapperClass(sd);
@@ -312,11 +312,11 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		wsigService.setServiceName(serviceName);
 		wsigService.setServicePrefix(servicePrefix);
 		wsigService.setAid(aid);
-		wsigService.setOnto(serviceOnto);
+		wsigService.setAgentOntology(onto);
 		wsigService.setMapperClass(mapperClass);
 
 		// Create wsdl
-		JadeToWSDL.createWSDLFromSD(this, sd, wsigService);
+		JadeToWSDL.createWSDL(wsigService);
 		
 		return wsigService;
 	}

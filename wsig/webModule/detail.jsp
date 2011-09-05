@@ -44,7 +44,7 @@ import="jade.content.onto.Ontology,
 		mapperClassName = mapperClass.getCanonicalName();
 	}
 	
-	Ontology onto = service.getOnto();
+	Ontology onto = service.getServiceOntology();
 	String ontoName = onto.getName();
 	
 	String servicePrefix = service.getServicePrefix();

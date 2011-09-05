@@ -75,7 +75,7 @@ public class JadeToSoap {
 		tns = WSDLConstants.URN + ":" + wsigService.getServicePrefix() + wsigService.getServiceName();
 			
 		// Get ontology
-		onto = wsigService.getOnto();
+		onto = wsigService.getServiceOntology();
 
 		// Create soap message
         MessageFactory messageFactory = MessageFactory.newInstance();

@@ -53,7 +53,7 @@ public class MathOntologyMapper {
 		abs.setComplex(complex);
 		return abs;
 	}
-	
+
 	@OperationName(name="AbsString")
 	public Abs toAbs(String real,String immaginary){
 		Abs abs = new Abs();
@@ -126,6 +126,30 @@ public class MathOntologyMapper {
 		sum.setFirstElement(firstElement);
 		sum.setSecondElement(secondElement+((thirdElement!=null)?thirdElement.floatValue():0));
 		return sum;
+	}
+
+	@OperationName(name="Add3")
+	public Sum toSum(Addends addends){
+		Sum sum = new Sum();
+		sum.setFirstElement(addends.getFirstElement());
+		sum.setSecondElement(addends.getSecondElement());
+		return sum;
+	}
+
+	@ResultConverter({
+		@ApplyTo(action="sum", operation="Add3")
+	})
+	public class SumResultConverter {
+		private float sum;
+
+		public SumResultConverter(float sum) {
+			this.sum = sum;
+		}
+		
+		@Slot(mandatory=true)
+		public Result getResult() {
+			return new Result(sum);
+		}  
 	}
 	
 	public PrintTime toPrintTime(){

@@ -123,7 +123,7 @@ public class SoapToJade extends DefaultHandler {
 		}
 		
 		// Get ontology
-		onto = wsigService.getOnto();
+		onto = wsigService.getServiceOntology();
 		
 		// Get parameters schema map
 		parametersInfo = actionBuilder.getParameters();

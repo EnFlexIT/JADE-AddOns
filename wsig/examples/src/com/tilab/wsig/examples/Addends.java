@@ -20,36 +20,39 @@ License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
-package com.tilab.wsig.store;
+package com.tilab.wsig.examples;
 
-import java.util.ArrayList;
-import java.util.List;
+import jade.content.onto.annotations.Slot;
 
-import jade.content.abs.AbsTerm;
-import jade.content.onto.Ontology;
-import jade.content.schema.ObjectSchema;
-
-
-public class OntologyBasedResultConverter extends ResultBuilder {
-
-	public OntologyBasedResultConverter(Ontology onto, String actionName) {
-		super(onto, actionName);
+public class Addends {
+	
+	private float firstElement;
+	private float secondElement;
+	 
+	public Addends() {
+		firstElement = 0;
+		secondElement = 0;
 	}
 
-	public List<ParameterInfo> getOperationResultValues(AbsTerm actionResultValue) throws Exception {
-		List<ParameterInfo> operationResultValues = new ArrayList<ParameterInfo>();
-
-		if (parameters.size() > 0) {
-			ParameterInfo returnParam = parameters.values().iterator().next();
-			returnParam.setValue(actionResultValue);
-			
-			operationResultValues.add(returnParam);
-		}
-		
-		return operationResultValues;
+	@Slot(mandatory=true)
+	public float getFirstElement() {
+		return firstElement;
 	}
 
-	public ObjectSchema getResponseSchema() throws Exception {
-		return getActionSchema();
+	public void setFirstElement(float firstElement) {
+		this.firstElement = firstElement;
+	}
+
+	public float getSecondElement() {
+		return secondElement;
+	}
+
+	public void setSecondElement(float secondElement) {
+		this.secondElement = secondElement;
+	}
+
+	@Override
+	public String toString() {
+		return "Addends [firstElement=" + firstElement + ", secondElement=" + secondElement + "]";
 	}
 }

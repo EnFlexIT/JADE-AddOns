@@ -23,8 +23,8 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.wsdl;
 
-import jade.content.ContentManager;
 import jade.content.onto.BasicOntology;
+import jade.content.onto.BeanOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
 import jade.content.onto.annotations.AggregateSlot;
@@ -35,8 +35,6 @@ import jade.content.schema.ConceptSchema;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.TermSchema;
-import jade.core.Agent;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -97,7 +95,7 @@ public class JadeToWSDL {
 	public static Integer MANDATORY = null;
 	public static Integer OPTIONAL = Integer.valueOf(0);
 	
-	public static Definition createWSDLFromSD(Agent agent, ServiceDescription sd, WSIGService wsigService) throws Exception {
+	public static Definition createWSDL(WSIGService wsigService) throws Exception {
 
 		// Get soap style & use
 		String soapStyle = WSIGConfiguration.getInstance().getWsdlStyle();
@@ -109,7 +107,7 @@ public class JadeToWSDL {
 		}
 		
 		// Create wsdl definition and type schema
-		String serviceName = wsigService.getServicePrefix() + sd.getName();
+		String serviceName = wsigService.getServiceName();
 		WSDLFactory factory = WSDLFactory.newInstance();
 		String tns = WSDLConstants.URN+":" + serviceName;
 		
@@ -164,147 +162,138 @@ public class JadeToWSDL {
 		Map<String, Map<String, Method>> mapperActions = getMapperActions(mapperClass);
 		Map<String, Map<String, Class>> mapperResultConverters = getMapperResultConverters(mapperClass);
 		
-		// Manage Ontologies
-		Iterator ontologies = sd.getAllOntologies();
-		ContentManager cntManager = agent.getContentManager();
+		// Manage ontology
+		Ontology onto = wsigService.getServiceOntology();
+		log.debug("Elaborate ontology: "+onto.getName());		
 		
-		// TODO: Actually manage only FIRST ontology in ServiceDescription   
-		if (ontologies.hasNext()) {
-			String ontoName = (String) ontologies.next();
-			log.debug("Elaborate ontology: "+ontoName);		
-			
-			// Get Ontology and list of actions
-			Ontology onto = cntManager.lookupOntology(ontoName);
-			List actionNames = onto.getActionNames();
-
-			// Manage actions
-			for (int i = 0; i < actionNames.size(); i++) {
-				try {
-					String actionName = (String) actionNames.get(i);
-					log.debug("Elaborate operation: "+ actionName);		
-
-					// Check if action is suppressed (valid only if mapper is present)
-					if (isActionSuppressed(mapperClass, actionName)) {
-						log.debug("--operation "+actionName+" suppressed");
-						continue;
-					}
-					
-					int operationsForAction = 1;
-					
-					// Get action methods declared in mapper (if any)
-					Map<String, Method> mapperMethodsForAction = mapperActions.get(actionName.toLowerCase());
-					Iterator<Entry<String, Method>> mapperMethodsForActionIt = null;
-					if (mapperMethodsForAction != null) {
-						operationsForAction = mapperMethodsForAction.size();
-						mapperMethodsForActionIt = mapperMethodsForAction.entrySet().iterator();
-					}
-					
-					// Loop all operations
-					for (int j = 0; j < operationsForAction; j++) {
-						
-						// Prepare default operation name
-						String operationName = actionName;
-
-						// Create appropriate ActionBuilder
-						ActionBuilder actionBuilder = null;
-						Method mapperActionMethod = null;
-						if (mapperMethodsForAction != null) {
-							Entry<String, Method> mapperMethodForAction = mapperMethodsForActionIt.next();
-							operationName = mapperMethodForAction.getKey();
-							mapperActionMethod = mapperMethodForAction.getValue();
-							
-							actionBuilder = new MapperBasedActionBuilder(onto, actionName, mapperObject, mapperActionMethod);
-						} else {
-							
-							actionBuilder = new OntologyBasedActionBuilder(onto, actionName);
-						}
-
-						// Add ActionBuilder to wsigService 
-						wsigService.addActionBuilder(operationName, actionBuilder);
-
-						// Operation
-						Operation operation = WSDLUtils.createOperation(operationName);
-						portType.addOperation(operation);
-
-						// Operation binding
-						BindingOperation operationBinding = WSDLUtils.createBindingOperation(registry, tns, operationName);
-						binding.addBindingOperation(operationBinding);
-						
-						// Input parameters
-						Message inputMessage = WSDLUtils.createMessage(tns, WSDLUtils.getRequestName(operationName));
-						Input input = WSDLUtils.createInput(inputMessage);
-						operation.setInput(input);
-						definition.addMessage(inputMessage);
-
-						BindingInput inputBinding = WSDLUtils.createBindingInput(registry, tns, soapUse);
-						operationBinding.setBindingInput(inputBinding);
-						
-						Map<String, ParameterInfo> inputParameters = manageInputParameters(onto, tns, operationName, soapStyle, wsdlTypeSchema, inputMessage, actionName, mapperActionMethod);
-						
-						// Set input parameters map to action builder
-						actionBuilder.setParameters(inputParameters);
-						
-						// Get result converter class declared in mapper (if any)
-						Class mapperResultConverterClass = null;
-						Map<String, Class> mapperResultConvertersForAction = mapperResultConverters.get(actionName.toLowerCase());
-						if (mapperResultConvertersForAction != null) {
-							mapperResultConverterClass = mapperResultConvertersForAction.get(operationName);
-						}
-						
-						// Create appropriate ResultBuilder
-						ResultBuilder resultBuilder;
-						if (mapperResultConverterClass != null) {
-							
-							resultBuilder = new MapperBasedResultConverter(mapperObject, mapperResultConverterClass, onto, actionName);
-						} else {
-							
-							resultBuilder = new OntologyBasedResultConverter(onto, actionName);
-						}
-
-						// Add ResultBuilder to wsigService 
-						wsigService.addResultBuilder(operationName, resultBuilder);
-						
-						// Output parameters		
-						Message outputMessage = WSDLUtils.createMessage(tns, WSDLUtils.getResponseName(operationName));
-						Output output = WSDLUtils.createOutput(outputMessage);
-						operation.setOutput(output);
-						definition.addMessage(outputMessage);
-
-						BindingOutput outputBinding = WSDLUtils.createBindingOutput(registry, tns, soapUse);
-						operationBinding.setBindingOutput(outputBinding);
-
-						Map<String, ParameterInfo> outputParameters = manageOutputParameters(onto, tns, operationName, soapStyle, wsdlTypeSchema, outputMessage, actionName, mapperResultConverterClass);
-						resultBuilder.setParameters(outputParameters);
-					}
-				} catch (Exception e) {
-					throw new Exception("Error in Agent Action Handling", e);
-				}
-			}
-			
-			// Log ontology
-			if (log.isDebugEnabled()) {
-				onto.dump();
-			}
-			
-			// Add complex type to wsdl definition
+		// Manage actions
+		List actionNames = onto.getActionNames();
+		for (int i = 0; i < actionNames.size(); i++) {
 			try {
-				definition.setTypes(WSDLUtils.createTypes(registry, wsdlTypeSchema));
-			} catch (WSDLException e) {
-				throw new Exception("Error adding type to definition", e);
-			}
+				String actionName = (String) actionNames.get(i);
+				log.debug("Elaborate operation: "+ actionName);		
 
-			// Set wsdl definition in wsigService
-			wsigService.setWsdlDefinition(definition);
-			
-			// Write wsdl on file system
-			if (WSIGConfiguration.getInstance().isWsdlWriteEnable()) {
-				try {
-					log.info("Write WSDL for service: "+serviceName);
-					WSDLUtils.writeWSDL(factory, definition, serviceName);
-					
-				} catch (Exception e) {
-					log.error("Error writing WSDL file", e);
+				// Check if action is suppressed (valid only if mapper is present)
+				if (isActionSuppressed(mapperClass, actionName)) {
+					log.debug("--operation "+actionName+" suppressed");
+					continue;
 				}
+				
+				int operationsForAction = 1;
+				
+				// Get action methods declared in mapper (if any)
+				Map<String, Method> mapperMethodsForAction = mapperActions.get(actionName.toLowerCase());
+				Iterator<Entry<String, Method>> mapperMethodsForActionIt = null;
+				if (mapperMethodsForAction != null) {
+					operationsForAction = mapperMethodsForAction.size();
+					mapperMethodsForActionIt = mapperMethodsForAction.entrySet().iterator();
+				}
+				
+				// Loop all operations
+				for (int j = 0; j < operationsForAction; j++) {
+					
+					// Prepare default operation name
+					String operationName = actionName;
+
+					// Create appropriate ActionBuilder
+					ActionBuilder actionBuilder = null;
+					Method mapperActionMethod = null;
+					if (mapperMethodsForAction != null) {
+						Entry<String, Method> mapperMethodForAction = mapperMethodsForActionIt.next();
+						operationName = mapperMethodForAction.getKey();
+						mapperActionMethod = mapperMethodForAction.getValue();
+						
+						actionBuilder = new MapperBasedActionBuilder(onto, actionName, mapperObject, mapperActionMethod);
+					} else {
+						
+						actionBuilder = new OntologyBasedActionBuilder(onto, actionName);
+					}
+
+					// Add ActionBuilder to wsigService 
+					wsigService.addActionBuilder(operationName, actionBuilder);
+
+					// Operation
+					Operation operation = WSDLUtils.createOperation(operationName);
+					portType.addOperation(operation);
+
+					// Operation binding
+					BindingOperation operationBinding = WSDLUtils.createBindingOperation(registry, tns, operationName);
+					binding.addBindingOperation(operationBinding);
+					
+					// Input parameters
+					Message inputMessage = WSDLUtils.createMessage(tns, WSDLUtils.getRequestName(operationName));
+					Input input = WSDLUtils.createInput(inputMessage);
+					operation.setInput(input);
+					definition.addMessage(inputMessage);
+
+					BindingInput inputBinding = WSDLUtils.createBindingInput(registry, tns, soapUse);
+					operationBinding.setBindingInput(inputBinding);
+					
+					Map<String, ParameterInfo> inputParameters = manageInputParameters(onto, tns, operationName, soapStyle, wsdlTypeSchema, inputMessage, actionName, mapperActionMethod);
+					
+					// Set input parameters map to action builder
+					actionBuilder.setParameters(inputParameters);
+					
+					// Get result converter class declared in mapper (if any)
+					Class mapperResultConverterClass = null;
+					Map<String, Class> mapperResultConvertersForAction = mapperResultConverters.get(actionName.toLowerCase());
+					if (mapperResultConvertersForAction != null) {
+						mapperResultConverterClass = mapperResultConvertersForAction.get(operationName);
+					}
+					
+					// Create appropriate ResultBuilder
+					ResultBuilder resultBuilder;
+					if (mapperResultConverterClass != null) {
+						
+						resultBuilder = new MapperBasedResultConverter(mapperObject, mapperResultConverterClass, onto, actionName);
+					} else {
+						
+						resultBuilder = new OntologyBasedResultConverter(onto, actionName);
+					}
+
+					// Add ResultBuilder to wsigService 
+					wsigService.addResultBuilder(operationName, resultBuilder);
+					
+					// Output parameters		
+					Message outputMessage = WSDLUtils.createMessage(tns, WSDLUtils.getResponseName(operationName));
+					Output output = WSDLUtils.createOutput(outputMessage);
+					operation.setOutput(output);
+					definition.addMessage(outputMessage);
+
+					BindingOutput outputBinding = WSDLUtils.createBindingOutput(registry, tns, soapUse);
+					operationBinding.setBindingOutput(outputBinding);
+
+					Map<String, ParameterInfo> outputParameters = manageOutputParameters(onto, tns, operationName, soapStyle, wsdlTypeSchema, outputMessage, actionName, mapperResultConverterClass);
+					resultBuilder.setParameters(outputParameters);
+				}
+			} catch (Exception e) {
+				throw new Exception("Error in Agent Action Handling", e);
+			}
+		}
+		
+		// Log ontology
+		if (log.isDebugEnabled()) {
+			onto.dump();
+		}
+		
+		// Add complex type to wsdl definition
+		try {
+			definition.setTypes(WSDLUtils.createTypes(registry, wsdlTypeSchema));
+		} catch (WSDLException e) {
+			throw new Exception("Error adding type to definition", e);
+		}
+
+		// Set wsdl definition in wsigService
+		wsigService.setWsdlDefinition(definition);
+		
+		// Write wsdl on file system
+		if (WSIGConfiguration.getInstance().isWsdlWriteEnable()) {
+			try {
+				log.info("Write WSDL for service: "+serviceName);
+				WSDLUtils.writeWSDL(factory, definition, serviceName);
+				
+			} catch (Exception e) {
+				log.error("Error writing WSDL file", e);
 			}
 		}
 		
@@ -770,11 +759,19 @@ public class JadeToWSDL {
 			}
 		} 
 		else {
-			// Java custom type (work with concept schema of type paramType)
-			// Search a schema of this type
+			// Java custom type, search in the ontology for a schema of this type
 			ObjectSchema conceptSchema = onto.getSchema(parameterClass);
 			if (conceptSchema == null) {
-				throw new Exception("ConceptSchema of type "+parameterClass.getSimpleName()+" doesn't exist in "+ onto.getName());
+				
+				// Schema not present -> add the class to ontology
+				log.debug("----add class "+parameterClass+" to ontology");
+				((BeanOntology)onto).add(parameterClass);
+				
+				// Retry to get schema -> if not found throw an exception
+				conceptSchema = onto.getSchema(parameterClass);
+				if (conceptSchema == null) {
+					throw new Exception("ConceptSchema of type "+parameterClass.getSimpleName()+" doesn't exist in "+ onto.getName());
+				}
 			}
 			
 			String conceptSchemaName = conceptSchema.getTypeName();

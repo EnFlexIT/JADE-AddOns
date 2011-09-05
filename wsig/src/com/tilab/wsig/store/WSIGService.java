@@ -23,6 +23,7 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.store;
 
+import jade.content.onto.BeanOntology;
 import jade.content.onto.Ontology;
 import jade.core.AID;
 
@@ -44,7 +45,8 @@ public class WSIGService {
 	private String serviceName;
 	private String servicePrefix;
 	private AID aid;
-	private Ontology onto;
+	private Ontology agentOnto;
+	private BeanOntology serviceOnto;
 	private Definition wsdlDefinition;
 	private SOAPAddress soapAddress;
 	private ServiceKey uddiServiceKey;
@@ -58,11 +60,18 @@ public class WSIGService {
 	public void setAid(AID aid) {
 		this.aid = aid;
 	}
-	public Ontology getOnto() {
-		return onto;
+	public Ontology getAgentOntology() {
+		return agentOnto;
 	}
-	public void setOnto(Ontology onto) {
-		this.onto = onto;
+	public BeanOntology getServiceOntology() {
+		return serviceOnto;
+	}
+	public void setAgentOntology(Ontology agentOnto) {
+		this.agentOnto = agentOnto;
+		
+		// Create the service ontology (bean-onto that extend the agent-onto)
+		String name = "wsig_"+agentOnto.getName();
+		serviceOnto = new BeanOntology(name, agentOnto);
 	}
 	public String getServiceName() {
 		return serviceName;
@@ -122,6 +131,6 @@ public class WSIGService {
 	
 	@Override
 	public String toString() {
-		return "WSIGService (name="+serviceName+", onto="+onto.getName()+", mapper="+mapperClass+")";
+		return "WSIGService (name="+serviceName+", agentOnto="+agentOnto.getName()+", mapper="+mapperClass+")";
 	}
 }
