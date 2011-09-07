@@ -79,6 +79,9 @@ public class XsdPrimitivesOntology extends Ontology {
 			
 			// Schema for wsdl <Any/> tag 
 			add(org.apache.axis.message.MessageElement.class);
+			
+			// Schema for wsdl anyURI type
+			add(org.apache.axis.types.URI.class);
 		} 
 		catch (OntologyException oe) {
 			oe.printStackTrace();
