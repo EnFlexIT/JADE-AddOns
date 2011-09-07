@@ -2,11 +2,9 @@
 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:MathFunctionsMapper">
    <soapenv:Header/>
    <soapenv:Body>
-      <urn:AbsComplex>
-         <complex>
-            <real>4</real>
-            <immaginary>5</immaginary>
-         </complex>
-      </urn:AbsComplex>
+      <urn:AbsString>
+         <real>5</real>
+	     <immaginary>6</immaginary>
+      </urn:AbsString>
    </soapenv:Body>
 </soapenv:Envelope>
