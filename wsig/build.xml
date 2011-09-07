@@ -163,7 +163,7 @@
 		<echo>Dir deletion succeded</echo>
 	</target>
 	
-	<target name="dist" depends="clean" description="Create the distribution ZIP file">
+	<target name="dist" depends="clean, war-base, jar-annotations" description="Create the distribution ZIP file">
 		<echo message="GENERATE THE PDF FORM OF THE WSIG GUIDE, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/wsig) AND THEN PRESS ENTER -->"/>
 		<input/>
 		<mkdir dir="${jade-home}/doc"/>
@@ -178,11 +178,15 @@
 			<include name="add-ons/wsig/lib/**"/>
 			<include name="add-ons/wsig/src/**"/>
 			<include name="add-ons/wsig/webModule/**"/>
+			<include name="add-ons/wsig/utils/**"/>
+			<include name="add-ons/wsig/webapp/**"/>
 			<include name="add-ons/wsig/build.properties"/>
 			<include name="add-ons/wsig/build.xml"/>
 			<include name="add-ons/wsig/COPYING"/>
 			<include name="add-ons/wsig/License"/>
 			<include name="doc/tutorials/WSIG_Guide.pdf"/>
+			<exclude name="add-ons/wsig/webModule/WEB-INF/classes/com/**"/>
+			<exclude name="add-ons/wsig/webModule/WEB-INF/lib/**"/>
 		</zip>
 		<echo>Zip creation completed</echo>
 	</target>
