@@ -48,4 +48,28 @@
     <role-name>wsig-role</role-name>
   </security-role>
   -->
+  
+  <!-- Enable the SSL authentication method 
+       Remember to add and configure in your servlet container the keystore file.
+       the entry with user/password linked to wsig-role.
+       
+	   If you use Apache Tomcat in the server.xml file configure the section 
+       <Connector port=”8443″ ....>
+	   
+	   Scope of http authentication:
+	   - <url-pattern>/*</url-pattern> : all (console and services)
+	   - <url-pattern>/ws/*</url-pattern> : only services (wsdl, endpoint)
+  -->
+  <!--
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>WSIG</web-resource-name>
+      <url-pattern>/*</url-pattern>
+    </web-resource-collection>
+	<user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+  -->
+  
 </web-app>
