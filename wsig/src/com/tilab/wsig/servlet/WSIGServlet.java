@@ -40,6 +40,9 @@ import java.util.Iterator;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -60,10 +63,19 @@ import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
 
+import org.apache.axis.AxisEngine;
+import org.apache.axis.AxisFault;
 import org.apache.axis.Message;
+import org.apache.axis.MessageContext;
+import org.apache.axis.client.AxisClient;
+import org.apache.axis.configuration.NullProvider;
 import org.apache.axis.transport.http.HTTPConstants;
 import org.apache.log4j.Logger;
 import org.apache.soap.rpc.SOAPContext;
+import org.apache.ws.axis.security.WSDoAllReceiver;
+import org.apache.ws.axis.security.WSDoAllSender;
+import org.apache.ws.security.WSPasswordCallback;
+import org.apache.ws.security.handler.WSHandlerConstants;
 
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.WSIGException;
@@ -82,6 +94,8 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 
 	private WSIGStore wsigStore;
 	private ServletContext servletContext;
+	private AxisEngine axisEngine = new AxisClient(new NullProvider());
+	private UsernameTokenCallback usernameTokenCallback;
 
 	public void init(ServletConfig servletConfig) throws ServletException {
 		super.init(servletConfig);
@@ -172,12 +186,21 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 			Message soapRequest = null;
 			try {
 				soapRequest = extractSOAPMessage(httpRequest);
+				
 				log.debug("SOAP request:");
 				log.debug(soapRequest.getSOAPPartAsString());
 			} catch(Exception e) {
 				log.error("Error extracting SOAP message from http request", e);
 				throw new WSIGException(WSIGException.CLIENT, "Error extracting SOAP message from http request. "+e.getMessage());
-			}
+			} 
+
+			// Manage WSS security 
+			try {
+				manageRequestWSS(soapRequest);
+			} catch(AxisFault e) {
+				log.error("Error managing request WSS security credential", e);
+				throw new WSIGException(WSIGException.SERVER, "Error managing request WSS security credential. "+e.getMessage());
+			} 
 			
 			// Get wsig service and operation name
 			String serviceName;
@@ -236,6 +259,14 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 				log.error("Error in jade to soap conversion", e);
 				throw new WSIGException(WSIGException.SERVER, e.getMessage());
 			}
+
+			// Manage WSS security 
+			try {
+				manageResponseWSS(soapResponse);
+			} catch(AxisFault e) {
+				log.error("Error managing response WSS security credential", e);
+				throw new WSIGException(WSIGException.SERVER, "Error managing response WSS security credential. "+e.getMessage());
+			} 
 			
 			// Send http response
 			try {
@@ -255,6 +286,52 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 				log.error("Error sending http error response", e1);
 				httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
+		}
+	}
+
+	private void manageRequestWSS(Message soapRequest) throws AxisFault {
+		String wssUsername = WSIGConfiguration.getInstance().getWssUsername();
+		String wssPassword = WSIGConfiguration.getInstance().getWssPassword();
+		String wssTimeToLive = WSIGConfiguration.getInstance().getWssTimeToLive();
+
+		if (wssUsername != null || wssTimeToLive != null) {
+			WSDoAllReceiver ws = new WSDoAllReceiver();
+			String action = "";
+
+			MessageContext mc = new MessageContext(axisEngine);
+			mc.setMessage(soapRequest);
+			
+			if (wssUsername != null) {
+				if (usernameTokenCallback == null) {
+					usernameTokenCallback = new UsernameTokenCallback(wssUsername, wssPassword);
+				}
+				mc.setProperty(WSHandlerConstants.PW_CALLBACK_REF, usernameTokenCallback);
+				
+				action = WSHandlerConstants.USERNAME_TOKEN;
+			}
+			
+			if (wssTimeToLive != null) {
+				action = action + (action.length()!=0?" ":"") + WSHandlerConstants.TIMESTAMP;
+			}
+			 
+			ws.setOption(WSHandlerConstants.ACTION, action);
+
+			ws.invoke(mc);
+		}
+	}
+
+	private void manageResponseWSS(SOAPMessage soapResponse) throws AxisFault {
+		String wssTimeToLive = WSIGConfiguration.getInstance().getWssTimeToLive();
+		
+		if (wssTimeToLive != null) {
+			WSDoAllSender ws = new WSDoAllSender(); 
+			ws.setOption(WSHandlerConstants.ACTION, WSHandlerConstants.TIMESTAMP);
+
+			MessageContext mc = new MessageContext(axisEngine);
+			mc.setMessage(soapResponse);
+			mc.setProperty(WSHandlerConstants.TTL_TIMESTAMP, wssTimeToLive);
+
+			ws.invoke(mc);
 		}
 	}
 
@@ -485,4 +562,33 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		servletContext.setAttribute("WSIGActive", false);
 		log.info("WSIG agent stopped");
 	}
+	
+	
+	// Inner class to check WSS UsernameToken credential
+	private class UsernameTokenCallback implements CallbackHandler {
+		
+		private String username;
+		private String password;
+
+		public UsernameTokenCallback(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+		
+		public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+			for (int i = 0; i < callbacks.length; i++) {
+				if (callbacks[i] instanceof WSPasswordCallback) {
+					WSPasswordCallback pc = (WSPasswordCallback) callbacks[i];
+					
+					if (!username.equals(pc.getIdentifer()) ||
+						!password.equals(pc.getPassword())) {
+						throw new IOException("Wrong WSS username-token credential");
+					}
+				} else {
+					throw new UnsupportedCallbackException(callbacks[i], "Unrecognized Callback");
+				}
+			}
+		}
+	}
+
 }

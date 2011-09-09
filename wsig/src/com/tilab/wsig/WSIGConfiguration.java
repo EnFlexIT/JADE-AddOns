@@ -58,7 +58,12 @@ public class WSIGConfiguration extends Properties {
 	public static final String KEY_WSIG_TIMEOUT = "wsig.timeout";
 	public static final String KEY_WSIG_PRESERVE_JAVA_TYPE = SLCodec.PRESERVE_JAVA_TYPES;
 	
-	// DF to WSDL converter
+	// WSS security
+	public final static String KEY_WSS_USERNAME = "wss.username";
+	public final static String KEY_WSS_PASSWORD = "wss.password";
+	public final static String KEY_WSS_TIME_TO_LIVE = "wss.timeToLive";
+	
+	// WSDL generation
 	public final static String KEY_LOCAL_NAMESPACE_PREFIX = "wsdl.localNamespacePrefix";
 	public static final String KEY_WSDL_WRITE_ENABLE = "wsdl.writeEnable";
 	public static final String KEY_WSDL_DIRECTORY = "wsdl.directory";
@@ -149,7 +154,20 @@ public class WSIGConfiguration extends Properties {
 		return Integer.parseInt(timeout);
 	}
 	
-   	// DF to WSDL converter
+	// WSS security
+	public synchronized String getWssUsername() {
+		return getProperty(KEY_WSS_USERNAME);
+	}
+
+	public synchronized String getWssPassword() {
+		return getProperty(KEY_WSS_PASSWORD);
+	}
+	
+	public synchronized String getWssTimeToLive() {
+		return getProperty(KEY_WSS_TIME_TO_LIVE);
+	}
+	
+   	// WSDL generation
 	public synchronized String getLocalNamespacePrefix() {
 		return getProperty(KEY_LOCAL_NAMESPACE_PREFIX);
 	}
