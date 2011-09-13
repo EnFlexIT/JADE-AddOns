@@ -844,15 +844,16 @@ public class JadeToWSDL {
 			String itemName = slotType;
 			String aggregateType = objSchema.getTypeName();
 			slotType = WSDLUtils.getAggregateType(slotType, cardMin, cardMax);
+
+			if (parentComponent != null) {
+				log.debug("------add array-type "+slotName+" ("+slotType+") ["+cardMin+","+cardMax+"]");
+				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, OPTIONAL.equals(cardMin)?cardMin:null, null);
+			}
 			
 			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
 				log.debug("----create array-type "+slotType);
 				XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType);
 				XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
-				if (parentComponent != null) {
-					log.debug("------add array-type "+slotName+" ("+slotType+") ["+cardMin+","+cardMax+"]");
-					WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, OPTIONAL.equals(cardMin)?cardMin:null, null);
-				}
 				createComplexTypeFromSchema(onto, tns, containerSchema, aggregateSchema, wsdlTypeSchema, itemName, sequence, cardMin, cardMax);
 			}
 		}
