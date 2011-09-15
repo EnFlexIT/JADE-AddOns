@@ -2,7 +2,7 @@
   <!-- set global properties for this build -->
   <property name="jade-home" value="../.."/>
 
-  <property name="version" value="2.4"/>
+  <property name="version" value="2.4.1"/>
 
   <property name="src" value="src"/>
   <property name="build" value="classes"/>
