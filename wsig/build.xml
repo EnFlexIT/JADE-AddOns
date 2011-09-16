@@ -109,6 +109,7 @@
 			<zipfileset dir="${wsigWeb.dir}">
 				<include name="**/*.*"/>
 				<exclude name="conf/wsig-template.properties"/>
+				<exclude name="WEB-INF/web-template.xml"/>
 			</zipfileset>
 		</zip>
 		<copy todir="${wsigWebapps.dir}">
@@ -147,7 +148,11 @@
 	</target>
 
 	<target name="clean" description="Clean the WSIG environment">
-		<delete dir="${wsigBuild.dir}/com" quiet="true"/>
+		<delete includeEmptyDirs="true" quiet="true">
+			<fileset dir="${wsigBuild.dir}">
+				<exclude name="log4j.properties"/>
+			</fileset>
+		</delete>
 		<delete dir="${wsigWebapps.dir}" quiet="true"/>
 		<delete dir="${wsigUtils.dir}" quiet="true"/>
 		<delete includeemptydirs="true" quiet="true">
@@ -203,9 +208,10 @@
 		<replace file="${wsigWeb.dir}/conf/wsig.properties" value="">
 			<replacetoken>#MyOntologies2#</replacetoken>
 		</replace>
+		<copy overwrite="true" file="${wsigWeb.dir}/WEB-INF/web-template.xml" tofile="${wsigWeb.dir}/WEB-INF/web.xml"/>
 	</target>
 
-	<target name="war-base" depends="build-base, war" description="Create the WSIG web application (war file) with nothing configuration">
+	<target name="war-base" depends="clean, build-base, war" description="Create the WSIG web application (war file) with nothing configuration">
 	</target>
 	
 	<target name="deploy-base" depends="build-base, deploy0" description="Deploy WSIG in Tomcat with nothing configuration">
@@ -242,15 +248,41 @@
 		<replace file="${wsigWeb.dir}/conf/wsig.properties" value="onto.math-bean-ontology=com.tilab.wsig.examples.MathBeanOntology">
 			<replacetoken>#MyOntologies2#</replacetoken>
 		</replace>
+		<copy overwrite="true" file="${wsigWeb.dir}/WEB-INF/web-template.xml" tofile="${wsigWeb.dir}/WEB-INF/web.xml"/>
 
 		<echo>Examples build complete</echo>
 	</target>
 	
-	<target name="war-examples" depends="build-examples, war" description="Create the WSIG web application (war file) properly configured to run the examples">
+	<target name="war-examples" depends="clean, build-examples, war" description="Create the WSIG web application (war file) properly configured to run the examples">
 	</target>
 
 	<target name="deploy-examples" depends="build-examples, deploy0" description="Deploy WSIG in Tomcat properly configured to run the examples">
 		<echo>Tomcat wsig with examples deployed succeded</echo>
 	</target>
 
+	<target name="customize-war" depends="clean, build-base" description="Create the WSIG web application (war file) customized with passed zip file">
+		<input addproperty="zipPath">Get path of zip file?</input>
+		<unzip src="${zipPath}" dest="${wsigWeb.dir}/WEB-INF">
+			<patternset>
+				<include name="lib/**/*.*"/>
+			</patternset>
+		</unzip>
+		<unzip src="${zipPath}" dest="${wsigWeb.dir}/WEB-INF">
+			<patternset>
+				<include name="classes/**/*.*"/>
+			</patternset>
+		</unzip>
+		<unzip src="${zipPath}" dest="${wsigWeb.dir}/WEB-INF">
+			<patternset>
+				<include name="web.xml"/>
+			</patternset>
+		</unzip>
+		<unzip src="${zipPath}" dest="${wsigWeb.dir}/conf">
+			<patternset>
+				<include name="wsig.properties"/>
+			</patternset>
+		</unzip>
+		<antcall target="war"/>
+	</target>
+	
 </project>
