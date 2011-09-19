@@ -260,8 +260,11 @@
 		<echo>Tomcat wsig with examples deployed succeded</echo>
 	</target>
 
-	<target name="customize-war" depends="clean, build-base" description="Create the WSIG web application (war file) customized with passed zip file">
+	<target name="ask-zip" unless="zipPath">
 		<input addproperty="zipPath">Get path of zip file?</input>
+	</target>
+	
+	<target name="customize-war" depends="clean, ask-zip, build-base" description="Create the WSIG web application (war file) customized with passed zip file">
 		<unzip src="${zipPath}" dest="${wsigWeb.dir}/WEB-INF">
 			<patternset>
 				<include name="lib/**/*.*"/>
