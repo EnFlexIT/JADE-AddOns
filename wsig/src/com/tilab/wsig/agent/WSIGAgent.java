@@ -225,6 +225,20 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		return false;
 	}
 
+	private Boolean isHierarchicalComplexTypeEnable(ServiceDescription sd) {
+
+		Property p = null;
+		Iterator it = sd.getAllProperties();
+		while (it.hasNext()) {
+			p = (Property) it.next();
+
+			if (WSIGConstants.WSIG_HIERARCHICAL_TYPE.equalsIgnoreCase(p.getName())) {
+				return p.getValue().toString().equals("true");
+			}
+		}
+		return null;
+	}
+	
 	private String getServicePrefix(ServiceDescription sd) {
 
 		Property p = null;
@@ -307,6 +321,12 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		// Get mapper class
 		Class mapperClass = getMapperClass(sd);
 
+		// Get hierarchicalComplexType flag
+		Boolean hierarchicalComplexType = isHierarchicalComplexTypeEnable(sd);
+		if (hierarchicalComplexType == null) {
+			hierarchicalComplexType = WSIGConfiguration.getInstance().isHierarchicalComplexTypeEnable();
+		}
+		
 		// Create new WSIGService
 		WSIGService wsigService = new WSIGService();
 		wsigService.setServiceName(serviceName);
@@ -314,9 +334,11 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		wsigService.setAid(aid);
 		wsigService.setAgentOntology(onto);
 		wsigService.setMapperClass(mapperClass);
+		wsigService.setHierarchicalComplexType(hierarchicalComplexType);
 
 		// Create wsdl
-		JadeToWSDL.createWSDL(wsigService);
+		JadeToWSDL jadeToWSDL = new JadeToWSDL();  
+		jadeToWSDL.createWSDL(wsigService);
 		
 		return wsigService;
 	}

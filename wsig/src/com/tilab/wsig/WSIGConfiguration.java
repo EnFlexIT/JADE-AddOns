@@ -68,6 +68,7 @@ public class WSIGConfiguration extends Properties {
 	public static final String KEY_WSDL_WRITE_ENABLE = "wsdl.writeEnable";
 	public static final String KEY_WSDL_DIRECTORY = "wsdl.directory";
 	public static final String KEY_WSDL_STYLE = "wsdl.style";
+	public static final String KEY_HIERARCHICAL_COMPLEX_TYPE = "wsdl.hierarchicalComplexType";
 	
 	// UDDI repository configuration
 	public final static String KEY_UDDI_ENABLE = "uddi.enable";
@@ -178,7 +179,12 @@ public class WSIGConfiguration extends Properties {
 	public synchronized void setWsdlDirectory(String wsdlDirectory) {
 		setProperty(KEY_WSDL_DIRECTORY, wsdlDirectory);
 	}
-
+	
+	public synchronized boolean isHierarchicalComplexTypeEnable() {
+		String hierarchicalComplexTypeEnable = getProperty(KEY_HIERARCHICAL_COMPLEX_TYPE);
+		return "true".equalsIgnoreCase(hierarchicalComplexTypeEnable);
+	}
+	
 	public synchronized boolean isWsdlWriteEnable() {
 		String wsdlWriteEnable = getProperty(KEY_WSDL_WRITE_ENABLE);
 		return "true".equalsIgnoreCase(wsdlWriteEnable);
@@ -274,6 +280,7 @@ public class WSIGConfiguration extends Properties {
 		setProperty(WSIGConfiguration.KEY_UDDI4J_LOG_ENABLED, "false");
 		setProperty(WSIGConfiguration.KEY_UDDI4J_TRANSPORT_CLASS, "org.uddi4j.transport.ApacheAxisTransport");
 		setProperty(WSIGConfiguration.KEY_UDDI_TMODEL, "");
+		setProperty(WSIGConfiguration.KEY_HIERARCHICAL_COMPLEX_TYPE, "false");
 	}
 
 	/**

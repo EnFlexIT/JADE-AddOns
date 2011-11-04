@@ -51,6 +51,7 @@ public class WSIGService {
 	private SOAPAddress soapAddress;
 	private ServiceKey uddiServiceKey;
 	private Class mapperClass;
+	private boolean hierarchicalComplexType;
 	private Map<String,ActionBuilder> actionsBuilder = new HashMap<String,ActionBuilder>();
 	private Map<String,ResultBuilder> resultsBuilder = new HashMap<String,ResultBuilder>();
 	
@@ -128,7 +129,12 @@ public class WSIGService {
 	public void setSOAPAddress(SOAPAddress soapAddress) {
 		this.soapAddress = soapAddress;
 	}
-	
+	public boolean isHierarchicalComplexType() {
+		return hierarchicalComplexType;
+	}
+	public void setHierarchicalComplexType(boolean hierarchicalComplexType) {
+		this.hierarchicalComplexType = hierarchicalComplexType;
+	}
 	@Override
 	public String toString() {
 		return "WSIGService (name="+serviceName+", agentOnto="+agentOnto.getName()+", mapper="+mapperClass+")";

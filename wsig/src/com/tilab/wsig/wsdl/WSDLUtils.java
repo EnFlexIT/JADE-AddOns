@@ -77,6 +77,7 @@ import org.apache.axis.utils.bytecode.ParamReader;
 import org.eclipse.xsd.XSDAnnotation;
 import org.eclipse.xsd.XSDComplexTypeDefinition;
 import org.eclipse.xsd.XSDCompositor;
+import org.eclipse.xsd.XSDDerivationMethod;
 import org.eclipse.xsd.XSDElementDeclaration;
 import org.eclipse.xsd.XSDEnumerationFacet;
 import org.eclipse.xsd.XSDFactory;
@@ -152,10 +153,19 @@ public class WSDLUtils {
 		if (tns != null) {
 			complexType.setTargetNamespace(tns);
 		}
-
 		return complexType;
 	}
 
+	static XSDComplexTypeDefinition createComplexType(String tns, String name, XSDTypeDefinition xsdBaseTypeDef) {
+		XSDComplexTypeDefinition complexType = createComplexType(tns, name);
+		if (xsdBaseTypeDef != null) {
+			complexType.setDerivationMethod(XSDDerivationMethod.EXTENSION_LITERAL);
+			complexType.setBaseTypeDefinition(xsdBaseTypeDef);
+		}
+		
+		return complexType;
+	}
+	
 	static XSDSimpleTypeDefinition createSimpleType(String tns, String name, XSDSimpleTypeDefinition simpleTypeDefinition) {
 		XSDSimpleTypeDefinition simpleType = XSDFactory.eINSTANCE.createXSDSimpleTypeDefinition();
 		
@@ -209,6 +219,13 @@ public class WSDLUtils {
 		return complexType;
 	}
 
+	static XSDComplexTypeDefinition addComplexTypeToSchema(String tns, XSDSchema schema, String complexTypeName, XSDTypeDefinition xsdBaseTypeDef) {
+		XSDComplexTypeDefinition complexType = createComplexType(tns, complexTypeName, xsdBaseTypeDef);
+		schema.getContents().add(complexType);
+
+		return complexType;
+	}
+	
 	static XSDComplexTypeDefinition addComplexTypeToElement(XSDElementDeclaration element) {
 		XSDComplexTypeDefinition complexType = createComplexType(null, null);
 		element.setAnonymousTypeDefinition(complexType);
@@ -217,7 +234,6 @@ public class WSDLUtils {
 	}
 	
 	static XSDElementDeclaration addElementToSchema(String tns, XSDSchema schema, String elementName) {
-		
 		XSDElementDeclaration element = createElement(null, elementName);
 		schema.getContents().add(element);
 		
@@ -225,7 +241,6 @@ public class WSDLUtils {
 	}
 	
 	static XSDModelGroup addSequenceToComplexType(XSDComplexTypeDefinition complexTypeDefinition) {
-
 		XSDParticle particle = XSDFactory.eINSTANCE.createXSDParticle();
 		XSDModelGroup contentSequence = XSDFactory.eINSTANCE.createXSDModelGroup();
 		contentSequence.setCompositor(XSDCompositor.SEQUENCE_LITERAL);
@@ -234,7 +249,7 @@ public class WSDLUtils {
 		
 		return contentSequence;
 	}
-
+	
 	static XSDParticle addElementToSequence(String tns, XSDSchema schema, String elementName, String elementType, XSDModelGroup sequence) {
 		XSDElementDeclaration element = createElement(null, elementName);
 		

@@ -55,6 +55,8 @@ import="jade.content.onto.Ontology,
 		servicePrefixName = servicePrefixName.substring(0, servicePrefixName.length()-1);
 	}
 	
+	boolean hierarchicalComplexType = service.isHierarchicalComplexType();
+	
 	String uddiKeyName = "-";
 	ServiceKey uddiServiceKey = service.getUddiServiceKey();
 	if (uddiServiceKey != null) {
@@ -78,6 +80,10 @@ import="jade.content.onto.Ontology,
 	<tr>
 		<td width="20%" class="title">Mapper class:</td>
 		<td class="value"><% out.print(mapperClassName); %></td>
+	</tr>
+	<tr>
+		<td width="20%" class="title">Hierarchical complex type:</td>
+		<td class="value"><% out.print(hierarchicalComplexType); %></td>
 	</tr>
 	<tr>
 		<td width="20%" class="title">Jade ontology:</td>

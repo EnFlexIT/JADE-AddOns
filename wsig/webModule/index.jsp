@@ -127,6 +127,10 @@ import="jade.content.onto.Ontology,
 		<td class="value"><% out.print(wsigConfig.getPreserveJavaType()!=null?wsigConfig.getPreserveJavaType():""); %></td>
 	</tr>
 	<tr>
+		<td width="30%" class="title">WSDL hierarchical complex type:</td>
+		<td class="value"><% out.print(wsigConfig.isHierarchicalComplexTypeEnable()); %></td>
+	</tr>
+	<tr>
 		<td width="30%" class="title">WSDL local namespace:</td>
 		<td class="value"><% out.print(wsigConfig.getLocalNamespacePrefix()); %></td>
 	</tr>

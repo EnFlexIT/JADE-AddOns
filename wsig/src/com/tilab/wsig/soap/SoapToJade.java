@@ -40,6 +40,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.xml.namespace.QName;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -50,6 +51,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.WSIGConstants;
 import com.tilab.wsig.store.ActionBuilder;
 import com.tilab.wsig.store.ParameterInfo;
@@ -67,6 +69,7 @@ public class SoapToJade extends DefaultHandler {
 	private XMLReader xmlParser;
 	private int level = 0;
 	private Ontology onto;
+	private boolean hierarchicalComplexType;
 	private StringBuffer elementValue = new StringBuffer();
 	private Vector<Vector<ParameterInfo>> parametersByLevel = new Vector<Vector<ParameterInfo>>();
 	private Vector<ObjectSchema> schemaByLevel = new Vector<ObjectSchema>();
@@ -108,6 +111,7 @@ public class SoapToJade extends DefaultHandler {
 
 		Object actionObj = null;
 		String soapBodyMessage = soapRequest.getSOAPBody().toString();
+		hierarchicalComplexType = wsigService.isHierarchicalComplexType();
 		
 		// Verify if parser is ready
 		if (xmlParser == null) {
@@ -155,7 +159,7 @@ public class SoapToJade extends DefaultHandler {
 		return params;
 	}
 
-	private TermSchema getParameterSchema(String elementName, int level) throws Exception {
+	private TermSchema getParameterSchema(String elementName, int level, Attributes attrs) throws Exception {
 
 		try {
 			TermSchema schema = null;
@@ -179,6 +183,19 @@ public class SoapToJade extends DefaultHandler {
 				// For aggregate wrap schema with TypedAggregateSchema  
 				if (schema instanceof AggregateSchema) {
 					schema = WSDLUtils.getTypedAggregateSchema(parentSchema, elementName);
+				}
+			}
+			
+			if (hierarchicalComplexType) {
+				// Get parameter schema declared in attribute type of SOAP 
+				String parameterType = getAttributeType(attrs);
+				if (parameterType != null) {
+					ObjectSchema soapSchema = onto.getSchema(parameterType);
+					if (soapSchema == null || !schema.isAssignableFrom(soapSchema)) {
+						throw new Exception("Schema "+soapSchema.getTypeName()+" not assignable from "+schema.getTypeName());
+					}
+					
+					schema = (TermSchema)soapSchema;
 				}
 			}
 			
@@ -274,6 +291,24 @@ public class SoapToJade extends DefaultHandler {
 		return absObj;
 	}
 	
+	private String getAttributeType(Attributes attrs) {
+		String type = null;
+		if (attrs != null) {
+			for (int i=0; i<attrs.getLength(); i++) {
+				if (attrs.getLocalName(i).equalsIgnoreCase("type")) {
+					String value = attrs.getValue(i);
+					int sepPos = value.indexOf(":");
+					if (sepPos == -1) {
+						type = value;
+					} else {
+						type = value.substring(sepPos+1);
+					}
+					break;
+				}
+			}
+		}		
+		return type;
+	}
 	
 	
 	//-------- PARSER EVENT HANDLERS -----------------//
@@ -291,7 +326,7 @@ public class SoapToJade extends DefaultHandler {
 				int parameterLevel = level - PARAMETERS_LEVEL; 
 
 				// Get parameter schema
-				TermSchema parameterSchema = getParameterSchema(parameterName, parameterLevel);
+				TermSchema parameterSchema = getParameterSchema(parameterName, parameterLevel, attrs);
 				log.debug("Start managing parameter "+parameterName+" of type "+parameterSchema.getTypeName());
 
 				// Get parameters vector for this level

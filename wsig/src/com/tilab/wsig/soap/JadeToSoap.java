@@ -35,6 +35,7 @@ import jade.content.schema.AggregateSchema;
 import jade.content.schema.ConceptSchema;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
+import jade.content.schema.TermSchema;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.Name;
@@ -63,6 +64,7 @@ public class JadeToSoap {
 	private String localNamespacePrefix;
 	private String soapStyle;
 	private Ontology onto;
+	private boolean hierarchicalComplexType;
 	
 	public JadeToSoap() {
 		localNamespacePrefix = WSIGConfiguration.getInstance().getLocalNamespacePrefix(); 
@@ -71,11 +73,9 @@ public class JadeToSoap {
 
 	public SOAPMessage convert(AbsTerm actionResultValue, WSIGService wsigService, String operationName) throws Exception {
 	
-		// Get tns
 		tns = WSDLConstants.URN + ":" + wsigService.getServicePrefix() + wsigService.getServiceName();
-			
-		// Get ontology
 		onto = wsigService.getServiceOntology();
+		hierarchicalComplexType = wsigService.isHierarchicalComplexType();
 
 		// Create soap message
         MessageFactory messageFactory = MessageFactory.newInstance();
@@ -86,11 +86,12 @@ public class JadeToSoap {
         envelope = soapPart.getEnvelope();
         envelope.setPrefix(WSDLConstants.SOAPENVELOP_PREFIX);
         envelope.addNamespaceDeclaration(WSDLConstants.XSD, WSDLConstants.XSD_URL);
+        envelope.addNamespaceDeclaration(localNamespacePrefix, tns);
         SOAPBody body = envelope.getBody();
 
         // Create soap element
         String responseElementName = operationName + WSDLConstants.RESPONSE_SUFFIX;
-        SOAPElement responseElement = addSoapElement(body, responseElementName, localNamespacePrefix, null, tns);
+        SOAPElement responseElement = addSoapElement(body, responseElementName, localNamespacePrefix, null, tns, false);
         
         // Get action builder
         log.debug("Operation name: "+operationName);
@@ -136,7 +137,7 @@ public class JadeToSoap {
 	
 				// Get type and create soap element
 		        soapType = WSDLUtils.getPrimitiveType(resultSchema, containerSchema, elementName);
-				soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD, soapType, "");
+				soapElement = addSoapElement(rootSoapElement, elementName, WSDLConstants.XSD, soapType, "", false);
 	
 				AbsPrimitive primitiveAbsObj = (AbsPrimitive)resultAbsObj;
 				
@@ -151,11 +152,25 @@ public class JadeToSoap {
 			} else if (resultSchema instanceof ConceptSchema) {
 				
 				// ConceptSchema
+				boolean forceType = false;
+				if (hierarchicalComplexType) {
+					// Get schema of resultAbsObj (to manage inheritance)
+					String parameterType = resultAbsObj.getTypeName();
+					if (!parameterType.equalsIgnoreCase(resultSchema.getTypeName())) {
+						ObjectSchema soapSchema = onto.getSchema(parameterType);
+						if (soapSchema == null || !resultSchema.isAssignableFrom(soapSchema)) {
+							throw new Exception("Schema "+soapSchema.getTypeName()+" not assignable from "+resultSchema.getTypeName());
+						}
+						
+						resultSchema = (TermSchema)soapSchema;
+						forceType = true;
+					}
+				}
 				log.debug("Elaborate concept schema: "+elementName+" of type: "+resultSchema.getTypeName());
 
 				// Get type and create soap element
 		        soapType = resultSchema.getTypeName();
-				soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType, "");
+				soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType, "", forceType);
 				
 				Class parameterClass = onto.getClassForElement(resultSchema.getTypeName());
 				if (parameterClass != null && parameterClass.isEnum()) {
@@ -198,7 +213,7 @@ public class JadeToSoap {
 				soapType = WSDLUtils.getAggregateType(soapType, cardMin, cardMax);
 				
 				// Create element
-				soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType, "");
+				soapElement = addSoapElement(rootSoapElement, elementName, localNamespacePrefix, soapType, "", false);
 				
 				// Elaborate all item of current aggregate schema 
 				AbsAggregate aggregateAbsObj = (AbsAggregate)resultAbsObj;
@@ -218,7 +233,7 @@ public class JadeToSoap {
 		return soapElement;
 	}
 
-	private SOAPElement addSoapElement(SOAPElement rootSoapElement, String elementName, String prefix, String soapType, String tns) throws Exception {
+	private SOAPElement addSoapElement(SOAPElement rootSoapElement, String elementName, String prefix, String soapType, String tns, boolean forceType) throws Exception {
 
 		// Create Name and Element
 		String elementPrefix = "";
@@ -234,7 +249,7 @@ public class JadeToSoap {
         }
 
 	    // Add type to element
-	    if (WSDLConstants.STYLE_RPC.equals(soapStyle) && prefix != null && soapType != null) {
+	    if ((WSDLConstants.STYLE_RPC.equals(soapStyle) || forceType) && prefix != null && soapType != null) {
 		    Name typeName = envelope.createName(WSDLConstants.TYPE, WSDLConstants.XSI, WSDLConstants.XSI_URL);
 		    soapElement.addAttribute(typeName, prefix+":"+soapType);
 	    }

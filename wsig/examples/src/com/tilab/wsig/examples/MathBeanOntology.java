@@ -19,6 +19,10 @@ public class MathBeanOntology extends BeanOntology {
 		try {
 			add(Complex.class);
 			add(AgentInfo.class);
+			add(Shape.class);
+			add(Rectangle.class);
+			add(Parallelepiped.class);
+			add(Sphere.class);
 			
 			add(Sum.class);
 		    add(Diff.class);
@@ -32,6 +36,7 @@ public class MathBeanOntology extends BeanOntology {
 			add(ConvertDate.class);
 			add(PrintTime.class);
 			add(CompareNumbers.class);
+			add(OrderShapesByArea.class);
 	    }
 	    catch (Exception e){
 	        e.printStackTrace();

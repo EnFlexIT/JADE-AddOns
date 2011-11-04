@@ -53,6 +53,7 @@ public class MathAgent extends Agent {
 	public static final String WSIG_FLAG = "wsig";
 	public static final String WSIG_MAPPER = "wsig-mapper";
 	public static final String WSIG_PREFIX = "wsig-prefix";
+	public static final String WSIG_HIERARCHICAL_TYPE = "wsig-hierarchical-type";
 	
 	private Logger log = Logger.getLogger(MathAgent.class.getName());
 	private SLCodec codec = new SLCodec();
@@ -111,6 +112,7 @@ public class MathAgent extends Agent {
 		log.info("Use bean-ontology: "+beanOnto);
 		if (beanOnto) {
 			onto = MathBeanOntology.getInstance();
+			sd.addProperties(new Property(WSIG_HIERARCHICAL_TYPE, "true"));
 		} else {
 			onto = MathOntology.getInstance();
 		}
@@ -181,7 +183,10 @@ public class MathAgent extends Agent {
 							servePrintTimeAction((PrintTime) action, actExpr, msg);
 						} else if (action instanceof CompareNumbers) {
 							serveCompareNumbersAction((CompareNumbers) action, actExpr, msg);
+						} else if (action instanceof OrderShapesByArea) {
+							serveOrderShapesByArea((OrderShapesByArea) action, actExpr, msg);
 						}
+
 					} catch (Exception e) {
 						log.error("Error serving action", e);
 					}
@@ -271,6 +276,25 @@ public class MathAgent extends Agent {
 		} else {
 			sendNotification(actExpr, msg, ACLMessage.FAILURE, compareNumbers.getFirstElement()+" not equals to "+compareNumbers.getSecondElement());			
 		}
+	}
+	
+	private void serveOrderShapesByArea(OrderShapesByArea orderShapesByArea, Action actExpr, ACLMessage msg) {
+		Shape shape = orderShapesByArea.getShape();
+		shape.calculateArea();
+
+		Parallelepiped parallelepiped = orderShapesByArea.getParallelepiped();
+		parallelepiped.calculateArea();
+		
+		List result = new ArrayList();
+		
+		if (shape.getArea() > parallelepiped.getArea()) {
+			result.add(shape);
+			result.add(parallelepiped);
+		} else {
+			result.add(parallelepiped);
+			result.add(shape);
+		}
+		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
 	
 	private void sendNotification(Action actExpr, ACLMessage request, int performative, Object result) {
