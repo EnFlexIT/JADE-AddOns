@@ -136,13 +136,23 @@ public class SecurityService extends BaseService {
     public String getName() {
         return CTIS_SECURITY_SERVICE;
     }
+    
+    /**
+     * if this method returns true security will be applied. This implementation applies security to {@link AgentManagementSlice#INFORM_CREATED}
+     * @param cmd the command that is checked
+     * @param inOrOut the direction for the command, see {@link Filter#INCOMING} and {@link Filter#OUTGOING}
+     * @return true when security should be applied
+     */
+    protected boolean applySecurity(VerticalCommand cmd, boolean inOrOut) {
+        return cmd.getName().equals(AgentManagementSlice.INFORM_CREATED);
+    }
 
     private class InFilter extends Filter {
 
         @Override
         protected boolean accept(VerticalCommand cmd) {
             String name = cmd.getName();
-            if (name.equals(AgentManagementSlice.INFORM_CREATED)) {
+            if (applySecurity(cmd, INCOMING)) {
                 AID a = (AID) cmd.getParam(FIRST);
                 String ln = a.getLocalName();
                 if (trustedAgents.contains(ln)) {
@@ -167,8 +177,7 @@ public class SecurityService extends BaseService {
 
         @Override
         protected boolean accept(VerticalCommand cmd) {
-            String name = cmd.getName();
-            if (name.equals(AgentManagementSlice.INFORM_CREATED)) {
+            if (applySecurity(cmd, OUTGOING)) {
                 try {
                     AID a = (AID) cmd.getParam(FIRST);
                     a.addUserDefinedSlot(TOKENKEY, provider.getToken(a.getName()));
@@ -178,7 +187,7 @@ public class SecurityService extends BaseService {
                 }
             } else {
                 if (log.isLoggable(Level.FINE)) {
-                    log.fine("not handled: " + name);
+                    log.fine("not handled: " + cmd.getName());
                 }
             }
             return true;
@@ -190,7 +199,7 @@ public class SecurityService extends BaseService {
     private Filter outFilter = new OutFilter();
 
     @Override
-    public Filter getCommandFilter(boolean direction) {
+    public final Filter getCommandFilter(boolean direction) {
         if (validator != null && direction == Filter.INCOMING) {
             return inFilter;
         } else if (provider != null && direction == Filter.OUTGOING) {
