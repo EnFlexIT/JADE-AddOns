@@ -128,7 +128,6 @@ public class JadeToSoap {
 		SOAPElement soapElement = null;
 		if (resultAbsObj != null) {
 			String soapType = null;
-			ObjectSchema newContainerSchema = resultSchema;
 			
 			if (resultSchema instanceof PrimitiveSchema) {
 				
@@ -189,7 +188,7 @@ public class JadeToSoap {
 						AbsTerm subAbsObject = (AbsTerm)resultAbsObj.getAbsObject(conceptSlotName);
 						
 						// Do recursive call
-						convertObjectToSoapElement(newContainerSchema, slotSchema, subAbsObject, conceptSlotName, soapElement);
+						convertObjectToSoapElement(resultSchema, slotSchema, subAbsObject, conceptSlotName, soapElement);
 					}
 				}
 			} else if (resultSchema instanceof AggregateSchema) {
@@ -224,7 +223,7 @@ public class JadeToSoap {
 						AbsTerm itemObject = aggregateAbsObj.get(i);
 		
 						// Do recursive call
-						convertObjectToSoapElement(newContainerSchema, aggrSchema, itemObject, itemName, soapElement);
+						convertObjectToSoapElement(resultSchema, aggrSchema, itemObject, itemName, soapElement);
 					}
 				}
 			}
