@@ -40,6 +40,7 @@ Boston, MA  02111-1307, USA.
 package jade.mtp.xmpp;
 
 import jade.util.leap.List;
+import jade.util.Logger;
 
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -64,26 +65,37 @@ public class MessageTransportProtocol implements MTP {
 
 	public XMPPConnection connection;	
 	
+    static Logger myLogger = Logger.getMyLogger (MessageTransportProtocol.class.getName ());
 
 	private void login(String servername, String username, String passwd) throws MTPException
 	{
 		try{
+			if (myLogger.isLoggable (Logger.INFO))
+				myLogger.log (Logger.INFO, "login: create XMPP connection w/ servername=" + servername + ", username=" + username);
+
 			connection = new XMPPConnection(servername);
-			connection.login(username, passwd, "acc");
+
+           connection.connect ();
+			if (myLogger.isLoggable (Logger.INFO))
+				myLogger.log (Logger.INFO, "login: now connection.isConnected => " + connection.isConnected ());
+
+           connection.login(username, passwd, "acc");
+			if (myLogger.isLoggable (Logger.INFO))
+				myLogger.log (Logger.INFO, "login: now connection.isAuthenticated => " + connection.isAuthenticated ());
 			
-			Presence p = new Presence(Presence.Type.AVAILABLE);
+			Presence p = new Presence(Presence.Type.available);
 			connection.sendPacket(p);
 		}
 		catch (XMPPException e){
-			throw new MTPException(	
-			"Cannot login to server (" + e.getMessage() + ")");
+			throw new MTPException ("Cannot login to server", e);
 		}
 	}
 
 	private void logout()
 	{
-		connection.close();
-	}
+
+		connection.disconnect ();
+}
 	
 	
 	
@@ -144,9 +156,16 @@ public class MessageTransportProtocol implements MTP {
 		String username = p.getParameter(PREFIX + "username", null); 
 		String passwd = p.getParameter(PREFIX + "passwd", null); 
 		
+		if (myLogger.isLoggable (Logger.INFO))
+			myLogger.log (Logger.INFO, "activate: obtained parameters server=" + server + ", username=" + username);
+
 		login(server, username, passwd);
-		ProviderManager.addExtensionProvider(FipaEnvelopePacketExtension.ELEMENT_NAME, FipaEnvelopePacketExtension.NAMESPACE, new FipaEnvelopePacketExtensionProvider());
-		MessageListener list = new MessageListener(connection, disp);
+		ProviderManager.getInstance().addExtensionProvider(FipaEnvelopePacketExtension.ELEMENT_NAME, FipaEnvelopePacketExtension.NAMESPACE, new FipaEnvelopePacketExtensionProvider());
+
+		if (myLogger.isLoggable (Logger.INFO))
+			myLogger.log (Logger.INFO, "activate: after login; this.connection=" + this.connection);
+
+     	MessageListener list = new MessageListener(connection, disp);
 		list.start();
 		
 		
@@ -210,7 +229,7 @@ public class MessageTransportProtocol implements MTP {
 		XMPPAddress jid = new XMPPAddress(addr);
 		msg.setTo(jid.getJID());
 		msg.setBody(new String(payload));
-		msg.setType(Message.Type.NORMAL);
+		msg.setType(Message.Type.normal);
 		msg.addExtension(ext);
 		connection.sendPacket(msg);
 //		System.out.println("Send: " + msg.toXML());

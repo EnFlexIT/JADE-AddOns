@@ -53,11 +53,14 @@ import org.jivesoftware.smack.packet.PacketExtension;
 import jade.domain.FIPAAgentManagement.Envelope;
 import jade.mtp.MTPException;
 import jade.mtp.InChannel.Dispatcher;
+import jade.util.Logger;
 
 public class MessageListener implements PacketListener {
 	private XMPPConnection _con;
 	private Dispatcher _disp;
 	
+    static Logger myLogger = Logger.getMyLogger (MessageListener.class.getName ());
+
 	public MessageListener(XMPPConnection con, Dispatcher disp){
 		_con = con;
 		_disp = disp;
@@ -68,7 +71,7 @@ public class MessageListener implements PacketListener {
 	}
 	
 	public void start(){
-		PacketFilter filter = new MessageTypeFilter(Message.Type.NORMAL);
+		PacketFilter filter = new MessageTypeFilter(Message.Type.normal);
 		_con.addPacketListener(this, filter);		
 	}
 	
@@ -81,9 +84,11 @@ public class MessageListener implements PacketListener {
 		Message msg = (Message)packet;
 		String payload = msg.getBody();
 //		System.out.println(msg.getFrom() + ": " + body);
+		myLogger.log (Logger.INFO, "processPacket: msg.getFrom => " + msg.getFrom () + ", payload = \"" + payload + "\"");
 		try{
 			//org.apache.xerces.parsers.SAXParser
 			XMLCodec parser = new XMLCodec("org.apache.crimson.parser.XMLReaderImpl");
+            myLogger.log (Logger.INFO, "processPacket: msg.getExtensions => " + msg.getExtensions ());
 			PacketExtension ext = msg.getExtension(FipaEnvelopePacketExtension.ELEMENT_NAME, FipaEnvelopePacketExtension.NAMESPACE);
 			if (ext == null){
 				throw new MTPException("Message do not contains a Envelope!");
@@ -92,6 +97,7 @@ public class MessageListener implements PacketListener {
 
 			StringReader sr = new StringReader(fipaext.getEnvelope());
 			env = parser.parse(sr);
+			myLogger.log (Logger.INFO, "processPacket: call dispatchMessage method of _disp=" + _disp + " w/ env=" + env);
 			synchronized (_disp) {
 				_disp.dispatchMessage(env, payload.getBytes());
 //				System.out.println("mensage enviado!");
@@ -99,6 +105,7 @@ public class MessageListener implements PacketListener {
 		}
 		catch(MTPException e)
 		{
+            myLogger.log (Logger.WARNING, "processPacket: dispatch failed; exception: " + e);
 		}
 	}
 
