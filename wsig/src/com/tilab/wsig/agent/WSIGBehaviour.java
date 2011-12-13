@@ -38,6 +38,8 @@ import jade.proto.AchieveREInitiator;
 import java.util.Date;
 import java.util.Vector;
 
+import com.tilab.wsig.store.OperationResult;
+
 public class WSIGBehaviour extends AchieveREInitiator {
 
 	private static final long serialVersionUID = 6463142354593931841L;
@@ -47,7 +49,7 @@ public class WSIGBehaviour extends AchieveREInitiator {
 	public static final int FAILURE_STATUS  = 2;
 	
 	private int status;
-	private AbsTerm result;
+	private OperationResult opResult;
 	private String error;
 	private SLCodec codec = new SLCodec();
 	private Ontology onto;
@@ -97,17 +99,21 @@ public class WSIGBehaviour extends AchieveREInitiator {
 		try {
 			status = SUCCESS_STATUS;
 
+			AbsTerm resultValue;
 			AbsContentElement content = myAgent.getContentManager().extractAbsContent(message);
 			String resultType = content.getTypeName();
 			if (BasicOntology.RESULT.equals(resultType)) {
-				result = ((AbsTerm)content.getAbsObject(BasicOntology.RESULT_VALUE));
+				resultValue = ((AbsTerm)content.getAbsObject(BasicOntology.RESULT_VALUE));
 				
 			} else if (BasicOntology.DONE.equals(resultType)) {
-				result = null;
+				resultValue = null;
 				
 			} else {
 				throw new Exception("Abs content element of type "+content.getTypeName()+" not supported");
 			}
+			
+			opResult = new OperationResult(resultValue, message);
+			
 		} catch (Exception e) {
 			status = FAILURE_STATUS;
 			error = "Extracting result error: "+e.getMessage();
@@ -145,7 +151,7 @@ public class WSIGBehaviour extends AchieveREInitiator {
 		return status;
 	}
 
-	public AbsTerm getAbsResult() {
-		return result;
+	public OperationResult getOperationResult() {
+		return opResult;
 	}
 }

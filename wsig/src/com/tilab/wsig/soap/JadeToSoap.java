@@ -49,6 +49,7 @@ import org.apache.log4j.Logger;
 
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.WSIGConstants;
+import com.tilab.wsig.store.OperationResult;
 import com.tilab.wsig.store.ParameterInfo;
 import com.tilab.wsig.store.ResultBuilder;
 import com.tilab.wsig.store.WSIGService;
@@ -71,7 +72,7 @@ public class JadeToSoap {
 		soapStyle = WSIGConfiguration.getInstance().getWsdlStyle();
 	}
 
-	public SOAPMessage convert(AbsTerm actionResultValue, WSIGService wsigService, String operationName) throws Exception {
+	public SOAPMessage convert(OperationResult opResult, WSIGService wsigService, String operationName) throws Exception {
 	
 		tns = WSDLConstants.URN + ":" + wsigService.getServicePrefix() + wsigService.getServiceName();
 		onto = wsigService.getServiceOntology();
@@ -105,7 +106,7 @@ public class JadeToSoap {
     	log.debug("Ontology result type: "+responseSchema.getTypeName());
     	
     	// Loop all element parameters
-    	List<ParameterInfo> operationResultValues = resultBuilder.getOperationResultValues(actionResultValue);
+    	List<ParameterInfo> operationResultValues = resultBuilder.getOperationResultValues(opResult);
     	for (ParameterInfo parameterInfo : operationResultValues) {
     		
     		String elementName = parameterInfo.getName();

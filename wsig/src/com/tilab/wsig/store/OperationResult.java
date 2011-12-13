@@ -22,17 +22,23 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package com.tilab.wsig.store;
 
-import java.util.List;
+import jade.content.abs.AbsTerm;
+import jade.lang.acl.ACLMessage;
 
-import jade.content.onto.Ontology;
-import jade.content.schema.ObjectSchema;
+public class OperationResult {
+	private AbsTerm value;
+	private ACLMessage message;
 
-public abstract class ResultBuilder extends Builder {
+	public OperationResult(AbsTerm value, ACLMessage message) {
+		this.value = value;
+		this.message = message;
+	}
 
-	public abstract List<ParameterInfo> getOperationResultValues(OperationResult opResult) throws Exception;
-	public abstract ObjectSchema getResponseSchema() throws Exception;
-	
-	public ResultBuilder(Ontology onto, String actionName) {
-		super(onto, actionName);
+	public AbsTerm getValue() {
+		return value;
+	}
+
+	public ACLMessage getMessage() {
+		return message;
 	}
 }

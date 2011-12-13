@@ -40,7 +40,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.xml.namespace.QName;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -51,7 +50,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.WSIGConstants;
 import com.tilab.wsig.store.ActionBuilder;
 import com.tilab.wsig.store.ParameterInfo;

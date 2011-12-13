@@ -28,6 +28,7 @@ import jade.content.abs.AbsTerm;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
 import jade.core.AID;
+import jade.lang.acl.ACLMessage;
 import jade.wrapper.ControllerException;
 import jade.wrapper.gateway.GatewayListener;
 import jade.wrapper.gateway.JadeGateway;
@@ -82,6 +83,7 @@ import com.tilab.wsig.WSIGException;
 import com.tilab.wsig.agent.WSIGBehaviour;
 import com.tilab.wsig.soap.JadeToSoap;
 import com.tilab.wsig.soap.SoapToJade;
+import com.tilab.wsig.store.OperationResult;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.store.WSIGStore;
 import com.tilab.wsig.wsdl.WSDLConstants;
@@ -237,11 +239,11 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 			}
 	
 			// Execute operation
-			AbsTerm operationAbsResult = null;
+			OperationResult opResult = null;
 			try {
-				operationAbsResult = executeOperation(agentAction, wsigService);
-				if (operationAbsResult != null) {
-					log.info("operationResult: "+operationAbsResult+", type "+operationAbsResult.getTypeName());
+				opResult = executeOperation(agentAction, wsigService);
+				if (opResult.getValue() != null) {
+					log.info("operationResult: "+opResult.getValue()+", type "+opResult.getValue().getTypeName());
 				} else {
 					log.info("operation without result");
 				}
@@ -254,7 +256,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 			SOAPMessage soapResponse = null;
 			try {
 				JadeToSoap jadeToSoap = new JadeToSoap();
-				soapResponse = jadeToSoap.convert(operationAbsResult, wsigService, operationName);
+				soapResponse = jadeToSoap.convert(opResult, wsigService, operationName);
 			} catch(Exception e) {
 				log.error("Error in jade to soap conversion", e);
 				throw new WSIGException(WSIGException.SERVER, e.getMessage());
@@ -335,9 +337,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		}
 	}
 
-	private AbsTerm executeOperation(AgentAction agentAction, WSIGService wsigService) throws WSIGException {
-		
-		AbsTerm absResult;
+	private OperationResult executeOperation(AgentAction agentAction, WSIGService wsigService) throws WSIGException {
 		int timeout = WSIGConfiguration.getInstance().getWsigTimeout();
 		AID agentExecutor = wsigService.getAid();
 		Ontology onto = wsigService.getAgentOntology(); 
@@ -360,14 +360,12 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		// Check result
 		if (wsigBehaviour.getStatus() == WSIGBehaviour.SUCCESS_STATUS) {
 			log.debug("Action "+agentAction+" successfully executed");
-			absResult = wsigBehaviour.getAbsResult();
+			return wsigBehaviour.getOperationResult();
 		} else {
 			// Agent error
 			log.error("Error executing action "+agentAction+": "+wsigBehaviour.getError());
 			throw new WSIGException(WSIGException.SERVER, wsigBehaviour.getError());
 		}
-		
-		return absResult;
 	}
 
 	private void elaborateWSIGAgentCommand(String wsigAgentCommand, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException  {
@@ -562,7 +560,6 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		servletContext.setAttribute("WSIGActive", false);
 		log.info("WSIG agent stopped");
 	}
-	
 	
 	// Inner class to check WSS UsernameToken credential
 	private class UsernameTokenCallback implements CallbackHandler {

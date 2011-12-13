@@ -211,7 +211,10 @@ public class MathAgent extends Agent {
 
 	private void serveSumAction(Sum sum, Action actExpr, ACLMessage msg) {
 		float result = sum.getFirstElement() + sum.getSecondElement();
-		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
+		
+		ACLMessage notification = prepareNotification(actExpr, msg, ACLMessage.INFORM, result);
+		notification.addUserDefinedParameter("USER-PARAM", "Test value passed as user defined parameter");
+		send(notification);
 	}
 
 	private void serveMultiplicationAction(Multiplication multiplication, Action actExpr, ACLMessage msg) {
@@ -224,7 +227,7 @@ public class MathAgent extends Agent {
 //		for (Object num : multiplication.getNumbers()) {
 //			result *= (((Number)num).doubleValue());
 //		}
-		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
+		prepareNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
 
 	private void serveSumComplexAction(SumComplex sumComplex, Action actExpr, ACLMessage msg) {
@@ -298,7 +301,11 @@ public class MathAgent extends Agent {
 	}
 	
 	private void sendNotification(Action actExpr, ACLMessage request, int performative, Object result) {
-		// Send back a proper reply to the requester
+		ACLMessage notification = prepareNotification(actExpr, request, performative, result);
+		send(notification);
+	}
+	
+	private ACLMessage prepareNotification(Action actExpr, ACLMessage request, int performative, Object result) {
 		ACLMessage reply = request.createReply();
 		if (performative == ACLMessage.INFORM) {
 			reply.setPerformative(ACLMessage.INFORM);
@@ -327,7 +334,7 @@ public class MathAgent extends Agent {
 			}
 		}
 		reply.addUserDefinedParameter(ACLMessage.IGNORE_FAILURE, "true");
-		send(reply);
+		return reply;
 	}
 
 	protected void takeDown() {

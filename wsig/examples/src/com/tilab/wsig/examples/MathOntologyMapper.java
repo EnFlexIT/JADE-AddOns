@@ -26,6 +26,7 @@ package com.tilab.wsig.examples;
 import jade.content.onto.annotations.AggregateSlot;
 import jade.content.onto.annotations.Slot;
 import jade.content.onto.annotations.SuppressSlot;
+import jade.lang.acl.ACLMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,14 +142,20 @@ public class MathOntologyMapper {
 	})
 	public class SumResultConverter {
 		private float sum;
+		private String userParam;
 
-		public SumResultConverter(float sum) {
+		public SumResultConverter(float sum, ACLMessage message) {
 			this.sum = sum;
+			this.userParam = message.getUserDefinedParameter("USER-PARAM");
 		}
 		
 		@Slot(mandatory=true)
 		public Result getResult() {
 			return new Result(sum);
+		}  
+		
+		public String getUserParam() {
+			return userParam;
 		}  
 	}
 	

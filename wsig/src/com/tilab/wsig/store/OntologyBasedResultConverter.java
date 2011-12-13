@@ -25,7 +25,6 @@ package com.tilab.wsig.store;
 import java.util.ArrayList;
 import java.util.List;
 
-import jade.content.abs.AbsTerm;
 import jade.content.onto.Ontology;
 import jade.content.schema.ObjectSchema;
 
@@ -36,12 +35,12 @@ public class OntologyBasedResultConverter extends ResultBuilder {
 		super(onto, actionName);
 	}
 
-	public List<ParameterInfo> getOperationResultValues(AbsTerm actionResultValue) throws Exception {
+	public List<ParameterInfo> getOperationResultValues(OperationResult opResult) throws Exception {
 		List<ParameterInfo> operationResultValues = new ArrayList<ParameterInfo>();
 
 		if (parameters.size() > 0) {
 			ParameterInfo returnParam = parameters.values().iterator().next();
-			returnParam.setValue(actionResultValue);
+			returnParam.setValue(opResult.getValue());
 			
 			operationResultValues.add(returnParam);
 		}

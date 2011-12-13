@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import jade.content.abs.AbsObject;
-import jade.content.abs.AbsTerm;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.AggregateHelper;
 import jade.content.onto.Ontology;
@@ -44,7 +43,7 @@ public class MapperBasedResultConverter extends ResultBuilder {
 
 	private Object mapperObj;
 	private Constructor resultConverterConstructor;
-	private Class constructorParameterClass;
+	private Class constructorParameterValueClass;
 	private String mapperClassName;
 	
 	public MapperBasedResultConverter(Object mapperObj, Class mapperResultConverterClass, Ontology onto, String actionName) throws Exception {
@@ -60,23 +59,32 @@ public class MapperBasedResultConverter extends ResultBuilder {
 		}
 		this.resultConverterConstructor = resultConverterConstructors[0];
 
-		// Check and get ResultConverter constructor parameter
+		// Check and get ResultConverter constructor first parameter
+		// The constructor con be of the form:
+		// Xxx(Yyy value)
+		// Xxx(Yyy value, ACLMessage message)
 		Class[] constructorParameterClasses = resultConverterConstructor.getParameterTypes();
-		if (constructorParameterClasses == null || constructorParameterClasses.length !=2) {
+		if (constructorParameterClasses == null || (constructorParameterClasses.length !=2 && constructorParameterClasses.length !=3)) {
 			throw new Exception("ResultConverter constructor with no one parameter defined in "+mapperResultConverterClass.getName());
 		}
 
-		constructorParameterClass = constructorParameterClasses[1];
+		constructorParameterValueClass = constructorParameterClasses[1];
 	}
 
-	public List<ParameterInfo> getOperationResultValues(AbsTerm actionResultAbs) throws Exception {
+	public List<ParameterInfo> getOperationResultValues(OperationResult opResult) throws Exception {
 		
 		// Convert action result in object
-		Object actionResultObj = onto.toObject(actionResultAbs);
-		actionResultObj = adjustValue(actionResultObj, constructorParameterClass);
+		Object value = onto.toObject(opResult.getValue());
+		value = adjustValue(value, constructorParameterValueClass);
 		
-		// Create ResultConverter
-		Object resultConverterObj = resultConverterConstructor.newInstance(mapperObj, actionResultObj);
+		// Try to create ResultConverter with constructor (Object value, ACLMessage message)
+		Object resultConverterObj;
+		try {
+			resultConverterObj = resultConverterConstructor.newInstance(mapperObj, value, opResult.getMessage());
+		} catch(Exception e) {
+			// Try to create ResultConverter with constructor (Object value)
+			resultConverterObj = resultConverterConstructor.newInstance(mapperObj, value);
+		}
 		
 		// Prepare parameters
 		List<ParameterInfo> operationResultValues = new ArrayList<ParameterInfo>();
