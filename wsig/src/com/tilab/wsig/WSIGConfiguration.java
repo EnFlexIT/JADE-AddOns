@@ -189,6 +189,9 @@ public class WSIGConfiguration extends Properties {
 		String wsdlWriteEnable = getProperty(KEY_WSDL_WRITE_ENABLE);
 		return "true".equalsIgnoreCase(wsdlWriteEnable);
 	}
+	public synchronized void setWsdlWriteEnable(boolean wsdlWriteEnable) {
+		setProperty(KEY_WSDL_WRITE_ENABLE, Boolean.toString(wsdlWriteEnable));
+	}
 
 	public synchronized String getWsdlStyle() {
 		return getProperty(KEY_WSDL_STYLE);

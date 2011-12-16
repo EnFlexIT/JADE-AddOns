@@ -26,7 +26,10 @@
 	<property name="wsigZip.name" value="${wsig.name}"/>
 	<property name="wsigJarAnnotations.name" value="wsigAnnotations"/>
 	<property name="warfile.path" location="${wsigWebapps.dir}/${wsigWar.name}"/>
-	<property name="jarfile.path" location="${wsigUtils.dir}/${wsigJarAnnotations.name}"/>
+	<property name="jarAnnotationFile.path" location="${wsigUtils.dir}/${wsigJarAnnotations.name}"/>
+	<property name="wsigJarGenerator.name" value="wsigGenerator"/>
+	<property name="jarGeneratorFile.path" location="${wsigUtils.dir}/${wsigJarGenerator.name}"/>
+	
 	<!--<property name="tomcat.dir" location="${env.CATALINA_BASE}"/>-->
 	<property name="tomcat.dir" location="${env.CATALINA_HOME}"/>
 
@@ -122,12 +125,24 @@
 	
 	<target name="jar-annotations" depends="compile" description="Create the WSIG annotations JAR">
 		<mkdir dir="${wsigUtils.dir}"/>
-		<jar destfile="${jarfile.path}.jar" compress="false">
+		<jar destfile="${jarAnnotationFile.path}.jar" compress="false">
 			<fileset dir="${wsigBuild.dir}">
 				<include name="com/tilab/wsig/store/OperationName.class"/>
 				<include name="com/tilab/wsig/store/SuppressOperation.class"/>
 				<include name="com/tilab/wsig/store/ApplyTo.class"/>
 				<include name="com/tilab/wsig/store/ResultConverter.class"/>
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="jar-generator" depends="compile" description="Create the WSIG generator JAR">
+		<mkdir dir="${wsigUtils.dir}"/>
+		<jar destfile="${jarGeneratorFile.path}.jar" compress="false">
+			<fileset dir="${wsigBuild.dir}">
+				<include name="com/tilab/wsig/store/*.class"/>
+				<include name="com/tilab/wsig/wsdl/*.class"/>
+				<include name="com/tilab/wsig/VersionManager.class"/>
+				<include name="com/tilab/wsig/WSIGConfiguration.class"/>
 			</fileset>
 		</jar>
 	</target>
@@ -170,7 +185,7 @@
 		<echo>Dir deletion succeded</echo>
 	</target>
 	
-	<target name="dist" depends="clean, war-base, jar-annotations" description="Create the distribution ZIP file">
+	<target name="dist" depends="clean, war-base, jar-annotations, jar-generator" description="Create the distribution ZIP file">
 		<echo message="GENERATE THE PDF FORM OF THE WSIG GUIDE, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/wsig) AND THEN PRESS ENTER -->"/>
 		<input/>
 		<mkdir dir="${jade-home}/doc"/>
@@ -261,10 +276,10 @@
 	</target>
 
 	<target name="ask-zip" unless="zipPath">
-		<input addproperty="zipPath">Get path of zip file?</input>
+		<input message="Path of zip file?" addproperty="zipPath"/>
 	</target>
-	
-	<target name="customize-war" depends="clean, ask-zip, build-base" description="Create the WSIG web application (war file) customized with passed zip file">
+
+	<target name="customize-env" depends="clean, ask-zip, build-base">
 		<unzip src="${zipPath}" dest="${wsigWeb.dir}/WEB-INF">
 			<patternset>
 				<include name="lib/**/*.*"/>
@@ -285,7 +300,40 @@
 				<include name="wsig.properties"/>
 			</patternset>
 		</unzip>
-		<antcall target="war"/>
 	</target>
 	
+	<target name="customize-war" depends="customize-env, war" description="Create the WSIG web application (war file) customized with passed zip file">
+	</target>
+	
+	<target name="generate-wsdl" depends="customize-env" description="Generate WSDL">
+		<input message="Service name?" addproperty="genServiceName"/>
+		<input message="Ontology class name?" addproperty="genServiceOnto"/>
+		<input message="Service prefix?" addproperty="genServicePrefix"/>
+		<input message="Mapper class name?" addproperty="genServiceMapper"/>
+		<input message="Hierarchical complex type?" validargs="true,false" defaultvalue="true" addproperty="genHierarchicalType"/>
+		<input message="Wsdl output folder?" defaultvalue="." addproperty="genOutFolder"/>
+	
+		<condition property="genServicePrefixArg" value="-prefix ${genServicePrefix}" else="">
+			<not>
+			<equals arg1="${genServicePrefix}" arg2="" trim="true"/>
+			</not>
+		</condition>
+		<condition property="genServiceMapperArg" value="-mapper ${genServiceMapper}" else="">
+			<not>
+			<equals arg1="${genServiceMapper}" arg2="" trim="true"/>
+			</not>
+		</condition>
+		
+		<property name="args" value="-name ${genServiceName} -onto ${genServiceOnto} ${genServicePrefixArg} ${genServiceMapperArg} -hierarchical ${genHierarchicalType} -conf ${wsigWeb.dir}/conf/wsig.properties -out ${genOutFolder}"/>
+		<java classname="com.tilab.wsig.wsdl.WSDLGenerator" fork="yes">
+			<arg line="${args}" />
+			<classpath>
+				<pathelement location="${wsigBuild.dir}"/>
+			    <fileset dir="${wsigWebLib.dir}">
+			    	<include name="**/*.jar"/>
+			    </fileset>
+			</classpath>
+		</java>
+	</target>
+
 </project>
