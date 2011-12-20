@@ -33,7 +33,7 @@ import="jade.content.onto.Ontology,
 	// WSIG Agent status
 	String wsigAgentStatus;
 	Boolean wsigActive = (Boolean)application.getAttribute("WSIGActive");
-	if (wsigActive.booleanValue() == true) {
+	if (wsigActive != null && wsigActive.booleanValue() == true) {
 		wsigAgentStatus = "<font color='green'>Active</font>";
 		wsigAgentStatus += " ( <a href='"+wsigConfig.getServicesUrl(request)+"?WSIGAgentCommand=stop'>STOP</a> )";
 	} else {

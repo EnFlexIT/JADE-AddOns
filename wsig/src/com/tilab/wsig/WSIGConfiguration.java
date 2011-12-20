@@ -48,10 +48,8 @@ public class WSIGConfiguration extends Properties {
 
 	public static final String WSIG_DEFAULT_CONFIGURATION_FILE = "conf/wsig.properties";
 	private static String wsigConfPath;
+	private static String wsigVersion;
 	
-	private static VersionManager versionManager = new VersionManager(); 
-
-
 	// AGENT CONFIGURATION FOR SERVLET
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
 	public static final String KEY_WSIG_SERVICES_URL = "wsig.servicesURL";
@@ -107,7 +105,25 @@ public class WSIGConfiguration extends Properties {
 
    	// WSIG CONFIGURATION
 	public synchronized String getWsigVersion() {
-		return versionManager.getVersion()+" - revision "+versionManager.getRevision()+" of "+versionManager.getDate();
+		if (wsigVersion == null) {
+			try {
+				Object versionManager = Class.forName("com.tilab.wsig.VersionManager").newInstance();
+				Class c = versionManager.getClass();
+				java.lang.reflect.Method m = c.getMethod("getVersion", new Class[0]);
+				String version = (String) m.invoke(versionManager, new Object[0]);
+				m = c.getMethod("getRevision", new Class[0]);
+				String revision = (String) m.invoke(versionManager, new Object[0]);
+				m = c.getMethod("getDate", new Class[0]);
+				String date = (String) m.invoke(versionManager, new Object[0]);
+				
+				wsigVersion = version+" - revision "+revision+" of "+date;
+			}
+			catch (Exception e) {
+				// VersionManager not available
+				wsigVersion = "Not available";
+			}
+		}
+		return wsigVersion;
 	}
    	
 	// AGENT CONFIGURATION FOR SERVLET
