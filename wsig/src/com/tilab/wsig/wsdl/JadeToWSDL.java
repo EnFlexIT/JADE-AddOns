@@ -248,7 +248,7 @@ public class JadeToWSDL {
 					Class mapperResultConverterClass = null;
 					Map<String, Class> mapperResultConvertersForAction = mapperResultConverters.get(actionName.toLowerCase());
 					if (mapperResultConvertersForAction != null) {
-						mapperResultConverterClass = mapperResultConvertersForAction.get(operationName);
+						mapperResultConverterClass = mapperResultConvertersForAction.get(operationName.toLowerCase());
 					}
 					
 					// Create appropriate ResultBuilder
@@ -441,7 +441,7 @@ public class JadeToWSDL {
 				aggregateElementClass = aggregateSlotAnnotation.type();
 			}
 			
-			String parameterComplexType = createComplexTypeFromClass(actionSchema, parameterClass, parameterName, null, cardMin, cardMax, aggregateElementClass);
+			String parameterComplexType = createComplexTypeFromClass(parameterClass, parameterName, null, cardMin, cardMax, aggregateElementClass);
 			log.debug("--mapper input parameter: "+parameterName+" ("+parameterComplexType+")");
 
 			// Create virtual schema of java parameter
@@ -681,7 +681,7 @@ public class JadeToWSDL {
 								mapperResultConverters.put(actionName.toLowerCase(), operationClasses);
 							}
 
-							operationClasses.put(operationName, mapperInnerClass);
+							operationClasses.put(operationName.toLowerCase(), mapperInnerClass);
 						}
 					}
 				}
@@ -711,7 +711,7 @@ public class JadeToWSDL {
 		return isSuppressed;
 	}
 	
-	private String createComplexTypeFromClass(ConceptSchema containerSchema, Class parameterClass, String paramName, XSDComponent parentComponent, Integer cardMin, Integer cardMax, Class aggregateElementClass) throws Exception {
+	private String createComplexTypeFromClass(Class parameterClass, String paramName, XSDComponent parentComponent, Integer cardMin, Integer cardMax, Class aggregateElementClass) throws Exception {
 		
 		String slotType = null;
 		if (parameterClass.isPrimitive() || WSDLConstants.java2xsd.get(parameterClass) != null) {
@@ -742,6 +742,10 @@ public class JadeToWSDL {
 				XSDSimpleTypeDefinition enumType = WSDLUtils.addSimpleTypeToSchema(tns, wsdlTypeSchema, slotType, simpleTypeDefinition);
 				WSDLUtils.addRestrictionToSimpleType(enumType, permittedValues);
 			}
+			if (parentComponent != null) {
+				log.debug("------add enum-type "+paramName+" ("+slotType+")");
+				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, paramName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
+			}
 		}
 		else if (Builder.isCollection(parameterClass)) {
 
@@ -765,7 +769,7 @@ public class JadeToWSDL {
 					// If not specified, default card-max is UNBOUNDED
 					cardMax = Integer.valueOf(ObjectSchema.UNLIMITED);
 				}
-				createComplexTypeFromClass(containerSchema, aggregateElementClass, paramName, sequence, cardMin, cardMax, null);
+				createComplexTypeFromClass(aggregateElementClass, paramName, sequence, cardMin, cardMax, null);
 			}
 		} 
 		else {
@@ -785,7 +789,7 @@ public class JadeToWSDL {
 			}
 			
 			String conceptSchemaName = conceptSchema.getTypeName();
-			slotType = createComplexTypeFromSchema(conceptSchema, containerSchema, conceptSchemaName, parentComponent, null, null);
+			slotType = createComplexTypeFromSchema(conceptSchema, null, conceptSchemaName, parentComponent, cardMin, cardMax);
 		}
 		
 		return slotType;
@@ -815,7 +819,14 @@ public class JadeToWSDL {
 			// Get type from ConceptSchema (if not found in wsdlTypeSchema create it)
 			slotType = objSchema.getTypeName();
 			if (parentComponent != null) {
-				if (cardMin == MANDATORY && !containerSchema.isMandatory(slotName)) {
+				// Nota: containerSchema può essere nullo solo nel caso di mapper dove la ActionSchema 
+				// non corrisponde al contenitore dei parametri definiti nei metodi toXXX o nelle classi 
+				// ResultConverter.
+				// Qui arrivo nei casi di parametri di tipo List<T> dove T e' un tipo complesso al 
+				// momento di gestire T. In questo caso parentComponent e' una sequence ma il containerSchema
+				// non puo' essere usato per determinare la mandatorieta', quindi solo la cardinalita'
+				// definita nella annotation viene presa in considerazione.
+				if (cardMin == MANDATORY && containerSchema != null && !containerSchema.isMandatory(slotName)) {
 					cardMin = OPTIONAL;
 				}
 				log.debug("------add defined-type "+slotName+" ("+slotType+") "+(OPTIONAL.equals(cardMin)?"OPTIONAL":""));
