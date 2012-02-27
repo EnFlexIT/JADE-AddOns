@@ -38,17 +38,15 @@ import org.apache.log4j.Logger;
 public abstract class Builder {
 	protected static Logger log = Logger.getLogger(Builder.class.getName());
 
-	protected Ontology onto;
+	protected Ontology ontoService;
+	protected Ontology ontoAgent;
 	protected String actionName;
 	protected Map<String, ParameterInfo> parameters = new HashMap<String, ParameterInfo>();
 
-	public Builder(Ontology onto, String actionName) {
-		this.onto = onto;
+	public Builder(Ontology ontoService, Ontology ontoAgent, String actionName) {
+		this.ontoService = ontoService;
+		this.ontoAgent = ontoAgent;
 		this.actionName = actionName;
-	}
-
-	public Ontology getOntology() {
-		return onto;
 	}
 
 	public String getActionName() {
@@ -64,7 +62,7 @@ public abstract class Builder {
 	}
 
 	public AgentActionSchema getActionSchema() throws OntologyException {
-		return (AgentActionSchema) onto.getSchema(actionName);
+		return (AgentActionSchema) ontoService.getSchema(actionName);
 	}
 	
 	public static Object adjustValue(Object value, Class<?> destClass) throws Exception {

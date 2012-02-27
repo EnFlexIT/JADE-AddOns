@@ -32,7 +32,7 @@ public abstract class ResultBuilder extends Builder {
 	public abstract List<ParameterInfo> getOperationResultValues(OperationResult opResult) throws Exception;
 	public abstract ObjectSchema getResponseSchema() throws Exception;
 	
-	public ResultBuilder(Ontology onto, String actionName) {
-		super(onto, actionName);
+	public ResultBuilder(Ontology ontoService, Ontology ontoAgent, String actionName) {
+		super(ontoService, ontoAgent, actionName);
 	}
 }

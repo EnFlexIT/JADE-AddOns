@@ -100,7 +100,8 @@ public class JadeToWSDL {
 	private String soapUse;
 	private String tns;
 	private WSIGService wsigService;
-	private Ontology onto;
+	private Ontology ontoService;
+	private Ontology ontoAgent;
 	private Class mapperClass;
 	private XSDSchema wsdlTypeSchema;
 	
@@ -173,11 +174,12 @@ public class JadeToWSDL {
 		Map<String, Map<String, Class>> mapperResultConverters = getMapperResultConverters();
 		
 		// Manage ontology
-		onto = wsigService.getServiceOntology();
-		log.debug("Elaborate ontology: "+onto.getName());		
+		ontoService = wsigService.getServiceOntology();
+		ontoAgent = wsigService.getAgentOntology();
+		log.debug("Elaborate ontology: "+ontoService.getName());		
 		
 		// Manage actions
-		List actionNames = onto.getActionNames();
+		List actionNames = ontoService.getActionNames();
 		for (int i = 0; i < actionNames.size(); i++) {
 			try {
 				String actionName = (String) actionNames.get(i);
@@ -213,10 +215,10 @@ public class JadeToWSDL {
 						operationName = mapperMethodForAction.getKey();
 						mapperActionMethod = mapperMethodForAction.getValue();
 						
-						actionBuilder = new MapperBasedActionBuilder(onto, actionName, mapperObject, mapperActionMethod);
+						actionBuilder = new MapperBasedActionBuilder(ontoService, ontoAgent, actionName, mapperObject, mapperActionMethod);
 					} else {
 						
-						actionBuilder = new OntologyBasedActionBuilder(onto, actionName);
+						actionBuilder = new OntologyBasedActionBuilder(ontoService, ontoAgent, actionName);
 					}
 
 					// Add ActionBuilder to wsigService 
@@ -255,10 +257,10 @@ public class JadeToWSDL {
 					ResultBuilder resultBuilder;
 					if (mapperResultConverterClass != null) {
 						
-						resultBuilder = new MapperBasedResultConverter(mapperObject, mapperResultConverterClass, onto, actionName);
+						resultBuilder = new MapperBasedResultConverter(mapperObject, mapperResultConverterClass, ontoService, ontoAgent, actionName);
 					} else {
 						
-						resultBuilder = new OntologyBasedResultConverter(onto, actionName);
+						resultBuilder = new OntologyBasedResultConverter(ontoService, ontoAgent, actionName);
 					}
 
 					// Add ResultBuilder to wsigService 
@@ -283,7 +285,7 @@ public class JadeToWSDL {
 		
 		// Log ontology
 		if (log.isDebugEnabled()) {
-			onto.dump();
+			ontoService.dump();
 		}
 		
 		// Add complex type to wsdl definition
@@ -312,7 +314,7 @@ public class JadeToWSDL {
 	
 	private Map<String, ParameterInfo> manageInputParameters(String operationName, Message inputMessage, String actionName, Method mapperMethod) throws Exception {
 
-		AgentActionSchema actionSchema = (AgentActionSchema) onto.getSchema(actionName);
+		AgentActionSchema actionSchema = (AgentActionSchema) ontoService.getSchema(actionName);
 
 		// In document style there is only a message part named parameters and an element in types definition
 		XSDModelGroup elementSequence = null;
@@ -478,7 +480,7 @@ public class JadeToWSDL {
 	
 	private Map<String, ParameterInfo> manageOutputParameters(String operationName, Message outputMessage, String actionName, Class mapperResultConverterClass) throws Exception {
 		
-		AgentActionSchema actionSchema = (AgentActionSchema) onto.getSchema(actionName);
+		AgentActionSchema actionSchema = (AgentActionSchema) ontoService.getSchema(actionName);
 
 		// In document style there is only a message part named parameters and an element in types definition
 		XSDModelGroup elementSequence = null;
@@ -593,15 +595,15 @@ public class JadeToWSDL {
 			
 			// Search a schema of this parameterClass
 			String conceptSchemaName = null;
-			List conceptNames = onto.getConceptNames();
+			List conceptNames = ontoService.getConceptNames();
 			for (int i=0; i<conceptNames.size(); i++) {
 				String conceptName = (String)conceptNames.get(i);
-				if (parameterClass.equals(onto.getClassForElement(conceptName))) {
+				if (parameterClass.equals(ontoService.getClassForElement(conceptName))) {
 					conceptSchemaName = conceptName;
 					break;
 				}
 			}
-			parameterSchema = (TermSchema)onto.getSchema(conceptSchemaName);
+			parameterSchema = (TermSchema)ontoService.getSchema(conceptSchemaName);
 		}
 
 		return parameterSchema;
@@ -774,17 +776,17 @@ public class JadeToWSDL {
 		} 
 		else {
 			// Java custom type, search in the ontology for a schema of this type
-			ObjectSchema conceptSchema = onto.getSchema(parameterClass);
+			ObjectSchema conceptSchema = ontoService.getSchema(parameterClass);
 			if (conceptSchema == null) {
 				
 				// Schema not present -> add the class to ontology
 				log.debug("----add class "+parameterClass+" to ontology");
-				((BeanOntology)onto).add(parameterClass);
+				((BeanOntology)ontoService).add(parameterClass);
 				
 				// Retry to get schema -> if not found throw an exception
-				conceptSchema = onto.getSchema(parameterClass);
+				conceptSchema = ontoService.getSchema(parameterClass);
 				if (conceptSchema == null) {
-					throw new Exception("ConceptSchema of type "+parameterClass.getSimpleName()+" doesn't exist in "+ onto.getName());
+					throw new Exception("ConceptSchema of type "+parameterClass.getSimpleName()+" doesn't exist in "+ ontoService.getName());
 				}
 			}
 			
@@ -834,7 +836,7 @@ public class JadeToWSDL {
 			}
 			
 			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, tns, slotType) == null) {
-				Class slotClass = onto.getClassForElement(slotType);
+				Class slotClass = ontoService.getClassForElement(slotType);
 				if (slotClass != null && slotClass.isEnum()) {
 					log.debug("----create simple-type "+slotType);
 					XSDSimpleTypeDefinition simpleTypeDefinition = wsdlTypeSchema.resolveSimpleTypeDefinition(WSDLConstants.XSD_URL, WSDLConstants.XSD_STRING);
@@ -870,9 +872,9 @@ public class JadeToWSDL {
 						}
 
 						// Manage schemas that extends this
-						List<String> conceptNames = onto.getConceptNames();
+						List<String> conceptNames = ontoService.getConceptNames();
 						for (String conceptName : conceptNames) {
-							ObjectSchema schema = onto.getSchema(conceptName);
+							ObjectSchema schema = ontoService.getSchema(conceptName);
 							superSchemas = schema.getSuperSchemas();
 							for (ObjectSchema superSchema : superSchemas) {
 								if (superSchema.getTypeName().equalsIgnoreCase(objSchema.getTypeName())) {

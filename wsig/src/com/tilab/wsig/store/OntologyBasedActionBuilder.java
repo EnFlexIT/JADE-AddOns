@@ -33,13 +33,13 @@ import java.util.LinkedHashMap;
 
 public class OntologyBasedActionBuilder extends ActionBuilder {
 
-	public OntologyBasedActionBuilder(Ontology onto, String actionName) {
-		super(onto, actionName);
+	public OntologyBasedActionBuilder(Ontology ontoService, Ontology ontoAgent, String actionName) {
+		super(ontoService, ontoAgent, actionName);
 	}
 
 	public AgentAction getAgentAction(LinkedHashMap<String, ParameterInfo> soapParams) throws Exception {
 
-		AgentActionSchema schema = (AgentActionSchema)onto.getSchema(getActionName());
+		AgentActionSchema schema = (AgentActionSchema)ontoService.getSchema(getActionName());
 		AbsAgentAction actionAbsObj = (AbsAgentAction) schema.newInstance();
 		if (soapParams != null) {
 			for (ParameterInfo param : soapParams.values()) {

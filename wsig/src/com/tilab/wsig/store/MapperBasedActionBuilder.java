@@ -35,8 +35,8 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 	private Method method;
 	private Object mapperObj;
 
-	public MapperBasedActionBuilder(Ontology onto, String actionName, Object mapperObj, Method method) {
-		super(onto, actionName);
+	public MapperBasedActionBuilder(Ontology ontoService, Ontology ontoAgent, String actionName, Object mapperObj, Method method) {
+		super(ontoService, ontoAgent, actionName);
 		
 		this.method = method;
 		this.mapperObj = mapperObj;
@@ -66,7 +66,7 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 					Object javaValue;
 					if (soapParameter != null) {
 						parameterList += parameterInfo.getSchema().getTypeName()+",";
-						javaValue = onto.toObject(soapParameter.getValue());
+						javaValue = ontoService.toObject(soapParameter.getValue());
 					} else {
 						parameterList += "null,";
 						javaValue = null;

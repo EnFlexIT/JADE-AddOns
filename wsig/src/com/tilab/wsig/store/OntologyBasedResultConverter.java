@@ -31,8 +31,8 @@ import jade.content.schema.ObjectSchema;
 
 public class OntologyBasedResultConverter extends ResultBuilder {
 
-	public OntologyBasedResultConverter(Ontology onto, String actionName) {
-		super(onto, actionName);
+	public OntologyBasedResultConverter(Ontology ontoService, Ontology ontoAgent, String actionName) {
+		super(ontoService, ontoAgent, actionName);
 	}
 
 	public List<ParameterInfo> getOperationResultValues(OperationResult opResult) throws Exception {

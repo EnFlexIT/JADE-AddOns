@@ -46,8 +46,8 @@ public class MapperBasedResultConverter extends ResultBuilder {
 	private Class constructorParameterValueClass;
 	private String mapperClassName;
 	
-	public MapperBasedResultConverter(Object mapperObj, Class mapperResultConverterClass, Ontology onto, String actionName) throws Exception {
-		super(onto, actionName);
+	public MapperBasedResultConverter(Object mapperObj, Class mapperResultConverterClass, Ontology ontoService, Ontology ontoAgent, String actionName) throws Exception {
+		super(ontoService, ontoAgent, actionName);
 
 		this.mapperObj = mapperObj;
 		this.mapperClassName = mapperResultConverterClass.getSimpleName();
@@ -74,7 +74,7 @@ public class MapperBasedResultConverter extends ResultBuilder {
 	public List<ParameterInfo> getOperationResultValues(OperationResult opResult) throws Exception {
 		
 		// Convert action result in object
-		Object value = onto.toObject(opResult.getValue());
+		Object value = ontoAgent.toObject(opResult.getValue());
 		value = adjustValue(value, constructorParameterValueClass);
 		
 		// Try to create ResultConverter with constructor (Object value, ACLMessage message)
@@ -115,7 +115,7 @@ public class MapperBasedResultConverter extends ResultBuilder {
 					parameterValueObj = AggregateHelper.adjustAggregateValue(parameterValueObj, destClass);
 				}
 
-				AbsObject parameterValueAbs = onto.fromObject(parameterValueObj);
+				AbsObject parameterValueAbs = ontoService.fromObject(parameterValueObj);
 				parameterInfo.setValue(parameterValueAbs);
 				operationResultValues.add(parameterInfo);
 			}

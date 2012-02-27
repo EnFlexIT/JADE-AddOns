@@ -31,7 +31,7 @@ public abstract class ActionBuilder extends Builder {
 
 	public abstract AgentAction getAgentAction(LinkedHashMap<String, ParameterInfo> soapParams) throws Exception;
 
-	public ActionBuilder(Ontology onto, String actionName) {
-		super(onto, actionName);
+	public ActionBuilder(Ontology ontoService, Ontology ontoAgent, String actionName) {
+		super(ontoService, ontoAgent, actionName);
 	}
 }
