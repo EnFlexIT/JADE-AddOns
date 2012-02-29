@@ -34,7 +34,7 @@
  
   <!-- Compile the examples -->
   <target name="examples" depends="lib">
-    <javac srcdir="examples" destdir="${build}" classpath="${classpath};${lib}/XMLCodec.jar" nowarn="off" optimize="on" deprecation="on"/>
+    <javac srcdir="examples" destdir="${build}" classpath="${classpath};${lib}/XMLCodec.jar" nowarn="off" optimize="on" deprecation="on" target="1.5"/>
   </target>
 
   <!-- Make distribution zip file and put in ${dist} -->
