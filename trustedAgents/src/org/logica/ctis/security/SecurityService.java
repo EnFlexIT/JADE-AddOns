@@ -16,15 +16,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This simple SecurityService facilitates making sure only agents with a token that can be validated will be allowed to join the Jade Platform. The way it works is
+ * This simple SecurityService facilitates security for {@link VerticalCommand}s, for example making sure only agents with a token that can be validated will be allowed to join the Jade Platform. The way it works is
  * that at a regular container a token is retrieved and connected to an agent AID, at the Main-Container (or mediator) the token is extracted from the AID and validated. Retrieving
  * a token and validating is a matter of implementing two very simple interfaces. Validating can be done using for example an external LDAP.
  * The Service can contain a {@link TokenProvider} or a {@link TokenValidator}.
  * <ul>
- * <li>A TokenProvider provides a token for a GenericCommand, the service then connects the token to the command</li>
+ * <li>A TokenProvider provides a token for a VerticalCommand issued by a AID, the service then connects the token to the AID</li>
  *
  *
- * <li>A TokenValidator retrieves a token from a GenericCommand, the service then calls validate with the token, command and objectName ({@link AID#getName() }) as arguments</li>
+ * <li>A TokenValidator retrieves a token from a VerticalCommand issued by a AID, the service then calls validate with the token, the command and the {@link AID} as arguments</li>
  * </ul>
  * Building a TokenProvider or a Validator is left to users of this security service.
  * <ul>
@@ -146,7 +146,7 @@ public class SecurityService extends BaseService {
     protected boolean applySecurity(VerticalCommand cmd, boolean inOrOut) {
         return cmd.getName().equals(AgentManagementSlice.INFORM_CREATED);
     }
-
+    
     private class InFilter extends Filter {
 
         @Override
@@ -159,7 +159,7 @@ public class SecurityService extends BaseService {
                     return true;
                 }
                 try {
-                    return validator.isValid(a.getAllUserDefinedSlot().getProperty(TOKENKEY), name, a.getName());
+                    return validator.isValid(a.getAllUserDefinedSlot().getProperty(TOKENKEY), cmd, a);
                 } catch (JADESecurityException ex) {
                     log.log(Level.SEVERE,"error during token validation", ex);
                     return false;
@@ -179,8 +179,8 @@ public class SecurityService extends BaseService {
         protected boolean accept(VerticalCommand cmd) {
             if (applySecurity(cmd, OUTGOING)) {
                 try {
-                    AID a = (AID) cmd.getParam(FIRST);
-                    a.addUserDefinedSlot(TOKENKEY, provider.getToken(a.getName()));
+                    AID a = (AID) cmd.getParam(Filter.FIRST);
+                    a.addUserDefinedSlot(TOKENKEY, provider.getToken(cmd, a));
                 } catch (JADESecurityException ex) {
                     log.log(Level.SEVERE,"error providing token", ex);
                     return false;

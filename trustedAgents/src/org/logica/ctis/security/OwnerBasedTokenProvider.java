@@ -1,7 +1,9 @@
 package org.logica.ctis.security;
 
+import jade.core.AID;
 import jade.core.Profile;
 import jade.core.ProfileException;
+import jade.core.VerticalCommand;
 import jade.security.JADESecurityException;
 
 public class OwnerBasedTokenProvider implements ConfigurableTokenProvider {
@@ -15,8 +17,8 @@ public class OwnerBasedTokenProvider implements ConfigurableTokenProvider {
 		}
 	}
 
-	public String getToken(String name) throws JADESecurityException {
-		return owner;
-	}
+    public String getToken(VerticalCommand command, AID agentId) throws JADESecurityException {
+        return owner;
+    }
 
 }

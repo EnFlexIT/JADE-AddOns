@@ -8,6 +8,6 @@ import jade.core.ProfileException;
  * is invoked only once just after the TokenValidator instantiation and gives it access to 
  * Profile configurations 
  */
-public interface ConfigurableTokenValidator {
+public interface ConfigurableTokenValidator extends TokenValidator {
 	void init(Profile p) throws ProfileException;
 }
