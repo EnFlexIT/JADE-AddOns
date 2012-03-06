@@ -51,7 +51,7 @@ import java.util.logging.Logger;
     or you can do validation at the mediator: org.logica.ctis.security.SecurityService_tokenvalidator=validatorClassname
     when doing validation at the mediator you probably won't use validation at the main-container
  * </pre>
- * @author Eduard Drenth: Logica, 28-jan-2010
+ * @author Eduard Drenth: Logica, 5-match-2012
  * 
  */
 public class SecurityService extends BaseService {
