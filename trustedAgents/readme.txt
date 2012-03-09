@@ -29,7 +29,7 @@ configuration at split 'client' container
 
 
     be-required-services=org.logica.ctis.security.SecurityService
-    At the runtime where the 'mediator' lives: org.logica.ctis.security.SecurityService_tokenprovider=providerClassname
+    At the runtime where the 'mediator' lives in leap.properties: org.logica.ctis.security.SecurityService_tokenprovider=providerClassname
     or you can do validation at the mediator: org.logica.ctis.security.SecurityService_tokenvalidator=validatorClassname
     when doing validation at the mediator you probably won't use validation at the main-container
 
