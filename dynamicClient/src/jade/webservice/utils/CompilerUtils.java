@@ -39,7 +39,7 @@ import java.util.jar.JarFile;
 public final class CompilerUtils {
 	
 	public static void compileJavaSrc(String classPath, List<File> srcList, String dest) throws Exception {
-		String[] javacCommand = new String[srcList.size() + 7];
+		String[] javacCommand = new String[srcList.size() + 9];
 		javacCommand[0] = "javac";
 		javacCommand[1] = "-classpath";
 		javacCommand[2] = classPath;        
@@ -47,12 +47,14 @@ public final class CompilerUtils {
 		javacCommand[4] = dest;
 		javacCommand[5] = "-target";
 		javacCommand[6] = "1.5";
+		javacCommand[7] = "-source";
+		javacCommand[8] = "1.5";
 
-		int i = 7;
+		int i = 9;
 		for (File f : srcList) {
 			javacCommand[i++] = f.getAbsolutePath();            
 		}
-		internalCompile(javacCommand, 7); 
+		internalCompile(javacCommand, 9); 
 	}
     
 	public static void setupClasspath(StringBuilder classPath, ClassLoader classLoader) throws URISyntaxException, IOException {
