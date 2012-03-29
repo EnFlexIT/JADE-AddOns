@@ -88,7 +88,9 @@
 				destdir="${wsigBuild.dir}" 
 				encoding="ISO-8859-1"
 				optimize="${optimised-build}"
-				includeAntRuntime="no">
+				includeAntRuntime="no"
+				target="1.5"
+				source="1.5">
 			<classpath refid="wsigCompile.classpath"/>
 		</javac>
 		<echo>Compilation complete</echo>
@@ -237,7 +239,13 @@
 	<!-- EXAMPLES related targets -->
 	<target name="compile-examples" depends="init" description="Compile WSIG examples sources">
 		<mkdir dir="${wsigExamplesBuild.dir}"/>
-		<javac srcdir="${wsigExamplesSrc.dir}" debug="yes" destdir="${wsigExamplesBuild.dir}" encoding="ISO-8859-1" includeAntRuntime="no">
+		<javac srcdir="${wsigExamplesSrc.dir}" 
+		       debug="yes" 
+			   destdir="${wsigExamplesBuild.dir}" 
+			   encoding="ISO-8859-1" 
+			   includeAntRuntime="no"
+			   target="1.5"
+			   source="1.5">
 			<classpath refid="wsigCompile.classpath"/>
 		</javac>
 		<echo>Examples compilation complete</echo>
