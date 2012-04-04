@@ -23,31 +23,38 @@
 
 package test.common;
 
-import jade.util.leap.*;
-
-import jade.domain.*;
-import jade.core.Agent;
-import jade.core.AID;
-import jade.core.ContainerID;
-import jade.core.AgentContainer;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
-
-import jade.domain.JADEAgentManagement.*;
-import jade.domain.mobility.MobilityOntology;
-import jade.domain.FIPANames;
 import jade.content.AgentAction;
 import jade.content.ContentElement;
+import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.content.onto.basic.Done;
 import jade.content.onto.basic.Result;
-import jade.content.lang.sl.SLCodec;
+import jade.core.AID;
+import jade.core.Agent;
+import jade.core.AgentContainer;
+import jade.core.ContainerID;
+import jade.domain.FIPANames;
+import jade.domain.FIPAService;
+import jade.domain.JADEAgentManagement.CreateAgent;
+import jade.domain.JADEAgentManagement.JADEManagementOntology;
+import jade.domain.JADEAgentManagement.JADEManagementVocabulary;
+import jade.domain.JADEAgentManagement.KillAgent;
+import jade.domain.JADEAgentManagement.KillContainer;
+import jade.domain.mobility.MobilityOntology;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import jade.util.leap.ArrayList;
+import jade.util.leap.Iterator;
+import jade.util.leap.List;
 
-import test.common.agentConfigurationOntology.*;
-import test.common.remote.RemoteManager;
-
+import java.io.File;
+import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.util.Date;
-import java.rmi.*;
+
+import test.common.agentConfigurationOntology.AddBehaviour;
+import test.common.agentConfigurationOntology.AgentConfigurationOntology;
+import test.common.remote.RemoteManager;
 
 /**
  Class including utility static methods for launching/killing
@@ -383,6 +390,23 @@ public class TestUtility {
 					classpath = classpath.substring(1)+System.getProperty("path.separator")+currentCp;
 				}
 			}
+			
+			// Add "" to all paths to prevent problems with blank
+			StringBuilder sb = new StringBuilder(); 
+			String[] paths = classpath.split(File.pathSeparator);
+			for (String path : paths) {
+				if (path.startsWith("\"")) {
+					sb.append(path);
+					
+				} else {
+					sb.append("\"");
+					sb.append(path);
+					sb.append("\"");
+				}
+				sb.append(File.pathSeparator);
+			}
+			classpath = sb.toString();
+			
 			classpathOption = "-cp "+classpath;
 		}
 		String javaHome = System.getenv("JAVA_HOME");
