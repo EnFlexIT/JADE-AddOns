@@ -395,10 +395,11 @@ public class TestUtility {
 			StringBuilder sb = new StringBuilder(); 
 			String[] paths = classpath.split(File.pathSeparator);
 			for (String path : paths) {
-				if (path.startsWith("\"")) {
+				if (path.startsWith("\"") || System.getProperty("os.name").toLowerCase().indexOf("windows")==-1) {
 					sb.append(path);
 					
 				} else {
+					// Windows
 					sb.append("\"");
 					sb.append(path);
 					sb.append("\"");
