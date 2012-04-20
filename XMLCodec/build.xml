@@ -22,7 +22,7 @@
 
   <!-- Compile the java code from ${src} into ${build} -->
   <target name="compile" depends="init">
-    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on" includes="jade/**"/>
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" nowarn="off" optimize="on" deprecation="on" includes="jade/**" target="1.5" source="1.5"/>
   </target>
 
   <!-- Make jars file and put in ${lib} -->
