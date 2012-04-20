@@ -49,8 +49,8 @@
            debug="${javac.debug}"
            debuglevel="lines,vars,source"
            deprecation="on"
-		   target="1.6"
-		   source="1.6">
+		   target="1.5"
+		   source="1.5">
       <classpath>
         <path refid="jade-classes"/>
       </classpath>
