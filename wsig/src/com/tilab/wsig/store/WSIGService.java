@@ -54,6 +54,7 @@ public class WSIGService {
 	private boolean hierarchicalComplexType;
 	private Map<String,ActionBuilder> actionsBuilder = new HashMap<String,ActionBuilder>();
 	private Map<String,ResultBuilder> resultsBuilder = new HashMap<String,ResultBuilder>();
+	private Map<String,FaultBuilder> faultsBuilder = new HashMap<String,FaultBuilder>();
 	
 	public AID getAid() {
 		return aid;
@@ -116,6 +117,12 @@ public class WSIGService {
 	}
 	public ResultBuilder getResultBuilder(String operationName) {
 		return resultsBuilder.get(operationName);
+	}
+	public void addFaultBuilder(String operationName, FaultBuilder faultBuilder) {
+		faultsBuilder.put(operationName, faultBuilder);
+	}
+	public FaultBuilder getFaultBuilder(String operationName) {
+		return faultsBuilder.get(operationName);
 	}
 	public String getServicePrefix() {
 		return servicePrefix;

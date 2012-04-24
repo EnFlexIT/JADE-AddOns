@@ -42,6 +42,7 @@ import javax.xml.soap.Name;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPEnvelope;
+import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
 
@@ -49,6 +50,7 @@ import org.apache.log4j.Logger;
 
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.WSIGConstants;
+import com.tilab.wsig.store.FaultBuilder;
 import com.tilab.wsig.store.OperationResult;
 import com.tilab.wsig.store.ParameterInfo;
 import com.tilab.wsig.store.ResultBuilder;
@@ -60,39 +62,84 @@ public class JadeToSoap {
 
 	private static Logger log = Logger.getLogger(JadeToSoap.class.getName());
 	
-	private SOAPEnvelope envelope;
-	private String tns;
 	private String localNamespacePrefix;
 	private String soapStyle;
 	private Ontology onto;
 	private boolean hierarchicalComplexType;
+	private SOAPMessage soapMessage;
+	private SOAPPart soapPart;
+	private SOAPEnvelope soapEnvelope;
+	private SOAPBody soapBody;
+	private String tns;
 	
 	public JadeToSoap() {
 		localNamespacePrefix = WSIGConfiguration.getInstance().getLocalNamespacePrefix(); 
 		soapStyle = WSIGConfiguration.getInstance().getWsdlStyle();
 	}
-
-	public SOAPMessage convert(OperationResult opResult, WSIGService wsigService, String operationName) throws Exception {
 	
-		tns = WSDLConstants.URN + ":" + wsigService.getServicePrefix() + wsigService.getServiceName();
+	public synchronized SOAPMessage convert(OperationResult opResult, WSIGService wsigService, String operationName) throws Exception {
 		onto = wsigService.getServiceOntology();
 		hierarchicalComplexType = wsigService.isHierarchicalComplexType();
-
+		tns = WSDLConstants.URN + ":" + wsigService.getServicePrefix() + wsigService.getServiceName();
+		
+        MessageFactory messageFactory = MessageFactory.newInstance();
+        soapMessage = messageFactory.createMessage();
+        soapPart = soapMessage.getSOAPPart();
+        soapEnvelope = soapPart.getEnvelope();
+        soapEnvelope.setPrefix(WSDLConstants.SOAPENVELOP_PREFIX);
+        soapEnvelope.addNamespaceDeclaration(WSDLConstants.XSD, WSDLConstants.XSD_URL);
+        soapEnvelope.addNamespaceDeclaration(localNamespacePrefix, tns);
+        soapBody = soapEnvelope.getBody();
+		
+		if (opResult.getResult() == OperationResult.Result.OK) {
+			fillResult(opResult, wsigService, operationName);
+		} else {
+			fillFault(opResult, wsigService, operationName);
+		}
+		
+		soapMessage.saveChanges();
+		return soapMessage;
+	}
+	
+	public static SOAPMessage convert(SOAPException e) throws Exception {
 		// Create soap message
         MessageFactory messageFactory = MessageFactory.newInstance();
-        SOAPMessage soapResponse = messageFactory.createMessage();
+        SOAPMessage soapFaultMessage = messageFactory.createMessage();
         
         // Create soap part and body            
-        SOAPPart soapPart = soapResponse.getSOAPPart();
-        envelope = soapPart.getEnvelope();
+        SOAPPart soapPart = soapFaultMessage.getSOAPPart();
+        SOAPEnvelope envelope = soapPart.getEnvelope();
         envelope.setPrefix(WSDLConstants.SOAPENVELOP_PREFIX);
         envelope.addNamespaceDeclaration(WSDLConstants.XSD, WSDLConstants.XSD_URL);
-        envelope.addNamespaceDeclaration(localNamespacePrefix, tns);
         SOAPBody body = envelope.getBody();
+		
+        // Create soap fault
+        SOAPFault fault = body.addFault();
+        fault.setFaultActor(e.getFaultActor());
+        fault.setFaultCode(e.getFaultCode());
+        fault.setFaultString(e.getFaultString());
 
+        return soapFaultMessage;
+	}
+	
+	private void fillFault(OperationResult opResult, WSIGService wsigService, String operationName) throws Exception {
+		FaultBuilder faultBuilder = wsigService.getFaultBuilder(operationName);
+        if (faultBuilder == null) {
+			throw new Exception("Fault builder not found for operation "+operationName+" in WSIG");
+        }
+		
+		faultBuilder.prepare(opResult.getMessage());
+		
+		SOAPFault soapFault = soapBody.addFault();
+		soapFault.setFaultCode(faultBuilder.getFaultCode());
+		soapFault.setFaultString(faultBuilder.getFaultString());
+		soapFault.setFaultActor(faultBuilder.getFaultActor());
+	}
+	
+	private void fillResult(OperationResult opResult, WSIGService wsigService, String operationName) throws Exception {
         // Create soap element
         String responseElementName = operationName + WSDLConstants.RESPONSE_SUFFIX;
-        SOAPElement responseElement = addSoapElement(body, responseElementName, localNamespacePrefix, null, tns, false);
+        SOAPElement responseElement = addSoapElement(soapBody, responseElementName, localNamespacePrefix, null, tns, false);
         
         // Get action builder
         log.debug("Operation name: "+operationName);
@@ -117,11 +164,6 @@ public class JadeToSoap {
     		log.debug("Add element type: "+elementSchema.getTypeName());
             convertObjectToSoapElement(responseSchema, elementSchema, elementValue, elementName, responseElement);
 		}
-
-        // Save all modifies of soap message
-        soapResponse.saveChanges();
-        
-		return soapResponse;
 	}
 
 	private SOAPElement convertObjectToSoapElement(ObjectSchema containerSchema, ObjectSchema resultSchema, AbsObject resultAbsObj, String elementName, SOAPElement rootSoapElement) throws Exception {
@@ -240,7 +282,7 @@ public class JadeToSoap {
 		if (WSDLConstants.STYLE_RPC.equals(soapStyle) && rootSoapElement instanceof SOAPBody) {
 			elementPrefix = prefix;
 		}
-		Name soapName = envelope.createName(elementName, elementPrefix, tns);
+		Name soapName = soapEnvelope.createName(elementName, elementPrefix, tns);
 	    SOAPElement soapElement = rootSoapElement.addChildElement(soapName);
 	    
 	    // Add encoding style only in result tag and for style rpc
@@ -250,7 +292,7 @@ public class JadeToSoap {
 
 	    // Add type to element
 	    if ((WSDLConstants.STYLE_RPC.equals(soapStyle) || forceType) && prefix != null && soapType != null) {
-		    Name typeName = envelope.createName(WSDLConstants.TYPE, WSDLConstants.XSI, WSDLConstants.XSI_URL);
+		    Name typeName = soapEnvelope.createName(WSDLConstants.TYPE, WSDLConstants.XSI, WSDLConstants.XSI_URL);
 		    soapElement.addAttribute(typeName, prefix+":"+soapType);
 	    }
 	    

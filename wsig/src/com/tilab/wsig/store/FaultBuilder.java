@@ -20,25 +20,23 @@ License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
+package com.tilab.wsig.store;
 
-package com.tilab.wsig;
+import jade.content.onto.Ontology;
+import jade.content.schema.ObjectSchema;
+import jade.lang.acl.ACLMessage;
 
-import java.text.SimpleDateFormat;
+public abstract class FaultBuilder extends Builder {
 
-public interface WSIGConstants {
+	public abstract String getFaultString();
+	public abstract String getFaultCode();
+	public abstract String getFaultActor();
+	public abstract ParameterInfo getDetailValue() throws Exception;
+	public abstract ObjectSchema getDetailSchema() throws Exception;
 
-	public static final String AGENT_TYPE = "WSIG Agent";
-	public static final String WSIG_FLAG = "wsig";
-	public static final String WSIG_MAPPER = "wsig-mapper";
-	public static final String WSIG_PREFIX = "wsig-prefix";
-	public static final String WSIG_HIERARCHICAL_TYPE = "wsig-hierarchical-type";
+	public abstract void prepare(ACLMessage message) throws Exception;
 	
-	public static final SimpleDateFormat ISO8601_DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSS");
-	
-	public static final String RESULT_CONVERTER_SUFFIX = "ResultConverter";
-	public static final String FAULT_CONVERTER_SUFFIX = "FaultConverter";
-	
-	public static final String HTTP_HEADER_PREFIX = "HTTP";
-	public static final String WSIG_HEADER_PREFIX = "WSIG";
-	public static final String WSIG_HEADER_CLIENT_IP = "client-ip";
+	public FaultBuilder(Ontology ontoService, Ontology ontoAgent, String actionName) {
+		super(ontoService, ontoAgent, actionName);
+	}
 }

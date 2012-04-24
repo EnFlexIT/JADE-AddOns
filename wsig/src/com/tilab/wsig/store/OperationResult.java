@@ -26,12 +26,16 @@ import jade.content.abs.AbsTerm;
 import jade.lang.acl.ACLMessage;
 
 public class OperationResult {
+	public static enum Result {OK, KO};
+	
 	private AbsTerm value;
 	private ACLMessage message;
+	private Result result;
 
-	public OperationResult(AbsTerm value, ACLMessage message) {
-		this.value = value;
+	public OperationResult(Result result, ACLMessage message, AbsTerm value) {
+		this.result = result;
 		this.message = message;
+		this.value = value;
 	}
 
 	public AbsTerm getValue() {
@@ -40,5 +44,9 @@ public class OperationResult {
 
 	public ACLMessage getMessage() {
 		return message;
+	}
+	
+	public Result getResult() {
+		return result;
 	}
 }

@@ -36,6 +36,9 @@ import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 
 import com.tilab.wsig.store.OperationResult;
@@ -47,7 +50,8 @@ public class WSIGBehaviour extends AchieveREInitiator {
 	public static final int UNKNOWN_STATUS  = 0;
 	public static final int SUCCESS_STATUS  = 1;
 	public static final int FAILURE_STATUS  = 2;
-	
+	public static final int APPLICATIVE_FAILURE_STATUS  = 3;
+
 	private int status;
 	private OperationResult opResult;
 	private String error;
@@ -56,9 +60,10 @@ public class WSIGBehaviour extends AchieveREInitiator {
 	private AgentAction agentAction;
 	private AID agentExecutor;
 	private int timeout = 0;
+	private Map<String, String> userDefinedParameters;
 
 	
-	public WSIGBehaviour(AID agentExecutor, AgentAction agentAction,  Ontology onto, int timeout) {
+	public WSIGBehaviour(AID agentExecutor, AgentAction agentAction,  Ontology onto, int timeout, Map<String, String> userDefinedParameters) {
 		super(null, null);
 		
 		this.status = UNKNOWN_STATUS;
@@ -66,6 +71,7 @@ public class WSIGBehaviour extends AchieveREInitiator {
 		this.agentAction = agentAction;
 		this.timeout = timeout;
 		this.agentExecutor = agentExecutor;
+		this.userDefinedParameters = userDefinedParameters;
 	}
 
 	public void onStart() {
@@ -84,8 +90,16 @@ public class WSIGBehaviour extends AchieveREInitiator {
 			request.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 			request.setReplyByDate(new Date(System.currentTimeMillis() + timeout));
 			request.addReceiver(agentExecutor);
-			myAgent.getContentManager().fillContent(request, new Action(agentExecutor, agentAction));
+
+			if (userDefinedParameters != null) {
+				Set<Entry<String, String>> udpSet = userDefinedParameters.entrySet();
+				for (Entry<String, String> udpEntry : udpSet) {
+					request.addUserDefinedParameter(udpEntry.getKey(), udpEntry.getValue());
+				}
+			}
 			
+			myAgent.getContentManager().fillContent(request, new Action(agentExecutor, agentAction));
+
 			v.addElement(request);
 			
 		} catch (Exception e) {
@@ -112,7 +126,7 @@ public class WSIGBehaviour extends AchieveREInitiator {
 				throw new Exception("Abs content element of type "+content.getTypeName()+" not supported");
 			}
 			
-			opResult = new OperationResult(resultValue, message);
+			opResult = new OperationResult(OperationResult.Result.OK, message, resultValue);
 			
 		} catch (Exception e) {
 			status = FAILURE_STATUS;
@@ -121,26 +135,29 @@ public class WSIGBehaviour extends AchieveREInitiator {
 	}
 
 	protected void handleFailure(ACLMessage failure)	{
-		status = FAILURE_STATUS;
-		
 		// Check for AMS response
 		if (failure.getSender().equals(myAgent.getAMS())) {
 			// Executor agent unreachable
 			error = "Agent "+agentExecutor.getLocalName()+" UNREACHABLE";
+			status = FAILURE_STATUS;
 		} else {
 			// Applicative failure
 			error = failure.getContent();
+			status = APPLICATIVE_FAILURE_STATUS;
+			opResult = new OperationResult(OperationResult.Result.KO, failure, null);
 		}
 	}
 
 	protected void handleRefuse(ACLMessage refuse) {
-		status = FAILURE_STATUS;
 		error = "Agent "+refuse.getSender().getLocalName()+" REFUSE request";
+		status = APPLICATIVE_FAILURE_STATUS;
+		opResult = new OperationResult(OperationResult.Result.KO, refuse, null);
 	}
 
 	protected void handleNotUnderstood(ACLMessage notUnderstood) {
-		status = FAILURE_STATUS;
 		error = "Agent "+notUnderstood.getSender().getLocalName()+" NOT_UNDERSTOOD request";
+		status = APPLICATIVE_FAILURE_STATUS;
+		opResult = new OperationResult(OperationResult.Result.KO, notUnderstood, null);
 	}
 	
 	public String getError() {

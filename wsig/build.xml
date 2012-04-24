@@ -133,6 +133,7 @@
 				<include name="com/tilab/wsig/store/SuppressOperation.class"/>
 				<include name="com/tilab/wsig/store/ApplyTo.class"/>
 				<include name="com/tilab/wsig/store/ResultConverter.class"/>
+				<include name="com/tilab/wsig/store/FaultConverter.class"/>
 			</fileset>
 		</jar>
 	</target>

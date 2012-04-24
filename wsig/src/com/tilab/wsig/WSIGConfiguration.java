@@ -50,11 +50,13 @@ public class WSIGConfiguration extends Properties {
 	private static String wsigConfPath;
 	private static String wsigVersion;
 	
-	// AGENT CONFIGURATION FOR SERVLET
+	// WSIG configuration
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
 	public static final String KEY_WSIG_SERVICES_URL = "wsig.servicesURL";
 	public static final String KEY_WSIG_TIMEOUT = "wsig.timeout";
 	public static final String KEY_WSIG_PRESERVE_JAVA_TYPE = SLCodec.PRESERVE_JAVA_TYPES;
+	public static final String KEY_WSIG_TRACE_CLIENT_IP = "wsig.traceClientIP";
+	public static final String KEY_WSIG_TRACE_HTTP_HEADERS = "wsig.traceHttpHeaders";
 	
 	// WSS security
 	public final static String KEY_WSS_USERNAME = "wss.username";
@@ -149,6 +151,16 @@ public class WSIGConfiguration extends Properties {
 	
 	public synchronized String getAgentClassName() {
 		return getProperty(KEY_WSIG_AGENT_CLASS_NAME);
+	}
+	
+	public synchronized boolean isTraceClientIP() {
+		String traceClientIP = getProperty(KEY_WSIG_TRACE_CLIENT_IP);
+		return "true".equalsIgnoreCase(traceClientIP);
+	}
+	
+	public synchronized boolean isTraceHttpHeaders() {
+		String traceHttpHeaders = getProperty(KEY_WSIG_TRACE_HTTP_HEADERS);
+		return "true".equalsIgnoreCase(traceHttpHeaders);
 	}
 	
 	public synchronized String getServicesUrl(HttpServletRequest request) throws MalformedURLException {
@@ -286,6 +298,8 @@ public class WSIGConfiguration extends Properties {
 		
 		setProperty(WSIGConfiguration.KEY_WSIG_AGENT_CLASS_NAME, "com.tilab.wsig.agent.WSIGAgent");
 		setProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT, "30000");
+		setProperty(WSIGConfiguration.KEY_WSIG_TRACE_CLIENT_IP, "true");
+		setProperty(WSIGConfiguration.KEY_WSIG_TRACE_HTTP_HEADERS, "true");
 		setProperty(WSIGConfiguration.KEY_WSDL_DIRECTORY, "wsdl");
 		setProperty(WSIGConfiguration.KEY_WSDL_WRITE_ENABLE, "false");
 		setProperty(WSIGConfiguration.KEY_WSDL_STYLE, WSDLConstants.STYLE_DOCUMENT);

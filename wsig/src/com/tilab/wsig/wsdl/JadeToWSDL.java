@@ -74,12 +74,17 @@ import org.eclipse.xsd.XSDSimpleTypeDefinition;
 import org.eclipse.xsd.XSDTypeDefinition;
 
 import com.tilab.wsig.WSIGConfiguration;
+import com.tilab.wsig.WSIGConstants;
 import com.tilab.wsig.store.ActionBuilder;
 import com.tilab.wsig.store.ApplyTo;
 import com.tilab.wsig.store.Builder;
+import com.tilab.wsig.store.FaultBuilder;
+import com.tilab.wsig.store.FaultConverter;
 import com.tilab.wsig.store.MapperBasedActionBuilder;
+import com.tilab.wsig.store.MapperBasedFaultConverter;
 import com.tilab.wsig.store.MapperBasedResultConverter;
 import com.tilab.wsig.store.OntologyBasedActionBuilder;
+import com.tilab.wsig.store.OntologyBasedFaultConverter;
 import com.tilab.wsig.store.OntologyBasedResultConverter;
 import com.tilab.wsig.store.OperationName;
 import com.tilab.wsig.store.ParameterInfo;
@@ -171,7 +176,8 @@ public class JadeToWSDL {
 
 		// Get mapper actions and converters
 		Map<String, Map<String, Method>> mapperActions = getMapperActions();
-		Map<String, Map<String, Class>> mapperResultConverters = getMapperResultConverters();
+		Map<String, Map<String, Class>> mapperResultConverters = getMapperConverters(ResultConverter.class, WSIGConstants.RESULT_CONVERTER_SUFFIX);
+		Map<String, Map<String, Class>> mapperFaultConverters = getMapperConverters(FaultConverter.class, WSIGConstants.FAULT_CONVERTER_SUFFIX);
 		
 		// Manage ontology
 		ontoService = wsigService.getServiceOntology();
@@ -265,6 +271,26 @@ public class JadeToWSDL {
 
 					// Add ResultBuilder to wsigService 
 					wsigService.addResultBuilder(operationName, resultBuilder);
+
+					// Get fault converter class declared in mapper (if any)
+					Class mapperFaultConverterClass = null;
+					Map<String, Class> mapperFaultConvertersForAction = mapperFaultConverters.get(actionName.toLowerCase());
+					if (mapperFaultConvertersForAction != null) {
+						mapperFaultConverterClass = mapperFaultConvertersForAction.get(operationName.toLowerCase());
+					}
+
+					// Create appropriate FaultBuilder
+					FaultBuilder faultBuilder;
+					if (mapperFaultConverterClass != null) {
+						
+						faultBuilder = new MapperBasedFaultConverter(mapperObject, mapperFaultConverterClass, ontoService, ontoAgent, actionName);
+					} else {
+						
+						faultBuilder = new OntologyBasedFaultConverter(ontoService, ontoAgent, actionName);
+					}
+
+					// Add FaultBuilder to wsigService 
+					wsigService.addFaultBuilder(operationName, faultBuilder);
 					
 					// Output parameters		
 					Message outputMessage = WSDLUtils.createMessage(tns, WSDLUtils.getResponseName(operationName));
@@ -658,16 +684,21 @@ public class JadeToWSDL {
 		return mapperActions;
 	}
 
-	private Map<String, Map<String, Class>> getMapperResultConverters() {
+	private <A> Map<String, Map<String, Class>> getMapperConverters(A annotationClass, String classSuffix) {
 		Map<String, Map<String, Class>> mapperResultConverters = new HashMap<String, Map<String, Class>>();
 
 		if (mapperClass != null) {
 			Class[] mapperInnerClasses = mapperClass.getDeclaredClasses();
 			for (Class mapperInnerClass : mapperInnerClasses) {
 				
-				ResultConverter annotationResultConverter = (ResultConverter)mapperInnerClass.getAnnotation(ResultConverter.class);
-				if (annotationResultConverter != null) {
-					ApplyTo[] appliesTo = annotationResultConverter.value();
+				A annotationConverter = (A)mapperInnerClass.getAnnotation((Class)annotationClass);
+				if (annotationConverter != null) {
+					ApplyTo[] appliesTo = null;
+					if (annotationConverter instanceof ResultConverter) {
+						appliesTo = ((ResultConverter)annotationConverter).value();
+					} else if (annotationConverter instanceof FaultConverter) {
+						appliesTo = ((FaultConverter)annotationConverter).value();
+					}
 					if (appliesTo != null) {
 						for (ApplyTo applyTo : appliesTo) {
 
@@ -677,20 +708,39 @@ public class JadeToWSDL {
 								operationName = actionName;
 							}
 							
-							Map<String,Class> operationClasses = mapperResultConverters.get(actionName.toLowerCase());
-							if (operationClasses == null) {
-								operationClasses = new HashMap<String, Class>();
-								mapperResultConverters.put(actionName.toLowerCase(), operationClasses);
-							}
-
-							operationClasses.put(operationName.toLowerCase(), mapperInnerClass);
+							addMapperConverters(mapperResultConverters, actionName, operationName, mapperInnerClass);
 						}
+					}
+				} else {
+					// Check is the inner-class name end with ResultConverter
+					String className = mapperInnerClass.getSimpleName();
+					if (className.endsWith(classSuffix)) {
+						
+						int pos = className.indexOf(classSuffix);
+						String actionName = className.substring(0, pos).toLowerCase();
+
+						
+						addMapperConverters(mapperResultConverters, actionName, actionName, mapperInnerClass);
 					}
 				}
 			}
 		}
 		
 		return mapperResultConverters;
+	}
+	
+	private void addMapperConverters(Map<String, Map<String, Class>> mapperConverters, String actionName, String operationName, Class mapperInnerClass) {
+		Map<String,Class> operationClasses = mapperConverters.get(actionName.toLowerCase());
+		if (operationClasses == null) {
+			operationClasses = new HashMap<String, Class>();
+			mapperConverters.put(actionName.toLowerCase(), operationClasses);
+		}
+
+		if (!operationClasses.containsKey(operationName.toLowerCase())) {
+			operationClasses.put(operationName.toLowerCase(), mapperInnerClass);	
+		} else {
+			log.warn("Skipped converter class <"+mapperInnerClass.getName()+"> map because the operation <"+operationName+"> of action <"+actionName+"> is already mapped!");
+		}
 	}
 	
 	private boolean isActionSuppressed(String actionName) {

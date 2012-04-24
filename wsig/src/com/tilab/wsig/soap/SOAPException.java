@@ -20,27 +20,27 @@ License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
-package com.tilab.wsig;
+package com.tilab.wsig.soap;
 
-public class WSIGException extends Exception {
+public class SOAPException extends Exception {
 
-	public static final String CLIENT = "Client";
-	public static final String SERVER = "Server";
+	public static final String FAULT_CODE_CLIENT = "Client";
+	public static final String FAULT_CODE_SERVER = "Server";
+	
+	public static final String FAULT_STRING_TIMEOUT = "TIMEOUT";
+	
+	public static final String FAULT_ACTOR_WSIG = "WSIG core";
 	
 	String faultString;
 	String faultCode;
 	String faultActor;
 	
-	public WSIGException(String faultActor, String faultCode, String faultString) {
+	public SOAPException(String faultCode, String faultString, String faultActor) {
 		super();
 		
-		this.faultActor = faultActor;
 		this.faultCode = faultCode;
 		this.faultString = faultString;
-	}
-	
-	public WSIGException(String faultCode, String faultString) {
-		this("WSIG", faultCode, faultString); 
+		this.faultActor = faultActor;
 	}
 	
 	public String getFaultString() {

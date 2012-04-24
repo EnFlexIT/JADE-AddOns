@@ -20,25 +20,50 @@ License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
+package com.tilab.wsig.store;
 
-package com.tilab.wsig;
+import com.tilab.wsig.soap.SOAPException;
 
-import java.text.SimpleDateFormat;
+import jade.content.onto.Ontology;
+import jade.content.schema.ObjectSchema;
+import jade.lang.acl.ACLMessage;
 
-public interface WSIGConstants {
 
-	public static final String AGENT_TYPE = "WSIG Agent";
-	public static final String WSIG_FLAG = "wsig";
-	public static final String WSIG_MAPPER = "wsig-mapper";
-	public static final String WSIG_PREFIX = "wsig-prefix";
-	public static final String WSIG_HIERARCHICAL_TYPE = "wsig-hierarchical-type";
+public class OntologyBasedFaultConverter extends FaultBuilder {
+
+	protected ACLMessage message;
 	
-	public static final SimpleDateFormat ISO8601_DATE_FORMAT = new SimpleDateFormat ("yyyy-MM-dd'T'HH:mm:ss.SSS");
+	public OntologyBasedFaultConverter(Ontology ontoService, Ontology ontoAgent, String actionName) {
+		super(ontoService, ontoAgent, actionName);
+	}
+
+	@Override
+	public void prepare(ACLMessage message) throws Exception {
+		this.message = message;
+	}
 	
-	public static final String RESULT_CONVERTER_SUFFIX = "ResultConverter";
-	public static final String FAULT_CONVERTER_SUFFIX = "FaultConverter";
-	
-	public static final String HTTP_HEADER_PREFIX = "HTTP";
-	public static final String WSIG_HEADER_PREFIX = "WSIG";
-	public static final String WSIG_HEADER_CLIENT_IP = "client-ip";
+	@Override
+	public String getFaultString() {
+		return message.getContent();
+	}
+
+	@Override
+	public String getFaultCode() {
+		return SOAPException.FAULT_CODE_SERVER;
+	}
+
+	@Override
+	public String getFaultActor() {
+		return message.getSender().getName();
+	}
+
+	@Override
+	public ParameterInfo getDetailValue() throws Exception {
+		return null;
+	}
+
+	@Override
+	public ObjectSchema getDetailSchema() throws Exception {
+		return null;
+	}
 }

@@ -105,7 +105,7 @@ public class SoapToJade extends DefaultHandler {
 		}
 	}
 	
-	public Object convert(Message soapRequest, WSIGService wsigService, String operationName) throws Exception {
+	public synchronized Object convert(Message soapRequest, WSIGService wsigService, String operationName) throws Exception {
 
 		Object actionObj = null;
 		String soapBodyMessage = soapRequest.getSOAPBody().toString();
