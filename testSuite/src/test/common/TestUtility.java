@@ -51,6 +51,7 @@ import java.io.File;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.Date;
+import java.util.UUID;
 
 import test.common.agentConfigurationOntology.AddBehaviour;
 import test.common.agentConfigurationOntology.AgentConfigurationOntology;
@@ -375,6 +376,11 @@ public class TestUtility {
 		if (jvmArgs == null) {
 			jvmArgs = "";
 		}
+
+		// Prepare the startup-tag used to check the JADE containers startup
+		String startupTag = UUID.randomUUID().toString();
+		jvmArgs += " -Dstartup-tag="+startupTag;
+		
 		// FIXME: We should propagate all -Dkey=value properties...
 		if (System.getProperty("project-home") != null) {
 			jvmArgs = jvmArgs + " -Dproject-home="+System.getProperty("project-home");
@@ -416,6 +422,7 @@ public class TestUtility {
 		}else{
 			javaHome= "java ";
 		}
+		
 		String commandLine = javaHome+classpathOption+" "+jvmArgs+" -DTSDaemon=true "+mainClass+" "+jadeArgs;
 		if ("true".equalsIgnoreCase(System.getProperty("DEBUG"))) {
 			System.out.println("Manual launch!!!!!!!!!!!!!!");
@@ -423,7 +430,7 @@ public class TestUtility {
 		}
 		else {
 			try {
-				jc = new LocalJadeController(instanceName, commandLine, protoNames, outputHandler, workingDir);
+				jc = new LocalJadeController(instanceName, commandLine, protoNames, outputHandler, workingDir, startupTag);
 			} catch(ExecException e) {
 				System.out.println("Error launching JADE. Check the JAVA_HOME environment variable (JAVA_HOME="+javaHome+")");
 				throw e;

@@ -44,7 +44,7 @@ class LocalJadeController implements JadeController, OutputHandler {
 	private Process proc;
 	private OutputHandler outHandler;
 	
-	public LocalJadeController(String instanceName, String cmdLine, String[] protoNames, OutputHandler handler, String workingDir) throws TestException {
+	public LocalJadeController(String instanceName, String cmdLine, String[] protoNames, OutputHandler handler, String workingDir, String startupTag) throws TestException {
 		outHandler = (handler != null ? handler : this);
 		workingDir = (workingDir != null ? workingDir : ".");
 		try {
@@ -53,7 +53,7 @@ class LocalJadeController implements JadeController, OutputHandler {
 			//System.out.println("Environment: "+System.getenv());
 			proc = java.lang.Runtime.getRuntime().exec(cmdLine, null, new File(workingDir).getCanonicalFile());
 			
-			Thread t = new SubProcessManager(instanceName, proc, protoNames);
+			Thread t = new SubProcessManager(instanceName, proc, protoNames, startupTag);
 			t.start();
 			
 			waitForJadeStartup();
@@ -135,10 +135,12 @@ class LocalJadeController implements JadeController, OutputHandler {
 		private String[] protoNames;
 		private String name;
 		private Thread errorManager;
+		private String startupTag;
 		
-		public SubProcessManager(String n, Process p, String[] names) {
+		public SubProcessManager(String n, Process p, String[] names, String st) {
 			name = n;
 			subProc = p;
+			startupTag = st;
 			br = new BufferedReader(new InputStreamReader(subProc.getInputStream()));
 			protoNames = (names != null ? names : new String[0]);
 			errorManager = startErrorManager();
@@ -157,7 +159,6 @@ class LocalJadeController implements JadeController, OutputHandler {
 				catch (IllegalThreadStateException itse) {
 					// The sub-process is still alive --> go on
 				}
-				
 				
 				try {
 					String line = br.readLine();
@@ -186,8 +187,8 @@ class LocalJadeController implements JadeController, OutputHandler {
 				// Possibly update the list of addresses of this JADE instance
 				catchAddress(line);
 
-				// Notify the launcher when JADE startup is completed 
-				if (containerName == null && line.startsWith("Agent container") && line.endsWith("is ready.")) {
+				// Notify the launcher when JADE startup is completed (startup-tag present in output)
+				if (containerName == null && line.startsWith(startupTag)) {
 					catchContainerName(line);
 					notifyStarted();
 				} else {
@@ -206,8 +207,7 @@ class LocalJadeController implements JadeController, OutputHandler {
 		
 		private void catchContainerName(String line) {
 			StringTokenizer st = new StringTokenizer(line, " @");
-			st.nextToken(); // Agent
-			st.nextToken(); // Container
+			st.nextToken(); // UUID
 			containerName = st.nextToken();
 		}
 		
