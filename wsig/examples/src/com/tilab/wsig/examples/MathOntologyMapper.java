@@ -32,12 +32,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.tilab.wsig.soap.SOAPException;
 import com.tilab.wsig.store.ApplyTo;
+import com.tilab.wsig.store.FaultConverter;
 import com.tilab.wsig.store.OperationName;
 import com.tilab.wsig.store.ResultConverter;
 import com.tilab.wsig.store.SuppressOperation;
 
 public class MathOntologyMapper {
+
+	@FaultConverter({
+		@ApplyTo(action="CompareNumbers")
+	})
+	public class CompareNumbersFaultConverter {
+		private ACLMessage message;
+		
+		public CompareNumbersFaultConverter(ACLMessage message) {
+			this.message = message;
+		}
+		
+		public String getFaultCode() {
+			return SOAPException.FAULT_CODE_CLIENT;
+		}
+		
+		public String getFaultString() {
+			return "Custom Fault String: "+message.getContent();
+		}
+		
+		public String getFaultActor() {
+			return "Custom Fault Actor: "+message.getSender().getName();
+		}
+	}
 	
 	public Abs toAbs(float real,float immaginary){
 		Abs abs = new Abs();
