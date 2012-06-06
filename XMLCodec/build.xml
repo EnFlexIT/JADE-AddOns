@@ -1,7 +1,7 @@
 <project name="XMLCodec" default="compile" basedir=".">
   <!-- set global properties for this build -->
   <property environment="env"/>
-  <property name="version" value="1.9"/>
+  <property name="version" value="1.10"/>
 
   <property name="src" value="src"/>
   <property name="build" value="classes"/>
