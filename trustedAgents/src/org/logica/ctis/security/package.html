@@ -15,21 +15,22 @@ SecurityService (TrustedAgent)
 
 
 <p>
-This simple SecurityService fascilitates making sure only agents with a
-token that can be validated will be allowed to join the Jade Platform.
-The way it works is that at a regular container a token is retrieved
-and connected to an agent AID, at the Main-Container (or mediator) the
-token is extracted from the AID and validated. Retreiving a token and
-validating is a matter of implementing two very simple interfaces.
-Validating can be done using for exmaple an external LDAP. The Service
-can contain a <a href="file:///home/eduard/jade_3.7/jade/add-ons/trustedAgents/doc/api/org/logica/ctis/security/TokenProvider.html" title="interface in org.logica.ctis.security"><code>TokenProvider</code></a> or a <a href="file:///home/eduard/jade_3.7/jade/add-ons/trustedAgents/doc/api/org/logica/ctis/security/TokenValidator.html" title="interface in org.logica.ctis.security"><code>TokenValidator</code></a>.
+This simple SecurityService facilitates security for {@link VerticalCommand}s,
+for example making sure only agents with a token that can be validated will
+be allowed to join the Jade Platform. The way it works is that at a regular
+container a token is retrieved and connected to an agent AID, at the
+Main-Container (or mediator) the token is extracted from the AID and
+validated. Retrieving a token and validating is a matter of implementing two
+very simple interfaces. Validating can be done using for example an external
+LDAP. The Service
+can contain a <a href="TokenProvider.html" title="interface in org.logica.ctis.security"><code>TokenProvider</code></a> or a <a href="TokenValidator.html" title="interface in org.logica.ctis.security"><code>TokenValidator</code></a>.
  </p><ul>
  <li>A TokenProvider provides a token for a GenericCommand, the service then connects the token to the command</li>
 
 
  <li>A
 TokenValidator retreives a token from a GenericCommand, the service
-then calls validate with the token, command and objectName (<code>AID.getName()</code>) as arguments</li>
+then calls validate with the token, command and <code>AID</code> as arguments</li>
  </ul>
  Building a TokenProvider or a Validator is left to users of this security service.
  <ul>
