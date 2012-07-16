@@ -1,0 +1,12 @@
+#!/bin/bash
+
+for f in new*.pem; do
+    [[ -e $f ]] && exit 1
+done
+
+mkdir "$1" || exit 1
+CA.sh -newreq
+CA.sh -sign
+mv new*.pem "$1"/
+cd "$1"
+pkiimport keystore "$1".jks newkey.pem newcert.pem default

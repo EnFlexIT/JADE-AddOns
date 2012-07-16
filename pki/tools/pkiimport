@@ -1,0 +1,95 @@
+#!/bin/bash
+
+usage() {
+    echo "pkiimport keystore <keystore> <keyfile> <certfile> <alias>" >&2
+    echo "pkiimport truststore <keystore> <certfile1>:<alias1>" \
+        "<certfile2>:<alias2> ..." >&2
+}
+
+MY_TMPDIR="$(mktemp -d)" || exit 1
+IMPORTKEY_CP="${0%/*}"
+
+cleanup() {
+    rm -rf "$MY_TMPDIR"
+}
+
+trap cleanup EXIT
+
+
+cp_to_tmp() {
+    cp "$1" "$MY_TMPDIR"/ && echo "$MY_TMPDIR/${1##*/}"
+}
+
+to_der() {
+    local what_="$1" in="$2" out="${2%.pem}.der"
+    [[ ${in##*.} = der ]] && echo "$in" && return 0
+    [[ ${in##*.} = pem ]] || return 1
+
+    case "$what_" in
+        crt)
+            openssl x509 -in "$in" -out "$out" -outform der || return 1
+            ;;
+        key)
+            openssl pkcs8 -topk8 -nocrypt -in "$in" -out "$out" -outform der \
+                || return 1
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+
+    echo "$out"
+}
+
+cp_as_der() {
+    local what_="$1" in="$2"
+    to_der "$what_" "$(cp_to_tmp "$in")"
+}
+
+handle_keystore() {
+    local ks="$1" alias_="$4"
+    local keyfile="$(cp_as_der key "$2")" || return 1
+    local crtfile="$(cp_as_der crt "$3")" || return 1
+
+    [[ $ks && $alias_ && $keyfile && $crtfile ]] || return 1
+
+    (cd "$IMPORTKEY_CP"; make ImportKey.class; )
+    CLASSPATH="$IMPORTKEY_CP" \
+        java -Dkeystore="$ks" ImportKey "$keyfile" "$crtfile" "$alias_"
+}
+
+handle_truststore() {
+    local ts="$1"
+    local tspasswd e crtfile alias_
+
+    read -p "Store password [123456]: " tspasswd
+    [[ $tspasswd ]] || tspasswd=123456
+
+    [[ $ts && $tspasswd ]] || return 1
+
+    shift
+    for e in "$@"; do
+        crtfile="$(cp_as_der crt "${e%:*}")" || return 1
+        alias_="${e#*:}"
+        keytool -import -alias "$alias_" -file "$crtfile" -keystore "$ts" \
+            -storepass "$tspasswd" || return 1
+    done
+
+    read -p "List certs? [y/n]"
+    if [[ $REPLY = y ]]; then
+        keytool -list -v -keystore "$ts" -storepass "$tspasswd"
+    fi
+}
+
+
+store="$1"
+shift
+
+case "$store" in
+    keystore) handle_keystore "$@" ;;
+    truststore) handle_truststore "$@" ;;
+    -h) usage ;;
+    *) exit 1 ;;
+esac
+
+exit 0
