@@ -163,15 +163,17 @@ public class FileManagerServer implements Serializable {
 						
 						ACLMessage reply = request.createReply();
 						reply.setPerformative(ACLMessage.INFORM);
-						if (bytesRead < getDownloadBlockSize()) {
-							byte[] partialBuffer = new byte[bytesRead];
-							System.arraycopy(buffer, 0, partialBuffer, 0, bytesRead);
-							reply.setByteSequenceContent(partialBuffer);
-						} else {
-							reply.setByteSequenceContent(buffer);
+						if (bytesRead > 0) {
+							if (bytesRead < getDownloadBlockSize()) {
+								byte[] partialBuffer = new byte[bytesRead];
+								System.arraycopy(buffer, 0, partialBuffer, 0, bytesRead);
+								reply.setByteSequenceContent(partialBuffer);
+							} else {
+								reply.setByteSequenceContent(buffer);
+							}
 						}
 						
-						if (totalBytesRead >= fileSize) {
+						if (bytesRead == -1 || totalBytesRead >= fileSize) {
 							closeSessionOnNextReply();
 						}
 

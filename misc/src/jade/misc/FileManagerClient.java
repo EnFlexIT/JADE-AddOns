@@ -430,7 +430,11 @@ public class FileManagerClient {
 				if (buffer == null) {
 					fillBuffer();
 				}
-				i = (int)buffer.get() & 0xff;
+				if (buffer == null) {
+					i = -1;
+				} else {
+					i = (int)buffer.get() & 0xff;
+				}
 			} catch(BufferUnderflowException bue) {
 				if (finished) {
 					i = -1;
@@ -477,7 +481,9 @@ public class FileManagerClient {
 		private void fillBuffer() throws IOException {
 			try {
 				DownloadInfo di = myConnector.download(conversationId, filePathName);
-				buffer = ByteBuffer.wrap(di.content);
+				if (di.content != null) {
+					buffer = ByteBuffer.wrap(di.content);
+				}
 				finished = di.completed;
 			} catch(Exception e) {
 				logger.log(Level.SEVERE, "Error getting file data from "+filePathName, e);
