@@ -129,6 +129,10 @@ public class FileManagerServer implements Serializable {
 							DownloadFileAction dfa = (DownloadFileAction)actExpr.getAction();
 		
 							filePathName = dfa.getFilePathName();
+							if (root != null) {
+								filePathName = root+File.separator+filePathName;
+							}
+							
 							File file = new File(filePathName);
 							bufferedInput = new BufferedInputStream(new FileInputStream(file));
 							buffer = new byte[getDownloadBlockSize()];
