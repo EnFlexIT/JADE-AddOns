@@ -174,6 +174,24 @@ import="jade.content.onto.Ontology,
 		<td width="30%" class="title">UDDI TModel:</td>
 		<td class="value"><% out.print(wsigConfig.getTModel()); %></td>
 	</tr>
+<%
+	if (wsigConfig.isJadeMiscPresent()) {
+%>	
+		<tr>
+			<td width="30%" class="title">LOG-MANAGER enable:</td>
+			<td class="value"><% out.print(wsigConfig.isLogManagerEnable()); %></td>
+		</tr>
+		<tr>
+			<td width="30%" class="title">LOG-MANAGER name:</td>
+			<td class="value"><% out.print(wsigConfig.getLogManagerName()); %></td>
+		</tr>
+		<tr>
+			<td width="30%" class="title">LOG-MANAGER root path:</td>
+			<td class="value"><% out.print(wsigConfig.getLogManagerRoot()); %></td>
+		</tr>
+<%
+	}
+%>	
 </table>
 
 </body>

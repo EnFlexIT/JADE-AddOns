@@ -26,6 +26,7 @@ package com.tilab.wsig.agent;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
 import jade.core.AID;
+import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -37,6 +38,7 @@ import jade.lang.acl.ACLMessage;
 import jade.proto.SubscriptionInitiator;
 import jade.wrapper.gateway.GatewayAgent;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 
@@ -64,6 +66,8 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 	protected void setup() {
 		super.setup();
 
+		WSIGConfiguration wsigConfiguration = WSIGConfiguration.getInstance();
+		
 		// Set non-standard archive scheme called “wsjar" 
 		System.setProperty("org.eclipse.emf.common.util.URI.archiveSchemes", "wsjar wszip jar zip");
 
@@ -87,7 +91,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		}
 
 		// Create UDDIManager
-		if (WSIGConfiguration.getInstance().isUddiEnable()) {
+		if (wsigConfiguration.isUddiEnable()) {
 			uddiManager = new UDDIManager();
 		}
 
@@ -95,7 +99,30 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		getContentManager().registerOntology(FIPAManagementOntology.getInstance());
 		getContentManager().registerOntology(JADEManagementOntology.getInstance());
 		getContentManager().registerLanguage(new SLCodec());
-
+		
+		// Manage log file manager
+		if (wsigConfiguration.isLogManagerEnable()) {
+			if (wsigConfiguration.isJadeMiscPresent()) {
+				try {
+					String fileManagerName = wsigConfiguration.getLogManagerName();
+					String fileManagerRoot = wsigConfiguration.getLogManagerRoot();
+					Integer fileManagerDownloadBlockSize = wsigConfiguration.getLogManagerDownloadBlockSize();
+					
+					Class cfmabClass = Class.forName("jade.misc.CreateFileManagerAgentBehaviour");
+					Class[] cfmabConstructorArgsType = new Class[] { String.class, String.class, Integer.class };
+					Constructor cfmabConstructor = cfmabClass.getConstructor(cfmabConstructorArgsType);
+					Object[] cfmabConstructorArgs = new Object[] { fileManagerName, fileManagerRoot, fileManagerDownloadBlockSize };
+					
+					Behaviour cfmab = (Behaviour)cfmabConstructor.newInstance(cfmabConstructorArgs);
+					addBehaviour(cfmab);
+				} catch(Exception e) {
+					log.error("Agent "+getLocalName()+" - Error creating CreateFileManagerAgentBehaviour", e);
+				}
+			} else {
+				log.warn("Agent "+getLocalName()+" - Log manager enabled bat jadeMisc.jar not present in WSIG classpath");
+			}
+		}
+		
 		// Register into a DF
 		registerIntoDF();
 

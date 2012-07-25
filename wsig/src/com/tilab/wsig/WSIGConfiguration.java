@@ -27,6 +27,7 @@ import jade.content.lang.sl.SLCodec;
 import jade.util.leap.Properties;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,6 +36,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
@@ -49,6 +51,7 @@ public class WSIGConfiguration extends Properties {
 	public static final String WSIG_DEFAULT_CONFIGURATION_FILE = "conf/wsig.properties";
 	private static String wsigConfPath;
 	private static String wsigVersion;
+	private ServletContext servletContext;
 	
 	// WSIG configuration
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
@@ -85,6 +88,13 @@ public class WSIGConfiguration extends Properties {
 
 	// Ontology configuration
 	public final static String KEY_ONTO_PREFIX = "onto";
+	
+	// Log manager configuration
+	public final static String KEY_ENABLE_LOG_MANAGER = "enable-log-manager";
+	public final static String KEY_LOG_MANAGER_NAME = "log-manager-name";
+	public final static String KEY_LOG_MANAGER_ROOT = "log-manager-root";
+	public final static String KEY_LOG_MANAGER_DOWNLOAD_BLOCK_SIZE = "log-manager-download-block-size";
+	public final static String LOG_MANAGER_ROOT_DEFAULT = "../../logs";
 	
 	
 	/**
@@ -289,6 +299,50 @@ public class WSIGConfiguration extends Properties {
 	public static URL getAdminUrl(HttpServletRequest request) throws MalformedURLException {
 		return getWebappUrl(request);
 	}
+
+	public synchronized boolean isJadeMiscPresent() {
+		try {
+			Class.forName("jade.misc.CreateFileManagerAgentBehaviour");
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
+	
+	public synchronized boolean isLogManagerEnable() {
+		String logManagerEnable = getProperty(KEY_ENABLE_LOG_MANAGER);
+		return "true".equalsIgnoreCase(logManagerEnable);
+	}
+	
+	public synchronized String getLogManagerName() {
+		return getProperty(KEY_LOG_MANAGER_NAME);
+	}
+	
+	public synchronized String getLogManagerRoot() {
+		String fileManagerRoot = getProperty(KEY_LOG_MANAGER_ROOT, LOG_MANAGER_ROOT_DEFAULT);
+		File f = new File(fileManagerRoot);
+		if (!f.isAbsolute()) {
+			fileManagerRoot = servletContext.getRealPath(fileManagerRoot);
+		}
+		return fileManagerRoot;
+	}
+
+	public synchronized Integer getLogManagerDownloadBlockSize() {
+		String fileManagerDownloadBlockSizeStr = getProperty(WSIGConfiguration.KEY_LOG_MANAGER_DOWNLOAD_BLOCK_SIZE);
+		Integer fileManagerDownloadBlockSize = null;
+		if (fileManagerDownloadBlockSizeStr != null) {
+			fileManagerDownloadBlockSize = Integer.valueOf(fileManagerDownloadBlockSizeStr);
+		}
+		return fileManagerDownloadBlockSize;
+	}
+
+	public ServletContext getServletContext() {
+		return servletContext;
+	}
+
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
 	
 	/**
 	 * adds properties missed.
@@ -314,6 +368,8 @@ public class WSIGConfiguration extends Properties {
 		setProperty(WSIGConfiguration.KEY_UDDI4J_TRANSPORT_CLASS, "org.uddi4j.transport.ApacheAxisTransport");
 		setProperty(WSIGConfiguration.KEY_UDDI_TMODEL, "");
 		setProperty(WSIGConfiguration.KEY_HIERARCHICAL_COMPLEX_TYPE, "false");
+		setProperty(WSIGConfiguration.KEY_ENABLE_LOG_MANAGER, "false");
+		setProperty(WSIGConfiguration.KEY_LOG_MANAGER_NAME, "WSIGLogManager");
 	}
 
 	/**

@@ -104,6 +104,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		// Init configuration
 		WSIGConfiguration.init(wsigPropertyPath);
 		WSIGConfiguration wsigConfiguration = WSIGConfiguration.getInstance();
+		wsigConfiguration.setServletContext(servletContext);
 		
 		// Set WSDL directory (convert relative to absolute path)
 		String wsdlRelativeDirectory = wsigConfiguration.getWsdlDirectory();
