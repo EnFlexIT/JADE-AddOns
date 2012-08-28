@@ -23,6 +23,7 @@ Boston, MA  02111-1307, USA.
 
 package jade.cli.behaviours;
 
+import java.io.PrintStream;
 import java.util.logging.Level;
 
 import jade.content.lang.sl.SLCodec;
@@ -62,12 +63,14 @@ public class GetLoggerInfoBehaviour extends OneShotBehaviour {
 	private static final long serialVersionUID = 8667957551752836265L;
 	private LogManager myLogManager;
 	AID helperController;
+	PrintStream out;
 	
-	public GetLoggerInfoBehaviour(){
+	public GetLoggerInfoBehaviour(PrintStream ps){
 		// Initialize the default LogManager
 		myLogManager = new JavaLoggingLogManagerImpl();
 		
 		helperController = null;
+		out = ps;
 	}
 	
 	@Override
@@ -97,7 +100,7 @@ public class GetLoggerInfoBehaviour extends OneShotBehaviour {
 				Level level = Level.parse(String.valueOf(logInfo.getLevel()));
 				sb.append(String.format("%-8s %s\n", level.getName(), logInfo.getName()));
 			}
-			System.out.println(sb.toString());
+			out.println(sb.toString());
 		}
 		catch (FIPAException e) {
 			e.printStackTrace();

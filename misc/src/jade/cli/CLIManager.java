@@ -100,6 +100,7 @@ public class CLIManager {
 	}
 	
 	public static void execute(CLICommand command, String[] args) {
+		command.setPrintStream(System.out);
 		try {
 			Properties pp = parseCommandLine(args);
 			if ("true".equalsIgnoreCase(pp.getProperty(CLICommand.HELP_OPTION, null))) {

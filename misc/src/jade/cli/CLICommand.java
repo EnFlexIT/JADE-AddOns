@@ -25,6 +25,7 @@ package jade.cli;
 
 import jade.core.behaviours.Behaviour;
 
+import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
@@ -33,17 +34,23 @@ public abstract class CLICommand {
 	public static final String HELP_OPTION = "help";
 	public static final String LOGS_OPTION = "logs";
 	
-	public void printUsage() {
-		System.out.println("USAGE: java -cp ... "+getClass().getName()+" [options]");
-		System.out.println();
-		System.out.println("Valid options:");
-		printCommandSpecificOptions();
-		System.out.println("-"+HELP_OPTION+": Print this help and terminate");
-		System.out.println("-"+LOGS_OPTION+": Enable normal JADE logs");
-		System.out.println("All JADE Split-Container options (see JADE documentation)");
+	protected PrintStream out;
+	
+	void setPrintStream(PrintStream out) {
+		this.out = out;
 	}
 	
-	private void printCommandSpecificOptions() {
+	public void printUsage() {
+		out.println("USAGE: java -cp ... "+getClass().getName()+" [options]");
+		out.println();
+		out.println("Valid options:");
+		printCommandSpecificOptions();
+		out.println("-"+HELP_OPTION+": Print this help and terminate");
+		out.println("-"+LOGS_OPTION+": Enable normal JADE logs");
+		out.println("All JADE Split-Container options (see JADE documentation)");
+	}
+	
+	void printCommandSpecificOptions() {
 		Field[] fields = getClass().getFields();
 		for (Field f : fields) {
 			Option opt = f.getAnnotation(Option.class);
@@ -52,7 +59,7 @@ public abstract class CLICommand {
 				if (String.class == f.getType()) {
 					try {
 						String optionName = (String) f.get(this);
-						System.out.println("-"+optionName+" "+opt.value()+": "+opt.description());
+						out.println("-"+optionName+" "+opt.value()+": "+opt.description());
 					}
 					catch (IllegalAccessException e) {
 						// Field not accessible. Should never happen as getFields() returns public fields only 
@@ -62,6 +69,6 @@ public abstract class CLICommand {
 			}
 		}
 	}
-
+	
 	public abstract Behaviour getBehaviour(Properties pp) throws IllegalArgumentException;
 }

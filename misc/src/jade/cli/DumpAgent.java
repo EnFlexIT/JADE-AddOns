@@ -70,19 +70,19 @@ public class DumpAgent extends CLICommand {
 					req.setContent("DUMP-AGENT "+agentName);
 				}
 				catch (Exception e) {
-					System.out.println(e.getMessage());
+					out.println(e.getMessage());
 				}
 				return req;
 			}
 
 			@Override
 			protected void handleInform(ACLMessage inform) {
-				System.out.println(inform.getContent());
+				out.println(inform.getContent());
 			}
 
 			@Override
 			protected void handleFailure(ACLMessage failure) {
-				System.out.println("ERROR: "+failure.getContent());
+				out.println("ERROR: "+failure.getContent());
 			}
 		};
 	}

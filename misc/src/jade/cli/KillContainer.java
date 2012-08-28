@@ -54,14 +54,14 @@ public class KillContainer extends CLICommand {
 					ACLMessage request = CLIManager.createAMSRequest(myAgent, kc);
 					ACLMessage response = FIPAService.doFipaRequestClient(myAgent, request, 10000);
 					if (response == null) {
-						System.out.println("Timeout expired");
+						out.println("Timeout expired");
 					}
 				}
 				catch (FIPAException fe) {
 					CLIManager.printFipaException(myAgent, fe);
 				}
 				catch (Exception e) {
-					System.out.println(e.getMessage());
+					out.println(e.getMessage());
 				}
 			}
 			
