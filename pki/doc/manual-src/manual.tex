@@ -1,0 +1,379 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{latexsym}
+\usepackage{url}
+\usepackage{tabularx}
+\usepackage[utf8]{inputenc}
+
+%%% enumerate i itemize bez pionowych odstępów
+\newenvironment{enumerate*}
+{\begin{enumerate}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}}
+{\end{enumerate}}
+
+\newenvironment{itemize*}
+{\begin{itemize}
+  \setlength{\itemsep}{0pt}
+  \setlength{\parskip}{0pt}}
+{\end{itemize}}
+
+
+% Zdefiniowanie autora i~tytułu:
+\author{Amadeusz~Piotr~Żołnowski}
+\title{JADE-PKI 1.0 Manual}
+\frenchspacing
+\begin{document}
+% Wstawienie autora i~tytułu do składu:
+\maketitle
+% Wstawienie spisu treści:
+\tableofcontents
+
+\section{Introduction}
+
+The purpose of the \textit{JADE-PKI} add-on is to introduce a~public key
+infrastructure into \textit{JADE}.  The add-on provides security for two
+areas: agent messaging and agent mobility.
+
+\subsection{Agent messaging}
+
+Agent messaging is secured by the \texttt{PKI\-Agent\-Messaging\-Ser\-vice}.
+It provides methods of encryption, signing, decryption and verification of the
+ACL messages.  An agent does not perform these operation itself, but gives it
+to the service.  The agent only marks a message whether it should be signed
+and/or encrypted.
+
+\subsection{Agent mobility}
+
+When the agent moves between containers its code and data are exposed to
+malicious modification.  The \texttt{PKI\-Agent\-Mo\-bi\-li\-ty\-Ser\-vice}
+provides integrity of code and data of the agent and certification of identity
+of the agent.  It achieves that by signing the code and the data with the
+private key of the container and attaching the certificate into the field of
+the agent.  For the agent to be secured that way it needs to implement the
+\texttt{Signable} interface or, which is recommended, extend one of the
+implementation: \texttt{SMo\-bile\-Agent} or \texttt{SAgent}.
+
+\section{Installation}
+
+\begin{enumerate}
+
+  \item Assume that \texttt{\$JADEHOME} points to the root directory of
+    your JADE installation.
+
+  \item Unpack \texttt{pkiAddOn-1.0.zip} into \texttt{\$JADEHOME/add-ons/pki}.
+    JAR files are built already in \path{lib} subdirectory.
+
+  \item   Your \texttt{\$CLASSPATH} should look as follows:
+
+    \begin{verbatim}
+CLASSPATH=$JADEHOME/add-ons/pki/lib/pki.jar:\
+  $JADEHOME/add-ons/pki/lib/pki-examples.jar:\
+  $JADEHOME/lib/jade.jar:\
+  $JADEHOME/lib/commons-codec/commons-codec-1.3.jar
+    \end{verbatim}
+
+\end{enumerate}
+
+\section{Configuration}
+
+Before \textit{JADE-PKI} services can be used, they need to be set up.
+
+\subsection{Setting up PKI}
+
+\begin{enumerate}
+
+  \item The first step is to set up a~public key infrastructure.  Please follow
+    \url{http://www.ibm.com/developerworks/java/library/j-certgen/} to set up
+    certificates chain to your needs.  The minimal setup is one root CA and
+    a~certificate for every container signed by the root CA.
+    \texttt{CommonName} should be set conforming to the following scheme:
+
+\begin{verbatim}
+my-host.my-domain/my-platform/my-container
+\end{verbatim}
+    \label{item:certchain}
+
+  \item The certificates cannot be used directly.  They need to be loaded into
+    Java key stores.  There's the \texttt{pkiimport} tool in \path{tools}
+    subdirectory of \texttt{\$JADEHOME/add-ons/pki}.  To pack all trusted CAs
+    (necessarily including the root CA created at point~\ref{item:certchain})
+    into the store, invoke \texttt{pkiimport} according to the following scheme:
+
+\begin{verbatim}
+./pkiimport truststore <keystore> <certfile1>:<alias1> \
+    <certfile2>:<alias2> ...
+\end{verbatim}
+
+    where \texttt{<keystore>} is an output file, \texttt{<certfileN>} is
+    a~trusted CA and \texttt{<aliasN>} is an alias for that certificate by
+    which the certificate can be referenced in a~Java key store.  You will be
+    asked for password to set up for the key store.
+
+  \item The container key and corresponding certificate need to be put into
+    another Java key store alone.  For this \texttt{pkiimport} can be used,
+    too.  Invoke it according to the following scheme:
+
+\begin{verbatim}
+./pkiimport keystore <keystore> <keyfile> <certfile> \
+    <alias>
+\end{verbatim}
+
+    where \texttt{<keystore>} is an output file, \texttt{<keyfile>} is the
+    private key of the container and \texttt{<certfile>} is its corresponding
+    certificate.  This step needs to be repeated for every container
+    certificate created at the point~\ref{item:certchain}.
+
+\end{enumerate}
+
+The result of the steps above are the following files:
+
+\begin{itemize*}
+
+  \item \texttt{truststore.jks} -- one Java key store containing trusted CAs,
+
+  \item \texttt{<container-name>-keystore.jks} -- a~Java key store containing
+    a~private key and a~certificate for a~container named
+    \texttt{<container-name>} -- for each container.
+
+\end{itemize*}
+
+\subsection{Configuring JADE-PKI}
+
+Here goes the example file for the \texttt{Main-Container}:
+
+\begin{verbatim}
+# ---- JADE configuration ----
+gui=true
+
+# ------ Platform ------
+name=myplatform
+platform-id=myplatform
+host=mymainhost
+local-host=mymainhost
+nomtp=true
+
+# ------ Services  ------
+services=\
+jade.core.management.AgentManagementService;\
+jade.core.messaging.MessagingService;\
+jade.core.resource.ResourceManagementService;\
+jade.core.mobility.AgentMobilityService;\
+jade.core.event.NotificationService;\
+jade.security.pki.core.PKICoreService;\
+jade.security.pki.messaging.PKIAgentMessagingService;\
+jade.security.pki.mobility.PKIAgentMobilityService
+
+# ------ PKI configuration ------
+jade_pki_keyStore=/path/to/maincontainer-keystore.jks
+jade_pki_keyStorePassword=123456
+jade_pki_trustStore=/path/to/truststore.jks
+jade_pki_trustStorePassword=123456 
+
+# ---- end JADE configuration ----
+\end{verbatim}
+
+\begin{table}[h]
+  \caption{Parametrs for the \texttt{PKIAgentCoreService}.}
+  \label{tab:pkiparams}
+  \begin{center}
+    {\small
+      \begin{tabularx}{\linewidth}{|l|X|}
+        \hline
+        \textbf{Name} & \textbf{Description} \\
+        \hline
+
+        \texttt{jade\_pki\_keyStore} & A~path to a~key store where a~private
+        key and a~certificate of the container is in.  \\
+
+        \texttt{jade\_pki\_keyStorePassword} & A~password to the store pointed
+        with the \texttt{jade\_pki\_keyStore} parameter.  \\
+
+        \texttt{jade\_pki\_trustStore} & A~path to a~store where certificates
+        of trusted CAs are in.  \\
+
+        \texttt{jade\_pki\_trustStorePassword} & A~password to the store
+        pointed with the \texttt{jade\_pki\_trustStore} parameter.  \\
+
+        \hline
+      \end{tabularx}
+    }
+  \end{center}
+\end{table}
+
+The following classes are the \textit{JADE-PKI} services:
+\begin{itemize*}
+
+  \item \texttt{jade.security.pki.core.PKICoreService},
+
+  \item \texttt{jade.security.pki.messaging.PKIAgentMessagingService},
+
+  \item \texttt{jade.security.pki.mobility.PKIAgentMobilityService}.
+
+\end{itemize*}
+
+The first is a requirement for the remaining two.  The second secures agent
+messaging and the last secures the agent when it moves between containers.
+Options in the \texttt{PKI configuration} section are used by the
+\texttt{PKI\-Core\-Ser\-vice} on initialization.  They are described in the
+table~\ref{tab:pkiparams}.
+
+And here goes an example of the configuration for an another container:
+
+\begin{verbatim}
+# ---- JADE configuration ----
+container=true
+container-name=Container-2
+
+# ------ Platform ------
+name=myplatform
+platform-id=myplatform
+host=mymainhost
+local-host=anotherhost
+
+# ------ Services  ------
+services=\
+jade.core.management.AgentManagementService;\
+jade.core.messaging.MessagingService;\
+jade.core.resource.ResourceManagementService;\
+jade.core.mobility.AgentMobilityService;\
+jade.core.event.NotificationService;\
+jade.security.pki.core.PKICoreService;\
+jade.security.pki.messaging.PKIAgentMessagingService;\
+jade.security.pki.mobility.PKIAgentMobilityService
+
+# ------ PKI configuration ------
+jade_pki_keyStore=/path/to/anothercontainer-keystore.jks
+jade_pki_keyStorePassword=987654
+jade_pki_trustStore=/path/to/truststore.jks
+jade_pki_trustStorePassword=123456 
+
+# ---- end JADE configuration ----
+\end{verbatim}
+
+Another container has different key store with its private key and certificate,
+but uses a copy of the same file with the trusted CAs.  Please take notice of
+the \texttt{Platform} section.  The name, id and a~host are the same as those
+of the main container, but \texttt{local-host} is the host name of this another
+container.
+
+\section{Basic usage}
+
+\subsection{Usage with PKI\-Agent\-Messaging\-Ser\-vice}
+
+To make use of the message signing and encryption the agent needs to start
+\texttt{Send\-Cer\-ti\-fi\-cate\-Be\-ha\-viour} behaviour which is in
+\texttt{jade.\-se\-cu\-ri\-ty.\-pki.\-messaging.\-be\-ha\-viours} package.
+This can be done in \texttt{setup()} method of the agent as follows:
+
+\begin{verbatim}
+@Override
+protected void setup() {
+    addBehaviour(new SendCertificateBehaviour(this));
+}
+\end{verbatim}
+
+The message is encrypted, signed, decrypted and verified by the service.  The
+agent only marks the message for the operation which can be done as follows:
+
+\begin{verbatim}
+/* Retrieve the service helper.  The ServiceException is
+ * thrown if the service isn't initialized on the
+ * current container, but for clarity it's not caught
+ * here.  */
+PKIAgentMessagingHelper pki = (PKIAgentMessagingHelper)
+    getHelper(
+    "jade.security.pki.messaging.PKIAgentMessaging");
+
+/* Create a message.  A performative can be anything,
+ * of course. */
+ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+
+/* Set msg content, sender and so on... */
+
+/* The message is marked for signing. */
+pki.markForSignature(msg);
+
+/* Before message is marked for encryption, an agent needs to
+ * retrieve the receiver agent's container. */
+if (pki.requestReceiversCertificate(myAgent, replyTo,
+        1000)) {
+    /* A certificate is retrieved, marking for encryption.  An
+     * algorithm for a symmetric encryption is the AES in the
+     * CBC mode and with the PKCS5 padding. */
+    pki.markForEncryption(msg, "AES/CBC/PKCS5Padding",
+            new KeySizeAlgorithmParameterSpec(128));
+}
+
+/* The message is send.  The JADE-PKI serivce handles it,
+ * encrypts and signs (in that order). */
+send(msg);
+\end{verbatim}
+
+\subsection{Usage with PKI\-Agent\-Mo\-bi\-li\-ty\-Ser\-vice}
+
+The agent to be secured with the service needs to implement the
+\texttt{Signable} interface. It is easier, however, to extend the
+\texttt{SMo\-bile\-Agent} class which implements most of \texttt{Signable}
+methods.
+
+\begin{verbatim}
+public class SMobAgentExmpl extends SMobileAgent {
+
+    private int constantValue;
+    private int counter;
+
+    /* This method needs to return data which needs to be
+     * protected when agent moves between containers.  In
+     * the example the counter field will be signed.
+     * The data needs to be returned in the form of byte
+     * array.  */
+    @Override
+    public byte[] getMutableData() {
+        return ByteBuffer.allocate(4).putInt(counter).array();
+    }
+
+    /* This method needs to return data which is not going to
+     * be changed after its initialization.  In the example the
+     * constantValue field will be signed.  */
+    @Override
+    public byte[] getImmutableData() {
+        return ByteBuffer.allocate(4).putInt(constantValue
+            ).array();
+    }
+
+    @Override
+    protected void setup() {
+        counter = 0;
+        constantValue = 3;
+
+        /* This method request the service to sign the agent
+         * class, identifier (AID) and data returned with
+         * getImmutableData(). */
+        ownMe();
+    }
+
+    @Override
+    protected void afterMove() {
+        /* We check if the move was successful.  If the agent
+         * has been modified during transfer, then the
+         * verification has failed and getSafeMoveStatus() will
+         * return value different than SAFE_MOVE_OK.  */
+        if (getSafeMoveStatus() != SAFE_MOVE_OK) {
+            return;
+        }
+        /* On each container this value can be modified.  It
+         * is signed when the agent leaves container.
+         */
+        counter++;
+    }
+}
+\end{verbatim}
+
+\subsection{Combining PKI\-Agent\-Messaging\-Ser\-vice and
+PKI\-Agent\-Mo\-bi\-li\-ty\-Ser\-vice}
+
+To combine the use of both services it is best to extend the \texttt{SAgent}
+class which starts the \texttt{Send\-Cer\-ti\-fi\-cate\-Be\-ha\-viour} and
+extends \texttt{SMo\-bile\-Agent}.
+
+\end{document}
