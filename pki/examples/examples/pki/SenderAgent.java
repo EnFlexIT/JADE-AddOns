@@ -62,7 +62,8 @@ public class SenderAgent extends Agent {
     @Override
     protected void setup() {
         try {
-            pki = (PKIAgentMessagingHelper) getHelper("jade.core.security.pki.PKI");
+            pki = (PKIAgentMessagingHelper)
+                getHelper("jade.security.pki.messaging.PKIAgentMessaging");
         } catch (ServiceException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
