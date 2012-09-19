@@ -69,12 +69,10 @@ public class Shell implements Runnable {
 		this.out = out;
 		myGateway = (gw != null ? gw : JadeGateway.getDefaultGateway());
 		myGateway.addListener(new GatewayListener() {
-			@Override
 			public void handleGatewayConnected() {
 				// Nothing to do 
 			}
 
-			@Override
 			public void handleGatewayDisconnected() {
 				loader = null;
 			}		

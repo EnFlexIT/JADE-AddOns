@@ -55,7 +55,7 @@ public class ListLoggers extends CLICommand {
 
 		SequentialBehaviour sb = new SequentialBehaviour();	
 		sb.addSubBehaviour(new CreateRemoteLoggerControllerBehaviour(containerName));
-		sb.addSubBehaviour(new GetLoggerInfoBehaviour());
+		sb.addSubBehaviour(new GetLoggerInfoBehaviour(out));
 		
 		return sb;	
 	}		
