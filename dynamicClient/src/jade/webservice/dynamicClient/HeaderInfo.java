@@ -34,7 +34,10 @@ public class HeaderInfo extends ParameterInfo {
 	
 	private int signaturePosition = EXPLICIT_HEADER;
 	private String namespace;
-
+	private String actor = null;
+	private boolean mustUnderstand = false;
+	private boolean relay = false;
+	
 	HeaderInfo(String headerName) {
 		super(headerName);
 	}
@@ -53,5 +56,29 @@ public class HeaderInfo extends ParameterInfo {
 
 	void setNamespace(String namespace) {
 		this.namespace = namespace;
+	}
+
+	public String getActor() {
+		return actor;
+	}
+
+	public void setActor(String actor) {
+		this.actor = actor;
+	}
+
+	public boolean isMustUnderstand() {
+		return mustUnderstand;
+	}
+
+	public void setMustUnderstand(boolean mustUnderstand) {
+		this.mustUnderstand = mustUnderstand;
+	}
+
+	public boolean isRelay() {
+		return relay;
+	}
+
+	public void setRelay(boolean relay) {
+		this.relay = relay;
 	}
 }

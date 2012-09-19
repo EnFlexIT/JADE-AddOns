@@ -1068,7 +1068,11 @@ public class DynamicClient {
 						// If exist header value -> set it in call
 						AbsObject headerAbs = input.getHeader(headerName);
 						if (headerAbs != null) {
-							stub.setHeader(hi.getNamespace(), headerName, convertAbsToObj(hi, headerAbs));
+							SOAPHeaderElement header = new SOAPHeaderElement(hi.getNamespace(), headerName, convertAbsToObj(hi, headerAbs));
+							header.setActor(hi.getActor());
+							header.setMustUnderstand(hi.isMustUnderstand());
+							header.setRelay(hi.isRelay());
+							stub.setHeader(header);
 						}
 					}
 				}
