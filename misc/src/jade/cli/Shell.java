@@ -185,7 +185,7 @@ public class Shell implements Runnable {
 		public void action() {
 			try {
 				AgentMobilityHelper mh = (AgentMobilityHelper) myAgent.getHelper(AgentMobilityService.NAME);
-				cl = mh.getContainerClassLoader(AgentContainer.MAIN_CONTAINER_NAME, Remote.class.getClassLoader());
+				cl = mh.getContainerClassLoader(AgentContainer.MAIN_CONTAINER_NAME, Shell.class.getClassLoader());
 			}
 			catch (ServiceException e) {
 				exception = e;
