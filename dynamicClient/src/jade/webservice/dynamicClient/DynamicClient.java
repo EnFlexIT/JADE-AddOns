@@ -552,12 +552,19 @@ public class DynamicClient {
 	 */
 	public void initClient(URI wsdlUri, String username, String password) throws DynamicClientException {
 		boolean localNoWrap = properties.isNoWrap();
+		boolean localWrapArrays = properties.isWrapArrays();
 		Exception compilerException;
 		try {
-			compilerException = internalInitClient(wsdlUri, username, password, localNoWrap);
+			compilerException = internalInitClient(wsdlUri, username, password, localNoWrap, localWrapArrays);
+			if (compilerException != null && properties.isSafeMode() && !localWrapArrays) {
+				// Force WrapArrays flag 
+				localWrapArrays = true;
+				compilerException = internalInitClient(wsdlUri, username, password, localNoWrap, localWrapArrays);
+			}
 			if (compilerException != null && properties.isSafeMode() && !localNoWrap) {
 				localNoWrap = true;
-				compilerException = internalInitClient(wsdlUri, username, password, localNoWrap);
+				localWrapArrays = properties.isWrapArrays();
+				compilerException = internalInitClient(wsdlUri, username, password, localNoWrap, localWrapArrays);
 			}
 		} catch(DynamicClientException dce) {
 			state = State.INIT_FAILED;
@@ -576,7 +583,7 @@ public class DynamicClient {
 		state = State.INITIALIZED;
 	}
 	
-	private Exception internalInitClient(URI wsdlUri, String username, String password, boolean noWrap) throws DynamicClientException {
+	private Exception internalInitClient(URI wsdlUri, String username, String password, boolean noWrap, boolean wrapArrays) throws DynamicClientException {
 
 		File src = null;
 		File classes = null;
@@ -604,16 +611,22 @@ public class DynamicClient {
 			emitter.setTimeout(properties.getDiscoverTimeout());
 			emitter.setAllWanted(true);
 			emitter.setNowrap(noWrap);
+			emitter.setWrapArrays(wrapArrays);
 			emitter.setPackageName(properties.getPackageName());
 			emitter.setBobMode(true);
 			emitter.setAllowInvalidURL(true);
+			emitter.setVerbose(logger.isLoggable(Logger.FINE));
+
+			HTTPAuthenticator httpAuthenticator = null;
 			if (username != null) {
 				emitter.setUsername(username);
+				httpAuthenticator = new HTTPAuthenticator(username, password);
 			}
 			if (password != null) {
 				emitter.setPassword(password);
 			}
-	
+			Authenticator.setDefault(httpAuthenticator);			
+			
 			// Prepare folders 
 			String stem = "DynamicClient-" + System.currentTimeMillis();
 			src = new File(properties.getTmpDir(), stem + "-src");
@@ -1588,4 +1601,21 @@ public class DynamicClient {
 			}
 		}
 	}
+	
+	// Inner class to manage HTTP Basic Authentication
+	private class HTTPAuthenticator extends Authenticator {
+		
+		private String username;
+		private String password;
+		
+		HTTPAuthenticator(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+	    protected PasswordAuthentication getPasswordAuthentication() {
+	        return new PasswordAuthentication(username, password != null ? password.toCharArray() : null);
+	    }
+	}
+
 }

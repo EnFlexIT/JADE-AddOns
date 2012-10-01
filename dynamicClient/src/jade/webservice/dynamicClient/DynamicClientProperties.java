@@ -39,6 +39,7 @@ public class DynamicClientProperties {
 	private String packageName;
 	private String tmpDir;
 	private boolean noWrap;
+	private boolean wrapArrays;
 	private boolean safeMode;
 	private StringBuilder classPath;
 	private long discoverTimeout;
@@ -50,6 +51,7 @@ public class DynamicClientProperties {
 		tmpDir = System.getProperty("java.io.tmpdir");
 		noWrap = false;
 		safeMode = true;
+		wrapArrays = false;
 		packageName = null;
 		classPath = null;
 		setDiscoverTimeout(45000);
@@ -107,6 +109,24 @@ public class DynamicClientProperties {
 	 */
 	public void setNoWrap(boolean noWrap) {
 		this.noWrap = noWrap;
+	}
+	
+	/**
+	 * Tests the wrap-arrays flag used to initialize the DynamicClient
+	 * 
+	 * @return true if wrap-arrays flag is setted, false otherwise
+	 */
+	public boolean isWrapArrays() {
+		return wrapArrays;
+	}
+
+	/**
+	 * Set the wrap-arrays flag used to initialize the DynamicClient
+	 * 
+	 * @param wrapArrays
+	 */
+	public void setWrapArrays(boolean wrapArrays) {
+		this.wrapArrays = wrapArrays;
 	}
 	
 	/**
