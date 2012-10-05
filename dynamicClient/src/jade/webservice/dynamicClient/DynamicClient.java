@@ -32,6 +32,7 @@ import jade.webservice.XsdPrimitivesOntology;
 import jade.webservice.utils.CompilerUtils;
 import jade.webservice.utils.FileUtils;
 import jade.webservice.utils.SSLUtils;
+import jade.webservice.utils.ThreadSafeAuthenticator;
 import jade.webservice.utils.WSDLUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -458,7 +459,8 @@ public class DynamicClient {
 	 * @param proxyHost proxy host
 	 */
 	public static void setProxyHost(String proxyHost) {
-		AxisProperties.setProperty("http.proxyHost", proxyHost);
+		System.setProperty("http.proxyHost", proxyHost);
+		System.setProperty("https.proxyHost", proxyHost);
 	}
 
 	/**
@@ -467,7 +469,8 @@ public class DynamicClient {
 	 * @param proxyPort proxy port
 	 */
 	public static void setProxyPort(String proxyPort) {
-		AxisProperties.setProperty("http.proxyPort", proxyPort);
+		System.setProperty("http.proxyPort", proxyPort);
+		System.setProperty("https.proxyPort", proxyPort);
 	}
 
 	/**
@@ -478,7 +481,8 @@ public class DynamicClient {
 	 * @param nonProxyHosts list of hosts
 	 */
 	public static void setNonProxyHosts(String nonProxyHosts) {
-		AxisProperties.setProperty("http.nonProxyHosts", nonProxyHosts);
+		System.setProperty("http.nonProxyHosts", nonProxyHosts);
+		System.setProperty("https.nonProxyHosts", nonProxyHosts);
 	}
 	
 	/**
@@ -488,11 +492,7 @@ public class DynamicClient {
 	 * @param proxyPassword authentication proxy password
 	 */
 	public static void setProxyAuthentication(final String proxyUser, final String proxyPassword) {
-	    Authenticator.setDefault(new Authenticator() {
-	        protected PasswordAuthentication getPasswordAuthentication() {
-	          return new
-	             PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
-	      }});
+		ThreadSafeAuthenticator.getInstance().setProxyCredential(proxyUser, proxyPassword);
 	}
 	
 	/**
@@ -587,6 +587,7 @@ public class DynamicClient {
 
 		File src = null;
 		File classes = null;
+		String id = "DynamicClient-" + System.currentTimeMillis();
 		try{
 			if (wsdlUri == null) {
 				throw new DynamicClientException("Wsdl uri not specified");
@@ -617,23 +618,21 @@ public class DynamicClient {
 			emitter.setAllowInvalidURL(true);
 			emitter.setVerbose(logger.isLoggable(Logger.FINE));
 
-			HTTPAuthenticator httpAuthenticator = null;
+			// Groups all emitter thread under a unique thread-group
+			ThreadGroup threadGroup = new ThreadGroup(id);
+			emitter.setThreadGroup(threadGroup);
+
+			// Manage http credentials
 			if (username != null) {
-				emitter.setUsername(username);
-				httpAuthenticator = new HTTPAuthenticator(username, password);
+				ThreadSafeAuthenticator.getInstance().setHttpCredential(id, username, password);
 			}
-			if (password != null) {
-				emitter.setPassword(password);
-			}
-			Authenticator.setDefault(httpAuthenticator);			
 			
 			// Prepare folders 
-			String stem = "DynamicClient-" + System.currentTimeMillis();
-			src = new File(properties.getTmpDir(), stem + "-src");
+			src = new File(properties.getTmpDir(), id + "-src");
 			if (!src.mkdir()) {
 				throw new DynamicClientException("Unable to create working directory " + src.getAbsolutePath());
 			}
-			classes = new File(properties.getTmpDir(), stem + "-classes");
+			classes = new File(properties.getTmpDir(), id + "-classes");
 			if (!classes.mkdir()) {
 				throw new DynamicClientException("Unable to create working directory " + classes.getAbsolutePath());
 			}
@@ -734,6 +733,9 @@ public class DynamicClient {
 			if (src != null) {
 				FileUtils.removeDir(src);
 			}
+			
+			// Remove http security entry
+			ThreadSafeAuthenticator.getInstance().reset(id);
 		}
 		
 		return null;
@@ -1600,22 +1602,6 @@ public class DynamicClient {
 				}
 			}
 		}
-	}
-	
-	// Inner class to manage HTTP Basic Authentication
-	private class HTTPAuthenticator extends Authenticator {
-		
-		private String username;
-		private String password;
-		
-		HTTPAuthenticator(String username, String password) {
-			this.username = username;
-			this.password = password;
-		}
-
-	    protected PasswordAuthentication getPasswordAuthentication() {
-	        return new PasswordAuthentication(username, password != null ? password.toCharArray() : null);
-	    }
 	}
 
 }
