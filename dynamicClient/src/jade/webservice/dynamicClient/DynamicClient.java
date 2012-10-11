@@ -27,12 +27,12 @@ import jade.content.onto.BasicOntology;
 import jade.content.onto.BeanOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
+import jade.security.ThreadGroupHttpAuthenticator;
 import jade.util.Logger;
 import jade.webservice.XsdPrimitivesOntology;
 import jade.webservice.utils.CompilerUtils;
 import jade.webservice.utils.FileUtils;
 import jade.webservice.utils.SSLUtils;
-import jade.webservice.utils.ThreadSafeAuthenticator;
 import jade.webservice.utils.WSDLUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -459,8 +459,7 @@ public class DynamicClient {
 	 * @param proxyHost proxy host
 	 */
 	public static void setProxyHost(String proxyHost) {
-		System.setProperty("http.proxyHost", proxyHost);
-		System.setProperty("https.proxyHost", proxyHost);
+		ThreadGroupHttpAuthenticator.getInstance().setProxyHost(proxyHost);
 	}
 
 	/**
@@ -469,8 +468,7 @@ public class DynamicClient {
 	 * @param proxyPort proxy port
 	 */
 	public static void setProxyPort(String proxyPort) {
-		System.setProperty("http.proxyPort", proxyPort);
-		System.setProperty("https.proxyPort", proxyPort);
+		ThreadGroupHttpAuthenticator.getInstance().setProxyPort(proxyPort);
 	}
 
 	/**
@@ -481,8 +479,7 @@ public class DynamicClient {
 	 * @param nonProxyHosts list of hosts
 	 */
 	public static void setNonProxyHosts(String nonProxyHosts) {
-		System.setProperty("http.nonProxyHosts", nonProxyHosts);
-		System.setProperty("https.nonProxyHosts", nonProxyHosts);
+		ThreadGroupHttpAuthenticator.getInstance().setNonProxyHosts(nonProxyHosts);
 	}
 	
 	/**
@@ -492,7 +489,7 @@ public class DynamicClient {
 	 * @param proxyPassword authentication proxy password
 	 */
 	public static void setProxyAuthentication(final String proxyUser, final String proxyPassword) {
-		ThreadSafeAuthenticator.getInstance().setProxyCredential(proxyUser, proxyPassword);
+		ThreadGroupHttpAuthenticator.getInstance().setProxyCredential(proxyUser, proxyPassword);
 	}
 	
 	/**
@@ -624,7 +621,7 @@ public class DynamicClient {
 
 			// Manage http credentials
 			if (username != null) {
-				ThreadSafeAuthenticator.getInstance().setHttpCredential(id, username, password);
+				ThreadGroupHttpAuthenticator.getInstance().setServerCredential(id, username, password);
 			}
 			
 			// Prepare folders 
@@ -735,7 +732,7 @@ public class DynamicClient {
 			}
 			
 			// Remove http security entry
-			ThreadSafeAuthenticator.getInstance().reset(id);
+			ThreadGroupHttpAuthenticator.getInstance().resetServerCredential(id);
 		}
 		
 		return null;
