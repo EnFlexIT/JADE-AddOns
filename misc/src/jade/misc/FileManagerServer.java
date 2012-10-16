@@ -94,7 +94,7 @@ public class FileManagerServer implements Serializable {
 						sendResponse(myAgent, msg, ACLMessage.INFORM, gfla, fileInfos);
 						
 					} catch(Exception e) {
-						logger.log(Level.SEVERE, "Error serving GetFilesList action", e);
+						logger.log(Level.SEVERE, "Error serving GetFilesList action, message= "+msg, e);
 						sendResponse(myAgent, msg, ACLMessage.FAILURE, null, e.getMessage());
 					}
 				} else {
