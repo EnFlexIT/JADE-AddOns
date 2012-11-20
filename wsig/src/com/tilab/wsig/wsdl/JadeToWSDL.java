@@ -169,7 +169,7 @@ public class JadeToWSDL {
 			try {
 				mapperObject = mapperClass.newInstance();
 			} catch (Exception e) {
-				log.error("Mapper class "+mapperClass.getName()+" not found", e);
+				log.error("Mapper class "+mapperClass.getName()+" can not be instantiated", e);
 				throw e;
 			}
 		}

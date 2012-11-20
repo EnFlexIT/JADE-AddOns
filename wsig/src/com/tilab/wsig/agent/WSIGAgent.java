@@ -164,7 +164,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 
 	private synchronized void registerAgent(DFAgentDescription dfad) throws Exception {
 
-		log.info("Start wsigs's registration from agent: " + dfad.getName());
+		log.info("Start wsig registration from agent: " + dfad.getName());
 
 		// Loop all services of agent
 		ServiceDescription sd;
@@ -178,16 +178,16 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			// Create wsdl & wsig service
 			wsigService = createWSIGService(agentId, sd);
 
-			// Register new service
-			registerService(wsigService);
+			if (wsigService != null) {
+				// Register new service
+				registerService(wsigService);
+			}
 		}
 
-		log.info("End wsigs's registration from agent: " + dfad.getName());
+		log.info("End wsig registration from agent: " + dfad.getName());
 	}
 
 	private void registerService(WSIGService wsigService) throws Exception {
-
-		if (null != wsigService) {
 			log.info("Create new wsig service: "+wsigService.toString());
 
 			// Register wsigService into UDDI
@@ -198,7 +198,6 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 
 			// Store wsigService into WSIGStore
 			wsigStore.addService(wsigService.getServiceName(), wsigService);
-		}
 	}
 
 	private synchronized void deregisterAgent(DFAgentDescription dfad) throws Exception {
@@ -297,6 +296,8 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			log.info("Service "+serviceName+" of agent "+aid.getName()+" is already registered");
 			return null;
 		}
+		
+		log.info("Managing service "+serviceName);
 
 		// Get ontology
 		// FIX-ME: elaborate only first ontology
@@ -306,14 +307,14 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			ontoName = (String)ontoIt.next();
 		}
 		if (ontoName == null) {
-			log.info("Service "+serviceName+" of agent "+aid.getName()+" have not ontology registered");
+			log.info("Service "+serviceName+" of agent "+aid.getName()+" do not have any ontology registered. Discard it.");
 			return null;
 		}
 
 		// Get ontology className
 		String ontoClassname = WSIGConfiguration.getInstance().getOntoClassname(ontoName);
 		if (ontoClassname == null) {
-			log.warn("Ontology "+ontoName+" not present in WSIG configuration file");
+			log.warn("Ontology "+ontoName+" for service "+serviceName+" not present in WSIG configuration file. Discard service.");
 			return null;
 		}
 
@@ -322,7 +323,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		try {
 			ontoClass = Class.forName(ontoClassname);
 		} catch (Exception e) {
-			log.warn("Ontology class "+ontoClassname+" not present in WSIG classpath", e);
+			log.warn("Ontology class "+ontoClassname+" for service "+serviceName+" can not be loaded. Discard service.", e);
 			return null;
 		}
 
@@ -337,7 +338,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 				Method getInstanceMethod = ontoClass.getMethod("getInstance", null);
 				onto = (Ontology)getInstanceMethod.invoke(null, null);
 			} catch (Exception e1) {
-				log.warn("Ontology class "+ontoClassname+" not instantiable", e);
+				log.warn("Ontology class "+ontoClassname+" for service "+serviceName+" can not be instantiated. Discard service.", e);
 				return null;
 			}
 		}
@@ -346,7 +347,14 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		getContentManager().registerOntology(onto);
 
 		// Get mapper class
-		Class mapperClass = getMapperClass(sd);
+		Class mapperClass = null;
+		String mapperClassName = getMapperClassName(sd);
+		try {
+			mapperClass = Class.forName(mapperClassName);
+		} catch (ClassNotFoundException e) {
+			log.warn("Mapper class "+mapperClassName+" for service "+serviceName+" can not be loaded. Discard service.", e);
+			return null;
+		}
 
 		// Get hierarchicalComplexType flag
 		Boolean hierarchicalComplexType = isHierarchicalComplexTypeEnable(sd);
@@ -370,32 +378,16 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		return wsigService;
 	}
 
-	public Class getMapperClass(ServiceDescription sd) throws Exception{
-		Property p = null;
-		boolean mapperFound = false;
-		String mapperClassName = null;
-
+	private String getMapperClassName(ServiceDescription sd) {
 		Iterator it = sd.getAllProperties();
-		while (it.hasNext() && !mapperFound) {
-			p = (Property) it.next();
+		while (it.hasNext()) {
+			Property p = (Property) it.next();
 			if (WSIGConstants.WSIG_MAPPER.equalsIgnoreCase(p.getName())) {
-				mapperClassName = (String)p.getValue();
-				mapperFound = true;
+				return (String)p.getValue();
 			}
 		}
 
-		if(!mapperFound) {
-			return null;
-		}
-
-		Class mapperClass = null;
-		try {
-			mapperClass = Class.forName(mapperClassName);
-		} catch (ClassNotFoundException e) {
-			throw new Exception("Class "+mapperClassName+" not found!", e);
-		}
-
-		return mapperClass;
+		return null;
 	}
 
 	private void registerIntoDF() {
