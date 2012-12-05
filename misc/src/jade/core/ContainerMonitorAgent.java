@@ -36,6 +36,8 @@ import jade.core.messaging.MessagingService;
 import jade.domain.introspection.IntrospectionServer;
 import jade.lang.acl.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -45,6 +47,16 @@ import jade.util.leap.Iterator;
 import jade.util.leap.Map;
 
 public class ContainerMonitorAgent extends Agent {
+	// ContainerMonitorAgent specific startup configuration options 
+	public static final String MANAGE_OUT_OF_MEMORY = "manage-oom";
+	public static final String MANAGE_OUT_OF_MEMORY_PERIOD = "manage-oom-period";
+	public static final String MANAGE_OUT_OF_MEMORY_BLOCKSIZE = "manage-oom-blocksize";
+	public static final String MANAGE_OUT_OF_MEMORY_ACTION = "manage-oom-action";
+	
+	// Out of memory management actions
+	public static final String LOG = "LOG";
+	public static final String KILL = "KILL";
+	
 	public static final String CONTAINER_MONITOR_ONTOLOGY = "container-monitor";
 	
 	public static final String HELP_ACTION = "HELP";
@@ -61,6 +73,7 @@ public class ContainerMonitorAgent extends Agent {
 	
 	private AgentContainerImpl myContainer;
 	private LADT myLADT;
+	private String oomAction = LOG;
 	
 	private MessageTemplate template = MessageTemplate.and(
 			MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
@@ -75,113 +88,148 @@ public class ContainerMonitorAgent extends Agent {
 		
 		addBehaviour(new IntrospectionServer(this));
 		
+		if ("true".equals(getProperty(MANAGE_OUT_OF_MEMORY, "false"))) {
+			long period = 60000; // 1 min
+			try {
+				period = Long.parseLong(getProperty(MANAGE_OUT_OF_MEMORY_PERIOD, "60000"));
+			}
+			catch (Exception e) { 
+				// Ignore and keep default
+			}
+			int blocksize = 10000; // 10 K
+			try {
+				blocksize = Integer.parseInt(getProperty(MANAGE_OUT_OF_MEMORY_BLOCKSIZE, "10000"));
+			}
+			catch (Exception e) { 
+				// Ignore and keep default
+			}
+			// If Out Of Memory management is enabled default action is KILL
+			oomAction = getProperty(MANAGE_OUT_OF_MEMORY_ACTION, KILL);
+			addBehaviour(new OutOfMemoryManager(period, blocksize));
+		}
+		
 		addBehaviour(new CyclicBehaviour(this) {
 			
 			public void action() {
-				ACLMessage msg = myAgent.receive(template);
-				if (msg != null) {
-					ACLMessage reply = msg.createReply();
-					reply.setPerformative(ACLMessage.INFORM);
-					String content = msg.getContent();
-					try {
-						String contentUC = content.toUpperCase();
-						if (contentUC.startsWith(DUMP_AGENTS_ACTION)) {
-							reply.setContent(getAgentsDump());
-						}
-						else if (contentUC.startsWith(DUMP_AGENT_ACTION)) {
-							String agentName = getParameter(content, 0, false); // MANDATORY
-							Agent a = getAgentFromLADT(agentName);
-							String replyContent = null;
-							if(a != null) {
-								replyContent = getAgentDump(a, true);
+				try {
+					ACLMessage msg = myAgent.receive(template);
+					if (msg != null) {
+						ACLMessage reply = msg.createReply();
+						reply.setPerformative(ACLMessage.INFORM);
+						String content = msg.getContent();
+						try {
+							String contentUC = content.toUpperCase();
+							if (contentUC.startsWith(DUMP_AGENTS_ACTION)) {
+								reply.setContent(getAgentsDump());
+							}
+							else if (contentUC.startsWith(DUMP_AGENT_ACTION)) {
+								String agentName = getParameter(content, 0, false); // MANDATORY
+								Agent a = getAgentFromLADT(agentName);
+								String replyContent = null;
+								if(a != null) {
+									replyContent = getAgentDump(a, true);
+								}
+								else {
+									reply.setPerformative(ACLMessage.FAILURE);
+									replyContent = "Agent " + agentName + " doesn't exist";
+								}
+								reply.setContent(replyContent);
+							}
+							else if (contentUC.startsWith(DUMP_MESSAGEQUEUE_ACTION)) {
+								String agentName = getParameter(content, 0, false); // MANDATORY
+								Agent a = getAgentFromLADT(agentName);
+								String replyContent = null;
+								if(a != null) {
+									replyContent = getMessageQueueDump(a);
+								}
+								else {
+									reply.setPerformative(ACLMessage.FAILURE);
+									replyContent = "Agent " + agentName + " doesn't exist";
+								}
+								reply.setContent(replyContent);
+							}
+							else if (contentUC.startsWith(DUMP_MESSAGEMANAGER_ACTION)) {
+								reply.setContent(getMessageManagerDump());
+							}
+							else if (contentUC.startsWith(DUMP_LADT_ACTION)) {
+								reply.setContent(getLADTDump());
+							}
+							else if (contentUC.startsWith(DUMP_SERVICES_MAP_ACTION)) {
+								reply.setContent(getServicesMapDump());
+							}
+							else if (contentUC.startsWith(DUMP_PLATFORM_MANAGER_ACTION)) {
+								reply.setContent(getPlatformManagerDump());
+							}
+							else if (contentUC.startsWith(DUMP_SERVICES_ACTION)){
+								reply.setContent(getServicesDump());
+							}
+							else if (contentUC.startsWith(DUMP_SERVICE_ACTION)) {
+								String serviceName = getParameter(content, 0, false); // MANDATORY
+								String key = getParameter(content, 1, true); // OPTIONAL
+								BaseService srv = getService(serviceName);
+								if (srv != null) {
+									reply.setContent(getServiceDump(srv, key));
+								}
+								else {
+									reply.setPerformative(ACLMessage.FAILURE);
+									reply.setContent("Service " + serviceName + " not installed");
+								}
+							}
+							else if (contentUC.startsWith(DUMP_THREADS_ACTION)) {
+								reply.setContent(getThreadsDump());
+							}
+							else if (contentUC.startsWith(HELP_ACTION)) {
+								reply.setContent(getHelp());
 							}
 							else {
-								reply.setPerformative(ACLMessage.FAILURE);
-								replyContent = "Agent " + agentName + " doesn't exist";
-							}
-							reply.setContent(replyContent);
-						}
-						else if (contentUC.startsWith(DUMP_MESSAGEQUEUE_ACTION)) {
-							String agentName = getParameter(content, 0, false); // MANDATORY
-							Agent a = getAgentFromLADT(agentName);
-							String replyContent = null;
-							if(a != null) {
-								replyContent = getMessageQueueDump(a);
-							}
-							else {
-								reply.setPerformative(ACLMessage.FAILURE);
-								replyContent = "Agent " + agentName + " doesn't exist";
-							}
-							reply.setContent(replyContent);
-						}
-						else if (contentUC.startsWith(DUMP_MESSAGEMANAGER_ACTION)) {
-							reply.setContent(getMessageManagerDump());
-						}
-						else if (contentUC.startsWith(DUMP_LADT_ACTION)) {
-							reply.setContent(getLADTDump());
-						}
-						else if (contentUC.startsWith(DUMP_SERVICES_MAP_ACTION)) {
-							reply.setContent(getServicesMapDump());
-						}
-						else if (contentUC.startsWith(DUMP_PLATFORM_MANAGER_ACTION)) {
-							reply.setContent(getPlatformManagerDump());
-						}
-						else if (contentUC.startsWith(DUMP_SERVICES_ACTION)){
-							reply.setContent(getServicesDump());
-						}
-						else if (contentUC.startsWith(DUMP_SERVICE_ACTION)) {
-							String serviceName = getParameter(content, 0, false); // MANDATORY
-							String key = getParameter(content, 1, true); // OPTIONAL
-							BaseService srv = getService(serviceName);
-							if (srv != null) {
-								reply.setContent(getServiceDump(srv, key));
-							}
-							else {
-								reply.setPerformative(ACLMessage.FAILURE);
-								reply.setContent("Service " + serviceName + " not installed");
+								reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
 							}
 						}
-						else if (contentUC.startsWith(DUMP_THREADS_ACTION)) {
-							reply.setContent(getThreadsDump());
+						catch (Exception e) {
+							e.printStackTrace();
+							reply.setPerformative(ACLMessage.FAILURE);
+							reply.setContent(e.toString());
 						}
-						else if (contentUC.startsWith(HELP_ACTION)) {
-							reply.setContent(getHelp());
+						if (reply.getPerformative() == ACLMessage.INFORM) {
+							System.out.println(reply.getContent());
 						}
-						else {
-							reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-						}
+						myAgent.send(reply);
 					}
-					catch (Exception e) {
-						e.printStackTrace();
-						reply.setPerformative(ACLMessage.FAILURE);
-						reply.setContent(e.toString());
+					else {
+						block();
 					}
-					if (reply.getPerformative() == ACLMessage.INFORM) {
-						System.out.println(reply.getContent());
-					}
-					myAgent.send(reply);
 				}
-				else {
-					block();
+				catch (OutOfMemoryError oome) {
+					manageOOM();
+				}
+				catch (Throwable t) {
+					t.printStackTrace();
 				}
 			}
 		});
 		
 		addBehaviour(new CyclicBehaviour(this) {
 			public void action() {
-				ACLMessage msg = myAgent.receive(helpTemplate);
-				if (msg != null) {
-					ACLMessage reply = msg.createReply();
-					reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-					reply.setContent(getHelp());
-					myAgent.send(reply);
+				try {
+					ACLMessage msg = myAgent.receive(helpTemplate);
+					if (msg != null) {
+						ACLMessage reply = msg.createReply();
+						reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+						reply.setContent(getHelp());
+						myAgent.send(reply);
+					}
+					else {
+						block();
+					}
 				}
-				else {
-					block();
+				catch (OutOfMemoryError oome) {
+					manageOOM();
+				}
+				catch (Throwable t) {
+					t.printStackTrace();
 				}
 			}
 		} );
-		
 	}
 	
 	public String getHelp() {
@@ -735,6 +783,43 @@ public class ContainerMonitorAgent extends Agent {
 		}
 		else {
 			return false;
+		}
+	}
+	
+	private void manageOOM() {
+		try {
+			if (oomAction.equals(KILL)) {
+				System.out.println("OUT OF MEMORY DETECTED!!!!!!!! Kill JVM");
+				System.exit(100);
+			}
+			else if (oomAction.equals(LOG)) {
+				System.out.println("OUT OF MEMORY DETECTED!!!!!!!!");
+			}
+		}
+		catch (Throwable t) {			
+		}
+	}
+	
+	
+	/**
+	 * Inner class OutOfMemoryManager
+	 */
+	private class OutOfMemoryManager extends TickerBehaviour {
+		private int blocksize;
+		
+		public OutOfMemoryManager(long period, int blocksize) {
+			super(null, period);
+			this.blocksize = blocksize;
+		}
+
+		@Override
+		protected void onTick() {
+			try {
+				byte[] dummy = new byte[blocksize];
+			}
+			catch (Throwable oome) {
+				manageOOM();
+			}
 		}
 	}
 }
