@@ -227,7 +227,7 @@ public class MathAgent extends Agent {
 //		for (Object num : multiplication.getNumbers()) {
 //			result *= (((Number)num).doubleValue());
 //		}
-		prepareNotification(actExpr, msg, ACLMessage.INFORM, result);
+		sendNotification(actExpr, msg, ACLMessage.INFORM, result);
 	}
 
 	private void serveSumComplexAction(SumComplex sumComplex, Action actExpr, ACLMessage msg) {
