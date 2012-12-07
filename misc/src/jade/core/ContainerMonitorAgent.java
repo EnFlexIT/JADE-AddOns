@@ -365,6 +365,7 @@ public class ContainerMonitorAgent extends Agent {
 		return sb.toString();
 	}
 	
+	// FIXME: Refactor with jade.utils.ThreadDumpManager class
 	private static String dumpThread(String prefix, Thread t) {
 		ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 		ThreadInfo threadInfo = threadMXBean.getThreadInfo(t.getId());
