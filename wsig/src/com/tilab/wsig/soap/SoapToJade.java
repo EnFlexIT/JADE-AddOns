@@ -209,12 +209,11 @@ public class SoapToJade extends DefaultHandler {
 	}
 
 	private Vector<ParameterInfo> getParametersByLevel(int level, boolean addIfNotExist) throws Exception {
-		
 		if (!addIfNotExist && parametersByLevel.size() <= level) {
-			throw new Exception("Parameters not present for level "+level);
+			return null;
 		}
 		
-		Vector<ParameterInfo> parameters = null;
+		Vector<ParameterInfo> parameters;
 		if (parametersByLevel.size() <= level) {
 			parameters = new Vector<ParameterInfo>();
 			parametersByLevel.add(level, parameters);
@@ -380,34 +379,36 @@ public class SoapToJade extends DefaultHandler {
 					else {
 						// Get parameters for complex/aggregate type 
 						Vector<ParameterInfo> fieldsParameter = getParametersByLevel(parameterLevel+1, false);
-	
-						if (absObj instanceof AbsAggregate) {
-	
-							// Type is aggregate
-							for (int arrayIndex = 0; arrayIndex < fieldsParameter.size(); arrayIndex++) {
-								
-								// Add parameters to aggregate
-								ParameterInfo fieldPi = fieldsParameter.get(arrayIndex);
-								((AbsAggregate)absObj).add((AbsTerm)fieldPi.getValue());
-								log.debug("Add element "+arrayIndex+" to "+parameterName+" with "+fieldPi.getValue());
-							}
-						} else {
+						if (fieldsParameter != null) {
 							
-							// Type is complex
-							for (int fieldIndex = 0; fieldIndex < fieldsParameter.size(); fieldIndex++) {
-								ParameterInfo fieldPi = fieldsParameter.get(fieldIndex);
-							
-								// Get field parameter info
-								String fieldName = fieldPi.getName();
-								AbsObject fieldValue = fieldPi.getValue();
+							if (absObj instanceof AbsAggregate) {
+		
+								// Type is aggregate
+								for (int arrayIndex = 0; arrayIndex < fieldsParameter.size(); arrayIndex++) {
+									
+									// Add parameters to aggregate
+									ParameterInfo fieldPi = fieldsParameter.get(arrayIndex);
+									((AbsAggregate)absObj).add((AbsTerm)fieldPi.getValue());
+									log.debug("Add element "+arrayIndex+" to "+parameterName+" with "+fieldPi.getValue());
+								}
+							} else {
 								
-								// Set value
-								AbsHelper.setAttribute(absObj, fieldName, fieldValue);
+								// Type is complex
+								for (int fieldIndex = 0; fieldIndex < fieldsParameter.size(); fieldIndex++) {
+									ParameterInfo fieldPi = fieldsParameter.get(fieldIndex);
+								
+									// Get field parameter info
+									String fieldName = fieldPi.getName();
+									AbsObject fieldValue = fieldPi.getValue();
+									
+									// Set value
+									AbsHelper.setAttribute(absObj, fieldName, fieldValue);
+								}
 							}
+							
+							// Remove parameters of level parameterLevel+1
+							parametersByLevel.remove(parameterLevel+1);
 						}
-	
-						// Remove parameters of level parameterLevel+1
-						parametersByLevel.remove(parameterLevel+1);
 	
 						// Set value in parameter info object
 						pi.setValue(absObj);
