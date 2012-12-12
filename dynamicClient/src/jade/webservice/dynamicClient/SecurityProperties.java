@@ -31,8 +31,6 @@ import org.apache.ws.security.WSConstants;
  */
 public class SecurityProperties {
 
-	public final static String PASSWORD_TEXT = WSConstants.PASSWORD_TEXT; 
-	public final static String PASSWORD_DIGEST = WSConstants.PASSWORD_DIGEST;
 	public final static String PW_TEXT = WSConstants.PW_TEXT;
 	public final static String PW_DIGEST = WSConstants.PW_DIGEST;
 	
