@@ -794,6 +794,14 @@ public class JadeToWSDL {
 				XSDSimpleTypeDefinition enumType = WSDLUtils.addSimpleTypeToSchema(tns, wsdlTypeSchema, slotType, simpleTypeDefinition);
 				WSDLUtils.addRestrictionToSimpleType(enumType, permittedValues);
 			}
+			
+			ObjectSchema enumSchema = ontoService.getSchema(parameterClass);
+			if (enumSchema == null) {
+				// Schema not present -> add the class to ontology
+				log.debug("----add class "+parameterClass+" to ontology");
+				((BeanOntology)ontoService).add(parameterClass);
+			}
+			
 			if (parentComponent != null) {
 				log.debug("------add enum-type "+paramName+" ("+slotType+")");
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, paramName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
@@ -806,6 +814,9 @@ public class JadeToWSDL {
 				aggregateElementClass = parameterClass.getComponentType();
 			}
 			
+			// If is not a java array is not possible get the type of aggregate element. 
+			// It would be possible get it from the return type of a method (such in BOB) 
+			// but not directly from a class (parameterClass)
 			if (aggregateElementClass == null) {
 				throw new Exception("Collection class "+parameterClass.getSimpleName()+" without specified element type");
 			}
@@ -828,7 +839,6 @@ public class JadeToWSDL {
 			// Java custom type, search in the ontology for a schema of this type
 			ObjectSchema conceptSchema = ontoService.getSchema(parameterClass);
 			if (conceptSchema == null) {
-				
 				// Schema not present -> add the class to ontology
 				log.debug("----add class "+parameterClass+" to ontology");
 				((BeanOntology)ontoService).add(parameterClass);
