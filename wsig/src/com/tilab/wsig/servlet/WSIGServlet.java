@@ -546,7 +546,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 			log.info("Starting WSIG agent...");
 			JadeGateway.checkJADE();
 		} catch (ControllerException e) {
-			log.warn("Jade platform not present...WSIG agent not started");
+			log.warn("Jade platform not present...WSIG agent not started", e);
 		}
 	}
 
