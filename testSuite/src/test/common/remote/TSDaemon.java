@@ -199,5 +199,9 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 	public void handleOutput(String source, String msg) {
 		System.out.println("###"+source+">> "+msg);
 	}
+
+	public void handleTermination(int exitValue) {
+		System.out.println("Process terminated with exitValue="+exitValue);
+	}
 }
 

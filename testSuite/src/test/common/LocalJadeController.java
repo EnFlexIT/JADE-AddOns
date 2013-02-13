@@ -32,11 +32,15 @@ import jade.util.leap.*;
 //import test.common.*;
 import java.io.*;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+
 
 /**
    @author Giovanni Caire - TILAB
  */
 class LocalJadeController implements JadeController, OutputHandler {
+	private static jade.util.Logger logger = jade.util.Logger.getMyLogger(LocalJadeController.class.getName());
+	
 	private Object lock = new Object();
 	private boolean ready = false;
 	private List addresses = new ArrayList();
@@ -49,7 +53,7 @@ class LocalJadeController implements JadeController, OutputHandler {
 		workingDir = (workingDir != null ? workingDir : ".");
 		try {
 			// Start a JADE instance in a different Process
-			System.out.println("Starting JADE with command line: "+cmdLine);
+			logger.log(Level.INFO, "Starting JADE with command line: "+cmdLine);
 			//System.out.println("Environment: "+System.getenv());
 			proc = java.lang.Runtime.getRuntime().exec(cmdLine, null, new File(workingDir).getCanonicalFile());
 			
@@ -66,7 +70,7 @@ class LocalJadeController implements JadeController, OutputHandler {
 		}
 		
 		if (!ready) {
-			System.out.println("JADE startup timeout expired");
+			logger.log(Level.WARNING, "JADE startup timeout expired");
 			proc.destroy();
 			throw new TestException("Remote JADE startup was not completed successfully"); 
 		}
@@ -150,9 +154,10 @@ class LocalJadeController implements JadeController, OutputHandler {
 			while (true) {
 				try {
 					// Check if the sub-process is still alive
-					subProc.exitValue();
-					System.out.println("Remote JADE instance "+name+" terminated");
+					int exitValue = subProc.exitValue();
+					logger.log(Level.INFO, "Remote JADE instance "+name+" terminated");
 					
+					outHandler.handleTermination(exitValue);
 					notifyTerminated();
 					break;
 				}
@@ -165,7 +170,7 @@ class LocalJadeController implements JadeController, OutputHandler {
 					handleLine(line);
 				}
 				catch (Exception e) {
-					e.printStackTrace();
+					logger.log(Level.SEVERE, "Error handling output line", e);
 				}				
 			}  // END of while
 			
@@ -191,7 +196,6 @@ class LocalJadeController implements JadeController, OutputHandler {
 				if (containerName == null && line.startsWith(startupTag)) {
 					catchContainerName(line);
 					notifyStarted();
-				} else {
 				}
 			}
 		}
@@ -224,7 +228,7 @@ class LocalJadeController implements JadeController, OutputHandler {
 					catch (Exception e) {
 						// The process has terminated. Do nothing
 					}
-					System.out.println("ErrorManager exiting");
+					logger.log(Level.INFO, "ErrorManager exiting");
 				}
 			} );
 			t.start();
@@ -237,7 +241,7 @@ class LocalJadeController implements JadeController, OutputHandler {
 				errorManager.interrupt();
 			}
 			catch (Exception e) {
-				System.out.println("Error closing Error stream");
+				logger.log(Level.SEVERE, "Error closing Error stream", e);
 			}
 		}			
 	}   // END of inner class SubProcessManager
@@ -248,5 +252,9 @@ class LocalJadeController implements JadeController, OutputHandler {
 	/////////////////////////////////////////////////
 	public void handleOutput(String source, String msg) {
 		System.out.println(source+">> "+msg);
+	}
+
+	public void handleTermination(int exitValue) {
+		System.out.println("Process terminated with exitValue="+exitValue);
 	}
 }
