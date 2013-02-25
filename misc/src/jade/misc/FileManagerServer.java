@@ -1,14 +1,5 @@
 package jade.misc;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.logging.Level;
-
 import jade.content.AgentAction;
 import jade.content.ContentElement;
 import jade.content.lang.leap.LEAPCodec;
@@ -29,6 +20,20 @@ import jade.proto.SSResponderDispatcher;
 import jade.util.Logger;
 import jade.util.leap.Serializable;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+
+
 public class FileManagerServer implements Serializable {
 
 	private static final long serialVersionUID = 784792949576972917L;
@@ -38,8 +43,16 @@ public class FileManagerServer implements Serializable {
 	
 	private int downloadBlockSize = 0;
 	
-	public void init(Agent myAgent, final String root) {
+	private FileManagerProperties properties;
+	File file=null;
+	
+	public FileManagerServer() {		
+		properties = new FileManagerProperties();
+	}
+	
 		
+	public void init(Agent myAgent, final String root) {
+						
 		myAgent.getContentManager().registerLanguage(new SLCodec());
 		myAgent.getContentManager().registerLanguage(new LEAPCodec());
 		myAgent.getContentManager().registerOntology(FileManagementOntology.getInstance());
@@ -119,30 +132,52 @@ public class FileManagerServer implements Serializable {
 					private long fileSize;
 					private long totalBytesRead;
 					private String filePathName;
+					private List<String> filesPathName = new ArrayList<String>();
 					
+										
 					@Override
 					public void onStart() {
 						super.onStart();
 						
 						try {
+							String id = "Log-" + System.currentTimeMillis()+".zip";
 							Action actExpr = (Action)myAgent.getContentManager().extractContent(initiationMsg);
-							DownloadFileAction dfa = (DownloadFileAction)actExpr.getAction();
-		
-							filePathName = dfa.getFilePathName();
-							if (root != null) {
-								filePathName = root+File.separator+filePathName;
+							 
+							//when a single file is going to be downloaded
+							if (actExpr.getAction() instanceof DownloadFileAction) {								
+								DownloadFileAction dfa = (DownloadFileAction)actExpr.getAction();								
+								filesPathName=null;
+								filePathName = dfa.getFilePathName();
+								if (root != null) {
+									filePathName = root+File.separator+filePathName;
+								}									
+								file = new File(filePathName);		
 							}
-							
-							File file = new File(filePathName);
+							//when multiples files are going to be downloaded
+							else {
+								DownloadMultipleFilesAction dmfa = (DownloadMultipleFilesAction)actExpr.getAction();
+								filesPathName = dmfa.getFilesPathName();
+								if (root != null) {
+									for (String fileName : filesPathName) {
+										filesPathName.add(root+File.separator+fileName);										
+									}	
+								}	
+								
+								String zipFile = properties.getTmpDir()+File.separator+id;																													    
+								Zip(filesPathName,zipFile);								
+								file = new File(zipFile);												
+							}
+
 							bufferedInput = new BufferedInputStream(new FileInputStream(file));
-							buffer = new byte[getDownloadBlockSize()];
-							
+							buffer = new byte[getDownloadBlockSize()];								
 							fileSize = file.length();
-							totalBytesRead = 0;
+							totalBytesRead = 0;	
+
 						} catch(Exception e) {
 							logger.log(Level.SEVERE, "Serving DownloadFile action: "+(filePathName==null?"Error decoding ACLMessage":"Error opening file "+filePathName), e);
 							exception = e;
 						}
+												
 					}
 					
 					@Override
@@ -194,14 +229,22 @@ public class FileManagerServer implements Serializable {
 			            } catch (IOException e) {
 			            	logger.log(Level.SEVERE, "Error closing file "+filePathName, e);
 			            }
-						
+
+						finally{
+							if (filesPathName !=null && file!=null) {
+								file.delete();
+							}
+						}						
 						return super.onEnd();
-					}
+						
+					}					
+					
 				};
 			}
 		});
 		
 		logger.log(Level.FINE, "FileManagerServer initialized in agent "+myAgent.getName()+" with root "+root);
+		
 	}
 		
 	public void setDownloadBlockSize(int downloadBlockSize) {
@@ -260,4 +303,37 @@ public class FileManagerServer implements Serializable {
 		failureReply.setContent(message);
 		return failureReply;
 	}
+	
+	private void Zip(List<String> sourceFiles, String zipFile){                
+		try
+		{
+			
+			byte[] buffer = new byte[1024];			
+			FileOutputStream fout = new FileOutputStream(zipFile);
+			ZipOutputStream zout = new ZipOutputStream(fout);			
+
+			for (String fileName : sourceFiles) {	
+				FileInputStream fin = new FileInputStream(fileName);
+				if (fileName.contains(File.separator)) {
+					int index= fileName.lastIndexOf(File.separator);
+					zout.putNextEntry(new ZipEntry(fileName.substring(index+1)));
+				}else{
+					zout.putNextEntry(new ZipEntry(fileName));
+				}				
+				int length;
+				while((length = fin.read(buffer)) > 0)
+				{
+					zout.write(buffer, 0, length);
+				}
+				zout.closeEntry();				
+				fin.close();
+			}			
+			zout.close();
+		}
+		catch(IOException ioe)
+		{
+			System.out.println("IOException :" + ioe);
+		}
+	}
+	
 }
