@@ -98,6 +98,11 @@ public class FileManagerClient {
 	public InputStream download(String filePathName) throws Exception {
 		return new FileManagerInputStream(filePathName);
 	}
+	
+	public InputStream downloadMultiple(List<String> filesPathName) throws Exception {
+		return new FileManagerInputStream(filesPathName);
+	}
+	
 
 	private ACLMessage prepareGetFilesListRequest(Agent agent, String dirPathName) throws CodecException, OntologyException {
 		ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
@@ -148,6 +153,28 @@ public class FileManagerClient {
 		
 		return req;
 	}
+	
+	private ACLMessage prepareDownloadMultipleRequest(Agent agent, String conversationId, List<String> filesPathName) throws CodecException, OntologyException {
+		ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
+		req.setSender(agent.getAID());
+		req.addReceiver(server);
+		req.setOntology(FileManagementOntology.getInstance().getName());
+		req.setLanguage(LEAPCodec.NAME);
+		req.setReplyByDate(new Date(System.currentTimeMillis() + getDowloadBlockTimeout()));
+		req.setProtocol(FIPANames.InteractionProtocol.ITERATED_FIPA_REQUEST);
+		req.setConversationId(conversationId);
+
+		Action action = new Action();
+		action.setActor(server);
+		action.setAction(new DownloadMultipleFilesAction(filesPathName));
+
+		agent.getContentManager().fillContent(req, action);
+		
+		return req;
+	}
+	
+	
+	
 
 	private DownloadInfo extractDownloadInfo(ACLMessage msg) {
 		byte[] content = msg.getByteSequenceContent();
@@ -179,6 +206,7 @@ public class FileManagerClient {
 		public List<FileInfo> listFiles(final String dirPathName) throws Exception;
 		public void sendCancelDownload(final String conversationId) throws Exception;
 		public DownloadInfo download(final String conversationId, final String filePathName) throws Exception;
+		public DownloadInfo downloadMultiple(final String conversationId, final List<String> filesPathName) throws Exception;
 	} // END of inner interface Connector
 
 	
@@ -219,6 +247,13 @@ public class FileManagerClient {
 				throw new Exception(TIMEOUT);
 			}
 		}
+
+		@Override
+		public DownloadInfo downloadMultiple(String conversationId,
+				List<String> filesPathName) throws Exception {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	} // END of inner class AgentBasedConnector
 	
 	
@@ -252,6 +287,12 @@ public class FileManagerClient {
 
 		public DownloadInfo download(final String conversationId, final String filePathName) throws Exception {
 			DownloadBehaviour db = new DownloadBehaviour(conversationId, filePathName);
+			myGateway.execute(db);
+			return new DownloadInfo(db.getContent(), db.isCompleted());
+		}
+		
+		public DownloadInfo downloadMultiple(final String conversationId, final List<String> filesPathName) throws Exception {
+			DownloadBehaviour db = new DownloadBehaviour(conversationId, filesPathName);
 			myGateway.execute(db);
 			return new DownloadInfo(db.getContent(), db.isCompleted());
 		}
@@ -338,6 +379,7 @@ public class FileManagerClient {
 		
 		private String conversationId;
 		private String filePathName;
+		private List<String> filesPathName;
 		private DownloadInfo downloadInfo;
 		private Exception exception;
 		
@@ -347,6 +389,14 @@ public class FileManagerClient {
 			this.conversationId = conversationId;
 			this.filePathName = filePathName;
 		}
+		
+		public DownloadBehaviour(String conversationId, List<String> filesPathName) {
+			super(null, null);
+
+			this.conversationId = conversationId;
+			this.filesPathName = filesPathName;
+		}
+		
 
 		@Override
 		public void onStart() {
@@ -359,7 +409,12 @@ public class FileManagerClient {
 		@Override
 		protected ACLMessage prepareRequest(ACLMessage unused) {
 			try {
-				return FileManagerClient.this.prepareDownloadRequest(myAgent, conversationId, filePathName);
+				if (filesPathName!=null) {
+					return FileManagerClient.this.prepareDownloadMultipleRequest(myAgent, conversationId, filesPathName);
+				}else{
+					return FileManagerClient.this.prepareDownloadRequest(myAgent, conversationId, filePathName);
+				}	
+				
 			} catch (Exception e) {
 				exception = e;
 			}
@@ -409,6 +464,7 @@ public class FileManagerClient {
 		
 		private ByteBuffer buffer;
 		private String conversationId;
+		private List<String> filesPathName;
 		private String filePathName;
 		private boolean finished;
 		private boolean closed;
@@ -416,6 +472,13 @@ public class FileManagerClient {
 		public FileManagerInputStream(String filePathName) {
 			this.filePathName = filePathName;
 			this.conversationId = createConversationId(filePathName);
+			this.finished = false;
+			this.closed = false;
+		}
+		
+		public FileManagerInputStream(List<String> filesPathName) {
+			this.filesPathName = filesPathName;
+			this.conversationId = createConversationId(filesPathName.get(0));
 			this.finished = false;
 			this.closed = false;
 		}
@@ -480,11 +543,18 @@ public class FileManagerClient {
 
 		private void fillBuffer() throws IOException {
 			try {
-				DownloadInfo di = myConnector.download(conversationId, filePathName);
+				DownloadInfo di;
+				if (filesPathName!=null) {
+					di = myConnector.downloadMultiple(conversationId, filesPathName);
+				}else{
+					di = myConnector.download(conversationId, filePathName);
+
+				}
 				if (di.content != null) {
 					buffer = ByteBuffer.wrap(di.content);
 				}
 				finished = di.completed;
+				
 			} catch(Exception e) {
 				logger.log(Level.SEVERE, "Error getting file data from "+filePathName, e);
 				throw new IOException(e);
