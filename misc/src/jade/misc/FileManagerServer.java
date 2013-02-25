@@ -1,3 +1,25 @@
+/*****************************************************************
+JADE - Java Agent DEvelopment Framework is a framework to develop 
+multi-agent systems in compliance with the FIPA specifications.
+Copyright (C) 2002 TILAB
+
+GNU Lesser General Public License
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation, 
+version 2.1 of the License. 
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA  02111-1307, USA.
+*****************************************************************/
 package jade.misc;
 
 import jade.content.AgentAction;
@@ -33,7 +55,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 
-
 public class FileManagerServer implements Serializable {
 
 	private static final long serialVersionUID = 784792949576972917L;
@@ -42,14 +63,10 @@ public class FileManagerServer implements Serializable {
 	private static Logger logger = Logger.getJADELogger(FileManagerServer.class.getName());
 	
 	private int downloadBlockSize = 0;
-	
-	private FileManagerProperties properties;
-	File file=null;
+	private String zipTmpDir = System.getProperty("java.io.tmpdir");
 	
 	public FileManagerServer() {		
-		properties = new FileManagerProperties();
 	}
-	
 		
 	public void init(Agent myAgent, final String root) {
 						
@@ -132,49 +149,51 @@ public class FileManagerServer implements Serializable {
 					private long fileSize;
 					private long totalBytesRead;
 					private String filePathName;
-					private List<String> filesPathName = new ArrayList<String>();
-					
+					private File file;
+					private boolean deleteOnExit = false;
 										
 					@Override
 					public void onStart() {
 						super.onStart();
-						
+
 						try {
-							String id = "Log-" + System.currentTimeMillis()+".zip";
 							Action actExpr = (Action)myAgent.getContentManager().extractContent(initiationMsg);
 							 
 							//when a single file is going to be downloaded
 							if (actExpr.getAction() instanceof DownloadFileAction) {								
 								DownloadFileAction dfa = (DownloadFileAction)actExpr.getAction();								
-								filesPathName=null;
 								filePathName = dfa.getFilePathName();
 								if (root != null) {
 									filePathName = root+File.separator+filePathName;
 								}									
-								file = new File(filePathName);		
 							}
 							//when multiples files are going to be downloaded
 							else {
 								DownloadMultipleFilesAction dmfa = (DownloadMultipleFilesAction)actExpr.getAction();
-								filesPathName = dmfa.getFilesPathName();
+								List<String> filesPathName = dmfa.getFilesPathName();
 								if (root != null) {
-									for (String fileName : filesPathName) {
-										filesPathName.add(root+File.separator+fileName);										
+									for (int i=0; i<filesPathName.size(); i++) {
+										filesPathName.set(i, root+File.separator+filesPathName.get(i));
 									}	
 								}	
+
+								filePathName = "Log-" + System.currentTimeMillis()+".zip";
+								if (zipTmpDir != null) {
+									filePathName =  zipTmpDir+File.separator+filePathName;
+								}
 								
-								String zipFile = properties.getTmpDir()+File.separator+id;																													    
-								Zip(filesPathName,zipFile);								
-								file = new File(zipFile);												
+								zip(filesPathName, filePathName);
+								deleteOnExit = true;
 							}
 
+							file = new File(filePathName);
 							bufferedInput = new BufferedInputStream(new FileInputStream(file));
 							buffer = new byte[getDownloadBlockSize()];								
 							fileSize = file.length();
 							totalBytesRead = 0;	
 
 						} catch(Exception e) {
-							logger.log(Level.SEVERE, "Serving DownloadFile action: "+(filePathName==null?"Error decoding ACLMessage":"Error opening file "+filePathName), e);
+							logger.log(Level.SEVERE, "Error downloading file "+filePathName, e);
 							exception = e;
 						}
 												
@@ -231,7 +250,7 @@ public class FileManagerServer implements Serializable {
 			            }
 
 						finally{
-							if (filesPathName !=null && file!=null) {
+							if (deleteOnExit && file!=null) {
 								file.delete();
 							}
 						}						
@@ -256,6 +275,10 @@ public class FileManagerServer implements Serializable {
 			return DEFAULT_BLOCK_SIZE;
 		}
 		return downloadBlockSize;
+	}
+	
+	public void setZipTmpDir(String zipTmpDir) {
+		this.zipTmpDir = zipTmpDir;
 	}
 	
 	private static final void sendResponse(Agent myAgent, ACLMessage request, int performative, AgentAction agentAction, Object result) {
@@ -304,36 +327,47 @@ public class FileManagerServer implements Serializable {
 		return failureReply;
 	}
 	
-	private void Zip(List<String> sourceFiles, String zipFile){                
+	private void zip(List<String> sourceFileNames, String zipFileName) {
+		ZipOutputStream zos = null;
 		try
 		{
-			
 			byte[] buffer = new byte[1024];			
-			FileOutputStream fout = new FileOutputStream(zipFile);
-			ZipOutputStream zout = new ZipOutputStream(fout);			
+			FileOutputStream fos = new FileOutputStream(zipFileName);
+			zos = new ZipOutputStream(fos);			
 
-			for (String fileName : sourceFiles) {	
-				FileInputStream fin = new FileInputStream(fileName);
-				if (fileName.contains(File.separator)) {
-					int index= fileName.lastIndexOf(File.separator);
-					zout.putNextEntry(new ZipEntry(fileName.substring(index+1)));
-				}else{
-					zout.putNextEntry(new ZipEntry(fileName));
-				}				
-				int length;
-				while((length = fin.read(buffer)) > 0)
-				{
-					zout.write(buffer, 0, length);
+			for (String fileName : sourceFileNames) {
+				File f = new File(fileName);
+				if (f.exists()) {
+					FileInputStream fis = null;
+					try {
+						fis = new FileInputStream(f);
+						zos.putNextEntry(new ZipEntry(f.getName()));
+						int length;
+						while((length = fis.read(buffer)) > 0)
+						{
+							zos.write(buffer, 0, length);
+						}
+						zos.closeEntry();
+					}
+					finally {
+						if (fis != null) {
+							fis.close();
+						}
+					}
 				}
-				zout.closeEntry();				
-				fin.close();
 			}			
-			zout.close();
 		}
-		catch(IOException ioe)
+		catch(Exception e)
 		{
-			System.out.println("IOException :" + ioe);
+			logger.log(Level.WARNING, "Error zipping files", e);
+		}
+		finally {
+			try {
+				if (zos != null) {
+					zos.close();
+				}
+			} catch (IOException e) {
+			}
 		}
 	}
-	
 }

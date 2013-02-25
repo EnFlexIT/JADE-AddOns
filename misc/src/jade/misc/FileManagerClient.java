@@ -1,3 +1,25 @@
+/*****************************************************************
+JADE - Java Agent DEvelopment Framework is a framework to develop 
+multi-agent systems in compliance with the FIPA specifications.
+Copyright (C) 2002 TILAB
+
+GNU Lesser General Public License
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation, 
+version 2.1 of the License. 
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA  02111-1307, USA.
+*****************************************************************/
 package jade.misc;
 
 import java.io.IOException;
@@ -9,6 +31,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 
+import jade.content.AgentAction;
 import jade.content.lang.Codec.CodecException;
 import jade.content.lang.leap.LEAPCodec;
 import jade.content.lang.sl.SLCodec;
@@ -102,7 +125,6 @@ public class FileManagerClient {
 	public InputStream downloadMultiple(List<String> filesPathName) throws Exception {
 		return new FileManagerInputStream(filesPathName);
 	}
-	
 
 	private ACLMessage prepareGetFilesListRequest(Agent agent, String dirPathName) throws CodecException, OntologyException {
 		ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
@@ -135,7 +157,7 @@ public class FileManagerClient {
 		return "C-"+name+'-'+System.currentTimeMillis()+'-'+(cnt++);
 	}
 
-	private ACLMessage prepareDownloadRequest(Agent agent, String conversationId, String filePathName) throws CodecException, OntologyException {
+	private ACLMessage prepareDownloadRequest(Agent agent, String conversationId, AgentAction agentAction) throws CodecException, OntologyException {
 		ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
 		req.setSender(agent.getAID());
 		req.addReceiver(server);
@@ -147,34 +169,12 @@ public class FileManagerClient {
 
 		Action action = new Action();
 		action.setActor(server);
-		action.setAction(new DownloadFileAction(filePathName));
+		action.setAction(agentAction);
 
 		agent.getContentManager().fillContent(req, action);
 		
 		return req;
 	}
-	
-	private ACLMessage prepareDownloadMultipleRequest(Agent agent, String conversationId, List<String> filesPathName) throws CodecException, OntologyException {
-		ACLMessage req = new ACLMessage(ACLMessage.REQUEST);
-		req.setSender(agent.getAID());
-		req.addReceiver(server);
-		req.setOntology(FileManagementOntology.getInstance().getName());
-		req.setLanguage(LEAPCodec.NAME);
-		req.setReplyByDate(new Date(System.currentTimeMillis() + getDowloadBlockTimeout()));
-		req.setProtocol(FIPANames.InteractionProtocol.ITERATED_FIPA_REQUEST);
-		req.setConversationId(conversationId);
-
-		Action action = new Action();
-		action.setActor(server);
-		action.setAction(new DownloadMultipleFilesAction(filesPathName));
-
-		agent.getContentManager().fillContent(req, action);
-		
-		return req;
-	}
-	
-	
-	
 
 	private DownloadInfo extractDownloadInfo(ACLMessage msg) {
 		byte[] content = msg.getByteSequenceContent();
@@ -239,20 +239,21 @@ public class FileManagerClient {
 		}
 
 		public DownloadInfo download(final String conversationId, final String filePathName) throws Exception {
-			ACLMessage request = FileManagerClient.this.prepareDownloadRequest(myAgent, conversationId, filePathName);
+			return download(conversationId, new DownloadFileAction(filePathName));
+		}
+
+		public DownloadInfo downloadMultiple(String conversationId,	List<String> filesPathName) throws Exception {
+			return download(conversationId, new DownloadMultipleFilesAction(filesPathName));
+		}
+		
+		private DownloadInfo download(String conversationId, AgentAction agentAction) throws Exception {
+			ACLMessage request = FileManagerClient.this.prepareDownloadRequest(myAgent, conversationId, agentAction);
 			ACLMessage reply = FIPAService.doFipaRequestClient(myAgent, request);
 			if (reply != null) {
 				return FileManagerClient.this.extractDownloadInfo(reply);
 			} else {
 				throw new Exception(TIMEOUT);
 			}
-		}
-
-		@Override
-		public DownloadInfo downloadMultiple(String conversationId,
-				List<String> filesPathName) throws Exception {
-			// TODO Auto-generated method stub
-			return null;
 		}
 	} // END of inner class AgentBasedConnector
 	
@@ -409,11 +410,14 @@ public class FileManagerClient {
 		@Override
 		protected ACLMessage prepareRequest(ACLMessage unused) {
 			try {
-				if (filesPathName!=null) {
-					return FileManagerClient.this.prepareDownloadMultipleRequest(myAgent, conversationId, filesPathName);
+				AgentAction action;
+				if (filesPathName != null) {
+					action =  new DownloadMultipleFilesAction(filesPathName);
 				}else{
-					return FileManagerClient.this.prepareDownloadRequest(myAgent, conversationId, filePathName);
+					action = new DownloadFileAction(filePathName);
 				}	
+				
+				return FileManagerClient.this.prepareDownloadRequest(myAgent, conversationId, action);
 				
 			} catch (Exception e) {
 				exception = e;
@@ -471,14 +475,16 @@ public class FileManagerClient {
 		
 		public FileManagerInputStream(String filePathName) {
 			this.filePathName = filePathName;
-			this.conversationId = createConversationId(filePathName);
-			this.finished = false;
-			this.closed = false;
+			init(filePathName);
 		}
 		
 		public FileManagerInputStream(List<String> filesPathName) {
 			this.filesPathName = filesPathName;
-			this.conversationId = createConversationId(filesPathName.get(0));
+			init(filesPathName.get(0));
+		}
+		
+		private void init(String name) {
+			this.conversationId = createConversationId(name);
 			this.finished = false;
 			this.closed = false;
 		}
@@ -544,7 +550,7 @@ public class FileManagerClient {
 		private void fillBuffer() throws IOException {
 			try {
 				DownloadInfo di;
-				if (filesPathName!=null) {
+				if (filesPathName != null) {
 					di = myConnector.downloadMultiple(conversationId, filesPathName);
 				}else{
 					di = myConnector.download(conversationId, filePathName);

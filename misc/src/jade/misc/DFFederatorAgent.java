@@ -20,7 +20,6 @@ License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
 *****************************************************************/
-
 package jade.misc;
 
 import jade.core.Agent;
@@ -29,7 +28,6 @@ import jade.domain.FIPANames;
 import jade.domain.DFGUIManagement.*;
 import jade.domain.JADEAgentManagement.*;	   
 import jade.domain.FIPAAgentManagement.DFAgentDescription;	   
-import jade.content.ContentManager;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.basic.Action;
 import jade.lang.acl.ACLMessage;
@@ -39,7 +37,6 @@ import jade.util.Logger;
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * This agent provides a simple graphical interface to federate DF agents.
