@@ -25,6 +25,7 @@ public class FileManagementOntology extends BeanOntology {
         	// actions schemas
         	add(GetFilesListAction.class);
         	add(DownloadFileAction.class);
+        	add(DownloadMultipleFilesAction.class);
         }
         catch (BeanOntologyException e){
             e.printStackTrace();
