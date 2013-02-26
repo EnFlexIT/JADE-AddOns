@@ -349,11 +349,13 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		// Get mapper class
 		Class mapperClass = null;
 		String mapperClassName = getMapperClassName(sd);
-		try {
-			mapperClass = Class.forName(mapperClassName);
-		} catch (ClassNotFoundException e) {
-			log.warn("Mapper class "+mapperClassName+" for service "+serviceName+" can not be loaded. Discard service.", e);
-			return null;
+		if (mapperClassName != null) {
+			try {
+				mapperClass = Class.forName(mapperClassName);
+			} catch (Exception e) {
+				log.warn("Mapper class "+mapperClassName+" for service "+serviceName+" can not be loaded. Discard service.", e);
+				return null;
+			}
 		}
 
 		// Get hierarchicalComplexType flag
