@@ -353,8 +353,7 @@ public class TestUtility {
 		}
 		
 		if (rm != null) {
-			// If a RemoteManager is set, use it and launch the JADE instance 
-			// remotely
+			// If a RemoteManager is set, use it and launch the JADE instance remotely
 			try {
 				int id = rm.launchJadeInstance(instanceName, classpath, jvmArgs, mainClass, jadeArgs, protoNames);
 				jc = new RemoteJadeController(rm, id);
@@ -373,6 +372,7 @@ public class TestUtility {
 	public static JadeController localLaunch(String instanceName, String classpath, String jvmArgs, String mainClass, String jadeArgs, String[] protoNames, OutputHandler outputHandler, String workingDir) throws TestException {
 		JadeController jc;
 		
+		// JVM arguments
 		if (jvmArgs == null) {
 			jvmArgs = "";
 		}
@@ -385,6 +385,13 @@ public class TestUtility {
 		if (System.getProperty("project-home") != null) {
 			jvmArgs = jvmArgs + " -Dproject-home="+System.getProperty("project-home");
 		}
+		
+		// Classpath: 
+		// - If a classpath is already specified in the JVM args (-cp ... or -classpath ....), just use it
+		// Otherwise
+		// - If the classpath argument specifies a normal classpath, use it.
+		// - If the classpath argument begins with +, use <classpath>;<current-classpath>
+		// - If the classpath argument is null, use the current classpath only
 		String classpathOption = "";
 		if (jvmArgs.indexOf("-cp ") < 0 && jvmArgs.indexOf("-classpath ") < 0) {
 			if (classpath == null || classpath.startsWith("+")) {
@@ -416,14 +423,18 @@ public class TestUtility {
 			
 			classpathOption = "-cp "+classpath;
 		}
+		
+		// Java executable.
+		// If the JAVA_HOME variable is specified, use that in <JAVA_HOME>/bin
+		// Else use that in the PATH
+		String javaExe = "java ";
 		String javaHome = System.getenv("JAVA_HOME");
 		if(javaHome != null){
-			javaHome = javaHome + System.getProperty("file.separator")+ "bin" + System.getProperty("file.separator")+"java ";
-		}else{
-			javaHome= "java ";
+			javaExe = javaHome + System.getProperty("file.separator")+ "bin" + System.getProperty("file.separator")+javaExe;
 		}
+
+		String commandLine = javaExe+classpathOption+" "+jvmArgs+" -DTSDaemon=true "+mainClass+" "+jadeArgs;
 		
-		String commandLine = javaHome+classpathOption+" "+jvmArgs+" -DTSDaemon=true "+mainClass+" "+jadeArgs;
 		if ("true".equalsIgnoreCase(System.getProperty("DEBUG"))) {
 			System.out.println("Manual launch!!!!!!!!!!!!!!");
 			jc = new ManualJadeController(instanceName, commandLine, protoNames);
