@@ -6,7 +6,6 @@
   <servlet>
     <servlet-name>wsigServlet</servlet-name>
     <servlet-class>com.tilab.wsig.servlet.WSIGServlet</servlet-class>
-    
 	<load-on-startup>1</load-on-startup>
   </servlet>
   
