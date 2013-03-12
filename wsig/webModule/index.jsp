@@ -35,10 +35,10 @@ import="jade.content.onto.Ontology,
 	Boolean wsigActive = (Boolean)application.getAttribute("WSIGActive");
 	if (wsigActive != null && wsigActive.booleanValue() == true) {
 		wsigAgentStatus = "<font color='green'>Active</font>";
-		wsigAgentStatus += " ( <a href='"+wsigConfig.getServicesUrl(request)+"?WSIGAgentCommand=stop'>STOP</a> )";
+		wsigAgentStatus += " ( <a href='"+wsigConfig.getAdminUrl(request)+"/admin/platform/disconnect'>STOP</a> )";
 	} else {
 		wsigAgentStatus = "<font color='red'><b>Down</b></font>";
-		wsigAgentStatus += " ( <a href='"+wsigConfig.getServicesUrl(request)+"?WSIGAgentCommand=start'>START</a> )";
+		wsigAgentStatus += " ( <a href='"+wsigConfig.getAdminUrl(request)+"/admin/platform/connect'>START</a> )";
 	}
 
 	// WSDL style
@@ -151,7 +151,7 @@ import="jade.content.onto.Ontology,
 		<td class="value"><% out.print(wsigConfig.isUddiEnable()); %></td>
 	</tr>
 	<tr>
-		<td width="30%" class="title">UDDI query mamager:</td>
+		<td width="30%" class="title">UDDI query manager:</td>
 		<td class="value"><% out.print(wsigConfig.getQueryManagerURL()); %></td>
 	</tr>
 	<tr>
