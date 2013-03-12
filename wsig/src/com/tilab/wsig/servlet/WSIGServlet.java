@@ -33,7 +33,6 @@ import jade.wrapper.gateway.JadeGateway;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -153,15 +152,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 	
 	protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
 
-		// Check if the request is a WSIG agent command
-		String wsigAgentCommand = httpRequest.getParameter("WSIGAgentCommand");
-		if (wsigAgentCommand != null && !wsigAgentCommand.equals("")) {
-
-			// Elaborate WSIG agent command
-			elaborateWSIGAgentCommand(wsigAgentCommand, httpRequest, httpResponse);
-			return;
-		}
-		
+				
 		// A typical Web Service convention is that a request of the form 
 		// http://<wsig-url>/<service-name>?WSDL (elements following the '?' are HTTP 
 		// request parameters), e.g. http://localhost:8080/wsig/ws/MatchService?WSDL, 
@@ -388,32 +379,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 			throw new SOAPException(SOAPException.FAULT_CODE_SERVER, wsigBehaviour.getError(), agentExecutor.getName());
 		}
 	}
-
-	private void elaborateWSIGAgentCommand(String wsigAgentCommand, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException  {
 	
-		log.info("WSIG agent command arrived ("+wsigAgentCommand+")");
-
-		if (wsigAgentCommand.equalsIgnoreCase("start")) {
-			// Start WSIGAgent
-			startupWSIGAgent();
-			try {
-				// Wait a bit for the registration of services before refreshing the page
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {}
-		} else if (wsigAgentCommand.equalsIgnoreCase("stop")) {
-			// Stop WSIGAgent
-			shutdownWSIGAgent();				
-		} else {
-			log.warn("WSIG agent command not implementated");
-		}
-		
-		log.info("WSIG agent command elaborated");
-
-		// Redirect to console home page
-		URL consoleUrl = WSIGConfiguration.getAdminUrl(httpRequest);
-		httpResponse.sendRedirect(consoleUrl.toString());
-	}
-
 	private void elaborateWSDLRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
 
 		String requestURL = httpRequest.getRequestURL().toString();
