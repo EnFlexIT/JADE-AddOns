@@ -8,7 +8,8 @@ import="jade.content.onto.Ontology,
 	org.uddi4j.util.ServiceKey,
 	com.tilab.wsig.store.WSIGService,
 	com.tilab.wsig.store.WSIGStore,
-	com.tilab.wsig.wsdl.WSDLUtils"
+	com.tilab.wsig.wsdl.WSDLUtils,
+	com.tilab.wsig.WSIGConfiguration"
 %>
 
 
@@ -26,6 +27,9 @@ import="jade.content.onto.Ontology,
 <h3> <a href="index.jsp" class="title">Home</a> - <a href="test.jsp" class="title">Test</a></h3>
 
 <%
+
+	WSIGConfiguration wsigConfig = (WSIGConfiguration)application.getAttribute("WSIGConfiguration");
+    
 	// Get parameter
 	String serviceName = request.getParameter("service");
 
@@ -99,9 +103,8 @@ import="jade.content.onto.Ontology,
 	</tr>
 	<tr>
 		<td width="20%" class="title">WSDL url:</td>
-		<td class="value"><a href="<% out.print(wsdlUrl); %>"><% out.print(wsdlUrl); %></a></td>
+		<td class="value"><a href="<%=wsigConfig.getAdminUrl(request)%>/admin/services/<%=serviceName%>/wsdl"><% out.print(wsdlUrl); %></a></td>
 	</tr>
-
 	<tr>
 		<td width="20%" class="title" valign="top">Operations:</td>
 		<td class="value">
