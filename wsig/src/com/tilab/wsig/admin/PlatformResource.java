@@ -19,10 +19,8 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
-*****************************************************************/
-
+ *****************************************************************/
 package com.tilab.wsig.admin;
-
 
 import jade.wrapper.ControllerException;
 import jade.wrapper.gateway.JadeGateway;
@@ -43,95 +41,71 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 
 import com.tilab.wsig.WSIGConfiguration;
-import com.tilab.wsig.servlet.WSIGServlet;
-
 
 @Path("platform")
 public class PlatformResource {
 
- private static Logger log = Logger.getLogger(WSIGServlet.class.getName());
-  
- 
- @GET
- public Response getWsigStatus(@Context ServletContext servletContext) {
-	 String wsigActive;
-	 Boolean status = (Boolean)servletContext.getAttribute("WSIGActive");
-	
-	if (status== null) {
-		wsigActive="UNKNOWN";
-	}else if(status == true) {
-		wsigActive="ACTIVE";
-	}else{
-		wsigActive="DOWN";
+	private static Logger log = Logger.getLogger(PlatformResource.class.getName());
+
+	@GET
+	public Response getStatus(@Context ServletContext servletContext) {
+		String wsigActive;
+		Boolean status = (Boolean)servletContext.getAttribute("WSIGActive");
+
+		if (status== null) {
+			wsigActive="UNKNOWN";
+		} 
+		else if (status == true) {
+			wsigActive="ACTIVE";
+		} 
+		else {
+			wsigActive="DOWN";
+		}
+		log.info("WSIG state retrieved: "+wsigActive);
+		return Response.ok(wsigActive).build(); 
 	}
-	log.info("WSIG state retrieved: "+wsigActive);
-	return Response.ok(wsigActive).build(); 
- }
- 
-  
- @Path("{status}")
- @GET
- public void modifyWsigStatus(@PathParam("status") String status,@Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) throws IOException {
 
-	 log.info("WSIG agent command arrived ("+status+")");
+	// This method is used only for administration via web-console
+	@Path("{status}")
+	@GET
+	public void getModifyStatus(@PathParam("status") String status, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) throws IOException {
+		modifyStatus(status);
+		
+		// Redirect to console home page
+		URL consoleUrl = WSIGConfiguration.getAdminUrl(httpRequest);
+		httpResponse.sendRedirect(consoleUrl.toString());
+	}
 
-	 if (status.equalsIgnoreCase("connect")) {
-		 // Start WSIGAgent
-		 try {
-			 log.info("Starting WSIG agent...");
-			 JadeGateway.checkJADE();
-		 } catch (ControllerException e) {
-			 log.warn("Jade platform not present...WSIG agent not started", e);
-		 }			
-		 try {
-			 // Wait a bit for the registration of services before refreshing the page
-			 Thread.sleep(1000);
-		 } catch (InterruptedException e) {}
-	 } else if (status.equalsIgnoreCase("disconnect")) {
-		 // Stop WSIGAgent
-		 log.info("Stopping WSIG agent...");
-		 JadeGateway.shutdown();			
-	 } else {
-		 log.warn("WSIG agent command not implementated");
-	 }
+	@Path("{status}")
+	@PUT
+	public Response putModifyStatus(@PathParam("status") String status, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) throws IOException {
+		modifyStatus(status);
+		return Response.ok().build(); 
+	}
 
-	 log.info("WSIG agent command elaborated");
+	private void modifyStatus(String status) {
+		log.info("WSIG agent command arrived ("+status+")");
 
-	 // Redirect to console home page
-	 URL consoleUrl = WSIGConfiguration.getAdminUrl(httpRequest);
-	 httpResponse.sendRedirect(consoleUrl.toString());
- }
- 
- @Path("{status}")
- @PUT
- public Response putWsigStatus(@PathParam("status") String status,@Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) throws IOException {
+		if (status.equalsIgnoreCase("connect")) {
+			// Start WSIGAgent
+			try {
+				log.info("Starting WSIG agent...");
+				JadeGateway.checkJADE();
+			} catch (ControllerException e) {
+				log.warn("Jade platform not present...WSIG agent not started", e);
+			}			
+			try {
+				// Wait a bit for the registration of services before refreshing the page
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {}
+		} else if (status.equalsIgnoreCase("disconnect")) {
+			// Stop WSIGAgent
+			log.info("Stopping WSIG agent...");
+			JadeGateway.shutdown();			
+		} else {
+			log.warn("WSIG agent command not implementated");
+		}
 
-	 log.info("WSIG agent command arrived ("+status+")");
-
-	 if (status.equalsIgnoreCase("connect")) {
-		 // Start WSIGAgent
-		 try {
-			 log.info("Starting WSIG agent...");
-			 JadeGateway.checkJADE();
-		 } catch (ControllerException e) {
-			 log.warn("Jade platform not present...WSIG agent not started", e);
-		 }			
-		 try {
-			 // Wait a bit for the registration of services before refreshing the page
-			 Thread.sleep(1000);
-		 } catch (InterruptedException e) {}
-	 } else if (status.equalsIgnoreCase("disconnect")) {
-		 // Stop WSIGAgent
-		 log.info("Stopping WSIG agent...");
-		 JadeGateway.shutdown();			
-	 } else {
-		 log.warn("WSIG agent command not implementated");
-	 }
-
-	 log.info("WSIG agent command elaborated");
-	
-	 return Response.ok().build(); 
-	 
- }
- 
+		log.info("WSIG agent command elaborated");
+	}
 } 

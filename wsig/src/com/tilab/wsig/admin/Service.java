@@ -19,8 +19,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
-*****************************************************************/
-
+ *****************************************************************/
 package com.tilab.wsig.admin;
 
 import java.util.Collection;
@@ -38,107 +37,83 @@ import com.tilab.wsig.wsdl.WSDLUtils;
 
 @XmlRootElement(name = "service")
 @XmlType(propOrder={"name",
-					"prefix",
-					"mapperClass",
-					"hierarchicalComplexType",
-					"jadeOntology",
-					"jadeAgent",
-					"uddiServiceKey",
-					"wsdlUrl",
-					"operation"})
-
+		"prefix",
+		"mapperClass",
+		"hierarchicalComplexType",
+		"jadeOntology",
+		"jadeAgent",
+		"uddiServiceKey",
+		"wsdlUrl",
+		"operation"})
 public class Service {
-	
-	
 	private  WSIGService wsigService;
 	private HttpServletRequest hsr;
-	
-	
-	public Service(){		
+
+	Service(){		
 	}	
-		
+
 	public Service(WSIGService service, HttpServletRequest hsr){
-		this.wsigService=service;		
-		this.hsr=hsr;	
+		this.wsigService = service;		
+		this.hsr = hsr;	
 	}
 
-	
 	@XmlElement(name="name")
 	public String getName() {
-	
-	 String name= wsigService.getServiceName();
-	if (name == null) {
-		name ="";
-	}	
-		return name;
+		return wsigService.getServiceName();
 	}
-	
+
 	@XmlElement(name="prefix")
 	public String getPrefix() {
-	
 		String servicePrefix = wsigService.getServicePrefix();
-		String servicePrefixName = servicePrefix;
 		if (servicePrefix == null || "".equals(servicePrefix)) {
-			servicePrefixName = "";
+			servicePrefix = null;
 		} else {
-			servicePrefixName = servicePrefixName.substring(0, servicePrefixName.length()-1);
+			servicePrefix = servicePrefix.substring(0, servicePrefix.length()-1);
 		}
-		return servicePrefixName;
+		return servicePrefix;
 	}
-	
+
 	@XmlElement(name="mapperClass")
 	public String getMapperClass() {
-	
-		String mapperClass="";
-		Class mclass = wsigService.getMapperClass();
-		if (mclass != null) {
-			mapperClass= mclass.getCanonicalName();
+		Class mapperClass = wsigService.getMapperClass();
+		if (mapperClass != null) {
+			return mapperClass.getCanonicalName();
 		}
-		return mapperClass;
+		return null;
 	}
-	
+
 	@XmlElement(name="hierarchicalComplexType")
 	public Boolean isHierarchicalComplexType() {
-			return wsigService.isHierarchicalComplexType();
+		return wsigService.isHierarchicalComplexType();
 	}
-	
-	
+
 	@XmlElement(name="jadeOntology")
 	public String getJadeOntology() {
-	
 		return wsigService.getServiceOntology().getName();
 	}
-	
+
 	@XmlElement(name="jadeAgent")
 	public String getJadeAgent() {
-	
 		return wsigService.getAid().getName();
 	}
-	
+
 	@XmlElement(name="uddiServiceKey")
 	public String getUddiServiceKey() {
-		
-		String uddiKeyName = "";
 		ServiceKey uddiServiceKey = wsigService.getUddiServiceKey();
 		if (uddiServiceKey != null) {
-			uddiKeyName = uddiServiceKey.getText();
+			return uddiServiceKey.getText();
 		}
-		
-		return uddiKeyName;
+		return null;
 	}
-	
+
 	@XmlElement(name="wsdlUrl")
 	public String getWsdlUrl() {
-	
-		String wsdlUrl = WSDLUtils.getWsdlUrl(wsigService.getServiceName(), hsr);
-		return wsdlUrl;
+		return WSDLUtils.getWsdlUrl(wsigService.getServiceName(), hsr);
 	}
-	
+
 	@XmlElementWrapper(name="operations")
 	@XmlElement(name="operation")
 	public Collection<String> getOperation() {
-			
 		return wsigService.getOperations();
 	}	
-	
 }

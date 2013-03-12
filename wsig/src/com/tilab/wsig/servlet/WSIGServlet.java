@@ -151,8 +151,6 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 	}
 	
 	protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
-
-				
 		// A typical Web Service convention is that a request of the form 
 		// http://<wsig-url>/<service-name>?WSDL (elements following the '?' are HTTP 
 		// request parameters), e.g. http://localhost:8080/wsig/ws/MatchService?WSDL, 

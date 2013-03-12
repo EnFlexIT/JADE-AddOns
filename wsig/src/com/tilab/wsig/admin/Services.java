@@ -19,10 +19,8 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
-*****************************************************************/
-
+ *****************************************************************/
 package com.tilab.wsig.admin;
-
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,16 +40,15 @@ public class Services {
 	private List<String> servicesNames = new ArrayList<String>();
 	private ServletContext servletContext;
 
-	public Services(){
+	Services(){
 	}	
 
 	public Services(ServletContext servletContext){
-		this.servletContext=servletContext;
+		this.servletContext = servletContext;
 	}	
 
 	@XmlElement(name="service")
 	public List<String> getServicesNames() {
-
 		WSIGService service;
 		WSIGStore wsigStore= (WSIGStore)servletContext.getAttribute("WSIGStore"); 
 		Collection<WSIGService> services = wsigStore.getAllServices();

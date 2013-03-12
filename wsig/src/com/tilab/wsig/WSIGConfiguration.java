@@ -19,7 +19,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
-*****************************************************************/
+ *****************************************************************/
 
 package com.tilab.wsig;
 
@@ -52,7 +52,7 @@ public class WSIGConfiguration extends Properties {
 	private static String wsigConfPath;
 	private static String wsigVersion;
 	private ServletContext servletContext;
-	
+
 	// WSIG configuration
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
 	public static final String KEY_WSIG_SERVICES_URL = "wsig.servicesURL";
@@ -60,19 +60,19 @@ public class WSIGConfiguration extends Properties {
 	public static final String KEY_WSIG_PRESERVE_JAVA_TYPE = SLCodec.PRESERVE_JAVA_TYPES;
 	public static final String KEY_WSIG_TRACE_CLIENT_IP = "wsig.traceClientIP";
 	public static final String KEY_WSIG_TRACE_HTTP_HEADERS = "wsig.traceHttpHeaders";
-	
+
 	// WSS security
 	public final static String KEY_WSS_USERNAME = "wss.username";
 	public final static String KEY_WSS_PASSWORD = "wss.password";
 	public final static String KEY_WSS_TIME_TO_LIVE = "wss.timeToLive";
-	
+
 	// WSDL generation
 	public final static String KEY_LOCAL_NAMESPACE_PREFIX = "wsdl.localNamespacePrefix";
 	public static final String KEY_WSDL_WRITE_ENABLE = "wsdl.writeEnable";
 	public static final String KEY_WSDL_DIRECTORY = "wsdl.directory";
 	public static final String KEY_WSDL_STYLE = "wsdl.style";
 	public static final String KEY_HIERARCHICAL_COMPLEX_TYPE = "wsdl.hierarchicalComplexType";
-	
+
 	// UDDI repository configuration
 	public final static String KEY_UDDI_ENABLE = "uddi.enable";
 	public final static String KEY_QUERY_MANAGER_URL = "uddi.queryManagerURL";
@@ -88,15 +88,15 @@ public class WSIGConfiguration extends Properties {
 
 	// Ontology configuration
 	public final static String KEY_ONTO_PREFIX = "onto";
-	
+
 	// Log manager configuration
 	public final static String KEY_ENABLE_LOG_MANAGER = "enable-log-manager";
 	public final static String KEY_LOG_MANAGER_NAME = "log-manager-name";
 	public final static String KEY_LOG_MANAGER_ROOT = "log-manager-root";
 	public final static String KEY_LOG_MANAGER_DOWNLOAD_BLOCK_SIZE = "log-manager-download-block-size";
 	public final static String LOG_MANAGER_ROOT_DEFAULT = "../../logs";
-	
-	
+
+
 	/**
 	 * Return an instance of the class.
 	 * Only one instance is reasonable to use.
@@ -111,11 +111,11 @@ public class WSIGConfiguration extends Properties {
 		return anInstance;
 	}
 
-   	public static void init(String _wsigConfPath){
+	public static void init(String _wsigConfPath){
 		wsigConfPath = _wsigConfPath;
-   	}
+	}
 
-   	// WSIG CONFIGURATION
+	// WSIG CONFIGURATION
 	public synchronized String getWsigVersion() {
 		if (wsigVersion == null) {
 			try {
@@ -127,7 +127,7 @@ public class WSIGConfiguration extends Properties {
 				String revision = (String) m.invoke(versionManager, new Object[0]);
 				m = c.getMethod("getDate", new Class[0]);
 				String date = (String) m.invoke(versionManager, new Object[0]);
-				
+
 				wsigVersion = version+" - revision "+revision+" of "+date;
 			}
 			catch (Exception e) {
@@ -137,67 +137,65 @@ public class WSIGConfiguration extends Properties {
 		}
 		return wsigVersion;
 	}
-   	
+
 	// AGENT CONFIGURATION FOR SERVLET
 	public synchronized String getMainHost() {
 		return getProperty(jade.core.Profile.MAIN_HOST);
 	}
-	
+
 	public void setMainHost(String mainHost) {
-		 setProperty(jade.core.Profile.MAIN_HOST, mainHost);
+		setProperty(jade.core.Profile.MAIN_HOST, mainHost);
 	}
-	
+
 	public synchronized String getMainPort() {
 		return getProperty(jade.core.Profile.MAIN_PORT);
 	}
-	
+
 	public void setMainPort(String mainPort) {
-		 setProperty(jade.core.Profile.MAIN_PORT, mainPort);
+		setProperty(jade.core.Profile.MAIN_PORT, mainPort);
 	}
-	
+
 	public synchronized String getContainerName() {
 		return getProperty(jade.core.Profile.CONTAINER_NAME);
 	}
-	
+
 	public void setContainerName(String containerName) {
-		 setProperty(jade.core.Profile.CONTAINER_NAME, containerName);
+		setProperty(jade.core.Profile.CONTAINER_NAME, containerName);
 	}
-	
+
 	public synchronized String getLocalPort() {
 		return getProperty(jade.core.Profile.LOCAL_PORT);
 	}
-	
+
 	public void setLocalPort(String localPort) {
-		 setProperty(jade.core.Profile.LOCAL_PORT, localPort);
+		setProperty(jade.core.Profile.LOCAL_PORT, localPort);
 	}
-	
+
 	public synchronized String getPreserveJavaType() {
 		return getProperty(KEY_WSIG_PRESERVE_JAVA_TYPE);
 	}
-	
+
 	public void setPreserveJavaType(String preserveJavaType) {
-		 setProperty(KEY_WSIG_PRESERVE_JAVA_TYPE,preserveJavaType);
+		setProperty(KEY_WSIG_PRESERVE_JAVA_TYPE,preserveJavaType);
 	}
-	
+
 	public synchronized String getAgentClassName() {
 		return getProperty(KEY_WSIG_AGENT_CLASS_NAME);
 	}
-	
+
 	public void setAgentClassName(String agentClassName) {
-		 setProperty(KEY_WSIG_AGENT_CLASS_NAME,agentClassName);
+		setProperty(KEY_WSIG_AGENT_CLASS_NAME,agentClassName);
 	}
-	
+
 	public synchronized boolean isTraceClientIP() {
 		String traceClientIP = getProperty(KEY_WSIG_TRACE_CLIENT_IP);
 		return "true".equalsIgnoreCase(traceClientIP);
 	}
-	
-		
+
 	public synchronized boolean isTraceHttpHeaders() {
 		String traceHttpHeaders = getProperty(KEY_WSIG_TRACE_HTTP_HEADERS);
 		return "true".equalsIgnoreCase(traceHttpHeaders);
 	}
-	
 
 	public synchronized String getServicesUrl(HttpServletRequest request) throws MalformedURLException {
 		// Try to read from configuration file 
@@ -213,47 +211,47 @@ public class WSIGConfiguration extends Properties {
 		}
 		return servicesUrl;
 	}
-	
+
 	public void setServicesUrl(String servicesUrl) {
-		 setProperty(KEY_WSIG_SERVICES_URL,servicesUrl);
+		setProperty(KEY_WSIG_SERVICES_URL,servicesUrl);
 	}
-		
+
 	public synchronized int getWsigTimeout() {
 		String timeout = getProperty(KEY_WSIG_TIMEOUT);
 		return Integer.parseInt(timeout);
 	}
-	
+
 	public void setWsigTimeout(int wsigTimeout) {
-		 String timeout = Integer.toString(wsigTimeout);
-		 setProperty(KEY_WSIG_TIMEOUT,timeout);
+		String timeout = Integer.toString(wsigTimeout);
+		setProperty(KEY_WSIG_TIMEOUT,timeout);
 	}
-	
+
 	// WSS security
 	public synchronized String getWssUsername() {
 		return getProperty(KEY_WSS_USERNAME);
 	}
-	
+
 	public void setWssUsername(String wssUsername) {
-		 setProperty(KEY_WSS_USERNAME,wssUsername);
+		setProperty(KEY_WSS_USERNAME,wssUsername);
 	}
 
 	public synchronized String getWssPassword() {
 		return getProperty(KEY_WSS_PASSWORD);
 	}
-	
+
 	public void setWssPassword(String wssPassword) {
-		 setProperty(KEY_WSS_PASSWORD,wssPassword);
+		setProperty(KEY_WSS_PASSWORD,wssPassword);
 	}
-	
+
 	public synchronized String getWssTimeToLive() {
 		return getProperty(KEY_WSS_TIME_TO_LIVE);
 	}
-	
-   	// WSDL generation
+
+	// WSDL generation
 	public synchronized String getLocalNamespacePrefix() {
 		return getProperty(KEY_LOCAL_NAMESPACE_PREFIX);
 	}
-	
+
 	public synchronized void setLocalNamespacePrefix(String localNamespacePrefix) {
 		setProperty(KEY_LOCAL_NAMESPACE_PREFIX,localNamespacePrefix);
 	}
@@ -261,25 +259,26 @@ public class WSIGConfiguration extends Properties {
 	public synchronized String getWsdlDirectory() {
 		return getProperty(KEY_WSDL_DIRECTORY);
 	}
+
 	public synchronized void setWsdlDirectory(String wsdlDirectory) {
 		setProperty(KEY_WSDL_DIRECTORY, wsdlDirectory);
 	}
-	
+
 	public synchronized boolean isHierarchicalComplexTypeEnable() {
 		String hierarchicalComplexTypeEnable = getProperty(KEY_HIERARCHICAL_COMPLEX_TYPE);
 		return "true".equalsIgnoreCase(hierarchicalComplexTypeEnable);
 	}
-	
+
 	public synchronized void setHierarchicalComplexTypeEnable(Boolean hierarchicalComplexTypeEnable) {
 		String hComplexTypeEnable = Boolean.toString(hierarchicalComplexTypeEnable);
 		setProperty(KEY_HIERARCHICAL_COMPLEX_TYPE, hComplexTypeEnable);
 	}
-	
-	
+
 	public synchronized boolean isWsdlWriteEnable() {
 		String wsdlWriteEnable = getProperty(KEY_WSDL_WRITE_ENABLE);
 		return "true".equalsIgnoreCase(wsdlWriteEnable);
 	}
+
 	public synchronized void setWsdlWriteEnable(boolean wsdlWriteEnable) {
 		setProperty(KEY_WSDL_WRITE_ENABLE, Boolean.toString(wsdlWriteEnable));
 	}
@@ -287,17 +286,17 @@ public class WSIGConfiguration extends Properties {
 	public synchronized String getWsdlStyle() {
 		return getProperty(KEY_WSDL_STYLE);
 	}
-	
+
 	public synchronized void setWsdlStyle(String wsdlStyle) {
 		setProperty(KEY_WSDL_STYLE,wsdlStyle);
 	}
-	
+
 	// UDDI repository configuration
 	public synchronized boolean isUddiEnable() {
 		String uddiEnable = getProperty(KEY_UDDI_ENABLE);
 		return "true".equalsIgnoreCase(uddiEnable);
 	}
-	
+
 	public synchronized void setUddiEnable(Boolean uddiEnable) {
 		String enable = Boolean.toString(uddiEnable);
 		setProperty(KEY_UDDI_ENABLE,enable);
@@ -306,7 +305,7 @@ public class WSIGConfiguration extends Properties {
 	public synchronized String getQueryManagerURL() {
 		return getProperty(KEY_QUERY_MANAGER_URL);
 	}
-	
+
 	public synchronized void setQueryManagerURL(String queryManagerURL) {
 		setProperty(KEY_QUERY_MANAGER_URL,queryManagerURL);
 	}
@@ -314,23 +313,23 @@ public class WSIGConfiguration extends Properties {
 	public synchronized String getLifeCycleManagerURL() {
 		return getProperty(KEY_LIFE_CYCLE_MANAGER_URL);
 	}
-	
+
 	public synchronized void setLifeCycleManagerURL(String lifeCycleManagerURL) {
 		setProperty(KEY_LIFE_CYCLE_MANAGER_URL,lifeCycleManagerURL);
 	}
-	
+
 	public synchronized String getBusinessKey() {
 		return getProperty(KEY_BUSINESS_KEY);
 	}
-	
+
 	public synchronized void setBusinessKey(String businessKey) {
 		setProperty(KEY_BUSINESS_KEY,businessKey);
 	}
-   	
+
 	public synchronized String getUserName() {
 		return getProperty(KEY_USER_NAME);
 	}
-	
+
 	public synchronized void setUserName(String userName) {
 		setProperty(KEY_USER_NAME,userName);
 	}
@@ -338,19 +337,19 @@ public class WSIGConfiguration extends Properties {
 	public synchronized String getUserPassword() {
 		return getProperty(KEY_USER_PASSWORD);
 	}
-	
+
 	public synchronized void setUserPassword(String userPassword) {
 		setProperty(KEY_USER_PASSWORD,userPassword);
 	}
-	
+
 	public synchronized String getTModel() {
 		return getProperty(KEY_UDDI_TMODEL);
 	}
-	
+
 	public synchronized void setTModel(String tModel) {
 		setProperty(KEY_UDDI_TMODEL,tModel);
 	}
-	
+
 	// UDDI4j configuration
 	public synchronized String getUDDI4jLogEnabled() {
 		return getProperty(KEY_UDDI4J_LOG_ENABLED);
@@ -362,7 +361,7 @@ public class WSIGConfiguration extends Properties {
 
 	// Ontology configuration
 	public synchronized String getOntoClassname(String ontoName) {
-		
+
 		String ontoKey = KEY_ONTO_PREFIX + "." + ontoName;
 		String propertyKey;
 		Iterator it =keySet().iterator();
@@ -373,7 +372,7 @@ public class WSIGConfiguration extends Properties {
 		}
 		return null;
 	}
-	
+
 	private static URL getWebappUrl(HttpServletRequest request) throws MalformedURLException {
 		String protocol = request.getScheme();
 		String serverName = request.getServerName();
@@ -381,14 +380,11 @@ public class WSIGConfiguration extends Properties {
 		String contextPath = request.getContextPath();
 		return new URL(protocol, serverName, serverPort, contextPath);
 	}
-			
-	
+
 	public static URL getAdminUrl(HttpServletRequest request) throws MalformedURLException {
 		return getWebappUrl(request);
 	}
-	
-	
-	
+
 	public synchronized boolean isJadeMiscPresent() {
 		try {
 			Class.forName("jade.misc.CreateFileManagerAgentBehaviour");
@@ -397,16 +393,16 @@ public class WSIGConfiguration extends Properties {
 			return false;
 		}
 	}
-	
+
 	public synchronized boolean isLogManagerEnable() {
 		String logManagerEnable = getProperty(KEY_ENABLE_LOG_MANAGER);
 		return "true".equalsIgnoreCase(logManagerEnable);
 	}
-	
+
 	public synchronized String getLogManagerName() {
 		return getProperty(KEY_LOG_MANAGER_NAME);
 	}
-	
+
 	public synchronized String getLogManagerRoot() {
 		String fileManagerRoot = getProperty(KEY_LOG_MANAGER_ROOT, LOG_MANAGER_ROOT_DEFAULT);
 		File f = new File(fileManagerRoot);
@@ -432,13 +428,13 @@ public class WSIGConfiguration extends Properties {
 	public void setServletContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 	}
-	
+
 	/**
 	 * adds properties missed.
 	 */
 	private void setDefaultProperties() {
 		setProperty(jade.core.Profile.MAIN, "false");
-		
+
 		setProperty(WSIGConfiguration.KEY_WSIG_AGENT_CLASS_NAME, "com.tilab.wsig.agent.WSIGAgent");
 		setProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT, "30000");
 		setProperty(WSIGConfiguration.KEY_WSIG_TRACE_CLIENT_IP, "true");
@@ -461,7 +457,6 @@ public class WSIGConfiguration extends Properties {
 		setProperty(WSIGConfiguration.KEY_LOG_MANAGER_NAME, "WSIGLogManager");
 	}
 
-	
 	public void store() {
 		try {
 			if (wsigConfPath != null) {
@@ -484,13 +479,13 @@ public class WSIGConfiguration extends Properties {
 	 * An internal instance is loaded.
 	 */
 	private static void load() {
-		
+
 		log.info("Loading WSIG configuration file...");
 		WSIGConfiguration c = getInstance();
 		InputStream is;
 		synchronized (c) {
 			c.setDefaultProperties();
-			
+
 			InputStream input = null;
 			if (wsigConfPath != null) {
 				try {

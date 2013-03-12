@@ -20,7 +20,6 @@ License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
  *****************************************************************/
-
 package com.tilab.wsig.admin;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,18 +35,16 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 
 import com.tilab.wsig.WSIGConfiguration;
-import com.tilab.wsig.servlet.WSIGServlet;
 
 
 @Path("/configuration")
 public class ConfigurationResource {
 
-	private static Logger log = Logger.getLogger(WSIGServlet.class.getName());
+	private static Logger log = Logger.getLogger(ConfigurationResource.class.getName());
 
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN})
 	public Configuration getConfiguration(@Context HttpServletRequest hsr) {
-
 		Configuration conf = new Configuration(hsr);	  
 		log.info("WSIG configuration retrieved.");	 
 		return conf;
@@ -56,9 +53,8 @@ public class ConfigurationResource {
 	@PUT
 	@Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN})
 	public Response updateConfiguration(Configuration conf) {
-
 		/* The parameters passed in the Configuration object are set using
-		 * the setters method of Configuration.class */	  
+		 * the setters method of Configuration class */	  
 		log.info("WSIG configuration changed.");
 		WSIGConfiguration.getInstance().store();
 		return Response.ok().build();
