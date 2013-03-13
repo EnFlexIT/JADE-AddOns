@@ -5,9 +5,8 @@
 
   <property name="shortname" value="pki"/>
   <property name="distname" value="${shortname}AddOn"/>
-  <property name="version" value="1.0.1"/>
+  <property name="version" value="1.1"/>
 
-  <property name="addon-home" location="${jade-home}/add-ons/${shortname}"/>
   <property name="src" location="src"/>
   <property name="examples" value="examples"/>
   <property name="build" location="classes"/>
@@ -111,16 +110,23 @@
 
   <!-- Make distribution zip file and put in the jade/add-ons directory -->
   <target name="dist" depends="clean, doc, lib">
-    <delete file="../${distname}-${version}.zip" quiet="true"/>
-    <zip zipfile="../${distname}-${version}.zip" basedir="${addon-home}">
-      <include name="*.pdf"/>
-      <include name="*.txt"/>
-      <include name="*.xml"/>
-      <include name="examples/**"/>
-      <include name="src/**"/>
-      <include name="doc/**"/>
-      <include name="lib/**"/>
-      <include name="tools/**"/>
+	<echo message="GENERATE THE PDF OF THE PKI GUIDE, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/pki) AND THEN PRESS ENTER -->"/>
+	<input/>
+	<mkdir dir="${jade-home}/doc"/>
+	<mkdir dir="${jade-home}/doc/tutorials"/>
+	<copy file="PKI_Guide.pdf" todir="${jade-home}/doc/tutorials"/>
+	
+	<delete file="../${distname}-${version}.zip" quiet="true"/>
+    <zip zipfile="../${distname}-${version}.zip" basedir="../..">
+      <include name="doc/tutorials/PKI_Guide.pdf"/>
+      <include name="add-ons/pki/*.txt"/>
+      <include name="add-ons/pki/*.xml"/>
+      <include name="add-ons/pki/examples/**"/>
+      <include name="add-ons/pki/src/**"/>
+      <include name="add-ons/pki/lib/**"/>
+      <include name="add-ons/pki/tools/**"/>
+	  <include name="add-ons/pki/doc/api/**"/>
+	  <include name="add-ons/pki/doc/manual-src/**"/>
     </zip>
   </target>
 
