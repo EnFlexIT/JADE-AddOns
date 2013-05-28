@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -70,14 +71,17 @@ import javax.wsdl.Operation;
 import javax.wsdl.Port;
 import javax.xml.rpc.holders.Holder;
 
+import org.apache.axis.AxisFault;
 import org.apache.axis.AxisProperties;
 import org.apache.axis.Handler;
+import org.apache.axis.MessageContext;
 import org.apache.axis.SimpleChain;
 import org.apache.axis.SimpleTargetedChain;
 import org.apache.axis.client.AxisClient;
 import org.apache.axis.client.Service;
 import org.apache.axis.client.Stub;
 import org.apache.axis.configuration.SimpleProvider;
+import org.apache.axis.handlers.BasicHandler;
 import org.apache.axis.handlers.SimpleSessionHandler;
 import org.apache.axis.message.SOAPHeaderElement;
 import org.apache.axis.message.addressing.AddressingHeaders;
@@ -986,7 +990,9 @@ public class DynamicClient {
 			SimpleChain requestHandlers = new SimpleChain(); 
 			SimpleChain responseHandlers = new SimpleChain(); 
 			requestHandlers.addHandler(sessionHandler); 
+			requestHandlers.addHandler(new PrintSOAPHandler(true));
 			responseHandlers.addHandler(sessionHandler); 
+			responseHandlers.addHandler(new PrintSOAPHandler(false));
 			
 			Handler pivot = (Handler)new HTTPSender(); 
 			Handler transport = new SimpleTargetedChain(requestHandlers, pivot, responseHandlers);
@@ -1601,4 +1607,38 @@ public class DynamicClient {
 		}
 	}
 
+	
+	// Inner class to manage print of SOAP request/response
+	private class PrintSOAPHandler extends BasicHandler {  
+		  
+		private boolean request;
+		
+		public PrintSOAPHandler(boolean request) {
+			this.request = request;
+		}
+		
+	    public void invoke(MessageContext msgContext) throws AxisFault {  
+	        try {  
+	        	String message;
+	        	if (request) {
+		            message = msgContext.getRequestMessage().getSOAPPartAsString();
+	        	} else {
+	        		message = msgContext.getResponseMessage().getSOAPPartAsString();
+	        	}
+	        	
+	        	StringBuilder sb = new StringBuilder();
+	        	sb.append("---- SOAP "+(request?"request":"response")+" ----");
+	        	sb.append(System.getProperty("line.separator"));
+	        	sb.append("Endpoint URL: "+msgContext.getProperty(MessageContext.TRANS_URL));
+	        	sb.append(System.getProperty("line.separator"));
+	        	sb.append(message);
+	        	sb.append(System.getProperty("line.separator"));
+	        	sb.append("----");
+	        	logger.log(Level.INFO, sb.toString());
+	        } catch (Exception e) {  
+	            throw new AxisFault("Failed to manage printing of SOAP message");  
+	        }  
+	    }
+	}  
+	
 }
