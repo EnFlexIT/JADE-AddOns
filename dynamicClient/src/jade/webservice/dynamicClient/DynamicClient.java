@@ -1634,7 +1634,7 @@ public class DynamicClient {
 	        	sb.append(message);
 	        	sb.append(System.getProperty("line.separator"));
 	        	sb.append("----");
-	        	logger.log(Level.INFO, sb.toString());
+	        	logger.log(Level.CONFIG, sb.toString());
 	        } catch (Exception e) {  
 	            throw new AxisFault("Failed to manage printing of SOAP message");  
 	        }  
