@@ -72,6 +72,7 @@ public class SoapToJade extends DefaultHandler {
 	private Vector<Vector<ParameterInfo>> parametersByLevel = new Vector<Vector<ParameterInfo>>();
 	private Vector<ObjectSchema> schemaByLevel = new Vector<ObjectSchema>();
 	private Map<String, ParameterInfo> parametersInfo;
+	private String anyTypeParameterName = null;
 	
 	public SoapToJade() {
 		
@@ -310,8 +311,24 @@ public class SoapToJade extends DefaultHandler {
 	
 	//-------- PARSER EVENT HANDLERS -----------------//
 
+	@Override
 	public void startElement (String uri, String parameterName, String qName, Attributes attrs) {
-
+		// Manage anyType parameter
+		if (anyTypeParameterName != null) {
+			// anyType managing active -> collect data and skip to next tag
+			elementValue.append("<");
+			elementValue.append(qName);
+			for (int i=0; i<attrs.getLength(); i++) {
+				elementValue.append(" ");
+				elementValue.append(attrs.getLocalName(i));
+				elementValue.append("=\"");
+				elementValue.append(attrs.getValue(i));
+				elementValue.append("\"");
+			}
+			elementValue.append(">");
+			return;
+		}
+		
 		try {
 			elementValue.setLength(0);
 			++level;
@@ -325,6 +342,11 @@ public class SoapToJade extends DefaultHandler {
 				// Get parameter schema
 				TermSchema parameterSchema = getParameterSchema(parameterName, parameterLevel, attrs);
 				log.debug("Start managing parameter "+parameterName+" of type "+parameterSchema.getTypeName());
+				
+				// If the slot is of type TermSchema start to collect all the following tags
+				if (parameterSchema.getClass() == TermSchema.class) {
+					anyTypeParameterName = parameterName;
+				}
 
 				// Get parameters vector for this level
 				Vector<ParameterInfo> parameters = getParametersByLevel(parameterLevel, true);
@@ -339,7 +361,21 @@ public class SoapToJade extends DefaultHandler {
 		}
 	}
 
+	@Override
 	public void endElement (String uri, String parameterName, String qName) {
+		// Manage anyType parameter
+		if (anyTypeParameterName != null) {
+			if (anyTypeParameterName.equals(parameterName)) {
+				// anyType tag closed -> resume normal tag management
+				anyTypeParameterName = null;
+			} else {
+				// anyType managing active -> collect data and skip to next tag
+				elementValue.append("</");
+				elementValue.append(qName);
+				elementValue.append(">");
+				return;
+			}
+		}
 		
 		try {
 			// Manage only parameters levels
@@ -361,6 +397,12 @@ public class SoapToJade extends DefaultHandler {
 				if (parameterSchema instanceof PrimitiveSchema) {
 					// Primitive type
 					pi.setValue(getPrimitiveAbsValue(parameterSchema, parameterValue));
+					log.debug("Set "+parameterName+" with " + parameterValue);
+					
+				} else if (parameterSchema.getClass() == TermSchema.class) {
+					// Term type (anyType)
+					// Assigned as a string
+					pi.setValue(getPrimitiveAbsValue(new PrimitiveSchema(WSDLConstants.XSD_STRING), parameterValue));
 					log.debug("Set "+parameterName+" with " + parameterValue);
 					
 				} else {
@@ -425,19 +467,24 @@ public class SoapToJade extends DefaultHandler {
 		--level;
 	}
 
+	@Override
 	public void characters (char ch[], int start, int length) {
 		elementValue.append(ch, start, length);
 	}
 
+	@Override
 	public void startDocument () {
 	}
 
+	@Override
 	public void endDocument () {
 	}
 
+	@Override
 	public void startPrefixMapping (String prefix, String uri) {
 	}
 
+	@Override
 	public void endPrefixMapping (String prefix) {
 	}
 }

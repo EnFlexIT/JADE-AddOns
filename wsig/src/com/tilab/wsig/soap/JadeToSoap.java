@@ -23,6 +23,8 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.soap;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 
 import jade.content.abs.AbsAggregate;
@@ -46,6 +48,7 @@ import javax.xml.soap.SOAPFault;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
 
+import org.apache.axis.utils.XMLUtils;
 import org.apache.log4j.Logger;
 
 import com.tilab.wsig.WSIGConfiguration;
@@ -165,14 +168,27 @@ public class JadeToSoap {
             convertObjectToSoapElement(responseSchema, elementSchema, elementValue, elementName, responseElement);
 		}
 	}
-
+	
+	private SOAPElement xmlToSOAPElement(String text) {
+		try {
+			InputStream is = new ByteArrayInputStream(text.getBytes());
+			org.w3c.dom.Document doc = XMLUtils.newDocument(is);
+			MessageFactory factory = MessageFactory.newInstance();
+			SOAPMessage message = factory.createMessage();
+			return message.getSOAPBody().addDocument(doc); 
+		} catch (Exception e) {
+			// Throw exception if the text is not a valid xml
+			return null; 
+		}
+	} 
+	
 	private SOAPElement convertObjectToSoapElement(ObjectSchema containerSchema, ObjectSchema resultSchema, AbsObject resultAbsObj, String elementName, SOAPElement rootSoapElement) throws Exception {
 		
 		SOAPElement soapElement = null;
 		if (resultAbsObj != null) {
 			String soapType = null;
 			
-			if (resultSchema instanceof PrimitiveSchema) {
+			if (resultSchema instanceof PrimitiveSchema || resultSchema.getClass()==TermSchema.class) {
 				
 				// PrimitiveSchema
 				log.debug("Elaborate primitive schema: "+elementName+" of type: "+resultSchema.getTypeName());
@@ -184,10 +200,19 @@ public class JadeToSoap {
 				AbsPrimitive primitiveAbsObj = (AbsPrimitive)resultAbsObj;
 				
 		        // Create a text node which contains the value of the object.
-		        // Format date objects in ISO8601 format;
+		        // If the value is a DATE Format it in ISO8601;
+				// if the slot is a TermSchema try to manage the value as a xml;
 		        // for every other kind of object, just call toString.
 		        if (BasicOntology.DATE.equals(primitiveAbsObj.getTypeName())) {
 		        	soapElement.addTextNode(WSIGConstants.ISO8601_DATE_FORMAT.format(primitiveAbsObj.getDate()));
+		        } else if (resultSchema.getClass() == TermSchema.class) {
+		        	String text = primitiveAbsObj.toString();
+		        	SOAPElement element = xmlToSOAPElement(text);
+		        	if (element != null) {
+		        		soapElement.addChildElement(element);
+		        	} else {
+			        	soapElement.addTextNode(text);
+		        	}
 		        } else {
 		        	soapElement.addTextNode(primitiveAbsObj.toString());
 		        }

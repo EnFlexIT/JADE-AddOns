@@ -310,11 +310,11 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			log.info("Service "+serviceName+" of agent "+aid.getName()+" do not have any ontology registered. Discard it.");
 			return null;
 		}
-
+		
 		// Get ontology className
-		String ontoClassname = WSIGConfiguration.getInstance().getOntoClassname(ontoName);
+		String ontoClassname = getOntologyClassName(sd, ontoName);
 		if (ontoClassname == null) {
-			log.warn("Ontology "+ontoName+" for service "+serviceName+" not present in WSIG configuration file. Discard service.");
+			log.warn("Ontology "+ontoName+" for service "+serviceName+" not present in ServiceDescriptor or WSIG configuration file. Discard service.");
 			return null;
 		}
 
@@ -392,6 +392,26 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		return null;
 	}
 
+	private String getOntologyClassName(ServiceDescription sd, String ontoName) {
+		String ontoClassname = null;
+		
+		// Check in ServiceDescription properties
+		Iterator it = sd.getAllProperties();
+		while (it.hasNext()) {
+			Property p = (Property) it.next();
+			if (WSIGConstants.WSIG_ONTOLOGY_CLASSNAME.equalsIgnoreCase(p.getName())) {
+				ontoClassname = (String)p.getValue();
+			}
+		}
+
+		// Check in configuration file
+		if (ontoClassname == null) {
+			ontoClassname = WSIGConfiguration.getInstance().getOntoClassname(ontoName);
+		}
+		
+		return ontoClassname;
+	}
+	
 	private void registerIntoDF() {
 		DFAgentDescription dfad = new DFAgentDescription();
 		dfad.setName(this.getAID());

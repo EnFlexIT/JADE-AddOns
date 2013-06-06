@@ -864,7 +864,7 @@ public class JadeToWSDL {
 	private String createComplexTypeFromSchema(ObjectSchema objSchema, ConceptSchema containerSchema, String slotName, XSDComponent parentComponent, Integer cardMin, Integer cardMax) throws Exception {
 		
 		String slotType = null;
-		if (objSchema instanceof PrimitiveSchema) {
+		if (objSchema instanceof PrimitiveSchema || objSchema.getClass()==TermSchema.class) {
 			// Get type from PrimitiveSchema
 			slotType = WSDLUtils.getPrimitiveType(objSchema, containerSchema, slotName);
 			

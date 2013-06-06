@@ -24,6 +24,7 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.wsdl;
 
 import jade.content.onto.BasicOntology;
+import jade.content.schema.TermSchema;
 
 import java.util.Hashtable;
 
@@ -71,6 +72,7 @@ public class WSDLConstants {
 	public static final String XSD_DATETIME = "dateTime";
 	public static final String XSD_BYTE = "byte";
 	public static final String XSD_SHORT = "short";
+	public static final String XSD_ANY = "anyType";
 	
 	// BOB enum slot
 	public static final String ENUM_SLOT_NAME = "name";
@@ -84,6 +86,7 @@ public class WSDLConstants {
 		jade2xsd.put(BasicOntology.BOOLEAN, XSD_BOOLEAN);
 		jade2xsd.put(BasicOntology.DATE, XSD_DATETIME);
 		jade2xsd.put(BasicOntology.BYTE_SEQUENCE, XSD_BYTE);
+		jade2xsd.put(TermSchema.BASE_NAME, XSD_ANY);
 	}
 
 	// Primitive conversion types from java to xsd (used for mapper)	
@@ -99,5 +102,6 @@ public class WSDLConstants {
 		java2xsd.put(java.lang.Short.class, XSD_SHORT);
 		java2xsd.put(java.util.Calendar.class, XSD_DATETIME);
 		java2xsd.put(java.util.Date.class, XSD_DATETIME);
+		java2xsd.put(java.lang.Object.class, XSD_ANY);
 	}
 }
