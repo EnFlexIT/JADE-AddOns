@@ -44,7 +44,7 @@ public class WSDLGenerator {
 		}
 
 		// Initialize WSIGConfiguration 
-		WSIGConfiguration.init(wsigConfPath);
+		WSIGConfiguration.init(wsigConfPath, null, null);
 		WSIGConfiguration.getInstance().setWsdlWriteEnable(true);
 		WSIGConfiguration.getInstance().setWsdlDirectory(wsdlDirectory);
 		

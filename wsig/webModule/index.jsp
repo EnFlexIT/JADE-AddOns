@@ -103,6 +103,10 @@ import="jade.content.onto.Ontology,
 		<td class="value"><% out.print(wsigConfig.getLocalPort()); %></td>
 	</tr>
 	<tr>
+		<td width="30%" class="title">JADE WSIG agent name:</td>
+		<td class="value"><% out.print(wsigConfig.getAgentName()); %></td>
+	</tr>
+	<tr>
 		<td width="30%" class="title">JADE WSIG agent class:</td>
 		<td class="value"><% out.print(wsigConfig.getAgentClassName()); %></td>
 	</tr>

@@ -48,12 +48,18 @@ public class WSIGConfiguration extends Properties {
 	private static WSIGConfiguration anInstance;
 	private static Logger log = Logger.getLogger(WSIGConfiguration.class.getName());
 
-	public static final String WSIG_DEFAULT_CONFIGURATION_FILE = "conf/wsig.properties";
+	public static final String WSIG_CONFIGURATION_FILE_NAME = "wsig.properties";
+	public static final String WSIG_DEFAULT_CONFIGURATION = "conf/"+WSIG_CONFIGURATION_FILE_NAME;
+	public static final String WSIG_CONFIGURATION_KEY = "configuration-file";
+	public static final String WSIG_RESOURCES_BASE_KEY = "resources-base";
+	
 	private static String wsigConfPath;
 	private static String wsigVersion;
-	private ServletContext servletContext;
+	private static ServletContext servletContext;
+	private static String resourcesBase;
 
 	// WSIG configuration
+	public static final String KEY_WSIG_AGENT_NAME = "wsig.agentName";
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
 	public static final String KEY_WSIG_SERVICES_URL = "wsig.servicesURL";
 	public static final String KEY_WSIG_TIMEOUT = "wsig.timeout";
@@ -111,10 +117,20 @@ public class WSIGConfiguration extends Properties {
 		return anInstance;
 	}
 
-	public static void init(String _wsigConfPath){
-		wsigConfPath = _wsigConfPath;
+	public static void init(String _configurationFile, ServletContext _servletContext, String _resourcesBase) {
+		servletContext = _servletContext;
+		resourcesBase = _resourcesBase;
+		wsigConfPath = resolvePath(_servletContext, _resourcesBase, _configurationFile);
 	}
 
+	public static void reset() {
+		anInstance = null;
+		wsigConfPath = null;
+		wsigVersion = null;
+		servletContext = null;
+		resourcesBase = null;
+	}
+	
 	// WSIG CONFIGURATION
 	public synchronized String getWsigVersion() {
 		if (wsigVersion == null) {
@@ -177,6 +193,14 @@ public class WSIGConfiguration extends Properties {
 
 	public void setPreserveJavaType(String preserveJavaType) {
 		setProperty(KEY_WSIG_PRESERVE_JAVA_TYPE,preserveJavaType);
+	}
+
+	public synchronized String getAgentName() {
+		return getProperty(KEY_WSIG_AGENT_NAME);
+	}
+
+	public void setAgentName(String agentName) {
+		setProperty(KEY_WSIG_AGENT_NAME,agentName);
 	}
 
 	public synchronized String getAgentClassName() {
@@ -257,7 +281,8 @@ public class WSIGConfiguration extends Properties {
 	}
 
 	public synchronized String getWsdlDirectory() {
-		return getProperty(KEY_WSDL_DIRECTORY);
+		String wsdlDirectory = getProperty(KEY_WSDL_DIRECTORY);
+		return resolvePath(servletContext, resourcesBase, wsdlDirectory);
 	}
 
 	public synchronized void setWsdlDirectory(String wsdlDirectory) {
@@ -405,11 +430,7 @@ public class WSIGConfiguration extends Properties {
 
 	public synchronized String getLogManagerRoot() {
 		String fileManagerRoot = getProperty(KEY_LOG_MANAGER_ROOT, LOG_MANAGER_ROOT_DEFAULT);
-		File f = new File(fileManagerRoot);
-		if (!f.isAbsolute()) {
-			fileManagerRoot = servletContext.getRealPath(fileManagerRoot);
-		}
-		return fileManagerRoot;
+		return resolvePath(servletContext, resourcesBase, fileManagerRoot);
 	}
 
 	public synchronized Integer getLogManagerDownloadBlockSize() {
@@ -425,16 +446,13 @@ public class WSIGConfiguration extends Properties {
 		return servletContext;
 	}
 
-	public void setServletContext(ServletContext servletContext) {
-		this.servletContext = servletContext;
-	}
-
 	/**
 	 * adds properties missed.
 	 */
 	private void setDefaultProperties() {
 		setProperty(jade.core.Profile.MAIN, "false");
 
+		setProperty(WSIGConfiguration.KEY_WSIG_AGENT_NAME, "wsig");
 		setProperty(WSIGConfiguration.KEY_WSIG_AGENT_CLASS_NAME, "com.tilab.wsig.agent.WSIGAgent");
 		setProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT, "30000");
 		setProperty(WSIGConfiguration.KEY_WSIG_TRACE_CLIENT_IP, "true");
@@ -469,6 +487,8 @@ public class WSIGConfiguration extends Properties {
 					}
 				}
 				store(wsigConfPath);
+			} else {
+				log.warn("Default configuration or configuration loaded in classloader is not modifiable");
 			}
 		} catch (IOException e) {
 			log.error("WSIG error writing configuration", e);
@@ -479,7 +499,6 @@ public class WSIGConfiguration extends Properties {
 	 * An internal instance is loaded.
 	 */
 	private static void load() {
-
 		log.info("Loading WSIG configuration file...");
 		WSIGConfiguration c = getInstance();
 		InputStream is;
@@ -491,13 +510,13 @@ public class WSIGConfiguration extends Properties {
 				try {
 					input = new FileInputStream(wsigConfPath);
 				} catch (FileNotFoundException e) {
-					log.error("WSIG configuration file <<" + wsigConfPath + ">> not found, wsig agent will use default configuration", e);
+					log.error("WSIG configuration <<" + wsigConfPath + ">> not found in file system, wsig agent will use default configuration", e);
 					return;
 				}
 			} else {
-				input = ClassLoader.getSystemResourceAsStream(WSIG_DEFAULT_CONFIGURATION_FILE);
+				input = ClassLoader.getSystemResourceAsStream(WSIG_CONFIGURATION_FILE_NAME);
 				if (input == null) {
-					log.error("WSIG configuration file <<" + WSIG_DEFAULT_CONFIGURATION_FILE + ">> not found, wsig agent will use default configuration");
+					log.error("WSIG configuration <<" + WSIG_CONFIGURATION_FILE_NAME + ">> not found in system class loader, wsig agent will use default configuration");
 					return;
 				}
 			}
@@ -511,5 +530,19 @@ public class WSIGConfiguration extends Properties {
 				log.error("WSIG configuration file error reading", e);
 			}
 		}
+	}
+	
+	public static String resolvePath(ServletContext servletContext, String resourcesBase, String path) {
+		File f = new File(path);
+		if (!f.isAbsolute()) {
+			if (resourcesBase != null) {
+				// Use specified base resources path
+				return resourcesBase+File.separator+path;
+			} else {
+				// Resolve with webapp context
+				return servletContext.getRealPath(path);
+			}
+		}
+		return path;
 	}
 }

@@ -37,6 +37,7 @@ import com.tilab.wsig.WSIGConfiguration;
 		"jadeMainPort", 
 		"jadeContainerName",
 		"containerLocalPort",
+		"WSIGAgentName",
 		"WSIGAgentClass",
 		"WSIGVersion",
 		"WSIGServicesURL",
@@ -102,6 +103,15 @@ class Configuration {
 		conf.setLocalPort(containerLocalPort);
 	}
 
+	@XmlElement
+	public String getWSIGAgentName() {
+		return conf.getAgentName();
+	}
+
+	public void setWSIGAgentName(String wsigAgentName) {
+		conf.setAgentName(wsigAgentName);
+	}
+	
 	@XmlElement
 	public String getWSIGAgentClass() {
 		return conf.getAgentClassName();

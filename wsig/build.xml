@@ -29,6 +29,7 @@
 	<property name="jarAnnotationFile.path" location="${wsigUtils.dir}/${wsigJarAnnotations.name}"/>
 	<property name="wsigJarGenerator.name" value="wsigGenerator"/>
 	<property name="jarGeneratorFile.path" location="${wsigUtils.dir}/${wsigJarGenerator.name}"/>
+	<property name="jarFile.path" location="${wsigUtils.dir}/${wsig.name}"/>
 	
 	<!--<property name="tomcat.dir" location="${env.CATALINA_BASE}"/>-->
 	<property name="tomcat.dir" location="${env.CATALINA_HOME}"/>
@@ -133,6 +134,19 @@
 		<echo>War creation succeded</echo>
 	</target>
 	
+	<target name="jar" depends="compile" description="Create the WSIG JAR">
+		<mkdir dir="${wsigUtils.dir}"/>
+		<jar destfile="${jarFile.path}.jar" compress="false">
+			<fileset dir="${wsigBuild.dir}">
+				<include name="com/tilab/wsig/**/*.class"/>
+			</fileset>
+			<zipfileset dir="${wsigWeb.dir}" prefix="wsigWeb">
+				<include name="*.jsp"/>
+				<include name="*.css"/>
+			</zipfileset>
+		</jar>
+	</target>
+
 	<target name="jar-annotations" depends="compile" description="Create the WSIG annotations JAR">
 		<mkdir dir="${wsigUtils.dir}"/>
 		<jar destfile="${jarAnnotationFile.path}.jar" compress="false">

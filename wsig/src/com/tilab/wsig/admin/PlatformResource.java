@@ -23,7 +23,6 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.admin;
 
 import jade.wrapper.ControllerException;
-import jade.wrapper.gateway.JadeGateway;
 
 import java.io.IOException;
 import java.net.URL;
@@ -41,6 +40,7 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 
 import com.tilab.wsig.WSIGConfiguration;
+import com.tilab.wsig.servlet.WSIGServlet;
 
 @Path("platform")
 public class PlatformResource {
@@ -90,7 +90,7 @@ public class PlatformResource {
 			// Start WSIGAgent
 			try {
 				log.info("Starting WSIG agent...");
-				JadeGateway.checkJADE();
+				WSIGServlet.getJadeGateway().checkJADE();
 			} catch (ControllerException e) {
 				log.warn("Jade platform not present...WSIG agent not started", e);
 			}			
@@ -101,7 +101,7 @@ public class PlatformResource {
 		} else if (status.equalsIgnoreCase("disconnect")) {
 			// Stop WSIGAgent
 			log.info("Stopping WSIG agent...");
-			JadeGateway.shutdown();			
+			WSIGServlet.getJadeGateway().shutdown();			
 		} else {
 			log.warn("WSIG agent command not implementated");
 		}

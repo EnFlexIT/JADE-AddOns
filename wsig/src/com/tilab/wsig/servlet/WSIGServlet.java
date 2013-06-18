@@ -27,9 +27,12 @@ import jade.content.AgentAction;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
 import jade.core.AID;
+import jade.core.Profile;
 import jade.wrapper.ControllerException;
+import jade.wrapper.gateway.DynamicJadeGateway;
 import jade.wrapper.gateway.GatewayListener;
 import jade.wrapper.gateway.JadeGateway;
+import jade.wrapper.gateway.LocalJadeGateway;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -90,25 +93,54 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 	private AxisEngine axisEngine = new AxisClient(new NullProvider());
 	private UsernameTokenCallback usernameTokenCallback;
 
+	private static DynamicJadeGateway jadeGateway;
+	public static DynamicJadeGateway getJadeGateway() {
+		return jadeGateway;	
+	}
+
+	public WSIGServlet() {
+		this(null);
+	}
+	
+	public WSIGServlet(DynamicJadeGateway jadeGateway) {
+		if (jadeGateway == null) {
+			jadeGateway = JadeGateway.getDefaultGateway();
+		}
+		this.jadeGateway = jadeGateway;
+	}
+	
 	public void init(ServletConfig servletConfig) throws ServletException {
 		super.init(servletConfig);
 		
 		log.info("Starting WSIG Servlet...");
-
-		// Get configuration file path
-		servletContext = servletConfig.getServletContext();
-		String wsigPropertyPath = servletContext.getRealPath(WSIGConfiguration.WSIG_DEFAULT_CONFIGURATION_FILE);
-		log.info("Configuration file= " + wsigPropertyPath);
+		
+		// Get init parameters
+		String resourcesBase = servletConfig.getInitParameter(WSIGConfiguration.WSIG_RESOURCES_BASE_KEY);
+		String configurationFile = servletConfig.getInitParameter(WSIGConfiguration.WSIG_CONFIGURATION_KEY);
+		if (configurationFile == null) {
+			configurationFile = WSIGConfiguration.WSIG_DEFAULT_CONFIGURATION;
+		}
+		log.info("Configuration file= " + configurationFile);
 
 		// Init configuration
-		WSIGConfiguration.init(wsigPropertyPath);
+		servletContext = servletConfig.getServletContext();
+		WSIGConfiguration.init(configurationFile, servletContext, resourcesBase);
 		WSIGConfiguration wsigConfiguration = WSIGConfiguration.getInstance();
-		wsigConfiguration.setServletContext(servletContext);
-		
-		// Set WSDL directory (convert relative to absolute path)
-		String wsdlRelativeDirectory = wsigConfiguration.getWsdlDirectory();
-		String wsdlAbsolutePath = servletContext.getRealPath(wsdlRelativeDirectory);
-		wsigConfiguration.setWsdlDirectory(wsdlAbsolutePath);
+
+		// If the jade gateway is local replace platform and container informations 
+		if (jadeGateway instanceof LocalJadeGateway) {
+			String mainHost = jadeGateway.getProfileProperty(Profile.MAIN_HOST, wsigConfiguration.getMainHost());
+			wsigConfiguration.setMainHost(mainHost);
+			
+			String mainPort = jadeGateway.getProfileProperty(Profile.MAIN_PORT, wsigConfiguration.getMainPort());
+			wsigConfiguration.setMainPort(mainPort);
+
+			String localPort = jadeGateway.getProfileProperty(Profile.LOCAL_PORT, "");
+			wsigConfiguration.setLocalPort(localPort);
+
+			String containerName = jadeGateway.getProfileProperty(Profile.CONTAINER_NAME, wsigConfiguration.getContainerName());
+			wsigConfiguration.setContainerName(containerName);
+		}
 		
 		// Set WSIGConfiguration into servlet context 
 		servletContext.setAttribute("WSIGConfiguration", wsigConfiguration);
@@ -126,8 +158,8 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		// Init Jade Gateway
 		log.info("Init Jade Gateway...");
 		Object [] wsigAgentArguments = new Object[]{wsigStore};
-		JadeGateway.init(wsigConfiguration.getAgentClassName(), wsigAgentArguments, wsigConfiguration);
-		JadeGateway.addListener(this);
+		jadeGateway.init(wsigConfiguration.getAgentName(), wsigConfiguration.getAgentClassName(), wsigAgentArguments, wsigConfiguration);
+		jadeGateway.addListener(this);
 		log.info("Jade Gateway initialized");
 
 		// Start WSIGAgent
@@ -351,7 +383,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 		// Execute operation
 		try {
 			log.debug("Execute action "+agentAction+" on agent "+agentExecutor.getLocalName());
-			JadeGateway.execute(wsigBehaviour, timeout);
+			jadeGateway.execute(wsigBehaviour, timeout);
 		} catch (InterruptedException ie) {
 			// Timeout
 			log.error("Timeout executing action "+agentAction);
@@ -508,7 +540,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 	private void startupWSIGAgent() {
 		try {
 			log.info("Starting WSIG agent...");
-			JadeGateway.checkJADE();
+			jadeGateway.checkJADE();
 		} catch (ControllerException e) {
 			log.warn("Jade platform not present...WSIG agent not started", e);
 		}
@@ -516,7 +548,7 @@ public class WSIGServlet extends HttpServlet implements GatewayListener {
 
 	private void shutdownWSIGAgent() {
 		log.info("Stopping WSIG agent...");
-		JadeGateway.shutdown();
+		jadeGateway.shutdown();
 	}
 
 	public void handleGatewayConnected() {
