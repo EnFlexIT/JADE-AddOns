@@ -34,17 +34,18 @@ import jade.content.schema.AggregateSchema;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.TermSchema;
+import jade.util.Logger;
 
 import java.io.StringReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.logging.Level;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.axis.Message;
-import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -62,7 +63,7 @@ public class SoapToJade extends DefaultHandler {
 
 	private static final int PARAMETERS_LEVEL = 3;
 	
-	private static Logger log = Logger.getLogger(SoapToJade.class.getName());
+	private static Logger logger = Logger.getMyLogger(SoapToJade.class.getName());
 
 	private XMLReader xmlParser;
 	private int level = 0;
@@ -85,7 +86,7 @@ public class SoapToJade extends DefaultHandler {
 			xmlParser.setErrorHandler(this);
 		}
 	    catch(Exception e) {
-			log.error("Unable to create XML parser", e);
+			logger.log(Level.SEVERE, "Unable to create XML parser", e);
 		}
 	}
 
@@ -114,14 +115,14 @@ public class SoapToJade extends DefaultHandler {
 		
 		// Verify if parser is ready
 		if (xmlParser == null) {
-			log.error("XML parser not initialized");
+			logger.log(Level.SEVERE, "XML parser not initialized");
 			throw new Exception("XML parser not initialized");
 		}
 
 		// Get action builder
 		ActionBuilder actionBuilder = wsigService.getActionBuilder(operationName);
 		if (actionBuilder == null) {
-			log.error("Operation "+operationName+" not present in service "+wsigService.getServiceName());
+			logger.log(Level.SEVERE, "Operation "+operationName+" not present in service "+wsigService.getServiceName());
 			throw new Exception("Operation "+operationName+" not present in service "+wsigService.getServiceName()); 
 		}
 		
@@ -141,19 +142,19 @@ public class SoapToJade extends DefaultHandler {
 	}
 	
 	private LinkedHashMap<String, ParameterInfo> getParameterValues() {
-		log.debug("Begin parameters list");
+		logger.log(Level.FINE, "Begin parameters list");
 
 		LinkedHashMap<String, ParameterInfo> params = new LinkedHashMap<String, ParameterInfo>();
 		if (parametersByLevel.size() >= 1) {
 			Vector<ParameterInfo> soapParams = parametersByLevel.get(0);
 			for (ParameterInfo soapParam : soapParams) {
 				params.put(soapParam.getName(), soapParam);
-				log.debug("   "+soapParam.getName()+"= "+soapParam.getValue());
+				logger.log(Level.FINE, "   "+soapParam.getName()+"= "+soapParam.getValue());
 			}
 		} else {
-			log.debug("   No parameters");
+			logger.log(Level.FINE, "   No parameters");
 		}
-		log.debug("End parameters list");
+		logger.log(Level.FINE, "End parameters list");
 		
 		return params;
 	}
@@ -204,7 +205,7 @@ public class SoapToJade extends DefaultHandler {
 			return schema;
 			
 		} catch(Exception e) {
-			log.error("Schema not found for element "+elementName, e);
+			logger.log(Level.SEVERE, "Schema not found for element "+elementName, e);
 			throw e;
 		}
 	}
@@ -341,7 +342,7 @@ public class SoapToJade extends DefaultHandler {
 
 				// Get parameter schema
 				TermSchema parameterSchema = getParameterSchema(parameterName, parameterLevel, attrs);
-				log.debug("Start managing parameter "+parameterName+" of type "+parameterSchema.getTypeName());
+				logger.log(Level.FINE, "Start managing parameter "+parameterName+" of type "+parameterSchema.getTypeName());
 				
 				// If the slot is of type TermSchema start to collect all the following tags
 				if (parameterSchema.getClass() == TermSchema.class) {
@@ -397,13 +398,13 @@ public class SoapToJade extends DefaultHandler {
 				if (parameterSchema instanceof PrimitiveSchema) {
 					// Primitive type
 					pi.setValue(getPrimitiveAbsValue(parameterSchema, parameterValue));
-					log.debug("Set "+parameterName+" with " + parameterValue);
+					logger.log(Level.FINE, "Set "+parameterName+" with " + parameterValue);
 					
 				} else if (parameterSchema.getClass() == TermSchema.class) {
 					// Term type (anyType)
 					// Assigned as a string
 					pi.setValue(getPrimitiveAbsValue(new PrimitiveSchema(WSDLConstants.XSD_STRING), parameterValue));
-					log.debug("Set "+parameterName+" with " + parameterValue);
+					logger.log(Level.FINE, "Set "+parameterName+" with " + parameterValue);
 					
 				} else {
 					// Complex type -> create abs object from schema
@@ -415,7 +416,7 @@ public class SoapToJade extends DefaultHandler {
 						AbsPrimitive enumValue = getPrimitiveAbsValue(new PrimitiveSchema(WSDLConstants.XSD_STRING), parameterValue);
 						AbsHelper.setAttribute(absObj, WSDLConstants.ENUM_SLOT_NAME, enumValue);
 						pi.setValue(absObj);
-						log.debug("Set "+parameterName+" with " + parameterValue);
+						logger.log(Level.FINE, "Set "+parameterName+" with " + parameterValue);
 						
 					}
 					else {
@@ -431,7 +432,7 @@ public class SoapToJade extends DefaultHandler {
 									// Add parameters to aggregate
 									ParameterInfo fieldPi = fieldsParameter.get(arrayIndex);
 									((AbsAggregate)absObj).add((AbsTerm)fieldPi.getValue());
-									log.debug("Add element "+arrayIndex+" to "+parameterName+" with "+fieldPi.getValue());
+									logger.log(Level.FINE, "Add element "+arrayIndex+" to "+parameterName+" with "+fieldPi.getValue());
 								}
 							} else {
 								
@@ -455,7 +456,7 @@ public class SoapToJade extends DefaultHandler {
 						// Set value in parameter info object
 						pi.setValue(absObj);
 					
-						log.debug("End managing parameter "+parameterName);
+						logger.log(Level.FINE, "End managing parameter "+parameterName);
 					}
 				}
 			}

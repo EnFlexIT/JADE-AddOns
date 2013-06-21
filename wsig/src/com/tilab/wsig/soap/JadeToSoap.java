@@ -26,6 +26,7 @@ package com.tilab.wsig.soap;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
+import java.util.logging.Level;
 
 import jade.content.abs.AbsAggregate;
 import jade.content.abs.AbsObject;
@@ -38,6 +39,7 @@ import jade.content.schema.ConceptSchema;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.TermSchema;
+import jade.util.Logger;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.Name;
@@ -49,7 +51,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
 
 import org.apache.axis.utils.XMLUtils;
-import org.apache.log4j.Logger;
 
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.WSIGConstants;
@@ -63,7 +64,7 @@ import com.tilab.wsig.wsdl.WSDLUtils;
 
 public class JadeToSoap {
 
-	private static Logger log = Logger.getLogger(JadeToSoap.class.getName());
+	private static Logger logger = Logger.getMyLogger(JadeToSoap.class.getName());
 	
 	private String localNamespacePrefix;
 	private String soapStyle;
@@ -145,7 +146,7 @@ public class JadeToSoap {
         SOAPElement responseElement = addSoapElement(soapBody, responseElementName, localNamespacePrefix, null, tns, false);
         
         // Get action builder
-        log.debug("Operation name: "+operationName);
+        logger.log(Level.FINE, "Operation name: "+operationName);
         ResultBuilder resultBuilder = wsigService.getResultBuilder(operationName);
         if (resultBuilder == null) {
 			throw new Exception("Result builder not found for operation "+operationName+" in WSIG");
@@ -153,7 +154,7 @@ public class JadeToSoap {
         
         // Get response schema
     	ObjectSchema responseSchema = resultBuilder.getResponseSchema();
-    	log.debug("Ontology result type: "+responseSchema.getTypeName());
+    	logger.log(Level.FINE, "Ontology result type: "+responseSchema.getTypeName());
     	
     	// Loop all element parameters
     	List<ParameterInfo> operationResultValues = resultBuilder.getOperationResultValues(opResult);
@@ -164,7 +165,7 @@ public class JadeToSoap {
     		ObjectSchema elementSchema = parameterInfo.getSchema();
 
     		// Create soap element
-    		log.debug("Add element type: "+elementSchema.getTypeName());
+    		logger.log(Level.FINE, "Add element type: "+elementSchema.getTypeName());
             convertObjectToSoapElement(responseSchema, elementSchema, elementValue, elementName, responseElement);
 		}
 	}
@@ -191,7 +192,7 @@ public class JadeToSoap {
 			if (resultSchema instanceof PrimitiveSchema || resultSchema.getClass()==TermSchema.class) {
 				
 				// PrimitiveSchema
-				log.debug("Elaborate primitive schema: "+elementName+" of type: "+resultSchema.getTypeName());
+				logger.log(Level.FINE, "Elaborate primitive schema: "+elementName+" of type: "+resultSchema.getTypeName());
 	
 				// Get type and create soap element
 		        soapType = WSDLUtils.getPrimitiveType(resultSchema, containerSchema, elementName);
@@ -233,7 +234,7 @@ public class JadeToSoap {
 						forceType = true;
 					}
 				}
-				log.debug("Elaborate concept schema: "+elementName+" of type: "+resultSchema.getTypeName());
+				logger.log(Level.FINE, "Elaborate concept schema: "+elementName+" of type: "+resultSchema.getTypeName());
 
 				// Get type and create soap element
 		        soapType = resultSchema.getTypeName();
@@ -262,7 +263,7 @@ public class JadeToSoap {
 			} else if (resultSchema instanceof AggregateSchema) {
 				
 				// AggregateSchema
-				log.debug("Elaborate aggregate schema: "+elementName);
+				logger.log(Level.FINE, "Elaborate aggregate schema: "+elementName);
 	
 				// Get aggregate type and cardinality
 				ObjectSchema aggrSchema = WSDLUtils.getAggregateElementSchema(containerSchema, elementName);

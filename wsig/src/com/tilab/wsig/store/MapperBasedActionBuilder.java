@@ -24,14 +24,18 @@ package com.tilab.wsig.store;
 
 import jade.content.AgentAction;
 import jade.content.onto.Ontology;
+import jade.util.Logger;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.logging.Level;
 
 
 public class MapperBasedActionBuilder extends ActionBuilder {
 	
+	private static Logger logger = Logger.getMyLogger(MapperBasedActionBuilder.class.getName());
+
 	private Method method;
 	private Object mapperObj;
 
@@ -58,7 +62,7 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 				try {
 					soapParameter = getSoapParameter(soapParams, parameterInfo);
 				} catch(Exception e) {
-					log.error(e.getMessage());
+					logger.log(Level.SEVERE, e.getMessage());
 					throw e;
 				}
 				
@@ -73,7 +77,7 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 					}
 					parameterValues[index++] = adjustValue(javaValue, parameterInfo.getParameterClass());
 				} catch(Exception e) {
-					log.error("Method "+method.getName()+", param "+parameterInfo.getName()+" error decoding value");
+					logger.log(Level.SEVERE, "Method "+method.getName()+", param "+parameterInfo.getName()+" error decoding value");
 					throw e;
 				}
 			}
@@ -87,10 +91,10 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 		try {
 			// Invoke mapper method
 			actionObj = (AgentAction)method.invoke(mapperObj, parameterValues);
-			log.debug("Invoked method "+method.getName()+"("+parameterList+") in mapper");
+			logger.log(Level.FINE, "Invoked method "+method.getName()+"("+parameterList+") in mapper");
 
 		} catch(Exception e) {
-			log.error("Method "+method.getName()+"("+parameterList+") error invocation");
+			logger.log(Level.SEVERE, "Method "+method.getName()+"("+parameterList+") error invocation");
 			throw e;
 		}
 		

@@ -24,6 +24,7 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig;
 
 import jade.content.lang.sl.SLCodec;
+import jade.util.Logger;
 import jade.util.leap.Properties;
 
 import java.io.BufferedInputStream;
@@ -35,18 +36,17 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.logging.Level;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-
-import org.apache.log4j.Logger;
 
 import com.tilab.wsig.wsdl.WSDLConstants;
 
 public class WSIGConfiguration extends Properties {
 
 	private static WSIGConfiguration anInstance;
-	private static Logger log = Logger.getLogger(WSIGConfiguration.class.getName());
+	private static Logger logger = Logger.getMyLogger(WSIGConfiguration.class.getName());
 
 	public static final String WSIG_CONFIGURATION_FILE_NAME = "wsig.properties";
 	public static final String WSIG_DEFAULT_CONFIGURATION = "conf/"+WSIG_CONFIGURATION_FILE_NAME;
@@ -488,10 +488,10 @@ public class WSIGConfiguration extends Properties {
 				}
 				store(wsigConfPath);
 			} else {
-				log.warn("Default configuration or configuration loaded in classloader is not modifiable");
+				logger.log(Level.WARNING, "Default configuration or configuration loaded in classloader is not modifiable");
 			}
 		} catch (IOException e) {
-			log.error("WSIG error writing configuration", e);
+			logger.log(Level.SEVERE, "WSIG error writing configuration", e);
 		}                  
 	}
 	/**
@@ -499,7 +499,7 @@ public class WSIGConfiguration extends Properties {
 	 * An internal instance is loaded.
 	 */
 	private static void load() {
-		log.info("Loading WSIG configuration file...");
+		logger.log(Level.INFO, "Loading WSIG configuration file...");
 		WSIGConfiguration c = getInstance();
 		InputStream is;
 		synchronized (c) {
@@ -510,13 +510,13 @@ public class WSIGConfiguration extends Properties {
 				try {
 					input = new FileInputStream(wsigConfPath);
 				} catch (FileNotFoundException e) {
-					log.error("WSIG configuration <<" + wsigConfPath + ">> not found in file system, wsig agent will use default configuration", e);
+					logger.log(Level.SEVERE, "WSIG configuration <<" + wsigConfPath + ">> not found in file system, wsig agent will use default configuration", e);
 					return;
 				}
 			} else {
 				input = ClassLoader.getSystemResourceAsStream(WSIG_CONFIGURATION_FILE_NAME);
 				if (input == null) {
-					log.error("WSIG configuration <<" + WSIG_CONFIGURATION_FILE_NAME + ">> not found in system class loader, wsig agent will use default configuration");
+					logger.log(Level.SEVERE, "WSIG configuration <<" + WSIG_CONFIGURATION_FILE_NAME + ">> not found in system class loader, wsig agent will use default configuration");
 					return;
 				}
 			}
@@ -524,10 +524,10 @@ public class WSIGConfiguration extends Properties {
 				is = new BufferedInputStream(input);
 				c.load(is);
 				is.close();
-				log.debug("WSIG configuration file is loaded");
+				logger.log(Level.FINE, "WSIG configuration file is loaded");
 
 			} catch (IOException e) {
-				log.error("WSIG configuration file error reading", e);
+				logger.log(Level.SEVERE, "WSIG configuration file error reading", e);
 			}
 		}
 	}

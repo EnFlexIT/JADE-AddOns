@@ -22,8 +22,11 @@ Boston, MA  02111-1307, USA.
  *****************************************************************/
 package com.tilab.wsig.admin;
 
+import jade.util.Logger;
+
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Level;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -35,8 +38,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger;
-
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.store.WSIGStore;
 import com.tilab.wsig.wsdl.WSDLUtils;
@@ -45,13 +46,13 @@ import com.tilab.wsig.wsdl.WSDLUtils;
 @Path("/services")
 public class ServicesResource {
 
-	private static Logger log = Logger.getLogger(ServicesResource.class.getName());
+	private static Logger logger = Logger.getMyLogger(ServicesResource.class.getName());
 
 	//get the list with the names of the services
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN})
 	public Services getServices(@Context ServletContext servletContext) {
-		log.info("The list with the Services'names has been retrieved...");
+		logger.log(Level.INFO, "The list with the Services'names has been retrieved...");
 		return new Services(servletContext);
 	}
 
@@ -63,7 +64,7 @@ public class ServicesResource {
 		WSIGStore wsigStore = (WSIGStore)servletContext.getAttribute("WSIGStore");
 		WSIGService wsigservice = wsigStore.getService(serviceName);
 		Service service = new Service(wsigservice, hsr);
-		log.info("The information of "+serviceName+" service has been retrieved...");
+		logger.log(Level.INFO, "The information of "+serviceName+" service has been retrieved...");
 		return service;	
 	}
 
@@ -75,6 +76,6 @@ public class ServicesResource {
 		String wsdlUrl = WSDLUtils.getWsdlUrl(serviceName, httpRequest);
 		URL consoleUrl = new URL(wsdlUrl);
 		httpResponse.sendRedirect(consoleUrl.toString());
-		log.info("The WSDL of "+serviceName+" service has been retrieved...");
+		logger.log(Level.INFO, "The WSDL of "+serviceName+" service has been retrieved...");
 	}
 } 

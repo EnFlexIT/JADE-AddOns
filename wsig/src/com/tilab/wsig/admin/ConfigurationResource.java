@@ -22,6 +22,10 @@ Boston, MA  02111-1307, USA.
  *****************************************************************/
 package com.tilab.wsig.admin;
 
+import java.util.logging.Level;
+
+import jade.util.Logger;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -32,21 +36,19 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.log4j.Logger;
-
 import com.tilab.wsig.WSIGConfiguration;
 
 
 @Path("/configuration")
 public class ConfigurationResource {
 
-	private static Logger log = Logger.getLogger(ConfigurationResource.class.getName());
+	private static Logger logger = Logger.getMyLogger(ConfigurationResource.class.getName());
 
 	@GET
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN})
 	public Configuration getConfiguration(@Context HttpServletRequest hsr) {
 		Configuration conf = new Configuration(hsr);	  
-		log.info("WSIG configuration retrieved.");	 
+		logger.log(Level.INFO, "WSIG configuration retrieved.");	 
 		return conf;
 	}  
 
@@ -55,7 +57,7 @@ public class ConfigurationResource {
 	public Response updateConfiguration(Configuration conf) {
 		/* The parameters passed in the Configuration object are set using
 		 * the setters method of Configuration class */	  
-		log.info("WSIG configuration changed.");
+		logger.log(Level.INFO, "WSIG configuration changed.");
 		WSIGConfiguration.getInstance().store();
 		return Response.ok().build();
 	}    

@@ -33,11 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 public abstract class Builder {
-	protected static Logger log = Logger.getLogger(Builder.class.getName());
-
 	protected Ontology ontoService;
 	protected Ontology ontoAgent;
 	protected String actionName;

@@ -23,10 +23,12 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.uddi;
 
+import jade.util.Logger;
+
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.logging.Level;
 
-import org.apache.log4j.Logger;
 import org.uddi4j.UDDIException;
 import org.uddi4j.client.UDDIProxy;
 import org.uddi4j.datatype.Name;
@@ -61,7 +63,7 @@ import com.tilab.wsig.wsdl.WSDLUtils;
 
 public class UDDIManager {
 
-	private Logger log = Logger.getLogger(UDDIManager.class.getName());
+	private Logger logger = Logger.getMyLogger(UDDIManager.class.getName());
 
 	private UDDIProxy uddiProxy;
 	private String businessKey;
@@ -74,7 +76,7 @@ public class UDDIManager {
 			setupUDDI4j();
 
 		} catch (Exception e) {
-			log.error("UDDI setup error", e);
+			logger.log(Level.SEVERE, "UDDI setup error", e);
 		}
 	}
 	
@@ -87,7 +89,7 @@ public class UDDIManager {
 
 		ServiceKey serviceKey = null;
 		String serviceName = wsigService.getServiceName();
-		log.info("Register service "+serviceName+" into UDDI");
+		logger.log(Level.INFO, "Register service "+serviceName+" into UDDI");
 
 		try {
 			// Create identification names
@@ -143,9 +145,9 @@ public class UDDIManager {
 				new TModelKey(tModel.getTModelKey()));
 
 		} catch (UDDIException e) {
-			log.error("UDDI Registration", e);
+			logger.log(Level.SEVERE, "UDDI Registration", e);
 		} catch (TransportException e) {
-			log.error("UDDI Registration", e);
+			logger.log(Level.SEVERE, "UDDI Registration", e);
 		}
 		
 		return serviceKey;
@@ -158,7 +160,7 @@ public class UDDIManager {
 	 */
 	public synchronized void UDDIDeregister(WSIGService wsigService) throws Exception {
 
-		log.info("Deregister service "+wsigService.getServiceName()+" from UDDI");
+		logger.log(Level.INFO, "Deregister service "+wsigService.getServiceName()+" from UDDI");
 		
 		// Get Key stored
 		ServiceKey k = wsigService.getUddiServiceKey();
@@ -172,7 +174,7 @@ public class UDDIManager {
 				bt.getTModelInstanceDetails().get(0).getTModelKey());
 			dr = uddiProxy.delete_tModel(getAuthToken().getAuthInfoString(), tModelKey.getText());
 			if (! dr.success()) {
-				log.error("Error during deletion of TModel\n" +
+				logger.log(Level.SEVERE, "Error during deletion of TModel\n" +
 					"\n operator:" + dr.getOperator() +
 					"\n generic:" + dr.getGeneric());
 			}
@@ -180,22 +182,22 @@ public class UDDIManager {
 			// Delete a service
 			dr = uddiProxy.delete_service(getAuthToken().getAuthInfoString(), k.getText());
 			if (! dr.success()) {
-				log.error("Error during deletion of Service\n" +
+				logger.log(Level.SEVERE, "Error during deletion of Service\n" +
 					"\n operator:" + dr.getOperator() +
 					"\n generic:" + dr.getGeneric());
 
 				Vector results = dr.getResultVector();
 				for (int j = 0; j < results.size(); j++) {
 					Result r = (Result) results.elementAt(j);
-					log.error(" errno:" + r.getErrno());
+					logger.log(Level.SEVERE, " errno:" + r.getErrno());
 					if (r.getErrInfo() != null) {
-						log.error("\n errCode:" + r.getErrInfo().getErrCode() +
+						logger.log(Level.SEVERE, "\n errCode:" + r.getErrInfo().getErrCode() +
 							"\n errInfoText:" + r.getErrInfo().getText());
 					}
 				}
 			}
 		} catch (Exception e) {
-			log.error("Error during UDDI deregistration", e);
+			logger.log(Level.SEVERE, "Error during UDDI deregistration", e);
 			throw e;
 		}
 	}
@@ -228,14 +230,14 @@ public class UDDIManager {
 			int k;
 
 			if (infos.size() < 1) {
-				log.debug("Old records do not exist in UDDI.");
+				logger.log(Level.FINE, "Old records do not exist in UDDI.");
 				return;
 			}
 
 			for (k = 0; k < infos.size(); k ++) {
 				info = infos.get(k);
 				s = info.getServiceKey();
-				log.debug(" service to delete: " + s);
+				logger.log(Level.FINE, " service to delete: " + s);
 				sKeys.add(s);
 			}
 
@@ -244,9 +246,9 @@ public class UDDIManager {
 				getAuthToken().getAuthInfoString(), sKeys);
 
 		} catch (UDDIException ue) {
-			log.debug(ue);
+			logger.log(Level.WARNING, ue.getMessage(), ue);
 		} catch (TransportException te) {
-			log.debug(te);
+			logger.log(Level.WARNING, te.getMessage(), te);
 		}
 	}
 
@@ -278,7 +280,7 @@ public class UDDIManager {
 				uddiProxy.setInquiryURL(c.getQueryManagerURL());
 				uddiProxy.setPublishURL(c.getLifeCycleManagerURL());
 			} catch (Exception e) {
-				log.error(e);
+				logger.log(Level.SEVERE, e.getMessage(), e);
 			}
 		}
 
@@ -295,11 +297,11 @@ public class UDDIManager {
 	 */
 	private AuthToken getAuthToken() throws TransportException, UDDIException {
 		// Get an authorization token
-		log.debug("Ask for authToken.");
+		logger.log(Level.FINE, "Ask for authToken.");
 
 		// Pass in userid and password registered at the UDDI site
 		AuthToken authToken = uddiProxy.get_authToken(userName, password);
-		log.debug("Returned authToken from a UDDI:" + authToken.getAuthInfoString());
+		logger.log(Level.FINE, "Returned authToken from a UDDI:" + authToken.getAuthInfoString());
 		return authToken;
 	}
 
@@ -313,7 +315,7 @@ public class UDDIManager {
 	 */
 	public BindingTemplate createBindingTemplate(AccessPoint accessPoint, ServiceKey serviceKey, TModelKey tModelKey) {
 
-		log.debug("A bindingTemplate is going to be created.");
+		logger.log(Level.FINE, "A bindingTemplate is going to be created.");
 		BindingTemplate bindingTemplateReturned = null;
 		try {
 			// create TModelInstanceDetails
@@ -342,12 +344,12 @@ public class UDDIManager {
 			bindingTemplateReturned = (BindingTemplate) (bindingTemplateVector.elementAt(0));
 
 		} catch (UDDIException e) {
-			log.error(e);
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		} catch (TransportException e) {
-			log.error(e);
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 
-		log.debug("New BindingKey: " + bindingTemplateReturned.getBindingKey());
+		logger.log(Level.FINE, "New BindingKey: " + bindingTemplateReturned.getBindingKey());
 		return bindingTemplateReturned;
 	}
 
@@ -359,7 +361,7 @@ public class UDDIManager {
 	 * @return tModel created
 	 */
 	public TModel createTModel(String wsdlURL, String name) {
-		log.debug("A tModel is going to be created.");
+		logger.log(Level.FINE, "A tModel is going to be created.");
 		TModel tModelReturned = null;
 		try {
 			// to point into a WSDL
@@ -383,12 +385,12 @@ public class UDDIManager {
 			tModelReturned = (TModel) (tModelsVector.elementAt(0));
 
 		} catch (UDDIException e) {
-			log.error(e);
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		} catch (TransportException e) {
-			log.error(e);
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 
-		log.debug("New tModelKey: " + tModelReturned.getTModelKey());
+		logger.log(Level.FINE, "New tModelKey: " + tModelReturned.getTModelKey());
 		return tModelReturned;
 	}
 

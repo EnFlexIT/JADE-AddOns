@@ -36,13 +36,14 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.lang.acl.ACLMessage;
 import jade.proto.SubscriptionInitiator;
+import jade.util.Logger;
 import jade.wrapper.gateway.GatewayAgent;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Iterator;
+import java.util.logging.Level;
 
-import org.apache.log4j.Logger;
 import org.uddi4j.util.ServiceKey;
 
 import com.tilab.wsig.WSIGConfiguration;
@@ -58,7 +59,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 
 	private static final long serialVersionUID = 3815496986569126415L;
 
-	private static Logger log = Logger.getLogger(WSIGAgent.class.getName());
+	private static Logger logger = Logger.getMyLogger(WSIGAgent.class.getName());
 
 	private WSIGStore wsigStore;
 	private UDDIManager uddiManager;
@@ -74,12 +75,12 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		// Set soap message factory library (solve jboss problem)
 		System.setProperty("javax.xml.soap.MessageFactory", "org.apache.axis.soap.MessageFactoryImpl"); 
 		
-		log.info("Agent "+getLocalName()+" - starting...");
+		logger.log(Level.INFO, "Agent "+getLocalName()+" - starting...");
 
 		// Get agent arguments
 		Object[] args = getArguments();
 		for (int i = 0; i < args.length; i++) {
-			log.info("arg[" + i + "]" + args[i]);
+			logger.log(Level.INFO, "arg[" + i + "]" + args[i]);
 		}
 
 		// Verify if wsigStore is passed as agent parameter
@@ -116,10 +117,10 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 					Behaviour cfmab = (Behaviour)cfmabConstructor.newInstance(cfmabConstructorArgs);
 					addBehaviour(cfmab);
 				} catch(Exception e) {
-					log.error("Agent "+getLocalName()+" - Error creating CreateFileManagerAgentBehaviour", e);
+					logger.log(Level.SEVERE, "Agent "+getLocalName()+" - Error creating CreateFileManagerAgentBehaviour", e);
 				}
 			} else {
-				log.warn("Agent "+getLocalName()+" - Log manager enabled bat jadeMisc.jar not present in WSIG classpath");
+				logger.log(Level.WARNING, "Agent "+getLocalName()+" - Log manager enabled bat jadeMisc.jar not present in WSIG classpath");
 			}
 		}
 		
@@ -135,7 +136,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		addBehaviour(new SubscriptionInitiator(this, subscriptionMsg) {
 
 			protected void handleInform(ACLMessage inform) {
-				log.debug("Agent "+getLocalName()+" - Notification received from DF ("+inform.getContent()+")");
+				logger.log(Level.FINE, "Agent "+getLocalName()+" - Notification received from DF ("+inform.getContent()+")");
 				try {
 					DFAgentDescription[] dfds = DFService.decodeNotification(inform.getContent());
 					for (int i = 0; i < dfds.length; ++i) {
@@ -150,12 +151,12 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 					}
 				}
 				catch (Exception e) {
-					log.warn("Agent "+myAgent.getLocalName() + " - Error processing DF notification", e);
+					logger.log(Level.WARNING, "Agent "+myAgent.getLocalName() + " - Error processing DF notification", e);
 				}
 			}
 		});
 
-		log.info("Agent "+getLocalName()+" - started!");
+		logger.log(Level.INFO, "Agent "+getLocalName()+" - started!");
 	}
 
 	public WSIGStore getWSIGStore() {
@@ -164,7 +165,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 
 	private synchronized void registerAgent(DFAgentDescription dfad) throws Exception {
 
-		log.info("Start wsig registration from agent: " + dfad.getName());
+		logger.log(Level.INFO, "Start wsig registration from agent: " + dfad.getName());
 
 		// Loop all services of agent
 		ServiceDescription sd;
@@ -184,11 +185,11 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			}
 		}
 
-		log.info("End wsig registration from agent: " + dfad.getName());
+		logger.log(Level.INFO, "End wsig registration from agent: " + dfad.getName());
 	}
 
 	private void registerService(WSIGService wsigService) throws Exception {
-			log.info("Create new wsig service: "+wsigService.toString());
+			logger.log(Level.INFO, "Create new wsig service: "+wsigService.toString());
 
 			// Register wsigService into UDDI
 			if (uddiManager != null) {
@@ -202,7 +203,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 
 	private synchronized void deregisterAgent(DFAgentDescription dfad) throws Exception {
 
-		log.info("Start wsigs's deregistration from agent: " + dfad.getName());
+		logger.log(Level.INFO, "Start wsigs's deregistration from agent: " + dfad.getName());
 
 		WSIGService wsigService;
 
@@ -215,14 +216,14 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			deregisterService(wsigService);
 		}
 
-		log.info("End wsigs's deregistration from agent: " + dfad.getName());
+		logger.log(Level.INFO, "End wsigs's deregistration from agent: " + dfad.getName());
 	}
 
 	private void deregisterService(WSIGService wsigService) throws Exception {
 
 		String serviceName = wsigService.getServiceName();
 
-		log.info("Remove wsig service "+serviceName);
+		logger.log(Level.INFO, "Remove wsig service "+serviceName);
 
 		// DeRegister wsigService from UDDI
 		try {
@@ -230,7 +231,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 				uddiManager.UDDIDeregister(wsigService);
 			}
 		} catch (Exception e) {
-			log.warn("Error removing service from UDDI", e);
+			logger.log(Level.WARNING, "Error removing service from UDDI", e);
 		}
 
 		// Remove wsigService from WSIGStore
@@ -287,17 +288,17 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 
 		// Verify if is a wsig service
 		if (!isWSIGService(sd)) {
-			log.info("Service "+serviceName+" discarded (no wsig service)");
+			logger.log(Level.INFO, "Service "+serviceName+" discarded (no wsig service)");
 			return null;
 		}
 
 		// Verify if the service is already registered
 		if (wsigStore.isServicePresent(serviceName)) {
-			log.info("Service "+serviceName+" of agent "+aid.getName()+" is already registered");
+			logger.log(Level.INFO, "Service "+serviceName+" of agent "+aid.getName()+" is already registered");
 			return null;
 		}
 		
-		log.info("Managing service "+serviceName);
+		logger.log(Level.INFO, "Managing service "+serviceName);
 
 		// Get ontology
 		// FIX-ME: elaborate only first ontology
@@ -307,14 +308,14 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			ontoName = (String)ontoIt.next();
 		}
 		if (ontoName == null) {
-			log.info("Service "+serviceName+" of agent "+aid.getName()+" do not have any ontology registered. Discard it.");
+			logger.log(Level.INFO, "Service "+serviceName+" of agent "+aid.getName()+" do not have any ontology registered. Discard it.");
 			return null;
 		}
 		
 		// Get ontology className
 		String ontoClassname = getOntologyClassName(sd, ontoName);
 		if (ontoClassname == null) {
-			log.warn("Ontology "+ontoName+" for service "+serviceName+" not present in ServiceDescriptor or WSIG configuration file. Discard service.");
+			logger.log(Level.WARNING, "Ontology "+ontoName+" for service "+serviceName+" not present in ServiceDescriptor or WSIG configuration file. Discard service.");
 			return null;
 		}
 
@@ -323,7 +324,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		try {
 			ontoClass = Class.forName(ontoClassname);
 		} catch (Exception e) {
-			log.warn("Ontology class "+ontoClassname+" for service "+serviceName+" can not be loaded. Discard service.", e);
+			logger.log(Level.WARNING, "Ontology class "+ontoClassname+" for service "+serviceName+" can not be loaded. Discard service.", e);
 			return null;
 		}
 
@@ -338,7 +339,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 				Method getInstanceMethod = ontoClass.getMethod("getInstance", null);
 				onto = (Ontology)getInstanceMethod.invoke(null, null);
 			} catch (Exception e1) {
-				log.warn("Ontology class "+ontoClassname+" for service "+serviceName+" can not be instantiated. Discard service.", e);
+				logger.log(Level.WARNING, "Ontology class "+ontoClassname+" for service "+serviceName+" can not be instantiated. Discard service.", e);
 				return null;
 			}
 		}
@@ -353,7 +354,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 			try {
 				mapperClass = Class.forName(mapperClassName);
 			} catch (Exception e) {
-				log.warn("Mapper class "+mapperClassName+" for service "+serviceName+" can not be loaded. Discard service.", e);
+				logger.log(Level.WARNING, "Mapper class "+mapperClassName+" for service "+serviceName+" can not be loaded. Discard service.", e);
 				return null;
 			}
 		}
@@ -424,7 +425,7 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 		try {
 			DFService.register(this, dfad);
 		} catch (Exception e) {
-			log.error("Agent "+getLocalName()+" - Error during DF registration", e);
+			logger.log(Level.SEVERE, "Agent "+getLocalName()+" - Error during DF registration", e);
 		}
 	}
 
@@ -439,17 +440,17 @@ public class WSIGAgent extends GatewayAgent implements WSIGConstants {
 				deregisterService(wsigService);
 			}
 		} catch (Exception e) {
-			log.error("Agent "+getLocalName()+" - Error during service deregistration", e);
+			logger.log(Level.SEVERE, "Agent "+getLocalName()+" - Error during service deregistration", e);
 		}
 
 		// Deregister WSIG agent
 		try {
 			DFService.deregister(this, getDefaultDF());
 		} catch (Exception e) {
-			log.error("Agent "+getLocalName()+" - Error during DF deregistration", e);
+			logger.log(Level.SEVERE, "Agent "+getLocalName()+" - Error during DF deregistration", e);
 		}
 
 		super.takeDown();
-		log.info("Agent "+getLocalName()+" - Taken down now");
+		logger.log(Level.INFO, "Agent "+getLocalName()+" - Taken down now");
 	}
 }

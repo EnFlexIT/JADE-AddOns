@@ -22,10 +22,12 @@ Boston, MA  02111-1307, USA.
  *****************************************************************/
 package com.tilab.wsig.admin;
 
+import jade.util.Logger;
 import jade.wrapper.ControllerException;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Level;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -37,15 +39,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.apache.log4j.Logger;
-
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.servlet.WSIGServlet;
 
 @Path("platform")
 public class PlatformResource {
 
-	private static Logger log = Logger.getLogger(PlatformResource.class.getName());
+	private static Logger logger = Logger.getMyLogger(PlatformResource.class.getName());
 
 	@GET
 	public Response getStatus(@Context ServletContext servletContext) {
@@ -61,7 +61,7 @@ public class PlatformResource {
 		else {
 			wsigActive="DOWN";
 		}
-		log.info("WSIG state retrieved: "+wsigActive);
+		logger.log(Level.INFO, "WSIG state retrieved: "+wsigActive);
 		return Response.ok(wsigActive).build(); 
 	}
 
@@ -84,15 +84,15 @@ public class PlatformResource {
 	}
 
 	private void modifyStatus(String status) {
-		log.info("WSIG agent command arrived ("+status+")");
+		logger.log(Level.INFO, "WSIG agent command arrived ("+status+")");
 
 		if (status.equalsIgnoreCase("connect")) {
 			// Start WSIGAgent
 			try {
-				log.info("Starting WSIG agent...");
+				logger.log(Level.INFO, "Starting WSIG agent...");
 				WSIGServlet.getJadeGateway().checkJADE();
 			} catch (ControllerException e) {
-				log.warn("Jade platform not present...WSIG agent not started", e);
+				logger.log(Level.WARNING, "Jade platform not present...WSIG agent not started", e);
 			}			
 			try {
 				// Wait a bit for the registration of services before refreshing the page
@@ -100,12 +100,12 @@ public class PlatformResource {
 			} catch (InterruptedException e) {}
 		} else if (status.equalsIgnoreCase("disconnect")) {
 			// Stop WSIGAgent
-			log.info("Stopping WSIG agent...");
+			logger.log(Level.INFO, "Stopping WSIG agent...");
 			WSIGServlet.getJadeGateway().shutdown();			
 		} else {
-			log.warn("WSIG agent command not implementated");
+			logger.log(Level.WARNING, "WSIG agent command not implementated");
 		}
 
-		log.info("WSIG agent command elaborated");
+		logger.log(Level.INFO, "WSIG agent command elaborated");
 	}
 } 

@@ -35,6 +35,7 @@ import jade.content.schema.ConceptSchema;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.TermSchema;
+import jade.util.Logger;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -45,6 +46,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
@@ -64,7 +66,6 @@ import javax.wsdl.extensions.ExtensionRegistry;
 import javax.wsdl.extensions.soap.SOAPAddress;
 import javax.wsdl.factory.WSDLFactory;
 
-import org.apache.log4j.Logger;
 import org.eclipse.xsd.XSDComplexTypeDefinition;
 import org.eclipse.xsd.XSDComponent;
 import org.eclipse.xsd.XSDElementDeclaration;
@@ -96,7 +97,7 @@ import com.tilab.wsig.store.WSIGService;
 
 public class JadeToWSDL {
 	
-	private static Logger log = Logger.getLogger(JadeToWSDL.class.getName());
+	private static Logger logger = Logger.getMyLogger(JadeToWSDL.class.getName());
 	
 	public static Integer MANDATORY = null;
 	public static Integer OPTIONAL = Integer.valueOf(0);
@@ -169,7 +170,7 @@ public class JadeToWSDL {
 			try {
 				mapperObject = mapperClass.newInstance();
 			} catch (Exception e) {
-				log.error("Mapper class "+mapperClass.getName()+" can not be instantiated", e);
+				logger.log(Level.SEVERE, "Mapper class "+mapperClass.getName()+" can not be instantiated", e);
 				throw e;
 			}
 		}
@@ -182,18 +183,18 @@ public class JadeToWSDL {
 		// Manage ontology
 		ontoService = wsigService.getServiceOntology();
 		ontoAgent = wsigService.getAgentOntology();
-		log.debug("Elaborate ontology: "+ontoService.getName());		
+		logger.log(Level.FINE, "Elaborate ontology: "+ontoService.getName());		
 		
 		// Manage actions
 		List actionNames = ontoService.getActionNames();
 		for (int i = 0; i < actionNames.size(); i++) {
 			try {
 				String actionName = (String) actionNames.get(i);
-				log.debug("Elaborate operation: "+ actionName);		
+				logger.log(Level.FINE, "Elaborate operation: "+ actionName);		
 
 				// Check if action is suppressed (valid only if mapper is present)
 				if (isActionSuppressed(actionName)) {
-					log.debug("--operation "+actionName+" suppressed");
+					logger.log(Level.FINE, "--operation "+actionName+" suppressed");
 					continue;
 				}
 				
@@ -310,7 +311,7 @@ public class JadeToWSDL {
 		}
 		
 		// Log ontology
-		if (log.isDebugEnabled()) {
+		if (logger.isLoggable(Level.FINE)) {
 			ontoService.dump();
 		}
 		
@@ -327,11 +328,11 @@ public class JadeToWSDL {
 		// Write wsdl on file system
 		if (WSIGConfiguration.getInstance().isWsdlWriteEnable()) {
 			try {
-				log.info("Write WSDL for service: "+serviceName);
+				logger.log(Level.INFO, "Write WSDL for service: "+serviceName);
 				WSDLUtils.writeWSDL(factory, definition, serviceName);
 				
 			} catch (Exception e) {
-				log.error("Error writing WSDL file", e);
+				logger.log(Level.SEVERE, "Error writing WSDL file", e);
 			}
 		}
 		
@@ -375,7 +376,7 @@ public class JadeToWSDL {
 		for (String slotName : slotNames) {
 			TermSchema slotSchema = (TermSchema)actionSchema.getSchema(slotName);
 			String slotType = createComplexTypeFromSchema(slotSchema, actionSchema, slotName, null, null, null);
-			log.debug("--ontology input slot: "+slotName+" ("+slotType+")");
+			logger.log(Level.FINE, "--ontology input slot: "+slotName+" ("+slotType+")");
 
 			// For aggregate create the relative TypedAggregateSchema
 			if (slotSchema instanceof AggregateSchema) {
@@ -470,7 +471,7 @@ public class JadeToWSDL {
 			}
 			
 			String parameterComplexType = createComplexTypeFromClass(parameterClass, parameterName, null, cardMin, cardMax, aggregateElementClass);
-			log.debug("--mapper input parameter: "+parameterName+" ("+parameterComplexType+")");
+			logger.log(Level.FINE, "--mapper input parameter: "+parameterName+" ("+parameterComplexType+")");
 
 			// Create virtual schema of java parameter
 			TermSchema parameterSchema = getParameterSchema(parameterClass, aggregateElementClass);
@@ -568,7 +569,7 @@ public class JadeToWSDL {
 		if (resultSchema != null) {
 			String resultName = WSDLUtils.getResultName(operationName);
 			String resultType = createComplexTypeFromSchema(resultSchema, actionSchema, resultSchema.getTypeName(), null, null, null);
-			log.debug("--ontology output result: "+resultName+" ("+resultType+")");
+			logger.log(Level.FINE, "--ontology output result: "+resultName+" ("+resultType+")");
 
 			outputParametersMap.put(resultName, new ParameterInfo(resultName, resultSchema));
 			
@@ -739,7 +740,7 @@ public class JadeToWSDL {
 		if (!operationClasses.containsKey(operationName.toLowerCase())) {
 			operationClasses.put(operationName.toLowerCase(), mapperInnerClass);	
 		} else {
-			log.warn("Skipped converter class <"+mapperInnerClass.getName()+"> map because the operation <"+operationName+"> of action <"+actionName+"> is already mapped!");
+			logger.log(Level.WARNING, "Skipped converter class <"+mapperInnerClass.getName()+"> map because the operation <"+operationName+"> of action <"+actionName+"> is already mapped!");
 		}
 	}
 	
@@ -775,7 +776,7 @@ public class JadeToWSDL {
 				slotType = (String) WSDLConstants.java2xsd.get(parameterClass);
 			}
 			if (parentComponent != null) {
-				log.debug("------add primitive-type "+paramName+" ("+slotType+")");
+				logger.log(Level.FINE, "------add primitive-type "+paramName+" ("+slotType+")");
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, paramName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
 		} 
@@ -784,7 +785,7 @@ public class JadeToWSDL {
 			// Enum
 			slotType = parameterClass.getSimpleName();
 			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
-				log.debug("----create simple-type "+slotType);
+				logger.log(Level.FINE, "----create simple-type "+slotType);
 				XSDSimpleTypeDefinition simpleTypeDefinition = wsdlTypeSchema.resolveSimpleTypeDefinition(WSDLConstants.XSD_URL, WSDLConstants.XSD_STRING);
 				Object[] enumValues = parameterClass.getEnumConstants();
 				Object[] permittedValues = new Object[enumValues.length]; 
@@ -798,12 +799,12 @@ public class JadeToWSDL {
 			ObjectSchema enumSchema = ontoService.getSchema(parameterClass);
 			if (enumSchema == null) {
 				// Schema not present -> add the class to ontology
-				log.debug("----add class "+parameterClass+" to ontology");
+				logger.log(Level.FINE, "----add class "+parameterClass+" to ontology");
 				((BeanOntology)ontoService).add(parameterClass);
 			}
 			
 			if (parentComponent != null) {
-				log.debug("------add enum-type "+paramName+" ("+slotType+")");
+				logger.log(Level.FINE, "------add enum-type "+paramName+" ("+slotType+")");
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, paramName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
 		}
@@ -824,7 +825,7 @@ public class JadeToWSDL {
 			paramName = aggregateElementClass.getSimpleName().toLowerCase();
 			slotType = WSDLUtils.getAggregateType(paramName, cardMin, cardMax);
 			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
-				log.debug("----create array-type "+slotType);
+				logger.log(Level.FINE, "----create array-type "+slotType);
 				XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType);
 				XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
 				
@@ -840,7 +841,7 @@ public class JadeToWSDL {
 			ObjectSchema conceptSchema = ontoService.getSchema(parameterClass);
 			if (conceptSchema == null) {
 				// Schema not present -> add the class to ontology
-				log.debug("----add class "+parameterClass+" to ontology");
+				logger.log(Level.FINE, "----add class "+parameterClass+" to ontology");
 				((BeanOntology)ontoService).add(parameterClass);
 				
 				// Retry to get schema -> if not found throw an exception
@@ -873,7 +874,7 @@ public class JadeToWSDL {
 					cardMin = OPTIONAL;
 				}
 				
-				log.debug("------add primitive-type "+slotName+" ("+slotType+") "+(OPTIONAL.equals(cardMin)?"OPTIONAL":""));
+				logger.log(Level.FINE, "------add primitive-type "+slotName+" ("+slotType+") "+(OPTIONAL.equals(cardMin)?"OPTIONAL":""));
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
 		} 
@@ -891,14 +892,14 @@ public class JadeToWSDL {
 				if (cardMin == MANDATORY && containerSchema != null && !containerSchema.isMandatory(slotName)) {
 					cardMin = OPTIONAL;
 				}
-				log.debug("------add defined-type "+slotName+" ("+slotType+") "+(OPTIONAL.equals(cardMin)?"OPTIONAL":""));
+				logger.log(Level.FINE, "------add defined-type "+slotName+" ("+slotType+") "+(OPTIONAL.equals(cardMin)?"OPTIONAL":""));
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, cardMin, cardMax);
 			}
 			
 			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, tns, slotType) == null) {
 				Class slotClass = ontoService.getClassForElement(slotType);
 				if (slotClass != null && slotClass.isEnum()) {
-					log.debug("----create simple-type "+slotType);
+					logger.log(Level.FINE, "----create simple-type "+slotType);
 					XSDSimpleTypeDefinition simpleTypeDefinition = wsdlTypeSchema.resolveSimpleTypeDefinition(WSDLConstants.XSD_URL, WSDLConstants.XSD_STRING);
 					Object[] permittedValues = WSDLUtils.getPermittedValues(objSchema, WSDLConstants.ENUM_SLOT_NAME);
 					XSDSimpleTypeDefinition enumType = WSDLUtils.addSimpleTypeToSchema(tns, wsdlTypeSchema, slotType, simpleTypeDefinition);
@@ -920,7 +921,7 @@ public class JadeToWSDL {
 						
 						if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, tns, slotType) == null) {
 							// Create xsd type
-							log.debug("----create complex-type "+slotType);
+							logger.log(Level.FINE, "----create complex-type "+slotType);
 							XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType, xsdBaseTypeDef);
 							XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
 							
@@ -946,7 +947,7 @@ public class JadeToWSDL {
 					}
 					else {
 						// Create xsd type
-						log.debug("----create complex-type "+slotType);
+						logger.log(Level.FINE, "----create complex-type "+slotType);
 						XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType);
 						XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
 						
@@ -977,12 +978,12 @@ public class JadeToWSDL {
 			slotType = WSDLUtils.getAggregateType(slotType, cardMin, cardMax);
 
 			if (parentComponent != null) {
-				log.debug("------add array-type "+slotName+" ("+slotType+") ["+cardMin+","+cardMax+"]");
+				logger.log(Level.FINE, "------add array-type "+slotName+" ("+slotType+") ["+cardMin+","+cardMax+"]");
 				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, slotName, slotType, (XSDModelGroup) parentComponent, OPTIONAL.equals(cardMin)?cardMin:null, null);
 			}
 			
 			if (WSDLUtils.getSimpleOrComplexType(wsdlTypeSchema, wsdlTypeSchema.getTargetNamespace(), slotType) == null) {
-				log.debug("----create array-type "+slotType);
+				logger.log(Level.FINE, "----create array-type "+slotType);
 				XSDComplexTypeDefinition complexType = WSDLUtils.addComplexTypeToSchema(tns, wsdlTypeSchema, slotType);
 				XSDModelGroup sequence = WSDLUtils.addSequenceToComplexType(complexType);
 				createComplexTypeFromSchema(aggregateSchema, containerSchema, itemName, sequence, cardMin, cardMax);

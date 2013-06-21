@@ -39,7 +39,6 @@
 		<pathelement location="${wsigBuild.dir}"/>
 
 		<fileset dir="${wsigLib.dir}">
-			<include name="log4j-1.2.14.jar"/>
 			<include name="org.eclipse.emf.common_2.3.0.v200612211251.jar"/>
 			<include name="org.eclipse.emf.ecore_2.3.0.v200612211251.jar"/>
 			<include name="org.eclipse.xsd_2.3.0.v200612211251.jar"/>
@@ -189,9 +188,7 @@
 
 	<target name="clean" description="Clean the WSIG environment">
 		<delete includeEmptyDirs="true" quiet="true">
-			<fileset dir="${wsigBuild.dir}">
-				<exclude name="log4j.properties"/>
-			</fileset>
+			<fileset dir="${wsigBuild.dir}"/>
 		</delete>
 		<delete dir="${wsigWebapps.dir}" quiet="true"/>
 		<delete dir="${wsigUtils.dir}" quiet="true"/>

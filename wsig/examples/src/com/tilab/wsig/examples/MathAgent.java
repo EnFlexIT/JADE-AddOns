@@ -40,13 +40,13 @@ import jade.domain.FIPAAgentManagement.Property;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.util.Logger;
 import jade.util.leap.ArrayList;
 import jade.util.leap.Iterator;
 import jade.util.leap.List;
 
 import java.util.Date;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
 
 public class MathAgent extends Agent {
 
@@ -55,14 +55,14 @@ public class MathAgent extends Agent {
 	public static final String WSIG_PREFIX = "wsig-prefix";
 	public static final String WSIG_HIERARCHICAL_TYPE = "wsig-hierarchical-type";
 	
-	private Logger log = Logger.getLogger(MathAgent.class.getName());
+	private Logger logger = Logger.getMyLogger(MathAgent.class.getName());
 	private SLCodec codec = new SLCodec();
 	private Date startDate;
 	private Ontology onto;
 
 	protected void setup() {
-		log.info("MathAgent starting...");
-		log.info("Agent name: "+getLocalName());
+		logger.log(Level.INFO, "MathAgent starting...");
+		logger.log(Level.INFO, "Agent name: "+getLocalName());
 
 		// Get agent arguments
 		Object[] args = getArguments();
@@ -87,7 +87,7 @@ public class MathAgent extends Agent {
 		if (args.length >= 1) {
 			wsigServiceName = (String)args[0];
 		}
-		log.info("Service name: "+wsigServiceName);
+		logger.log(Level.INFO, "Service name: "+wsigServiceName);
 		sd.setName(wsigServiceName);
 		
 		// Mapper
@@ -97,7 +97,7 @@ public class MathAgent extends Agent {
 				isMapperPresent = Boolean.parseBoolean((String)args[1]);
 			}
 		}
-		log.info("Mapper present: "+isMapperPresent);
+		logger.log(Level.INFO, "Mapper present: "+isMapperPresent);
 		if (isMapperPresent) {
 			sd.addProperties(new Property(WSIG_MAPPER, "com.tilab.wsig.examples.MathOntologyMapper"));
 		}
@@ -109,7 +109,7 @@ public class MathAgent extends Agent {
 				beanOnto = Boolean.parseBoolean((String)args[2]);
 			}
 		}
-		log.info("Use bean-ontology: "+beanOnto);
+		logger.log(Level.INFO, "Use bean-ontology: "+beanOnto);
 		if (beanOnto) {
 			onto = MathBeanOntology.getInstance();
 			sd.addProperties(new Property(WSIG_HIERARCHICAL_TYPE, "true"));
@@ -123,7 +123,7 @@ public class MathAgent extends Agent {
 		if (args.length >= 4) {
 			wsigPrefix = (String)args[3];
 		}
-		log.info("Prefix: "+wsigPrefix);
+		logger.log(Level.INFO, "Prefix: "+wsigPrefix);
 		if (wsigPrefix != null && !wsigPrefix.equals("")) {
 			sd.addProperties(new Property(WSIG_PREFIX, wsigPrefix));
 		}
@@ -139,11 +139,11 @@ public class MathAgent extends Agent {
 		try {
 			DFService.register(this, dfad);
 		} catch (Exception e) {
-			log.error("Problem during DF registration", e);
+			logger.log(Level.SEVERE, "Problem during DF registration", e);
 			doDelete();
 		}
 
-		log.info("MathAgent started");
+		logger.log(Level.INFO, "MathAgent started");
 		startDate = new Date();
 		
 		// Add math behaviour
@@ -158,7 +158,7 @@ public class MathAgent extends Agent {
 						actExpr = (Action) myAgent.getContentManager().extractContent(msg);
 						AgentAction action = (AgentAction) actExpr.getAction();
 						
-						log.info("Execute action: "+action.getClass().getSimpleName());
+						logger.log(Level.INFO, "Execute action: "+action.getClass().getSimpleName());
 						if (action instanceof Sum) {
 							serveSumAction((Sum) action, actExpr, msg);
 						} else if (action instanceof Diff) {
@@ -188,7 +188,7 @@ public class MathAgent extends Agent {
 						}
 
 					} catch (Exception e) {
-						log.error("Error serving action", e);
+						logger.log(Level.SEVERE, "Error serving action", e);
 					}
 				} else {
 					block();
@@ -264,12 +264,12 @@ public class MathAgent extends Agent {
 	}
 	
 	private void servePrintComplexAction(PrintComplex printComplex, Action actExpr, ACLMessage msg) {
-		log.info("Complex number is "+printComplex.getComplex());
+		logger.log(Level.INFO, "Complex number is "+printComplex.getComplex());
 		sendNotification(actExpr, msg, ACLMessage.INFORM, null);
 	}
 
 	private void servePrintTimeAction(PrintTime printTime, Action actExpr, ACLMessage msg) {
-		log.info("Time is "+(new Date()).toString());
+		logger.log(Level.INFO, "Time is "+(new Date()).toString());
 		sendNotification(actExpr, msg, ACLMessage.INFORM, null);
 	}
 
@@ -325,7 +325,7 @@ public class MathAgent extends Agent {
 				getContentManager().fillContent(reply, ce);
 			}
 			catch (Exception e) {
-				log.error("Agent " + getName() + ": Unable to send notification", e);
+				logger.log(Level.SEVERE, "Agent " + getName() + ": Unable to send notification", e);
 			}
 		} else {
 			reply.setPerformative(performative);
@@ -342,9 +342,9 @@ public class MathAgent extends Agent {
 		try {
 			DFService.deregister(this);
 		} catch (Exception e) {
-			log.error("Error in DF deregistration", e);
+			logger.log(Level.SEVERE, "Error in DF deregistration", e);
 		}
 
-		log.info("MathAgent stopped");
+		logger.log(Level.INFO, "MathAgent stopped");
 	}
 }
