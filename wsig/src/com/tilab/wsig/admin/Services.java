@@ -31,6 +31,7 @@ import javax.servlet.ServletContext;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.tilab.wsig.servlet.WSIGServletBase;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.store.WSIGStore;
 
@@ -50,7 +51,7 @@ public class Services {
 	@XmlElement(name="service")
 	public List<String> getServicesNames() {
 		WSIGService service;
-		WSIGStore wsigStore= (WSIGStore)servletContext.getAttribute("WSIGStore"); 
+		WSIGStore wsigStore= (WSIGStore)servletContext.getAttribute(WSIGServletBase.WEBAPP_STORE_KEY); 
 		Collection<WSIGService> services = wsigStore.getAllServices();
 		Iterator<WSIGService> itServices = services.iterator();
 

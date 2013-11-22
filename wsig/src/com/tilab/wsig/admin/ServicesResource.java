@@ -38,6 +38,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import com.tilab.wsig.servlet.WSIGServletBase;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.store.WSIGStore;
 import com.tilab.wsig.wsdl.WSDLUtils;
@@ -61,7 +62,7 @@ public class ServicesResource {
 	@Path("{serviceName}")
 	@Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN})
 	public Service getService(@Context ServletContext servletContext, @PathParam("serviceName") String serviceName, @Context HttpServletRequest hsr) {
-		WSIGStore wsigStore = (WSIGStore)servletContext.getAttribute("WSIGStore");
+		WSIGStore wsigStore = (WSIGStore)servletContext.getAttribute(WSIGServletBase.WEBAPP_STORE_KEY);
 		WSIGService wsigservice = wsigStore.getService(serviceName);
 		Service service = new Service(wsigservice, hsr);
 		logger.log(Level.INFO, "The information of "+serviceName+" service has been retrieved...");

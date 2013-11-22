@@ -8,7 +8,8 @@ import="jade.content.onto.Ontology,
 	org.uddi4j.util.ServiceKey,
 	com.tilab.wsig.store.WSIGService,
 	com.tilab.wsig.store.WSIGStore,
-	com.tilab.wsig.WSIGConfiguration"
+	com.tilab.wsig.WSIGConfiguration,
+	com.tilab.wsig.servlet.WSIGServletBase"
 %>
 
 
@@ -23,16 +24,17 @@ import="jade.content.onto.Ontology,
 <body>
 <div class="nav" align="right"><font size="-2"><a href="http://jade.tilab.com/" target="_top">Jade - Java Agent DEvelopment Framework</a></font></div>
 <h1>.: WSIG Console :.</h1>
-<h3> <a href="index.jsp" class="title">Home</a> - <a href="test.jsp" class="title">Test</a></h3>
+<h3> <a href="index.jsp" class="title">Home</a> - <a href="test.jsp" class="title">SOAP Test</a> - <a href="testRest.jsp" class="title">REST Test</a></h3>
+
 
 <%
 	// Get WSIG Store
-	WSIGStore wsigStore = (WSIGStore)application.getAttribute("WSIGStore");
-	WSIGConfiguration wsigConfig = (WSIGConfiguration)application.getAttribute("WSIGConfiguration");
+	WSIGStore wsigStore = (WSIGStore)application.getAttribute(WSIGServletBase.WEBAPP_STORE_KEY);
+	WSIGConfiguration wsigConfig = (WSIGConfiguration)application.getAttribute(WSIGServletBase.WEBAPP_CONFIGURATION_KEY);
 
 	// WSIG Agent status
 	String wsigAgentStatus;
-	Boolean wsigActive = (Boolean)application.getAttribute("WSIGActive");
+	Boolean wsigActive = (Boolean)application.getAttribute(WSIGServletBase.WEBAPP_ACTIVE_KEY);
 	if (wsigActive != null && wsigActive.booleanValue() == true) {
 		wsigAgentStatus = "<font color='green'>Active</font>";
 		wsigAgentStatus += " ( <a href='"+wsigConfig.getAdminUrl(request)+"/admin/platform/disconnect'>STOP</a> )";
@@ -117,6 +119,10 @@ import="jade.content.onto.Ontology,
 	<tr>
 		<td width="30%" class="title">WSIG services url:</td>
 		<td class="value"><% out.print(wsigConfig.getServicesUrl(request)); %></td>
+	</tr>
+	<tr>
+		<td width="30%" class="title">WSIG REST services url:</td>
+		<td class="value"><% out.print(wsigConfig.getRESTServicesUrl(request)); %></td>
 	</tr>
 	<tr>
 		<td width="30%" class="title">WSIG admin url:</td>

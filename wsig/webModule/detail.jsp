@@ -9,7 +9,8 @@ import="jade.content.onto.Ontology,
 	com.tilab.wsig.store.WSIGService,
 	com.tilab.wsig.store.WSIGStore,
 	com.tilab.wsig.wsdl.WSDLUtils,
-	com.tilab.wsig.WSIGConfiguration"
+	com.tilab.wsig.WSIGConfiguration,
+	com.tilab.wsig.servlet.WSIGServletBase"
 %>
 
 
@@ -24,17 +25,17 @@ import="jade.content.onto.Ontology,
 <body>
 <div class="nav" align="right"><font size="-2"><a href="http://jade.tilab.com/" target="_top">Jade - Java Agent DEvelopment Framework</a></font></div>
 <h1>.: WSIG Console :.</h1>
-<h3> <a href="index.jsp" class="title">Home</a> - <a href="test.jsp" class="title">Test</a></h3>
+<h3> <a href="index.jsp" class="title">Home</a> - <a href="test.jsp" class="title">SOAP Test</a> - <a href="testRest.jsp" class="title">REST Test</a></h3>
 
 <%
 
-	WSIGConfiguration wsigConfig = (WSIGConfiguration)application.getAttribute("WSIGConfiguration");
+	WSIGConfiguration wsigConfig = (WSIGConfiguration)application.getAttribute(WSIGServletBase.WEBAPP_CONFIGURATION_KEY);
     
 	// Get parameter
 	String serviceName = request.getParameter("service");
 
 	// Get WSIG Store
-	WSIGStore wsigStore = (WSIGStore)application.getAttribute("WSIGStore");
+	WSIGStore wsigStore = (WSIGStore)application.getAttribute(WSIGServletBase.WEBAPP_STORE_KEY);
 
 	// Get service
 	WSIGService service = wsigStore.getService(serviceName);

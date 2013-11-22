@@ -4,13 +4,19 @@
   <distributable/>
   
   <servlet>
-    <servlet-name>wsigServlet</servlet-name>
+    <servlet-name>WSIG SOAP Service</servlet-name>
     <servlet-class>com.tilab.wsig.servlet.WSIGServlet</servlet-class>
 	<load-on-startup>1</load-on-startup>
-  </servlet>
+  </servlet> 
+
+  <servlet>
+    <servlet-name>WSIG REST Service</servlet-name>
+    <servlet-class>com.tilab.wsig.servlet.WSIGRestServlet</servlet-class>     
+	<load-on-startup>2</load-on-startup>	
+  </servlet> 
   
   <servlet>
-    <servlet-name>Jersey REST Service</servlet-name>
+    <servlet-name>WSIG Administration Service</servlet-name>
     <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
     <init-param>
       <param-name>com.sun.jersey.config.feature.DisableXmlSecurity</param-name>
@@ -20,20 +26,25 @@
       <param-name>com.sun.jersey.config.property.packages</param-name>
       <param-value>com.tilab.wsig.admin</param-value>
     </init-param>
-    <load-on-startup>2</load-on-startup>
+    <load-on-startup>3</load-on-startup>
   </servlet>
     
   <servlet-mapping>
-  	<servlet-name>wsigServlet</servlet-name>
+  	<servlet-name>WSIG SOAP Service</servlet-name>
     <url-pattern>/ws/*</url-pattern>
+  </servlet-mapping> 
+
+  <servlet-mapping>
+  	<servlet-name>WSIG REST Service</servlet-name>
+    <url-pattern>/wsRest/*</url-pattern>
   </servlet-mapping>
     
   <servlet-mapping>
-    <servlet-name>Jersey REST Service</servlet-name>
+    <servlet-name>WSIG Administration Service</servlet-name>
     <url-pattern>/admin/*</url-pattern>
-  </servlet-mapping>  
-  
-   <welcome-file-list>
+  </servlet-mapping> 
+    
+  <welcome-file-list>
     <welcome-file>/index.jsp</welcome-file>
   </welcome-file-list>
   <session-config>

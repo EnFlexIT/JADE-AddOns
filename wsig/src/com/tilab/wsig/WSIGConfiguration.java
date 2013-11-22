@@ -62,6 +62,7 @@ public class WSIGConfiguration extends Properties {
 	public static final String KEY_WSIG_AGENT_NAME = "wsig.agentName";
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
 	public static final String KEY_WSIG_SERVICES_URL = "wsig.servicesURL";
+	public static final String KEY_WSIG_REST_SERVICES_URL = "wsig.REST.servicesURL";
 	public static final String KEY_WSIG_TIMEOUT = "wsig.timeout";
 	public static final String KEY_WSIG_PRESERVE_JAVA_TYPE = SLCodec.PRESERVE_JAVA_TYPES;
 	public static final String KEY_WSIG_TRACE_CLIENT_IP = "wsig.traceClientIP";
@@ -237,6 +238,25 @@ public class WSIGConfiguration extends Properties {
 	}
 
 	public void setServicesUrl(String servicesUrl) {
+		setProperty(KEY_WSIG_SERVICES_URL,servicesUrl);
+	}
+	
+	public synchronized String getRESTServicesUrl(HttpServletRequest request) throws MalformedURLException {
+		// Try to read from configuration file 
+		String servicesUrl = getProperty(KEY_WSIG_REST_SERVICES_URL);
+		if (servicesUrl == null) {
+			// Try to get from request
+			if (request != null) {
+				String webappUrl = getWebappUrl(request).toString();
+				servicesUrl = webappUrl + "/wsRest";
+			} else {
+				servicesUrl = "$ENDPOINT$";
+			}
+		}
+		return servicesUrl;
+	}
+
+	public void setRESTServicesUrl(String servicesUrl) {
 		setProperty(KEY_WSIG_SERVICES_URL,servicesUrl);
 	}
 

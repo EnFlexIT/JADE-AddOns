@@ -24,6 +24,7 @@ package com.tilab.wsig.admin;
 
 import jade.util.Logger;
 import jade.wrapper.ControllerException;
+import jade.wrapper.gateway.DynamicJadeGateway;
 
 import java.io.IOException;
 import java.net.URL;
@@ -40,7 +41,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 import com.tilab.wsig.WSIGConfiguration;
-import com.tilab.wsig.servlet.WSIGServlet;
+import com.tilab.wsig.servlet.WSIGServletBase;
 
 @Path("platform")
 public class PlatformResource {
@@ -50,7 +51,7 @@ public class PlatformResource {
 	@GET
 	public Response getStatus(@Context ServletContext servletContext) {
 		String wsigActive;
-		Boolean status = (Boolean)servletContext.getAttribute("WSIGActive");
+		Boolean status = (Boolean)servletContext.getAttribute(WSIGServletBase.WEBAPP_ACTIVE_KEY);
 
 		if (status== null) {
 			wsigActive="UNKNOWN";
@@ -68,8 +69,8 @@ public class PlatformResource {
 	// This method is used only for administration via web-console
 	@Path("{status}")
 	@GET
-	public void getModifyStatus(@PathParam("status") String status, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) throws IOException {
-		modifyStatus(status);
+	public void getModifyStatus(@PathParam("status") String status, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse, @Context ServletContext servletContext) throws IOException {
+		modifyStatus(status, servletContext);
 		
 		// Redirect to console home page
 		URL consoleUrl = WSIGConfiguration.getAdminUrl(httpRequest);
@@ -78,19 +79,21 @@ public class PlatformResource {
 
 	@Path("{status}")
 	@PUT
-	public Response putModifyStatus(@PathParam("status") String status, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) throws IOException {
-		modifyStatus(status);
+	public Response putModifyStatus(@PathParam("status") String status, @Context ServletContext servletContext) throws IOException {
+		modifyStatus(status, servletContext);
 		return Response.ok().build(); 
 	}
 
-	private void modifyStatus(String status) {
+	private void modifyStatus(String status, ServletContext servletContext) {
 		logger.log(Level.INFO, "WSIG agent command arrived ("+status+")");
 
+		DynamicJadeGateway djg = (DynamicJadeGateway) servletContext.getAttribute(WSIGServletBase.WEBAPP_GATEWAY_KEY);
+		
 		if (status.equalsIgnoreCase("connect")) {
 			// Start WSIGAgent
 			try {
 				logger.log(Level.INFO, "Starting WSIG agent...");
-				WSIGServlet.getJadeGateway().checkJADE();
+				djg.checkJADE();
 			} catch (ControllerException e) {
 				logger.log(Level.WARNING, "Jade platform not present...WSIG agent not started", e);
 			}			
@@ -101,7 +104,7 @@ public class PlatformResource {
 		} else if (status.equalsIgnoreCase("disconnect")) {
 			// Stop WSIGAgent
 			logger.log(Level.INFO, "Stopping WSIG agent...");
-			WSIGServlet.getJadeGateway().shutdown();			
+			djg.shutdown();			
 		} else {
 			logger.log(Level.WARNING, "WSIG agent command not implementated");
 		}
