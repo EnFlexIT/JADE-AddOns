@@ -36,6 +36,7 @@ import jade.content.onto.basic.Action;
 import jade.core.Agent;
 import jade.core.MicroRuntime;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
@@ -147,6 +148,13 @@ public class CLIManager {
 		} );
 		
 		AgentController executor = MicroRuntime.getAgent(cliAdminExecutorName);
+		if (b == null) {
+			// Use a dummy behaviour 
+			b = new OneShotBehaviour(null) {
+				public void action() {
+				}
+			};
+		}
 		executor.putO2AObject(b, AgentController.ASYNC);
 	}
 	

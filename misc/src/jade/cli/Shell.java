@@ -26,6 +26,8 @@ public class Shell implements Runnable {
 	private InputStream inp;
 	private PrintStream out;	
 	private DynamicJadeGateway myGateway;
+	private Properties configProperties;
+	private String defaultPackage;
 	private ClassLoader loader;
 
 	public static void main(String[] args) {	
@@ -47,7 +49,7 @@ public class Shell implements Runnable {
 			JadeGateway.checkJADE();
 			
 			// Run the shell
-			Shell s = new Shell(System.in, System.out);
+			Shell s = new Shell(System.in, System.out, pp);
 			s.run();
 			
 			JadeGateway.shutdown();
@@ -60,11 +62,11 @@ public class Shell implements Runnable {
 	}
 	
 	
-	public Shell(InputStream inp, PrintStream out) {
-		this(inp, out, JadeGateway.getDefaultGateway());
+	public Shell(InputStream inp, PrintStream out, Properties pp) {
+		this(inp, out, JadeGateway.getDefaultGateway(), pp);
 	}
 	
-	public Shell(InputStream inp, PrintStream out, DynamicJadeGateway gw) {
+	public Shell(InputStream inp, PrintStream out, DynamicJadeGateway gw, Properties pp) {
 		this.inp = inp;
 		this.out = out;
 		myGateway = (gw != null ? gw : JadeGateway.getDefaultGateway());
@@ -77,9 +79,10 @@ public class Shell implements Runnable {
 				loader = null;
 			}		
 		});
+		configProperties = pp != null ? pp : new Properties();
+		defaultPackage = configProperties.getProperty("defaultPackage", null);
 	}
-	
-	
+		
 	public void run() {
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(inp));
@@ -115,6 +118,11 @@ public class Shell implements Runnable {
 		}
 		String[] args = argsList.toArray(new String[]{});
 
+		if (defaultPackage != null && !commandClass.contains(".")) {
+			// This is not a fully qualified class name --> prefix it with the default package (if any)
+			commandClass = defaultPackage+'.'+commandClass;
+		}
+		
 		CLICommand cmd = null;
 		try {
 			cmd = loadCLICommand(commandClass);
@@ -125,13 +133,15 @@ public class Shell implements Runnable {
 			}
 			else {
 				Behaviour b = cmd.getBehaviour(commandProperties);
-				try {
-					myGateway.execute(b);
-				} 
-				catch (Exception e) {
-					out.println("Error executing command "+commandClass);
-					e.printStackTrace(out);
-				} 
+				if (b != null) {
+					try {
+						myGateway.execute(b);
+					} 
+					catch (Exception e) {
+						out.println("Error executing command "+commandClass);
+						e.printStackTrace(out);
+					} 
+				}
 			}
 		}
 		catch (IllegalArgumentException iae) {
