@@ -60,6 +60,8 @@
 			<include name="jettison-1.1.jar"/>
 			<include name="jsr311-api-1.1.1.jar"/>
 			<include name="asm-3.1.jar"/>	
+			<include name="json-lib-2.3-jdk15.jar"/>
+			<include name="xom-1.1.jar"/>
 		</fileset>
 		<fileset dir="${jade-home}/lib">
 			<include name="**/*.jar"/>
@@ -188,7 +190,7 @@
 
 	<target name="clean" description="Clean the WSIG environment">
 		<delete includeEmptyDirs="true" quiet="true">
-			<fileset dir="${wsigBuild.dir}"/>
+			<fileset dir="${wsigBuild.dir}" includes="**/*"/>
 		</delete>
 		<delete dir="${wsigWebapps.dir}" quiet="true"/>
 		<delete dir="${wsigUtils.dir}" quiet="true"/>
@@ -296,7 +298,7 @@
 		<echo>Examples build complete</echo>
 	</target>
 	
-	<target name="war-examples" depends="clean, build-examples, war" description="Create the WSIG web application (war file) properly configured to run the examples">
+	<target name="war-examples" depends="build-examples, war" description="Create the WSIG web application (war file) properly configured to run the examples">
 	</target>
 
 	<target name="deploy-examples" depends="build-examples, deploy0" description="Deploy WSIG in Tomcat properly configured to run the examples">
