@@ -23,6 +23,7 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.servlet;
 
 import jade.content.AgentAction;
+import jade.wrapper.gateway.DynamicJadeGateway;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -72,6 +73,14 @@ public class WSIGServlet extends WSIGServletBase {
 	private AxisEngine axisEngine = new AxisClient(new NullProvider());
 	private UsernameTokenCallback usernameTokenCallback;
 
+	public WSIGServlet() {
+		super();
+	}
+
+	public WSIGServlet(DynamicJadeGateway jadeGateway) {
+		super(jadeGateway);
+	}
+	
 	@Override
 	public void init(ServletConfig servletConfig) throws ServletException {
 		logger.log(Level.INFO, "Starting WSIG SOAP Servlet...");

@@ -24,6 +24,7 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.servlet;
 
 import jade.content.AgentAction;
+import jade.wrapper.gateway.DynamicJadeGateway;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -64,6 +65,14 @@ import com.tilab.wsig.store.WSIGService;
 public class WSIGRestServlet extends WSIGServletBase {
 	private static final long serialVersionUID = -3447051223821710511L;
 
+
+	public WSIGRestServlet() {
+		super();
+	}
+
+	public WSIGRestServlet(DynamicJadeGateway jadeGateway) {
+		super(jadeGateway);
+	}
 
 	@Override
 	public void init(ServletConfig servletConfig) throws ServletException {
