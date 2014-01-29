@@ -35,9 +35,14 @@ public abstract class CLICommand {
 	public static final String LOGS_OPTION = "logs";
 	
 	protected PrintStream out;
+	public Shell shell;
 	
 	void setPrintStream(PrintStream out) {
 		this.out = out;
+	}
+	
+	void setShell(Shell shell) {
+		this.shell = shell;
 	}
 	
 	public void printUsage() {

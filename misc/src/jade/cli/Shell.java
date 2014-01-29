@@ -28,6 +28,7 @@ public class Shell implements Runnable {
 	private DynamicJadeGateway myGateway;
 	private Properties configProperties;
 	private String defaultPackage;
+	private String prompt;
 	private ClassLoader loader;
 
 	public static void main(String[] args) {	
@@ -81,6 +82,7 @@ public class Shell implements Runnable {
 		});
 		configProperties = pp != null ? pp : new Properties();
 		defaultPackage = configProperties.getProperty("defaultPackage", null);
+		prompt = configProperties.getProperty("prompt", "JCLI");
 	}
 		
 	public void run() {
@@ -89,7 +91,7 @@ public class Shell implements Runnable {
 			String command = "";
 			out.println();
 			while (true) {
-				out.print("JCLI>");
+				out.print(prompt+'>');
 				command = br.readLine();
 				if (command != null && !command.equals("exit")) {
 					command = command.trim();
@@ -103,6 +105,14 @@ public class Shell implements Runnable {
 			}
 		} catch (IOException e) {
 		}
+	}
+	
+	public String getPrompt() {
+		return prompt;
+	}
+	
+	public void setPrompt(String prompt) {
+		this.prompt = prompt;
 	}
 	
 	/**
@@ -127,6 +137,7 @@ public class Shell implements Runnable {
 		try {
 			cmd = loadCLICommand(commandClass);
 			cmd.setPrintStream(out);
+			cmd.setShell(this);
 			Properties commandProperties = CLIManager.parseCommandLine(args);
 			if ("true".equalsIgnoreCase(commandProperties.getProperty(CLICommand.HELP_OPTION, null))) {
 				printUsage(cmd);
