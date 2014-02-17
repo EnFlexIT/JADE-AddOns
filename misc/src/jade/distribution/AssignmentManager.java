@@ -1,3 +1,25 @@
+/*****************************************************************
+JADE - Java Agent DEvelopment Framework is a framework to develop 
+multi-agent systems in compliance with the FIPA specifications.
+Copyright (C) 2000 CSELT S.p.A. 
+
+GNU Lesser General Public License
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation, 
+version 2.1 of the License. 
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the
+Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA  02111-1307, USA.
+*****************************************************************/
 package jade.distribution;
 
 import jade.core.AID;
@@ -23,6 +45,13 @@ import java.util.Map;
  * @param <Item> The class of the items to be assigned
  */
 public class AssignmentManager<Item> extends DistributionManager<Item>{
+	
+	/**
+	 * The DataStore key where retrieve-assignments behaviours must insert the list of
+	 * items currently owned by a given target agent.
+	 * @see createRetrieveAssignmentsBehaviour(AID) 
+	 */
+	public static final String OWNED_ITEMS = "OWNED-ITEMS";
 
 	private Map<Object, AssignedItem> assignments = new HashMap<Object, AssignedItem>();
 	private Map<AID, List<Item>> itemsByAgent = new HashMap<AID, List<Item>>();
@@ -53,8 +82,10 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 	}
 			
 	/**
-	 * Subclasses may redefine this method to provide a behaviour responsible to 
-	 * interact with the agent selected as assignee of a given item to make it aware of
+	 * This method is invoked (following a call to the <code>assign()</code> method) just after 
+	 * a given item has been assigned to a given target agent.
+	 * Subclasses may redefine it to provide a behaviour responsible to 
+	 * interact with the agent selected as assignee to make it aware of
 	 * the assignment. If and how this interaction takes place is application-specific: for instance 
 	 * it could be done by means of a one-shot notification or a request-reply protocol. 
 	 * In any case the created behaviour, if any, must return a value > 0 in its onEnd() method to 
@@ -64,14 +95,17 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 	 * @param item The item to be assigned
 	 * @param target The agent selected as assignee for the given item 
 	 * @return The assignment behaviour or null if no assignment interaction is needed.
+	 * @see assign(Item, Callback)
 	 */
 	protected Behaviour createAssignmentBehaviour(Item item, AID target) {
 		return null;
 	}
 	
 	/**
-	 * Subclasses may redefine this method to provide a behaviour responsible to 
-	 * interact with the owner agent of a given item to make it aware of
+	 * This method is invoked (following a call to the <code>unassign()</code> or <code>unassignItem()</code> methods) 
+	 * just after a given item has been un-assigned to a given target agent.
+	 * Subclasses may redefine it to provide a behaviour responsible to 
+	 * interact with the owner agent to make it aware of
 	 * the un-assignment. If and how this interaction takes place is application-specific: for instance 
 	 * it could be done by means of a one-shot notification or a request-reply protocol. 
 	 * In any case the created behaviour, if any, must return a value > 0 in its onEnd() method to 
@@ -81,8 +115,32 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 	 * @param item The item to be un-assigned
 	 * @param owner The agent the given item is currently assigned to 
 	 * @return The un-assignment behaviour or null if no un-assignment interaction is needed.
+	 * @see unassign(Item, Callback)
+	 * @see unassignItem(Object, Callback)
 	 */
 	protected Behaviour createUnassignmentBehaviour(Item item, AID owner) {
+		return null;
+	}
+	
+	
+	/**
+	 * This method is invoked (following a call to the <code>reconstructAssignments()</code> method) 
+	 * once for each target agent.
+	 * Subclasses may redefine it to provide a behaviour responsible to 
+	 * interact with the indicated target agent to retrieve the items it is currently owning.
+	 * If and how this interaction takes place is application-specific. 
+	 * In any case the created behaviour, if any, must insert the retrieved list of items
+	 * in its DataStore at the <code>OWNED_ITEMS</code> key.
+	 * The default implementation returns null indicating that no interaction with the given target
+	 * agent has to be performed. This corresponds to the situation where assignee agents are not
+	 * aware of the items they have been assigned to and therefore the whole reconstruct assignments 
+	 * process is not relevant.
+	 * @param item The item to be un-assigned
+	 * @param owner The agent the given item is currently assigned to 
+	 * @return The un-assignment behaviour or null if no un-assignment interaction is needed.
+	 * @see reconstructAssignments(Callback)
+	 */
+	protected Behaviour createRetrieveAssignmentsBehaviour(AID owner) {
 		return null;
 	}
 	
@@ -208,6 +266,12 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 		}
 	}
 	
+	/**
+	 * Un-assign the item identified by a given key
+	 * @param key The key identifying the item to be un-assigned as would be returned by getIdentifyingKey()
+	 * @param callback A Callback object whose onSuccess() method will be invoked (with 
+	 * the previous assignee agent as parameter) when the un-assignment will be completed.
+	 */
 	public void unassignItem(Object key, Callback<AID> callback) {
 		AssignedItem ai = assignments.remove(key);
 		if (ai != null) {
@@ -229,6 +293,12 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 		}
 	}
 	
+	/**
+	 * Un-assign a given item 
+	 * @param item The item to be un-assigned
+	 * @param callback A Callback object whose onSuccess() method will be invoked (with 
+	 * the previous assignee agent as parameter) when the un-assignment will be completed.
+	 */
 	public void unassign(Item item, Callback<AID> callback) {
 		Object key = getIdentifyingKey(item);
 		unassignItem(key, callback);
@@ -273,15 +343,27 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 	}
 	
 	/**
-	 * 
+	 * This method triggers the assignment reconstruction process that allows restoring the 
+	 * current assignments after a restart of the agent using this AssignmentManager instance.
+	 * This process implies interacting with all assignee agents to retrieve their current assignments.
+	 * Such interactions are implemented by behaviours returned by the createRetrieveAssignmentsBehaviour()
+	 * method. 
+	 * @param callback
 	 */
-	public void reconstructAssignments() {
+	public void reconstructAssignments(Callback<Void> callback) {
 		if (isReady()) {
-			// FIXME: To be implemented
+			reconstruct(callback);
 		}
 		else {
-			throw new IllegalStateException("Not ready");
+			// We are still waiting for the retrieval of available target agents
+			//needReconstruct = true;
+			//reconstructCallback = callback;
 		}
+	}
+	
+	private void reconstruct(Callback<Void> callback) {
+		AID[] targetAgents = selectionPolicy.getAllAgents();
+		// FIXME: To be implemented
 	}
 
 	@Override
