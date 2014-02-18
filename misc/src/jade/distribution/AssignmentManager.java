@@ -24,6 +24,7 @@ package jade.distribution;
 
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.WakerBehaviour;
 import jade.core.behaviours.WrapperBehaviour;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -44,7 +45,7 @@ import java.util.Map;
  *
  * @param <Item> The class of the items to be assigned
  */
-public class AssignmentManager<Item> extends DistributionManager<Item>{
+public class AssignmentManager<Item> extends DistributionManager<Item> {
 	
 	/**
 	 * The DataStore key where retrieve-assignments behaviours must insert the list of
@@ -58,6 +59,9 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 	
 	private Map<AID, DeadAgentInfo> itemsByDeadAgent = new HashMap<AID, DeadAgentInfo>();
 	private long deadAgentsRestartTimeout = 30000;
+	
+	private boolean needReconstruct = false;
+	private Callback<Void> reconstructCallback;
 	
 	/**
 	 * Create an AssignmentManager that assigns items to agents that provides a DF service
@@ -244,18 +248,24 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 		AssignedItem ai = assignments.get(identifyingKey);
 		if (ai != null) {
 			ai.aid = targetAgent;
-			List<Item> ii = itemsByAgent.get(targetAgent);
-			if (ii == null) {
-				ii = new ArrayList<Item>();
-				itemsByAgent.put(targetAgent, ii);
-			}
-			ii.add(item);
+			addItemToAgent(item, targetAgent);
 			if (callback != null) {
 				callback.onSuccess(targetAgent);
 			}
 		}
 		else {
 			handleError(item, identifyingKey, getNature(item)+" "+identifyingKey+" unassigned in the meanwhile", callback);
+		}
+	}
+	
+	private void addItemToAgent(Item item, AID owner) {
+		List<Item> ii = itemsByAgent.get(owner);
+		if (ii == null) {
+			ii = new ArrayList<Item>();
+			itemsByAgent.put(owner, ii);
+		}
+		if (!ii.contains(item)) {
+			ii.add(item);
 		}
 	}
 	
@@ -277,19 +287,23 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 		if (ai != null) {
 			AID owner = ai.aid;
 			if (owner != null) {
-				List<Item> ii = itemsByAgent.get(owner);
-				if (ii != null) {
-					ii.remove(ai.item);
-					if (ii.isEmpty()) {
-						itemsByAgent.remove(owner);
-					}
-				}
+				removeItemFromAgent(ai.item, owner);				
 				unassign(ai.item, key, owner, callback);
 				return;
 			}
 		}
 		if (callback != null) {
 			callback.onSuccess(null);
+		}
+	}
+	
+	private void removeItemFromAgent(Item item, AID owner) {
+		List<Item> ii = itemsByAgent.get(owner);
+		if (ii != null) {
+			ii.remove(item);
+			if (ii.isEmpty()) {
+				itemsByAgent.remove(owner);
+			}
 		}
 	}
 	
@@ -342,29 +356,6 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 		}
 	}
 	
-	/**
-	 * This method triggers the assignment reconstruction process that allows restoring the 
-	 * current assignments after a restart of the agent using this AssignmentManager instance.
-	 * This process implies interacting with all assignee agents to retrieve their current assignments.
-	 * Such interactions are implemented by behaviours returned by the createRetrieveAssignmentsBehaviour()
-	 * method. 
-	 * @param callback
-	 */
-	public void reconstructAssignments(Callback<Void> callback) {
-		if (isReady()) {
-			reconstruct(callback);
-		}
-		else {
-			// We are still waiting for the retrieval of available target agents
-			//needReconstruct = true;
-			//reconstructCallback = callback;
-		}
-	}
-	
-	private void reconstruct(Callback<Void> callback) {
-		AID[] targetAgents = selectionPolicy.getAllAgents();
-		// FIXME: To be implemented
-	}
 
 	@Override
 	protected void onDeregister(DFAgentDescription dfad) {	
@@ -374,7 +365,8 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 		// not restart in due time 
 		AID aid = dfad.getName();
 		List<Item> items = itemsByAgent.remove(aid);
-		if (items != null) {
+		if (items != null && items.size() > 0 && deadAgentsRestartTimeout > 0) {
+			myLogger.log(Logger.WARNING, "Agent "+myAgent.getName()+" - Target agent "+aid.getLocalName()+" no longer available. Activate restore procedure to manage the items ("+items.size()+") that were assigned to it");
 			WatchDog watchDog = new WatchDog(aid);
 			myAgent.addBehaviour(watchDog);
 			itemsByDeadAgent.put(aid, new DeadAgentInfo(items, watchDog));				
@@ -406,6 +398,88 @@ public class AssignmentManager<Item> extends DistributionManager<Item>{
 			}
 		}
 	}
+	
+	@Override
+	protected void targetAgentsInitialized() {
+		// FIXME: set level to FINE
+		myLogger.log(Logger.INFO, "Agent "+myAgent.getLocalName()+" - Target agents initialized");
+		if (needReconstruct) {
+			reconstruct(reconstructCallback);
+		}
+	}
+	
+	/**
+	 * This method triggers the assignment reconstruction process that allows restoring the 
+	 * current assignments after a restart of the agent using this AssignmentManager instance.
+	 * This process implies interacting with all assignee agents to retrieve their current assignments.
+	 * Such interactions are implemented by behaviours returned by the createRetrieveAssignmentsBehaviour()
+	 * method. 
+	 * @param callback
+	 */
+	public void reconstructAssignments(Callback<Void> callback) {
+		switch (getStatus()) {
+		case READY_STATUS:
+			reconstruct(callback);
+			break;
+		case IDLE_STATUS:
+			// We are still waiting for the retrieval of available target agents. Just set a flag: the
+			// assignment reconstruction process will start as soon as target agents retrieval completes
+			// See targetAgentsInitialized()
+			needReconstruct = true;
+			reconstructCallback = callback;
+			break;
+		default:
+			throw new IllegalStateException("Assignment reconstruction process cannot be started in status "+getStatus());
+		}
+	}
+	
+	private void reconstruct(final Callback<Void> callback) {
+		// FIXME: set level to FINE
+		myLogger.log(Logger.INFO, "Agent "+myAgent.getLocalName()+" - Activating assignments reconstruction process");
+		// Block whatever assignment that can occur during the reconstruction process. Such assignments will 
+		// be managed as soon as the reconstruction process completes
+		block();
+		
+		AID[] targetAgents = selectionPolicy.getAllAgents();
+		ParallelBehaviour pb = new ParallelBehaviour() {
+			public int onEnd() {
+				// When the process is fully completed notify the callback if any and unblock assignments
+				myLogger.log(Logger.INFO, "Agent "+myAgent.getLocalName()+" - Reconstruction completed: "+dump(null));
+				if (callback != null) {
+					callback.onSuccess(null);
+				}
+				unblock();
+				return super.onEnd();
+			}
+		};
+		pb.setBehaviourName("Assignment-Reconstructor");
+		for (final AID aid : targetAgents) {
+			Behaviour b = createRetrieveAssignmentsBehaviour(aid);
+			if (b != null) {
+				pb.addSubBehaviour(new WrapperBehaviour(b) {
+					public int onEnd() {
+						fillReconstructedAssignemtns(aid, (List<Item>) getDataStore().get(OWNED_ITEMS));
+						return super.onEnd();
+					}
+				});
+			}
+		}
+		myAgent.addBehaviour(pb);
+	}
+	
+	private void fillReconstructedAssignemtns(AID owner, List<Item> items) {
+		if (items != null) {
+			for (Item item : items) {
+				AssignedItem ai = new AssignedItem(item);
+				ai.aid = owner;
+				Object key = getIdentifyingKey(item);
+				assignments.put(key, ai);
+				addItemToAgent(item, owner);
+				myLogger.log(Logger.INFO, "Agent "+myAgent.getLocalName()+" - "+getNature(item)+" "+key+" re-associated to agent "+owner.getLocalName());
+			}
+		}
+	}
+	
 	
 	/**
 	 * Inner class AssignedItem

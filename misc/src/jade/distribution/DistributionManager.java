@@ -45,11 +45,15 @@ import java.util.Map;
  */
 public class DistributionManager<Item> {
 
+	public static final int IDLE_STATUS = 0;
+	public static final int READY_STATUS = 1;
+	public static final int BLOCKED_STATUS = -1;
+	
 	protected Agent myAgent;
 	protected DFAgentDescription targetAgentsTemplate;
 	protected AgentSelectionPolicy<Item> selectionPolicy;
 	
-	private boolean ready = false;
+	private int status = IDLE_STATUS;
 	
 	private List<PendingItem> pendingItems = new LinkedList<PendingItem>();
 	
@@ -72,7 +76,7 @@ public class DistributionManager<Item> {
 	/**
 	 * 
 	 */
-	protected void onReady() {
+	protected void targetAgentsInitialized() {
 	}
 	
 	protected void onRegister(DFAgentDescription dfad) {	
@@ -81,8 +85,24 @@ public class DistributionManager<Item> {
 	protected void onDeregister(DFAgentDescription dfad) {	
 	}
 	
-	public boolean isReady() {
-		return ready;
+	public int getStatus() {
+		return status;
+	}
+	
+	public void block() {
+		if (status == READY_STATUS) {
+			status = BLOCKED_STATUS;
+		}
+		else {
+			throw new IllegalStateException("DistributionManager can be blocked only when READY");
+		}
+	}
+	
+	public void unblock() {
+		if (status == BLOCKED_STATUS) {
+			status = READY_STATUS;
+			flushPendingItems();
+		}
 	}
 	
 	public void start(Agent agent) {
@@ -106,13 +126,23 @@ public class DistributionManager<Item> {
 			
 			@Override
 			public void afterFirstNotification(DFAgentDescription[] dfds) {
-				ready = true;
-				onReady();
-				for (PendingItem pi : pendingItems) {
-					DistributionManager.this.getAgent(pi.item, pi.callback);
+				status = READY_STATUS;
+				targetAgentsInitialized();
+	
+				// Subclasses may need to perform further initializations before pending items can be 
+				// flushed. In that case they redefine targetAgentsInitialized() and can call block() inside it.
+				// Therefore status can be BLOCKED at this stage.
+				if (status != BLOCKED_STATUS) {
+					flushPendingItems();
 				}
 			}
 		});
+	}
+
+	private void flushPendingItems() {
+		for (PendingItem pi : pendingItems) {
+			DistributionManager.this.getAgent(pi.item, pi.callback);
+		}
 	}
 	
 	
@@ -129,7 +159,7 @@ public class DistributionManager<Item> {
 	}
 	
 	public void getAgent(final Item item, final Callback<AID> callback) {
-		if (ready) {
+		if (status == READY_STATUS) {
 			AID targetAgent = null;
 			final CorrelationInfo ci = getCorrelationInfo(item);
 			if (ci != null) {
