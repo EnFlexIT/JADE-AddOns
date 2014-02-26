@@ -47,6 +47,13 @@ import java.util.Map;
  */
 public class AssignmentManager<Item> extends DistributionManager<Item> {
 	
+	/** Assignment context specifying that an new item is being assigned */
+	public static final int ASSIGN_CONTEXT = 0;
+	/** Assignment context specifying that an item previously allocated to target agent A is being reassigned to A following A's restart */
+	public static final int REASSIGN_RESTARTED_CONTEXT = 1;
+	/** Assignment context specifying that an item previously allocated to target agent A is being reassigned to another agent B following A's termination */
+	public static final int REASSIGN_OTHER_CONTEXT = 2;
+	
 	/**
 	 * The DataStore key where retrieve-assignments behaviours must insert the list of
 	 * items currently owned by a given target agent.
@@ -56,6 +63,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 
 	private Map<Object, AssignedItem> assignments = new HashMap<Object, AssignedItem>();
 	private Map<AID, List<Item>> itemsByAgent = new HashMap<AID, List<Item>>();
+	
 	
 	private Map<AID, DeadAgentInfo> itemsByDeadAgent = new HashMap<AID, DeadAgentInfo>();
 	private long deadAgentsRestartTimeout = 30000;
@@ -103,6 +111,10 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	 */
 	protected Behaviour createAssignmentBehaviour(Item item, AID target) {
 		return null;
+	}
+	
+	protected Behaviour createAssignmentBehaviour(Item item, AID target, int context) {
+		return createAssignmentBehaviour(item, target);
 	}
 	
 	/**
@@ -183,12 +195,26 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	}
 	
 	/**
+	 * Retrieve the number of items currently assigned to a given owner agent
+	 * @param owner The owner agent
+	 * @return The number of items currently assigned to the owner agent
+	 */
+	public int getAssignedCnt(AID owner) {
+		List<Item> items = itemsByAgent.get(owner);
+		return items != null ? items.size() : 0;
+	}
+	
+	/**
 	 * Assign a given item to a suitable agent
 	 * @param item The item to be assigned
 	 * @param callback A Callback object whose onSuccess() method will be invoked (with 
 	 * the assignee agent as parameter) when the assignment will be completed.
 	 */
 	public void assign(final Item item, final Callback<AID> callback) {
+		assign(item, ASSIGN_CONTEXT, callback);
+	}
+	
+	public void assign(final Item item, final int context, final Callback<AID> callback) {
 		final Object key = getIdentifyingKey(item);
 		AssignedItem ai = assignments.get(key);
 		if (ai == null) {
@@ -198,7 +224,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 				@Override
 				public void onSuccess(AID targetAgent) {
 					// Agent selection completed
-					manageSelectionDone(item, key, targetAgent, callback);
+					manageSelectionDone(item, key, targetAgent, context, callback);
 				}
 
 				@Override
@@ -214,9 +240,9 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		}
 	}
 	
-	private void manageSelectionDone(final Item item, final Object identifyingKey, final AID targetAgent, final Callback<AID> callback) {
+	private void manageSelectionDone(final Item item, final Object identifyingKey, final AID targetAgent, int context, final Callback<AID> callback) {
 		try {
-			Behaviour b = createAssignmentBehaviour(item, targetAgent);
+			Behaviour b = createAssignmentBehaviour(item, targetAgent, context);
 			if (b != null) {
 				myAgent.addBehaviour(new WrapperBehaviour(b) {
 					public int onEnd() {
@@ -359,17 +385,27 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 
 	@Override
 	protected void onDeregister(DFAgentDescription dfad) {	
-		// A given target agent is no longer there. Store the items assigned to that agent
-		// so that as soon as it restarts we can re-assign them.
-		// Also start a watchDog to reassign these items to other agents in case the dead agent does 
-		// not restart in due time 
+		// A given target agent is no longer there. Manage items that were assigned to it 
 		AID aid = dfad.getName();
 		List<Item> items = itemsByAgent.remove(aid);
-		if (items != null && items.size() > 0 && deadAgentsRestartTimeout > 0) {
-			myLogger.log(Logger.WARNING, "Agent "+myAgent.getName()+" - Target agent "+aid.getLocalName()+" no longer available. Activate restore procedure to manage the items ("+items.size()+") that were assigned to it");
-			WatchDog watchDog = new WatchDog(aid);
-			myAgent.addBehaviour(watchDog);
-			itemsByDeadAgent.put(aid, new DeadAgentInfo(items, watchDog));				
+		if (items != null && items.size() > 0) {
+			if (deadAgentsRestartTimeout > 0) {
+				// Item re-assignment enabled --> Store the items assigned to the dead agent
+				// so that as soon as it restarts we can re-assign them.
+				// Also start a watchDog to reassign these items to other agents in case the dead agent does 
+				// not restart in due time. 
+				myLogger.log(Logger.WARNING, "Agent "+myAgent.getName()+" - Target agent "+aid.getLocalName()+" no longer available. Activate restore procedure to manage the items ("+items.size()+") that were assigned to it");
+				WatchDog watchDog = new WatchDog(aid);
+				myAgent.addBehaviour(watchDog);
+				itemsByDeadAgent.put(aid, new DeadAgentInfo(items, watchDog));				
+			}
+			else {
+				// Item re-assignment disabled --> just clean the current assignments
+				for (Item item : items) {
+					Object key = getIdentifyingKey(item);
+					assignments.remove(key);
+				}
+			}
 		}
 	}
 	
@@ -384,7 +420,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			myAgent.removeBehaviour(dai.watchDog);
 			for (final Item item : dai.items) {
 				final Object key = getIdentifyingKey(item);
-				manageSelectionDone(item, key, aid, new Callback<AID>() {
+				manageSelectionDone(item, key, aid, REASSIGN_RESTARTED_CONTEXT, new Callback<AID>() {
 					@Override
 					public void onSuccess(AID targetAgent) {
 						myLogger.log(Logger.INFO, "Agent "+myAgent.getName()+" - "+getNature(item)+" "+key+" reassigned to restarted agent "+aid.getLocalName());
@@ -524,7 +560,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 				for (final Item item : dai.items) {
 					final Object key = getIdentifyingKey(item);
 					assignments.remove(key);
-					assign(item, new Callback<AID>() {
+					assign(item, REASSIGN_OTHER_CONTEXT, new Callback<AID>() {
 						@Override
 						public void onSuccess(AID result) {
 							myLogger.log(Logger.INFO, "Agent "+myAgent.getName()+" - "+getNature(item)+" "+key+" reassigned to agent "+targetAgent.getLocalName());

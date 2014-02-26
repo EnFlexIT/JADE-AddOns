@@ -22,9 +22,6 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package jade.distribution;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import jade.core.AID;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.util.leap.RoundList;
