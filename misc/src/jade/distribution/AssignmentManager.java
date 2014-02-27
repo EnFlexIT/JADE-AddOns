@@ -31,10 +31,15 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.util.Callback;
 import jade.util.Logger;
 
+import java.util.AbstractCollection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -49,10 +54,12 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	
 	/** Assignment context specifying that an new item is being assigned */
 	public static final int ASSIGN_CONTEXT = 0;
-	/** Assignment context specifying that an item previously allocated to target agent A is being reassigned to A following A's restart */
-	public static final int REASSIGN_RESTARTED_CONTEXT = 1;
-	/** Assignment context specifying that an item previously allocated to target agent A is being reassigned to another agent B following A's termination */
-	public static final int REASSIGN_OTHER_CONTEXT = 2;
+	/** Assignment context specifying that a modified version of an already assigned item is being reassigned */
+	public static final int REASSIGN_MODIFIED_CONTEXT = 0;
+	/** Assignment context specifying that an item previously assigned to target agent A is being reassigned to A following A's restart */
+	public static final int REASSIGN_RESTARTED_OWNER_CONTEXT = 1;
+	/** Assignment context specifying that an item previously assigned to target agent A is being reassigned to another agent B following A's termination */
+	public static final int REASSIGN_DEAD_OWNER_CONTEXT = 2;
 	
 	/**
 	 * The DataStore key where retrieve-assignments behaviours must insert the list of
@@ -92,10 +99,11 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	public void setDeadAgentsRestartTimeout(long timeout) {
 		deadAgentsRestartTimeout = timeout;
 	}
-			
+		
 	/**
-	 * This method is invoked (following a call to the <code>assign()</code> method) just after 
-	 * a given item has been assigned to a given target agent.
+	 * This method is invoked when an item is assigned to a given assignee agent. This typically 
+	 * occurs following a call to the <code>assign()</code> method, but can also occur in other situations
+	 * e.g. following the termination of a target agent to reassign its items.
 	 * Subclasses may redefine it to provide a behaviour responsible to 
 	 * interact with the agent selected as assignee to make it aware of
 	 * the assignment. If and how this interaction takes place is application-specific: for instance 
@@ -106,15 +114,14 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	 * agent is needed.    
 	 * @param item The item to be assigned
 	 * @param target The agent selected as assignee for the given item 
+	 * @param context An indication of the context in which the assignment takes place. Possible values 
+	 * are <code>ASSIGN_CONTEXT</code>, <code>REASSIGN_MODIFIED_CONTEXT</code>, <code>REASSIGN_RESTARTED_OWNER_CONTEXT</code> and
+	 * <code>REASSIGN_DEAD_OWNER_CONTEXT</code>
 	 * @return The assignment behaviour or null if no assignment interaction is needed.
 	 * @see assign(Item, Callback)
 	 */
-	protected Behaviour createAssignmentBehaviour(Item item, AID target) {
-		return null;
-	}
-	
 	protected Behaviour createAssignmentBehaviour(Item item, AID target, int context) {
-		return createAssignmentBehaviour(item, target);
+		return null;
 	}
 	
 	/**
@@ -195,6 +202,52 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	}
 	
 	/**
+	 * Returns an unmodifiable view of the keys of all currently assigned items
+	 * @return A Set representing an unmodifiable view of the keys of all currently assigned items
+	 */
+	public Set<Object> getAssignedKeys() {
+		return Collections.unmodifiableSet(assignments.keySet());
+	}
+	
+	/**
+	 * Returns an unmodifiable view of all currently assigned items
+	 * @return A Set representing an unmodifiable view of all currently assigned items
+	 */
+	public Set<Item> getAssignedItems() {
+		return new ItemsSet();
+	}
+	
+	private class ItemsSet extends AbstractCollection<Item> implements Set<Item> {
+		public boolean add(Item item) {throw new UnsupportedOperationException();}
+		public boolean addAll(Collection<? extends Item> arg0) {throw new UnsupportedOperationException();}
+		public void clear() {throw new UnsupportedOperationException();}
+		public boolean remove(Object arg0) {throw new UnsupportedOperationException();}
+		public boolean removeAll(Collection<?> arg0) {throw new UnsupportedOperationException();}
+		public boolean retainAll(Collection<?> arg0) {throw new UnsupportedOperationException();}
+
+		public Iterator<Item> iterator() {
+			return new Iterator<Item>() {
+				private Iterator<AssignedItem> inner = assignments.values().iterator();
+				
+				public void remove() {throw new UnsupportedOperationException();}
+
+				public boolean hasNext() {
+					return inner.hasNext();
+				}
+
+				public Item next() {
+					AssignedItem ai = inner.next();
+					return ai.item;
+				}
+			};
+		}
+
+		public int size() {
+			return assignments.size();
+		}
+	}
+	
+	/**
 	 * Retrieve the number of items currently assigned to a given owner agent
 	 * @param owner The owner agent
 	 * @return The number of items currently assigned to the owner agent
@@ -214,7 +267,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		assign(item, ASSIGN_CONTEXT, callback);
 	}
 	
-	public void assign(final Item item, final int context, final Callback<AID> callback) {
+	private void assign(final Item item, final int context, final Callback<AID> callback) {
 		final Object key = getIdentifyingKey(item);
 		AssignedItem ai = assignments.get(key);
 		if (ai == null) {
@@ -236,7 +289,15 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		}
 		else {
 			// Item already assigned
-			handleSuccess(item, key, ai.aid, callback);
+			if (ai.item.equals(item)) {
+				// This is the very same version of an already assigned item --> Just invoke the callback onSuccess() method
+				handleSuccess(item, key, ai.aid, callback);
+			}
+			else {
+				// This is a modified version of an already assigned item --> Substitute it and go on specifying the MODIFIED context 
+				ai.item = item;
+				manageSelectionDone(item, key, ai.aid, REASSIGN_MODIFIED_CONTEXT, callback);
+			}
 		}
 	}
 	
@@ -420,7 +481,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			myAgent.removeBehaviour(dai.watchDog);
 			for (final Item item : dai.items) {
 				final Object key = getIdentifyingKey(item);
-				manageSelectionDone(item, key, aid, REASSIGN_RESTARTED_CONTEXT, new Callback<AID>() {
+				manageSelectionDone(item, key, aid, REASSIGN_RESTARTED_OWNER_CONTEXT, new Callback<AID>() {
 					@Override
 					public void onSuccess(AID targetAgent) {
 						myLogger.log(Logger.INFO, "Agent "+myAgent.getName()+" - "+getNature(item)+" "+key+" reassigned to restarted agent "+aid.getLocalName());
@@ -560,7 +621,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 				for (final Item item : dai.items) {
 					final Object key = getIdentifyingKey(item);
 					assignments.remove(key);
-					assign(item, REASSIGN_OTHER_CONTEXT, new Callback<AID>() {
+					assign(item, REASSIGN_DEAD_OWNER_CONTEXT, new Callback<AID>() {
 						@Override
 						public void onSuccess(AID result) {
 							myLogger.log(Logger.INFO, "Agent "+myAgent.getName()+" - "+getNature(item)+" "+key+" reassigned to agent "+targetAgent.getLocalName());
