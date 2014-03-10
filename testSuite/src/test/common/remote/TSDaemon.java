@@ -26,11 +26,11 @@ package test.common.remote;
 import java.rmi.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.*;
-import java.net.InetAddress;
 import java.util.Hashtable;
 import java.util.Iterator;
 
 import test.common.*;
+import jade.core.Profile;
 import jade.util.leap.List;
 
 /**
@@ -86,7 +86,7 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 			// (if one is already running just get it)
 			String name = System.getProperty("tsdaemon.name", DEFAULT_NAME);
 			String port = System.getProperty("tsdaemon.port", String.valueOf(DEFAULT_PORT));
-			String hostName = InetAddress.getLocalHost().getHostName();      
+			String hostName = Profile.getDefaultNetworkName();
 			Registry theRegistry = getRmiRegistry(hostName, Integer.parseInt(port));
 			String registryID = "rmi://"+hostName+":"+port;
 
