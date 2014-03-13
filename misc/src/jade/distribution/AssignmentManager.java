@@ -55,11 +55,11 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	/** Assignment context specifying that an new item is being assigned */
 	public static final int ASSIGN_CONTEXT = 0;
 	/** Assignment context specifying that a modified version of an already assigned item is being reassigned */
-	public static final int REASSIGN_MODIFIED_CONTEXT = 0;
+	public static final int REASSIGN_MODIFIED_CONTEXT = 1;
 	/** Assignment context specifying that an item previously assigned to target agent A is being reassigned to A following A's restart */
-	public static final int REASSIGN_RESTARTED_OWNER_CONTEXT = 1;
+	public static final int REASSIGN_RESTARTED_OWNER_CONTEXT = 2;
 	/** Assignment context specifying that an item previously assigned to target agent A is being reassigned to another agent B following A's termination */
-	public static final int REASSIGN_DEAD_OWNER_CONTEXT = 2;
+	public static final int REASSIGN_DEAD_OWNER_CONTEXT = 3;
 	
 	/**
 	 * The DataStore key where retrieve-assignments behaviours must insert the list of
