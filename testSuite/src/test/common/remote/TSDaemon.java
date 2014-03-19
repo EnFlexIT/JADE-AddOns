@@ -23,7 +23,11 @@
 
 package test.common.remote;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.rmi.*;
+import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.*;
 import java.util.Hashtable;
@@ -82,6 +86,9 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 		}
 
 		try {
+			// Redefine RMI socket factory to enable the keep-alive
+			RMISocketFactory.setSocketFactory(new KeepAliveSocketFactory());
+			
 			// Create an RMI registry on the local host and DAEMON port
 			// (if one is already running just get it)
 			String name = System.getProperty("tsdaemon.name", DEFAULT_NAME);
@@ -99,6 +106,17 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 			System.out.println("ERROR starting Test Suite Daemon");
 			e.printStackTrace();
 			System.exit(1);
+		}
+	}
+
+	class KeepAliveSocketFactory extends RMISocketFactory {
+		public Socket createSocket(String host, int port) throws IOException {
+			Socket s = getDefaultSocketFactory().createSocket(host, port);
+			s.setKeepAlive(true);
+			return s;
+		}
+		public ServerSocket createServerSocket(int port) throws IOException {
+			return getDefaultSocketFactory().createServerSocket(port);
 		}
 	}
 
