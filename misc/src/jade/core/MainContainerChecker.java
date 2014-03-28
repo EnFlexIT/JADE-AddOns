@@ -57,4 +57,34 @@ public class MainContainerChecker {
 
 		return true;
 	}
+	
+	/**
+	 * Get the platform name
+	 * @param props Main-container properties
+	 * @return the name of platform, null if main-container is active
+	 */
+	public static String getPlatformName(Properties props) {
+		IMTPManager imtpManager = null;
+		try {
+			// Create profile
+			props.setProperty(Profile.MAIN, "false");
+			ProfileImpl profile = new ProfileImpl(props);
+			
+			// Create and initialize the IMTPManager
+			imtpManager = profile.getIMTPManager();
+			imtpManager.initialize(profile);
+			
+			// Try to create a proxy to the PlatformManager
+			// This method try to execute the GET_PLATFORM_NAME command that fail if 
+			// the skeleton object not exist
+			PlatformManager pm = imtpManager.getPlatformManagerProxy();
+			return pm.getPlatformName();
+		} catch (Exception e) {
+			return null;
+		} finally {
+			if (imtpManager != null) {
+				imtpManager.shutDown();
+			}
+		}
+	}
 }

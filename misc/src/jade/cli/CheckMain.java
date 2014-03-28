@@ -38,9 +38,9 @@ public class CheckMain {
 			printUsage();
 		}
 		else {
-			boolean mainPresent = MainContainerChecker.check(jade.util.leap.Properties.toLeapProperties(pp));
-			if (mainPresent) {
-				System.out.println("Main-container up and running");
+			String platformName = MainContainerChecker.getPlatformName(jade.util.leap.Properties.toLeapProperties(pp));
+			if (platformName != null) {
+				System.out.println("Main-container up and running. Platform-name="+platformName);
 			} else {
 				System.out.println("Main-container down");
 			}
