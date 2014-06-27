@@ -75,6 +75,10 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	private Map<AID, DeadAgentInfo> itemsByDeadAgent = new HashMap<AID, DeadAgentInfo>();
 	private long deadAgentsRestartTimeout = 30000;
 	
+	// Maps an item-key to a list of pending assignment callbacks. This is only used 
+	// When the same item is assigned a second time (or more) while the first assignment has not completed yet.
+	// As soon as the first assignment completes all pending callbacks are notified and flushed
+	private Map<Object, List<Callback<AID>>> pendingAssignmentCallbacks = new HashMap<Object, List<Callback<AID>>>();
 	private boolean needReconstruct = false;
 	private Callback<Void> reconstructCallback;
 	
@@ -290,8 +294,15 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		else {
 			// Item already assigned
 			if (ai.item.equals(item)) {
-				// This is the very same version of an already assigned item --> Just invoke the callback onSuccess() method
-				handleSuccess(item, key, ai.aid, callback);
+				// This is the very same version of an already assigned item --> 
+				// If the original assignment is completed just invoke the callback onSuccess() method.
+				// Otherwise store the callback: it will be notified as soon as the original assignment completes
+				if (ai.aid != null) {
+					handleSuccess(item, key, ai.aid, callback);
+				}
+				else {
+					storePendingCallback(key, callback);
+				}
 			}
 			else {
 				// This is a modified version of an already assigned item --> Substitute it and go on specifying the MODIFIED context 
@@ -339,6 +350,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			if (callback != null) {
 				callback.onSuccess(targetAgent);
 			}
+			notifyPendingCallbacksSuccess(identifyingKey, targetAgent);
 		}
 		else {
 			handleError(item, identifyingKey, getNature(item)+" "+identifyingKey+" unassigned in the meanwhile", callback);
@@ -360,6 +372,36 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		assignments.remove(identifyingKey);
 		if (callback != null) {
 			callback.onFailure(new Exception(errorMessage));
+		}
+		notifyPendingCallbacksError(identifyingKey, errorMessage);
+	}
+	
+	private void storePendingCallback(Object key, Callback<AID> callback) {
+		if (callback != null) {
+			List<Callback<AID>> l = pendingAssignmentCallbacks.get(key);
+			if (l == null) {
+				l = new ArrayList<Callback<AID>>();
+				pendingAssignmentCallbacks.put(key, l);
+			}
+			l.add(callback);
+		}
+	}
+	
+	private void notifyPendingCallbacksSuccess(Object key, AID owner) {
+		List<Callback<AID>> l = pendingAssignmentCallbacks.remove(key);
+		if (l != null) {
+			for (Callback<AID> callback : l) {
+				callback.onSuccess(owner);
+			}
+		}
+	}
+	
+	private void notifyPendingCallbacksError(Object key, String errorMessage) {
+		List<Callback<AID>> l = pendingAssignmentCallbacks.remove(key);
+		if (l != null) {
+			for (Callback<AID> callback : l) {
+				callback.onFailure(new Exception(errorMessage));
+			}
 		}
 	}
 	

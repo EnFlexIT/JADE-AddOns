@@ -184,10 +184,10 @@ public class DistributionManager<Item> {
 							if (b instanceof AgentSelectionPolicy.AgentSelector) {
 								AID targetAgent = ((AgentSelectionPolicy.AgentSelector) b).getAgent();
 								manageSelection(targetAgent, ci, callback);
-								callback.onSuccess(targetAgent);
+								if (callback != null) {callback.onSuccess(targetAgent);}
 							}
 							else {
-								callback.onFailure(new Exception("Selection behaviour class "+b.getClass().getName()+" does not implement the AgentSelector interface"));
+								if (callback != null) {callback.onFailure(new Exception("Selection behaviour class "+b.getClass().getName()+" does not implement the AgentSelector interface"));}
 							}
 							return ret;
 						}
@@ -208,11 +208,11 @@ public class DistributionManager<Item> {
 			if (ci != null && !ci.isLast()) {
 				targetAgentsByCorrelationKey.put(ci.getKey(), targetAgent);
 			}
-			callback.onSuccess(targetAgent);
+			if (callback != null) {callback.onSuccess(targetAgent);}
 		}
 		else {
 			// We couldn't find any agent to assign the item to
-			callback.onFailure(new Exception("No suitable agent found"));
+			if (callback != null) {callback.onFailure(new Exception("No suitable agent found"));}
 		}
 	}
 	
