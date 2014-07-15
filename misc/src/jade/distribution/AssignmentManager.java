@@ -34,7 +34,6 @@ import jade.util.Logger;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +51,8 @@ import java.util.Set;
  */
 public class AssignmentManager<Item> extends DistributionManager<Item> {
 	
+	private static final long serialVersionUID = 8757454234438L;
+	
 	/** Assignment context specifying that an new item is being assigned */
 	public static final int ASSIGN_CONTEXT = 0;
 	/** Assignment context specifying that a modified version of an already assigned item is being reassigned */
@@ -68,9 +69,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	 */
 	public static final String OWNED_ITEMS = "OWNED-ITEMS";
 
-	private Map<Object, AssignedItem> assignments = new HashMap<Object, AssignedItem>();
-	private Map<AID, List<Item>> itemsByAgent = new HashMap<AID, List<Item>>();
-	
+	private AssignmentsMap<Item> assignmentsMap = new DefaultAssignmentsMap<Item>();	
 	
 	private Map<AID, DeadAgentInfo> itemsByDeadAgent = new HashMap<AID, DeadAgentInfo>();
 	private long deadAgentsRestartTimeout = 30000;
@@ -79,6 +78,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	// When the same item is assigned a second time (or more) while the first assignment has not completed yet.
 	// As soon as the first assignment completes all pending callbacks are notified and flushed
 	private Map<Object, List<Callback<AID>>> pendingAssignmentCallbacks = new HashMap<Object, List<Callback<AID>>>();
+	
 	private boolean needReconstruct = false;
 	private Callback<Void> reconstructCallback;
 	
@@ -198,9 +198,9 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	 * @return The agent the item identified by the given key was assigned to
 	 */
 	public AID getItemOwner(Object key) {
-		AssignedItem ai = assignments.get(key);
-		if (ai != null) {
-			return ai.aid;
+		Assignment<Item> a = assignmentsMap.get(key);
+		if (a != null) {
+			return a.getAid();
 		}
 		return null;
 	}
@@ -210,7 +210,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	 * @return A Set representing an unmodifiable view of the keys of all currently assigned items
 	 */
 	public Set<Object> getAssignedKeys() {
-		return Collections.unmodifiableSet(assignments.keySet());
+		return assignmentsMap.getAllKeys();
 	}
 	
 	/**
@@ -231,7 +231,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 
 		public Iterator<Item> iterator() {
 			return new Iterator<Item>() {
-				private Iterator<AssignedItem> inner = assignments.values().iterator();
+				private Iterator<Assignment<Item>> inner = assignmentsMap.iterator();
 				
 				public void remove() {throw new UnsupportedOperationException();}
 
@@ -240,14 +240,14 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 				}
 
 				public Item next() {
-					AssignedItem ai = inner.next();
-					return ai.item;
+					Assignment<Item> a = inner.next();
+					return a.getItem();
 				}
 			};
 		}
 
 		public int size() {
-			return assignments.size();
+			return assignmentsMap.size();
 		}
 	}
 	
@@ -257,8 +257,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	 * @return The number of items currently assigned to the owner agent
 	 */
 	public int getAssignedCnt(AID owner) {
-		List<Item> items = itemsByAgent.get(owner);
-		return items != null ? items.size() : 0;
+		return assignmentsMap.getAssignedCnt(owner);	
 	}
 	
 	/**
@@ -273,10 +272,10 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	
 	private void assign(final Item item, final int context, final Callback<AID> callback) {
 		final Object key = getIdentifyingKey(item);
-		AssignedItem ai = assignments.get(key);
-		if (ai == null) {
+		Assignment<Item> a = assignmentsMap.get(key);
+		if (a == null) {
 			// New item
-			assignments.put(key, new AssignedItem(item));
+			assignmentsMap.prepareAssignment(key, item);
 			getAgent(item, new Callback<AID>() {
 				@Override
 				public void onSuccess(AID targetAgent) {
@@ -293,12 +292,12 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		}
 		else {
 			// Item already assigned
-			if (ai.item.equals(item)) {
+			if (a.getItem().equals(item)) {
 				// This is the very same version of an already assigned item --> 
 				// If the original assignment is completed just invoke the callback onSuccess() method.
 				// Otherwise store the callback: it will be notified as soon as the original assignment completes
-				if (ai.aid != null) {
-					handleSuccess(item, key, ai.aid, callback);
+				if (a.getAid() != null) {
+					handleSuccess(item, key, a.getAid(), callback);
 				}
 				else {
 					storePendingCallback(key, callback);
@@ -306,8 +305,8 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			}
 			else {
 				// This is a modified version of an already assigned item --> Substitute it and go on specifying the MODIFIED context 
-				ai.item = item;
-				manageSelectionDone(item, key, ai.aid, REASSIGN_MODIFIED_CONTEXT, callback);
+				a.setItem(item);
+				manageSelectionDone(item, key, a.getAid(), REASSIGN_MODIFIED_CONTEXT, callback);
 			}
 		}
 	}
@@ -343,10 +342,9 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	}
 	
 	private void handleSuccess(Item item, Object identifyingKey, AID targetAgent, Callback<AID> callback) {
-		AssignedItem ai = assignments.get(identifyingKey);
-		if (ai != null) {
-			ai.aid = targetAgent;
-			addItemToAgent(item, targetAgent);
+		Assignment<Item> a = assignmentsMap.completeAssignment(item, identifyingKey, targetAgent);
+		if (a != null) {
+			// Assignment completed successfully
 			if (callback != null) {
 				callback.onSuccess(targetAgent);
 			}
@@ -357,19 +355,8 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		}
 	}
 	
-	private void addItemToAgent(Item item, AID owner) {
-		List<Item> ii = itemsByAgent.get(owner);
-		if (ii == null) {
-			ii = new ArrayList<Item>();
-			itemsByAgent.put(owner, ii);
-		}
-		if (!ii.contains(item)) {
-			ii.add(item);
-		}
-	}
-	
 	private void handleError(Item item, Object identifyingKey, String errorMessage, Callback<AID> callback) {
-		assignments.remove(identifyingKey);
+		assignmentsMap.remove(identifyingKey);
 		if (callback != null) {
 			callback.onFailure(new Exception(errorMessage));
 		}
@@ -412,27 +399,16 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	 * the previous assignee agent as parameter) when the un-assignment will be completed.
 	 */
 	public void unassignItem(Object key, Callback<AID> callback) {
-		AssignedItem ai = assignments.remove(key);
-		if (ai != null) {
-			AID owner = ai.aid;
+		Assignment<Item> a = assignmentsMap.remove(key);
+		if (a != null) {
+			AID owner = a.getAid();
 			if (owner != null) {
-				removeItemFromAgent(ai.item, owner);				
-				unassign(ai.item, key, owner, callback);
+				unassign(a.getItem(), key, owner, callback);
 				return;
 			}
 		}
 		if (callback != null) {
 			callback.onSuccess(null);
-		}
-	}
-	
-	private void removeItemFromAgent(Item item, AID owner) {
-		List<Item> ii = itemsByAgent.get(owner);
-		if (ii != null) {
-			ii.remove(item);
-			if (ii.isEmpty()) {
-				itemsByAgent.remove(owner);
-			}
 		}
 	}
 	
@@ -490,7 +466,8 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	protected void onDeregister(DFAgentDescription dfad) {	
 		// A given target agent is no longer there. Manage items that were assigned to it 
 		AID aid = dfad.getName();
-		List<Item> items = itemsByAgent.remove(aid);
+		// RRR List<Item> items = itemsByAgent.remove(aid);
+		List<Item> items = assignmentsMap.getAssignedItems(aid);
 		if (items != null && items.size() > 0) {
 			if (deadAgentsRestartTimeout > 0) {
 				// Item re-assignment enabled --> Store the items assigned to the dead agent
@@ -506,7 +483,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 				// Item re-assignment disabled --> just clean the current assignments
 				for (Item item : items) {
 					Object key = getIdentifyingKey(item);
-					assignments.remove(key);
+					assignmentsMap.remove(key);
 				}
 			}
 		}
@@ -540,7 +517,6 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	
 	@Override
 	protected void targetAgentsInitialized() {
-		// FIXME: set level to FINE
 		myLogger.log(Logger.INFO, "Agent "+myAgent.getLocalName()+" - Target agents initialized");
 		if (needReconstruct) {
 			reconstruct(reconstructCallback);
@@ -597,8 +573,9 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			if (b != null) {
 				pb.addSubBehaviour(new WrapperBehaviour(b) {
 					public int onEnd() {
-						fillReconstructedAssignemtns(aid, (List<Item>) getDataStore().get(OWNED_ITEMS));
-						return super.onEnd();
+						int ret = super.onEnd();
+						fillReconstructedAssignemtns(aid, (Collection<Item>) getDataStore().get(OWNED_ITEMS));
+						return ret;
 					}
 				});
 			}
@@ -606,14 +583,12 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		myAgent.addBehaviour(pb);
 	}
 	
-	private void fillReconstructedAssignemtns(AID owner, List<Item> items) {
+	private void fillReconstructedAssignemtns(AID owner, Collection<Item> items) {
 		if (items != null) {
 			for (Item item : items) {
-				AssignedItem ai = new AssignedItem(item);
-				ai.aid = owner;
 				Object key = getIdentifyingKey(item);
-				assignments.put(key, ai);
-				addItemToAgent(item, owner);
+				assignmentsMap.prepareAssignment(key, item);
+				assignmentsMap.completeAssignment(item, key, owner);
 				myLogger.log(Logger.INFO, "Agent "+myAgent.getLocalName()+" - "+getNature(item)+" "+key+" re-associated to agent "+owner.getLocalName());
 			}
 		}
@@ -621,16 +596,15 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	
 	
 	/**
-	 * Inner class AssignedItem
+	 * Inner class Assignment
 	 */
-	private class AssignedItem {
-		private Item item;
-		private AID aid;
+	public static interface Assignment<Item> {
 		
-		public AssignedItem(Item item) {
-			this.item = item;
-		}
-	} // END of inner class AssignedItem
+		public Item getItem();
+		public void setItem(Item item);
+		public AID getAid();
+		
+	} // END of inner class Assignment
 	
 
 	/**
@@ -662,7 +636,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			if (dai != null) {
 				for (final Item item : dai.items) {
 					final Object key = getIdentifyingKey(item);
-					assignments.remove(key);
+					assignmentsMap.remove(key);
 					assign(item, REASSIGN_DEAD_OWNER_CONTEXT, new Callback<AID>() {
 						@Override
 						public void onSuccess(AID result) {
@@ -687,13 +661,13 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			prefix = "";
 		}
 		StringBuffer sb = new StringBuffer(prefix+"ASSIGNMENTS\n");
-		for (Object key : assignments.keySet()) {
-			AssignedItem ai = assignments.get(key);
+		for (Object key : assignmentsMap.getAllKeys()) {
+			Assignment<Item> a = assignmentsMap.get(key);
 			String keyStr = key.toString();
-			if (key != ai.item) {
-				keyStr = keyStr+"["+ai.item+"]";
+			if (key != a.getItem()) {
+				keyStr = keyStr+"["+a.getItem()+"]";
 			}
-			String agentStr = ai.aid != null ? ai.aid.getLocalName() : "null";
+			String agentStr = a.getAid() != null ? a.getAid().getLocalName() : "null";
 			sb.append(prefix+"- "+keyStr+" --> "+agentStr+"\n");
 		}
 		return sb.toString();

@@ -32,6 +32,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.util.Callback;
 import jade.util.Logger;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +44,7 @@ import java.util.Map;
  *
  * @param <Item> The class of the items to be assigned
  */
-public class DistributionManager<Item> {
+public class DistributionManager<Item> implements Serializable {
 
 	public static final int IDLE_STATUS = 0;
 	public static final int READY_STATUS = 1;
