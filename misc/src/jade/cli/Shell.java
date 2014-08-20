@@ -26,6 +26,7 @@ public class Shell implements Runnable {
 	private InputStream inp;
 	private PrintStream out;	
 	private DynamicJadeGateway myGateway;
+	private GatewayListener gatewayListener;
 	private Properties configProperties;
 	private String defaultPackage;
 	private String prompt;
@@ -71,7 +72,8 @@ public class Shell implements Runnable {
 		this.inp = inp;
 		this.out = out;
 		myGateway = (gw != null ? gw : JadeGateway.getDefaultGateway());
-		myGateway.addListener(new GatewayListener() {
+		
+		gatewayListener = new GatewayListener() {
 			public void handleGatewayConnected() {
 				// Nothing to do 
 			}
@@ -79,12 +81,18 @@ public class Shell implements Runnable {
 			public void handleGatewayDisconnected() {
 				loader = null;
 			}		
-		});
+		};
+		
+		myGateway.addListener(gatewayListener);
 		configProperties = pp != null ? pp : new Properties();
 		defaultPackage = configProperties.getProperty("defaultPackage", null);
 		prompt = configProperties.getProperty("prompt", "JCLI");
 	}
-		
+	
+	public void shutdown() {
+		myGateway.removeListener(gatewayListener);
+	}
+	
 	public void run() {
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(inp));
