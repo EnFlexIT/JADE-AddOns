@@ -10,7 +10,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 
 /**
- * This class must be used by bundles that package agets code 
+ * This class must be used by bundles that package agents code 
  * to make it available to other bundles. It registers an osgi service 
  * with bundle name and version attributes. When a bundle wants to start
  * an agent packaged in this bundle, jadeOsgi searches for the corresponding
