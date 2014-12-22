@@ -44,14 +44,17 @@ import jade.domain.mobility.MobilityOntology;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.util.leap.ArrayList;
+import jade.util.leap.HashMap;
 import jade.util.leap.Iterator;
 import jade.util.leap.List;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.UUID;
+import java.util.regex.Matcher;
 
 import test.common.agentConfigurationOntology.AddBehaviour;
 import test.common.agentConfigurationOntology.AgentConfigurationOntology;
@@ -369,6 +372,99 @@ public class TestUtility {
 		return jc;
 	}
 
+	private static String adjustFileSeparator(String path) {
+		path = path.replaceAll("\\\\", Matcher.quoteReplacement(File.separator));
+		return path.replaceAll("/", Matcher.quoteReplacement(File.separator));
+	}
+
+	private static String adjustWindowsPath(String path) {
+		if (path.startsWith("\"") || System.getProperty("os.name").toLowerCase().indexOf("windows")==-1) {
+			return path;
+		} 
+		
+		// Windows
+		return "\""+path+"\"";
+	}
+	
+	private static List getJarsFromDir(String dirPath) {
+		File[] jars = new File(dirPath).listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.toLowerCase().endsWith(".jar");
+			}
+		});
+
+		List files = new ArrayList();
+		if (jars != null) {
+			for (File jar : jars) {
+				files.add(jar.getName());
+			}
+		}
+		return files;
+	}
+
+	private static String getOptimizeClasspath(String classpath) {
+		HashMap jarsByDir = new HashMap();
+		StringBuilder sb = new StringBuilder();
+		String[] paths = classpath.split(File.pathSeparator);
+		for (String path : paths) {
+			if (path.toLowerCase().endsWith(".jar")) {
+				// This is a jar
+				path = adjustFileSeparator(path);
+				int pos = path.lastIndexOf(File.separator);
+				if (pos > 0) {
+					// Jar in a specific dir -> add it to map
+					String dir = path.substring(0, pos);
+					String jar = path.substring(pos+1);
+					
+					List jars = (List) jarsByDir.get(dir);
+					if (jars == null) {
+						jars = new ArrayList();
+						jarsByDir.put(dir, jars);
+					}
+					jars.add(jar);
+				}
+				else {
+					// Jar without path -> add it
+					sb.append(adjustWindowsPath(path)+File.pathSeparator);
+				}
+			}
+			else {
+				// This is a dir -> add it
+				sb.append(adjustWindowsPath(path)+File.pathSeparator);
+			}
+		}
+
+		// Check if dir contains all classpath jars
+		Iterator dirIt = jarsByDir.keySet().iterator();
+		while (dirIt.hasNext()) {
+			String dir = (String) dirIt.next();
+			List jars = (List) jarsByDir.get(dir);
+			List dirJars = getJarsFromDir(dir);
+
+			Iterator jarIt = jars.iterator();
+			while (jarIt.hasNext()) {
+				String jar = (String) jarIt.next();
+				dirJars.remove(jar);
+			}
+			
+			if (dirJars.isEmpty()) {
+				// All jar contained -> add dir with add it with /*
+				sb.append(adjustWindowsPath(dir+File.separator+"*")+File.pathSeparator);
+			}
+			else {
+				// Add specific jars
+				jarIt = jars.iterator();
+				while (jarIt.hasNext()) {
+					String jar = (String) jarIt.next();
+					// Add dir with specific jar
+					sb.append(adjustWindowsPath(dir+File.separator+jar)+File.pathSeparator);
+				}				
+			}
+		}
+		
+		return sb.toString();
+	}
+	
 	public static JadeController localLaunch(String instanceName, String classpath, String jvmArgs, String mainClass, String jadeArgs, String[] protoNames, OutputHandler outputHandler, String workingDir) throws TestException {
 		JadeController jc;
 		
@@ -404,24 +500,7 @@ public class TestUtility {
 				}
 			}
 			
-			// Add "" to all paths to prevent problems with blank
-			StringBuilder sb = new StringBuilder(); 
-			String[] paths = classpath.split(File.pathSeparator);
-			for (String path : paths) {
-				if (path.startsWith("\"") || System.getProperty("os.name").toLowerCase().indexOf("windows")==-1) {
-					sb.append(path);
-					
-				} else {
-					// Windows
-					sb.append("\"");
-					sb.append(path);
-					sb.append("\"");
-				}
-				sb.append(File.pathSeparator);
-			}
-			classpath = sb.toString();
-			
-			classpathOption = "-cp "+classpath;
+			classpathOption = "-cp "+getOptimizeClasspath(classpath);
 		}
 		
 		// Java executable.
