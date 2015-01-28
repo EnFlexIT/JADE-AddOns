@@ -103,6 +103,10 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	public void setDeadAgentsRestartTimeout(long timeout) {
 		deadAgentsRestartTimeout = timeout;
 	}
+	
+	public long getDeadAgentsRestertTimeout() {
+		return deadAgentsRestartTimeout;
+	}
 		
 	/**
 	 * This method is invoked when an item is assigned to a given assignee agent. This typically 
@@ -466,7 +470,6 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	protected void onDeregister(DFAgentDescription dfad) {	
 		// A given target agent is no longer there. Manage items that were assigned to it 
 		AID aid = dfad.getName();
-		// RRR List<Item> items = itemsByAgent.remove(aid);
 		List<Item> items = assignmentsMap.getAssignedItems(aid);
 		if (items != null && items.size() > 0) {
 			if (deadAgentsRestartTimeout > 0) {
@@ -634,13 +637,15 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			myLogger.log(Logger.WARNING, "Agent "+myAgent.getName()+" - Target-Agent "+targetAgent.getLocalName()+" did not restart in due time --> redistribute its items");
 			DeadAgentInfo dai = itemsByDeadAgent.remove(targetAgent);
 			if (dai != null) {
-				for (final Item item : dai.items) {
+				// We need to scan a copy of the items list since assignmentMap.remove() will modify the original one
+				List<Item> items = new ArrayList<Item>(dai.items);
+				for (final Item item : items) {
 					final Object key = getIdentifyingKey(item);
 					assignmentsMap.remove(key);
 					assign(item, REASSIGN_DEAD_OWNER_CONTEXT, new Callback<AID>() {
 						@Override
 						public void onSuccess(AID result) {
-							myLogger.log(Logger.INFO, "Agent "+myAgent.getName()+" - "+getNature(item)+" "+key+" reassigned to agent "+targetAgent.getLocalName());
+							myLogger.log(Logger.INFO, "Agent "+myAgent.getName()+" - "+getNature(item)+" "+key+" reassigned to agent "+result.getLocalName());
 						}
 
 						@Override
