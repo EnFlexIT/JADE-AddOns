@@ -35,10 +35,19 @@ public class CorrelationInfo {
 		this.last = last;
 	}
 	
+	/**
+	 * @return The actual correlation key
+	 */
 	public Object getKey() {
 		return key;
 	}
 	
+	/**
+	 * @return A boolean indication stating whether or not the item this CorrelationInfo object 
+	 * is associated to is the last one associated to this correlation-key.
+	 * This indication is used by the Distribution Framework to clean-up its internal structures
+	 * related to this correlation-key after processing the item.
+	 */
 	public boolean isLast() {
 		return last;
 	}
