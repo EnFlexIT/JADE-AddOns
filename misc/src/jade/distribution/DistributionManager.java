@@ -74,6 +74,10 @@ public class DistributionManager<Item> implements Serializable {
 		this.selectionPolicy = selectionPolicy;
 	}
 	
+	public AgentSelectionPolicy<Item> getAgentSelectionPolicy() {
+		return selectionPolicy;
+	}
+	
 	/**
 	 * 
 	 */
