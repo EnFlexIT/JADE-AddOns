@@ -37,10 +37,10 @@ import="jade.content.onto.Ontology,
 	Boolean wsigActive = (Boolean)application.getAttribute(WSIGServletBase.WEBAPP_ACTIVE_KEY);
 	if (wsigActive != null && wsigActive.booleanValue() == true) {
 		wsigAgentStatus = "<font color='green'>Active</font>";
-		wsigAgentStatus += " ( <a href='"+wsigConfig.getAdminUrl(request)+"/admin/platform/disconnect'>STOP</a> )";
+		wsigAgentStatus += " ( <a href='"+wsigConfig.getAdminServicesUrl(request)+"/platform/disconnect'>STOP</a> )";
 	} else {
 		wsigAgentStatus = "<font color='red'><b>Down</b></font>";
-		wsigAgentStatus += " ( <a href='"+wsigConfig.getAdminUrl(request)+"/admin/platform/connect'>START</a> )";
+		wsigAgentStatus += " ( <a href='"+wsigConfig.getAdminServicesUrl(request)+"/platform/connect'>START</a> )";
 	}
 
 	// WSDL style
@@ -126,7 +126,11 @@ import="jade.content.onto.Ontology,
 	</tr>
 	<tr>
 		<td width="30%" class="title">WSIG admin url:</td>
-		<td class="value"><% out.print(wsigConfig.getAdminUrl(request)); %></td>
+		<td class="value"><% out.print(wsigConfig.getAdminServicesUrl(request)); %></td>
+	</tr>
+	<tr>
+		<td width="30%" class="title">WSIG console url:</td>
+		<td class="value"><% out.print(wsigConfig.getConsoleUrl(request)); %></td>
 	</tr>
 	<tr>
 		<td width="30%" class="title">WSIG timeout (ms):</td>
