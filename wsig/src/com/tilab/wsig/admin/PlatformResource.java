@@ -73,8 +73,8 @@ public class PlatformResource {
 		modifyStatus(status, servletContext);
 		
 		// Redirect to console home page
-		URL consoleUrl = WSIGConfiguration.getAdminUrl(httpRequest);
-		httpResponse.sendRedirect(consoleUrl.toString());
+		String consoleUrl = WSIGConfiguration.getConsoleUrl(httpRequest);
+		httpResponse.sendRedirect(consoleUrl);
 	}
 
 	@Path("{status}")

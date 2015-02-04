@@ -55,6 +55,7 @@ import org.codehaus.jettison.mapped.Configuration;
 import org.codehaus.jettison.mapped.MappedNamespaceConvention;
 import org.codehaus.jettison.mapped.MappedXMLStreamReader;
 
+import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.rest.JadeToRest;
 import com.tilab.wsig.rest.RestException;
 import com.tilab.wsig.rest.RestToJade;
@@ -79,6 +80,11 @@ public class WSIGRestServlet extends WSIGServletBase {
 		logger.log(Level.INFO, "Starting WSIG REST Servlet...");
 
 		super.init(servletConfig);
+
+		String endpointPath = servletConfig.getInitParameter(WSIGConfiguration.WSIG_ENDPOINT_PATH_KEY);
+		if (endpointPath != null && !endpointPath.isEmpty()) {
+			WSIGConfiguration.getInstance().setRESTServicesPath(endpointPath);
+		}
 
 		logger.log(Level.INFO, "WSIG REST Servlet started");
 	}

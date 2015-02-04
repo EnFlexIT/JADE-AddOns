@@ -136,8 +136,8 @@ class Configuration {
 	}
 
 	@XmlElement
-	public URL getWSIGAdminURL() throws MalformedURLException {
-		return conf.getAdminUrl(hsr);
+	public String getWSIGAdminURL() throws MalformedURLException {
+		return conf.getAdminServicesUrl(hsr);
 	}
 
 	@XmlElement

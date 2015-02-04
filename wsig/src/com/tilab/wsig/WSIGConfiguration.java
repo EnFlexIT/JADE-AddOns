@@ -52,6 +52,7 @@ public class WSIGConfiguration extends Properties {
 	public static final String WSIG_DEFAULT_CONFIGURATION = "conf/"+WSIG_CONFIGURATION_FILE_NAME;
 	public static final String WSIG_CONFIGURATION_KEY = "configuration-file";
 	public static final String WSIG_RESOURCES_BASE_KEY = "resources-base";
+	public static final String WSIG_ENDPOINT_PATH_KEY = "endpoint-path";
 	
 	private static String wsigConfPath;
 	private static String wsigVersion;
@@ -62,7 +63,11 @@ public class WSIGConfiguration extends Properties {
 	public static final String KEY_WSIG_AGENT_NAME = "wsig.agentName";
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
 	public static final String KEY_WSIG_SERVICES_URL = "wsig.servicesURL";
+	public static final String KEY_WSIG_SERVICES_PATH = "wsig.servicesPath";
 	public static final String KEY_WSIG_REST_SERVICES_URL = "wsig.REST.servicesURL";
+	public static final String KEY_WSIG_REST_SERVICES_PATH = "wsig.REST.servicesPath";
+	public static final String KEY_WSIG_ADMIN_SERVICES_URL = "wsig.admin.servicesURL";
+	public static final String KEY_WSIG_ADMIN_SERVICES_PATH = "wsig.admin.servicesPath";
 	public static final String KEY_WSIG_TIMEOUT = "wsig.timeout";
 	public static final String KEY_WSIG_PRESERVE_JAVA_TYPE = SLCodec.PRESERVE_JAVA_TYPES;
 	public static final String KEY_WSIG_TRACE_CLIENT_IP = "wsig.traceClientIP";
@@ -229,7 +234,7 @@ public class WSIGConfiguration extends Properties {
 			// Try to get from request
 			if (request != null) {
 				String webappUrl = getWebappUrl(request).toString();
-				servicesUrl = webappUrl + "/ws";
+				servicesUrl = webappUrl + "/" + getServicesPath();
 			} else {
 				servicesUrl = "$ENDPOINT$";
 			}
@@ -240,6 +245,14 @@ public class WSIGConfiguration extends Properties {
 	public void setServicesUrl(String servicesUrl) {
 		setProperty(KEY_WSIG_SERVICES_URL,servicesUrl);
 	}
+
+	public String getServicesPath() {
+		return getProperty(KEY_WSIG_SERVICES_PATH);
+	}
+
+	public void setServicesPath(String servicesPath) {
+		setProperty(KEY_WSIG_SERVICES_PATH,servicesPath);
+	}
 	
 	public synchronized String getRESTServicesUrl(HttpServletRequest request) throws MalformedURLException {
 		// Try to read from configuration file 
@@ -248,7 +261,7 @@ public class WSIGConfiguration extends Properties {
 			// Try to get from request
 			if (request != null) {
 				String webappUrl = getWebappUrl(request).toString();
-				servicesUrl = webappUrl + "/wsRest";
+				servicesUrl = webappUrl + "/" + getRESTServicesPath();
 			} else {
 				servicesUrl = "$ENDPOINT$";
 			}
@@ -257,7 +270,44 @@ public class WSIGConfiguration extends Properties {
 	}
 
 	public void setRESTServicesUrl(String servicesUrl) {
-		setProperty(KEY_WSIG_SERVICES_URL,servicesUrl);
+		setProperty(KEY_WSIG_REST_SERVICES_URL,servicesUrl);
+	}
+
+	public String getRESTServicesPath() {
+		return getProperty(KEY_WSIG_REST_SERVICES_PATH);
+	}
+
+	public void setRESTServicesPath(String servicesPath) {
+		setProperty(KEY_WSIG_REST_SERVICES_PATH,servicesPath);
+	}
+	
+	public synchronized String getAdminServicesUrl(HttpServletRequest request) throws MalformedURLException {
+		// Try to read from configuration file 
+		String servicesUrl = getProperty(KEY_WSIG_ADMIN_SERVICES_URL);
+		if (servicesUrl == null) {
+			// Try to get from request
+			if (request != null) {
+				String webappUrl = getWebappUrl(request).toString();
+				servicesUrl = webappUrl + "/" + getAdminServicesPath();
+			}
+		}
+		return servicesUrl;
+	}
+
+	public void setAdminServicesUrl(String servicesUrl) {
+		setProperty(KEY_WSIG_ADMIN_SERVICES_URL,servicesUrl);
+	}
+
+	public String getAdminServicesPath() {
+		return getProperty(KEY_WSIG_ADMIN_SERVICES_PATH);
+	}
+
+	public void setAdminServicesPath(String servicesPath) {
+		setProperty(KEY_WSIG_ADMIN_SERVICES_PATH,servicesPath);
+	}
+	
+	public static String getConsoleUrl(HttpServletRequest request) throws MalformedURLException {
+		return getWebappUrl(request).toString();
 	}
 
 	public synchronized int getWsigTimeout() {
@@ -426,10 +476,6 @@ public class WSIGConfiguration extends Properties {
 		return new URL(protocol, serverName, serverPort, contextPath);
 	}
 
-	public static URL getAdminUrl(HttpServletRequest request) throws MalformedURLException {
-		return getWebappUrl(request);
-	}
-
 	public synchronized boolean isJadeMiscPresent() {
 		try {
 			Class.forName("jade.misc.CreateFileManagerAgentBehaviour");
@@ -477,6 +523,9 @@ public class WSIGConfiguration extends Properties {
 		setProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT, "30000");
 		setProperty(WSIGConfiguration.KEY_WSIG_TRACE_CLIENT_IP, "true");
 		setProperty(WSIGConfiguration.KEY_WSIG_TRACE_HTTP_HEADERS, "true");
+		setProperty(WSIGConfiguration.KEY_WSIG_SERVICES_PATH, "ws");
+		setProperty(WSIGConfiguration.KEY_WSIG_REST_SERVICES_PATH, "wsRest");
+		setProperty(WSIGConfiguration.KEY_WSIG_ADMIN_SERVICES_PATH, "admin");
 		setProperty(WSIGConfiguration.KEY_WSDL_DIRECTORY, "wsdl");
 		setProperty(WSIGConfiguration.KEY_WSDL_WRITE_ENABLE, "false");
 		setProperty(WSIGConfiguration.KEY_WSDL_STYLE, WSDLConstants.STYLE_DOCUMENT);

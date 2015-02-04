@@ -86,6 +86,11 @@ public class WSIGServlet extends WSIGServletBase {
 		logger.log(Level.INFO, "Starting WSIG SOAP Servlet...");
 
 		super.init(servletConfig);
+		
+		String endpointPath = servletConfig.getInitParameter(WSIGConfiguration.WSIG_ENDPOINT_PATH_KEY);
+		if (endpointPath != null && !endpointPath.isEmpty()) {
+			WSIGConfiguration.getInstance().setServicesPath(endpointPath);
+		}
 
 		logger.log(Level.INFO, "WSIG SOAP Servlet started");
 	}
