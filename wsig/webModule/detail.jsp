@@ -104,7 +104,7 @@ import="jade.content.onto.Ontology,
 	</tr>
 	<tr>
 		<td width="20%" class="title">WSDL url:</td>
-		<td class="value"><a href="<%=wsigConfig.getAdminServicesUrl(request)%>/services/<%=serviceName%>/wsdl"><% out.print(wsdlUrl); %></a></td>
+		<td class="value"><a href="<%=wsdlUrl%>"><% out.print(wsdlUrl); %></a></td>
 	</tr>
 	<tr>
 		<td width="20%" class="title" valign="top">Operations:</td>
