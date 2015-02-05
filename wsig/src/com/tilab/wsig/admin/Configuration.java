@@ -23,7 +23,6 @@ Boston, MA  02111-1307, USA.
 package com.tilab.wsig.admin;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.annotation.XmlElement;
@@ -40,8 +39,10 @@ import com.tilab.wsig.WSIGConfiguration;
 		"WSIGAgentName",
 		"WSIGAgentClass",
 		"WSIGVersion",
-		"WSIGServicesURL",
-		"WSIGAdminURL",
+		"WSIGsoapEndpointURL",
+		"WSIGrestEndpointURL",
+		"WSIGadminEndpointURL",
+		"WSIGconsoleURL",
 		"WSIGTimeOut",
 		"WSIGJavaTypePreservation",
 		"WSDLHierarchicalComplexType",
@@ -127,19 +128,37 @@ class Configuration {
 	}
 
 	@XmlElement
-	public String getWSIGServicesURL() throws MalformedURLException {
+	public String getWSIGsoapEndpointURL() throws MalformedURLException {
 		return conf.getServicesUrl(hsr);
 	}	
 
-	public void setWSIGServicesURL(String wsigServicesURL) {
+	public void setWSIGsoapEndpointURL(String wsigServicesURL) {
 		conf.setServicesUrl(wsigServicesURL);
+	}
+	
+	@XmlElement
+	public String getWSIGrestEndpointURL() throws MalformedURLException {
+		return conf.getRESTServicesUrl(hsr);
+	}	
+
+	public void setWSIGrestEndpointURL(String wsigServicesURL) {
+		conf.setRESTServicesUrl(wsigServicesURL);
 	}
 
 	@XmlElement
-	public String getWSIGAdminURL() throws MalformedURLException {
+	public String getWSIGadminEndpointURL() throws MalformedURLException {
 		return conf.getAdminServicesUrl(hsr);
 	}
 
+	public void setWSIGadminEndpointURL(String wsigServicesURL) {
+		conf.setAdminServicesUrl(wsigServicesURL);
+	}
+
+	@XmlElement
+	public String getWSIGconsoleURL() throws MalformedURLException {
+		return conf.getConsoleUrl(hsr);
+	}
+	
 	@XmlElement
 	public int getWSIGTimeOut() {
 		return conf.getWsigTimeout();
