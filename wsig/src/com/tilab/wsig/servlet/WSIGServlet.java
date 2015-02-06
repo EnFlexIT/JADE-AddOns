@@ -22,7 +22,7 @@ Boston, MA  02111-1307, USA.
  *****************************************************************/
 package com.tilab.wsig.servlet;
 
-import jade.content.AgentAction;
+import jade.content.ContentElement;
 import jade.wrapper.gateway.DynamicJadeGateway;
 
 import java.io.ByteArrayOutputStream;
@@ -166,10 +166,10 @@ public class WSIGServlet extends WSIGServletBase {
 			}
 
 			// Convert soap to jade
-			AgentAction agentAction = null;
+			ContentElement agentAction = null;
 			try {
 				SoapToJade soapToJade = new SoapToJade();
-				agentAction = (AgentAction)soapToJade.convert(soapRequest, wsigService, operationName);
+				agentAction = (ContentElement) soapToJade.convert(soapRequest, wsigService, operationName);
 				logger.log(Level.INFO, "Jade Action: "+agentAction.toString());
 			} catch (Exception e) {
 				logger.log(Level.SEVERE, "Error in soap to jade conversion", e);

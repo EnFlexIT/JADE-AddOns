@@ -44,7 +44,7 @@ public class OntologyBasedFaultConverter extends FaultBuilder {
 	
 	@Override
 	public String getFaultString() {
-		return message.getContent();
+		return message != null ? message.getContent() : null;
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class OntologyBasedFaultConverter extends FaultBuilder {
 
 	@Override
 	public String getFaultActor() {
-		return message.getSender().getName();
+		return message != null ? message.getSender().getName(): null;
 	}
 
 	@Override

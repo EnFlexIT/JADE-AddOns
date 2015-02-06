@@ -22,14 +22,14 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package com.tilab.wsig.store;
 
-import java.util.LinkedHashMap;
-
-import jade.content.AgentAction;
+import jade.content.ContentElement;
 import jade.content.onto.Ontology;
+
+import java.util.LinkedHashMap;
 
 public abstract class ActionBuilder extends Builder {
 
-	public abstract AgentAction getAgentAction(LinkedHashMap<String, ParameterInfo> soapParams) throws Exception;
+	public abstract ContentElement getAgentAction(LinkedHashMap<String, ParameterInfo> soapParams) throws Exception;
 
 	public ActionBuilder(Ontology ontoService, Ontology ontoAgent, String actionName) {
 		super(ontoService, ontoAgent, actionName);

@@ -22,7 +22,7 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package com.tilab.wsig.store;
 
-import jade.content.AgentAction;
+import jade.content.ContentElement;
 import jade.content.onto.Ontology;
 import jade.util.Logger;
 
@@ -46,7 +46,7 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 		this.mapperObj = mapperObj;
 	}
 
-	public AgentAction getAgentAction(LinkedHashMap<String, ParameterInfo> soapParams) throws Exception {
+	public ContentElement getAgentAction(LinkedHashMap<String, ParameterInfo> soapParams) throws Exception {
 		Object[] parameterValues = new Object[0];
 		String parameterList = "";
 
@@ -87,10 +87,10 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 			}
 		}
 		
-		AgentAction actionObj = null;
+		ContentElement actionObj = null;
 		try {
 			// Invoke mapper method
-			actionObj = (AgentAction)method.invoke(mapperObj, parameterValues);
+			actionObj = (ContentElement)method.invoke(mapperObj, parameterValues);
 			logger.log(Level.FINE, "Invoked method "+method.getName()+"("+parameterList+") in mapper");
 
 		} catch(Exception e) {

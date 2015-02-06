@@ -25,6 +25,7 @@ package com.tilab.wsig.examples;
 
 import jade.content.AgentAction;
 import jade.content.ContentElement;
+import jade.content.Predicate;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
 import jade.content.onto.basic.Action;
@@ -153,44 +154,51 @@ public class MathAgent extends Agent {
 			public void action() {
 				ACLMessage msg = myAgent.receive(template);
 				if (msg != null) {
-					Action actExpr;
 					try {
-						actExpr = (Action) myAgent.getContentManager().extractContent(msg);
-						AgentAction action = (AgentAction) actExpr.getAction();
-						
-						logger.log(Level.INFO, "Execute action: "+action.getClass().getSimpleName());
-						if (action instanceof Sum) {
-							serveSumAction((Sum) action, actExpr, msg);
-						} else if (action instanceof Diff) {
-							serveDiffAction((Diff) action, actExpr, msg);
-						} else if (action instanceof Abs) {
-							serveAbsAction((Abs) action, actExpr, msg);
-						} else if (action instanceof Multiplication) {
-							serveMultiplicationAction((Multiplication) action, actExpr, msg);
-						} else if (action instanceof SumComplex) {
-							serveSumComplexAction((SumComplex) action, actExpr, msg);
-						} else if (action instanceof GetComponents) {
-							serveGetComponentsAction((GetComponents) action, actExpr, msg);
-						} else if (action instanceof GetRandom) {
-							serveGetRandomAction((GetRandom) action, actExpr, msg);
-						} else if (action instanceof PrintComplex) {
-							servePrintComplexAction((PrintComplex) action, actExpr, msg);
-						} else if (action instanceof GetAgentInfo) {
-							serveGetAgentInfoAction((GetAgentInfo) action, actExpr, msg);
-						} else if (action instanceof ConvertDate) {
-							serveConvertDateAction((ConvertDate) action, actExpr, msg);
-						} else if (action instanceof PrintTime) {
-							servePrintTimeAction((PrintTime) action, actExpr, msg);
-						} else if (action instanceof CompareNumbers) {
-							serveCompareNumbersAction((CompareNumbers) action, actExpr, msg);
-						} else if (action instanceof OrderShapesByArea) {
-							serveOrderShapesByArea((OrderShapesByArea) action, actExpr, msg);
+						ContentElement content = myAgent.getContentManager().extractContent(msg);
+						if (content instanceof Action) {
+							Action actExpr = (Action) content;
+							AgentAction action = (AgentAction) actExpr.getAction();
+							
+							logger.log(Level.INFO, "Execute action: "+action.getClass().getSimpleName());
+							if (action instanceof Sum) {
+								serveSumAction((Sum) action, actExpr, msg);
+							} else if (action instanceof Diff) {
+								serveDiffAction((Diff) action, actExpr, msg);
+							} else if (action instanceof Abs) {
+								serveAbsAction((Abs) action, actExpr, msg);
+							} else if (action instanceof Multiplication) {
+								serveMultiplicationAction((Multiplication) action, actExpr, msg);
+							} else if (action instanceof SumComplex) {
+								serveSumComplexAction((SumComplex) action, actExpr, msg);
+							} else if (action instanceof GetComponents) {
+								serveGetComponentsAction((GetComponents) action, actExpr, msg);
+							} else if (action instanceof GetRandom) {
+								serveGetRandomAction((GetRandom) action, actExpr, msg);
+							} else if (action instanceof GetAgentInfo) {
+								serveGetAgentInfoAction((GetAgentInfo) action, actExpr, msg);
+							} else if (action instanceof ConvertDate) {
+								serveConvertDateAction((ConvertDate) action, actExpr, msg);
+							} else if (action instanceof CompareNumbers) {
+								serveCompareNumbersAction((CompareNumbers) action, actExpr, msg);
+							} else if (action instanceof OrderShapesByArea) {
+								serveOrderShapesByArea((OrderShapesByArea) action, actExpr, msg);
+							}
 						}
-
-					} catch (Exception e) {
+						else if (content instanceof Predicate) {
+							Predicate predicate = (Predicate) content;
+							if (predicate instanceof PrintComplex) {
+								servePrintComplexAction((PrintComplex) predicate, msg);
+							} else if (predicate instanceof PrintTime) {
+								servePrintTimeAction((PrintTime) predicate, msg);
+							}
+						}
+					} 
+					catch (Exception e) {
 						logger.log(Level.SEVERE, "Error serving action", e);
 					}
-				} else {
+				} 
+				else {
 					block();
 				}
 			}
@@ -263,14 +271,12 @@ public class MathAgent extends Agent {
 		sendNotification(actExpr, msg, ACLMessage.INFORM, Long.valueOf(result).toString());
 	}
 	
-	private void servePrintComplexAction(PrintComplex printComplex, Action actExpr, ACLMessage msg) {
+	private void servePrintComplexAction(PrintComplex printComplex, ACLMessage msg) {
 		logger.log(Level.INFO, "Complex number is "+printComplex.getComplex());
-		sendNotification(actExpr, msg, ACLMessage.INFORM, null);
 	}
 
-	private void servePrintTimeAction(PrintTime printTime, Action actExpr, ACLMessage msg) {
+	private void servePrintTimeAction(PrintTime printTime, ACLMessage msg) {
 		logger.log(Level.INFO, "Time is "+(new Date()).toString());
-		sendNotification(actExpr, msg, ACLMessage.INFORM, null);
 	}
 
 	private void serveCompareNumbersAction(CompareNumbers compareNumbers, Action actExpr, ACLMessage msg) {

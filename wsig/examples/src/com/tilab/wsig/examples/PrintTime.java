@@ -23,9 +23,9 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.examples;
 
-import jade.content.AgentAction;
+import jade.content.Predicate;
 
-public class PrintTime implements AgentAction {
+public class PrintTime implements Predicate {
 
 	@Override
 	public String toString() {

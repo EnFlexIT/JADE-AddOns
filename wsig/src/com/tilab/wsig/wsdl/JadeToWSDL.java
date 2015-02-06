@@ -187,6 +187,7 @@ public class JadeToWSDL {
 		
 		// Manage actions
 		List actionNames = ontoService.getActionNames();
+		actionNames.addAll(ontoService.getPredicateNames());
 		for (int i = 0; i < actionNames.size(); i++) {
 			try {
 				String actionName = (String) actionNames.get(i);
@@ -341,7 +342,7 @@ public class JadeToWSDL {
 	
 	private Map<String, ParameterInfo> manageInputParameters(String operationName, Message inputMessage, String actionName, Method mapperMethod) throws Exception {
 
-		AgentActionSchema actionSchema = (AgentActionSchema) ontoService.getSchema(actionName);
+		ObjectSchema actionSchema = (ObjectSchema) ontoService.getSchema(actionName);
 
 		// In document style there is only a message part named parameters and an element in types definition
 		XSDModelGroup elementSequence = null;
@@ -367,7 +368,7 @@ public class JadeToWSDL {
 		return inputParametersMap;
 	}
 	
-	private Map<String, ParameterInfo> manageOntologyInputParameters(XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema) throws Exception {
+	private Map<String, ParameterInfo> manageOntologyInputParameters(XSDModelGroup elementSequence, Message inputMessage, ObjectSchema actionSchema) throws Exception {
 
 		String[] slotNames = actionSchema.getNames();
 		Map<String, ParameterInfo> inputParametersMap = new HashMap<String, ParameterInfo>();
@@ -402,7 +403,7 @@ public class JadeToWSDL {
 		return inputParametersMap;
 	}
 
-	private Map<String, ParameterInfo> manageMapperInputParameters(XSDModelGroup elementSequence, Message inputMessage, AgentActionSchema actionSchema, Method mapperMethod) throws Exception {
+	private Map<String, ParameterInfo> manageMapperInputParameters(XSDModelGroup elementSequence, Message inputMessage, ObjectSchema actionSchema, Method mapperMethod) throws Exception {
 		String[] parameterNames = WSDLUtils.getParameterNames(mapperMethod);
 		Class[] parameterClasses = mapperMethod.getParameterTypes();
 		Annotation[][] parameterAnnotations = mapperMethod.getParameterAnnotations();
@@ -410,7 +411,7 @@ public class JadeToWSDL {
 		return manageMapperParameters(elementSequence, inputMessage, actionSchema, parameterNames, parameterClasses, parameterAnnotations, null);
 	}
 
-	private Map<String, ParameterInfo> manageMapperParameters(XSDModelGroup elementSequence, Message message, AgentActionSchema actionSchema, String[] parameterNames, Class[] parameterClasses, Annotation[][] parameterAnnotations, Method[] parameterMethods) throws Exception {
+	private Map<String, ParameterInfo> manageMapperParameters(XSDModelGroup elementSequence, Message message, ObjectSchema actionSchema, String[] parameterNames, Class[] parameterClasses, Annotation[][] parameterAnnotations, Method[] parameterMethods) throws Exception {
 		Map<String, ParameterInfo> parametersMap = new LinkedHashMap<String, ParameterInfo>();
 		
 		// Loop for all parameters of mapper method
@@ -507,7 +508,7 @@ public class JadeToWSDL {
 	
 	private Map<String, ParameterInfo> manageOutputParameters(String operationName, Message outputMessage, String actionName, Class mapperResultConverterClass) throws Exception {
 		
-		AgentActionSchema actionSchema = (AgentActionSchema) ontoService.getSchema(actionName);
+		ObjectSchema actionSchema = (ObjectSchema) ontoService.getSchema(actionName);
 
 		// In document style there is only a message part named parameters and an element in types definition
 		XSDModelGroup elementSequence = null;
@@ -537,7 +538,7 @@ public class JadeToWSDL {
 		return outputParametersMap;
 	}
 	
-	private Map<String, ParameterInfo> manageMapperOutputParameters(XSDModelGroup elementSequence, Message outputMessage, AgentActionSchema actionSchema, String operationName, Class resultConverterClass) throws Exception {
+	private Map<String, ParameterInfo> manageMapperOutputParameters(XSDModelGroup elementSequence, Message outputMessage, ObjectSchema actionSchema, String operationName, Class resultConverterClass) throws Exception {
 		
 		ArrayList<Method> parameterMethods = new ArrayList<Method>();
 		ArrayList<String> parameterNames = new ArrayList<String>();
@@ -561,25 +562,27 @@ public class JadeToWSDL {
 		return manageMapperParameters(elementSequence, outputMessage, actionSchema, names, classes, annotations, methods);
 	}
 
-	private Map<String, ParameterInfo> manageOntologyOutputParameters(XSDModelGroup elementSequence, Message outputMessage, AgentActionSchema actionSchema, String operationName) throws Exception {
+	private Map<String, ParameterInfo> manageOntologyOutputParameters(XSDModelGroup elementSequence, Message outputMessage, ObjectSchema actionSchema, String operationName) throws Exception {
 		
 		Map<String, ParameterInfo> outputParametersMap = new HashMap<String, ParameterInfo>();
 		
-		TermSchema resultSchema = actionSchema.getResultSchema();
-		if (resultSchema != null) {
-			String resultName = WSDLUtils.getResultName(operationName);
-			String resultType = createComplexTypeFromSchema(resultSchema, actionSchema, resultSchema.getTypeName(), null, null, null);
-			logger.log(Level.FINE, "--ontology output result: "+resultName+" ("+resultType+")");
-
-			outputParametersMap.put(resultName, new ParameterInfo(resultName, resultSchema));
-			
-			Part partMessage;
-			if (WSDLConstants.STYLE_RPC.equals(soapStyle)) {
-				partMessage = WSDLUtils.createTypePart(resultName, resultType, tns);
-				outputMessage.addPart(partMessage);
+		if (actionSchema instanceof AgentActionSchema) {
+			TermSchema resultSchema = ((AgentActionSchema) actionSchema).getResultSchema();
+			if (resultSchema != null) {
+				String resultName = WSDLUtils.getResultName(operationName);
+				String resultType = createComplexTypeFromSchema(resultSchema, actionSchema, resultSchema.getTypeName(), null, null, null);
+				logger.log(Level.FINE, "--ontology output result: "+resultName+" ("+resultType+")");
+	
+				outputParametersMap.put(resultName, new ParameterInfo(resultName, resultSchema));
 				
-			} else {
-				WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, resultName, resultType, elementSequence);
+				Part partMessage;
+				if (WSDLConstants.STYLE_RPC.equals(soapStyle)) {
+					partMessage = WSDLUtils.createTypePart(resultName, resultType, tns);
+					outputMessage.addPart(partMessage);
+					
+				} else {
+					WSDLUtils.addElementToSequence(tns, wsdlTypeSchema, resultName, resultType, elementSequence);
+				}
 			}
 		}
 		
@@ -862,7 +865,7 @@ public class JadeToWSDL {
 		return createComplexTypeFromSchema(objSchema, null, null, null, null, null);
 	}
 	
-	private String createComplexTypeFromSchema(ObjectSchema objSchema, ConceptSchema containerSchema, String slotName, XSDComponent parentComponent, Integer cardMin, Integer cardMax) throws Exception {
+	private String createComplexTypeFromSchema(ObjectSchema objSchema, ObjectSchema containerSchema, String slotName, XSDComponent parentComponent, Integer cardMin, Integer cardMax) throws Exception {
 		
 		String slotType = null;
 		if (objSchema instanceof PrimitiveSchema || objSchema.getClass()==TermSchema.class) {

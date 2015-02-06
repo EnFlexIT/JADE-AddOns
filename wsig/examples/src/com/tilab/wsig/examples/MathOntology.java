@@ -29,6 +29,7 @@ import jade.content.onto.OntologyException;
 import jade.content.schema.AgentActionSchema;
 import jade.content.schema.ConceptSchema;
 import jade.content.schema.ObjectSchema;
+import jade.content.schema.PredicateSchema;
 import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.TermSchema;
 
@@ -54,11 +55,11 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			add(new AgentActionSchema(SUMCOMPLEX), SumComplex.class);
 			add(new AgentActionSchema(GETCOMPONENTS), GetComponents.class);
 			add(new AgentActionSchema(GETRANDOM), GetRandom.class);
-			add(new AgentActionSchema(PRINTCOMPLEX), PrintComplex.class);
+			add(new AgentActionSchema(COMPARENUMBERS), CompareNumbers.class);
 			add(new AgentActionSchema(GETAGENTINFO), GetAgentInfo.class);
 			add(new AgentActionSchema(CONVERTDATE), ConvertDate.class);
-			add(new AgentActionSchema(PRINTTIME), PrintTime.class);
-			add(new AgentActionSchema(COMPARENUMBERS), CompareNumbers.class);
+			add(new PredicateSchema(PRINTTIME), PrintTime.class);
+			add(new PredicateSchema(PRINTCOMPLEX), PrintComplex.class);
 			
 			add(new ConceptSchema(COMPLEX), Complex.class);
 			add(new ConceptSchema(AGENTINFO), AgentInfo.class);
@@ -101,9 +102,6 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			as = (AgentActionSchema) getSchema(GETRANDOM);
 			as.setResult((ConceptSchema) getSchema(COMPLEX));
 			
-			as = (AgentActionSchema) getSchema(PRINTCOMPLEX);
-			as.add(COMPLEX, (ConceptSchema) getSchema(COMPLEX));
-			
 			as = (AgentActionSchema) getSchema(GETAGENTINFO);
 			as.setResult((ConceptSchema)getSchema(AGENTINFO));
 			
@@ -115,6 +113,9 @@ public class MathOntology extends Ontology implements MathVocabulary{
 			as.add(FIRST_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
 			as.add(SECOND_ELEMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT));
 			as.setResult((PrimitiveSchema)getSchema(BasicOntology.BOOLEAN));
+
+			PredicateSchema ps = (PredicateSchema) getSchema(PRINTCOMPLEX);
+			ps.add(COMPLEX, (ConceptSchema) getSchema(COMPLEX));
 			
 		} catch (OntologyException oe) {
 			oe.printStackTrace();

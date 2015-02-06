@@ -23,10 +23,10 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.examples;
 
-import jade.content.AgentAction;
+import jade.content.Predicate;
 import jade.content.onto.annotations.Slot;
 
-public class PrintComplex implements AgentAction {
+public class PrintComplex implements Predicate {
 
 	private Complex complex;
 

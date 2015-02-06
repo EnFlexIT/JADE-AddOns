@@ -26,7 +26,7 @@ import jade.content.onto.AggregateHelper;
 import jade.content.onto.BasicOntology;
 import jade.content.onto.Ontology;
 import jade.content.onto.OntologyException;
-import jade.content.schema.AgentActionSchema;
+import jade.content.schema.ObjectSchema;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,8 +57,8 @@ public abstract class Builder {
 		this.parameters = parameters;
 	}
 
-	public AgentActionSchema getActionSchema() throws OntologyException {
-		return (AgentActionSchema) ontoService.getSchema(actionName);
+	public ObjectSchema getActionSchema() throws OntologyException {
+		return (ObjectSchema) ontoService.getSchema(actionName);
 	}
 	
 	public static Object adjustValue(Object value, Class<?> destClass) throws Exception {

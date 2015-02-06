@@ -23,8 +23,6 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.rest;
 
-import jade.content.AgentAction;
-
 import org.apache.axis.Message;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -45,9 +43,7 @@ public class RestToJade extends DefaultHandler {
 				
 		Message soapRequest =  new Message(message); 
 		SoapToJade soapToJade = new SoapToJade();
-		AgentAction agentAction = (AgentAction)soapToJade.convert(soapRequest, wsigService, operationName);
-		
-		return agentAction;
+		return soapToJade.convert(soapRequest, wsigService, operationName);
 	}	
 }
 

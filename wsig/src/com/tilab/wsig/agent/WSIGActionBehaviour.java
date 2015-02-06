@@ -43,7 +43,7 @@ import java.util.Vector;
 
 import com.tilab.wsig.store.OperationResult;
 
-public class WSIGBehaviour extends AchieveREInitiator {
+public class WSIGActionBehaviour extends AchieveREInitiator {
 
 	private static final long serialVersionUID = 6463142354593931841L;
 	
@@ -63,7 +63,7 @@ public class WSIGBehaviour extends AchieveREInitiator {
 	private Map<String, String> userDefinedParameters;
 
 	
-	public WSIGBehaviour(AID agentExecutor, AgentAction agentAction,  Ontology onto, int timeout, Map<String, String> userDefinedParameters) {
+	public WSIGActionBehaviour(AID agentExecutor, AgentAction agentAction,  Ontology onto, int timeout, Map<String, String> userDefinedParameters) {
 		super(null, null);
 		
 		this.status = UNKNOWN_STATUS;

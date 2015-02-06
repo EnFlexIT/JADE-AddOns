@@ -22,12 +22,12 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package com.tilab.wsig.store;
 
-import jade.content.AgentAction;
-import jade.content.abs.AbsAgentAction;
+import jade.content.ContentElement;
+import jade.content.abs.AbsContentElement;
 import jade.content.abs.AbsHelper;
 import jade.content.abs.AbsObject;
 import jade.content.onto.Ontology;
-import jade.content.schema.AgentActionSchema;
+import jade.content.schema.ObjectSchema;
 
 import java.util.LinkedHashMap;
 
@@ -37,10 +37,10 @@ public class OntologyBasedActionBuilder extends ActionBuilder {
 		super(ontoService, ontoAgent, actionName);
 	}
 
-	public AgentAction getAgentAction(LinkedHashMap<String, ParameterInfo> soapParams) throws Exception {
+	public ContentElement getAgentAction(LinkedHashMap<String, ParameterInfo> soapParams) throws Exception {
 
-		AgentActionSchema schema = (AgentActionSchema)ontoService.getSchema(getActionName());
-		AbsAgentAction actionAbsObj = (AbsAgentAction) schema.newInstance();
+		ObjectSchema schema = (ObjectSchema)ontoService.getSchema(getActionName());
+		AbsContentElement actionAbsObj = (AbsContentElement) schema.newInstance();
 		if (soapParams != null) {
 			for (ParameterInfo param : soapParams.values()) {
 				String slotName = param.getName();

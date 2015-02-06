@@ -22,6 +22,21 @@ Boston, MA  02111-1307, USA.
  *****************************************************************/
 package com.tilab.wsig.servlet;
 
+import jade.content.AgentAction;
+import jade.content.ContentElement;
+import jade.content.Predicate;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
+import jade.core.AID;
+import jade.core.Profile;
+import jade.core.behaviours.Behaviour;
+import jade.util.Logger;
+import jade.wrapper.ControllerException;
+import jade.wrapper.gateway.DynamicJadeGateway;
+import jade.wrapper.gateway.GatewayListener;
+import jade.wrapper.gateway.JadeGateway;
+import jade.wrapper.gateway.LocalJadeGateway;
+
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -37,23 +52,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.WSIGConstants;
-import com.tilab.wsig.agent.WSIGBehaviour;
+import com.tilab.wsig.agent.WSIGActionBehaviour;
+import com.tilab.wsig.agent.WSIGPredicateBehaviour;
 import com.tilab.wsig.soap.SOAPException;
 import com.tilab.wsig.store.OperationResult;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.store.WSIGStore;
-
-import jade.content.AgentAction;
-import jade.content.lang.sl.SLCodec;
-import jade.content.onto.Ontology;
-import jade.core.AID;
-import jade.core.Profile;
-import jade.util.Logger;
-import jade.wrapper.ControllerException;
-import jade.wrapper.gateway.DynamicJadeGateway;
-import jade.wrapper.gateway.GatewayListener;
-import jade.wrapper.gateway.JadeGateway;
-import jade.wrapper.gateway.LocalJadeGateway;
 
 public abstract class WSIGServletBase extends HttpServlet implements GatewayListener {
 	private static final long serialVersionUID = 1471617048324302610L;
@@ -183,11 +187,18 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 		doPost(request, response);
 	}
 	
-	protected OperationResult executeOperation(AgentAction agentAction, Map<String, String> headers, WSIGService wsigService) throws SOAPException {
+	protected OperationResult executeOperation(ContentElement agentAction, Map<String, String> headers, WSIGService wsigService) throws SOAPException {
 		int timeout = WSIGConfiguration.getInstance().getWsigTimeout();
 		AID agentExecutor = wsigService.getAid();
 		Ontology onto = wsigService.getAgentOntology(); 
-		WSIGBehaviour wsigBehaviour = new WSIGBehaviour(agentExecutor, agentAction, onto, timeout, headers);
+
+		Behaviour wsigBehaviour;
+		if (agentAction instanceof AgentAction) {
+			wsigBehaviour = new WSIGActionBehaviour(agentExecutor, (AgentAction) agentAction, onto, timeout, headers);
+		}
+		else {
+			wsigBehaviour = new WSIGPredicateBehaviour(agentExecutor, (Predicate) agentAction,  onto, headers);
+		}
 
 		// Execute operation
 		try {
@@ -204,18 +215,33 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 		} 
 
 		// Check result
-		if (wsigBehaviour.getStatus() == WSIGBehaviour.SUCCESS_STATUS) {
-			// Success
-			logger.log(Level.FINE, "Action "+agentAction+" successfully executed");
-			return wsigBehaviour.getOperationResult();
-		} else if (wsigBehaviour.getStatus() == WSIGBehaviour.APPLICATIVE_FAILURE_STATUS) {
-			// Application failure
-			logger.log(Level.FINE, "Action "+agentAction+" applicatically failed");
-			return wsigBehaviour.getOperationResult();
-		} else {
-			// Other failure
-			logger.log(Level.SEVERE, "Error executing action "+agentAction+": "+wsigBehaviour.getError());
-			throw new SOAPException(SOAPException.FAULT_CODE_SERVER, wsigBehaviour.getError(), agentExecutor.getName());
+		if (wsigBehaviour instanceof WSIGActionBehaviour) {
+			WSIGActionBehaviour wsigActionBehaviour = (WSIGActionBehaviour) wsigBehaviour;
+			if (wsigActionBehaviour.getStatus() == WSIGActionBehaviour.SUCCESS_STATUS) {
+				// Success
+				logger.log(Level.FINE, "Action "+agentAction+" successfully executed");
+				return wsigActionBehaviour.getOperationResult();
+			} else if (wsigActionBehaviour.getStatus() == WSIGActionBehaviour.APPLICATIVE_FAILURE_STATUS) {
+				// Application failure
+				logger.log(Level.FINE, "Action "+agentAction+" applicatically failed");
+				return wsigActionBehaviour.getOperationResult();
+			} else {
+				// Other failure
+				logger.log(Level.SEVERE, "Error executing action "+agentAction+": "+wsigActionBehaviour.getError());
+				throw new SOAPException(SOAPException.FAULT_CODE_SERVER, wsigActionBehaviour.getError(), agentExecutor.getName());
+			}
+		}
+		else {
+			WSIGPredicateBehaviour wsigPredicateBehaviour = (WSIGPredicateBehaviour) wsigBehaviour;
+			if (wsigPredicateBehaviour.getStatus() == WSIGActionBehaviour.SUCCESS_STATUS) {
+				// Success
+				logger.log(Level.FINE, "Action "+agentAction+" successfully executed");
+				return wsigPredicateBehaviour.getOperationResult();
+			} else {
+				// Other failure
+				logger.log(Level.SEVERE, "Error executing action "+agentAction+": "+wsigPredicateBehaviour.getError());
+				throw new SOAPException(SOAPException.FAULT_CODE_SERVER, wsigPredicateBehaviour.getError(), agentExecutor.getName());
+			}
 		}
 	}
 	

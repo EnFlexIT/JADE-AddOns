@@ -23,7 +23,7 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.servlet;
 
-import jade.content.AgentAction;
+import jade.content.ContentElement;
 import jade.wrapper.gateway.DynamicJadeGateway;
 
 import java.io.BufferedReader;
@@ -236,10 +236,10 @@ public class WSIGRestServlet extends WSIGServletBase {
 			}
 
 			// Convert REST to jade
-			AgentAction agentAction = null;
+			ContentElement agentAction = null;
 			try {
 				RestToJade restToJade = new RestToJade();
-				agentAction = (AgentAction)restToJade.convert(xml, wsigService, operationName);
+				agentAction = (ContentElement) restToJade.convert(xml, wsigService, operationName);
 				logger.log(Level.INFO, "Jade Action: "+agentAction.toString());
 			} catch (Exception e) {
 				logger.log(Level.SEVERE, "Error in REST to jade conversion", e);
@@ -309,12 +309,18 @@ public class WSIGRestServlet extends WSIGServletBase {
 
 		if (accept != null) {
 			if (bodyResponse.contains("<soapenv:Body")) {
+				bodyResponse = bodyResponse.replace("<soapenv:Body xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">","");
+				bodyResponse = bodyResponse.replace("</soapenv:Body>", "");
+				bodyResponse = bodyResponse.replaceAll(" xmlns=\"\"", "");	
+				bodyResponse = bodyResponse.replaceAll(" xmlns=\".*\"", "");	
+				bodyResponse = bodyResponse.replaceAll("soapenv:", "");
+				
 				if (accept.equals(MediaType.APPLICATION_XML)) {		
-					bodyResponse = bodyResponse.replace("<soapenv:Body xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\">","");
-					bodyResponse = bodyResponse.replace("</soapenv:Body>", "");
-					bodyResponse = bodyResponse.replaceAll(" xmlns=\"\"", "");	
-					bodyResponse = bodyResponse.replaceAll(" xmlns=\".*\"", "");	
-					bodyResponse = format(bodyResponse);	
+					ByteArrayOutputStream out = new ByteArrayOutputStream();
+					Serializer serializer = new Serializer(out);
+					serializer.setIndent(4);
+					serializer.write(new Builder().build(bodyResponse, ""));
+					bodyResponse = out.toString("UTF-8");
 				}
 				else if (accept.equals(MediaType.APPLICATION_JSON)) {
 					XMLSerializer xmlSerializer = new XMLSerializer(); 
@@ -363,13 +369,5 @@ public class WSIGRestServlet extends WSIGServletBase {
 		}					
 
 		return operationName;
-	}
-
-	private static String format(String xml) throws ParsingException, IOException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		Serializer serializer = new Serializer(out);
-		serializer.setIndent(4);  // or whatever you like
-		serializer.write(new Builder().build(xml, ""));
-		return out.toString("UTF-8");
 	}
 }
