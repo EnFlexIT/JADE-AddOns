@@ -23,11 +23,6 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig.soap;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.List;
-import java.util.logging.Level;
-
 import jade.content.abs.AbsAggregate;
 import jade.content.abs.AbsObject;
 import jade.content.abs.AbsPrimitive;
@@ -40,6 +35,11 @@ import jade.content.schema.ObjectSchema;
 import jade.content.schema.PrimitiveSchema;
 import jade.content.schema.TermSchema;
 import jade.util.Logger;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.List;
+import java.util.logging.Level;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.Name;

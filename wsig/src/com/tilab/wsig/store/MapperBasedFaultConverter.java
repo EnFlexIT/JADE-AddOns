@@ -22,14 +22,14 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package com.tilab.wsig.store;
 
+import jade.content.onto.Ontology;
+import jade.content.schema.ObjectSchema;
+import jade.lang.acl.ACLMessage;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import com.tilab.wsig.soap.SOAPException;
-
-import jade.content.onto.Ontology;
-import jade.content.schema.ObjectSchema;
-import jade.lang.acl.ACLMessage;
 
 public class MapperBasedFaultConverter extends FaultBuilder {
 
@@ -78,7 +78,8 @@ public class MapperBasedFaultConverter extends FaultBuilder {
 			if (getFaultCodeMethod.getReturnType() == String.class) {
 				faultCode = (String)getFaultCodeMethod.invoke(faultConverterObj, null);
 			}
-		} catch(NoSuchMethodException e) {
+		} 
+		catch(NoSuchMethodException e) {
 			// getFaultCode method not present -> use default
 		}
 			
@@ -88,7 +89,8 @@ public class MapperBasedFaultConverter extends FaultBuilder {
 			if (getFaultStringMethod.getReturnType() == String.class) {
 				faultString = (String)getFaultStringMethod.invoke(faultConverterObj, null);
 			}
-		} catch(NoSuchMethodException e) {
+		} 
+		catch(NoSuchMethodException e) {
 			// getFaultString method not present -> use default
 		}
 		
@@ -98,7 +100,8 @@ public class MapperBasedFaultConverter extends FaultBuilder {
 			if (getFaultActorMethod.getReturnType() == String.class) {
 				faultActor = (String)getFaultActorMethod.invoke(faultConverterObj, null);
 			}
-		} catch(NoSuchMethodException e) {
+		} 
+		catch(NoSuchMethodException e) {
 			// getFaultActor method not present -> use default
 		}
 	}

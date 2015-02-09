@@ -92,8 +92,8 @@ public class MapperBasedActionBuilder extends ActionBuilder {
 			// Invoke mapper method
 			actionObj = (ContentElement)method.invoke(mapperObj, parameterValues);
 			logger.log(Level.FINE, "Invoked method "+method.getName()+"("+parameterList+") in mapper");
-
-		} catch(Exception e) {
+		}
+		catch(Exception e) {
 			logger.log(Level.SEVERE, "Method "+method.getName()+"("+parameterList+") error invocation");
 			throw e;
 		}

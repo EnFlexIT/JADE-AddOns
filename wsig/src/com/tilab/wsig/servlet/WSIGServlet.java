@@ -27,8 +27,8 @@ import jade.wrapper.gateway.DynamicJadeGateway;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.logging.Level;
 
 import javax.mail.MessagingException;
@@ -60,6 +60,7 @@ import org.apache.ws.security.WSPasswordCallback;
 import org.apache.ws.security.handler.WSHandlerConstants;
 
 import com.tilab.wsig.WSIGConfiguration;
+import com.tilab.wsig.rest.RestException;
 import com.tilab.wsig.soap.JadeToSoap;
 import com.tilab.wsig.soap.SOAPException;
 import com.tilab.wsig.soap.SoapToJade;
@@ -170,7 +171,12 @@ public class WSIGServlet extends WSIGServletBase {
 				SoapToJade soapToJade = new SoapToJade();
 				agentAction = (ContentElement) soapToJade.convert(soapRequest, wsigService, operationName);
 				logger.log(Level.INFO, "Jade Action: "+agentAction.toString());
-			} catch (Exception e) {
+			}
+			catch(InvocationTargetException ite) {
+				logger.log(Level.WARNING, "Error mapper invocation method", ite);
+				throw new SOAPException(RestException.FAULT_CODE_SERVER, ite.getTargetException().getMessage(), RestException.FAULT_ACTOR_WSIG);
+			}
+			catch (Exception e) {
 				logger.log(Level.SEVERE, "Error in soap to jade conversion", e);
 				throw new SOAPException(SOAPException.FAULT_CODE_SERVER, e.getMessage(), SOAPException.FAULT_ACTOR_WSIG);
 			}
@@ -198,7 +204,12 @@ public class WSIGServlet extends WSIGServletBase {
 			try {
 				JadeToSoap jadeToSoap = new JadeToSoap();
 				soapResponse = jadeToSoap.convert(opResult, wsigService, operationName);
-			} catch(Exception e) {
+			}
+			catch(InvocationTargetException ite) {
+				logger.log(Level.WARNING, "Error mapper invocation method", ite);
+				throw new SOAPException(RestException.FAULT_CODE_SERVER, ite.getTargetException().getMessage(), RestException.FAULT_ACTOR_WSIG);
+			}
+			catch(Exception e) {
 				logger.log(Level.SEVERE, "Error in jade to soap conversion", e);
 				throw new SOAPException(SOAPException.FAULT_CODE_SERVER, e.getMessage(), SOAPException.FAULT_ACTOR_WSIG);
 			}

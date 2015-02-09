@@ -22,12 +22,6 @@ Boston, MA  02111-1307, USA.
 *****************************************************************/
 package com.tilab.wsig.store;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import jade.content.abs.AbsObject;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.AggregateHelper;
@@ -37,6 +31,12 @@ import jade.content.schema.ConceptSchema;
 import jade.content.schema.ObjectSchema;
 import jade.content.schema.TermSchema;
 import jade.content.schema.facets.JavaTypeFacet;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 
 public class MapperBasedResultConverter extends ResultBuilder {

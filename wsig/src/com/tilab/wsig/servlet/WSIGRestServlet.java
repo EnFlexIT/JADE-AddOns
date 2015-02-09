@@ -31,8 +31,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
-import java.util.Map;
 import java.util.logging.Level;
 
 import javax.servlet.ServletConfig;
@@ -47,7 +47,6 @@ import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 import net.sf.json.xml.XMLSerializer;
 import nu.xom.Builder;
-import nu.xom.ParsingException;
 import nu.xom.Serializer;
 
 import org.codehaus.jettison.json.JSONObject;
@@ -59,7 +58,6 @@ import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.rest.JadeToRest;
 import com.tilab.wsig.rest.RestException;
 import com.tilab.wsig.rest.RestToJade;
-import com.tilab.wsig.soap.SOAPException;
 import com.tilab.wsig.store.OperationResult;
 import com.tilab.wsig.store.WSIGService;
 
@@ -250,7 +248,12 @@ public class WSIGRestServlet extends WSIGServletBase {
 				RestToJade restToJade = new RestToJade();
 				agentAction = (ContentElement) restToJade.convert(xml, wsigService, operationName);
 				logger.log(Level.INFO, "Jade Action: "+agentAction.toString());
-			} catch (Exception e) {
+			}
+			catch(InvocationTargetException ite) {
+				logger.log(Level.WARNING, "Error mapper invocation method", ite);
+				throw new RestException(RestException.FAULT_CODE_SERVER, ite.getTargetException().getMessage(), RestException.FAULT_ACTOR_WSIG);
+			}
+			catch (Exception e) {
 				logger.log(Level.SEVERE, "Error in REST to jade conversion", e);
 				throw new RestException(RestException.FAULT_CODE_SERVER, e.getMessage(), RestException.FAULT_ACTOR_WSIG);
 			}
@@ -278,7 +281,12 @@ public class WSIGRestServlet extends WSIGServletBase {
 				JadeToRest jadeToRest = new JadeToRest();
 				bodyResponse = jadeToRest.convert(opResult, wsigService, operationName);
 
-			} catch(Exception e) {
+			}
+			catch(InvocationTargetException ite) {
+				logger.log(Level.WARNING, "Error mapper invocation method", ite);
+				throw new RestException(RestException.FAULT_CODE_SERVER, ite.getTargetException().getMessage(), RestException.FAULT_ACTOR_WSIG);
+			}
+			catch(Exception e) {
 				logger.log(Level.SEVERE, "Error in jade to REST conversion", e);
 				throw new RestException(RestException.FAULT_CODE_SERVER, e.getMessage(), RestException.FAULT_ACTOR_WSIG);
 			}
