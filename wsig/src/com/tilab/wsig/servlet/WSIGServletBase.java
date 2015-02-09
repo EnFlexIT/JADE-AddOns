@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import javax.servlet.ServletConfig;
@@ -245,7 +246,7 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 		}
 	}
 	
-	protected Map<String, String> extractHeaders(HttpServletRequest request) {
+	protected void handleInputHeaders(HttpServletRequest request) {
 		Map<String, String> headers = new HashMap<String, String>();
 
 		// Get HTTP headers
@@ -268,7 +269,14 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 			logger.log(Level.FINE, "Client IP: "+clientIP);
 		}
 
-		return headers;
+		// Put in thread-local
+		HTTPInfo.getInputHeaders().putAll(headers);
+	}
+	
+	protected void handleOutputHeaders(HttpServletResponse response) {
+		for (Entry<String, String> entry : HTTPInfo.getOutputHeaders().entrySet()) {
+			response.setHeader(entry.getKey(), entry.getValue());
+		}
 	}
 	
 	private void startupWSIGAgent() {

@@ -30,8 +30,10 @@ import jade.lang.acl.ACLMessage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.tilab.wsig.servlet.HTTPInfo;
 import com.tilab.wsig.soap.SOAPException;
 import com.tilab.wsig.store.ApplyTo;
 import com.tilab.wsig.store.FaultConverter;
@@ -185,7 +187,26 @@ public class MathOntologyMapper {
 	}
 	
 	public PrintTime toPrintTime(){
+		
+		Map<String, String> inputHeaders = HTTPInfo.getInputHeaders();
+		inputHeaders.put("USER-PARAM", "PIPPO");
+		
 		return new PrintTime();
+	}
+
+	@ResultConverter({
+		@ApplyTo(action="printTime")
+	})
+	public class PrintTimeResultConverter {
+
+		public PrintTimeResultConverter(Void v, ACLMessage message) {
+			Map<String, String> outputHeaders = HTTPInfo.getOutputHeaders();
+			outputHeaders.put("OUT-PARAM", "PLUTO");
+		}
+		
+		public String getResult() {
+			return "OK";
+		}  
 	}
 	
 	public Multiplication toMultiplication(

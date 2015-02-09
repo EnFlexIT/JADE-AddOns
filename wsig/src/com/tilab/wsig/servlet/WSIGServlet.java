@@ -130,10 +130,9 @@ public class WSIGServlet extends WSIGServletBase {
 				throw new SOAPException(SOAPException.FAULT_CODE_CLIENT, "Error extracting SOAP message from http request. "+e.getMessage(), SOAPException.FAULT_ACTOR_WSIG);
 			} 
 
-			// Extract headers
-			Map<String, String> headers = null;
+			// Extract HTTP headers and put in threadLocal HTTPInfo
 			try {
-				headers = extractHeaders(httpRequest);
+				handleInputHeaders(httpRequest);
 			} catch(Exception e) {
 				logger.log(Level.SEVERE, "Error extracting headers from http request", e);
 				throw new SOAPException(SOAPException.FAULT_CODE_CLIENT, "Error extracting headers from http request. "+e.getMessage(), SOAPException.FAULT_ACTOR_WSIG);
@@ -179,7 +178,7 @@ public class WSIGServlet extends WSIGServletBase {
 			// Execute operation
 			OperationResult opResult = null;
 			try {
-				opResult = executeOperation(agentAction, headers, wsigService);
+				opResult = executeOperation(agentAction, HTTPInfo.getInputHeaders(), wsigService);
 				if (opResult.getResult() == OperationResult.Result.OK) {
 					if (opResult.getValue() != null) {
 						logger.log(Level.INFO, "operationResult: "+opResult.getValue()+", type "+opResult.getValue().getTypeName());
@@ -210,6 +209,9 @@ public class WSIGServlet extends WSIGServletBase {
 			// Send http response
 			try {
 				if (opResult.getResult() == OperationResult.Result.OK) {
+					// Fill HTTP headers with the threadLocal HTTPInfo 
+					handleOutputHeaders(httpResponse);
+
 					sendHttpResponse(soapResponse, httpResponse);
 				} else {
 					sendHttpErrorResponse(soapResponse, httpResponse);

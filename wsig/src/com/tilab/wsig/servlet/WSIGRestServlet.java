@@ -59,6 +59,7 @@ import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.rest.JadeToRest;
 import com.tilab.wsig.rest.RestException;
 import com.tilab.wsig.rest.RestToJade;
+import com.tilab.wsig.soap.SOAPException;
 import com.tilab.wsig.store.OperationResult;
 import com.tilab.wsig.store.WSIGService;
 
@@ -235,6 +236,14 @@ public class WSIGRestServlet extends WSIGServletBase {
 				xml = xml.substring(index);
 			}
 
+			// Extract HTTP headers and put in threadLocal HTTPInfo 
+			try {
+				handleInputHeaders(httpRequest);
+			} catch(Exception e) {
+				logger.log(Level.SEVERE, "Error extracting headers from http request", e);
+				throw new RestException(RestException.FAULT_CODE_CLIENT, "Error extracting headers from http request. "+e.getMessage(), RestException.FAULT_ACTOR_WSIG);
+			} 
+			
 			// Convert REST to jade
 			ContentElement agentAction = null;
 			try {
@@ -246,12 +255,10 @@ public class WSIGRestServlet extends WSIGServletBase {
 				throw new RestException(RestException.FAULT_CODE_SERVER, e.getMessage(), RestException.FAULT_ACTOR_WSIG);
 			}
 
-			Map<String, String> headers = extractHeaders(httpRequest);	
-
 			// Execute operation
 			OperationResult opResult = null;
 			try {
-				opResult = executeOperation(agentAction, headers, wsigService);
+				opResult = executeOperation(agentAction, HTTPInfo.getInputHeaders(), wsigService);
 				if (opResult.getResult() == OperationResult.Result.OK) {
 					if (opResult.getValue() != null) {
 						logger.log(Level.INFO, "operationResult: "+opResult.getValue()+", type "+opResult.getValue().getTypeName());
@@ -279,6 +286,9 @@ public class WSIGRestServlet extends WSIGServletBase {
 			// Send http response
 			try {
 				if (opResult.getResult() == OperationResult.Result.OK) {
+					// Fill HTTP headers with the threadLocal HTTPInfo 
+					handleOutputHeaders(httpResponse);
+					
 					sendRESTHttpResponse(bodyResponse, httpResponse, accept);
 				} else {
 					sendRESTHttpErrorResponse(bodyResponse, httpResponse, accept);
