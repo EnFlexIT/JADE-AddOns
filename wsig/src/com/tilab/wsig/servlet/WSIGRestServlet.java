@@ -41,18 +41,12 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
-import javax.xml.stream.XMLStreamReader;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONSerializer;
-import net.sf.json.xml.XMLSerializer;
 import nu.xom.Builder;
 import nu.xom.Serializer;
 
-import org.codehaus.jettison.json.JSONObject;
-import org.codehaus.jettison.mapped.Configuration;
-import org.codehaus.jettison.mapped.MappedNamespaceConvention;
-import org.codehaus.jettison.mapped.MappedXMLStreamReader;
+import org.json.JSONObject;
+import org.json.XML;
 
 import com.tilab.wsig.WSIGConfiguration;
 import com.tilab.wsig.rest.JadeToRest;
@@ -193,25 +187,17 @@ public class WSIGRestServlet extends WSIGServletBase {
 			//if content type is equal to application/json the body request is converted from json to xml,
 			//and the Operation Name is obtained as well			
 			else if (contentType.equals(MediaType.APPLICATION_JSON)){
-				JSONObject obj;
 				try {
-					XMLSerializer serializer = new XMLSerializer(); 
-					serializer.setRemoveNamespacePrefixFromElements(true);					
-					serializer.setRemoveNamespacePrefixFromElements(true);					
-					serializer.setSkipNamespaces(true);
-					serializer.setTypeHintsEnabled(false);
-					JSON json = JSONSerializer.toJSON(requestBodyString); 
-
-					xml = serializer.write(json);  
-
-					xml = xml.replaceFirst("<o>", "");
-					xml = xml.replaceFirst("</o>", "");							
-
-					obj = new JSONObject(requestBodyString);
-					Configuration config = new Configuration();
-					MappedNamespaceConvention con = new MappedNamespaceConvention(config);
-					XMLStreamReader xmlStreamReader = new MappedXMLStreamReader(obj, con);
-					operationName= xmlStreamReader.getLocalName();	
+					JSONObject jsonObj = new JSONObject(requestBodyString);
+					xml = XML.toString(jsonObj);
+					if (xml.contains("<?xml")) {
+						int index = xml.indexOf(">");
+						xml = xml.substring(index+1);
+						index = xml.indexOf("<");
+						xml = xml.substring(index);
+					}
+					operationName = getOperationNameFromXML(xml);
+					
 					logger.log(Level.INFO, "Operation Name: "+operationName);		
 				} catch (Exception e) {
 					throw new RestException(RestException.FAULT_CODE_CLIENT, "Error with Content Type  "+e, RestException.FAULT_ACTOR_WSIG);
@@ -341,23 +327,17 @@ public class WSIGRestServlet extends WSIGServletBase {
 					bodyResponse = out.toString("UTF-8");
 				}
 				else if (accept.equals(MediaType.APPLICATION_JSON)) {
-					XMLSerializer xmlSerializer = new XMLSerializer(); 
-					xmlSerializer.setTypeHintsEnabled(false);
-					xmlSerializer.setSkipNamespaces(true);
-					xmlSerializer.setRemoveNamespacePrefixFromElements(false);
-					xmlSerializer.setSkipNamespaces(true);
-					xmlSerializer.setTrimSpaces(true);		
-					xmlSerializer.setElementName("string");
-
-					JSON json = xmlSerializer.read(bodyResponse); 
-					bodyResponse = json.toString(2);
+					JSONObject jsonObj = XML.toJSONObject(bodyResponse);
+					bodyResponse = jsonObj.toString();
 				}
 			}
 		}
 
 		// Write response
 		ServletOutputStream responseOutputStream = httpResponse.getOutputStream();
-		responseOutputStream.write(bodyResponse.getBytes(Charset.forName("UTF-8")));
+		if (bodyResponse != null) {
+			responseOutputStream.write(bodyResponse.getBytes(Charset.forName("UTF-8")));
+		}
 		responseOutputStream.flush();
 		responseOutputStream.close();
 	}

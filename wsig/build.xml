@@ -60,7 +60,7 @@
 			<include name="jettison-1.1.jar"/>
 			<include name="jsr311-api-1.1.1.jar"/>
 			<include name="asm-3.1.jar"/>	
-			<include name="json-lib-2.3-jdk15.jar"/>
+			<include name="java-json.jar"/>
 			<include name="xom-1.1.jar"/>
 		</fileset>
 		<fileset dir="${jade-home}/lib">
