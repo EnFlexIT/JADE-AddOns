@@ -42,9 +42,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-import nu.xom.Builder;
-import nu.xom.Serializer;
-
 import org.json.JSONObject;
 import org.json.XML;
 
@@ -321,9 +318,6 @@ public class WSIGRestServlet extends WSIGServletBase {
 				
 				if (accept.equals(MediaType.APPLICATION_XML)) {		
 					ByteArrayOutputStream out = new ByteArrayOutputStream();
-					Serializer serializer = new Serializer(out);
-					serializer.setIndent(4);
-					serializer.write(new Builder().build(bodyResponse, ""));
 					bodyResponse = out.toString("UTF-8");
 				}
 				else if (accept.equals(MediaType.APPLICATION_JSON)) {
