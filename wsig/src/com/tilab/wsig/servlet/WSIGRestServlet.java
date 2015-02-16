@@ -316,11 +316,7 @@ public class WSIGRestServlet extends WSIGServletBase {
 				bodyResponse = bodyResponse.replaceAll(" xmlns=\".*\"", "");	
 				bodyResponse = bodyResponse.replaceAll("soapenv:", "");
 				
-				if (accept.equals(MediaType.APPLICATION_XML)) {		
-					ByteArrayOutputStream out = new ByteArrayOutputStream();
-					bodyResponse = out.toString("UTF-8");
-				}
-				else if (accept.equals(MediaType.APPLICATION_JSON)) {
+				if (accept.equals(MediaType.APPLICATION_JSON)) {
 					JSONObject jsonObj = XML.toJSONObject(bodyResponse);
 					bodyResponse = jsonObj.toString();
 				}
