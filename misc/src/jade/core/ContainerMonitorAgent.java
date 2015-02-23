@@ -193,6 +193,10 @@ public class ContainerMonitorAgent extends Agent {
 						if (reply.getPerformative() == ACLMessage.INFORM) {
 							System.out.println(reply.getContent());
 						}
+						
+						if ("true".equals(msg.getUserDefinedParameter(ACLMessage.SYNCH_DELIVERY))) {
+							reply.addUserDefinedParameter(ACLMessage.SYNCH_DELIVERY, "true");
+						}
 						myAgent.send(reply);
 					}
 					else {
