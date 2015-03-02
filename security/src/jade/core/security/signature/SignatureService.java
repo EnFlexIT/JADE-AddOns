@@ -125,8 +125,8 @@ public class SignatureService extends BaseService {
 					myLogger.log(Logger.FINEST, "Processing Incoming Command: "+cmd.getName());
 				}
 
+				Object[] params = cmd.getParams();
 				try {
-					Object[] params = cmd.getParams();
 					msg = (GenericMessage)params[1];
 					SecurityObject so;
 					Envelope env = msg.getEnvelope();
@@ -175,7 +175,7 @@ public class SignatureService extends BaseService {
 					try {
 						// Reports the exception to the sender
 						ss.reconstructACLMessage(msg);
-						ms.notifyFailureToSender(msg, sender, new InternalError(e.getMessage()));
+						ms.notifyFailureToSender(msg, (AID) params[2], new InternalError(e.getMessage()));
 					}
 					catch(Exception ne) {
 						cmd.setReturnValue(ne);
@@ -238,7 +238,7 @@ public class SignatureService extends BaseService {
 					try {
 						// Reports the exception to the sender
 						ss.reconstructACLMessage(msg);
-						ms.notifyFailureToSender(msg, (AID)params[0], new InternalError(e.getMessage()));
+						ms.notifyFailureToSender(msg, (AID)params[2], new InternalError(e.getMessage()));
 					}
 					catch(Exception ne) {
 						cmd.setReturnValue(ne);

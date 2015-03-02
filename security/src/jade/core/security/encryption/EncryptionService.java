@@ -127,8 +127,8 @@ public class EncryptionService extends BaseService {
 					myLogger.log(Logger.FINEST, "Processing Incoming Command: "+cmd.getName());
 				}
 
+				Object[] params = cmd.getParams();
 				try {
-					Object[] params = cmd.getParams();
 					msg = (GenericMessage)params[1];
 					Envelope env = msg.getEnvelope();
 					if (env != null) {
@@ -193,7 +193,7 @@ public class EncryptionService extends BaseService {
 					try {
 						// Reports the exception to the sender
 						ss.reconstructACLMessage(msg);
-						ms.notifyFailureToSender(msg, sender, new InternalError(e.getMessage()));
+						ms.notifyFailureToSender(msg, (AID) params[2], new InternalError(e.getMessage()));
 					}
 					catch(Exception ne) {
 						cmd.setReturnValue(ne);
@@ -258,7 +258,7 @@ public class EncryptionService extends BaseService {
 					try {
 						// Reports the exception to the sender
 						ss.reconstructACLMessage(msg);
-						ms.notifyFailureToSender(msg, (AID)params[0], new InternalError(e.getMessage()));
+						ms.notifyFailureToSender(msg, (AID)params[2], new InternalError(e.getMessage()));
 					}
 					catch(Exception ne) {
 						cmd.setReturnValue(ne);
