@@ -27,10 +27,12 @@ import jade.content.ContentElement;
 import jade.wrapper.gateway.DynamicJadeGateway;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
@@ -41,6 +43,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 import org.json.JSONObject;
 import org.json.XML;
@@ -145,7 +151,6 @@ public class WSIGRestServlet extends WSIGServletBase {
 
 			// Get wsig service and operation name
 			String serviceName = null;
-			String operationName = null;
 
 			//getting the Service Name from the path
 			String pathInfo = httpRequest.getPathInfo();
@@ -169,33 +174,14 @@ public class WSIGRestServlet extends WSIGServletBase {
 			//and it is parsed to get the Operation Name
 			String xml = null;
 			if (contentType.equals(MediaType.APPLICATION_XML)) {
-				xml = requestBodyString;
-				if (xml.contains("<?xml")) {
-					int index = xml.indexOf(">");
-					xml = xml.substring(index+1);
-					index = xml.indexOf("<");
-					xml = xml.substring(index);
-					operationName = getOperationNameFromXML(xml);
-				}
-				else {					
-					operationName = getOperationNameFromXML(xml);
-				}			
+				xml = removeXmlHeader(requestBodyString);
 			}
 			//if content type is equal to application/json the body request is converted from json to xml,
 			//and the Operation Name is obtained as well			
 			else if (contentType.equals(MediaType.APPLICATION_JSON)){
 				try {
 					JSONObject jsonObj = new JSONObject(requestBodyString);
-					xml = XML.toString(jsonObj);
-					if (xml.contains("<?xml")) {
-						int index = xml.indexOf(">");
-						xml = xml.substring(index+1);
-						index = xml.indexOf("<");
-						xml = xml.substring(index);
-					}
-					operationName = getOperationNameFromXML(xml);
-					
-					logger.log(Level.INFO, "Operation Name: "+operationName);		
+					xml = removeXmlHeader(XML.toString(jsonObj));
 				} catch (Exception e) {
 					throw new RestException(RestException.FAULT_CODE_CLIENT, "Error with Content Type  "+e, RestException.FAULT_ACTOR_WSIG);
 				}
@@ -208,15 +194,18 @@ public class WSIGRestServlet extends WSIGServletBase {
 				throw new RestException(RestException.FAULT_CODE_CLIENT, "Service name "+serviceName+" not present in wsig. ", RestException.FAULT_ACTOR_WSIG);
 			}
 
-			//to use the same methods exposed by the SOAPtoJade and JadeToSOAP classes,
-			//we add the soapenv:Envelope and soapenv:Body tags to our Request Body
-			if (xml.contains("<?xml")) {
-				int index = xml.indexOf(">");
-				xml = xml.substring(index+1);
-				index = xml.indexOf("<");
-				xml = xml.substring(index);
+			// Try to convert all the xml attributes to xml tags
+			try {
+				xml = convertAttributesToTags(xml);
+				// The xsl transformation add the xml header -> remove again 
+				xml = removeXmlHeader(xml);
+			} catch (Exception e) {
+				logger.log(Level.WARNING, "Error converting xml attributes to xml tags", e);
 			}
 
+			// Extract operation name
+			String operationName = getOperationNameFromXML(xml);
+			
 			// Extract HTTP headers and put in threadLocal HTTPInfo 
 			try {
 				handleInputHeaders(httpRequest);
@@ -300,6 +289,38 @@ public class WSIGRestServlet extends WSIGServletBase {
 				httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e1.getMessage());
 			}
 		}
+	}
+
+	private String removeXmlHeader(String xml) {
+		if (xml.contains("<?xml")) {
+			int index = xml.indexOf(">");
+			xml = xml.substring(index+1);
+			index = xml.indexOf("<");
+			xml = xml.substring(index);
+		}
+		return xml;
+	}
+		
+	private static final String xslString = 
+	"<xsl:stylesheet xmlns:xsl='http://www.w3.org/1999/XSL/Transform' version='1.0'>"+
+	"  <xsl:output method='xml' indent='no'/>"+
+	"  <xsl:template match='node()'>"+
+	"    <xsl:copy>"+
+	"      <xsl:apply-templates select='@*|node()'/>"+
+	"    </xsl:copy>"+
+	"  </xsl:template>"+
+	"  <xsl:template match='@*'>"+
+	"    <xsl:element name='{name()}'><xsl:value-of select='.'/></xsl:element>"+
+	"  </xsl:template>"+
+	"</xsl:stylesheet>";
+
+	private String convertAttributesToTags(String xmlString) throws Exception {
+		StreamSource xsl = new StreamSource(new ByteArrayInputStream(xslString.getBytes()));
+		Transformer transformer = TransformerFactory.newInstance().newTransformer(xsl); 
+		StreamSource xml = new StreamSource(new ByteArrayInputStream(xmlString.getBytes())); 
+		StringWriter writer = new StringWriter();
+		transformer.transform(xml, new StreamResult(writer));
+		return writer.toString();
 	}
 
 	private void sendRESTHttpResponse(String bodyResponse, HttpServletResponse httpResponse, String accept) throws Exception  {
