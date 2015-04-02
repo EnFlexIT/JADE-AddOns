@@ -257,7 +257,7 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 				if (headerName != null) {
 					String headerValue = request.getHeader(headerName);
 					headers.put(WSIGConstants.HTTP_HEADER_PREFIX+"."+headerName, headerValue);
-					logger.log(Level.FINE, "HTTP headerName: "+headerName+", headerValue: "+headerValue);
+					logger.log(Level.INFO, "HTTP headerName: "+headerName+", headerValue: "+headerValue);
 				}
 			}
 		}

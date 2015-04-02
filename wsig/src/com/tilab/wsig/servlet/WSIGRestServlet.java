@@ -201,6 +201,7 @@ public class WSIGRestServlet extends WSIGServletBase {
 				xml = removeXmlHeader(xml);
 			} catch (Exception e) {
 				logger.log(Level.WARNING, "Error converting xml attributes to xml tags", e);
+				throw new RestException(RestException.FAULT_CODE_CLIENT, "Error converting xml attributes to xml tags", RestException.FAULT_ACTOR_WSIG);
 			}
 
 			// Extract operation name
