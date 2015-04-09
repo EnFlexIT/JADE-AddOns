@@ -90,6 +90,8 @@ public class PlatformResource {
 		DynamicJadeGateway djg = (DynamicJadeGateway) servletContext.getAttribute(WSIGServletBase.WEBAPP_GATEWAY_KEY);
 		
 		if (status.equalsIgnoreCase("connect")) {
+			servletContext.setAttribute(WSIGServletBase.WEBAPP_USER_STATUS_ACTIVE_KEY, true);
+			
 			// Start WSIGAgent
 			try {
 				logger.log(Level.INFO, "Starting WSIG agent...");
@@ -102,6 +104,8 @@ public class PlatformResource {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {}
 		} else if (status.equalsIgnoreCase("disconnect")) {
+			servletContext.setAttribute(WSIGServletBase.WEBAPP_USER_STATUS_ACTIVE_KEY, false);
+			
 			// Stop WSIGAgent
 			logger.log(Level.INFO, "Stopping WSIG agent...");
 			djg.shutdown();			

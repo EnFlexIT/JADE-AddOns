@@ -67,6 +67,7 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 	public static final String WEBAPP_GATEWAY_KEY = "JADEGateway";
 	public static final String WEBAPP_STORE_KEY = "WSIGStore";
 	public static final String WEBAPP_ACTIVE_KEY = "WSIGActive";
+	public static final String WEBAPP_USER_STATUS_ACTIVE_KEY = "WSIGUserStatusActive";
 	
 	protected Logger logger = Logger.getMyLogger(getClass().getName());
 	
@@ -116,8 +117,17 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 				System.setProperty(SLCodec.PRESERVE_JAVA_TYPES, preserveJavaType);
 			}
 
+			// Add services  
+			String services = wsigConfiguration.getProperty(Profile.SERVICES);
+			if (services == null) {
+				wsigConfiguration.setProperty(Profile.SERVICES, Profile.DEFAULT_SERVICES_NOMOBILITY+";jade.core.faultRecovery.FaultRecoveryService");
+			}
+			
 			// Set WSIGConfiguration into context 
 			webappContext.setAttribute(WEBAPP_CONFIGURATION_KEY, wsigConfiguration);
+			
+			// Set startup user status to true (enable automatic restart gateway after a shutdown) 
+			webappContext.setAttribute(WEBAPP_USER_STATUS_ACTIVE_KEY, true);
 		}
 		
 		// Check the WSIG store
@@ -276,6 +286,34 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 	protected void handleOutputHeaders(HttpServletResponse response) {
 		for (Entry<String, String> entry : HTTPInfo.getOutputHeaders().entrySet()) {
 			response.setHeader(entry.getKey(), entry.getValue());
+		}
+	}
+	
+	// Check if WSIG is up, in the case of down status and user status is active 
+	// and automatic startup is true try to activate it and then wait for automaticStartupTimeout.
+	// Set automaticStartupTimeout=-1 to disable the automatic startup.  
+	protected void checkAutomaticStartupWSIGAgent() {
+		// Check gateway status
+		Boolean wsigActive = (Boolean)webappContext.getAttribute(WSIGServletBase.WEBAPP_ACTIVE_KEY);
+		if (wsigActive != null && wsigActive.booleanValue() == true) {
+			// WSIG already active
+			return;
+		}
+		
+		// Check user status
+		Boolean userStatus = (Boolean)webappContext.getAttribute(WSIGServletBase.WEBAPP_USER_STATUS_ACTIVE_KEY);
+		if (userStatus != null && userStatus.booleanValue() == true) {
+			
+			// Check automaticStartupTimeout
+			WSIGConfiguration wsigConfiguration = (WSIGConfiguration) webappContext.getAttribute(WEBAPP_CONFIGURATION_KEY);
+			int automaticStartupTimeout = wsigConfiguration.getWsigAutomaticStartupTimeout();
+			if (automaticStartupTimeout > 0) {
+				startupWSIGAgent();
+				try {
+					Thread.sleep(automaticStartupTimeout);
+				} 
+				catch (InterruptedException e) {}
+			}
 		}
 	}
 	

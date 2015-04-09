@@ -158,6 +158,10 @@ public class WSIGServlet extends WSIGServletBase {
 				throw new SOAPException(SOAPException.FAULT_CODE_CLIENT, "Error extracting SOAP body message from request. "+e.getMessage(), SOAPException.FAULT_ACTOR_WSIG);
 			}
 
+			// Check if WSIG is up, in the case of down status and user status is active 
+			// and automatic startup is true try to activate it
+			checkAutomaticStartupWSIGAgent();
+
 			// Get WSIGService 
 			WSIGService wsigService = wsigStore.getService(serviceName);
 			if (wsigService == null) {

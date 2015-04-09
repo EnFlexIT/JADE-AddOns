@@ -69,6 +69,7 @@ public class WSIGConfiguration extends Properties {
 	public static final String KEY_WSIG_ADMIN_SERVICES_URL = "wsig.admin.servicesURL";
 	public static final String KEY_WSIG_ADMIN_SERVICES_PATH = "wsig.admin.servicesPath";
 	public static final String KEY_WSIG_TIMEOUT = "wsig.timeout";
+	public static final String KEY_WSIG_AUTOMATIC_STARTUP_TIMEOUT = "wsig.automaticStartup.timeout";
 	public static final String KEY_WSIG_PRESERVE_JAVA_TYPE = SLCodec.PRESERVE_JAVA_TYPES;
 	public static final String KEY_WSIG_TRACE_CLIENT_IP = "wsig.traceClientIP";
 	public static final String KEY_WSIG_TRACE_HTTP_HEADERS = "wsig.traceHttpHeaders";
@@ -320,6 +321,16 @@ public class WSIGConfiguration extends Properties {
 		setProperty(KEY_WSIG_TIMEOUT,timeout);
 	}
 
+	public synchronized int getWsigAutomaticStartupTimeout() {
+		String timeout = getProperty(KEY_WSIG_AUTOMATIC_STARTUP_TIMEOUT);
+		return Integer.parseInt(timeout);
+	}
+
+	public void setWsigAutomaticStartupTimeout(int timeout) {
+		String strTimeout = Integer.toString(timeout);
+		setProperty(KEY_WSIG_AUTOMATIC_STARTUP_TIMEOUT,strTimeout);
+	}
+	
 	// WSS security
 	public synchronized String getWssUsername() {
 		return getProperty(KEY_WSS_USERNAME);
@@ -521,6 +532,7 @@ public class WSIGConfiguration extends Properties {
 		setProperty(WSIGConfiguration.KEY_WSIG_AGENT_NAME, "wsig");
 		setProperty(WSIGConfiguration.KEY_WSIG_AGENT_CLASS_NAME, "com.tilab.wsig.agent.WSIGAgent");
 		setProperty(WSIGConfiguration.KEY_WSIG_TIMEOUT, "30000");
+		setProperty(WSIGConfiguration.KEY_WSIG_AUTOMATIC_STARTUP_TIMEOUT, "5000");
 		setProperty(WSIGConfiguration.KEY_WSIG_TRACE_CLIENT_IP, "true");
 		setProperty(WSIGConfiguration.KEY_WSIG_TRACE_HTTP_HEADERS, "true");
 		setProperty(WSIGConfiguration.KEY_WSIG_SERVICES_PATH, "ws");

@@ -187,6 +187,10 @@ public class WSIGRestServlet extends WSIGServletBase {
 				}
 			}		
 
+			// Check if WSIG is up, in the case of down status and user status is active 
+			// and automatic startup is true try to activate it
+			checkAutomaticStartupWSIGAgent();
+			
 			// Get WSIGService 
 			WSIGService wsigService = wsigStore.getService(serviceName);
 			if (wsigService == null) {
