@@ -2,7 +2,7 @@
 <web-app  id="WebApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
   <display-name>WSIG application</display-name>
   <distributable/>
-  
+
   <servlet>
     <servlet-name>WSIG SOAP Service</servlet-name>
     <servlet-class>com.tilab.wsig.servlet.WSIGServlet</servlet-class>
@@ -103,6 +103,20 @@
       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
   </security-constraint>
+  -->
+  
+  <!-- To disable access of WSIG web console
+  -->
+  <!--
+  <security-constraint>
+    <display-name>Disable JSP pages</display-name>
+    <web-resource-collection>
+        <web-resource-name>JSP files</web-resource-name>
+        <url-pattern>*.jsp</url-pattern>
+        <http-method>GET</http-method>
+    </web-resource-collection>
+    <auth-constraint />
+  </security-constraint> 
   -->
   
 </web-app>
