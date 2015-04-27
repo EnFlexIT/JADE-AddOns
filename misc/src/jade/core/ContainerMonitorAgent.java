@@ -194,9 +194,9 @@ public class ContainerMonitorAgent extends Agent {
 							System.out.println(reply.getContent());
 						}
 						
-						if ("true".equals(msg.getUserDefinedParameter(ACLMessage.SYNCH_DELIVERY))) {
+//						if ("true".equals(msg.getUserDefinedParameter(ACLMessage.SYNCH_DELIVERY))) {
 							reply.addUserDefinedParameter(ACLMessage.SYNCH_DELIVERY, "true");
-						}
+//						}
 						myAgent.send(reply);
 					}
 					else {
