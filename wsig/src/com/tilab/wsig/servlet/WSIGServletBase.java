@@ -175,8 +175,12 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 			webappContext.setAttribute(WEBAPP_GATEWAY_KEY, jadeGateway);
 			
 			// Start WSIG agent
-			startupWSIGAgent();
-			
+			try {
+				logger.log(Level.INFO, "Starting WSIG agent...");
+				jadeGateway.checkJADE();
+			} catch (ControllerException e) {
+				logger.log(Level.WARNING, "Jade platform not present...WSIG agent not started", e);
+			}
 		} else {
 			jadeGateway = djg;
 		}
@@ -292,7 +296,7 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 	// Check if WSIG is up, in the case of down status and user status is active 
 	// and automatic startup is true try to activate it and then wait for automaticStartupTimeout.
 	// Set automaticStartupTimeout=-1 to disable the automatic startup.  
-	protected void checkAutomaticStartupWSIGAgent() {
+	protected synchronized void checkAutomaticStartupWSIGAgent() {
 		// Check gateway status
 		Boolean wsigActive = (Boolean)webappContext.getAttribute(WSIGServletBase.WEBAPP_ACTIVE_KEY);
 		if (wsigActive != null && wsigActive.booleanValue() == true) {
@@ -308,24 +312,18 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 			WSIGConfiguration wsigConfiguration = (WSIGConfiguration) webappContext.getAttribute(WEBAPP_CONFIGURATION_KEY);
 			int automaticStartupTimeout = wsigConfiguration.getWsigAutomaticStartupTimeout();
 			if (automaticStartupTimeout > 0) {
-				startupWSIGAgent();
 				try {
+					logger.log(Level.INFO, "Starting WSIG agent...");
+					jadeGateway.checkJADE();
+					
 					Thread.sleep(automaticStartupTimeout);
-				} 
-				catch (InterruptedException e) {}
+				} catch (Exception e) {
+					logger.log(Level.WARNING, "Jade platform not present...WSIG agent not started", e);
+				}
 			}
 		}
 	}
 	
-	private void startupWSIGAgent() {
-		try {
-			logger.log(Level.INFO, "Starting WSIG agent...");
-			jadeGateway.checkJADE();
-		} catch (ControllerException e) {
-			logger.log(Level.WARNING, "Jade platform not present...WSIG agent not started", e);
-		}
-	}
-
 	private void shutdownWSIGAgent() {
 		logger.log(Level.INFO, "Stopping WSIG agent...");
 		jadeGateway.shutdown();

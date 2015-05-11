@@ -28,7 +28,6 @@ import jade.wrapper.gateway.DynamicJadeGateway;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -94,7 +93,7 @@ public class WSIGRestServlet extends WSIGServletBase {
 			accept = MediaType.APPLICATION_XML;
 		}
 		//getting the Body request content type. It could be :application/json or application/xml
-		String contentType =httpRequest.getContentType();
+		String contentType = httpRequest.getContentType();
 
 		// Rest elaboration 
 		try {
@@ -102,7 +101,7 @@ public class WSIGRestServlet extends WSIGServletBase {
 				throw new RestException(RestException.FAULT_CODE_CLIENT, "Unsupported Accept Media type: "+accept+". ", RestException.FAULT_ACTOR_WSIG);
 			}
 
-			if (!(contentType.equals(MediaType.APPLICATION_XML) || contentType.equals(MediaType.APPLICATION_JSON))) {
+			if (contentType == null || !(contentType.equals(MediaType.APPLICATION_XML) || contentType.equals(MediaType.APPLICATION_JSON))) {
 				throw new RestException(RestException.FAULT_CODE_CLIENT, "Unsupported Content Type for request body. Check if you have specified the appropriate Content Type", RestException.FAULT_ACTOR_WSIG);
 			}
 
