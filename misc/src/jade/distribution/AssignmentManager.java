@@ -34,6 +34,7 @@ import jade.util.Logger;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -104,7 +105,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		deadAgentsRestartTimeout = timeout;
 	}
 	
-	public long getDeadAgentsRestertTimeout() {
+	public long getDeadAgentsRestartTimeout() {
 		return deadAgentsRestartTimeout;
 	}
 		
@@ -262,6 +263,32 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	 */
 	public int getAssignedCnt(AID owner) {
 		return assignmentsMap.getAssignedCnt(owner);	
+	}
+	
+	public Collection<Item> getAssignedItems(AID owner) {
+		return Collections.unmodifiableCollection(assignmentsMap.getAssignedItems(owner));
+	}
+	
+	/**
+	 * Return the current load of a given agent taking into account that assigned items may 
+	 * have different weights. 
+	 * @param aid The agent whose current load is requested
+	 * @return The current load of the agent 
+	 * @see getWeight(Item)
+	 */
+	public int getCurrentLoad(AID aid) {
+		int load = 0;
+		List<Item> l = assignmentsMap.getAssignedItems(aid);
+		if (l != null) {
+			for (Item item : l) {
+				load += getWeight(item);
+			}
+		}
+		return load;
+	}
+	
+	public int getWeight(Item item) {
+		return 1;
 	}
 	
 	/**
