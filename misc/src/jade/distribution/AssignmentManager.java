@@ -266,7 +266,13 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	}
 	
 	public Collection<Item> getAssignedItems(AID owner) {
-		return Collections.unmodifiableCollection(assignmentsMap.getAssignedItems(owner));
+		List<Item> l = assignmentsMap.getAssignedItems(owner);
+		if (l != null) {
+			return Collections.unmodifiableCollection(assignmentsMap.getAssignedItems(owner));
+		}
+		else {
+			return null;
+		}
 	}
 	
 	/**
