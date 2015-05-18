@@ -36,10 +36,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 
 
 /**
@@ -71,6 +73,8 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	public static final String OWNED_ITEMS = "OWNED-ITEMS";
 
 	private AssignmentsMap<Item> assignmentsMap = new DefaultAssignmentsMap<Item>();	
+	// Map an agent with the items that are going to be assigned to it: agent selection already done, but assignment not completed yet
+	private Map<AID, Set<Item>> pendingItems = new HashMap<AID, Set<Item>>();	
 	
 	private Map<AID, DeadAgentInfo> itemsByDeadAgent = new HashMap<AID, DeadAgentInfo>();
 	private long deadAgentsRestartTimeout = 30000;
@@ -265,6 +269,11 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		return assignmentsMap.getAssignedCnt(owner);	
 	}
 	
+	/**
+	 * Retrieve an unmodifiable collection of the items currently assigned to a given agent
+	 * @param owner The owner agent
+	 * @return An unmodifiable collection of the items currently assigned to the owner agent
+	 */
 	public Collection<Item> getAssignedItems(AID owner) {
 		List<Item> l = assignmentsMap.getAssignedItems(owner);
 		if (l != null) {
@@ -284,9 +293,18 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	 */
 	public int getCurrentLoad(AID aid) {
 		int load = 0;
+		// Consider load of items already assigned to aid
 		List<Item> l = assignmentsMap.getAssignedItems(aid);
 		if (l != null) {
 			for (Item item : l) {
+				load += getWeight(item);
+			}
+		}
+		
+		// Add load of items that are going to be assigned to aid
+		Set<Item> s = pendingItems.get(aid);
+		if (s != null) {
+			for (Item item : s) {
 				load += getWeight(item);
 			}
 		}
@@ -317,6 +335,8 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 				@Override
 				public void onSuccess(AID targetAgent) {
 					// Agent selection completed
+					// Item is going to be assigned to targetAgent, but assignment is not completed yet
+					addPendingItem(targetAgent, item);
 					manageSelectionDone(item, key, targetAgent, context, callback);
 				}
 
@@ -354,6 +374,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			if (b != null) {
 				myAgent.addBehaviour(new WrapperBehaviour(b) {
 					public int onEnd() {
+						removePendingItem(targetAgent, item);
 						int ret = super.onEnd();
 						if (ret > 0) {
 							// Success
@@ -585,7 +606,6 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	}
 	
 	private void reconstruct(final Callback<Void> callback) {
-		// FIXME: set level to FINE
 		myLogger.log(Logger.INFO, "Agent "+myAgent.getLocalName()+" - Activating assignments reconstruction process");
 		// Block whatever assignment that can occur during the reconstruction process. Such assignments will 
 		// be managed as soon as the reconstruction process completes
@@ -643,6 +663,39 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	} // END of inner class Assignment
 	
 
+	private void addPendingItem(AID selectedAgent, Item item) {
+		Set<Item> ii = pendingItems.get(selectedAgent);
+		if (ii == null) {
+			ii = new HashSet<Item>();
+			pendingItems.put(selectedAgent, ii);
+		}
+		ii.add(item);
+	}
+	
+	private void removePendingItem(AID selectedAgent, Item item) {
+		if (selectedAgent != null) { 
+			Set<Item> ii = pendingItems.get(selectedAgent);
+			if (ii != null) {
+				ii.remove(item);
+				if (ii.isEmpty()) {
+					pendingItems.remove(selectedAgent);
+				}
+			}
+		}
+		else {
+			for (AID aid : pendingItems.keySet()) {
+				Set<Item> ii = pendingItems.get(aid);
+				if (ii.remove(item)) {
+					if (ii.isEmpty()) {
+						pendingItems.remove(selectedAgent);
+					}
+					break;
+				}
+			}
+		}
+	}
+	
+	
 	/**
 	 * Inner class DeadAgentInfo
 	 */
