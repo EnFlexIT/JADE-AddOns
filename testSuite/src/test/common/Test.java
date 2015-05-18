@@ -31,6 +31,8 @@ import jade.util.leap.*;
 import jade.core.behaviours.DataStore;
 import test.common.xml.TestDescriptor;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Hashtable;
 
 /**
@@ -65,6 +67,8 @@ public abstract class Test implements Serializable {
 
 	private boolean pauseEnabled = false;
 	private static MessageTemplate resumeTemplate = MessageTemplate.MatchContent("resume");
+	
+	public static SimpleDateFormat logTimeFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
 
 	/**
      Specific tests must re-define this method to perform test specific 
@@ -176,7 +180,9 @@ public abstract class Test implements Serializable {
      Log a given String
 	 */
 	protected final void log(String s) {
-		Logger.getLogger().log(s);
+		String time = logTimeFormatter.format(new Date());
+		String separator = s.startsWith("---") ? " " : "--- ";
+		Logger.getLogger().log(time+separator+s);
 	}
 
 	protected final void pause() {
