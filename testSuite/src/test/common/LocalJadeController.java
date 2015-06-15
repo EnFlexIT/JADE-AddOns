@@ -151,6 +151,7 @@ class LocalJadeController implements JadeController, OutputHandler {
 		}
 		
 		public void run() {
+			int errorCnt = 0;
 			while (true) {
 				try {
 					// Check if the sub-process is still alive
@@ -168,9 +169,17 @@ class LocalJadeController implements JadeController, OutputHandler {
 				try {
 					String line = br.readLine();
 					handleLine(line);
+					errorCnt = 0;
 				}
 				catch (Exception e) {
-					logger.log(Level.SEVERE, "Error handling output line", e);
+					logger.log(Level.WARNING, "Error handling output line", e);
+					// In some cases there seems to be a problem so that subProc.exitValue() still says the process is alive, but reading its output
+					// continuously produce errors --> Avoid looping forever
+					errorCnt++;
+					if (errorCnt > 10) {
+						logger.log(Level.SEVERE, "Management of output of process "+name+" seems to be looping on errors --> Stop doing it");
+						break;
+					}
 				}				
 			}  // END of while
 			
