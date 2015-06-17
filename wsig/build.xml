@@ -24,9 +24,9 @@
 	<property name="wsig.name" value="wsig"/>
 	<property name="wsigWar.name" value="${wsig.name}"/>
 	<property name="wsigZip.name" value="${wsig.name}"/>
-	<property name="wsigJarAnnotations.name" value="wsigAnnotations"/>
+	<property name="wsigJarCommons.name" value="wsigCommons"/>
 	<property name="warfile.path" location="${wsigWebapps.dir}/${wsigWar.name}"/>
-	<property name="jarAnnotationFile.path" location="${wsigUtils.dir}/${wsigJarAnnotations.name}"/>
+	<property name="jarCommonsFile.path" location="${wsigUtils.dir}/${wsigJarCommons.name}"/>
 	<property name="wsigJarGenerator.name" value="wsigGenerator"/>
 	<property name="jarGeneratorFile.path" location="${wsigUtils.dir}/${wsigJarGenerator.name}"/>
 	<property name="jarFile.path" location="${wsigUtils.dir}/${wsig.name}"/>
@@ -148,15 +148,16 @@
 		</jar>
 	</target>
 
-	<target name="jar-annotations" depends="compile" description="Create the WSIG annotations JAR">
+	<target name="jar-commons" depends="compile" description="Create the WSIG commons JAR">
 		<mkdir dir="${wsigUtils.dir}"/>
-		<jar destfile="${jarAnnotationFile.path}.jar" compress="false">
+		<jar destfile="${jarCommonsFile.path}.jar" compress="false">
 			<fileset dir="${wsigBuild.dir}">
 				<include name="com/tilab/wsig/store/OperationName.class"/>
 				<include name="com/tilab/wsig/store/SuppressOperation.class"/>
 				<include name="com/tilab/wsig/store/ApplyTo.class"/>
 				<include name="com/tilab/wsig/store/ResultConverter.class"/>
 				<include name="com/tilab/wsig/store/FaultConverter.class"/>
+				<include name="com/tilab/wsig/servlet/HTTPInfo.class"/>
 			</fileset>
 		</jar>
 	</target>
@@ -209,7 +210,7 @@
 		<echo>Dir deletion succeded</echo>
 	</target>
 	
-	<target name="dist" depends="clean, war-base, jar-annotations, jar-generator" description="Create the distribution ZIP file">
+	<target name="dist" depends="clean, war-base, jar-commons, jar-generator" description="Create the distribution ZIP file">
 		<echo message="GENERATE THE PDF FORM OF THE WSIG GUIDE, PUT IT IN THE LOCAL DIRECTORY (jade/add-ons/wsig) AND THEN PRESS ENTER -->"/>
 		<input/>
 		<mkdir dir="${jade-home}/doc"/>
