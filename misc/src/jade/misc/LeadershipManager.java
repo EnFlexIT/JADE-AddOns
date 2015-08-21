@@ -14,12 +14,14 @@ import jade.core.messaging.TopicManagementHelper;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.util.Logger;
 import jade.util.leap.Serializable;
 
 /**
  * This class can be used when a group of agents need to coordinate to elect one leader.
  * Each agent in the group is expected to use one LeadershipManager object.
- * The leader election procedure is based on the bully algorithm 
+ * The leader election procedure is based on the bully algorithm and requires the 
+ * TopicManagementService to be activated in each container.
  */
 public class LeadershipManager implements Serializable {
 	public static final long DEFAULT_PROPOSAL_RESPONSE_TIMEOUT = 10000;
@@ -43,9 +45,12 @@ public class LeadershipManager implements Serializable {
 	private AID leaderElectionTopic;
 	
 	private long upTime;
+	private LeaderElectionInitiator initiator;
 	
 	private long proposalResponseTimeout = DEFAULT_PROPOSAL_RESPONSE_TIMEOUT;
 	private long proposalRetryInterval = DEFAULT_PROPOSAL_RETRY_INTERVAL;
+	
+	private Logger logger = Logger.getJADELogger(getClass().getName());
 	
 	/**
 	 * Bind this <code>LeadershipManager</code> to a given agent, initialize configuration properties,
@@ -83,7 +88,8 @@ public class LeadershipManager implements Serializable {
 	public void updateLeadership() {
 		leader = null;
 		status = ACQUIRING_LEADERSHIP;
-		myAgent.addBehaviour(new LeaderElectionInitiator(myAgent));
+		initiator = new LeaderElectionInitiator(myAgent);
+		myAgent.addBehaviour(initiator);
 	}
 	
 	/**
@@ -123,16 +129,27 @@ public class LeadershipManager implements Serializable {
 	private void handleLeadershipNotification(ACLMessage inform) {
 		try {
 			Leader l = (Leader) myAgent.getContentManager().extractContent(inform);
-			AID oldLeader = leader; 
-			leader = l.getName();
-			// Check the up-time
-			if (l.getAge() < (System.currentTimeMillis() - upTime)) {
-				// Should never happen
-				System.out.println("WARNING: New leader "+leader.getLocalName()+" is younger than me");
+			long myAge = System.currentTimeMillis() - upTime;
+			
+			if (isLeader()) {
+				// I am the leader and another agent thinks to be the leader too --> Leader duplication!!
+				// This may happen in situations with heavy load: for some reason a REJECT_PROPOSAL or INFORM message
+				// is delivered VERY slowly and is not received in due time or even got lost.
+				// Give up our leadership, but restart the update leadership procedure to avoid that, if the other leader is in the 
+				// same situation, we end up with no leader at all 
+				logger.log(Logger.WARNING, "Agent "+myAgent.getLocalName()+" - Leader duplication with "+l.getName().getLocalName()+" [my-age="+myAge+", duplicated-leader-age="+l.getAge()+"]. Restart leader update procedure");
+				if (initiator != null) {
+					myAgent.removeBehaviour(initiator);
+				}
+				updateLeadership();
 			}
-			status = LEADERSHIP_KNOWN;
-			if (!leader.equals(oldLeader)) {
-				leaderElected(leader);
+			else {
+				AID oldLeader = leader; 
+				leader = l.getName();
+				status = LEADERSHIP_KNOWN;
+				if (!leader.equals(oldLeader)) {
+					leaderElected(leader);
+				}
 			}
 		}
 		catch (Exception e) {
@@ -143,6 +160,7 @@ public class LeadershipManager implements Serializable {
 	
 	/**
 	 * Inner class LeaderElectionResponder
+	 * Serve messages broadcasted to the LeaderElectionTopic
 	 */
 	private class LeaderElectionResponder extends CyclicBehaviour {
 		private MessageTemplate template = MessageTemplate.MatchTopic(leaderElectionTopic);
@@ -179,16 +197,12 @@ public class LeadershipManager implements Serializable {
 				try {
 					Leader l = (Leader) myAgent.getContentManager().extractContent(propose);
 					long myAge = System.currentTimeMillis() - upTime;
-					if (l.getAge() < myAge) {
-						// The remote agent is younger than me --> Reject his proposal to become leader
-						reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
-					}
-					else if (l.getAge() == myAge) {
-						// The remote agent is as old as me --> Accept his proposal to become leader unless I am already proposing myself
+					if (l.getAge() <= myAge) {
+						// The remote agent is younger (or equal) than me --> Accept his proposal to become leader unless I am already proposing myself
 						reply.setPerformative(status == ACQUIRING_LEADERSHIP ? ACLMessage.REJECT_PROPOSAL : ACLMessage.ACCEPT_PROPOSAL);
 					}
 					else {
-						// The remote agent is elder than me --> Accept his proposal to become leader
+						// The remote agent is elder than me --> Accept his proposal to become leader anyway
 						reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);	
 					}
 				}
@@ -274,7 +288,7 @@ public class LeadershipManager implements Serializable {
 	 * Inner class SingleAttemptLeaderElectionInitiator
 	 */
 	private class SingleAttemptLeaderElectionInitiator extends ParallelBehaviour {
-		private boolean proposalAccepted = true;
+		private boolean noRejectReceived = true;
 		private MessageTemplate template;
 		
 		// Note that this behaviour runs until the timeout for receiving responses expires 
@@ -305,7 +319,7 @@ public class LeadershipManager implements Serializable {
 								break;
 							case ACLMessage.REJECT_PROPOSAL:
 								//System.out.println("Agent "+myAgent.getLocalName()+" - REJECT_PROPOSAL response received. Status is "+status);
-								proposalAccepted = false;
+								noRejectReceived = false;
 								break;
 							case ACLMessage.INFORM:
 								//System.out.println("Agent "+myAgent.getLocalName()+" - INFORM response received. Status is "+status);
@@ -323,7 +337,7 @@ public class LeadershipManager implements Serializable {
 			
 			addSubBehaviour(new WakerBehaviour(a, proposalResponseTimeout) {
 				public void onWake() {
-					if (status == ACQUIRING_LEADERSHIP && proposalAccepted) {
+					if (status == ACQUIRING_LEADERSHIP && noRejectReceived) {
 						// When the timeout expires, if no REJECT_PROPOSAL was received, and no one 
 						// became the leader in the meanwhile, acquire the leadership.
 						acquireLeadership();
@@ -340,7 +354,7 @@ public class LeadershipManager implements Serializable {
 		}
 		
 		public void reset() {
-			proposalAccepted = true;
+			noRejectReceived = true;
 			super.reset();
 		}
 	} // END of inner class SingleAttemptLeaderElectionInitiator
