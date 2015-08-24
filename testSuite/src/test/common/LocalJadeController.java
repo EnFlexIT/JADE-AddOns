@@ -29,8 +29,10 @@ import jade.core.Runtime;
 //import jade.core.ProfileImpl;
 //import jade.wrapper.*;
 import jade.util.leap.*;
+
 //import test.common.*;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 
@@ -124,7 +126,14 @@ class LocalJadeController implements JadeController, OutputHandler {
 		
 	public void kill() {
 		if (proc != null) {
-			proc.destroy();
+			try {
+				// The destroyForcibly() method is available in Java8 only
+				Method m = proc.getClass().getMethod("destroyForcibly");
+				m.invoke(proc, new Object[0]);
+			}
+			catch (Exception e) {
+				proc.destroy();
+			}
 			try {
 				Thread.sleep(1000);
 			}
