@@ -161,14 +161,12 @@ class LocalJadeController implements JadeController, OutputHandler {
 		
 		public void run() {
 			int errorCnt = 0;
+			int exitValue = -1;
 			while (true) {
 				try {
 					// Check if the sub-process is still alive
-					int exitValue = subProc.exitValue();
-					logger.log(Level.INFO, "Remote JADE instance "+name+" terminated");
-					
-					outHandler.handleTermination(exitValue);
-					notifyTerminated();
+					exitValue = subProc.exitValue();
+					logger.log(Level.INFO, "Remote JADE instance "+name+" terminated");					
 					break;
 				}
 				catch (IllegalThreadStateException itse) {
@@ -191,6 +189,9 @@ class LocalJadeController implements JadeController, OutputHandler {
 					}
 				}				
 			}  // END of while
+			
+			outHandler.handleTermination(exitValue);
+			notifyTerminated();
 			
 			stopErrorManager();
 		}   // END of run()
