@@ -390,6 +390,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			}
 			else {
 				// Implicit assignment (target agents need not to be aware they have been assigned a given item)
+				removePendingItem(targetAgent, item);
 				handleSuccess(item, identifyingKey, targetAgent, callback);
 			}
 		}
