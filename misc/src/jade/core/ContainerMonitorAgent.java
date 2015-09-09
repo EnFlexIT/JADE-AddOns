@@ -124,10 +124,11 @@ public class ContainerMonitorAgent extends Agent {
 							}
 							else if (contentUC.startsWith(DUMP_AGENT_ACTION)) {
 								String agentName = getParameter(content, 0, false); // MANDATORY
+								String filter = getParameter(content, 1, true); // OPTIONAL
 								Agent a = getAgentFromLADT(agentName);
 								String replyContent = null;
 								if(a != null) {
-									replyContent = getAgentDump(a, true);
+									replyContent = getAgentDump(a, filter, true);
 								}
 								else {
 									reply.setPerformative(ACLMessage.FAILURE);
@@ -286,14 +287,14 @@ public class ContainerMonitorAgent extends Agent {
 	    Agent[] agents = myLADT.values();
 	    for (int i = 0; i < agents.length; ++i) {
 	    	Agent a = agents[i];
-	    	String agentDump = getAgentDump(a, false);
+	    	String agentDump = getAgentDump(a, null, false);
 	    	sb.append(agentDump);
 	    }
 		sb.append("-------------------------------------------------------------\n");
 		return sb.toString();
 	}
 	
-	public static String getAgentDump(Agent a, boolean stackTraceMode) {
+	public static String getAgentDump(Agent a, String filter, boolean fullMode) {
 		StringBuffer sb = new StringBuffer();
 		if (a != null) {
     		try {
@@ -301,26 +302,39 @@ public class ContainerMonitorAgent extends Agent {
 	    		sb.append("  - Class = "+a.getClass().getName()+"\n");
 	    		sb.append("  - State = "+a.getState()+"\n");
 	    		sb.append("  - MessageQueue size = "+a.getMessageQueue().size()+"\n");
+	    		// Behaviours
 	    		sb.append("  - Behaviours\n");
 	    		Behaviour[] bb = a.getScheduler().getBehaviours();
 	    		for (int j = 0; j < bb.length; ++j) {
 	    			Behaviour b = bb[j];
 		    		sb.append("    - Behaviour "+b.getBehaviourName()+"\n");
-		    		appendBehaviourInfo(b, sb, "      ", stackTraceMode);
+		    		appendBehaviourInfo(b, sb, "      ", fullMode);
 	    		}
-	    		if(stackTraceMode) {
+	    		if(fullMode) {
+	    			// Agent thread
 	    			String dumpAgentThread = dumpThread("    ", a.getThread());
 	    			sb.append("  - Agent thread dump\n");
 	    			sb.append(dumpAgentThread);
-	    		}
-	    		try {
-	    			Method dumpMethod = a.getClass().getMethod("dump", new Class[0]);
-	    			String agentSpecificDump = (String) dumpMethod.invoke(a, new Object[0]);
-	    			sb.append("Agent specific dump\n");
-	    			sb.append(agentSpecificDump);
-	    		}
-	    		catch (Throwable t) {
-	    			// dump() method not present --> Just do nothing 
+	    			// Agent specific dump
+		    		try {
+		    			String agentSpecificDump = null;
+		    			if (filter != null) {
+		    				// Filtered dump: try to invoke a method public String dump(String filter)
+			    			Method dumpMethod = a.getClass().getMethod("dump", new Class[]{String.class});
+			    			agentSpecificDump = (String) dumpMethod.invoke(a, new Object[]{filter});
+		    			}
+		    			else {
+		    				// Normal dump: try to invoke a method public String dump()
+			    			Method dumpMethod = a.getClass().getMethod("dump", new Class[0]);
+			    			agentSpecificDump = (String) dumpMethod.invoke(a, new Object[0]);
+			    			filter = "no filter";
+		    			}
+		    			sb.append("Agent specific dump ("+filter+")\n");
+		    			sb.append(agentSpecificDump);
+		    		}
+		    		catch (Throwable t) {
+		    			// dump() method not present --> Just do nothing 
+		    		}
 	    		}
     		}
     		catch (Exception e) {
