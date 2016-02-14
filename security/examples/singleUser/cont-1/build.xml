@@ -33,7 +33,7 @@
 
        <java classname="jade.Boot" fork="yes">
 
-         <arg line="-conf cont-1.conf -container" />
+         <arg line="-conf cont-1.conf" />
 
          <classpath>
            <path refid="jade-classes"/>
