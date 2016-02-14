@@ -2,8 +2,6 @@ grant codebase "file:../../../lib/jadeSecurity.jar" {
 	permission java.security.AllPermission;  };
 grant codebase "file:../../../../../lib/jade.jar" {
 	permission java.security.AllPermission;  };
-grant codebase "file:../../../../../lib/jadeTools.jar" {
-	permission java.security.AllPermission;  };
 
 
 // --- Startup example ---
