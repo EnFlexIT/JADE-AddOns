@@ -172,10 +172,9 @@ public class PermissionFilter extends Filter {
       checkerTable.add( AgentManagementSlice.INFORM_STATE_CHANGED, 
                         am_checker );
 
-      checkerTable.add( AgentManagementSlice.KILL_CONTAINER, 
-                        am_checker );
-      checkerTable.add( AgentManagementSlice.REMOVE_TOOL, 
-                        am_checker );
+      checkerTable.add( AgentManagementSlice.SHUTDOWN_PLATFORM, am_checker );
+      checkerTable.add( AgentManagementSlice.KILL_CONTAINER, am_checker );
+      checkerTable.add( AgentManagementSlice.REMOVE_TOOL, am_checker );
 
       checkerTable.add( AgentManagementSlice.REQUEST_CREATE,
                         am_checker );

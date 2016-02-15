@@ -58,273 +58,257 @@ import jade.security.Name;
  @version $Date$ $Revision$
  */
 public class JADEAccessControllerImpl
-    implements jade.security.JADEAccessController {
-
-  private String ac_name = null;
-  private JADEAuthority authority = null;
-
-  private Policy ac_policy = null;
-
-  // The securitystore used
-  private SecurityStore securityStore = null;
-
-  Logger myLogger = myLogger = Logger.getMyLogger(this.getClass().getName());
-  
-  // constructor
-  public JADEAccessControllerImpl(String name, JADEAuthority authority, String policy) {
-    this.ac_name = name;
-    this.authority = authority;
-    setPolicy( policy );
-    initSecurityStore();
-  }
-
-
-  private void initSecurityStore() {
-    //    Locally (into the securityStore) we have a table that maps:
-    //    (JADEPrincipal) => (localAlias) ---
-        // give the JADEPrincipal
-        // get the localAlias(s)
-        securityStore = new SecurityStore( ac_name );
-        securityStore.open("secret".getBytes());
-        securityStore.flush();
-  }
-
-
-  /**
-   */
-  public synchronized void checkAction(JADEPrincipal requester,
-                          Permission permission,
-                          JADEPrincipal target,
-                          Credentials credentials) throws JADESecurityException {
-
-
-     if (requester==null) {
-       // 'null' is not a valid requester
-       requester=new JADEPrincipalImpl("guest");
-/*
-       throw new JADESecurityException("AccCtrl "+ac_name+
-                               ", req from:"+requester+
-                               ", -Not Authorized- "+permission
-                               );
-*/
-     }
+implements jade.security.JADEAccessController {
+
+	private String ac_name = null;
+	private JADEAuthority authority = null;
+
+	private Policy ac_policy = null;
+
+	// The securitystore used
+	private SecurityStore securityStore = null;
+
+	Logger myLogger = myLogger = Logger.getMyLogger(this.getClass().getName());
+
+	// constructor
+	public JADEAccessControllerImpl(String name, JADEAuthority authority, String policy) {
+		this.ac_name = name;
+		this.authority = authority;
+		setPolicy( policy );
+		initSecurityStore();
+	}
+
+
+	private void initSecurityStore() {
+		//    Locally (into the securityStore) we have a table that maps:
+		//    (JADEPrincipal) => (localAlias) ---
+		// give the JADEPrincipal
+		// get the localAlias(s)
+		securityStore = new SecurityStore( ac_name );
+		securityStore.open("secret".getBytes());
+		securityStore.flush();
+	}
+
+
+	/**
+	 */
+	public synchronized void checkAction(JADEPrincipal requester,
+			Permission permission,
+			JADEPrincipal target,
+			Credentials credentials) throws JADESecurityException {
+
+		if (requester==null) {
+			// 'null' is not a valid requester. Set the default "guest" requester
+			requester=new JADEPrincipalImpl("guest");
+		}
+
+		// local names of the requester that are accredited of performing the requested action
+		Vector localNames = new Vector();
+
+		// --- retrieve the entry from the table JADEPrincipal -> Alias
+		Name[] requesterLocNames = securityStore.getLocalNames( requester );
+
+		// typically the requester has one local name only
+		if (requesterLocNames!=null) myLogger.log(Logger.FINE, "Retrieved requester's Local alias, is: '"+ requesterLocNames[0] +"'");
+
+		if ( (requesterLocNames==null) || (requesterLocNames.length<1) 
+				|| (requesterLocNames[0].getName()==null)) { 
+			// a local name is not known.
+			// try to retrieve a NameCertificate from a NameAuthority
+			NameCertificate nc=null;
+			if (nameAuthority!=null) {
+				nc = nameAuthority.getNameCertificate(requester);
+			}
+			if (nc!=null) {
+				// TOFIX: certificate should be verified
+				String certifiedName = nc.getSubject().getName();
+				if (certifiedName!=null) 
+					requesterLocNames = Name.getName( new String[] {certifiedName});
+			}
+		}
+		if (requesterLocNames!=null) {
+			for (int i=0; i<requesterLocNames.length; i++) {
+				if ( requesterLocNames[i] != null) {
+					if (requesterLocNames[i].getName()!=null)
+						localNames.add( (Name) requesterLocNames[i] );       
+				}
+			}
+		}
 
-     // local names of the requester tha are accredited of 
-     // performing the requested action
-     Vector localNames = new Vector();
 
 
-     // --- retrieve the entry from the table JADEPrincipal -> Alias
-     Name[] requesterLocNames = securityStore.getLocalNames( requester );
+		// "unroll" the credentials
+		// from the given credentials, check if there are delegationcertificate or 
+		// OwnershipCertificate that extend the requester capabilities
+		if (credentials!=null) {
+			Enumeration creds = credentials.elements();
+			for (;creds.hasMoreElements();){
+				Object cred = creds.nextElement();
 
-     // typically the requester has one local name only
-     if (requesterLocNames!=null) myLogger.log(Logger.FINE, "Retrieved requester's Local alias, is: '"+ requesterLocNames[0] +"'");
+				if (cred instanceof OwnershipCertificate){
+					// TOFIX: verify certificate
+					JADEPrincipal owner = ((OwnershipCertificate)cred).getOwner();
+					if (owner!=null) {
+						// add the name of the owner
+						localNames.add( new Name(owner.getName()) );
+						// add (if any) other local aliases of the owner principal 
+						Name[] ownerNames = securityStore.getLocalNames( owner );
+						if ((ownerNames!=null) && (ownerNames[0]!=null)) 
+							localNames.add( ownerNames[0] ); // assume single owner alias
+					}
 
-     if ( (requesterLocNames==null) || (requesterLocNames.length<1) 
-          || (requesterLocNames[0].getName()==null)) { 
-       // a local name is not known.
-       // try to retrieve a NameCertificate from a NameAuthority
-       NameCertificate nc=null;
-       if (nameAuthority!=null) {
-         nc = nameAuthority.getNameCertificate(requester);
-       }
-       if (nc!=null) {
-       // TOFIX: certificate should be verified
-       String certifiedName = nc.getSubject().getName();
-       if (certifiedName!=null) 
-         requesterLocNames = Name.getName( new String[] {certifiedName});
-       }
-     }
-     if (requesterLocNames!=null) {
-     for (int i=0; i<requesterLocNames.length; i++) {
-       if ( requesterLocNames[i] != null) {
-         if (requesterLocNames[i].getName()!=null)
-           localNames.add( (Name) requesterLocNames[i] );       
-       }
-     }// end for
-     }
+				} else 
 
+					if (cred instanceof DelegationCertificate){
+						// verifies the cert
+						// extract the additional local names 
+						// taking into account: both 'permission' and certificates
 
+					} 
+			} // end for
 
-     // "unroll" the credentials
-     // from the given credentials, check if there are delegationcertificate or 
-     // OwnershipCertificate that extend the requester capabilities
-     if (credentials!=null) {
-     Enumeration creds = credentials.elements();
-     for (;creds.hasMoreElements();){
-       Object cred = creds.nextElement();
+		} // end if credentials!=null
 
-       if (cred instanceof OwnershipCertificate){
-         // TOFIX: verify certificate
-         JADEPrincipal owner = ((OwnershipCertificate)cred).getOwner();
-         if (owner!=null) {
-           // add the name of the owner
-           localNames.add( new Name(owner.getName()) );
-           // add (if any) other local aliases of the owner principal 
-           Name[] ownerNames = securityStore.getLocalNames( owner );
-           if ((ownerNames!=null) && (ownerNames[0]!=null)) 
-             localNames.add( ownerNames[0] ); // assume single owner alias
-         }
 
-       } else 
+		// TOFIX: temporary hack (users are not present yet into ac-jade store)
+		if ( (localNames.size()<1) || (((Name)localNames.get(0)).getName()==null) ){ 
+			Name user=new Name(requester.getName());
+			localNames.add( user );
+			myLogger.log(Logger.FINER, "### Requester's Local name converted to: '"+ user.getName() +"'");
+		}
 
-       if (cred instanceof DelegationCertificate){
-         // verifies the cert
-         // extract the additional local names 
-         // taking into account: both 'permission' and certificates
 
-       } 
-     } // end for
+		// the special LocalName '*' can be played by everybody
+		localNames.add( new Name("*") );
 
-     } // end if credentials!=null
 
+		// convert the localNames Vector to an array
+		Name[] locNames = new Name[ localNames.size() ];
+		for (int i=0; i<localNames.size(); i++) 
+			locNames[i]= (Name) localNames.get(i);
 
-     // TOFIX: temporary hack (users are not present yet into ac-jade store)
-     if ( (localNames.size()<1) || (((Name)localNames.get(0)).getName()==null) ){ 
-       Name user=new Name(requester.getName());
-       localNames.add( user );
-       myLogger.log(Logger.FINER, "### Requester's Local name converted to: '"+ user.getName() +"'");
-     }
 
+		// --- Construct lnpd, a ProtectionDomain from the LocalName ---
+		Policy ac_policy = Policy.getPolicy();
+		CodeSource source = new CodeSource(null, (java.security.cert.Certificate[]) null);
 
-     // the special LocalName '*' can be played by everybody
-     localNames.add( new Name("*") );
+		// this is just for testing
+		//    ProtectionDomain nullDomain = new ProtectionDomain(
+		//    source, null, null, null);
+		//     PermissionCollection nullPerms = policy.getPermissions(nullDomain);
+		//
 
+		ProtectionDomain lnpd = new ProtectionDomain(
+				source, null, getClass().getClassLoader(),
+				locNames
+				);
 
+		PermissionCollection perms = ac_policy.getPermissions( lnpd );
+		//myLogger.log(Logger.FINE, " perms = \n"+perms+"\n");
 
 
-     // convert the localNames Vector to an array
-     Name[] locNames = new Name[ localNames.size() ];
-     for (int i=0; i<localNames.size(); i++) 
-       locNames[i]= (Name) localNames.get(i);
 
+		// --- check for the Permission
+		//       into that ProtectionDomain
+		//       according to the current java Policy ---
 
+		StringBuffer str = new StringBuffer();
+		str.append( "Can { ");
+		for (int i=0; i<locNames.length;i++) str.append( locNames[i] +" ");
+		str.append("} perform "+permission+"??? ");
 
 
+		//boolean passed = Policy.getPolicy().implies( lnpd, permission );
+		boolean passed = perms.implies( permission );  // works either ways
 
+		str.append( (passed) ? "yes" : "NOT");
+		myLogger.log( Logger.FINE, str.toString() );
 
 
-      // --- Construct lnpd, a ProtectionDomain from the LocalName ---
-      Policy ac_policy = Policy.getPolicy();
-      CodeSource source = new CodeSource(null, (java.security.cert.Certificate[]) null);
+		//passed=true;
 
-      // this is just for testing
-      //    ProtectionDomain nullDomain = new ProtectionDomain(
-      //    source, null, null, null);
-      //     PermissionCollection nullPerms = policy.getPermissions(nullDomain);
-      //
 
-      ProtectionDomain lnpd = new ProtectionDomain(
-          source, null, getClass().getClassLoader(),
-          locNames
-      );
+		if (!passed) 
+			throw new JADESecurityException("AccCtrl "+ac_name+
+					", req from:"+requester.getName()+
+					", -Not Authorized- "+permission
+					);
 
-      PermissionCollection perms = ac_policy.getPermissions( lnpd );
-      //myLogger.log(Logger.FINE, " perms = \n"+perms+"\n");
+	} // end checkAction()
 
 
 
-      // --- check for the Permission
-      //       into that ProtectionDomain
-      //       according to the current java Policy ---
 
-      StringBuffer str = new StringBuffer();
-      str.append( "Can { ");
-      for (int i=0; i<locNames.length;i++) str.append( locNames[i] +" ");
-      str.append("} perform "+permission+"??? ");
- 
- 
-      //boolean passed = Policy.getPolicy().implies( lnpd, permission );
-      boolean passed = perms.implies( permission );  // works either ways
 
-      str.append( (passed) ? "yes" : "NOT");
-      myLogger.log( Logger.FINE, str.toString() );
+	public Object doPrivileged(PrivilegedExceptionAction action) throws Exception {
+		throw new Exception("JADEAccessControllerImpl:  doPrivileged() method not implemented yet.");
+		//    return new Object();
+	}
 
 
-      //passed=true;
+	// this private class is needed to properly intersect the protection domains
+	// of JADE (AllPermission) and the agent's code
+	private class MyDomainCombiner
+	implements DomainCombiner {
+		public ProtectionDomain[] combine(ProtectionDomain[] currentDomains,
+				ProtectionDomain[] assignedDomains) {
+			return assignedDomains;
+		} // end combine
+	} // end class
 
 
-      if (!passed) 
-        throw new JADESecurityException("AccCtrl "+ac_name+
-                                      ", req from:"+requester.getName()+
-                                      ", -Not Authorized- "+permission
-                                      );
 
-} // end checkAction()
+	/**
+	 * Make a priviledged action by using the given credentials
+	 *
+	 * @param action
+	 * @param certs
+	 * @return
+	 * @throws java.lang.Exception
+	 */
+	public Object doAsPrivileged(PrivilegedExceptionAction action,
+			final Credentials credential) throws Exception {
 
 
+		// --- create the context where the action will be executed ---
+		AccessControlContext acc = (AccessControlContext) AccessController.
+				doPrivileged(
+						// begin AccessController.doPrivileged call
+						new java.security.PrivilegedExceptionAction() {
+							public Object run() throws Exception {
 
+								verifySubject(credential);
+								ProtectionDomain domain = new ProtectionDomain(
+										new CodeSource(null, (java.security.cert.Certificate[])null), collectPermissions(credential), null, null);
 
+								MyDomainCombiner myDomainCombiner = new MyDomainCombiner();
 
-  public Object doPrivileged(PrivilegedExceptionAction action) throws Exception {
-    throw new Exception("JADEAccessControllerImpl:  doPrivileged() method not implemented yet.");
-//    return new Object();
-  }
+								AccessControlContext acc = new AccessControlContext(
+										new AccessControlContext(
+												new ProtectionDomain[] {domain}
+												),
+												myDomainCombiner
+										);
+								return acc;
+							}
+						}); // end AccessController.doPrivileged call
 
 
-  // this private class is needed to properly intersect the protection domains
-  // of JADE (AllPermission) and the agent's code
-  private class MyDomainCombiner
-      implements DomainCombiner {
-    public ProtectionDomain[] combine(ProtectionDomain[] currentDomains,
-                                      ProtectionDomain[] assignedDomains) {
-      return assignedDomains;
-    } // end combine
-  } // end class
+		// --- execute the action in the proper context ---
+		try {
+			return AccessController.doPrivileged(action, acc);
+		}
+		catch (PrivilegedActionException e) {
+			throw e.getException();
+		}
 
+	} // end doAsPrivileged() method
 
 
-  /**
-   * Make a priviledged action by using the given credentials
-   *
-   * @param action
-   * @param certs
-   * @return
-   * @throws java.lang.Exception
-   */
-  public Object doAsPrivileged(PrivilegedExceptionAction action,
-                               final Credentials credential) throws Exception {
 
-
-    // --- create the context where the action will be executed ---
-    AccessControlContext acc = (AccessControlContext) AccessController.
-        doPrivileged(
-        // begin AccessController.doPrivileged call
-        new java.security.PrivilegedExceptionAction() {
-      public Object run() throws Exception {
-
-        verifySubject(credential);
-        ProtectionDomain domain = new ProtectionDomain(
-            new CodeSource(null, (java.security.cert.Certificate[])null), collectPermissions(credential), null, null);
-
-        MyDomainCombiner myDomainCombiner = new MyDomainCombiner();
-
-        AccessControlContext acc = new AccessControlContext(
-            new AccessControlContext(
-                  new ProtectionDomain[] {domain}
-            ),
-            myDomainCombiner
-        );
-        return acc;
-      }
-    }); // end AccessController.doPrivileged call
-
-
-    // --- execute the action in the proper context ---
-    try {
-      return AccessController.doPrivileged(action, acc);
-    }
-    catch (PrivilegedActionException e) {
-      throw e.getException();
-    }
-
-  } // end doAsPrivileged() method
-
-
-
-  private void verifySubject(Credentials creds) throws
-      JADESecurityException {
-/*
+	private void verifySubject(Credentials creds) throws
+	JADESecurityException {
+		/*
     if (certs.getIdentityCertificate() == null) {
       throw new JADESecurityException("Null identity");
     }
@@ -342,14 +326,14 @@ public class JADEAccessControllerImpl
       }
       verify( (DelegationCertificate) certs.getDelegationCertificates().get(d));
     }
-*/
-  }
+		 */
+	}
 
 
 
-  private PermissionCollection collectPermissions(Credentials creds) {
-    Permissions perms = new Permissions();
-/*
+	private PermissionCollection collectPermissions(Credentials creds) {
+		Permissions perms = new Permissions();
+		/*
     for (int j = 0;
          j < certs.getDelegationCertificates().size() &&
          certs.getDelegationCertificates().get(j) != null; j++) {
@@ -360,12 +344,12 @@ public class JADEAccessControllerImpl
         perms.add(p);
       }
     }
- */
-    return perms;
-  }
+		 */
+		return perms;
+	}
 
-  private static void verify(JADECertificate certificate) throws JADESecurityException {
-    /*        if (publicKey == null)
+	private static void verify(JADECertificate certificate) throws JADESecurityException {
+		/*        if (publicKey == null)
                     return;
             if (certificate == null)
                     throw new JADESecurityException("Null certificate");
@@ -401,40 +385,40 @@ public class JADEAccessControllerImpl
             catch (ClassCastException e4) {
                     throw new JADESecurityException(e4.getMessage());
             }
-     */
-  }
+		 */
+	}
 
 
 
-  /**
-   * (optionally) it can be associated a NameAuthority, so that 
-   *  when a principal does not have a known local alias, 
-   *  a NameCertificate is retrieved. The local alias used 
-   *  is the name contained into the certificate.
-   */
-  public void setNameAuthority(NameAuthority nameAuthority){
-    this.nameAuthority=nameAuthority;
-  }
-  private NameAuthority nameAuthority = null;
+	/**
+	 * (optionally) it can be associated a NameAuthority, so that 
+	 *  when a principal does not have a known local alias, 
+	 *  a NameCertificate is retrieved. The local alias used 
+	 *  is the name contained into the certificate.
+	 */
+	public void setNameAuthority(NameAuthority nameAuthority){
+		this.nameAuthority=nameAuthority;
+	}
+	private NameAuthority nameAuthority = null;
 
 
 
 
-  private void setPolicy(String policyFile) {
-    try {
-    //if (System.getSecurityManager() == null) {
-        System.setProperty("java.security.policy", policyFile);
-        myLogger.log( Logger.CONFIG, "Setting security policy: "+policyFile);
-        //Policy.getPolicy();
-        //Policy.setPolicy(new sun.security.provider.PolicyFile());
-        //System.out.println("Setting security manager");
-        //System.setSecurityManager(new SecurityManager());
-    //}
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+	private void setPolicy(String policyFile) {
+		try {
+			//if (System.getSecurityManager() == null) {
+			System.setProperty("java.security.policy", policyFile);
+			myLogger.log( Logger.CONFIG, "Setting security policy: "+policyFile);
+			//Policy.getPolicy();
+			//Policy.setPolicy(new sun.security.provider.PolicyFile());
+			//System.out.println("Setting security manager");
+			//System.setSecurityManager(new SecurityManager());
+			//}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 
 

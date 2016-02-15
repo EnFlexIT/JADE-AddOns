@@ -23,8 +23,6 @@ Boston, MA  02111-1307, USA.
 
 package jade.security;
 
-import jade.security.*;
-
 
 public class PlatformPermission extends AuthPermission {
 	
@@ -36,7 +34,7 @@ public class PlatformPermission extends AuthPermission {
 	}
 
 	/**
-		Creates a new ContainerPermission.
+		Creates a new PlatformPermission.
 		@param name The name of the permission.
 		@param actions The actions of the permission.
 	*/

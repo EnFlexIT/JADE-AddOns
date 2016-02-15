@@ -76,8 +76,6 @@ public class SimpleJADEChecker extends BaseJADEChecker {
 	 *
 	 */
 	public void check(Command cmd) throws JADESecurityException {
-
-
 		String name = cmd.getName();
 		Object[] params = cmd.getParams(); 
 		JADEPrincipal requester = cmd.getPrincipal();
@@ -102,7 +100,7 @@ public class SimpleJADEChecker extends BaseJADEChecker {
 			creds = nd.getOwnerCredentials();
 
 			if ( nd.getNode().hasPlatformManager() ) {
-				// Node holds a Main container: Check if the requester is autorized to create a platform.
+				// Node holds a Main container: Check if the requester is authorized to create a platform.
 				myLogger.log(Logger.FINE, "  NEW_NODE ("+nd.getName()+")  p="+requester+" c="+creds);
 				permission = new PlatformPermission( "", "create");
 				checkAction( requester, permission, null, creds );
@@ -120,6 +118,14 @@ public class SimpleJADEChecker extends BaseJADEChecker {
 		else if (name.equals(Service.DEAD_NODE)) {
 			// FIXME: Should we perform some check?
 		}
+		else if (name.equals(AgentManagementSlice.SHUTDOWN_PLATFORM)) {
+			if (direction == Filter.OUTGOING) {
+				// Main container: SHUTDOWN_PLATFORM DOWN command issued by the AMS on behalf of a requester
+				jade.core.security.permission.PermissionFilter.log( direction, cmd );
+				permission = new PlatformPermission( "", "kill");
+				checkAction( requester, permission, null, creds );
+			}
+		}
 		else if (name.equals(AgentManagementSlice.KILL_CONTAINER)) {
 			if (direction == Filter.OUTGOING) {
 				// Main container: KILL_CONTAINER DOWN command issued by the AMS on behalf of a requester
@@ -129,7 +135,7 @@ public class SimpleJADEChecker extends BaseJADEChecker {
 				try {
 					String containerOwner = service.getContainerOwner(cid).getName();
 	
-					// Check if the requester is autorized to kill a container owned by a given owner.
+					// Check if the requester is authorized to kill a container owned by a given owner.
 					permission = new ContainerPermission(ContainerPermission.CONTAINER_OWNER+"="+containerOwner, "kill");				
 					checkAction( requester, permission, null, creds );
 				}
@@ -466,8 +472,7 @@ public class SimpleJADEChecker extends BaseJADEChecker {
 
 			// feed the new cmd into the service chain
 			try {
-				Service amserv = myContainer.getServiceFinder().findService(
-						jade.core.management.AgentManagementSlice.NAME);
+				Service amserv = myContainer.getServiceFinder().findService(jade.core.management.AgentManagementSlice.NAME);
 
 				returnValue = amserv.submit(cmd2);
 			} catch (ServiceException ex) {
