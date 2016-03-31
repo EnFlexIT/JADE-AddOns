@@ -22,12 +22,10 @@ Boston, MA  02111-1307, USA.
  *****************************************************************/
 package com.tilab.wsig.servlet;
 
-import jade.content.ContentElement;
-import jade.wrapper.gateway.DynamicJadeGateway;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.logging.Level;
 
@@ -41,7 +39,6 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.wsdl.Definition;
-import javax.wsdl.WSDLException;
 import javax.wsdl.factory.WSDLFactory;
 import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPElement;
@@ -66,6 +63,9 @@ import com.tilab.wsig.soap.SOAPException;
 import com.tilab.wsig.soap.SoapToJade;
 import com.tilab.wsig.store.OperationResult;
 import com.tilab.wsig.store.WSIGService;
+
+import jade.content.ContentElement;
+import jade.wrapper.gateway.DynamicJadeGateway;
 
 
 public class WSIGServlet extends WSIGServletBase {
@@ -96,8 +96,36 @@ public class WSIGServlet extends WSIGServletBase {
 		logger.log(Level.INFO, "WSIG SOAP Servlet started");
 	}
 
+	private void dumpRequest(HttpServletRequest httpRequest) {
+		try {
+			StringBuilder sb = new StringBuilder();
+			sb.append("HTTP Request -> ");
+			sb.append("[HTTP REQUEST URL: ");
+			sb.append(httpRequest.getRequestURL());                                        
+			sb.append("] [HTTP METHOD: ");
+			sb.append(httpRequest.getMethod());                                        
+			sb.append("] [REQUEST PARAMETERS: ");
+	        Enumeration<String> enumeration = httpRequest.getParameterNames();
+	        while(enumeration.hasMoreElements()) {
+	            String parameterName = enumeration.nextElement();
+	            sb.append(parameterName + "=" +httpRequest.getParameter(parameterName)+",");
+	        }
+	        sb.append("] [REMOTE ADDRESS: ");
+	        sb.append(httpRequest.getRemoteAddr());
+	        sb.append("] [SESSION ID: ");
+	        sb.append(httpRequest.getRequestedSessionId());
+	        sb.append("]");
+	        logger.log(Level.INFO, sb.toString());
+		}
+		catch (Exception e) {
+			logger.log(Level.WARNING, "Error tracing http request", e);
+		}
+	}
+	
 	@Override
 	protected void doPost(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws ServletException, IOException {
+		dumpRequest(httpRequest);
+		
 		// A typical Web Service convention is that a request of the form 
 		// http://<wsig-url>/<service-name>?WSDL (elements following the '?' are HTTP 
 		// request parameters), e.g. http://localhost:8080/wsig/ws/MatchService?WSDL, 
@@ -312,35 +340,32 @@ public class WSIGServlet extends WSIGServletBase {
 	}
 
 	private void elaborateWSDLRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
-
-		String requestURL = httpRequest.getRequestURL().toString();
-		logger.log(Level.INFO, "WSDL request arrived ("+requestURL+")");
-
-		int pos = requestURL.lastIndexOf('/');
-		if (pos == -1) {
-			httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "WSDL request " + requestURL + " not correct");
-			return;
-		}
-
-		String serviceName = requestURL.substring(pos+1);
-		logger.log(Level.INFO, "WSDL request for service "+serviceName);
-
-		// Get WSIGService 
-		WSIGService wsigService = wsigStore.getService(serviceName);
-		if (wsigService == null) {
-			logger.log(Level.SEVERE, "Service "+serviceName+" not present in wsig");
-			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Service "+serviceName+" not present in wsig");
-			return;
-		}
-
-		// Get wsdl definition (and update soap endpoint)
-		Definition wsdlDefinition = wsigService.getWsdlDefinition(httpRequest);
-
-		// Send wsdl over http
+		String serviceName = null;
 		try {
+			String requestURL = httpRequest.getRequestURL().toString();
+			int pos = requestURL.lastIndexOf('/');
+			if (pos == -1) {
+				httpResponse.sendError(HttpServletResponse.SC_NOT_FOUND, "WSDL request " + requestURL + " not correct");
+				return;
+			}
+	
+			serviceName = requestURL.substring(pos+1);
+			logger.log(Level.INFO, "WSDL request for service "+serviceName);
+	
+			// Get WSIGService 
+			WSIGService wsigService = wsigStore.getService(serviceName);
+			if (wsigService == null) {
+				logger.log(Level.SEVERE, "Service "+serviceName+" not present in wsig");
+				httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Service "+serviceName+" not present in wsig");
+				return;
+			}
+	
+			// Get wsdl definition (and update soap endpoint)
+			Definition wsdlDefinition = wsigService.getWsdlDefinition(httpRequest);
 			WSDLFactory.newInstance().newWSDLWriter().writeWSDL(wsdlDefinition, httpResponse.getOutputStream());
-		} catch (WSDLException e) {
-			logger.log(Level.SEVERE, "Error sending wsdl of service "+serviceName);
+		} 
+		catch (Exception e) {
+			logger.log(Level.SEVERE, "Error sending wsdl of service "+serviceName, e);
 			httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error sending wsdl of service "+serviceName);
 		}
 	}
