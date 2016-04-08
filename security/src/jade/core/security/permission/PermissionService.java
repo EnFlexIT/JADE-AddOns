@@ -115,6 +115,8 @@ implements NameAuthority {
 
 		myContainer = ac;
 		myProfile = profile;
+		
+		myLogger.log( Logger.INFO, "PermissionService initializing....");
 
 		// set properly various profile parameters and system properties
 		setPropertiesValue();
