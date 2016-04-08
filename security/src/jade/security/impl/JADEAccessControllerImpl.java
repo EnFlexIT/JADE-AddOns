@@ -57,8 +57,7 @@ import jade.security.Name;
  @author Giosue Vitaglione - Telecom Italia LAB
  @version $Date$ $Revision$
  */
-public class JADEAccessControllerImpl
-implements jade.security.JADEAccessController {
+public class JADEAccessControllerImpl implements jade.security.JADEAccessController {
 
 	private String ac_name = null;
 	private JADEAuthority authority = null;
@@ -78,12 +77,25 @@ implements jade.security.JADEAccessController {
 		initSecurityStore();
 	}
 
-
+	private void setPolicy(String policyFile) {
+		try {
+			//if (System.getSecurityManager() == null) {
+			System.setProperty("java.security.policy", policyFile);
+			myLogger.log( Logger.CONFIG, "Setting security policy: "+policyFile);
+			//Policy.getPolicy();
+			//Policy.setPolicy(new sun.security.provider.PolicyFile());
+			//System.out.println("Setting security manager");
+			//System.setSecurityManager(new SecurityManager());
+			//}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void initSecurityStore() {
-		//    Locally (into the securityStore) we have a table that maps:
-		//    (JADEPrincipal) => (localAlias) ---
-		// give the JADEPrincipal
-		// get the localAlias(s)
+		// Locally (into the securityStore) we have a table that maps:
+		// JADEPrincipal => localAlias[]
 		securityStore = new SecurityStore( ac_name );
 		securityStore.open("secret".getBytes());
 		securityStore.flush();
@@ -93,9 +105,9 @@ implements jade.security.JADEAccessController {
 	/**
 	 */
 	public synchronized void checkAction(JADEPrincipal requester,
-			Permission permission,
-			JADEPrincipal target,
-			Credentials credentials) throws JADESecurityException {
+	                                     Permission permission,
+	                                     JADEPrincipal target,
+	                                     Credentials credentials) throws JADESecurityException {
 
 		if (requester==null) {
 			// 'null' is not a valid requester. Set the default "guest" requester
@@ -111,8 +123,7 @@ implements jade.security.JADEAccessController {
 		// typically the requester has one local name only
 		if (requesterLocNames!=null) myLogger.log(Logger.FINE, "Retrieved requester's Local alias, is: '"+ requesterLocNames[0] +"'");
 
-		if ( (requesterLocNames==null) || (requesterLocNames.length<1) 
-				|| (requesterLocNames[0].getName()==null)) { 
+		if ( (requesterLocNames==null) || (requesterLocNames.length<1) || (requesterLocNames[0].getName()==null)) { 
 			// a local name is not known.
 			// try to retrieve a NameCertificate from a NameAuthority
 			NameCertificate nc=null;
@@ -142,9 +153,8 @@ implements jade.security.JADEAccessController {
 		// OwnershipCertificate that extend the requester capabilities
 		if (credentials!=null) {
 			Enumeration creds = credentials.elements();
-			for (;creds.hasMoreElements();){
+			while (creds.hasMoreElements()){
 				Object cred = creds.nextElement();
-
 				if (cred instanceof OwnershipCertificate){
 					// TOFIX: verify certificate
 					JADEPrincipal owner = ((OwnershipCertificate)cred).getOwner();
@@ -156,18 +166,14 @@ implements jade.security.JADEAccessController {
 						if ((ownerNames!=null) && (ownerNames[0]!=null)) 
 							localNames.add( ownerNames[0] ); // assume single owner alias
 					}
-
-				} else 
-
-					if (cred instanceof DelegationCertificate){
-						// verifies the cert
-						// extract the additional local names 
-						// taking into account: both 'permission' and certificates
-
-					} 
-			} // end for
-
-		} // end if credentials!=null
+				} 
+				else if (cred instanceof DelegationCertificate){
+					// verifies the cert
+					// extract the additional local names 
+					// taking into account: both 'permission' and certificates
+				} 
+			}
+		}
 
 
 		// TOFIX: temporary hack (users are not present yet into ac-jade store)
@@ -187,53 +193,29 @@ implements jade.security.JADEAccessController {
 		for (int i=0; i<localNames.size(); i++) 
 			locNames[i]= (Name) localNames.get(i);
 
-
-		// --- Construct lnpd, a ProtectionDomain from the LocalName ---
+		// Construct a ProtectionDomain from the LocalNames
 		Policy ac_policy = Policy.getPolicy();
 		CodeSource source = new CodeSource(null, (java.security.cert.Certificate[]) null);
-
-		// this is just for testing
-		//    ProtectionDomain nullDomain = new ProtectionDomain(
-		//    source, null, null, null);
-		//     PermissionCollection nullPerms = policy.getPermissions(nullDomain);
-		//
-
-		ProtectionDomain lnpd = new ProtectionDomain(
-				source, null, getClass().getClassLoader(),
-				locNames
-				);
-
+		ProtectionDomain lnpd = new ProtectionDomain(source, null, getClass().getClassLoader(), locNames);
+		// Check the permission
 		PermissionCollection perms = ac_policy.getPermissions( lnpd );
-		//myLogger.log(Logger.FINE, " perms = \n"+perms+"\n");
-
-
-
-		// --- check for the Permission
-		//       into that ProtectionDomain
-		//       according to the current java Policy ---
-
-		StringBuffer str = new StringBuffer();
-		str.append( "Can { ");
-		for (int i=0; i<locNames.length;i++) str.append( locNames[i] +" ");
-		str.append("} perform "+permission+"??? ");
-
-
-		//boolean passed = Policy.getPolicy().implies( lnpd, permission );
 		boolean passed = perms.implies( permission );  // works either ways
 
-		str.append( (passed) ? "yes" : "NOT");
-		myLogger.log( Logger.FINE, str.toString() );
-
-
-		//passed=true;
-
-
-		if (!passed) 
+		if (!passed) { 
+			StringBuffer str = new StringBuffer();
+			str.append( "Permission check FAILED: Requester="+requester.getName()+", local-names={");
+			for (int i=0; i<locNames.length;i++) {
+				str.append( locNames[i] +" ");
+			}
+			str.append("}, associated-permissions="+perms); 
+			str.append(", required-permission="+permission);
+			myLogger.log(Logger.WARNING, str.toString());
+			
 			throw new JADESecurityException("AccCtrl "+ac_name+
 					", req from:"+requester.getName()+
 					", -Not Authorized- "+permission
 					);
-
+		}
 	} // end checkAction()
 
 
@@ -400,26 +382,5 @@ implements jade.security.JADEAccessController {
 		this.nameAuthority=nameAuthority;
 	}
 	private NameAuthority nameAuthority = null;
-
-
-
-
-	private void setPolicy(String policyFile) {
-		try {
-			//if (System.getSecurityManager() == null) {
-			System.setProperty("java.security.policy", policyFile);
-			myLogger.log( Logger.CONFIG, "Setting security policy: "+policyFile);
-			//Policy.getPolicy();
-			//Policy.setPolicy(new sun.security.provider.PolicyFile());
-			//System.out.println("Setting security manager");
-			//System.setSecurityManager(new SecurityManager());
-			//}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-
 
 }

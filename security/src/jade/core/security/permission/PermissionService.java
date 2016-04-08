@@ -116,28 +116,16 @@ implements NameAuthority {
 		myContainer = ac;
 		myProfile = profile;
 
-
 		// set properly various profile parameters and system properties
 		setPropertiesValue();
 
 		// set security manager for this Java Virtual Machine
 		setSecurityManager();
 
-
-		// print names of all services will start
-		jade.util.leap.List l = myProfile.getSpecifiers(Profile.SERVICES);
-		jade.util.leap.Iterator serviceSpecifiers = l.iterator();
-		while(serviceSpecifiers.hasNext()) {
-			jade.core.Specifier s = (jade.core.Specifier)serviceSpecifiers.next();
-			String serviceClass = s.getClassName();
-			if (myLogger.isLoggable(Logger.FINER))
-				myLogger.log(Logger.FINER, "serviceClass="+serviceClass );
-		}
-
 		// PermissionFilter class
 		String permFilterClass = myProfile.getParameter( PERM_FILTER_CLASS_KEY, PERM_FILTER_CLASS_DEFAULT);
 
-		// create and initialize the filter of this service
+		// create and initialize the filters of this service
 		try {
 			permFilterDown = (PermissionFilter) Class.forName(permFilterClass).
 			newInstance();
@@ -165,48 +153,37 @@ implements NameAuthority {
 		}
 	}
 
-
 	private void setPropertiesValue() {
-		// container's policy file
 		copyProp( POLICY_FILE_KEY, POLICY_FILE_DEFAULT);
-	} // end setPropertiesValue
+	} 
+	
+	// Copy a JADE-profile property to a System property
 	private void copyProp(String key, String defaultVal){
 		String val =  myProfile.getParameter( key, null );
 		if (( val!=null) && (val.length()>0)) { 
 			System.setProperty(  key, val ); 
 		} else {
 			System.setProperty(  key, defaultVal ); }
-	} // end copyProp
+	}
 
-
-	// for the whole JVM
+	// Set the indicated SecurityManager for the local JVM
 	private void setSecurityManager() {
-
-		String secman_class = myProfile.getParameter( SECURITY_MANAGER_KEY, 
-				SECURITY_MANAGER_DEFAULT);
+		String secman_class = myProfile.getParameter( SECURITY_MANAGER_KEY, SECURITY_MANAGER_DEFAULT);
 
 		// if 'null' do not set any security manager
 		if (secman_class.equals(SECURITY_MANAGER_NULL)) return;
 
 		try {
 			if (System.getSecurityManager() == null) {
-				if (myLogger.isLoggable(Logger.INFO))
-					myLogger.log(Logger.INFO, "Installing JADESecurityManager.  ");
+				myLogger.log(Logger.INFO, "Installing JADESecurityManager.  ");
 			}
 			else {
-				if (myLogger.isLoggable(Logger.INFO))
-					myLogger.log(Logger.INFO,
-							"Replacing existing SecurityManager with a JADESecurityManager.  (" +
-							System.getSecurityManager() + ")");
-			} // end if-else
-			System.setSecurityManager( (SecurityManager)
-					Class.forName(secman_class).newInstance()
-			);
+				myLogger.log(Logger.INFO, "Replacing existing SecurityManager with a JADESecurityManager.  (" +System.getSecurityManager() + ")");
+			}
+			System.setSecurityManager( (SecurityManager) Class.forName(secman_class).newInstance() );
 		}
 		catch (Exception e) {
-			if (myLogger.isLoggable(Logger.FINER))
-				myLogger.log(Logger.FINER, e.getMessage());
-			e.printStackTrace();
+			myLogger.log(Logger.WARNING, "Error setting SecurityManager for the local JVM", e);
 		}
 	}
 
@@ -229,7 +206,7 @@ implements NameAuthority {
 		JADEPrincipal amsPrincipal = null;
 		if (amsNameCert!=null) {
 			amsPrincipal = amsNameCert.getSubject();
-		} // end if
+		}
 		return amsPrincipal;
 	} 
 
@@ -411,13 +388,10 @@ implements NameAuthority {
 
 			// retrieve policy file name from the configuration
 			String policyFileName=myProfile.getParameter(POLICY_FILE_KEY, POLICY_FILE_DEFAULT);
-
-			if (myLogger.isLoggable(Logger.INFO))
-				myLogger.log( Logger.INFO, "Loading security policy: "+policyFileName);
+			myLogger.log( Logger.INFO, "Loading security policy from file: "+policyFileName);
 			// check if policy file exists
 			if (!(new File(policyFileName).exists())) {
-				if (myLogger.isLoggable(Logger.INFO))
-					myLogger.log( Logger.SEVERE, "Security policy file not found: "+policyFileName);
+				myLogger.log( Logger.SEVERE, "Security policy file not found: "+policyFileName);
 			}
 
 			// instantiate one only Access Controller associated to the service for both filters
@@ -429,7 +403,6 @@ implements NameAuthority {
 
 			// the PermissionService acts also as NameAuthority
 			( (JADEAccessControllerImpl) myJADEAccessController ).setNameAuthority( this );
-
 		}
 
 		return myJADEAccessController;

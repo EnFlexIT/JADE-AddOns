@@ -191,21 +191,18 @@ public class UserAuthenticator {
 			LoginContext lc = null;
 
 			// Give user three attempts to authenticate.
+			boolean loginDone = false;
 			for (i = 0; i < 3; i++) {
 				try {
 					lc = new LoginContext(authenticationContext, jadeDialogCallbackHandler);
-					myLogger.log(Logger.FINE, 
-							"UserAuthenticator -> Authentication Context is: "
-									+ authenticationContext);
-				} catch (LoginException le) {
-					myLogger.log(Logger.FINE, 
-							"UserAuthenticator -> Cannot create LoginContext. "
-									+ le.getMessage());
+					myLogger.log(Logger.FINE, "UserAuthenticator -> Authentication Context is: "+ authenticationContext);
+				} 
+				catch (LoginException le) {
+					myLogger.log(Logger.FINE, "UserAuthenticator -> Cannot create LoginContext. "+ le.getMessage());
 					throw le;
-				} catch (SecurityException se) {
-					myLogger.log(Logger.FINE, 
-							"UserAuthenticator -> Cannot create LoginContext. "
-									+ se.getMessage());
+				} 
+				catch (SecurityException se) {
+					myLogger.log(Logger.FINE, "UserAuthenticator -> Cannot create LoginContext. "+ se.getMessage());
 					throw se;
 				}
 
@@ -213,19 +210,16 @@ public class UserAuthenticator {
 				try {
 					lc.login();
 					// No exception == succesfull authentication.
-					i = 5;
+					loginDone = true;
+					break;
 				} catch (LoginException le) {
-					myLogger.log(Logger.SEVERE, 
-							"UserAuthenticator -> Authentication has failed:\n"
-									+ le.getMessage());
+					myLogger.log(Logger.WARNING, "UserAuthenticator -> Authentication failed:\n"+ le.getMessage());
 				}
 			}
 
-			if (i == 3) {
+			if (!loginDone) {
 				// All three attempts to authenticate have failed.
-				myLogger.log(Logger.SEVERE, 
-						"UserAuthenticator -> Three failure attempts to authenticate!!!");
-
+				myLogger.log(Logger.SEVERE, "UserAuthenticator -> Three failure attempts to authenticate!!!");
 				throw new LoginException("Three failure attempts to login.");
 			} else {
 				myLogger.log(Logger.FINE, "UserAuthenticator -> Authentication succeeded!");
