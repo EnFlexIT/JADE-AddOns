@@ -30,7 +30,7 @@ package jade.security;
 
    A service enforcing the policy should handle a Name 
    as, in order of preference, 1) a local alias, 
-   2) a GUID, or 3) a local name (unique into the platorm).
+   2) a GUID, or 3) a local name (unique into the platform).
 
    @author Giosue Vitaglione - Telecom Italia LAB
  

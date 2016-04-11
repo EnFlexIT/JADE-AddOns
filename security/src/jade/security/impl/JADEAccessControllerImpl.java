@@ -209,6 +209,7 @@ public class JADEAccessControllerImpl implements jade.security.JADEAccessControl
 			}
 			str.append("}, associated-permissions="+perms); 
 			str.append(", required-permission="+permission);
+			str.append(", Policy="+ac_policy+" of class "+ac_policy.getClass().getName());
 			myLogger.log(Logger.WARNING, str.toString());
 			
 			throw new JADESecurityException("AccCtrl "+ac_name+
