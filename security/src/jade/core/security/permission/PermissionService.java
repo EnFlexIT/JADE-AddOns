@@ -117,11 +117,18 @@ implements NameAuthority {
 		myProfile = profile;
 		
 		myLogger.log( Logger.INFO, "PermissionService initializing....");
+		
+		String policyFileName = myProfile.getParameter(POLICY_FILE_KEY, POLICY_FILE_DEFAULT);
+		myLogger.log( Logger.INFO, "Loading security policy from file: "+policyFileName);
+		// Check that the indicated policy file exists
+		if (!(new File(policyFileName).exists())) {
+			myLogger.log( Logger.SEVERE, "Security policy file not found: "+policyFileName);
+		}
 
-		// set properly various profile parameters and system properties
-		setPropertiesValue();
+		// Set the java.security.policy System property to the indicated policy file
+		System.setProperty(POLICY_FILE_KEY, policyFileName);
 
-		// set security manager for this Java Virtual Machine
+		// Set security manager for this Java Virtual Machine
 		setSecurityManager();
 
 		// PermissionFilter class
@@ -153,19 +160,6 @@ implements NameAuthority {
 			if (myLogger.isLoggable(Logger.FINE))
 				myLogger.log( Logger.FINE, "getAMSJADEPrincipal=" + amsPrincipal.toString());
 		}
-	}
-
-	private void setPropertiesValue() {
-		copyProp( POLICY_FILE_KEY, POLICY_FILE_DEFAULT);
-	} 
-	
-	// Copy a JADE-profile property to a System property
-	private void copyProp(String key, String defaultVal){
-		String val =  myProfile.getParameter( key, null );
-		if (( val!=null) && (val.length()>0)) { 
-			System.setProperty(  key, val ); 
-		} else {
-			System.setProperty(  key, defaultVal ); }
 	}
 
 	// Set the indicated SecurityManager for the local JVM
@@ -388,19 +382,11 @@ implements NameAuthority {
 		if (myJADEAccessController==null) {
 			// -- create the container JADEAccessController --
 
-			// retrieve policy file name from the configuration
-			String policyFileName=myProfile.getParameter(POLICY_FILE_KEY, POLICY_FILE_DEFAULT);
-			myLogger.log( Logger.INFO, "Loading security policy from file: "+policyFileName);
-			// check if policy file exists
-			if (!(new File(policyFileName).exists())) {
-				myLogger.log( Logger.SEVERE, "Security policy file not found: "+policyFileName);
-			}
-
 			// instantiate one only Access Controller associated to the service for both filters
 			myJADEAccessController = ((jade.security.impl.JADESecurityFactory) SecurityFactory.getSecurityFactory()).newJADEAccessController(
 					"ac-jade", 
 					null, 
-					policyFileName
+					System.getProperty(POLICY_FILE_KEY)
 			);
 
 			// the PermissionService acts also as NameAuthority

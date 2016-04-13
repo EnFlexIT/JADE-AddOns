@@ -62,8 +62,6 @@ public class JADEAccessControllerImpl implements jade.security.JADEAccessControl
 	private String ac_name = null;
 	private JADEAuthority authority = null;
 
-	private Policy ac_policy = null;
-
 	// The securitystore used
 	private SecurityStore securityStore = null;
 
@@ -73,25 +71,25 @@ public class JADEAccessControllerImpl implements jade.security.JADEAccessControl
 	public JADEAccessControllerImpl(String name, JADEAuthority authority, String policy) {
 		this.ac_name = name;
 		this.authority = authority;
-		setPolicy( policy );
+//		setPolicy( policy );
 		initSecurityStore();
 	}
 
-	private void setPolicy(String policyFile) {
-		try {
-			//if (System.getSecurityManager() == null) {
-			System.setProperty("java.security.policy", policyFile);
-			myLogger.log( Logger.CONFIG, "Setting security policy: "+policyFile);
-			//Policy.getPolicy();
-			//Policy.setPolicy(new sun.security.provider.PolicyFile());
-			//System.out.println("Setting security manager");
-			//System.setSecurityManager(new SecurityManager());
-			//}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+//	private void setPolicy(String policyFile) {
+//		try {
+//			//if (System.getSecurityManager() == null) {
+//			System.setProperty("java.security.policy", policyFile);
+//			myLogger.log( Logger.CONFIG, "Setting security policy: "+policyFile);
+//			//Policy.getPolicy();
+//			//Policy.setPolicy(new sun.security.provider.PolicyFile());
+//			//System.out.println("Setting security manager");
+//			//System.setSecurityManager(new SecurityManager());
+//			//}
+//		}
+//		catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 	
 	private void initSecurityStore() {
 		// Locally (into the securityStore) we have a table that maps:
@@ -208,6 +206,7 @@ public class JADEAccessControllerImpl implements jade.security.JADEAccessControl
 				str.append( locNames[i] +" ");
 			}
 			str.append("}, associated-permissions="+perms); 
+			str.append(", policy file="+System.getProperty(jade.core.security.permission.PermissionService.POLICY_FILE_KEY));
 			str.append(", required-permission="+permission);
 			str.append(", Policy="+ac_policy+" of class "+ac_policy.getClass().getName());
 			myLogger.log(Logger.WARNING, str.toString());
