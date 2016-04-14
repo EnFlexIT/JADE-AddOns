@@ -197,7 +197,7 @@ public class JADEAccessControllerImpl implements jade.security.JADEAccessControl
 		ProtectionDomain lnpd = new ProtectionDomain(source, null, getClass().getClassLoader(), locNames);
 		// Check the permission
 		PermissionCollection perms = ac_policy.getPermissions( lnpd );
-		boolean passed = perms.implies( permission );  // works either ways
+		boolean passed = perms.implies( permission );
 
 		if (!passed) { 
 			StringBuffer str = new StringBuffer();

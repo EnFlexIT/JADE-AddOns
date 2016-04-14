@@ -33,6 +33,10 @@ public class ContainerPermission extends AuthPermission {
 		return allActions;
 	}
 
+	public ContainerPermission() {
+		super(null, null);
+	}
+	
 	/**
 		Creates a new ContainerPermission.
 		@param name The name of the permission.

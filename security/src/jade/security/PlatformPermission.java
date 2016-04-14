@@ -33,6 +33,10 @@ public class PlatformPermission extends AuthPermission {
 		return allActions;
 	}
 
+	public PlatformPermission() {
+		super(null, null);
+	}
+	
 	/**
 		Creates a new PlatformPermission.
 		@param name The name of the permission.
