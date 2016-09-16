@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -151,6 +152,26 @@ public class Shell implements Runnable {
 				printUsage(cmd);
 			}
 			else {
+				// If the blanc-replacer option is specified replace it with ' ' in all property values
+				String blancReplacer = commandProperties.getProperty(CLICommand.BLANC_OPTION, null);
+				if (blancReplacer != null && !blancReplacer.isEmpty()) {
+					for (Map.Entry<Object, Object> entry : commandProperties.entrySet()) {
+						String value = (String) entry.getValue();
+						entry.setValue(value.replace(blancReplacer, " "));
+					}
+				}
+
+				// If some value starts with the file-prefix, replace it with the file content.
+				// By default use the file indication as file pathname
+				for (Map.Entry<Object, Object> entry : commandProperties.entrySet()) {
+					String value = (String) entry.getValue();
+					if (value.startsWith(CLICommand.FILE_PREFIX)) {
+						String fileIndication = value.substring(CLICommand.FILE_PREFIX.length());
+						entry.setValue(loadFileContent((String) entry.getKey(), fileIndication));
+					}
+					entry.setValue(value.replace(blancReplacer, " "));
+				}
+				
 				Behaviour b = cmd.getBehaviour(commandProperties);
 				if (b != null) {
 					try {
@@ -176,6 +197,10 @@ public class Shell implements Runnable {
 		}
 	}
 	
+	protected String loadFileContent(String optionName, String fileIndication) {
+		out.println("FAKE: loading content of file "+fileIndication);
+		return fileIndication;
+	}
 	
 	private CLICommand loadCLICommand(String commandClass) throws Exception {
 		if (loader == null) {

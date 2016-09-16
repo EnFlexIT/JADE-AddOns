@@ -44,8 +44,8 @@ public class MainContainerChecker {
 			imtpManager.initialize(profile);
 			
 			// Try to create a proxy to the PlatformManager
-			// This method try to execute the GET_PLATFORM_NAME command that fail if 
-			// the skeleton object not exist
+			// This method tries to execute the GET_PLATFORM_NAME command that fails if 
+			// a Main Container with a valid skeleton object does not exist 
 			imtpManager.getPlatformManagerProxy();
 		} catch (Exception e) {
 			return false;

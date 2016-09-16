@@ -33,6 +33,14 @@ public abstract class CLICommand {
 	
 	public static final String HELP_OPTION = "help";
 	public static final String LOGS_OPTION = "logs";
+	// Allows specifying a character that will be substituted with ' '. This is useful when the value of a property 
+	// contains one or more white spaces e.g.
+	// -x AAA BBB  can be specified as
+	// -x AAA#BBB -blanc #
+	public static final String BLANC_OPTION = "blanc";
+	
+	// Allows specifying that a value of a given option is the content of a given file
+	public static final String FILE_PREFIX = "[FILE]";
 	
 	protected PrintStream out;
 	public Shell shell;
