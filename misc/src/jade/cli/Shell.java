@@ -169,7 +169,6 @@ public class Shell implements Runnable {
 						String fileIndication = value.substring(CLICommand.FILE_PREFIX.length());
 						entry.setValue(loadFileContent((String) entry.getKey(), fileIndication));
 					}
-					entry.setValue(value.replace(blancReplacer, " "));
 				}
 				
 				Behaviour b = cmd.getBehaviour(commandProperties);
