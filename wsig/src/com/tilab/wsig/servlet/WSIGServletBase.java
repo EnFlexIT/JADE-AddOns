@@ -245,13 +245,26 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 
 		// Get client-ip
 		if (WSIGConfiguration.getInstance().isTraceClientIP()) {
-			String clientIP = request.getRemoteAddr();
+			String clientIP = getRemoteAddress(request);
 			headers.put(WSIGConstants.WSIG_HEADER_PREFIX+"."+WSIGConstants.WSIG_HEADER_CLIENT_IP, clientIP);
 			logger.log(Level.FINE, "Client IP: "+clientIP);
 		}
 
 		// Put in thread-local
 		HTTPInfo.getInputHeaders().putAll(headers);
+	}
+
+	private static String getRemoteAddress(HttpServletRequest request) {
+		String remoteAddr = request.getHeader("X-Forwarded-For");
+		if (remoteAddr != null && remoteAddr.length() > 0) {
+			// If more then 1, take first one
+			int pos = remoteAddr.indexOf(',');
+			if (pos < 0) {
+				return remoteAddr;
+			}
+			return remoteAddr.substring(0,pos); 
+		}
+		return request.getRemoteAddr();
 	}
 	
 	protected void handleOutputHeaders(HttpServletResponse response) {
