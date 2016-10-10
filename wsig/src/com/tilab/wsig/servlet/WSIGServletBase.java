@@ -22,21 +22,6 @@ Boston, MA  02111-1307, USA.
  *****************************************************************/
 package com.tilab.wsig.servlet;
 
-import jade.content.AgentAction;
-import jade.content.ContentElement;
-import jade.content.Predicate;
-import jade.content.lang.sl.SLCodec;
-import jade.content.onto.Ontology;
-import jade.core.AID;
-import jade.core.Profile;
-import jade.core.behaviours.Behaviour;
-import jade.util.Logger;
-import jade.wrapper.ControllerException;
-import jade.wrapper.gateway.DynamicJadeGateway;
-import jade.wrapper.gateway.GatewayListener;
-import jade.wrapper.gateway.JadeGateway;
-import jade.wrapper.gateway.LocalJadeGateway;
-
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -59,6 +44,20 @@ import com.tilab.wsig.soap.SOAPException;
 import com.tilab.wsig.store.OperationResult;
 import com.tilab.wsig.store.WSIGService;
 import com.tilab.wsig.store.WSIGStore;
+
+import jade.content.AgentAction;
+import jade.content.ContentElement;
+import jade.content.Predicate;
+import jade.content.onto.Ontology;
+import jade.core.AID;
+import jade.core.Profile;
+import jade.core.behaviours.Behaviour;
+import jade.util.Logger;
+import jade.wrapper.ControllerException;
+import jade.wrapper.gateway.DynamicJadeGateway;
+import jade.wrapper.gateway.GatewayListener;
+import jade.wrapper.gateway.JadeGateway;
+import jade.wrapper.gateway.LocalJadeGateway;
 
 public abstract class WSIGServletBase extends HttpServlet implements GatewayListener {
 	private static final long serialVersionUID = 1471617048324302610L;
@@ -97,38 +96,6 @@ public abstract class WSIGServletBase extends HttpServlet implements GatewayList
 		
 		// Check WSIG configuration
 		WSIGConfiguration wsigConfiguration = (WSIGConfiguration) webappContext.getAttribute(WEBAPP_CONFIGURATION_KEY);
-		if (wsigConfiguration == null) {
-
-			// Get init parameters
-			String resourcesBase = servletConfig.getInitParameter(WSIGConfiguration.WSIG_RESOURCES_BASE_KEY);
-			String configurationFile = servletConfig.getInitParameter(WSIGConfiguration.WSIG_CONFIGURATION_KEY);
-			if (configurationFile == null) {
-				configurationFile = WSIGConfiguration.WSIG_DEFAULT_CONFIGURATION;
-			}
-			logger.log(Level.INFO, "Configuration file= " + configurationFile);
-
-			// Init configuration
-			WSIGConfiguration.init(configurationFile, webappContext, resourcesBase);
-			wsigConfiguration = WSIGConfiguration.getInstance();
-			
-			// Java type preservation
-			String preserveJavaType = wsigConfiguration.getPreserveJavaType();
-			if (preserveJavaType != null) {
-				System.setProperty(SLCodec.PRESERVE_JAVA_TYPES, preserveJavaType);
-			}
-
-			// Add services  
-			String services = wsigConfiguration.getProperty(Profile.SERVICES);
-			if (services == null) {
-				wsigConfiguration.setProperty(Profile.SERVICES, Profile.DEFAULT_SERVICES_NOMOBILITY+";jade.core.faultRecovery.FaultRecoveryService");
-			}
-			
-			// Set WSIGConfiguration into context 
-			webappContext.setAttribute(WEBAPP_CONFIGURATION_KEY, wsigConfiguration);
-			
-			// Set startup user status to true (enable automatic restart gateway after a shutdown) 
-			webappContext.setAttribute(WEBAPP_USER_STATUS_ACTIVE_KEY, true);
-		}
 		
 		// Check the WSIG store
 		wsigStore = (WSIGStore) webappContext.getAttribute(WEBAPP_STORE_KEY); 

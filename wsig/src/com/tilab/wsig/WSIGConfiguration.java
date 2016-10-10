@@ -23,10 +23,6 @@ Boston, MA  02111-1307, USA.
 
 package com.tilab.wsig;
 
-import jade.content.lang.sl.SLCodec;
-import jade.util.Logger;
-import jade.util.leap.Properties;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,6 +39,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.tilab.wsig.wsdl.WSDLConstants;
 
+import jade.content.lang.sl.SLCodec;
+import jade.util.Logger;
+import jade.util.leap.Properties;
+
 public class WSIGConfiguration extends Properties {
 
 	private static WSIGConfiguration anInstance;
@@ -50,16 +50,17 @@ public class WSIGConfiguration extends Properties {
 
 	public static final String WSIG_CONFIGURATION_FILE_NAME = "wsig.properties";
 	public static final String WSIG_DEFAULT_CONFIGURATION = "conf/"+WSIG_CONFIGURATION_FILE_NAME;
-	public static final String WSIG_CONFIGURATION_KEY = "configuration-file";
-	public static final String WSIG_RESOURCES_BASE_KEY = "resources-base";
 	public static final String WSIG_ENDPOINT_PATH_KEY = "endpoint-path";
+	public static final String WSIG_CONF_DIR = "conf";
+	public static final String WSIG_RESOURCE_PATH = "WSIG_RESOURCE_PATH";
 	
-	private static String wsigConfPath;
+	private static String wsigConfFile;
 	private static String wsigVersion;
 	private static ServletContext servletContext;
 	private static String resourcesBase;
 
 	// WSIG configuration
+	public static final String KEY_WSIG_INITIALIZER_CLASS_NAME = "wsig.initializer";
 	public static final String KEY_WSIG_AGENT_NAME = "wsig.agentName";
 	public static final String KEY_WSIG_AGENT_CLASS_NAME = "wsig.agent";
 	public static final String KEY_WSIG_SERVICES_URL = "wsig.servicesURL";
@@ -124,15 +125,25 @@ public class WSIGConfiguration extends Properties {
 		return anInstance;
 	}
 
-	public static void init(String _configurationFile, ServletContext _servletContext, String _resourcesBase) {
+	public static void init(String configurationFile, ServletContext _servletContext, String _resourcesBase) {
 		servletContext = _servletContext;
+
 		resourcesBase = _resourcesBase;
-		wsigConfPath = resolvePath(_servletContext, _resourcesBase, _configurationFile);
+		if (resourcesBase == null) {
+			// Try to read resource-base from environment variable WSIG_RESOURCE_PATH
+			resourcesBase = System.getenv(WSIG_RESOURCE_PATH);
+		}
+		
+		if (configurationFile == null) {
+			configurationFile = WSIG_DEFAULT_CONFIGURATION;
+		}
+		wsigConfFile = resolvePath(servletContext, resourcesBase, configurationFile);
+		logger.log(Level.INFO, "Configuration file= " + wsigConfFile);
 	}
 
 	public static void reset() {
 		anInstance = null;
-		wsigConfPath = null;
+		wsigConfFile = null;
 		wsigVersion = null;
 		servletContext = null;
 		resourcesBase = null;
@@ -161,6 +172,14 @@ public class WSIGConfiguration extends Properties {
 		return wsigVersion;
 	}
 
+	public synchronized String getWsigResourcePath() {
+		return resolvePath(servletContext, resourcesBase, null);
+	}
+
+	public synchronized String getWsigConfPath() {
+		return resolvePath(servletContext, resourcesBase, WSIG_CONF_DIR);
+	}
+	
 	// AGENT CONFIGURATION FOR SERVLET
 	public synchronized String getMainHost() {
 		return getProperty(jade.core.Profile.MAIN_HOST);
@@ -218,6 +237,14 @@ public class WSIGConfiguration extends Properties {
 		setProperty(KEY_WSIG_AGENT_CLASS_NAME,agentClassName);
 	}
 
+	public synchronized String getInitializerClassName() {
+		return getProperty(KEY_WSIG_INITIALIZER_CLASS_NAME);
+	}
+
+	public void setInitializerClassName(String initializerClassName) {
+		setProperty(KEY_WSIG_INITIALIZER_CLASS_NAME,initializerClassName);
+	}
+	
 	public synchronized boolean isTraceClientIP() {
 		String traceClientIP = getProperty(KEY_WSIG_TRACE_CLIENT_IP);
 		return "true".equalsIgnoreCase(traceClientIP);
@@ -558,7 +585,7 @@ public class WSIGConfiguration extends Properties {
 
 	public void store() {
 		try {
-			if (wsigConfPath != null) {
+			if (wsigConfFile != null) {
 				String propertyKey;
 				Iterator it =keySet().iterator();
 				while(it.hasNext()) {
@@ -567,7 +594,7 @@ public class WSIGConfiguration extends Properties {
 						this.setProperty(propertyKey, "");
 					}
 				}
-				store(wsigConfPath);
+				store(wsigConfFile);
 			} else {
 				logger.log(Level.WARNING, "Default configuration or configuration loaded in classloader is not modifiable");
 			}
@@ -587,11 +614,11 @@ public class WSIGConfiguration extends Properties {
 			c.setDefaultProperties();
 
 			InputStream input = null;
-			if (wsigConfPath != null) {
+			if (wsigConfFile != null) {
 				try {
-					input = new FileInputStream(wsigConfPath);
+					input = new FileInputStream(wsigConfFile);
 				} catch (FileNotFoundException e) {
-					logger.log(Level.SEVERE, "WSIG configuration <<" + wsigConfPath + ">> not found in file system, wsig agent will use default configuration", e);
+					logger.log(Level.SEVERE, "WSIG configuration <<" + wsigConfFile + ">> not found in file system, wsig agent will use default configuration", e);
 					return;
 				}
 			} else {
@@ -613,17 +640,33 @@ public class WSIGConfiguration extends Properties {
 		}
 	}
 	
-	public static String resolvePath(ServletContext servletContext, String resourcesBase, String path) {
-		File f = new File(path);
-		if (!f.isAbsolute()) {
-			if (resourcesBase != null) {
-				// Use specified base resources path
-				return resourcesBase+File.separator+path;
-			} else {
-				// Resolve with webapp context
-				return servletContext.getRealPath(path);
+	private static String resolvePath(ServletContext servletContext, String resourcesBase, String path) {
+		if (path != null) {
+			// Check if path is absolute
+			File f = new File(path);
+			if (f.isAbsolute()) {
+				return path;
 			}
 		}
-		return path;
+
+		String absolutePath;
+		if (resourcesBase != null) {
+			// Use specified absolute base resources path
+			absolutePath = resourcesBase;
+			if (path != null) {
+				absolutePath = absolutePath+File.separator+path;
+			}
+		} 
+		else {
+			// Resolve with webapp context
+			if (path != null) {
+				absolutePath = servletContext.getRealPath(path);
+			}
+			else {
+				absolutePath = servletContext.getRealPath("");
+			}
+		}
+		
+		return absolutePath;
 	}
 }

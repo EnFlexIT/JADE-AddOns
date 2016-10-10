@@ -3,6 +3,10 @@
   <display-name>WSIG application</display-name>
   <distributable/>
 
+  <listener>
+	<listener-class>com.tilab.wsig.servlet.WSIGInitializer</listener-class>
+  </listener>    
+
   <servlet>
     <servlet-name>WSIG SOAP Service</servlet-name>
     <servlet-class>com.tilab.wsig.servlet.WSIGServlet</servlet-class>

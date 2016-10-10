@@ -117,6 +117,18 @@ import="jade.content.onto.Ontology,
 		<td class="value"><% out.print(wsigConfig.getWsigVersion()); %></td>
 	</tr>
 	<tr>
+		<td width="30%" class="title">WSIG resource path:</td>
+		<td class="value"><% out.print(wsigConfig.getWsigResourcePath()); %></td>
+	</tr>
+	<tr>
+		<td width="30%" class="title">WSIG configuration path:</td>
+		<td class="value"><% out.print(wsigConfig.getWsigConfPath()); %></td>
+	</tr>
+	<tr>
+		<td width="30%" class="title">WSIG initializer class:</td>
+		<td class="value"><% out.print(wsigConfig.getInitializerClassName()!=null?wsigConfig.getInitializerClassName():""); %></td>
+	</tr>
+	<tr>
 		<td width="30%" class="title">WSIG services url:</td>
 		<td class="value"><% out.print(wsigConfig.getServicesUrl(request)); %></td>
 	</tr>
