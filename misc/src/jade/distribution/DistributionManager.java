@@ -25,6 +25,7 @@ package jade.distribution;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.core.behaviours.WrapperBehaviour;
 import jade.domain.DFSubscriber;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -34,6 +35,7 @@ import jade.util.Logger;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +59,7 @@ public class DistributionManager<Item> implements Serializable {
 	private int status = IDLE_STATUS;
 	
 	private List<PendingItem> pendingItems = new LinkedList<PendingItem>();
+	private long pendingTimeoutMs = 120000;
 	
 	private Map<Object, AID> targetAgentsByCorrelationKey = new HashMap<Object, AID>();
 	
@@ -76,6 +79,22 @@ public class DistributionManager<Item> implements Serializable {
 	
 	public AgentSelectionPolicy<Item> getAgentSelectionPolicy() {
 		return selectionPolicy;
+	}
+	
+	/** 
+	 * Defines the maximum time in ms that this DistributionManager maintains an item while not yet READY
+	 * (first notification from DF not yet received) before notifying a failure to the caller.
+	 * Default 2 min. 
+	 * 0 --> INFINITE
+	 * NOTE: This method must be invoked before calling the start() method
+	 * @param timeout
+	 */
+	public void setPendingTimeout(long timeout) {
+		pendingTimeoutMs = timeout;
+	}
+	
+	public long getPendingTimeout() {
+		return pendingTimeoutMs;
 	}
 	
 	/**
@@ -142,6 +161,31 @@ public class DistributionManager<Item> implements Serializable {
 				}
 			}
 		});
+		
+		// Add the behaviour managing pending items that are to old
+		if (pendingTimeoutMs > 0) {
+			TickerBehaviour pendingPurger = new TickerBehaviour(myAgent, 30000) {
+				@Override
+				protected void onTick() {
+					long now = System.currentTimeMillis();
+					Iterator<PendingItem> it = pendingItems.iterator(); 
+					while (it.hasNext()) {
+						PendingItem pi = it.next();
+						if (now - pi.timestamp > pendingTimeoutMs) {
+							// Timeout for this pending item expired. No agent to give it
+							if (pi.callback != null) {pi.callback.onFailure(new Exception("No suitable agent found"));}
+							it.remove();
+						}
+						else {
+							// Pending items are ordered by timestamp. If this pending item has not expired yet, for sure next ones won't
+							break;
+						}
+					}
+				}
+			};
+			pendingPurger.setBehaviourName("DM-Pending-Items-Purger");
+			myAgent.addBehaviour(pendingPurger);
+		}
 	}
 
 	private void flushPendingItems() {
@@ -199,6 +243,10 @@ public class DistributionManager<Item> implements Serializable {
 					});
 					return;
 				}
+				catch (Exception e) {
+					myLogger.log(Logger.WARNING, "Agent "+myAgent.getLocalName()+" - Unexpected error selecting agent for item "+item, e);
+					if (callback != null) {callback.onFailure(e);}
+				}
 			}
 			manageSelection(targetAgent, ci, callback);
 		}
@@ -236,10 +284,12 @@ public class DistributionManager<Item> implements Serializable {
 	private class PendingItem {
 		private Item item;
 		private Callback<AID> callback;
+		private long timestamp;
 		
 		public PendingItem(Item item, Callback<AID> callback) {
 			this.item = item;
 			this.callback = callback;
+			this.timestamp = System.currentTimeMillis();
 		}
 	}
 }

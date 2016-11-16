@@ -31,7 +31,12 @@ public class RoundRobinAgentSelectionPolicy<Item> implements AgentSelectionPolic
 	
 	@Override
 	public AID select(Item item) throws AsynchSelection {
-		return (AID) availableAgents.get();
+		if (availableAgents.size() > 0) {
+			return (AID) availableAgents.get();
+		}
+		else {
+			return null;
+		}
 	}
 
 	@Override
