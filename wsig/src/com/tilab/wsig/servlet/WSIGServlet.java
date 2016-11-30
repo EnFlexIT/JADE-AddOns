@@ -29,7 +29,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.logging.Level;
 
-import javax.mail.MessagingException;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -395,7 +394,7 @@ public class WSIGServlet extends WSIGServletBase {
 		return serviceName;
 	}
 
-	private Message extractSOAPMessage(HttpServletRequest request) throws IOException, MessagingException {
+	private Message extractSOAPMessage(HttpServletRequest request) throws IOException {
 		// Get soap message
 		String contentLocation = request.getHeader(HTTPConstants.HEADER_CONTENT_LOCATION);
 		logger.log(Level.FINE, "contentLocation: "+contentLocation);
