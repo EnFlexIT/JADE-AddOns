@@ -32,7 +32,7 @@ import jade.security.*;
 import test.common.*;
 import test.security.*;
 
-import starlight.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * This class is a generic security test
@@ -102,7 +102,7 @@ public class SecurityTest extends Test {
 
             if ((encrypt)&&(publicKey)) {
               SDSIName tmp = sh.getPrincipal().getSDSIName();
-              String encodedKey = new String(Base64.encode(tmp.getEncoded()));
+              String encodedKey = new String(Base64.encodeBase64(tmp.getEncoded()));
               encodedKey = encodedKey.replace('=', '*');
               agtParams[5] = encodedKey;
               agtParams[6] = tmp.getAlgorithm();

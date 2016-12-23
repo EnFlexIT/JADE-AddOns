@@ -32,7 +32,7 @@ import jade.security.*;
 import test.common.*;
 import test.security.*;
 
-import starlight.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * This class is a generic security test
@@ -84,7 +84,7 @@ public class SecurityHack extends Test {
             
             if (encrypt) {
               SDSIName tmp = sh.getPrincipal().getSDSIName(); 
-              agtParams[5] = new String(Base64.encode(tmp.getEncoded()));
+              agtParams[5] = new String(Base64.encodeBase64(tmp.getEncoded()));
               agtParams[6] = tmp.getAlgorithm();
             }
             agtParams[7] = myAgent.getName();

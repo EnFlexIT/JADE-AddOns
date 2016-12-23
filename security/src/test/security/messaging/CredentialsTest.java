@@ -35,7 +35,7 @@ import jade.security.*;
 import test.common.*;
 import test.security.*;
 
-import starlight.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 import java.util.Enumeration;
 
@@ -87,7 +87,7 @@ public class CredentialsTest extends Test {
             if (encrypt) {
               agtParams = new String[4];
               SDSIName tmp = sh.getPrincipal().getSDSIName();
-              String encodedKey = new String(Base64.encode(tmp.getEncoded()));
+              String encodedKey = new String(Base64.encodeBase64(tmp.getEncoded()));
               encodedKey = encodedKey.replace('=', '*');
               agtParams[2] = encodedKey;
               agtParams[3] = tmp.getAlgorithm();

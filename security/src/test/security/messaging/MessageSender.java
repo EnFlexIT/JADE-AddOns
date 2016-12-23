@@ -32,7 +32,7 @@ import jade.security.impl.JADEPrincipalImpl;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-import starlight.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * This class is a generic message sender for the security tests.
@@ -94,9 +94,7 @@ public class MessageSender extends Agent {
         keySize = Integer.parseInt((String)args[4]);
       }
       if (isSet((String)args[5])) {
-        destKey = Base64.decode(
-            ((String)args[5]).replace('*', '=').toCharArray()
-        );
+        destKey = Base64.decodeBase64(((String)args[5]).replace('*', '=').getBytes());
       }
       destAlgo = (String)args[6];
       

@@ -36,7 +36,7 @@ import jade.lang.acl.MessageTemplate;
 
 import java.util.Enumeration;
 
-import starlight.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 /**
  * This class is a generic message sender for the security tests.
@@ -76,9 +76,8 @@ public class CredentialsSender extends Agent {
       }
       else if (args.length == 4) {
         encrypt = true;
-        destKey = Base64.decode(
-            ((String)args[2]).replace('*', '=').toCharArray()
-        );
+        String s = ((String)args[2]).replace('*', '=');
+        destKey = Base64.decodeBase64((byte[]) s.getBytes());
 
         destAlgo = (String)args[3];
       
