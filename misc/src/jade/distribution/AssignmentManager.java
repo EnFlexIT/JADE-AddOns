@@ -761,7 +761,15 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			}
 			String agentStr = a.getAid() != null ? a.getAid().getLocalName() : "null";
 			sb.append(prefix+"- "+keyStr+" --> "+agentStr+"\n");
+			String assignmentInfo = getDumpAssignmentInfo(prefix, key, a.getItem());
+			if (assignmentInfo != null) {
+				sb.append(assignmentInfo);
+			}
 		}
 		return sb.toString();
+	}
+	
+	public String getDumpAssignmentInfo(String prefix, Object key, Item item) {
+		return null;
 	}
 }
