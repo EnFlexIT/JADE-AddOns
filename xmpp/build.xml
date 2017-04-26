@@ -4,9 +4,9 @@
   <property name="src" value="src"/>
   <property name="build" value="classes"/>
   <property name="lib" value="lib"/>
+  <property name="jar-name" value="xmpp.jar"/>
   
   <property name="jade-lib-dir" value="${jade-home}/lib"/>
-  <property name="smack-lib-dir" value="${jade-lib-dir}"/>
   
   <path id="jade-classes">
  	<fileset dir="${jade-lib-dir}">
@@ -16,9 +16,9 @@
   </path>
 	
   <path id="smack-classes">
-  	<fileset dir="${smack-lib-dir}">
-	      <include name="smack.jar"/>
-	      <include name="smackx.jar"/>
+  	<fileset dir="${lib}">
+	      <include name="*.jar"/>
+	      <exclude name="${jar-name}"/>
 	</fileset>
    </path>
 	
@@ -31,17 +31,23 @@
 
   <!-- Compile the java code from ${src} into ${build} -->
   <target name="compile" depends="init">
-    <javac srcdir="${src}" destdir="${build}" nowarn="off" optimize="on" deprecation="on">
-    	<classpath>
-    		<path refid="jade-classes"/>
-    		<path refid="smack-classes"/>
-    	</classpath>
+    <javac srcdir="${src}"
+           destdir="${build}"
+           nowarn="off"
+           optimize="off"
+           debug="on"
+           debuglevel="lines,vars,source"
+           deprecation="on">
+      <classpath>
+        <path refid="jade-classes"/>
+		<path refid="smack-classes"/>
+      </classpath>
     </javac>
   </target>
 
   <!-- Make jars file and put in ${lib} -->
   <target name="lib" depends="init, compile">
-    <jar jarfile="${lib}/xmpp.jar">
+    <jar jarfile="${lib}/${jar-name}">
       <fileset dir="${build}" includes="**/jade/mtp/xmpp/*"/>
     </jar>
   </target>
@@ -51,7 +57,7 @@
   	<zip zipfile="../xmppAddOn.zip" basedir="../..">
       <include name="add-ons/xmpp/${src}/**"/>
       <include name="add-ons/xmpp/*"/>
-      <include name="add-ons/xmpp/${lib}/**"/>
+      <include name="add-ons/xmpp/${lib}/*.jar"/>
   	</zip>
   </target>
 
@@ -60,10 +66,10 @@
   <!-- delete ${build} and ${lib} directories -->
   <target name="clean" description="clean up">
     <!-- Delete the ${build} directory tree -->
-    <delete includeEmptyDirs="true" file="${lib}/rdf.jar">
+    <delete includeEmptyDirs="true">
       <fileset dir="${build}"/>
     </delete>
-  	<delete file="${lib}/xmpp.jar"/>
+  	<delete file="${lib}/${jar-name}"/>
   </target>
 
 </project>
