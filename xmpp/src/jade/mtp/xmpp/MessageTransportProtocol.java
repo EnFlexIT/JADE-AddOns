@@ -26,7 +26,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 Boston, MA  02111-1307, USA.
-*****************************************************************/
+ *****************************************************************/
 
 /**
  * MessageTransportProtocol.java
@@ -42,6 +42,7 @@ package jade.mtp.xmpp;
 import jade.util.leap.List;
 import jade.util.Logger;
 
+import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
@@ -58,14 +59,14 @@ import jade.mtp.*;
 public class MessageTransportProtocol implements MTP {
 
 	private static final String PREFIX = "jade_mtp_xmpp_";
-	
+
 	private String[] PROTOCOLS = { "xmpp" };
 
 	private String FIPA_NAME = "fipa.mts.mtp.xmpp";
 
 	public XMPPConnection connection;	
-	
-    static Logger myLogger = Logger.getMyLogger (MessageTransportProtocol.class.getName ());
+
+	static Logger myLogger = Logger.getMyLogger (MessageTransportProtocol.class.getName ());
 
 	private void login(String servername, String username, String passwd) throws MTPException
 	{
@@ -73,16 +74,20 @@ public class MessageTransportProtocol implements MTP {
 			if (myLogger.isLoggable (Logger.INFO))
 				myLogger.log (Logger.INFO, "login: create XMPP connection w/ servername=" + servername + ", username=" + username);
 
-			connection = new XMPPConnection(servername);
+			ConnectionConfiguration cc = new ConnectionConfiguration(servername);
+			cc.setSecurityMode(ConnectionConfiguration.SecurityMode.enabled);
+			cc.setSelfSignedCertificateEnabled(true);
+			cc.setDebuggerEnabled(false);
+			connection = new XMPPConnection(cc);
 
-           connection.connect ();
+			connection.connect ();
 			if (myLogger.isLoggable (Logger.INFO))
 				myLogger.log (Logger.INFO, "login: now connection.isConnected => " + connection.isConnected ());
 
-           connection.login(username, passwd, "acc");
+			connection.login(username, passwd, "acc");
 			if (myLogger.isLoggable (Logger.INFO))
 				myLogger.log (Logger.INFO, "login: now connection.isAuthenticated => " + connection.isAuthenticated ());
-			
+
 			Presence p = new Presence(Presence.Type.available);
 			connection.sendPacket(p);
 		}
@@ -95,10 +100,10 @@ public class MessageTransportProtocol implements MTP {
 	{
 
 		connection.disconnect ();
-}
-	
-	
-	
+	}
+
+
+
 	/**
 	 Converts a string representing a valid address in this MTP to a
 	 <code>TransportAddress</code> object.
@@ -111,7 +116,7 @@ public class MessageTransportProtocol implements MTP {
 	public TransportAddress strToAddr(String arg0) throws MTPException {
 		return new XMPPAddress(arg0);
 	}
- 
+
 	/**
 	 Converts a <code>TransportAddress</code> object into a string
 	 representation.
@@ -151,11 +156,12 @@ public class MessageTransportProtocol implements MTP {
 	 */
 	public TransportAddress activate(Dispatcher disp, Profile p)
 			throws MTPException {
-		
+
 		String server = p.getParameter(PREFIX + "server", null); 
 		String username = p.getParameter(PREFIX + "username", null); 
 		String passwd = p.getParameter(PREFIX + "passwd", null); 
-		
+		boolean verbose = p.getBooleanProperty(PREFIX + "verbose", true);
+
 		if (myLogger.isLoggable (Logger.INFO))
 			myLogger.log (Logger.INFO, "activate: obtained parameters server=" + server + ", username=" + username);
 
@@ -165,10 +171,10 @@ public class MessageTransportProtocol implements MTP {
 		if (myLogger.isLoggable (Logger.INFO))
 			myLogger.log (Logger.INFO, "activate: after login; this.connection=" + this.connection);
 
-     	MessageListener list = new MessageListener(connection, disp);
+		MessageListener list = new MessageListener(connection, disp, verbose);
 		list.start();
-		
-		
+
+
 		return strToAddr("xmpp://" + username + "@" + server +"/acc");
 	}
 
@@ -225,16 +231,16 @@ public class MessageTransportProtocol implements MTP {
 		Message msg = new Message();
 		FipaEnvelopePacketExtension ext = new FipaEnvelopePacketExtension();
 		ext.setEnvelope(XMLCodec.encodeXML(env));
-		
+
 		XMPPAddress jid = new XMPPAddress(addr);
 		msg.setTo(jid.getJID());
 		msg.setBody(new String(payload));
 		msg.setType(Message.Type.normal);
 		msg.addExtension(ext);
 		connection.sendPacket(msg);
-//		System.out.println("Send: " + msg.toXML());
-//		System.out.println("Deliver to: " + jid.getJID());
-//		System.out.println("Deliver body: " + body);		
+		//		System.out.println("Send: " + msg.toXML());
+		//		System.out.println("Deliver to: " + jid.getJID());
+		//		System.out.println("Deliver body: " + body);		
 	}
 
 }

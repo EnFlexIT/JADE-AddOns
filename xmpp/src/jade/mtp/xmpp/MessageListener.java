@@ -58,12 +58,15 @@ import jade.util.Logger;
 public class MessageListener implements PacketListener {
 	private XMPPConnection _con;
 	private Dispatcher _disp;
+	private XMLCodec _parser;
+	private boolean _verbose;
 	
     static Logger myLogger = Logger.getMyLogger (MessageListener.class.getName ());
 
-	public MessageListener(XMPPConnection con, Dispatcher disp){
+	public MessageListener(XMPPConnection con, Dispatcher disp, boolean verbose){
 		_con = con;
 		_disp = disp;
+		_verbose = verbose;
 	}
 	
 	public void finalize(){
@@ -80,33 +83,62 @@ public class MessageListener implements PacketListener {
 	}
 	
 	public void processPacket(Packet packet){
-		Envelope env;
 		Message msg = (Message)packet;
 		String payload = msg.getBody();
 //		System.out.println(msg.getFrom() + ": " + body);
-		myLogger.log (Logger.INFO, "processPacket: msg.getFrom => " + msg.getFrom () + ", payload = \"" + payload + "\"");
+		myLogger.log (Logger.INFO, "Incoming XMPP packet received from " + msg.getFrom ());
+		if (_verbose) {
+			myLogger.log (Logger.INFO, "Payload = \"" + payload + "\"");
+		}
+		PacketExtension ext = msg.getExtension(FipaEnvelopePacketExtension.ELEMENT_NAME, FipaEnvelopePacketExtension.NAMESPACE);
+		if (ext == null){
+			myLogger.log(Logger.WARNING, "Incoming Message does not contain an Envelope! Abort dispatch");
+			return;
+		}
+		if (_verbose) {
+			myLogger.log(Logger.INFO, "Encoded envelope extension found: "+ext);
+		}
+		
+		Envelope env = null;
 		try{
-			//org.apache.xerces.parsers.SAXParser
-			XMLCodec parser = new XMLCodec("org.apache.crimson.parser.XMLReaderImpl");
-            myLogger.log (Logger.INFO, "processPacket: msg.getExtensions => " + msg.getExtensions ());
-			PacketExtension ext = msg.getExtension(FipaEnvelopePacketExtension.ELEMENT_NAME, FipaEnvelopePacketExtension.NAMESPACE);
-			if (ext == null){
-				throw new MTPException("Message do not contains a Envelope!");
-			}
 			FipaEnvelopePacketExtension fipaext = (FipaEnvelopePacketExtension)ext;
-
 			StringReader sr = new StringReader(fipaext.getEnvelope());
-			env = parser.parse(sr);
-			myLogger.log (Logger.INFO, "processPacket: call dispatchMessage method of _disp=" + _disp + " w/ env=" + env);
-			synchronized (_disp) {
-				_disp.dispatchMessage(env, payload.getBytes());
-//				System.out.println("mensage enviado!");
+			XMLCodec parser = getParser();
+			if (parser != null) {
+				env = parser.parse(sr);
+				if (_verbose) {
+					myLogger.log (Logger.INFO, "Envelope successfully parsed: " + env);
+				}
+			}
+			else {
+				myLogger.log(Logger.WARNING, "NO XMLCodec available! Abort dispatch");
+				return;
 			}
 		}
-		catch(MTPException e)
-		{
-            myLogger.log (Logger.WARNING, "processPacket: dispatch failed; exception: " + e);
+		catch (MTPException mtpe) {
+			myLogger.log(Logger.WARNING, "Error parsing envelope! Abort dispatch");
+			return;
+		}
+		
+		if (_verbose) {
+			myLogger.log (Logger.INFO, "Activating internal delivery ... ");
+		}
+		synchronized (_disp) {
+			_disp.dispatchMessage(env, payload.getBytes());
 		}
 	}
 
+	private synchronized XMLCodec getParser() {
+		if (_parser == null) {
+			//org.apache.xerces.parsers.SAXParser
+			String parserClass = "org.apache.crimson.parser.XMLReaderImpl";
+			try {
+				_parser = new XMLCodec(parserClass);
+			}
+			catch (MTPException mtpe) {
+				myLogger.log(Logger.SEVERE, "Cannot create XMLCodec with parser class "+parserClass, mtpe);
+			}
+		}
+		return _parser;
+	}
 }
