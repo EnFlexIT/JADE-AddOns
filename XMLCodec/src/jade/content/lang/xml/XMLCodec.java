@@ -219,6 +219,9 @@ public class XMLCodec extends StringCodec {
 			else if (character == '&') {
 				result.append("&amp;");
 			}
+			else if (character == '\n') {
+				result.append("&#13;");
+			}
 			else {
 				result.append(character);
 			}
@@ -233,6 +236,7 @@ public class XMLCodec extends StringCodec {
 		xmlText = xmlText.replace("&quot;", "\"");
 		xmlText = xmlText.replace("&#039;", "\'");
 		xmlText = xmlText.replace("&amp;", "&");
+		xmlText = xmlText.replace("&#13;", "\n");
 		return xmlText;
 	}
 
