@@ -261,9 +261,8 @@ public class PermissionFilter extends Filter {
         return false;
 
       } catch (Throwable e) {
-        if (myLogger.isLoggable(Logger.SEVERE))
           //#PJAVA_EXCLUDE_BEGIN
-          myLogger.log(Logger.SEVERE, "[PermissionFilter] ", e); 
+          myLogger.log(Logger.WARNING, "[PermissionFilter] Unexpected error checking permissions for V-Command "+cmd.getName()+" of Service "+cmd.getService(), e); 
           //#PJAVA_EXCLUDE_END
           /*#PJAVA_INCLUDE_BEGIN
           myLogger.log(Logger.SEVERE, "[PermissionFilter] "); 

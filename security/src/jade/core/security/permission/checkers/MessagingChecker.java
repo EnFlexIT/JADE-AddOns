@@ -123,27 +123,21 @@ public class MessagingChecker extends BaseJADEChecker {
 					, "send-to");
 			// add two checks?: AGENT_SEND_AS and AGENT_SEND_FROM
 
-			JADESecurityException ae;
 			try {
 				checkAction( requester, permission, target, creds);
 			} catch(JADESecurityException e) {
-				ae=e; // exception to re-throw
-
-				//- send failure vertical command
+				// Issue NotifyFailure vertical command
 				try {
-					Service ms = myContainer.getServiceFinder().findService(jade.core.messaging.
-							MessagingSlice.NAME);
+					Service ms = myContainer.getServiceFinder().findService(jade.core.messaging.MessagingSlice.NAME);
 
 					// Create a failure message
-					GenericCommand failurecmd = new GenericCommand( 
-							MessagingSlice.NOTIFY_FAILURE, MessagingSlice.NAME, null  );
+					GenericCommand failurecmd = new GenericCommand(MessagingSlice.NOTIFY_FAILURE, MessagingSlice.NAME, null  );
 					//0- generic message (the same as the blocked one)
 					failurecmd.addParam( (GenericMessage) params[1] );
 					//1- receiver (is the sender of the message was attempting to go)
 					failurecmd.addParam( sender );
 					//2- reason why it failed: jade.domain.FIPAAgentManagement.InternalError(String aaa)
-					failurecmd.addParam( new jade.domain.FIPAAgentManagement.InternalError(
-					"NOT AUTHORIZED") );
+					failurecmd.addParam( new jade.domain.FIPAAgentManagement.InternalError("NOT AUTHORIZED") );
 
 					// this failure message should be signed by the local container 
 					// since it is "a part" of the ams, and can sing on his behalf.
@@ -158,10 +152,9 @@ public class MessagingChecker extends BaseJADEChecker {
 				catch (IMTPException ex) {
 					// could not send the failure notification
 				}
-				//- end send failure vertical command
 
-				// report authorization exception, normally
-				if (ae instanceof JADESecurityException) throw ae;
+				// Report authorization exception, normally
+				throw e;
 			}
 
 		}
