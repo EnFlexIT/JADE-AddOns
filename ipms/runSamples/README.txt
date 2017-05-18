@@ -12,7 +12,7 @@ jade/
 If this is not the case the paths in the .bat and configuration files must be modified to reflect your directory structure!!!!
 
 
-The example comprises two platforms P1 and P2 and a MobileAgent moving across them.Such MobileAgent gets the hops to perform from
+The example comprises two platforms P1 and P2 and a MobileAgent moving across them. Such MobileAgent gets the hops to perform from
 the itinerary.properties file.
 
 To try the example do the followings:
