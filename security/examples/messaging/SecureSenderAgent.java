@@ -89,7 +89,7 @@ public class SecureSenderAgent extends Agent {
 					try {
 						System.out.println(getName()+": Retrieving principal for agent "+receiver.getName()+"...");
 						JADEPrincipal principal = retrievePrincipal(receiver);
-						System.out.println(getName()+": Principal for agent "+receiver.getName()+" retrieved.");
+						System.out.println(getName()+": Principal for agent "+receiver.getName()+" retrieved: "+principal);
 						mySecurityHelper.addTrustedPrincipal(principal);
 					}
 					catch (Exception e) {
