@@ -141,6 +141,7 @@ public class JarManager {
 			fos.write(buffy, 0, bytes);
 		codestream.close();
 		fos.close();
+		System.out.println("IPMS: JAR file "+f.getCanonicalPath()+" created");
 		return registerAgentJar(name, f, false);
 	}
 	
@@ -176,12 +177,10 @@ public class JarManager {
 			// Rename the new JAR with the original name
 			//System.out.println("################ Deleting file "+f.getPath());
 			if (!f.delete()) {
-				System.out.println("####################### DELETE of " 
-						+ f.getPath() + "didn't work properly");
+				System.out.println("####################### DELETE of " + f.getPath() + "didn't work properly");
 			}
 			if (!(new File(TMP_JAR)).renameTo(f)) {
-				System.out.println("####################### RENAME of "
-						+ f.getPath() + "didn't work properly");
+				System.out.println("####################### RENAME of " + f.getPath() + "didn't work properly");
 			}
 			// Register agent.
 			return registerJar(name, f.getPath(), jarUID, userCreatedJar);
@@ -202,13 +201,16 @@ public class JarManager {
 			_jarHash.put(jarUID, new Row(path, userCreatedJar));
 			_agentsUsingJar.put(name, jarUID);
 			return path;
-		} else {
+		} 
+		else {
 			// A jar file with the same code already exists (other agents of the same class are already 
 			// active in the local container) --> avoid dupplications and just increment the number 
 			// of agents refering to that jar file
 			_agentsUsingJar.put(name, jarUID);
 			r.incRef();
-			if (!userCreatedJar) deleteFile(path);
+			if (!userCreatedJar) { 
+				deleteFile(path);
+			}
 			return r.getLocation();
 		}
 	}
@@ -258,11 +260,10 @@ public class JarManager {
 		byte[] buffer = new byte[SIZE_HASH_JAR_BUFFER];
 		byte[] finalDigest = new byte[16];
 		
-		if (!entries.hasMoreElements())
-			throw new IOException();
+//		if (!entries.hasMoreElements())
+//			throw new IOException();
 		
-		while (entries.hasMoreElements()) {
-			
+		while (entries.hasMoreElements()) {			
 			ze = (ZipEntry) entries.nextElement();
 			//Prevent to get hash of directory or manifest files.
 			if ((!ze.isDirectory()) && (!ze.getName().startsWith("META-INF"))) {
@@ -275,8 +276,6 @@ public class JarManager {
 			}
 		}
 		return new String(Base64.encodeBase64(finalDigest), "US-ASCII");
-		//return b64Encoder.encode(finalDigest);
-		
 	}
 	
 	private byte[] xor(byte[] first, byte[] second) {

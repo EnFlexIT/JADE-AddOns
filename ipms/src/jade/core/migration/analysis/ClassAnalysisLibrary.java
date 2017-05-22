@@ -110,7 +110,7 @@ public class ClassAnalysisLibrary {
 	 * @param recursiveSearch Indicates whether search dependences of the first dependences of main class.
 	 * @return Return byte array of the resulting JAR.
 	 */
-	public byte[] createJar(boolean recursiveSearch) throws ClassNotFoundException, IOException, Exception {
+	public byte[] createJarContent(boolean recursiveSearch) throws ClassNotFoundException, IOException, Exception {
 		
 		ClassAnalysisLibrary cal;
 		Enumeration dependantClasses;
@@ -184,21 +184,22 @@ public class ClassAnalysisLibrary {
 		Vector subresult = new Vector();
 	
 		try {
-			if (c!=null) cp = new ConstantPool(className,c.getClassLoader());
-			else cp = new ConstantPool(className);
-		} catch (IOException ioe) {
+			if (c != null) 
+				cp = new ConstantPool(className, c.getClassLoader());
+			else 
+				cp = new ConstantPool(className);
+		} 
+		catch (IOException ioe) {
 			throw new ClassNotFoundException();
 		}
 		
-		if (cp==null) throw new ClassNotFoundException();
-
 		//Scan constant pool class searching Classes, Fields, Methods and Interfaces.
-		for(int i=1;i<cp.length();i++){
+		for (int i=1; i < cp.length(); i++){
 			ConstantElement ce = cp.getElement(i);
 			if (ce instanceof ConstantClass){
 				tempConstant = ((ConstantUtf8String)cp.getElement(((ConstantClass)ce).getNameIndex())).getString();
-				if (acceptConstant(tempConstant)) subresult.add(tempConstant);
-
+				if (acceptConstant(tempConstant)) 
+					subresult.add(tempConstant);
 			}
 			else if(ce instanceof ConstantField){
 				//ConstantClass cc = 
