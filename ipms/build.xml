@@ -61,7 +61,6 @@
   <target name="dist" depends="clean, lib">
     <mkdir dir="${jade-doc-dir}"/>
     <mkdir dir="${jade-doc-dir}/tutorials"/>
-    <copy file="${doc}/migration.html" todir="${jade-doc-dir}/tutorials"/>
     <zip zipfile="../migrationAddOn.zip" basedir="../..">
       <include name="add-ons/migration/*"/>
       <include name="add-ons/migration/src/**"/>
@@ -69,7 +68,6 @@
       <include name="add-ons/migration/doc/CHANGES"/>
       <exclude name="add-ons/migration/src/test/**"/>
       <include name="add-ons/migration/lib/migration.jar"/>
-      <include name="doc/tutorials/migration.html"/>
     </zip>
   </target>
 
