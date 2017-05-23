@@ -9,7 +9,6 @@
   <property name="doc" value="doc"/>
   <property name="lib" value="lib"/>
   <property name="jade-lib-dir" value="${jade-home}/lib"/>
-  <property name="jade-doc-dir" value="${jade-home}/doc"/>
 
   <path id="jade-classes">
     <fileset dir="${jade-lib-dir}">
@@ -59,16 +58,14 @@
 
   <!-- Make distribution zip file and put in ${dist} -->
   <target name="dist" depends="clean, lib">
-    <mkdir dir="${jade-doc-dir}"/>
-    <mkdir dir="${jade-doc-dir}/tutorials"/>
-    <zip zipfile="../migrationAddOn.zip" basedir="../..">
-      <include name="add-ons/migration/*"/>
-      <include name="add-ons/migration/src/**"/>
-      <include name="add-ons/migration/doc/README"/>
-      <include name="add-ons/migration/doc/CHANGES"/>
-      <exclude name="add-ons/migration/src/test/**"/>
-      <include name="add-ons/migration/lib/migration.jar"/>
-    </zip>
+    <jar jarfile="../ipmsAddOn-${version}.zip" basedir="../..">
+      <include name="add-ons/ipms/*"/>
+      <include name="add-ons/ipms/src/**"/>
+      <include name="add-ons/ipms/doc/README"/>
+      <include name="add-ons/ipms/doc/CHANGES"/>
+      <exclude name="add-ons/ipms/src/test/**"/>
+      <include name="add-ons/ipms/lib/migration.jar"/>
+    </jar>
   </target>
 
   <!-- delete ${build} and ${lib} directories -->
