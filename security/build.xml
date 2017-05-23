@@ -7,7 +7,7 @@
 
 <project name="jade-s" default="compile" basedir=".">
   <!-- set global properties for this build -->
-  <property name="version" value="3.9"/>
+  <property name="version" value="3.10"/>
   <property name="optimised-build" value="off"/>
   <property name="debug-build" value="on"/>
   <property name="jade-root" value="../.."/>
