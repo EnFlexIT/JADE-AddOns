@@ -3,7 +3,7 @@
                           for the JADE Platform  
                          Joan Ametller-Esquerra & 
                            Jordi Cucurull-Juan
-                              Version 1.2
+                              Version 1.5
 
 
 0. Contents
@@ -11,14 +11,16 @@
 
   1. How it works ?
   2. Security Considerations
-  3. Build & Installation
-  4. Usage
-  5. About the Authors
+  3. Installation
+  4. Build
+  5. Usage
+  6. Class Analysis and JAR Agents
+  7. About the Authors
 
-NOTE: This version requires the JADE 3.5 release.
+NOTE: This version requires the JADE 4.5 release.
 
 
-1. How it works ?
+1. How it works
 ==================
 
 The Inter-Platform Mobility Service has been designed and implemented
@@ -30,11 +32,11 @@ agent programmer, in the sense that, programming agents that will move
 across different platforms will be as easy as moving agents between
 JADE containers.
 
-This first version of the service doesn't provide a fully featured,
+This version of the service doesn't provide a fully featured,
 optimal, secure and fault-tolerant migration system. The migration
 system provided, althought simple, tries to be the basis to create a
 more sophisticated service in the future. It has been built taking
-into account the requirements that will surely arise from its first
+into account the requirements that will surely arise from its
 usage by the community.
 
 In this README file we will try to describe the design philosophy and
@@ -50,98 +52,27 @@ are sent between AMS agents of the involved platforms and follow the
 rules imposed by some of the FIPA Interaction Protocols
 (http://www.fipa.org).
 
-The migration system provided (in this first version) is significantly
-different from the one provided in intra-platform mobility. In
-container-to-container mobility, although agent's user is not
-conscious about that, only agent's data is sent from the origin to the
-destination container. The agent's class files are transferred on demand
-as they are needed by the agent. This approach is efficient in
-terms of amount of data transfered over the network, but has the problem
-that agent execution is highly dependent of the reliability of the network
-connections and the home container. If connection to home container is
-lost, agent execution could fail whether some needed class could not be
-downloaded from the agent's home container.
+The migration system provided by the IPMS add-on is significantly
+different from the usual intra-platform mobility system embedded in JADE.
+In the latter in facts the agent's class files are transferred on demand
+as they are needed by the agent. This approach is efficient as it only 
+transfers actually required classes that are not found in the destination 
+container, but may require several interactions between the source and the 
+destination containers (one per class) and, as a consequence, highly depends 
+on the reliability of the network. 
+IPMS on the contrary collects all classes used by an agent at migration time,
+packages them in a single ACLMessage together with the agent'state and
+transfers everything with a one-shot approach. 
 
-As it can be seen from [1] there is not a perfect strategy to move
-agents. It highly depends, not only in user preferences
-(such as fault-tolerance, performance, ...) but also in external factors 
-at migration time, like network latency, network load and so on.
+Agent's class files are automatically detected and packaged by the IPMS 
+add-on at migration time. Alternatively the programmer can pack an agent
+inside a jar file (we call it a "jar agent") to speed-up migration 
+performances. More details can be found in section 6.
 
-The authors intention is to continue the developement of this
-mobility service, providing a large set of migration
-strategies and protocols. At the moment, we have only implemented a
-"one-shot" migration strategy, where all data and code that the agent
-will need in its execution is transfered every time agent moves. We
-are concious that this is probably the worst strategy in terms of
-performace, but it is probably the best in terms of fault-tolerance.
-This makes mobile agent totally independent from the home
-platform once it has moved, because this last can be turned off 
-without impact for the moving agent.
-
-As we previously said, we hope to provide a rich set of migration
-strategies in next releases.
-
-1.2 Jar Agents 
----------------
-
-In the previous section we have seen which migration strategy has been
-choosen to be the first one in this service, the "one-shot" migration
-strategy. This kind of migration can be viewed as the simplest way of
-moving an agent, but in contrast, its implementation it is far from
-trivial to implement, at least in the JADE context.
-
-Let's explain the problem graphically. Imagine that we want to move a
-JADE agent from one platform to another. The home platform will be
-switched off after agent's jump so it is necessary for the agent to
-carry all the code that it will need during it's travel. The problem here
-is, how we (the migration system) identify all the code of the agent ?
-In JADE, we have all platform's code, libraries, and agent's code
-mixed in the classpath so it is not easy to decide whether a library
-or a class in the classpath will be used by the agent in the future.
-
-We provide two different solutions to this problem. The simplest one
-is that agent programmers can pack its agents inside a jar file. It is
-supposed that the programmer has correctly packed all needed code, so
-the provided jar file will be transferred together with the agent.
-
-The second approach, more sophisticated and transparent to the
-programmer, autonomously detects all needed classes and transparently
-builds a jar file with them.
-
-1.3 ACL Migration
-------------------
-
-To conclude with the introduction, we will describe the transport
-mechanism used to carry agent's code and data from the origin to the
-destination platform, that is, the ACL Messages.
-
-When an agent wants to move, an ACL Message with agent's code and data
-is built following an special ontology. The remote platform will use
-this information to restore agent's execution and inform the origin
-platform whether the agent has been correctly restored or some error has
-occurred. In this second case, migration process will be aborted and
-agent's execution will be restored again in the home platform.
-
-An advantage of using ACL messages to transport the agent from one
-platform to another is that we don't need to setup an extra
-communication channel between platforms. Furthermore, the underlying
-MTP will be the last responsible in the agent transport, so changing
-the platform's MTP will automatically change agent's transport
-protocol.
-
-1.4 Future Work
-----------------
-
-The proposed mobility add-on its very simple by now. We will work to
-provide more features in the next versions, some of them are:
-
-  - Provide more migration strategies.
-  - Improve the use of FIPA IPs.
-  - Access Control / Security mechanisms.
-
-Of course, all the people interested in collaborating in the
-developement / design of this add-on, can contact the authors listed
-below.
+Once the package containing the agent's code and state is ready it is 
+transferred by the source platform AMS to the destination platform AMS. The
+latter is responsible for recreating the incoming agent and reactivating it.
+ 
 
 2. Security Considerations
 ===========================
@@ -156,7 +87,7 @@ Activating inter-platform mobility service implies that the machine
 where the JADE platform is running, executes arbitrary code (by means
 of an agent) comming from any machine reachable via network.
 
-At the present time, does not exist any access control mechanism to
+At the present time, no access control mechanism exists to
 decide which incomming agents will be executed and which won't. Using
 this version, we can only perform access control by means of a secure
 MTP (for instance, HTTPS MTP provides some simple authentication
@@ -164,7 +95,7 @@ features that can be used for this purpose) or using network firewalls
 to prevent connections from malicious platforms.
 
 In any case, while we don't have access control for incomming mobile
-agents we recomend that platforms using inter-platform mobility
+agents we recommend that platforms using inter-platform mobility
 services should take some security precautions:
 
   1. Do not use this mobility service in open environments or in
@@ -178,108 +109,75 @@ some configurable security mechanisms, which allow to build secure
 mobile-agent based applications in open environments.
 
 
-3. Build & Installation
+3. Installation
 ========================
 
-In order to build this add-on the package distribution file must be
-unzipped inside the JADE folder. Once unzipped, the service can be
-built by using the ant tool inside the package folder, where build.xml
-file is placed.
+The IPMS Add-on can be downloaded from the Download area of the JAE web site.
+To install it, it is sufficient to unzip the installation package in the 
+JADE home directory thus obtaining a directory structure similar to that below
+jade/
+  |--add-ons
+       |--...
+	   |--ipms/
+	       |--doc/
+		   |--lib/
+		       |--migration.jar
+		   |--runSamples/
+		   |--src/
+  |--...
+  |--lib/
+      |--commons-codec/
+	         |--commons-codec-1.3.jar
+	  |--jade.jar
+	  
+Furthermore be sure both jade.jar, commons-codec-1.3.jar and migration.jar
+libraries are included in the classpath when you launch JADE with the IPMS.
 
-After it has been built, the command "ant lib" creates the jar file 
-with all compiled class files. 
+Finally proper configurations must be set when launching JADE
+- the InterPlatformMobilityService must be activated
+- JADE must be instructed to accept "foreign agents" i.e. agents whose 
+names do not have the usual form <local-name>@<platform-name> since they
+come from a different platform.
+The following command line provides an example 
+
+java -cp ... jade.Boot ... -accept-foreign-agents true -services jade.core.mobility.AgentMobilityService;jade.core.migration.InterPlatformMobilityService;jade.core.event.NotificationService ... 
+
+NOTE: If you are working in a Linux environment do remember to escape the ;
+
+The runSamples directory contains an example that can be used to try 
+inter-platform mobility and test that everything is OK. Read carefully the 
+README file included in the runSamples directory for information about 
+how to launch the example.
+
+4. Build
+==========================
+
+In case of modifications, the IPMS library (migration.jar) can be rebuilt
+opening a shell in the jade/add-ons/ipms directory and typing
+
+ant clean lib
+
+This requires ANT 1.7 or later to be installed.
 
 
-4. Usage
+5. Usage
 =========
 
-4.1 Initialization
--------------------
+From the programming point of view inter-platform migration is initiated
+by calling the doMove() method exactly as in the case of container-to-container 
+mobility. Te only difference is that a PlatformID object must be passed 
+as destination location instead of a ContaierID as exemplified below.
 
-In order to use the service, it is necessary to specify it from the
-command line using the -services parameter:
-
-In linux:
-
-java jade.Boot -services
-jade.core.mobility.AgentMobilityService\;jade.core.migration.InterPlatformMobilityService
-
-In Windows:
-
-java jade.Boot -services
-jade.core.mobility.AgentMobilityService;jade.core.migration.InterPlatformMobilityService
-
-Since IPMS version 1.1 it is possible to define through parameters the
-timeout associated to each agent to do a migration. The default used
-value is 5000 ms. Moreover, in order to detect trucated migration on
-the destination platforms, a new timeout is associated to the agents
-installed in them but not initiated. This should have a value of two
-times the first timeout, then the default value is 10000 ms. It can be
-redefined through a parameter too. For example, if we want to define
-them to 15 seconds of timeout and 30 of timeout to initiate the agent
-we should start the service as we can see in the following lines:
-
-java jade.Boot 
--jade_core_migration_IPMS_migration_timeout 15000
--jade_core_migration_IPMS_migration_timeout_responder 30000
--services
-jade.core.mobility.AgentMobilityService;jade.core.migration.InterPlatformMobilityService
-
-If the default values are changed a message can be seen on the screen
-warning about that.
-
-4.2 Programming mobile agents
-------------------------------
-
-As we previously said, the first goal of this mobility service is to
-be simple to use. Basically its usage from the programmer point of
-view is very similar to the intra-platform mobility use (see Programmers 
-Guide).
-
-JADE Agents own the method doMove inherited from jade.core.Agent with
-the following signature:
-
-public void doMove(Location l)
-
-Actually, in the JADE platform there are two implementations of the
-Location interface which are the jade.core.ContainerID and
-jade.core.PlatformID classes.
-
-Programmers with experience in container-to-container mobility know
-that ContainerID objects are used to wrap the name of the destination
-container in intra-platform mobility.
-
-If the Inter-platform Mobility Service has been correctly initialized
-in the platform, PlatformID objects can be used in the same manner as
-ContainerID, but referencing destination platforms instead of
-destination containers.
-
-If we look at the PlatformID constructor it can be seen that the
-argument needed to build such an object its an AID instance.  This
-must be the AID of the remote platform's AMS agent where we want to
-move our agent. This AID must contains the transport address of the
-remote platform. Below, we can see sample code invocating migration to
-a remote platform.
-
-Sample code:
-
-// We build the AID corresponding to remote platform's AID 
-// Specified MTP is HTTP in this case, but does not matter which is used
-
-AID remoteAMS = new AID("ams@remotePlatform:1099/JADE", AID.ISGUID);
+AID remoteAMS = new AID("ams@remotePlatform", AID.ISGUID);
 remoteAMS.addAddresses("http://remotePlatformaddr:7778/acc");
-
 PlatformID destination = new PlatformID(remoteAMS); 
-
-// We are supposing that we exectue this code from a behaviour
-
 myAgent.doMove(destination);
 
-Several examples can be found in the "src/jade/samples" folder.
+Usual callback methods beforeMove() and afterMove() are invoked normally.
 
 
-4.3 Class Analysis and JAR Agents
-----------------------------------
+6 Class Analysis and JAR Agents
+===============================
 
 As we pointed at the beginning, the migration system needs to keep
 track of all agent's code. In this version, we provide two ways to
@@ -336,7 +234,7 @@ jar files in the classpath, and we load them as we do for normal
 agents.
 
 
-5. About the Authors
+7. About the Authors
 ====================
 
 Jordi Cucurull-Juan and Joan Ametller-Esquerra are PhD students at the
