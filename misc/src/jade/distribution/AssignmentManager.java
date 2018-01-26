@@ -74,7 +74,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 
 	private AssignmentsMap<Item> assignmentsMap = new DefaultAssignmentsMap<Item>();	
 	// Map an agent with the items that are going to be assigned to it: agent selection already done, but assignment not completed yet
-	private Map<AID, Set<Item>> pendingItems = new HashMap<AID, Set<Item>>();	
+	private Map<AID, Set<Item>> ongoingAssignmentItems = new HashMap<AID, Set<Item>>();	
 	
 	private Map<AID, DeadAgentInfo> itemsByDeadAgent = new HashMap<AID, DeadAgentInfo>();
 	private long deadAgentsRestartTimeout = 30000;
@@ -302,7 +302,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 		}
 		
 		// Add load of items that are going to be assigned to aid
-		Set<Item> s = pendingItems.get(aid);
+		Set<Item> s = ongoingAssignmentItems.get(aid);
 		if (s != null) {
 			for (Item item : s) {
 				load += getWeight(item);
@@ -336,7 +336,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 				public void onSuccess(AID targetAgent) {
 					// Agent selection completed
 					// Item is going to be assigned to targetAgent, but assignment is not completed yet
-					addPendingItem(targetAgent, item);
+					addOngoingAssignmentItem(targetAgent, item);
 					manageSelectionDone(item, key, targetAgent, context, callback);
 				}
 
@@ -374,7 +374,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			if (b != null) {
 				myAgent.addBehaviour(new WrapperBehaviour(b) {
 					public int onEnd() {
-						removePendingItem(targetAgent, item);
+						removeOngoingAssignmentItem(targetAgent, item);
 						int ret = super.onEnd();
 						if (ret > 0) {
 							// Success
@@ -390,7 +390,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 			}
 			else {
 				// Implicit assignment (target agents need not to be aware they have been assigned a given item)
-				removePendingItem(targetAgent, item);
+				removeOngoingAssignmentItem(targetAgent, item);
 				handleSuccess(item, identifyingKey, targetAgent, callback);
 			}
 		}
@@ -664,31 +664,31 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 	} // END of inner class Assignment
 	
 
-	private void addPendingItem(AID selectedAgent, Item item) {
-		Set<Item> ii = pendingItems.get(selectedAgent);
+	private void addOngoingAssignmentItem(AID selectedAgent, Item item) {
+		Set<Item> ii = ongoingAssignmentItems.get(selectedAgent);
 		if (ii == null) {
 			ii = new HashSet<Item>();
-			pendingItems.put(selectedAgent, ii);
+			ongoingAssignmentItems.put(selectedAgent, ii);
 		}
 		ii.add(item);
 	}
 	
-	private void removePendingItem(AID selectedAgent, Item item) {
+	private void removeOngoingAssignmentItem(AID selectedAgent, Item item) {
 		if (selectedAgent != null) { 
-			Set<Item> ii = pendingItems.get(selectedAgent);
+			Set<Item> ii = ongoingAssignmentItems.get(selectedAgent);
 			if (ii != null) {
 				ii.remove(item);
 				if (ii.isEmpty()) {
-					pendingItems.remove(selectedAgent);
+					ongoingAssignmentItems.remove(selectedAgent);
 				}
 			}
 		}
 		else {
-			for (AID aid : pendingItems.keySet()) {
-				Set<Item> ii = pendingItems.get(aid);
+			for (AID aid : ongoingAssignmentItems.keySet()) {
+				Set<Item> ii = ongoingAssignmentItems.get(aid);
 				if (ii.remove(item)) {
 					if (ii.isEmpty()) {
-						pendingItems.remove(selectedAgent);
+						ongoingAssignmentItems.remove(selectedAgent);
 					}
 					break;
 				}

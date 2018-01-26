@@ -156,7 +156,7 @@ public class DistributionManager<Item> implements Serializable {
 				// Subclasses may need to perform further initializations before pending items can be 
 				// flushed. In that case they redefine targetAgentsInitialized() and can call block() inside it.
 				// Therefore status can be BLOCKED at this stage.
-				if (status != BLOCKED_STATUS) {
+				if (status == READY_STATUS) {
 					flushPendingItems();
 				}
 			}
@@ -192,6 +192,9 @@ public class DistributionManager<Item> implements Serializable {
 		for (PendingItem pi : pendingItems) {
 			DistributionManager.this.getAgent(pi.item, pi.callback);
 		}
+		// Note that this method is ALWAYS invoked in READY state --> All pending items have been 
+		// processed at this point
+		pendingItems.clear();
 	}
 	
 	
