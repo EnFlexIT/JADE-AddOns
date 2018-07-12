@@ -137,11 +137,18 @@ public class ContainerMonitorAgent extends Agent {
 								reply.setContent(replyContent);
 							}
 							else if (contentUC.startsWith(DUMP_MESSAGEQUEUE_ACTION)) {
-								String agentName = getParameter(content, 0, false); // MANDATORY
+								String agentName = getParameter(content, 0, false); // MANDATORY PARAM
 								Agent a = getAgentFromLADT(agentName);
 								String replyContent = null;
 								if(a != null) {
-									replyContent = getMessageQueueDump(a);
+									int limit = -1;
+									try {
+										limit = Integer.parseInt(getParameter(content, 1, true)); // OPTIONAL PARAM
+									}
+									catch (Exception e) {
+										// Keep default 
+									}
+									replyContent = getMessageQueueDump(a, limit);
 								}
 								else {
 									reply.setPerformative(ACLMessage.FAILURE);
@@ -573,7 +580,7 @@ public class ContainerMonitorAgent extends Agent {
 		return null;
 	}
 	
-	public String getMessageQueueDump(Agent a) {
+	public String getMessageQueueDump(Agent a, int limit) {
 		// WE don't use acquire() to avoid risk of blocking in case there is a deadlock
 		StringBuffer sb = new StringBuffer();
 		sb.append("-------------------------------------------------------------\n");
@@ -585,7 +592,8 @@ public class ContainerMonitorAgent extends Agent {
 		if (queue instanceof InternalMessageQueue) {
 			Object[] messages = ((InternalMessageQueue) queue).getAllMessages();
 			if (messages.length > 0) {
-	    		for (int j = 0; j < messages.length; ++j) {
+				int max = limit > 0 ? limit : messages.length;
+	    		for (int j = 0; j < max; ++j) {
 	    			sb.append("Message # ");
 	    			sb.append(j);
 	    			sb.append('\n');
