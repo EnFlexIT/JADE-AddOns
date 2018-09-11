@@ -589,25 +589,32 @@ public class ContainerMonitorAgent extends Agent {
 		sb.append(" MessageQueue DUMP\n");
 		sb.append("-------------------------------------------------------------\n");
 		MessageQueue queue = a.getMessageQueue();
-		if (queue instanceof InternalMessageQueue) {
-			Object[] messages = ((InternalMessageQueue) queue).getAllMessages();
-			if (messages.length > 0) {
-				int max = limit > 0 ? limit : messages.length;
-	    		for (int j = 0; j < max; ++j) {
-	    			sb.append("Message # ");
-	    			sb.append(j);
-	    			sb.append('\n');
-	    			sb.append(messages[j]);
-	    			sb.append('\n');
-	    		}
+		// The method to dump the message-queue is not part of the MessageQueue interface.
+		// Invoke it via reflection if available
+		try {
+			String queueDump = null;
+			// Try dump(int limit) first
+			try {
+				Method dumpMethod = queue.getClass().getMethod("dump", new Class[]{int.class});
+				System.out.println("Method with limit found");
+				queueDump = (String) dumpMethod.invoke(queue, new Object[]{limit});
 			}
-			else {
-				sb.append("Queue is empty\n");
+			catch (NoSuchMethodException nsme) {
+				nsme.printStackTrace();
+				// Try dump() (ignore limit parameter
+				Method dumpMethod = queue.getClass().getMethod("dump", new Class[]{});
+				System.out.println("Method with NO limit found");
+				queueDump = (String) dumpMethod.invoke(queue, new Object[]{});
 			}
+			sb.append(queueDump);
 		}
-		else {
-			sb.append("MessageQueue is not an InternalMessageQueue. Cannot dump it\n");
+		catch (Throwable t) {
+			t.printStackTrace();
+			// Dump method not available or dump error
+			sb.append("Size="+queue.size()+"\n");
+			sb.append("Details unavailable\n");
 		}
+		
 		return sb.toString();
 	}
 	
