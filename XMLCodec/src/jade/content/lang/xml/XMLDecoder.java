@@ -335,85 +335,12 @@ class XMLDecoder {
 	private void setPrimitiveSlot(AbsPrimitiveSlotsHolder abs, String slotName, String slotTypeName, String value) {
 		AbsPrimitive slotValue = decodeAbsPrimitive(slotTypeName, value);
 		abs.set(slotName, slotValue);
-		/* Try as a Long
-		try {
-			abs.set(slotName, Long.parseLong(value));
-			return;
-		}
-		catch (Exception e) {}
-		// Try as a Double
-		try {
-			abs.set(slotName, Double.parseDouble(value));
-			return;
-		}
-		catch (Exception e) {}
-		// Try as a Date
-		try {
-			abs.set(slotName, ISO8601.toDate(value));
-			return;
-		}
-		catch (Exception e) {}
-		// Try as a byte[]
-		if (value.startsWith(XMLCodec.BINARY_STARTER)) {
-			try {
-				String base64Str = value.substring(1);
-				byte[] binaryValue = Base64.decodeBase64(base64Str.getBytes("US-ASCII")); 
-				abs.set(slotName, binaryValue);
-				return;
-			}
-			catch (Exception e) {}
-		}
-		// Try as a Boolean (note that Boolean.parseBoolean() returns false for all strings but "true")
-		if (value.equalsIgnoreCase("true")) {
-			abs.set(slotName, true);
-			return;
-		}
-		if (value.equalsIgnoreCase("false")) {
-			abs.set(slotName, false);
-			return;
-		}
-		abs.set(slotName, value);*/
 	}
 
 	private void setPrimitiveSlot(String[] slotNames, AbsObject[] slotValues, String slotName, String slotType, String value) throws OntologyException {
 		for (int i = 0; i < slotNames.length; ++i) {
 			if (slotNames[i].equalsIgnoreCase(slotName)) {
 				slotValues[i] = decodeAbsPrimitive(slotType, value);
-				/* Try as a Long
-				try {
-					slotValues[i] = AbsPrimitive.wrap(Long.parseLong(value));
-					return;
-				}
-				catch (Exception e) {}
-				// Try as a Double
-				try {
-					slotValues[i] = AbsPrimitive.wrap(Double.parseDouble(value));
-					return;
-				}
-				catch (Exception e) {}
-				// Try as a Date
-				try {
-					slotValues[i] = AbsPrimitive.wrap(ISO8601.toDate(value));
-					return;
-				}
-				catch (Exception e) {}
-				// Try as a byte[]
-				if (value.startsWith(XMLCodec.BINARY_STARTER)) {
-					try {
-						String base64Str = value.substring(1);
-						byte[] binaryValue = Base64.decodeBase64(base64Str.getBytes("US-ASCII")); 
-						slotValues[i] = AbsPrimitive.wrap(binaryValue);
-						return;
-					}
-					catch (Exception e) {}
-				}
-				// Try as a Boolean
-				try {
-					slotValues[i] = AbsPrimitive.wrap(Boolean.parseBoolean(value));
-					return;
-				}
-				catch (Exception e) {}
-				slotValues[i] = AbsPrimitive.wrap(value);*/
 				return;
 			}
 		}

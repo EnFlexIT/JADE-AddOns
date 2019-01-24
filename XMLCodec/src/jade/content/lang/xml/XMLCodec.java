@@ -220,7 +220,10 @@ public class XMLCodec extends StringCodec {
 				result.append("&amp;");
 			}
 			else if (character == '\n') {
-				result.append("&#13;");
+				result.append("&#010;");
+			}
+			else if (character == '\r') {
+				result.append("&#013;");
 			}
 			else {
 				result.append(character);
@@ -236,7 +239,8 @@ public class XMLCodec extends StringCodec {
 		xmlText = xmlText.replace("&quot;", "\"");
 		xmlText = xmlText.replace("&#039;", "\'");
 		xmlText = xmlText.replace("&amp;", "&");
-		xmlText = xmlText.replace("&#13;", "\n");
+		xmlText = xmlText.replace("&#010;", "\n");
+		xmlText = xmlText.replace("&#013;", "\r");
 		return xmlText;
 	}
 
