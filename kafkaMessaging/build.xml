@@ -1,0 +1,106 @@
+<project name="KafkaMessaging" default="compile" basedir=".">
+	<property environment="env"/>
+	<property file="build.properties"/>
+    
+	<!-- set global properties for this build -->
+    <property name="jade-home" value="../.."/>
+
+    <property name="src" value="src"/>
+    <property name="build" value="classes"/>
+    <property name="lib" value="lib"/>
+    <property name="jade-lib-dir" value="${jade-home}/lib"/>
+    <property name="kafka-lib-dir" value="${kafka-home}/libs"/>
+
+    <path id="jade-classes">
+      <fileset dir="${jade-lib-dir}">
+        <include name="commons-codec/commons-codec-1.3.jar"/>
+        <include name="*.jar"/>
+      </fileset>
+    </path>
+
+    <path id="kafka-classes">
+      <fileset dir="${kafka-lib-dir}">
+        <include name="*.jar"/>
+      </fileset>
+    </path>
+
+    <target name="init">
+      <!-- Create the time stamp -->
+      <tstamp/>
+      <!-- Create the directories structure used to store files -->
+      <mkdir dir="${build}"/>
+      <mkdir dir="${lib}"/>
+    </target>
+
+
+    <target name="compile" depends="init">
+      <javac srcdir="${src}"
+             destdir="${build}"
+             nowarn="off"
+             optimize="${optimised-build}"
+             debug="${debug-build}"
+             debuglevel="lines,vars,source"
+             deprecation="on">
+        <classpath>
+          <path refid="jade-classes"/>
+          <path refid="kafka-classes"/>
+        </classpath>
+      </javac>
+    </target>
+
+    <target name="lib" depends="compile" description="generate jar archive">
+      <jar jarfile="${lib}/kafkaMessaging.jar">
+        <fileset dir="${build}" includes="**/jade/**"/>
+      </jar>
+    </target>
+
+    <target name="clean" description="clean up">
+      <!-- Delete the ${build} directory tree -->
+      <delete includeEmptyDirs="true" quiet="true">
+        <fileset dir="${build}"/>
+        <fileset dir=".">
+          <include name="APDescription.txt"/>
+	     <include name="MTPs-Main-Container.txt"/>
+        </fileset>
+      </delete>
+    </target>
+
+    <!-- Make distribution zip file and put in ${dist} -->
+    <target name="dist" depends="clean, lib">
+      <mkdir dir="${jade-home}/doc"/>
+
+      <delete file="../kafkaMessagingAddOn-${version}.zip" quiet="true"/>
+      <zip zipfile="../kafkaMessagingAddOn-${version}.zip" basedir="../..">
+        <include name="add-ons/kafkaMessaging/*"/>
+        <include name="add-ons/kafkaMessaging/src/**"/>
+        <include name="add-ons/kafkaMessaging/lib/**"/>
+      </zip>
+    </target>
+	
+    <target name="main" depends="compile" description="test the classes">
+      <java classname="jade.Boot" fork="true">
+        <arg value="-gui"/>
+        <arg value="-nomtp"/>
+        <arg value="-messaging-service-class"/>
+        <arg value="jade.core.messaging.KafkaMessagingService"/>
+        <classpath>
+          <pathelement location="${build}"/>
+          <path refid="jade-classes"/>
+          <path refid="kafka-classes"/>
+        </classpath>
+      </java>
+    </target>
+	
+    <target name="container" depends="compile" description="test the classes">
+      <java classname="jade.Boot" fork="true">
+        <arg value="-container"/>
+        <arg value="-messaging-service-class"/>
+        <arg value="jade.core.messaging.KafkaMessagingService"/>
+        <classpath>
+          <pathelement location="${build}"/>
+          <path refid="jade-classes"/>
+          <path refid="kafka-classes"/>
+        </classpath>
+      </java>
+    </target>
+</project>
