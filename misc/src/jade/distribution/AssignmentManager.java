@@ -729,15 +729,18 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 				for (final Item item : items) {
 					final Object key = getIdentifyingKey(item);
 					assignmentsMap.remove(key);
+					// Since the WatchDog behaviour is terminating its myAgent variable will
+					// likely no longer be available when the Callback will be invoked
+					final String agentName = myAgent.getName();
 					assign(item, REASSIGN_DEAD_OWNER_CONTEXT, new Callback<AID>() {
 						@Override
 						public void onSuccess(AID result) {
-							myLogger.log(Logger.INFO, "Agent "+myAgent.getName()+" - "+getNature(item)+" "+key+" reassigned to agent "+result.getLocalName());
+							myLogger.log(Logger.INFO, "Agent "+agentName+" - "+getNature(item)+" "+key+" reassigned to agent "+result.getLocalName());
 						}
 
 						@Override
 						public void onFailure(Throwable t) {
-							myLogger.log(Logger.WARNING, "Agent "+myAgent.getName()+" - Cannot reassign "+getNature(item)+" "+key+". "+t.getMessage());
+							myLogger.log(Logger.WARNING, "Agent "+agentName+" - Cannot reassign "+getNature(item)+" "+key+". "+t.getMessage());
 						}
 					});
 				}
