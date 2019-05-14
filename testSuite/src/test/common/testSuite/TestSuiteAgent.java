@@ -98,7 +98,7 @@ public class TestSuiteAgent extends GuiAgent {
 	public static final String   TEST_PLATFORM_NAME = "TestPlatform";
 	
 	private static final String  NAME = "test-suite";
-	private static final String  TESTER_NAME = "tester";
+	public static final String  TESTER_NAME = "tester";
 	
 	// Gui event types
 	public static final int      LOAD_EVENT = 0;
@@ -745,7 +745,7 @@ public class TestSuiteAgent extends GuiAgent {
 	/**
 	 * Utility method to wait one sec without annoying exceptions to catch
 	 */
-	private static void waitABit() {
+	static void waitABit() {
 		try {
 			// jjj pac
 			Thread.sleep(100);
