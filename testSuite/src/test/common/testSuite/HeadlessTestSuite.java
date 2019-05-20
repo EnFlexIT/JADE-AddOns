@@ -207,7 +207,12 @@ public class HeadlessTestSuite {
 		try {
 			HeadlessTestSuite hts = new HeadlessTestSuite();
 			hts.initialize();
-			TestSuiteReport report = hts.executeTestSuite(null, NO_INTERRUPT);
+			
+			String xmlFileName = null;
+			if (args != null && args.length > 0) {
+				xmlFileName = args[0];
+			}
+			TestSuiteReport report = hts.executeTestSuite(xmlFileName, NO_INTERRUPT);
 			System.out.println(report);
 		}
 		catch (Exception e) {
