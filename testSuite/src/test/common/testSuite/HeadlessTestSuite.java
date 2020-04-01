@@ -50,7 +50,7 @@ public class HeadlessTestSuite {
 		}
 		
 		// Launch the Main container in a separated process
-		mainController = TestUtility.launchJadeInstance("Main", null, "-gui -nomtp -local-port "+Test.DEFAULT_PORT+" -services "+TestSuiteAgent.MAIN_SERVICES+" -name "+TestSuiteAgent.TEST_PLATFORM_NAME+" "+asCommandLine(mainAdditionalConfig)+" -jade_domain_df_autocleanup true", null);
+		mainController = TestUtility.launchJadeInstance("Main", null, "-nomtp -local-port "+Test.DEFAULT_PORT+" -services "+TestSuiteAgent.MAIN_SERVICES+" -name "+TestSuiteAgent.TEST_PLATFORM_NAME+" "+asCommandLine(mainAdditionalConfig)+" -jade_domain_df_autocleanup true", null);
 
 		if (pp == null) {
 			pp = new Properties();
@@ -206,7 +206,9 @@ public class HeadlessTestSuite {
 	public static void main(String[] args) {
 		try {
 			HeadlessTestSuite hts = new HeadlessTestSuite();
-			hts.initialize();
+			Properties pp = new Properties();
+			pp.setProperty(Profile.GUI, "true");
+			hts.initialize(pp, null);
 			
 			String xmlFileName = null;
 			if (args != null && args.length > 0) {
