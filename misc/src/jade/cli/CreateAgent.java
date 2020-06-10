@@ -63,7 +63,7 @@ public class CreateAgent extends CLICommand {
 				ca.setClassName(className);
 				ca.setContainer(new ContainerID(containerName, null));
 				if (argumentsList != null) {
-					Vector v = Specifier.parseList(argumentsList, ',');
+					Vector v = Specifier.parseList(argumentsList, Specifier.getArgSeparator());
 					for (Object a : v) {
 						ca.addArguments(a);
 					}

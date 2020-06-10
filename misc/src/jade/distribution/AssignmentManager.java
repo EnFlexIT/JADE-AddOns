@@ -735,7 +735,7 @@ public class AssignmentManager<Item> extends DistributionManager<Item> {
 					assign(item, REASSIGN_DEAD_OWNER_CONTEXT, new Callback<AID>() {
 						@Override
 						public void onSuccess(AID result) {
-							myLogger.log(Logger.INFO, "Agent "+agentName+" - "+getNature(item)+" "+key+" reassigned to agent "+result.getLocalName());
+							myLogger.log(Logger.INFO, "Agent "+agentName+" - "+getNature(item)+" "+key+" reassigned to agent "+(result != null ? result.getLocalName() : "null"));
 						}
 
 						@Override
