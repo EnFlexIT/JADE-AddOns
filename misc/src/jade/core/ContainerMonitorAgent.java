@@ -596,14 +596,14 @@ public class ContainerMonitorAgent extends Agent {
 			// Try dump(int limit) first
 			try {
 				Method dumpMethod = queue.getClass().getMethod("dump", new Class[]{int.class});
-				System.out.println("Method with limit found");
+				System.out.println("Method dump() with limit parameter found. Invoke it");
 				queueDump = (String) dumpMethod.invoke(queue, new Object[]{limit});
 			}
 			catch (NoSuchMethodException nsme) {
 				nsme.printStackTrace();
-				// Try dump() (ignore limit parameter
+				// Try dump() (without limit parameter)
 				Method dumpMethod = queue.getClass().getMethod("dump", new Class[]{});
-				System.out.println("Method with NO limit found");
+				System.out.println("Method dump() without limit parameter found. Invoke it");
 				queueDump = (String) dumpMethod.invoke(queue, new Object[]{});
 			}
 			sb.append(queueDump);
