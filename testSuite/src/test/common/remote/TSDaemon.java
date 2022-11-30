@@ -26,16 +26,20 @@ package test.common.remote;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.rmi.*;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
-import java.rmi.registry.*;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import test.common.*;
 import jade.core.Profile;
 import jade.util.leap.List;
+import test.common.JadeController;
+import test.common.OutputHandler;
+import test.common.TestException;
+import test.common.TestUtility;
 
 /**
  @author Giovanni Caire - TILAB
@@ -94,12 +98,44 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 			String name = System.getProperty("tsdaemon.name", DEFAULT_NAME);
 			String port = System.getProperty("tsdaemon.port", String.valueOf(DEFAULT_PORT));
 			String hostName = Profile.getDefaultNetworkName();
-			Registry theRegistry = getRmiRegistry(hostName, Integer.parseInt(port));
-			String registryID = "rmi://"+hostName+":"+port;
+			final boolean secured = Boolean.getBoolean("tsdaemon.secured");
+			
+			Registry theRegistry;
+			if (secured) {
+				System.out.println("Create secured RMI TSDaemon server");
+						
+				// Create secured RMI registry
+				String keystore = System.getProperty("tsdaemon.keystore");
+				String encryptedKeystorePassword = System.getProperty("tsdaemon.encryptedKeystorePassword");
+				String policyGrant = System.getProperty("tsdaemon.policyGrant");
+				if (policyGrant != null) {
+					System.setProperty("java.security.policy", policyGrant);
+				}
 
+				// Check security configuration parameters
+				if (	keystore == null || keystore.isEmpty() || 
+						encryptedKeystorePassword == null || encryptedKeystorePassword.isEmpty() ||
+						policyGrant == null || policyGrant.isEmpty()
+					) {
+					throw new IllegalArgumentException("installerdaemon-secured active but installerdaemon-keystore or installerdaemon-encryptedKeystorePassword or installerdaemon-policyGrant not present");
+				}
+				
+				// 
+		        // Create and install a security manager
+		        if (System.getSecurityManager() == null) {
+		            System.setSecurityManager(new SecurityManager());
+		        }
+				
+		        theRegistry = getSSLRmiRegistry(hostName, Integer.parseInt(port), keystore, encryptedKeystorePassword);
+			}
+			else {
+				// Create standard RMI registry				
+				theRegistry = getRmiRegistry(hostName, Integer.parseInt(port));
+			}
+			
 			// Bind to the registry
 			additionalArgs = sb.toString();
-			Naming.bind(registryID+"//"+name, this);
+			theRegistry.bind(name, this);
 			printWelcomeMessage(port, name);
 		}
 		catch(Exception e) {
@@ -141,6 +177,29 @@ public class TSDaemon extends UnicastRemoteObject implements RemoteManager, Outp
 		// instance of the registry, so let's create one.
 		if (rmiRegistry == null) {
 			rmiRegistry = LocateRegistry.createRegistry(portNumber);
+		}
+
+		return rmiRegistry;
+	}
+	
+	private static Registry getSSLRmiRegistry(String host, int portNumber, String keystore, String encryptedKeystorePassword) throws Exception {
+		Registry rmiRegistry = null;
+		// See if a registry already exists and
+		// make sure we can really talk to it.
+		try {
+			rmiRegistry = LocateRegistry.getRegistry(host, portNumber, new RMISSLClientSocketFactory());
+			rmiRegistry.list();
+		} 
+		catch (Exception exc) {
+			rmiRegistry = null;
+		}
+
+		// If rmiRegistry is null, then we failed to find an already running
+		// instance of the registry, so let's create one.
+		if (rmiRegistry == null) {
+			rmiRegistry = LocateRegistry.createRegistry(portNumber,
+	                new RMISSLClientSocketFactory(),
+	                new RMISSLServerSocketFactory(keystore, encryptedKeystorePassword));
 		}
 
 		return rmiRegistry;

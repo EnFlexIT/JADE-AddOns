@@ -23,6 +23,15 @@
 
 package test.common;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.Date;
+import java.util.UUID;
+import java.util.regex.Matcher;
+
 import jade.content.AgentAction;
 import jade.content.ContentElement;
 import jade.content.lang.sl.SLCodec;
@@ -47,17 +56,9 @@ import jade.util.leap.ArrayList;
 import jade.util.leap.HashMap;
 import jade.util.leap.Iterator;
 import jade.util.leap.List;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.rmi.Naming;
-import java.rmi.RemoteException;
-import java.util.Date;
-import java.util.UUID;
-import java.util.regex.Matcher;
-
 import test.common.agentConfigurationOntology.AddBehaviour;
 import test.common.agentConfigurationOntology.AgentConfigurationOntology;
+import test.common.remote.RMISSLClientSocketFactory;
 import test.common.remote.RemoteManager;
 
 /**
@@ -530,13 +531,24 @@ public class TestUtility {
 		return jc;
 	}
 
-
 	public static RemoteManager createRemoteManager(String hostName, int port, String managerName) throws TestException {
-		String remoteManagerRMI = "rmi://"+hostName+":"+port+"//"+managerName;
+		
 		try {
-			return (RemoteManager) Naming.lookup(remoteManagerRMI);
+			Registry registry;
+			
+			boolean secured = Boolean.getBoolean("tsdaemon.secured");
+			if (secured) {
+				System.out.println("Create secured RMI TSDaemon client");
+	            registry = LocateRegistry.getRegistry(hostName, port, new RMISSLClientSocketFactory());
+			}
+			else {
+				registry = LocateRegistry.getRegistry(hostName, port);
+			}
+
+			return (RemoteManager) registry.lookup(managerName);
 		}
 		catch (Exception e) {
+			String remoteManagerRMI = "rmi://"+hostName+":"+port+"//"+managerName;
 			throw new TestException("Error looking up remote manager "+remoteManagerRMI, e);
 		}
 	}
